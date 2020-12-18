@@ -1,0 +1,13 @@
+/build
+/bin
+.DS_Store
+.classpath
+.project
+/.gradle
+/.settings
+.jshintrc
+/node_modules/
+/src/main/resources/public/dist/
+/src/main/resources/public/js/
+/src/main/resources/public/template/entcore/
+/src/main/resources/view/
