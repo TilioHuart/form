@@ -4,6 +4,7 @@
 .classpath
 .project
 /.gradle
+/.idea/
 /.settings
 .jshintrc
 /node_modules/
