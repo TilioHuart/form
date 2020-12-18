@@ -1,0 +1,35 @@
+<lightbox show="vm.display.lightbox.reminder" on-close="vm.cancelRemind()">
+    <h2><i18n>formulaire.remind.title</i18n></h2>
+    <div ng-if="vm.distributions.all.length >= 1">
+        <div ng-if="vm.checkIfFormOpen()">
+            <div ng-if="vm.forms.selected[0].multiple"><i18n>formulaire.remind.description.multipleTrue</i18n></div>
+            <div ng-if="!vm.forms.selected[0].multiple"><i18n>formulaire.remind.description.multipleFalse</i18n></div>
+            <div style="margin-top:5%">
+                <label style="display: flex;">
+                    <i18n>formulaire.remind.subject.label</i18n>
+                    <input type="text" class="eight" ng-model="vm.mail.subject" i18n-placeholder="formulaire.remind.subject.placeholder"/>
+                </label>
+                <editor ng-model="vm.mail.body"></editor>
+            </div>
+            <div style="margin-bottom:5%">
+                <i18n>formulaire.remind.link</i18n><a href="#/form/[[vm.forms.selected[0].id]]">[[config.host]]/formulaire#/form/[[vm.forms.selected[0].id]]</a>
+            </div>
+            <div class="action-buttons">
+                <button class="cell cancel" ng-click="vm.cancelRemind()"><i18n>formulaire.cancel</i18n></button>
+                <button class="cell" ng-click="vm.doRemind()"><i18n>formulaire.confirm</i18n></button>
+            </div>
+        </div>
+        <div ng-if="!vm.checkIfFormOpen()">
+            <div><i18n>formulaire.remind.notOpen</i18n></div>
+            <div class="action-buttons">
+                <button class="cell cancel" ng-click="vm.cancelRemind()"><i18n>formulaire.close</i18n></button>
+            </div>
+        </div>
+    </div>
+    <div ng-if="vm.distributions.all.length <= 0">
+        <div><i18n>formulaire.remind.noDistrib</i18n></div>
+        <div class="action-buttons">
+            <button class="cell cancel" ng-click="vm.cancelRemind()"><i18n>formulaire.close</i18n></button>
+        </div>
+    </div>
+</lightbox>

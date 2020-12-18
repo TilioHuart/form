@@ -1,0 +1,185 @@
+<div class="row" ng-controller="FormsListController as vm">
+    <div class="row">
+        <section class="cell five">
+            <div>
+                <h1>
+                    <a href="#/"><i18n>formulaire.title</i18n></a>
+                </h1>
+            </div>
+        </section>
+
+        <section class="cell seven zero-mobile">
+            <div class="main-button">
+                <button class="cell" ng-click="redirectTo('/form/create')"><i18n>formulaire.form.create.button</i18n></button>
+            </div>
+        </section>
+
+        <div ng-click="redirectTo('/form/create')" class="fab zero-desktop">
+            +
+        </div>
+    </div>
+
+    <div class="row twelve cell tabs zero-mobile" style="min-height: 60px;">
+        <div class="cell">
+            <header class="horizontal-spacing selected" ng-class="{ selected : currentPage === Pages.FORMS_LIST }"
+                    ng-if="canCreate()" ng-click="redirectTo('/list/mine')">
+                <i18n>formulaire.tab.list</i18n>
+            </header>
+            <header class="horizontal-spacing " ng-class="{ selected : currentPage === Pages.FORMS_RESPONSE }"
+                    ng-if="canRespond()" ng-click="redirectTo('/list/responses')">
+                <i18n>formulaire.tab.responses</i18n>
+            </header>
+        </div>
+    </div>
+
+    <nav class="vertical mobile-navigation tabs zero-desktop heightNavBar" side-nav >
+        <header class="horizontal-spacing row ellipsis" ng-class="{ selected : currentPage === Pages.FORMS_LIST }"
+                ng-if="canCreate()" ng-click="redirectTo('/list/mine')">
+            <i18n>formulaire.tab.list</i18n>
+        </header>
+        <header class="horizontal-spacing row ellipsis" ng-class="{ selected : currentPage === Pages.FORMS_RESPONSE }"
+                ng-if="canRespond()" ng-click="redirectTo('/list/responses')">
+            <i18n>formulaire.tab.responses</i18n>
+        </header>
+    </nav>
+
+    <div class="row zero-desktop">
+        <i ng-click="vm.openNavMyForms()" class="dropbtn"></i>
+        <span>[[vm.displayFolder()]]</span>
+    </div>
+
+    <h4 class="zero-desktop"><input type="text" ng-model="vm.searchInput" placeholder="Rechercher"></h4>
+
+    <!--Navigation menu-->
+    <section class="cell three zero-mobile">
+        <h4><input type="text" ng-model="vm.searchInput" placeholder="Rechercher"></h4>
+        <nav class="vertical row">
+            <ul>
+                <li><a ng-click="vm.openFolder('mine')" ng-class="{selected : vm.folder === 'mine'}">
+                    <i18n>formulaire.forms.mine</i18n>
+                </a></li>
+                <li><a ng-click="vm.openFolder('shared')" ng-class="{selected : vm.folder === 'shared'}">
+                    <i18n>formulaire.forms.shared</i18n>
+                </a></li>
+                <li><a ng-click="vm.openFolder('archived')" ng-class="{selected : vm.folder === 'archived'}">
+                    <i18n>formulaire.forms.archived</i18n>
+                </a></li>
+            </ul>
+        </nav>
+    </section>
+
+    <div id="mySidenavForms" class="sideNavMyForms zero-desktop ellipsis">
+        <div class="vertical-spacing row">
+            <i18n class="text-font titleSideNav">formulaire.forms.folders</i18n>
+            <a class="closebtn" ng-click="vm.closeNavMyForms()">&times;</a>
+        </div>
+        <nav class="vertical row">
+            <ul>
+                <li><a ng-click="vm.openFolder('mine')" ng-class="{selected : vm.folder === 'mine'}">
+                    <i18n>formulaire.forms.mine</i18n>
+                </a></li>
+                <li><a ng-click="vm.openFolder('shared')" ng-class="{selected : vm.folder === 'shared'}">
+                    <i18n>formulaire.forms.shared</i18n>
+                </a></li>
+                <li><a ng-click="vm.openFolder('archived')" ng-class="{selected : vm.folder === 'archived'}">
+                    <i18n>formulaire.forms.archived</i18n>
+                </a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <!--List of forms-->
+    <section class="cell nine twelve-mobile">
+
+        <div class="folder-info zero-mobile">
+            <div><h4><i class="folder spaced-right"></i>[[vm.displayFolder()]]</h4></div>
+            <div>
+                <i class="view-cards hg-icon" ng-click="vm.display.grid = true" ng-class="{'selected': vm.display.grid}"></i>
+                <i class="view-tab hg-icon" ng-click="vm.display.grid = false" ng-class="{'selected': !vm.display.grid}"></i>
+            </div>
+        </div>
+
+        <div ng-include="'formulaire/public/template/components/filters.html'"></div>
+
+        <!--Dominos display-->
+        <div class="dominos" ng-if="!vm.forms.all.empty() && vm.display.grid">
+            <div ng-repeat="form in vm.forms.all | filter:vm.searchInput | limitTo:vm.limitTo"
+                 ng-if="!vm.forms.all.empty() && vm.display.grid && form.displayed"
+                 ng-click="form.selected = !form.selected" ng-dblclick="vm.openForm(form)"
+                 class="item" ng-class="{'selected' : form.selected}">
+                <div class="domino">
+                    <div class="four picture" ng-class="{'empty': !form.picture}">
+                        <img ng-src="[[(form.picture) || '/formulaire/public/img/empty-image.png']]"/>
+                    </div>
+                    <div class="eight">
+                        <div class="data">
+                            <div class="data-text">
+                                <div class="title" title="[[form.title]]">[[form.title]]</div>
+                                <div class="owner">[[form.owner_name]]</div>
+                                <div class="date"><i18n>formulaire.modified</i18n>[[displayDate(form.date_modification)]]</div>
+                            </div>
+                            <div class="data-bottom">
+                                <div class="count"><i18n>formulaire.responses.count</i18n> : [[form.nb_responses]]</div>
+                                <div class="icons">
+                                    <i class="send md-icon" ng-if="form.sent && !form.archived" title="[[vm.getTitle('sent')]]"></i>
+                                    <i class="share md-icon" ng-if="form.collab" title="[[vm.getTitle('shared')]]"></i>
+                                    <i class="bell md-icon" ng-if="form.reminded" title="[[vm.getTitle('reminded')]]"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--Table display-->
+        <table class="twelve table" ng-if="!vm.forms.all.empty() && !vm.display.grid && !isMobile">
+            <thead>
+                <tr>
+                    <th class="one">
+                        <label>
+                            <input type="checkbox" ng-change="vm.switchAll(vm.allFormsSelected)" ng-model="vm.allFormsSelected"/>
+                            <span></span>
+                        </label>
+                    </th>
+                    <th class="four"><i18n>formulaire.table.title</i18n></th>
+                    <th class="two"><i18n>formulaire.table.author</i18n></th>
+                    <th class="one"><i18n>formulaire.responses.count</i18n></th>
+                    <th class="three"><i18n>formulaire.table.modified</i18n></th>
+                    <th class="one"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="form in vm.forms.all | filter:vm.searchInput | limitTo:vm.limitTo"
+                    ng-if="form.displayed"
+                    ng-dblclick="vm.openForm(form)">
+                    <td><label><input type="checkbox" ng-model="form.selected"/><span></span></label></td>
+                    <td ng-click="form.selected=!form.selected">[[form.title]]</td>
+                    <td ng-click="form.selected=!form.selected">[[form.owner_name]]</td>
+                    <td ng-click="form.selected=!form.selected">[[form.nb_responses]]</td>
+                    <td ng-click="form.selected=!form.selected"><i18n>formulaire.modified</i18n>[[displayDate(form.date_modification)]]</td>
+                    <td ng-click="form.selected=!form.selected">
+                        <i class="send md-icon" ng-if="form.sent && !form.archived" title="[[vm.getTitle('sent')]]"></i>
+                        <i class="share md-icon" ng-if="form.collab" title="[[vm.getTitle('shared')]]"></i>
+                        <i class="bell md-icon" ng-if="form.reminded" title="[[vm.getTitle('reminded')]]"></i>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Loader -->
+        <div ng-if="vm.loading" class="twelve loader">
+            <loader min-height="'10px'"/>
+        </div>
+
+        <div class="error" ng-if="vm.forms.all.empty()">
+            <img src="/formulaire/public/img/onboarding.svg"/>
+            <i18n>formulaire.forms.empty</i18n>
+        </div>
+    </section>
+
+    <infinite-scroll scrolled="vm.infiniteScroll()" loading-mode="true"></infinite-scroll>
+
+    <container template='lightbox'></container>
+    <div ng-include="'formulaire/public/template/components/toaster.html'"></div>
+</div>

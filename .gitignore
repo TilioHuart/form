@@ -4,10 +4,13 @@
 .classpath
 .project
 /.gradle
+/.idea/
 /.settings
 .jshintrc
 /node_modules/
 /src/main/resources/public/dist/
 /src/main/resources/public/js/
-/src/main/resources/public/template/entcore/
 /src/main/resources/view/
+/src/main/resources/public/font
+/src/main/resources/public/template/entcore/
+/rev-manifest.json

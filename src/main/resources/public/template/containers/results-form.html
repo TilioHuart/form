@@ -1,0 +1,144 @@
+<div ng-controller="FormResultsController as vm">
+    <div class="row">
+        <section class="cell">
+            <div>
+                <h1>
+                    <a href="#/"><i18n>formulaire.title</i18n></a>
+                    <i18n>formulaire.title.separator</i18n>[[form.title]]
+                    <i18n>formulaire.title.separator</i18n><i18n>formulaire.results</i18n>
+                </h1>
+            </div>
+        </section>
+
+        <section class="cell" style="float:right;">
+            <div class="main-button">
+                <button class="cell cancel" ng-click="vm.export(Exports.PDF)"><i18n>formulaire.form.download.all.results.pdf</i18n></button>
+                <button class="cell" ng-click="vm.export(Exports.CSV)"><i18n>formulaire.form.download.all.results.csv</i18n></button>
+            </div>
+        </section>
+    </div>
+
+    <div class="results-form">
+        <div class="result">
+            <!-- Question title -->
+            <div class="title">
+                <h4 ng-if="vm.question.question_type == Types.FREETEXT">[[vm.question.title]]</h4>
+                <h4 ng-if="vm.question.question_type != Types.FREETEXT && vm.form.nb_responses > 1">
+                    [[vm.question.title]] ([[vm.form.nb_responses]] <i18n>formulaire.responses</i18n>)<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span>
+                </h4>
+                <h4 ng-if="vm.question.question_type != Types.FREETEXT && vm.form.nb_responses <= 1">
+                    [[vm.question.title]] ([[vm.form.nb_responses]] <i18n>formulaire.response</i18n>)<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span>
+                </h4>
+                <button class="cell" ng-click="vm.zipAndDownload()" ng-if="vm.question.question_type == Types.FILE">
+                    <i18n>formulaire.form.download.all.files</i18n>
+                </button>
+            </div>
+
+            <!-- List of results FREETEXT -->
+            <div ng-if="vm.question.question_type == Types.FREETEXT" class="freetext" bind-html="vm.question.statement"></div>
+
+            <!-- List of results SINGLEANSWER, MULTIPLEANSWER -->
+            <div ng-if="vm.question.question_type == Types.SINGLEANSWER || vm.question.question_type == Types.MULTIPLEANSWER"
+                 class="choices">
+                <div class="twelve-mobile" ng-class="vm.question.question_type == Types.MULTIPLEANSWER ? 'twelve' : 'five'">
+                    <div ng-repeat="choice in vm.question.choices.all" class="choice">
+                        <div class="infos twelve-mobile" ng-class="vm.question.question_type == Types.MULTIPLEANSWER ? 'five' : 'twelve'">
+                            <div class="choice-value eight twelve-mobile ellipsis">
+                                <span ng-if="($index+1) != vm.question.choices.all.length">[[$index + 1]]. </span>[[choice.value]]
+                            </div>
+                            <div class="four twelve-mobile ellipsis bold">
+                                [[choice.nbResponses]]
+                                <i18n ng-if="choice.nbResponses > 1">formulaire.responses</i18n>
+                                <i18n ng-if="choice.nbResponses <= 1">formulaire.response</i18n>
+                                ([[vm.getWidth(choice.nbResponses, 100).toFixed(2)]]%)
+                            </div>
+                        </div>
+                        <!-- Graph for MULTIPLEANSWER -->
+                        <div ng-if="vm.question.question_type == Types.MULTIPLEANSWER" class="seven zero-mobile">
+                            <div class="graph-bar"
+                                 ng-style="{width: (vm.getWidth(choice.nbResponses, 95) + '%'), 'background-color': vm.getColor(choice.id)}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graph for SINGLEANSWER -->
+                <div ng-if="vm.question.question_type == Types.SINGLEANSWER" class="graph-camembert seven zero-mobile">
+                    <div class="eight">
+                        <div id="singleanswer-response-chart"></div>
+                    </div>
+                </div>
+
+                <!-- Loader -->
+                <div ng-if="vm.loading && !vm.display.lightbox.export" class="twelve loader">
+                    <loader min-height="'10px'"/>
+                </div>
+            </div>
+
+            <!-- List of results SHORTANSWER, LONGANSWER, DATE, TIME, FILE -->
+            <div ng-if="vm.question.question_type != Types.SINGLEANSWER &&
+                        vm.question.question_type != Types.MULTIPLEANSWER &&
+                        vm.question.question_type != Types.FREETEXT">
+                <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':true" class="distrib">
+                    <div class="infos four twelve-mobile">
+                        <div class="four twelve-mobile">[[displayDate(distrib.date_response)]]</div>
+                        <div class="eight twelve-mobile ellipsis" ng-if="!vm.form.anonymous">[[distrib.responder_name]]</div>
+                    </div>
+                    <div class="eight twelve-mobile results">
+                        <div ng-repeat="result in vm.getDataByDistrib(distrib.id)"
+                             ng-class="{'notLast' : !$last}">
+                            <div ng-if="vm.question.question_type == Types.SHORTANSWER ||
+                                        vm.question.question_type == Types.LONGANSWER ||
+                                        vm.question.question_type == Types.DATE ||
+                                        vm.question.question_type == Types.TIME"
+                                 bind-html="result.answer"></div>
+                            <a ng-if="vm.question.question_type == Types.FILE" ng-click="vm.downloadFile(result.id)">
+                                <i class="download lg-icon spaced-right"></i> [[result.filename]]
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Loader -->
+                <div ng-if="vm.loading && !vm.display.lightbox.export" class="twelve loader">
+                    <loader min-height="'10px'"/>
+                </div>
+            </div>
+
+            <!-- See more button -->
+            <div ng-if="vm.showMoreButton()" style="margin: 1%;">
+                <a ng-click="vm.loadMoreResults()">
+                    <i18n>formulaire.seeMore</i18n>
+                </a>
+            </div>
+        </div>
+
+
+        <!-- Navigation buttons -->
+        <div class="buttons">
+            <button class="cell" ng-click="vm.prev()" ng-disabled="vm.question.position == 1">
+                <i18n class="zero-mobile">formulaire.prev</i18n>
+                <i class="chevron-left zero-desktop"></i>
+            </button>
+            <div class="goto six">
+                <i18n class="one" style="margin-right:10px">formulaire.goTo</i18n>
+                <select class="ten" ng-change="vm.goTo(vm.navigatorValue)" ng-model="vm.navigatorValue" style="height: 24px;">
+                    <option ng-repeat="question in vm.questions.all" ng-value="question.position"
+                            ng-selected="vm.navigatorValue == question.position">
+                        [[question.position]]. [[question.title]]
+                    </option>
+                </select>
+            </div>
+            <button class="cell" ng-click="vm.next()" ng-disabled="vm.last">
+                <i18n class="zero-mobile">formulaire.next</i18n>
+                <i class="chevron-right zero-desktop"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Temp graph for PDF export -->
+    <div class="twelve" style="opacity:0;">
+        <div ng-repeat="chart in vm.getGraphQuestions()" id="pdf-response-chart-[[$index]]"></div>
+    </div>
+
+    <container template='lightbox'></container>
+</div>

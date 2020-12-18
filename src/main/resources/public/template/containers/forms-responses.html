@@ -1,0 +1,152 @@
+<div class="row" ng-controller="FormsResponsesController as vm">
+    <div class="row">
+        <section class="cell twelve">
+            <div>
+                <h1>
+                    <a href="#/"><i18n>formulaire.title</i18n></a>
+                </h1>
+            </div>
+        </section>
+    </div>
+
+    <div class="row twelve cell tabs zero-mobile" style="min-height: 60px;">
+        <div class="cell">
+            <header class="horizontal-spacing" ng-class="{ selected : currentPage === Pages.FORMS_LIST }"
+                    ng-if="canCreate()" ng-click="redirectTo('/list/mine')">
+                <i18n>formulaire.tab.list</i18n>
+            </header>
+            <header class="horizontal-spacing " ng-class="{ selected : currentPage === Pages.FORMS_RESPONSE }"
+                    ng-if="canRespond()" ng-click="redirectTo('/list/responses')">
+                <i18n>formulaire.tab.responses</i18n>
+            </header>
+        </div>
+    </div>
+
+    <nav class="vertical mobile-navigation tabs zero-desktop heightNavBar" side-nav >
+        <header class="horizontal-spacing row ellipsis" ng-class="{ selected : currentPage === Pages.FORMS_LIST }"
+                ng-if="canCreate()" ng-click="redirectTo('/list/mine')">
+            <i18n>formulaire.tab.list</i18n>
+        </header>
+        <header class="horizontal-spacing row ellipsis" ng-class="{ selected : currentPage === Pages.FORMS_RESPONSE }"
+                ng-if="canRespond()" ng-click="redirectTo('/list/responses')">
+            <i18n>formulaire.tab.responses</i18n>
+        </header>
+    </nav>
+
+    <!--Search bar and display icons-->
+    <section class="cell twelve">
+        <div class="folder-info zero-mobile">
+            <div><input type="text" ng-model="vm.searchInput" placeholder="Rechercher"></div>
+            <div>
+                <i class="view-cards hg-icon" ng-click="vm.display.grid = true" ng-class="{'selected': vm.display.grid}"></i>
+                <i class="view-tab hg-icon" ng-click="vm.display.grid = false" ng-class="{'selected': !vm.display.grid}"></i>
+            </div>
+        </div>
+    </section>
+
+    <!--List of forms-->
+    <section class="cell twelve">
+        <div ng-include="'formulaire/public/template/components/filters.html'"></div>
+        <!--Dominos display-->
+        <div class="dominos" ng-if="!vm.forms.all.empty() && vm.display.grid">
+            <div ng-repeat="form in vm.forms.all | filter:vm.searchInput | limitTo:vm.limitTo"
+                 ng-if="!vm.forms.all.empty() && vm.display.grid && form.displayed"
+                 ng-click="form.selected = !form.selected" ng-dblclick="vm.openForm(form)"
+                 class="item response" ng-class="{'selected' : form.selected}">
+                <div class="domino">
+                    <div class="four picture" ng-class="{'empty': !form.picture}">
+                        <img ng-src="[[(form.picture) || '/formulaire/public/img/empty-image.png']]"/>
+                    </div>
+                    <div class="eight">
+                        <div class="data">
+                            <div class="data-text">
+                                <div class="title ellipsis" title="[[form.title]]">[[form.title]]</div>
+                                <div class="owner">[[form.owner_name]]</div>
+                                <div class="date"><i18n>formulaire.sentAt</i18n>[[displayDate(form.date_sending)]]</div>
+                            </div>
+                            <div class="data-status">
+                                <div ng-if="!form.multiple">
+                                    <span ng-if="!!vm.getMyResponses(form)[0].date_response" class="responded">
+                                        <i18n>formulaire.responded.date</i18n>[[displayDate(vm.getMyResponses(form)[0].date_response)]]
+                                    </span>
+                                    <span ng-if="!!!vm.getMyResponses(form)[0].date_response" class="notResponded">
+                                        <i18n>formulaire.responded.waiting</i18n>
+                                    </span>
+                                </div>
+                                <div ng-if="form.multiple">
+                                    <span ng-if="vm.getMyResponses(form).length > 0" class="responded">
+                                        <i18n>formulaire.responses.count</i18n> : [[vm.getMyResponses(form).length]]
+                                    </span>
+                                    <span ng-if="vm.getMyResponses(form).length <= 0" class="notResponded">
+                                        <i18n>formulaire.responses.count</i18n> : 0
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--Table display-->
+        <table class="twelve table" ng-if="!vm.forms.all.empty() && !vm.display.grid">
+            <thead>
+                <tr>
+                    <th class="one">
+                        <label>
+                            <input type="checkbox" ng-change="vm.switchAll(vm.allFormsSelected)" ng-model="vm.allFormsSelected"/>
+                            <span></span>
+                        </label>
+                    </th>
+                    <th class="four"><i18n>formulaire.table.title</i18n></th>
+                    <th class="two"><i18n>formulaire.table.author</i18n></th>
+                    <th class="three"><i18n>formulaire.table.sent</i18n></th>
+                    <th class="two"><i18n>formulaire.status</i18n></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="form in vm.forms.all | filter:vm.searchInput | limitTo:vm.limitTo"
+                    ng-if="form.displayed"
+                    ng-dblclick="vm.openForm(form)">
+                    <td><label><input type="checkbox" ng-model="form.selected"/><span></span></label></td>
+                    <td ng-click="form.selected=!form.selected">[[form.title]]</td>
+                    <td ng-click="form.selected=!form.selected">[[form.owner_name]]</td>
+                    <td ng-click="form.selected=!form.selected"><i18n>formulaire.sentAt</i18n>[[displayDate(form.date_sending)]]</td>
+                    <td ng-click="form.selected=!form.selected">
+                        <div ng-if="!form.multiple">
+                                <span ng-if="!!vm.getMyResponses(form)[0].date_response" class="responded">
+                                    <i18n>formulaire.responded.date</i18n>[[displayDate(vm.getMyResponses(form)[0].date_response)]]
+                                </span>
+                            <span ng-if="!!!vm.getMyResponses(form)[0].date_response" class="notResponded">
+                                    <i18n>formulaire.responded.waiting</i18n>
+                                </span>
+                        </div>
+                        <div ng-if="form.multiple">
+                                <span ng-if="vm.getMyResponses(form).length > 0" class="responded">
+                                    <i18n>formulaire.responses.count</i18n> : [[vm.getMyResponses(form).length]]
+                                </span>
+                            <span ng-if="vm.getMyResponses(form).length <= 0" class="notResponded">
+                                    <i18n>formulaire.responses.count</i18n> : 0
+                                </span>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Loader -->
+        <div ng-if="vm.loading" class="twelve loader">
+            <loader min-height="'10px'"/>
+        </div>
+
+        <div class="error" ng-if="vm.forms.all.empty()">
+            <img src="/formulaire/public/img/onboarding.svg"/>
+            <i18n>formulaire.forms.empty</i18n>
+        </div>
+    </section>
+
+    <infinite-scroll scrolled="vm.infiniteScroll()" loading-mode="true"></infinite-scroll>
+
+    <container template='lightbox'></container>
+    <div ng-include="'formulaire/public/template/components/toaster.html'"></div>
+</div>

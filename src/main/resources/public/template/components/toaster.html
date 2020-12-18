@@ -1,0 +1,64 @@
+<section class="toggle-buttons" ng-if="vm.forms.selected.length > 0">
+    <div class="toggle">
+        <div class="row" ng-if="currentPage === Pages.FORMS_RESPONSE" workflow="formulaire.response">
+            <button ng-click="vm.openForm(vm.forms.selected[0])" class="cell" ng-show="vm.checkOpenButton()">
+                <i18n>formulaire.open</i18n>
+            </button>
+            <button ng-click="vm.openMyResponses(vm.forms.selected[0])" class="cell" ng-show="vm.checkMyResponsesButton()">
+                <i18n>formulaire.myResponses</i18n>
+            </button>
+            <button ng-click="vm.switchAll(true)" class="cell toaster-right" ng-if="!isMobile">
+                <i18n>formulaire.selectAll</i18n>
+            </button>
+            <button ng-click="vm.switchAll(false)" class="cell toaster-right" ng-if="!isMobile">
+                <i18n>formulaire.deselect</i18n>
+            </button>
+        </div>
+        <div class="row" ng-if="currentPage === Pages.FORMS_LIST && !vm.forms.selected[0].archived" workflow="formulaire.creation">
+            <button ng-click="vm.openForm(vm.forms.selected[0])" class="cell" ng-show="vm.forms.selected.length === 1">
+                <i18n>formulaire.open</i18n>
+            </button>
+            <button ng-click="vm.openPropertiesForm()" class="cell" ng-show="vm.forms.selected.length === 1">
+                <i18n>formulaire.properties</i18n>
+            </button>
+            <button ng-click="vm.duplicateForms()" class="cell">
+                <i18n>formulaire.duplicate</i18n>
+            </button>
+            <button ng-click="vm.shareForm()" class="cell"
+                    ng-show="vm.forms.selected.length === 1 && !!vm.forms.selected[0].nb_questions && hasShareRightManager(vm.forms.selected[0]) ">
+                <i18n>formulaire.share</i18n>
+            </button>
+            <button ng-click="vm.seeResultsForm()" class="cell"
+                    ng-show="vm.forms.selected.length === 1 && !!vm.forms.selected[0].nb_questions">
+                <i18n>formulaire.results</i18n>
+            </button>
+            <button ng-click="vm.remind()" class="cell"
+                    ng-show="vm.forms.selected.length === 1 && !!vm.forms.selected[0].nb_questions">
+                <i18n>formulaire.remind</i18n>
+            </button>
+            <button ng-click="vm.archiveForms()" class="cell" ng-show="hasShareRightManager(vm.forms.selected[0])">
+                <i18n>formulaire.archive</i18n>
+            </button>
+            <button ng-click="vm.switchAll(true)" class="cell toaster-right" ng-if="!isMobile">
+                <i18n>formulaire.selectAll</i18n>
+            </button>
+            <button ng-click="vm.switchAll(false)" class="cell toaster-right" ng-if="!isMobile">
+                <i18n>formulaire.deselect</i18n>
+            </button>
+        </div>
+        <div class="row" ng-if="currentPage === Pages.FORMS_LIST && vm.forms.selected[0].archived" workflow="formulaire.creation">
+            <button ng-click="vm.restoreForms()" class="cell" ng-show="hasShareRightManager(vm.forms.selected[0])">
+                <i18n>formulaire.restore</i18n>
+            </button>
+            <button ng-click="vm.deleteForms()" class="cell" ng-show="hasShareRightManager(vm.forms.selected[0])">
+                <i18n>formulaire.delete</i18n>
+            </button>
+            <button ng-click="vm.switchAll(true)" class="cell toaster-right" ng-if="!isMobile">
+                <i18n>formulaire.selectAll</i18n>
+            </button>
+            <button ng-click="vm.switchAll(false)" class="cell toaster-right" ng-if="!isMobile">
+                <i18n>formulaire.deselect</i18n>
+            </button>
+        </div>
+    </div>
+</section>

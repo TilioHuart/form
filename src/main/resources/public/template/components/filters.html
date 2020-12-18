@@ -1,0 +1,24 @@
+<div class="row filter-forms">
+    <div class="drop-down-block" ng-class="{ slided: displayFilterForms }">
+        <div class="drop-down-label" ng-click="displayFilterForms = !displayFilterForms">
+            <div class="twelve cell">
+                <i class="arrow"></i>
+                <i18n>formulaire.filter</i18n>
+            </div>
+        </div>
+    </div>
+    <div ng-hide="!displayFilterForms">
+        <label ng-repeat="order in vm.forms.orders | filter:{display:true}" ng-click="vm.sort(order.name)"
+               class="chip checkbox" ng-class="{ selected: vm.forms.order.field === order.name }">
+            <i18n>[[vm.displayFilterName(order.name)]]</i18n>
+            <i class="arrow" ng-if="vm.forms.isOrderedAsc(order.name)"></i>
+            <i class="arrow bottom" ng-if="vm.forms.isOrderedDesc(order.name)"></i>
+        </label>
+
+        <label ng-repeat="filter in vm.forms.filters | filter:{display:true}"
+               class="chip checkbox" ng-class="{ selected: filter.value }">
+            <i18n>[[vm.displayFilterName(filter.name)]]</i18n>
+            <input type="checkbox" ng-click="vm.filter(filter.name)">
+        </label>
+    </div>
+</div>

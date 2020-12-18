@@ -9,8 +9,8 @@ var argv = require('yargs').argv;
 var fs = require('fs');
 
 gulp.task('drop-cache', function(){
-     return gulp.src(['./src/main/resources/public/dist'], { read: false })
-		.pipe(clean());
+    return gulp.src(['./src/main/resources/public/dist'], { read: false })
+        .pipe(clean());
 });
 
 gulp.task('copy-files', ['drop-cache'], () => {
@@ -22,7 +22,12 @@ gulp.task('copy-files', ['drop-cache'], () => {
     return merge(html, bundle);
 })
 
-gulp.task('webpack', ['copy-files'], () => { 
+gulp.task('copy-mdi-font', ['copy-files'], function () {
+    return gulp.src('./node_modules/@mdi/font/fonts/*')
+        .pipe(gulp.dest('./src/main/resources/public/font/material-design/fonts'));
+});
+
+gulp.task('webpack', ['copy-mdi-font'], () => {
     return gulp.src('./src/main/resources/public')
         .pipe(webpack(require('./webpack.config.js')))
         .on('error', function handleError() {
@@ -52,7 +57,7 @@ gulp.task('build', ['rev'], () => {
 
 function getModName(fileContent){
     var getProp = function(prop){
-        return fileContent.split(prop + '=')[1].split(/\\r?\\n/)[0];
+        return fileContent.split(prop + '=')[1].split(/\r?\n/)[0];
     }
     return getProp('modowner') + '~' + getProp('modname') + '~' + getProp('version');
 }

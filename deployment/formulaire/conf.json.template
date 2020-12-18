@@ -1,0 +1,20 @@
+{
+  "name": "fr.openent~formulaire~1.0.0",
+  "config": {
+    "main" : "fr.openent.formulaire.Formulaire",
+    "port" : 8067,
+    "app-name" : "Formulaire",
+    "app-address" : "/formulaire",
+    "app-icon" : "${host}/formulaire/public/img/logo.svg",
+    "host": "${host}",
+    "ssl" : $ssl,
+    "auto-redeploy": false,
+    "userbook-host": "${host}",
+    "integration-mode" : "HTTP",
+    "app-registry.port" : 8012,
+    "mode" : "${mode}",
+    "entcore.port" : 8009,
+    "sql" : true,
+    "db-schema" : "formulaire"
+  }
+}

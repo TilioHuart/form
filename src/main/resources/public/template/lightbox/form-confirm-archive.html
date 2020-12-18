@@ -1,0 +1,26 @@
+<lightbox show="vm.display.lightbox.archive" on-close="vm.display.lightbox.archive = false">
+    <h2><i18n>formulaire.form.archive.title</i18n></h2>
+    <div class="warning" ng-if="vm.display.warning" style="margin-top: 20px;">
+        <i18n>formulaire.warning.forms.archive</i18n>
+    </div>
+    <table class="table" style="margin: 20px 10px;">
+        <thead>
+        <tr>
+            <th class="four"><i18n>formulaire.table.title</i18n></th>
+            <th class="three"><i18n>formulaire.table.author</i18n></th>
+            <th class="three"><i18n>formulaire.table.modified</i18n></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="form in vm.forms.selected">
+            <td>[[form.title]]</td>
+            <td>[[form.owner_name]]</td>
+            <td><i18n>formulaire.modified</i18n>[[displayDate(form.date_modification)]]</td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="action-buttons">
+        <button class="cell cancel" ng-click="vm.display.lightbox.archive = false"><i18n>formulaire.cancel</i18n></button>
+        <button class="cell" ng-click="vm.doArchiveForms()"><i18n>formulaire.archive</i18n></button>
+    </div>
+</lightbox>
