@@ -1,3 +1,5 @@
 {
-  "formulaire.title": "Formulaire"
+  "formulaire.title": "Formulaires",
+  "formulaire.empty": "Désolé, vous n'avez aucun formulaire ...",
+  "formulaire.error": "Erreur"
 }

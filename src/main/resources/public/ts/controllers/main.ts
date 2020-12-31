@@ -1,10 +1,13 @@
 import {idiom, model, ng, template} from 'entcore';
+import {Forms} from "../models/Form";
 import rights from "../rights";
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', ($scope, route) => {
 	route({
 		main: () => {
-			template.open('main', `controllers/main`);
+			$scope.forms = new Forms();
+			await $scope.forms.sync();
+			template.open('main', `containers/main`);
 		}
 	});
 
