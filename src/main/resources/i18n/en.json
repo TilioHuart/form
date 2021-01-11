@@ -1,5 +1,30 @@
 {
   "formulaire.title": "Forms",
-  "formulaire.empty": "Sorry, you don't have any form ...",
-  "formulaire.error": "Error"
+  "formulaire.forms.mine": "My forms",
+  "formulaire.forms.shared": "Forms shared with me",
+  "formulaire.forms.sent": "Forms sent",
+  "formulaire.forms.archive": "Archive",
+  "formulaire.forms.empty": "Sorry, you don't have any form ...",
+
+  "formulaire.toaster.open": "Open",
+  "formulaire.toaster.properties": "Properties",
+  "formulaire.toaster.send": "Send",
+  "formulaire.toaster.share": "Share",
+  "formulaire.toaster.export": "Export",
+  "formulaire.toaster.delete": "Delete",
+
+  "formulaire.create": "Create form",
+  "formulaire.mine": "My form",
+
+  "formulaire.table.title": "Form title",
+  "formulaire.table.author": "Author",
+  "formulaire.table.modified": "Last modification",
+
+  "formulaire.error": "Error",
+  "formulaire.error.404": "Sorry, the page you're looking for doesn't exist",
+  "formulaire.error.backToMenu": "Back to forms list",
+  "formulaire.error.form.sync": "An error occurred during the forms' synchronisation",
+  "formulaire.error.formService.list": "An error occurred during the forms' retrieving",
+  "formulaire.error.formService.create": "An error occurred during the form's creation",
+  "formulaire.error.formService.get": "An error occurred during the form retrieving"
 }

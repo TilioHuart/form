@@ -1,6 +1,22 @@
-<div>
-    <div class="cell twelve-mobile course-article style-bord-with-over-effect infoBackground bottom-margin"
-         ng-repeat="form in forms.allForms">
-        <forms-item form="form"></forms-item>
-    </div>
+<div class="row" ng-if="page != 'e404'">
+    <section class="cell three">
+        <div>
+            <h1>
+                <a href="#/mine"><i18n>formulaire.title</i18n></a>
+                <span ng-if="edit.mode">/ [[edit.form.title]]</span>
+            </h1>
+        </div>
+    </section>
+
+    <section class="cell nine">
+        <div>
+            <button class="cell"><i18n>formulaire.create</i18n></button>
+        </div>
+    </section>
 </div>
+
+<div class="row">
+    <container template="tab"></container>
+</div>
+
+<!--<div ng-include="'formulaire/public/template/components/toaster.html'"></div>-->

@@ -64,9 +64,7 @@ public class FormController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void get(HttpServerRequest request) {
         String id = request.getParam("id");
-        RequestUtils.bodyToJson(request, form -> {
-            formService.get(id, defaultResponseHandler(request));
-        });
+        formService.get(id, defaultResponseHandler(request));
     }
 
     @Put("/forms/:id")

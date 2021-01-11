@@ -1,0 +1,80 @@
+<div class="row forms-list" ng-controller="FormsListController as vm">
+
+    <!--Navigation menu-->
+    <section class="cell three">
+        <input type="text" ng-if="!edit.mode" ng-model="vm.searchInput" placeholder="Rechercher">
+        <nav class="vertical row">
+            <ul>
+                <li>
+                    <a ng-click="vm.openFolder('mine')" ng-class="{selected : page === 'mine'}">
+                        <i18n>formulaire.forms.mine</i18n>
+                    </a>
+                </li>
+                <li>
+                    <a ng-click="vm.openFolder('shared')" ng-class="{selected : page === 'shared'}">
+                        <i18n>formulaire.forms.shared</i18n>
+                    </a>
+                </li>
+                <li>
+                    <a ng-click="vm.openFolder('sent')" ng-class="{selected : page === 'sent'}">
+                        <i18n>formulaire.forms.sent</i18n>
+                    </a>
+                </li>
+                <li>
+                    <a ng-click="vm.openFolder('archived')" ng-class="{selected : page === 'archived'}">
+                        <i18n>formulaire.forms.archive</i18n>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </section>
+
+    <!--List of forms-->
+    <section class="cell nine" ng-if="!vm.wrongPageName">
+        <div class="row">
+            <div>[[page]]</div>
+            <div>
+                <i class="show-icons hg-icon" ng-click="vm.display.grid = true" ng-class="{'selected': vm.display.grid}"></i>
+                <i class="show-list hg-icon" ng-click="vm.display.grid = false" ng-class="{'selected': !vm.display.grid}"></i>
+            </div>
+        </div>
+
+        <!--Dominos display-->
+        <div class="dominos">
+            <div ng-repeat="form in vm.forms.all | filter:vm.searchInput" ng-if="!vm.forms.all.empty() && vm.display.grid" class="item">
+                <div ng-include="'formulaire/public/template/components/form-item.html'"></div>
+            </div>
+        </div>
+
+        <!--Table display-->
+        <table class="twelve" ng-if="!vm.forms.all.empty() && !vm.display.grid">
+            <thead>
+                <tr>
+                    <th class="one"><input type="checkbox" ng-change="vm.switchAll(vm.allFormsSelected)" ng-model="vm.allFormsSelected"/></th>
+                    <th class="three"><i18n>formulaire.table.title</i18n></th>
+                    <th class="three"><i18n>formulaire.table.author</i18n></th>
+                    <th class="three"><i18n>formulaire.table.modified</i18n></th>
+                    <th class="two"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="form in vm.forms.all | filter:vm.searchInput" ng-dblclick="vm.openForm(form)">
+                    <td><input type="checkbox" ng-model="form.selected"/></td>
+                    <td ng-click="form.selected=!form.selected">[[form.title]]</td>
+                    <td ng-click="form.selected=!form.selected">[[form.owner_name]]</td>
+                    <td ng-click="form.selected=!form.selected">[[form.modified]]</td>
+                    <td ng-click="form.selected=!form.selected">
+                        <i></i>
+                        <i></i>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div ng-if="vm.forms.all.empty()">
+            <i18n>formulaire.forms.empty</i18n>
+        </div>
+    </section>
+
+    <div ng-include="'formulaire/public/template/components/toaster.html'"></div>
+</div>

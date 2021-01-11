@@ -1,0 +1,9 @@
+<div class="domino" ng-dblclick="vm.openForm(form)" ng-class="{'selected' : form.selected}">
+    <label for="[[form.id]]">
+        <input type="checkbox" id="[[form.id]]" ng-model="form.selected"/>
+        <h3>[[form.title]]</h3>
+        <p>[[form.owner_name]]</p>
+        <p>[[form.created]]</p>
+        <p>[[form.description]]</p>
+    </label>
+</div>

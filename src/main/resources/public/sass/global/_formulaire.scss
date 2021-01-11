@@ -1,0 +1,12 @@
+body.formulaire {
+  @import "components/index";
+
+  .e404 {
+    text-align: center;
+    a {text-decoration: underline;}
+  }
+
+  .domino.selected {
+    background: rgba(100,150,255,0.5);
+  }
+}

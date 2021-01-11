@@ -1,5 +1,30 @@
 {
   "formulaire.title": "Formulaires",
-  "formulaire.empty": "Désolé, vous n'avez aucun formulaire ...",
-  "formulaire.error": "Erreur"
+  "formulaire.forms.mine": "Mes formulaires",
+  "formulaire.forms.shared": "Formulaires partagées avec moi",
+  "formulaire.forms.sent": "Formulaires envoyés",
+  "formulaire.forms.archive": "Corbeille",
+  "formulaire.forms.empty": "Désolé, vous n'avez aucun formulaire ...",
+
+  "formulaire.toaster.open": "Ouvrir",
+  "formulaire.toaster.properties": "Propriétés",
+  "formulaire.toaster.send": "Envoyer",
+  "formulaire.toaster.share": "Partager",
+  "formulaire.toaster.export": "Exporter",
+  "formulaire.toaster.delete": "Suprimer",
+
+  "formulaire.create": "Créer un formulaire",
+  "formulaire.mine": "Mon formulaire",
+
+  "formulaire.table.title": "Titre du formulaire",
+  "formulaire.table.author": "Auteur",
+  "formulaire.table.modified": "Dernière modification",
+
+  "formulaire.error": "Erreur",
+  "formulaire.error.404": "Désolé, la page que vous cherchez n'existe pas",
+  "formulaire.error.backToMenu": "Retour à la liste des formulaires",
+  "formulaire.error.form.sync": "Une erreur est survenue lors de la synchronisation des formulaires",
+  "formulaire.error.formService.list": "Une erreur est survenue lors de la récupération des formulaires",
+  "formulaire.error.formService.create": "Une erreur est survenue lors de la création du nouveau formulaire",
+  "formulaire.error.formService.get": "Une erreur est survenue lors de la récupération du formulaire"
 }

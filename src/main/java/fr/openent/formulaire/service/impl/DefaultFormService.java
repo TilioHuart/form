@@ -14,7 +14,7 @@ public class DefaultFormService implements FormService {
 
     @Override
     public void list(UserInfos user, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT * FROM " + Formulaire.FORM_TABLE + " WHERE owner_id = ? ORDER BY title";
+        String query = "SELECT * FROM " + Formulaire.FORM_TABLE + " WHERE owner_id = ? ORDER BY title;";
         JsonArray params = new JsonArray().add(user.getUserId());
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }

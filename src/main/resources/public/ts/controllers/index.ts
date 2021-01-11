@@ -1,2 +1,3 @@
 export * from './main';
-export * from './myForms';
+export * from './forms-list';
+export * from './form-editor';
