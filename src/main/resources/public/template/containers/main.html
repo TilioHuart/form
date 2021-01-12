@@ -1,5 +1,5 @@
-<div class="row" ng-if="page != 'e404'">
-    <section class="cell three">
+<div class="row">
+    <section class="cell nine">
         <div>
             <h1>
                 <a href="#/mine"><i18n>formulaire.title</i18n></a>
@@ -8,9 +8,14 @@
         </div>
     </section>
 
-    <section class="cell nine">
-        <div>
-            <button class="cell"><i18n>formulaire.create</i18n></button>
+    <section class="cell three">
+        <div class="main-button" ng-if="page == 'list'">
+            <button class="cell" ng-click="redirectTo('/form/create')"><i18n>formulaire.create.button</i18n></button>
+        </div>
+        <div class="main-button" ng-if="page == 'edit'">
+            <button class="cell" ng-click=""><i18n>formulaire.edit.add</i18n></button>
+            <button class="cell" ng-click=""><i18n>formulaire.edit.organize</i18n></button>
+            <button class="cell" ng-click=""><i18n>formulaire.edit.preview</i18n></button>
         </div>
     </section>
 </div>
@@ -18,5 +23,3 @@
 <div class="row">
     <container template="tab"></container>
 </div>
-
-<!--<div ng-include="'formulaire/public/template/components/toaster.html'"></div>-->

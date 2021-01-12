@@ -2,11 +2,89 @@ body.formulaire {
   @import "components/index";
 
   .e404 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     text-align: center;
     a {text-decoration: underline;}
   }
 
-  .domino.selected {
-    background: rgba(100,150,255,0.5);
+  .img_mini {
+    max-height: 300px;
+    margin: 25px;
+  }
+
+  .main-button {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  // Forms-list
+
+  .folder-info {
+    display: flex;
+    justify-content: space-between;
+    align-content: center;
+  }
+
+  .dominos {
+    justify-content: flex-start;
+
+    .item {
+      width: calc(90%/3); // responsive /2 /1
+      background: white;
+
+      &.selected {
+        background: rgba(75 ,175,213,0.3);
+      }
+
+      .domino {
+        img {
+          background: white;
+
+          &.empty {
+            background: #4bafd5;
+          }
+        }
+
+        .space-around {
+          padding: 10px;
+
+          h4, h5 {
+            margin: 0;
+          }
+
+          .date {
+            font-size: 12px;
+          }
+        }
+      }
+    }
+   }
+
+  .table {
+    margin-top: 10px;
+
+    img {
+      opacity: 0.1;
+
+      &.selected {
+        opacity: 0.6;
+      }
+    }
+  }
+
+  // Create-form
+
+  .create-form {
+    display: flex;
+    justify-content: center;
+  }
+
+  // Edit-form
+
+  .edit-form {
+    display: flex;
+    justify-content: center;
   }
 }

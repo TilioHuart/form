@@ -25,9 +25,9 @@ export class Form implements Selectable {
         this.owner_name = null;
         this.created = null;
         this.modified = null;
-        this.sent = null;
-        this.shared = null;
-        this.archived = null; // TODO
+        this.sent = false;
+        this.shared = false;
+        this.archived = false; // TODO
         this.selected = null;
     }
 

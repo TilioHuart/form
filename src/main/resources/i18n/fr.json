@@ -1,10 +1,21 @@
 {
   "formulaire.title": "Formulaires",
+  "formulaire.mine": "Mon formulaire",
+  "formulaire.created": "Créé le ",
+  "formulaire.modified": "Modifié le ",
+  "formulaire.at": " à ",
+  "formulaire.save": "Enregistrer",
+  "formulaire.cancel": "Annuler",
+
   "formulaire.forms.mine": "Mes formulaires",
   "formulaire.forms.shared": "Formulaires partagées avec moi",
   "formulaire.forms.sent": "Formulaires envoyés",
-  "formulaire.forms.archive": "Corbeille",
+  "formulaire.forms.archived": "Corbeille",
   "formulaire.forms.empty": "Désolé, vous n'avez aucun formulaire ...",
+
+  "formulaire.table.title": "Titre du formulaire",
+  "formulaire.table.author": "Auteur",
+  "formulaire.table.modified": "Dernière modification",
 
   "formulaire.toaster.open": "Ouvrir",
   "formulaire.toaster.properties": "Propriétés",
@@ -13,18 +24,32 @@
   "formulaire.toaster.export": "Exporter",
   "formulaire.toaster.delete": "Suprimer",
 
-  "formulaire.create": "Créer un formulaire",
-  "formulaire.mine": "Mon formulaire",
+  "formulaire.create.button": "Créer un formulaire",
+  "formulaire.create.title": "Titre de mon formulaire",
 
-  "formulaire.table.title": "Titre du formulaire",
-  "formulaire.table.author": "Auteur",
-  "formulaire.table.modified": "Dernière modification",
+  "formulaire.edit.add": "Ajouter",
+  "formulaire.edit.organize": "Organiser",
+  "formulaire.edit.preview": "Aperçu",
+  "formulaire.edit.empty.main": "Votre formulaire est vide",
+  "formulaire.edit.empty.caption": "Cliquez sur 'Ajouter' pour créez votre premier élément",
 
   "formulaire.error": "Erreur",
   "formulaire.error.404": "Désolé, la page que vous cherchez n'existe pas",
   "formulaire.error.backToMenu": "Retour à la liste des formulaires",
+
   "formulaire.error.form.sync": "Une erreur est survenue lors de la synchronisation des formulaires",
   "formulaire.error.formService.list": "Une erreur est survenue lors de la récupération des formulaires",
   "formulaire.error.formService.create": "Une erreur est survenue lors de la création du nouveau formulaire",
-  "formulaire.error.formService.get": "Une erreur est survenue lors de la récupération du formulaire"
+  "formulaire.error.formService.get": "Une erreur est survenue lors de la récupération du formulaire",
+  "formulaire.error.formService.update": "Une erreur est survenue lors de la sauvegarde du formulaire",
+  "formulaire.error.formService.delete": "Une erreur est survenue lors de la suppression du formulaire",
+
+  "formulaire.error.question.sync": "Une erreur est survenue lors de la synchronisation des questions",
+  "formulaire.error.questionService.list": "Une erreur est survenue lors de la récupération des questions",
+  "formulaire.error.questionService.create": "Une erreur est survenue lors de la création de la nouvelle question",
+  "formulaire.error.questionService.get": "Une erreur est survenue lors de la récupération de la question",
+  "formulaire.error.questionService.update": "Une erreur est survenue lors de la sauvearde de la question",
+  "formulaire.error.questionService.delete": "Une erreur est survenue lors de la suppression de la question",
+
+  "formulaire.success.create": "Votre formulaire a bien été créé !"
 }

@@ -9,9 +9,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.template = template;
 
 		// Init variables
-
-		$scope.page = "";
-		$scope.formsListPages = ["mine", "shared", "sent", "archived"];
+		$scope.page = '';
 		$scope.edit = {
 			mode: false,
 			form: new Form()
@@ -19,28 +17,28 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 
 		// Routing & template opening
 
-		template.open('main', `containers/main`);
 		route({
-			formsList: (params) => {
-				if ($scope.formsListPages.includes(params.pageName)) {
-					$scope.page = params.pageName;
-					template.open('tab', `containers/forms-list`);
-				}
-				else {
-					$scope.redirectTo('/e404');
-				}
+			formsList: () => {
+				$scope.page = 'list';
+				template.open('main', `containers/main`);
+				template.open('tab', `containers/forms-list`);
 			},
-			form: async (params) => {
-				$scope.page = 'form';
-				let idForm = params.idForm;
-				$scope.edit.mode = true;
-				let { data } = await formService.get(idForm);
+			createForm: () => {
+				$scope.page = 'create';
+				template.open('main', `containers/main`);
+				template.open('tab', `containers/create-form`);
+			},
+			editForm: async (params) => {
+				$scope.page = 'edit';
+				let { data } = await formService.get(params.idForm);
 				$scope.edit.form = data;
-				template.open('tab', `containers/form`);
+				$scope.edit.mode = true;
+				template.open('main', `containers/main`);
+				template.open('tab', `containers/edit-form`);
 			},
 			e404: () => {
 				$scope.page = 'e404';
-				template.open('tab', `containers/e404`);
+				template.open('main', `containers/e404`);
 			}
 		});
 

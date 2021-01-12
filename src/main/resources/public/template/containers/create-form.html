@@ -1,0 +1,20 @@
+<div class="dominos" ng-controller="FormCreatorController as vm">
+    <div class="item">
+        <div class="domino">
+            <div class="cell two">
+                <label for="img">
+                    <img src="[[vm.form.picture]]"/>
+                    <input type="file" id="img" ng-model="vm.form.picture" style="display:none">
+                </label>
+            </div>
+            <div class="cell ten">
+                <h4>
+                    <i18n>formulaire.create.title</i18n>
+                    <input type="text" ng-model="vm.form.title" placeholder="Rechercher">
+                </h4>
+                <button class="cell" ng-click="redirectTo('/forms-list')"><i18n>formulaire.cancel</i18n></button>
+                <button class="cell" ng-click="vm.save()" ng-disabled="!vm.form.title"><i18n>formulaire.save</i18n></button>
+            </div>
+        </div>
+    </div>
+</div>

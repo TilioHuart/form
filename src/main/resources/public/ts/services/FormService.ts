@@ -6,6 +6,8 @@ export interface FormService {
     list(): Promise<AxiosResponse>;
     create(Form): Promise<AxiosResponse>;
     get(number): Promise<AxiosResponse>;
+    update(Form): Promise<AxiosResponse>;
+    delete(number): Promise<AxiosResponse>;
 }
 
 export const formService: FormService = {
@@ -33,6 +35,24 @@ export const formService: FormService = {
             return await http.get(`/formulaire/forms/${id}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.get'));
+            throw err;
+        }
+    },
+
+    async update(form : Form): Promise<AxiosResponse> {
+        try {
+            return await http.post(`/formulaire/forms/${form}`);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.formService.update'));
+            throw err;
+        }
+    },
+
+    async delete(id : number): Promise<AxiosResponse> {
+        try {
+            return await http.delete(`/formulaire/forms/${id}`);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.formService.delete'));
             throw err;
         }
     }

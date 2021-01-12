@@ -62,3 +62,6 @@ CREATE TABLE formulaire.distribution (
     created     timestamp without time zone NOT NULL DEFAULT now(),
     CONSTRAINT fk_form_id FOREIGN KEY (form_id) REFERENCES formulaire.form (id) ON UPDATE NO ACTION ON DELETE CASCADE
 );
+
+INSERT INTO formulaire.question_type(code, name)
+VALUES (1, 'FREE_TEXT'), (2, 'SHORT_ANSWER'), (3, 'LONG_ANSWER'), (4, 'UNIC_ANSWER'), (5, 'MULTIPLE_ANSWER'), (6, 'DATETIME'), (7, 'FILE');

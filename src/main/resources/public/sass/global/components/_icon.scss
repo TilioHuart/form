@@ -1,4 +1,8 @@
 i {
+  &.spaced {
+    margin-right: 15px;
+  }
+
   &.xs-icon {
     font-size: 10px;
   }
@@ -20,25 +24,13 @@ i {
   }
 
   &.show-icons {
-    background-repeat: no-repeat;
-    background-position: center;
-    display: inline-block;
-    box-sizing: border-box;
     vertical-align: middle;
     opacity: 0.2;
-    //  color: #4bafd5;
   }
 
   &.show-list {
-    margin-left: 15px;
-    background-repeat: no-repeat;
-    background-position: center;
-    display: inline-block;
-    box-sizing: border-box;
     vertical-align: middle;
     opacity: 0.2;
-    background-size: 100% 93%;
-    //  color: #4bafd5;
   }
 
   &.selected {

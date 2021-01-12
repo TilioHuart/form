@@ -1,18 +1,21 @@
 import {idiom, ng, notify, toasts} from 'entcore';
 import {Form, Forms} from "../models";
+import {DateUtils} from "../utils/date";
 
 interface ViewModel {
     forms: Forms;
+    folder: string;
     allFormsSelected: boolean;
     searchInput: string;
     display: {
         grid: boolean
     };
-    wrongPageName: boolean;
 
     init(): void;
     openFolder(string): void;
     switchAll(boolean): void;
+    displayPage(): string;
+    displayDate(Date): string;
     openForm(Form): void;
     openPropertiesForm(Form): void;
     sendForm(Form): void;
@@ -27,28 +30,24 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     const vm: ViewModel = this;
     vm.forms = new Forms();
+    vm.folder = "mine";
     vm.searchInput = "";
     vm.allFormsSelected = false;
     vm.display = {
         grid: true
     };
-    vm.wrongPageName = false;
 
     vm.init = async (): Promise<void> => {
         $scope.edit.mode = false;
         await vm.forms.sync();
 
-        // Check if the page if ok
-        switch ($scope.page) {
+        // Check if the folder is ok
+        switch (vm.folder) {
             case "mine": vm.forms.all = vm.forms.all.filter(form => form.archived === false); break;
             case "shared": vm.forms.all = vm.forms.all.filter(form => form.shared === true); break;
             case "sent": vm.forms.all = vm.forms.all.filter(form => form.sent === true); break;
             case "archived": vm.forms.all = vm.forms.all.filter(form => form.archived === true); break;
-            default :
-                vm.wrongPageName = true;
-                notify.error(idiom.translate('formulaire.error.404'));
-                vm.openFolder('mine');
-                break;
+            default : vm.openFolder('mine'); break;
         }
 
         $scope.safeApply();
@@ -56,16 +55,25 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     // Functions
 
-    vm.openFolder = (pageName:string) => {
-        $scope.page = pageName;
+    vm.openFolder = (pageName:string) : void => {
+        vm.folder = pageName;
         vm.init();
-        if (!vm.wrongPageName) {
-            $scope.redirectTo(`/forms-list/${pageName}`);
-        }
     };
 
-    vm.switchAll = (value:boolean) => {
+    vm.switchAll = (value:boolean) : void => {
         value ? vm.forms.selectAll() : vm.forms.deselectAll();
+    };
+
+    // Utils
+
+    vm.displayPage = () : string => {
+        return idiom.translate("formulaire.forms." + vm.folder);
+    };
+
+    vm.displayDate = (dateToFormat:Date) : string => {
+        let date = DateUtils.format(dateToFormat, DateUtils.FORMAT["DAY-MONTH-YEAR"]);
+        let time = DateUtils.format(dateToFormat, DateUtils.FORMAT["HOUR-MINUTES"]);
+        return date + idiom.translate('formulaire.at') + time;
     };
 
 

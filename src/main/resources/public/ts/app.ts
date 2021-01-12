@@ -17,16 +17,19 @@ for (let directive in directives) {
 
 routes.define(function($routeProvider){
 	$routeProvider
-		.when('/forms-list/:pageName', {
+		.when('/forms-list', {
 			action: 'formsList'
 		})
+		.when('/form/create', {
+			action: 'createForm'
+		})
 		.when('/form/:idForm', {
-			action: 'form'
+			action: 'editForm'
 		})
 		.when('/e404', {
 			action: 'e404'
 		})
 		.otherwise({
-			redirectTo: '/forms-list/mine'
+			redirectTo: '/forms-list'
 		});
 });

@@ -1,38 +1,30 @@
-<div class="row forms-list" ng-controller="FormsListController as vm">
+<div class="row" ng-controller="FormsListController as vm">
 
     <!--Navigation menu-->
     <section class="cell three">
-        <input type="text" ng-if="!edit.mode" ng-model="vm.searchInput" placeholder="Rechercher">
+        <h4><input type="text" ng-if="!edit.mode" ng-model="vm.searchInput" placeholder="Rechercher"></h4>
         <nav class="vertical row">
             <ul>
-                <li>
-                    <a ng-click="vm.openFolder('mine')" ng-class="{selected : page === 'mine'}">
-                        <i18n>formulaire.forms.mine</i18n>
-                    </a>
-                </li>
-                <li>
-                    <a ng-click="vm.openFolder('shared')" ng-class="{selected : page === 'shared'}">
-                        <i18n>formulaire.forms.shared</i18n>
-                    </a>
-                </li>
-                <li>
-                    <a ng-click="vm.openFolder('sent')" ng-class="{selected : page === 'sent'}">
-                        <i18n>formulaire.forms.sent</i18n>
-                    </a>
-                </li>
-                <li>
-                    <a ng-click="vm.openFolder('archived')" ng-class="{selected : page === 'archived'}">
-                        <i18n>formulaire.forms.archive</i18n>
-                    </a>
-                </li>
+                <li><a ng-click="vm.openFolder('mine')" ng-class="{selected : page === 'mine'}">
+                    <i18n>formulaire.forms.mine</i18n>
+                </a></li>
+                <li><a ng-click="vm.openFolder('shared')" ng-class="{selected : page === 'shared'}">
+                    <i18n>formulaire.forms.shared</i18n>
+                </a></li>
+                <li><a ng-click="vm.openFolder('sent')" ng-class="{selected : page === 'sent'}">
+                    <i18n>formulaire.forms.sent</i18n>
+                </a></li>
+                <li><a ng-click="vm.openFolder('archived')" ng-class="{selected : page === 'archived'}">
+                    <i18n>formulaire.forms.archived</i18n>
+                </a></li>
             </ul>
         </nav>
     </section>
 
     <!--List of forms-->
-    <section class="cell nine" ng-if="!vm.wrongPageName">
-        <div class="row">
-            <div>[[page]]</div>
+    <section class="cell nine">
+        <div class="folder-info">
+            <div><h4><i class="folder spaced"></i>[[vm.displayPage()]]</h4></div>
             <div>
                 <i class="show-icons hg-icon" ng-click="vm.display.grid = true" ng-class="{'selected': vm.display.grid}"></i>
                 <i class="show-list hg-icon" ng-click="vm.display.grid = false" ng-class="{'selected': !vm.display.grid}"></i>
@@ -40,21 +32,38 @@
         </div>
 
         <!--Dominos display-->
-        <div class="dominos">
-            <div ng-repeat="form in vm.forms.all | filter:vm.searchInput" ng-if="!vm.forms.all.empty() && vm.display.grid" class="item">
-                <div ng-include="'formulaire/public/template/components/form-item.html'"></div>
+        <div class="dominos" ng-if="!vm.forms.all.empty() && vm.display.grid">
+            <div ng-repeat="form in vm.forms.all | filter:vm.searchInput"
+                 ng-if="!vm.forms.all.empty() && vm.display.grid"
+                 ng-click="form.selected = !form.selected" ng-dblclick="vm.openForm(form)"
+                 class="item" ng-class="{'selected' : form.selected}">
+                <div class="domino">
+<!--                    <label for="[[form.id]]">-->
+<!--                        <input type="checkbox" id="[[form.id]]" ng-model="form.selected"/>-->
+                        <div class="cell four">
+                            <img src="[[form.picture]]"
+                                 onerror="this.src='/formulaire/public/img/empty-image.png';"
+                                 ng-class="{'empty': !form.picture}"/>
+                        </div>
+                        <div class="cell space-around">
+                            <h4>[[form.title]]</h4>
+                            <h5>[[form.owner_name]]</h5>
+                            <div class="date"><i18n>formulaire.created</i18n>[[vm.displayDate(form.created)]]</div>
+                        </div>
+<!--                    </label>-->
+                </div>
             </div>
         </div>
 
         <!--Table display-->
-        <table class="twelve" ng-if="!vm.forms.all.empty() && !vm.display.grid">
+        <table class="twelve table" ng-if="!vm.forms.all.empty() && !vm.display.grid">
             <thead>
                 <tr>
                     <th class="one"><input type="checkbox" ng-change="vm.switchAll(vm.allFormsSelected)" ng-model="vm.allFormsSelected"/></th>
-                    <th class="three"><i18n>formulaire.table.title</i18n></th>
+                    <th class="four"><i18n>formulaire.table.title</i18n></th>
                     <th class="three"><i18n>formulaire.table.author</i18n></th>
                     <th class="three"><i18n>formulaire.table.modified</i18n></th>
-                    <th class="two"></th>
+                    <th class="one"></th>
                 </tr>
             </thead>
             <tbody>
@@ -62,16 +71,17 @@
                     <td><input type="checkbox" ng-model="form.selected"/></td>
                     <td ng-click="form.selected=!form.selected">[[form.title]]</td>
                     <td ng-click="form.selected=!form.selected">[[form.owner_name]]</td>
-                    <td ng-click="form.selected=!form.selected">[[form.modified]]</td>
+                    <td ng-click="form.selected=!form.selected"><i18n>formulaire.modified</i18n>[[vm.displayDate(form.modified)]]</td>
                     <td ng-click="form.selected=!form.selected">
-                        <i></i>
-                        <i></i>
+                        <img src="formulaire/public/img/icons/send.svg" ng-class="{'selected': form.sent}"/>
+                        <img src="formulaire/public/img/icons/share.svg" ng-class="{'selected': form.shared}"/>
                     </td>
                 </tr>
             </tbody>
         </table>
 
-        <div ng-if="vm.forms.all.empty()">
+        <div class="e404" ng-if="vm.forms.all.empty()">
+            <img src="/formulaire/public/image/onboarding.svg"/>
             <i18n>formulaire.forms.empty</i18n>
         </div>
     </section>

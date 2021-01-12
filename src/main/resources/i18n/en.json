@@ -1,10 +1,21 @@
 {
   "formulaire.title": "Forms",
+  "formulaire.mine": "My form",
+  "formulaire.created": "Created on ",
+  "formulaire.modified": "Modified on ",
+  "formulaire.at": " at ",
+  "formulaire.save": "Save",
+  "formulaire.cancel": "Cancel",
+
   "formulaire.forms.mine": "My forms",
   "formulaire.forms.shared": "Forms shared with me",
   "formulaire.forms.sent": "Forms sent",
-  "formulaire.forms.archive": "Archive",
+  "formulaire.forms.archived": "Archive",
   "formulaire.forms.empty": "Sorry, you don't have any form ...",
+
+  "formulaire.table.title": "Form title",
+  "formulaire.table.author": "Author",
+  "formulaire.table.modified": "Last modification",
 
   "formulaire.toaster.open": "Open",
   "formulaire.toaster.properties": "Properties",
@@ -13,18 +24,32 @@
   "formulaire.toaster.export": "Export",
   "formulaire.toaster.delete": "Delete",
 
-  "formulaire.create": "Create form",
-  "formulaire.mine": "My form",
+  "formulaire.create.button": "Create form",
+  "formulaire.create.title": "Title of my form",
 
-  "formulaire.table.title": "Form title",
-  "formulaire.table.author": "Author",
-  "formulaire.table.modified": "Last modification",
+  "formulaire.edit.add": "Add",
+  "formulaire.edit.organize": "Organize",
+  "formulaire.edit.preview": "Preview",
+  "formulaire.edit.empty.main": "Yout form is empty",
+  "formulaire.edit.empty.caption": "Click on 'Add' to create your first element",
 
   "formulaire.error": "Error",
   "formulaire.error.404": "Sorry, the page you're looking for doesn't exist",
   "formulaire.error.backToMenu": "Back to forms list",
+
   "formulaire.error.form.sync": "An error occurred during the forms' synchronisation",
   "formulaire.error.formService.list": "An error occurred during the forms' retrieving",
   "formulaire.error.formService.create": "An error occurred during the form's creation",
-  "formulaire.error.formService.get": "An error occurred during the form retrieving"
+  "formulaire.error.formService.get": "An error occurred during the form's retrieving",
+  "formulaire.error.formService.update": "An error occurred during the form's saving",
+  "formulaire.error.formService.delete": "An error occurred during the form's suppression",
+
+  "formulaire.error.question.sync": "An error occurred during the questions' synchronisation",
+  "formulaire.error.questionService.list": "An error occurred during the questions' retrieving",
+  "formulaire.error.questionService.create": "An error occurred during the question's creation",
+  "formulaire.error.questionService.get": "An error occurred during the question's retrieving",
+  "formulaire.error.questionService.update": "An error occurred during the question's saving",
+  "formulaire.error.questionService.delete": "An error occurred during the question's suppression",
+
+  "formulaire.success.create": "You form has been successfully created !"
 }

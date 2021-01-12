@@ -1,0 +1,22 @@
+<div class="edit-form" ng-class="{'dominos': vm.questions.length > 0}" ng-controller="FormEditorController as vm">
+    <div ng-if="vm.questions.length > 0">
+        <div class="item">
+            <div class="domino">
+                <div class="cell twelve">
+                    <div>Hello je suis [[edit.form.title]]</div>
+                    <h3>[[edit.form.title]]</h3>
+                    <p>[[edit.form.owner_name]]</p>
+                    <p>[[edit.form.created]]</p>
+                    <p>[[edit.form.description]]</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="e404" ng-if="vm.questions.length <= 0">
+        <img src="/formulaire/public/img/empty-form.svg" class="img_mini"/>
+        <h1><i18n>formulaire.edit.empty.main</i18n></h1>
+        <br>
+        <div><i18n>formulaire.edit.empty.caption</i18n></div>
+    </div>
+</div>
