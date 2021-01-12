@@ -1,7 +1,6 @@
 package fr.openent.formulaire;
 
-import fr.openent.formulaire.controller.FormController;
-import fr.openent.formulaire.controller.FormulaireController;
+import fr.openent.formulaire.controller.*;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.http.BaseServer;
@@ -10,9 +9,9 @@ public class Formulaire extends BaseServer {
 	private static final Logger log = LoggerFactory.getLogger(Formulaire.class);
 
 	public static String DB_SCHEMA;
-	public static String FORM_TABLE ;
+	public static String FORM_TABLE;
 	public static String QUESTION_TABLE;
-	public static String RESPONSE_TABLE ;
+	public static String RESPONSE_TABLE;
 
 	public static final String view = "formulaire.view";
 
@@ -27,7 +26,6 @@ public class Formulaire extends BaseServer {
 
 		addController(new FormulaireController());
 		addController(new FormController());
-//		addController(new QuestionController());
-//		addController(new ResponseController());
+		addController(new QuestionController());
 	}
 }

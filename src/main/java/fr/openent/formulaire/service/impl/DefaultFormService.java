@@ -43,13 +43,14 @@ public class DefaultFormService implements FormService {
 
     @Override
     public void update(String id, JsonObject form, Handler<Either<String, JsonObject>> handler) {
-        String query = "UPDATE " + Formulaire.FORM_TABLE + " SET title = ?, description = ?, picture = ?, modified = ?) " +
-                "VALUES (?, ?, ?, ?) RETURNING *;";
+        String query = "UPDATE " + Formulaire.FORM_TABLE + " SET title = ?, description = ?, picture = ?, modified = ? " +
+                "WHERE id = ?;";
         JsonArray params = new JsonArray()
                 .add(form.getString("title", ""))
                 .add(form.getString("description", ""))
                 .add(form.getString("picture", ""))
-                .add("NOW()");
+                .add("NOW()")
+                .add(id);
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
