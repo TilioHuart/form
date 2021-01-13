@@ -27,5 +27,6 @@ public class Formulaire extends BaseServer {
 		addController(new FormulaireController());
 		addController(new FormController());
 		addController(new QuestionController());
+		addController(new ResponseController());
 	}
 }
