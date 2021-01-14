@@ -1,6 +1,6 @@
-import {idiom, model, ng, notify, template, toasts} from 'entcore';
+import {idiom, model, ng, template} from 'entcore';
 import rights from "../rights";
-import {Form} from "../models";
+import {Form, QuestionTypes} from "../models";
 import {formService} from "../services";
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', 'FormService',
@@ -9,36 +9,36 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.template = template;
 
 		// Init variables
-		$scope.page = '';
+		$scope.currentTab = 'formsList';
 		$scope.edit = {
 			mode: false,
 			form: new Form()
 		};
+		$scope.questionTypes = new QuestionTypes();
+		$scope.questionTypes.sync();
 
 		// Routing & template opening
 
 		route({
 			formsList: () => {
-				$scope.page = 'list';
-				template.open('main', `containers/main`);
-				template.open('tab', `containers/forms-list`);
+				$scope.currentTab = 'formsList';
+				template.open('main', 'containers/forms-list');
+			},
+			formsResponses: () => {
+				$scope.currentTab = 'formsResponses';
+				template.open('main', 'containers/forms-responses');
 			},
 			createForm: () => {
-				$scope.page = 'create';
-				template.open('main', `containers/main`);
-				template.open('tab', `containers/create-form`);
+				template.open('main', 'containers/create-form');
 			},
 			editForm: async (params) => {
-				$scope.page = 'edit';
 				let { data } = await formService.get(params.idForm);
 				$scope.edit.form = data;
 				$scope.edit.mode = true;
-				template.open('main', `containers/main`);
-				template.open('tab', `containers/edit-form`);
+				template.open('main', 'containers/edit-form');
 			},
 			e404: () => {
-				$scope.page = 'e404';
-				template.open('main', `containers/e404`);
+				template.open('main', 'containers/e404');
 			}
 		});
 

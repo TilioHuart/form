@@ -1,6 +1,6 @@
 const rights = {
     workflow: {
-        access: 'fr.openent.formulaire.controllers.FormulaireController|view',
+        access: 'fr.openent.formulaire.controllers.FormulaireController|view'
     },
     resource: {}
 };

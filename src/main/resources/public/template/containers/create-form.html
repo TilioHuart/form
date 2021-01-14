@@ -1,19 +1,33 @@
-<div class="dominos" ng-controller="FormCreatorController as vm">
-    <div class="item">
-        <div class="domino">
-            <div class="cell two">
-                <label for="img">
-                    <img src="[[vm.form.picture]]"/>
-                    <input type="file" id="img" ng-model="vm.form.picture" style="display:none">
-                </label>
+<div ng-controller="FormCreatorController as vm">
+    <div class="row">
+        <section class="cell nine">
+            <div>
+                <h1>
+                    <a href="#/mine"><i18n>formulaire.title</i18n></a>
+                </h1>
             </div>
-            <div class="cell ten">
-                <h4>
-                    <i18n>formulaire.create.title</i18n>
-                    <input type="text" ng-model="vm.form.title" placeholder="Rechercher">
-                </h4>
-                <button class="cell" ng-click="redirectTo('/forms-list')"><i18n>formulaire.cancel</i18n></button>
-                <button class="cell" ng-click="vm.save()" ng-disabled="!vm.form.title"><i18n>formulaire.save</i18n></button>
+        </section>
+    </div>
+
+    <div class="create-form dominos">
+        <div class="item">
+            <div class="domino">
+                <div class="two picture" ng-class="{'empty': !vm.form.picture}">
+                    <label for="img">
+                        <img src="[[vm.form.picture]]" onerror="this.src='/formulaire/public/img/empty-image.png';"/>
+                        <input type="file" id="img" ng-model="vm.form.picture" style="display:none">
+                    </label>
+                </div>
+                <div class="ten data">
+                    <div class="data-text">
+                        <h4><i18n>formulaire.form.create.title</i18n></h4>
+                        <input type="text" ng-model="vm.form.title" size="30" i18n-placeholder="formulaire.form.create.title">
+                    </div>
+                    <div class="data-icons">
+                        <button class="cell" ng-click="redirectTo('/forms-list')"><i18n>formulaire.cancel</i18n></button>
+                        <button class="cell" ng-click="vm.save()" ng-disabled="!vm.form.title"><i18n>formulaire.save</i18n></button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

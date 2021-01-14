@@ -3,19 +3,28 @@
   "formulaire.mine": "Mon formulaire",
   "formulaire.created": "Créé le ",
   "formulaire.modified": "Modifié le ",
+  "formulaire.sent": "Envoyé le ",
+  "formulaire.status": "Statut",
   "formulaire.at": " à ",
   "formulaire.save": "Enregistrer",
   "formulaire.cancel": "Annuler",
 
+  "formulaire.tab.list": "Mes formulaires",
+  "formulaire.tab.responses": "Mes réponses",
+
   "formulaire.forms.mine": "Mes formulaires",
-  "formulaire.forms.shared": "Formulaires partagées avec moi",
+  "formulaire.forms.shared": "Formulaires partagés avec moi",
   "formulaire.forms.sent": "Formulaires envoyés",
   "formulaire.forms.archived": "Corbeille",
   "formulaire.forms.empty": "Désolé, vous n'avez aucun formulaire ...",
 
+  "formulaire.distribution.status.waiting": "En attente de réponse",
+  "formulaire.distribution.status.done": "Répondu le ",
+
   "formulaire.table.title": "Titre du formulaire",
   "formulaire.table.author": "Auteur",
   "formulaire.table.modified": "Dernière modification",
+  "formulaire.table.sent": "Date d'envoi",
 
   "formulaire.toaster.open": "Ouvrir",
   "formulaire.toaster.properties": "Propriétés",
@@ -23,15 +32,26 @@
   "formulaire.toaster.share": "Partager",
   "formulaire.toaster.export": "Exporter",
   "formulaire.toaster.delete": "Suprimer",
+  "formulaire.toaster.deselect": "Déselectionner",
 
-  "formulaire.create.button": "Créer un formulaire",
-  "formulaire.create.title": "Titre de mon formulaire",
+  "formulaire.form.create.button": "Créer un formulaire",
+  "formulaire.form.create.title": "Titre de mon formulaire",
 
-  "formulaire.edit.add": "Ajouter",
-  "formulaire.edit.organize": "Organiser",
-  "formulaire.edit.preview": "Aperçu",
-  "formulaire.edit.empty.main": "Votre formulaire est vide",
-  "formulaire.edit.empty.caption": "Cliquez sur 'Ajouter' pour créez votre premier élément",
+  "formulaire.form.edit.add": "Ajouter",
+  "formulaire.form.edit.organize": "Organiser",
+  "formulaire.form.edit.preview": "Aperçu",
+  "formulaire.form.edit.empty.main": "Votre formulaire est vide",
+  "formulaire.form.edit.empty.caption": "Cliquez sur 'Ajouter' pour créez votre premier élément",
+
+  "formulaire.question.selectType": "Sélectionner le type de section",
+  "formulaire.question.type.FREETEXT": "Zone de texte",
+  "formulaire.question.type.SHORTANSWER": "Réponse courte",
+  "formulaire.question.type.LONGANSWER": "Paragraphe",
+  "formulaire.question.type.SINGLEANSWER": "Réponse unique",
+  "formulaire.question.type.MULTIPLEANSWER": "Choix multiples",
+  "formulaire.question.type.DATE": "Date",
+  "formulaire.question.type.TIME": "Heure",
+  "formulaire.question.type.FILE": "Dépôt de fichier",
 
   "formulaire.error": "Erreur",
   "formulaire.error.404": "Désolé, la page que vous cherchez n'existe pas",
@@ -50,6 +70,10 @@
   "formulaire.error.questionService.get": "Une erreur est survenue lors de la récupération de la question",
   "formulaire.error.questionService.update": "Une erreur est survenue lors de la sauvearde de la question",
   "formulaire.error.questionService.delete": "Une erreur est survenue lors de la suppression de la question",
+
+  "formulaire.error.questionTypeService.sync": "Une erreur est survenue lors de la synchronisation des types de question",
+  "formulaire.error.questionTypeService.list": "Une erreur est survenue lors de la récupération des types de question",
+  "formulaire.error.questionTypeService.get": "Une erreur est survenue lors de la récupération du type de question",
 
   "formulaire.success.create": "Votre formulaire a bien été créé !"
 }

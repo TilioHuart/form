@@ -4,7 +4,6 @@ import {DateUtils} from "../utils/date";
 
 interface ViewModel {
     forms: Forms;
-    folder: string;
     allFormsSelected: boolean;
     searchInput: string;
     display: {
@@ -12,9 +11,7 @@ interface ViewModel {
     };
 
     init(): void;
-    openFolder(string): void;
     switchAll(boolean): void;
-    displayFolder(): string;
     displayDate(Date): string;
     openForm(Form): void;
     openPropertiesForm(Form): void;
@@ -25,12 +22,11 @@ interface ViewModel {
 }
 
 
-export const formsListController = ng.controller('FormsListController', ['$scope',
+export const formsResponsesController = ng.controller('FormsResponsesController', ['$scope',
     function ($scope) {
 
     const vm: ViewModel = this;
     vm.forms = new Forms();
-    vm.folder = "mine";
     vm.searchInput = "";
     vm.allFormsSelected = false;
     vm.display = {
@@ -41,25 +37,10 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         $scope.edit.mode = false;
         await vm.forms.sync();
 
-
-        // Check if the folder is ok
-        switch (vm.folder) {
-            case "mine": vm.forms.all = vm.forms.all.filter(form => form.archived === false); break;
-            case "shared": vm.forms.all = vm.forms.all.filter(form => form.shared === true); break;
-            case "sent": vm.forms.all = vm.forms.all.filter(form => form.sent === true); break;
-            case "archived": vm.forms.all = vm.forms.all.filter(form => form.archived === true); break;
-            default : vm.openFolder('mine'); break;
-        }
-
         $scope.safeApply();
     };
 
     // Functions
-
-    vm.openFolder = (foldeName:string) : void => {
-        vm.folder = foldeName;
-        vm.init();
-    };
 
     vm.switchAll = (value:boolean) : void => {
         value ? vm.forms.selectAll() : vm.forms.deselectAll();
@@ -67,14 +48,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     // Utils
 
-    vm.displayFolder = () : string => {
-        return idiom.translate("formulaire.forms." + vm.folder);
-    };
-
     vm.displayDate = (dateToFormat:Date) : string => {
-        let date = DateUtils.format(dateToFormat, DateUtils.FORMAT["DAY-MONTH-YEAR"]);
-        let time = DateUtils.format(dateToFormat, DateUtils.FORMAT["HOUR-MINUTES"]);
-        return date + idiom.translate('formulaire.at') + time;
+        return "00/00/0000";
     };
 
 

@@ -1,3 +1,10 @@
+$formulaire-screen-mobile: 500px;
+$formulaire-screen-tablet: 800px;
+$formulaire-screen-laptop: 1200px;
+
+$formulaire-white: white;
+$formulaire-blue: #4bafd5;
+
 body.formulaire {
   @import "components/index";
 
@@ -27,58 +34,31 @@ body.formulaire {
     align-content: center;
   }
 
-  .dominos {
-    justify-content: flex-start;
-
-    .item {
-      width: calc(90%/3); // responsive /2 /1
-      background: white;
-
-      &.selected {
-        background: rgba(75 ,175,213,0.3);
-      }
-
-      .domino {
-        img {
-          background: white;
-
-          &.empty {
-            background: #4bafd5;
-          }
-        }
-
-        .space-around {
-          padding: 10px;
-
-          h4, h5 {
-            margin: 0;
-          }
-
-          .date {
-            font-size: 12px;
-          }
-        }
-      }
-    }
-   }
-
   .table {
-    margin-top: 10px;
+    margin: 10px;
 
     img {
       opacity: 0.1;
-
-      &.selected {
-        opacity: 0.6;
-      }
+      &.selected { opacity: 0.6; }
     }
   }
+
+  .toaster-right { float: right; }
 
   // Create-form
 
   .create-form {
     display: flex;
     justify-content: center;
+
+    .item {
+      width: 50%;
+      @media screen and (max-width: $formulaire-screen-laptop) { width: 100%; }
+
+      .picture:hover {
+        cursor: pointer;
+      }
+    }
   }
 
   // Edit-form

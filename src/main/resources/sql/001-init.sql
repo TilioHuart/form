@@ -10,7 +10,7 @@ CREATE TABLE formulaire.form (
     title       VARCHAR NOT NULL,
     description VARCHAR,
     picture     VARCHAR,
-    owner_id    VARCHAR NOT NULL,
+    owner_id    VARCHAR(36) NOT NULL,
     owner_name  VARCHAR NOT NULL,
     created     timestamp without time zone NOT NULL DEFAULT now(),
     modified    timestamp without time zone NOT NULL DEFAULT now(),
@@ -48,20 +48,20 @@ CREATE TABLE formulaire.response (
     id              bigserial PRIMARY KEY,
     question_id     bigint NOT NULL,
     answer          VARCHAR NOT NULL,
-    user_id         VARCHAR NOT NULL,
+    respondent_id   VARCHAR(36) NOT NULL,
     created         timestamp without time zone NOT NULL DEFAULT now(),
     CONSTRAINT fk_question_id FOREIGN KEY (question_id) REFERENCES formulaire.question (id) ON UPDATE NO ACTION ON DELETE CASCADE
 );
 
 CREATE TABLE formulaire.distribution (
-    id          bigserial PRIMARY KEY,
-    form_id     bigint NOT NULL,
-    user_id     VARCHAR NOT NULL,
-    user_name   VARCHAR NOT NULL,
-    status      VARCHAR NOT NULL,
-    created     timestamp without time zone NOT NULL DEFAULT now(),
+    id                  bigserial PRIMARY KEY,
+    form_id             bigint NOT NULL,
+    respondent_id       VARCHAR(36) NOT NULL,
+    respondent_name     VARCHAR NOT NULL,
+    status              VARCHAR NOT NULL,
+    created             timestamp without time zone NOT NULL DEFAULT now(),
     CONSTRAINT fk_form_id FOREIGN KEY (form_id) REFERENCES formulaire.form (id) ON UPDATE NO ACTION ON DELETE CASCADE
 );
 
 INSERT INTO formulaire.question_type(code, name)
-VALUES (1, 'FREE_TEXT'), (2, 'SHORT_ANSWER'), (3, 'LONG_ANSWER'), (4, 'UNIC_ANSWER'), (5, 'MULTIPLE_ANSWER'), (6, 'DATETIME'), (7, 'FILE');
+VALUES (1, 'FREETEXT'), (2, 'SHORTANSWER'), (3, 'LONGANSWER'), (4, 'SINGLEANSWER'), (5, 'MULTIPLEANSWER'), (6, 'DATE'), (7, 'TIME'), (8, 'FILE');

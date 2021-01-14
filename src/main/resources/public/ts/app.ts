@@ -20,6 +20,9 @@ routes.define(function($routeProvider){
 		.when('/forms-list', {
 			action: 'formsList'
 		})
+		.when('/forms-responses', {
+			action: 'formsResponses'
+		})
 		.when('/form/create', {
 			action: 'createForm'
 		})

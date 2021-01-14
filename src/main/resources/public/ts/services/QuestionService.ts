@@ -14,7 +14,7 @@ export const questionService: QuestionService = {
 
     async list (formId : number): Promise<AxiosResponse> {
         try {
-            return await http.get(`/formulaire/forms/${formId}/question`);
+            return await http.get(`/formulaire/forms/${formId}/questions`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.list'));
             throw err;

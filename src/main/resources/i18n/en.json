@@ -3,9 +3,14 @@
   "formulaire.mine": "My form",
   "formulaire.created": "Created on ",
   "formulaire.modified": "Modified on ",
+  "formulaire.sent": "Sent on ",
+  "formulaire.status": "Status",
   "formulaire.at": " at ",
   "formulaire.save": "Save",
   "formulaire.cancel": "Cancel",
+
+  "formulaire.tab.list": "My forms",
+  "formulaire.tab.responses": "My responses",
 
   "formulaire.forms.mine": "My forms",
   "formulaire.forms.shared": "Forms shared with me",
@@ -13,9 +18,13 @@
   "formulaire.forms.archived": "Archive",
   "formulaire.forms.empty": "Sorry, you don't have any form ...",
 
+  "formulaire.distribution.status.waiting": "Waiting for response",
+  "formulaire.distribution.status.done": "Responded on ",
+
   "formulaire.table.title": "Form title",
   "formulaire.table.author": "Author",
   "formulaire.table.modified": "Last modification",
+  "formulaire.table.sent": "Sending date",
 
   "formulaire.toaster.open": "Open",
   "formulaire.toaster.properties": "Properties",
@@ -23,15 +32,26 @@
   "formulaire.toaster.share": "Share",
   "formulaire.toaster.export": "Export",
   "formulaire.toaster.delete": "Delete",
+  "formulaire.toaster.deselect": "Deselect",
 
-  "formulaire.create.button": "Create form",
-  "formulaire.create.title": "Title of my form",
+  "formulaire.form.create.button": "Create form",
+  "formulaire.form.create.title": "Title of my form",
 
-  "formulaire.edit.add": "Add",
-  "formulaire.edit.organize": "Organize",
-  "formulaire.edit.preview": "Preview",
-  "formulaire.edit.empty.main": "Yout form is empty",
-  "formulaire.edit.empty.caption": "Click on 'Add' to create your first element",
+  "formulaire.form.edit.add": "Add",
+  "formulaire.form.edit.organize": "Organize",
+  "formulaire.form.edit.preview": "Preview",
+  "formulaire.form.edit.empty.main": "Yout form is empty",
+  "formulaire.form.edit.empty.caption": "Click on 'Add' to create your first element",
+
+  "formulaire.question.selectType": "Select a type of section",
+  "formulaire.question.type.FREETEXT": "Text area",
+  "formulaire.question.type.SHORTANSWER": "Short answer",
+  "formulaire.question.type.LONGANSWER": "Paragraph",
+  "formulaire.question.type.SIGLEANSWER": "Single answer",
+  "formulaire.question.type.MULTIPLEANSWER": "Multiple choices",
+  "formulaire.question.type.DATE": "Date",
+  "formulaire.question.type.TIME": "Time",
+  "formulaire.question.type.FILE": "File repository",
 
   "formulaire.error": "Error",
   "formulaire.error.404": "Sorry, the page you're looking for doesn't exist",
@@ -50,6 +70,10 @@
   "formulaire.error.questionService.get": "An error occurred during the question's retrieving",
   "formulaire.error.questionService.update": "An error occurred during the question's saving",
   "formulaire.error.questionService.delete": "An error occurred during the question's suppression",
+
+  "formulaire.error.questionTypeService.sync": "An error occurred during the questions type's synchronisation",
+  "formulaire.error.questionTypeService.list": "An error occurred during the question type's retrieving",
+  "formulaire.error.questionTypeService.get": "An error occurred during the question types' retrieving",
 
   "formulaire.success.create": "You form has been successfully created !"
 }

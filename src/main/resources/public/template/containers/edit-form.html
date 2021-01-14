@@ -1,22 +1,44 @@
-<div class="edit-form" ng-class="{'dominos': vm.questions.length > 0}" ng-controller="FormEditorController as vm">
-    <div ng-if="vm.questions.length > 0">
-        <div class="item">
-            <div class="domino">
-                <div class="cell twelve">
-                    <div>Hello je suis [[edit.form.title]]</div>
-                    <h3>[[edit.form.title]]</h3>
-                    <p>[[edit.form.owner_name]]</p>
-                    <p>[[edit.form.created]]</p>
-                    <p>[[edit.form.description]]</p>
+<div ng-controller="FormEditorController as vm">
+    <div class="row">
+        <section class="cell nine">
+            <div>
+                <h1>
+                    <a href="#/mine"><i18n>formulaire.title</i18n></a><span>/ [[edit.form.title]]</span>
+                </h1>
+            </div>
+        </section>
+
+        <section class="cell three">
+            <div class="main-button">
+                <button class="cell" ng-click="vm.openNewQuestion()"><i18n>formulaire.form.edit.add</i18n></button>
+                <button class="cell" ng-click=""><i18n>formulaire.form.edit.organize</i18n></button>
+                <button class="cell" ng-click=""><i18n>formulaire.form.edit.preview</i18n></button>
+            </div>
+        </section>
+    </div>
+
+    <div class="edit-form" ng-class="{'dominos': vm.questions.length > 0}">
+        <div ng-if="vm.questions.length > 0">
+            <div class="item">
+                <div class="domino">
+                    <div class="cell twelve">
+                        <div>Hello je suis [[edit.form.title]]</div>
+                        <h3>[[edit.form.title]]</h3>
+                        <p>[[edit.form.owner_name]]</p>
+                        <p>[[edit.form.created]]</p>
+                        <p>[[edit.form.description]]</p>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <div class="e404" ng-if="vm.questions.length <= 0">
+            <img src="/formulaire/public/img/empty-form.svg" class="img_mini"/>
+            <h1><i18n>formulaire.form.edit.empty.main</i18n></h1>
+            <br>
+            <div><i18n>formulaire.form.edit.empty.caption</i18n></div>
+        </div>
     </div>
 
-    <div class="e404" ng-if="vm.questions.length <= 0">
-        <img src="/formulaire/public/img/empty-form.svg" class="img_mini"/>
-        <h1><i18n>formulaire.edit.empty.main</i18n></h1>
-        <br>
-        <div><i18n>formulaire.edit.empty.caption</i18n></div>
-    </div>
+    <container template='lightbox'></container>
 </div>

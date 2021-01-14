@@ -1,0 +1,51 @@
+.dominos {
+  justify-content: flex-start;
+
+  .item {
+    width: calc(90%/3);
+    background: $formulaire-white;
+
+    @media screen and (max-width: $formulaire-screen-laptop) { width: calc(90%/2); }
+    @media screen and (max-width: $formulaire-screen-tablet) { width: calc(90%); }
+
+    &.selected { background: rgba(75 ,175,213,0.3); }
+
+    .domino {
+      display: flex;
+      flex-direction: row;
+
+      .picture {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: $formulaire-white;
+        &.empty { background: $formulaire-blue; }
+      }
+
+      .data {
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+
+        &-text {
+          h4, h5 { margin: 0; }
+          .date { font-size: 12px; }
+        }
+
+        &-icons {
+          display: flex;
+          flex-direction: row;
+          justify-content: flex-end;
+          align-items: flex-end;
+
+          img {
+            height: 70%;
+            opacity: 0.1;
+            &.selected { opacity: 0.6; }
+          }
+        }
+      }
+    }
+  }
+}
+
