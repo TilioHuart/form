@@ -44,6 +44,14 @@
             &.selected { opacity: 0.6; }
           }
         }
+
+        &-status {
+          display: flex;
+          flex-direction: row;
+          justify-content: flex-end;
+          align-items: flex-end;
+          font-weight: bold;
+        }
       }
     }
   }

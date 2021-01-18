@@ -4,6 +4,8 @@
   "formulaire.created": "Created on ",
   "formulaire.modified": "Modified on ",
   "formulaire.sent": "Sent on ",
+  "formulaire.responded.date": "Responded on ",
+  "formulaire.responded.waiting": "Waiting for response",
   "formulaire.status": "Status",
   "formulaire.at": " at ",
   "formulaire.save": "Save",

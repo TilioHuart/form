@@ -14,11 +14,6 @@ interface ViewModel {
     switchAll(boolean): void;
     displayDate(Date): string;
     openForm(Form): void;
-    openPropertiesForm(Form): void;
-    sendForm(Form): void;
-    shareForm(Form): void;
-    exportForms(Forms): void;
-    deleteForms(Forms): void;
 }
 
 
@@ -37,6 +32,11 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
         $scope.edit.mode = false;
         await vm.forms.sync();
 
+        vm.forms.all[0].sent_date = "06/06/26";
+        vm.forms.all[0].resp_date = "07/07/27";
+        vm.forms.all[1].sent_date = "02/01/21";
+        vm.forms.all[2].resp_date = "01/02/21";
+
         $scope.safeApply();
     };
 
@@ -48,8 +48,8 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
 
     // Utils
 
-    vm.displayDate = (dateToFormat:Date) : string => {
-        return "00/00/0000";
+    vm.displayDate = (dateToFormat) : string => {
+        return dateToFormat;
     };
 
 
@@ -57,42 +57,8 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
 
     vm.openForm = (form:Form): void => {
         vm.forms.deselectAll();
-        $scope.edit.mode = true;
-        $scope.edit.form = form;
         $scope.redirectTo(`/form/${form.id}`);
         $scope.safeApply();
-    };
-
-    vm.openPropertiesForm = (form:Form): void => {
-        vm.forms.deselectAll();
-        //TODO : Open lightbox avec prop ? Ou juste open form mais pas en mode edit ? -> ask Marylou
-        toasts.info('displayPropertiesForm to do');
-    };
-
-    vm.sendForm = (form:Form): void => {
-        vm.forms.deselectAll();
-        //TODO : Open lightbox pour confirmation de l'envoi
-        toasts.info('sendForm to do');
-    };
-
-    vm.shareForm = (form:Form): void => {
-        vm.forms.deselectAll();
-        //TODO : Open lightbox pour confirmation du partage
-        toasts.info('shareForm to do');
-    };
-
-    vm.exportForms = (): void => {
-        let formsToExport = vm.forms.selected;
-        vm.forms.deselectAll();
-        //TODO : Open lightbox pour confirmation de l'export (afficher la liste des forms  concernés)
-        toasts.info('exportForms to do');
-    };
-
-    vm.deleteForms = (): void => {
-        let formsToDelete = vm.forms.selected;
-        vm.forms.deselectAll();
-        //TODO : Open lightbox pour confirmation de la suppression (afficher la liste des forms concernés)
-        toasts.info('deleteForms to do');
     };
 
     vm.init();

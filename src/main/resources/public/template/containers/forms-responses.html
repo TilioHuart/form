@@ -42,51 +42,62 @@
     <!--List of forms-->
     <section class="cell twelve">
         <!--Dominos display-->
-<!--        <div class="dominos" ng-if="!vm.forms.all.empty() && vm.display.grid">-->
-<!--            <div ng-repeat="form in vm.forms.all | filter:vm.searchInput"-->
-<!--                 ng-if="!vm.forms.all.empty() && vm.display.grid"-->
-<!--                 ng-click="form.selected = !form.selected" ng-dblclick="vm.openForm(form)"-->
-<!--                 class="item" ng-class="{'selected' : form.selected}">-->
-<!--                <div class="domino">-->
-<!--                    <div class="four picture" ng-class="{'empty': !form.picture}">-->
-<!--                        <img src="[[form.picture]]" onerror="this.src='/formulaire/public/img/empty-image.png';"/>-->
-<!--                    </div>-->
-<!--                    <div class="eight data">-->
-<!--                        <div class="data-text">-->
-<!--                            <h4>[[form.title]]</h4>-->
-<!--                            <h5>[[form.owner_name]]</h5>-->
-<!--                            <div class="date"><i18n>formulaire.modified</i18n>[[vm.displayDate(form.modified)]]</div>-->
-<!--                        </div>-->
-<!--                        <div class="data-icons">-->
-<!--                            <img src="formulaire/public/img/icons/send.svg" ng-class="{'selected': form.sent}">-->
-<!--                            <img src="formulaire/public/img/icons/share.svg" ng-class="{'selected': form.shared}">-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
+        <div class="dominos" ng-if="!vm.forms.all.empty() && vm.display.grid">
+            <div ng-repeat="form in vm.forms.all | filter:vm.searchInput"
+                 ng-if="!vm.forms.all.empty() && vm.display.grid"
+                 ng-click="form.selected = !form.selected" ng-dblclick="vm.openForm(form)"
+                 class="item" ng-class="{'selected' : form.selected}">
+                <div class="domino">
+                    <div class="four picture" ng-class="{'empty': !form.picture}">
+                        <img src="[[form.picture]]" onerror="this.src='/formulaire/public/img/empty-image.png';"/>
+                    </div>
+                    <div class="eight data">
+                        <div class="data-text">
+                            <h4>[[form.title]]</h4>
+                            <h5>[[form.owner_name]]</h5>
+                            <div class="date"><i18n>formulaire.sent</i18n>[[vm.displayDate(form.sent_date)]]</div>
+                        </div>
+                        <div class="data-status">
+                            <span ng-if="!!form.resp_date" style="color: green">
+                                <i18n>formulaire.responded.date</i18n>[[vm.displayDate(form.resp_date)]]
+                            </span>
+                            <span ng-if="!!!form.resp_date" style="color: #b50000">
+                                <i18n>formulaire.responded.waiting</i18n>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!--Table display-->
-<!--        <table class="twelve table" ng-if="!vm.forms.all.empty() && !vm.display.grid">-->
-<!--            <thead>-->
-<!--                <tr>-->
-<!--                    <th class="one"><input type="checkbox" ng-change="vm.switchAll(vm.allFormsSelected)" ng-model="vm.allFormsSelected"/></th>-->
-<!--                    <th class="four"><i18n>formulaire.table.title</i18n></th>-->
-<!--                    <th class="three"><i18n>formulaire.table.author</i18n></th>-->
-<!--                    <th class="three"><i18n>formulaire.table.sent</i18n></th>-->
-<!--                    <th class="one"><i18n>formulaire.status</i18n></th>-->
-<!--                </tr>-->
-<!--            </thead>-->
-<!--            <tbody>-->
-<!--                <tr ng-repeat="form in vm.forms.all | filter:vm.searchInput" ng-dblclick="vm.openForm(form)">-->
-<!--                    <td><input type="checkbox" ng-model="form.selected"/></td>-->
-<!--                    <td ng-click="form.selected=!form.selected">[[form.title]]</td>-->
-<!--                    <td ng-click="form.selected=!form.selected">[[form.owner_name]]</td>-->
-<!--                    <td ng-click="form.selected=!form.selected"><i18n>formulaire.sent</i18n>[[vm.displayDateSent(form.date_sent)]]</td>-->
-<!--                    <td ng-click="form.selected=!form.selected">[[vm.displayDateResponse()]]</td>-->
-<!--                </tr>-->
-<!--            </tbody>-->
-<!--        </table>-->
+        <table class="twelve table" ng-if="!vm.forms.all.empty() && !vm.display.grid">
+            <thead>
+                <tr>
+                    <th class="one"><input type="checkbox" ng-change="vm.switchAll(vm.allFormsSelected)" ng-model="vm.allFormsSelected"/></th>
+                    <th class="three"><i18n>formulaire.table.title</i18n></th>
+                    <th class="three"><i18n>formulaire.table.author</i18n></th>
+                    <th class="three"><i18n>formulaire.table.sent</i18n></th>
+                    <th class="two"><i18n>formulaire.status</i18n></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="form in vm.forms.all | filter:vm.searchInput" ng-dblclick="vm.openForm(form)">
+                    <td><input type="checkbox" ng-model="form.selected"/></td>
+                    <td ng-click="form.selected=!form.selected">[[form.title]]</td>
+                    <td ng-click="form.selected=!form.selected">[[form.owner_name]]</td>
+                    <td ng-click="form.selected=!form.selected"><i18n>formulaire.sent</i18n>[[vm.displayDate(form.sent_date)]]</td>
+                    <td ng-click="form.selected=!form.selected">
+                        <span ng-if="!!form.resp_date" style="color: green">
+                            <i18n>formulaire.responded.date</i18n>[[vm.displayDate(form.resp_date)]]
+                        </span>
+                        <span ng-if="!!!form.resp_date" style="color: #b50000">
+                            <i18n>formulaire.responded.waiting</i18n>
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 
         <div class="e404" ng-if="vm.forms.all.empty()">
             <img src="/formulaire/public/img/onboarding.svg"/>
