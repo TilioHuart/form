@@ -14,7 +14,7 @@ public class DefaultFormService implements FormService {
 
     @Override
     public void list(UserInfos user, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT * FROM " + Formulaire.FORM_TABLE + " WHERE owner_id = ? ORDER BY title;";
+        String query = "SELECT * FROM " + Formulaire.FORM_TABLE + " WHERE owner_id = ? ORDER BY date_modification DESC;";
         JsonArray params = new JsonArray().add(user.getUserId());
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
@@ -28,8 +28,8 @@ public class DefaultFormService implements FormService {
 
     @Override
     public void create(JsonObject form, UserInfos user, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, picture, created, modified) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+        String query = "INSERT INTO " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, picture, " +
+                "date_creation, date_modification) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(user.getUserId())
                 .add(user.getUsername())
@@ -43,13 +43,16 @@ public class DefaultFormService implements FormService {
 
     @Override
     public void update(String id, JsonObject form, Handler<Either<String, JsonObject>> handler) {
-        String query = "UPDATE " + Formulaire.FORM_TABLE + " SET title = ?, description = ?, picture = ?, modified = ? " +
-                "WHERE id = ?;";
+        String query = "UPDATE " + Formulaire.FORM_TABLE + " SET title = ?, description = ?, picture = ?, " +
+                "date_modification = ?, sent = ?, shared = ?, archived = ? WHERE id = ?;";
         JsonArray params = new JsonArray()
                 .add(form.getString("title", ""))
                 .add(form.getString("description", ""))
                 .add(form.getString("picture", ""))
                 .add("NOW()")
+                .add(form.getBoolean("sent", false))
+                .add(form.getBoolean("shared", false))
+                .add(form.getBoolean("archived", false))
                 .add(id);
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));

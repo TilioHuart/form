@@ -1,6 +1,6 @@
 <div ng-controller="FormCreatorController as vm">
     <div class="row">
-        <section class="cell nine">
+        <section class="cell eight">
             <div>
                 <h1>
                     <a href="#/mine"><i18n>formulaire.title</i18n></a>
@@ -13,10 +13,8 @@
         <div class="item">
             <div class="domino">
                 <div class="two picture" ng-class="{'empty': !vm.form.picture}">
-                    <label for="img">
-                        <img src="[[vm.form.picture]]" onerror="this.src='/formulaire/public/img/empty-image.png';"/>
-                        <input type="file" id="img" ng-model="vm.form.picture" style="display:none">
-                    </label>
+                    <img src="[[vm.form.picture]]" onerror="this.src='/formulaire/public/img/empty-image.png';"/>
+<!--                <image-select ng-change="vm.getImage()" ng-model="vm.form.picture" default="/formulaire/public/img/empty-image.png"></image-select>-->
                 </div>
                 <div class="ten data">
                     <div class="data-text">

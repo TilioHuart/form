@@ -1,7 +1,7 @@
-<lightbox ng-if="vm.lightbox.newQuestion" on-close="vm.lightbox.newQuestion = false">
+<lightbox show="vm.display.lightbox.newQuestion" on-close="vm.display.lightbox.newQuestion = false">
     <h1><i18n>formulaire.question.selectType</i18n></h1>
     <div class="dominos">
-        <div ng-repeat="type in vm.types.all" class="item">
+        <div ng-repeat="type in questionTypes.all" class="item">
             <div class="domino">
                 [[vm.displayTypeName(type.name)]]
             </div>

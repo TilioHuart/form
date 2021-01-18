@@ -10,6 +10,13 @@
   "formulaire.at": " at ",
   "formulaire.save": "Save",
   "formulaire.cancel": "Cancel",
+  "formulaire.open": "Open",
+  "formulaire.properties": "Properties",
+  "formulaire.send": "Send",
+  "formulaire.share": "Share",
+  "formulaire.export": "Export",
+  "formulaire.delete": "Delete",
+  "formulaire.deselect": "Deselect",
 
   "formulaire.tab.list": "My forms",
   "formulaire.tab.responses": "My responses",
@@ -28,17 +35,10 @@
   "formulaire.table.modified": "Last modification",
   "formulaire.table.sent": "Sending date",
 
-  "formulaire.toaster.open": "Open",
-  "formulaire.toaster.properties": "Properties",
-  "formulaire.toaster.send": "Send",
-  "formulaire.toaster.share": "Share",
-  "formulaire.toaster.export": "Export",
-  "formulaire.toaster.delete": "Delete",
-  "formulaire.toaster.deselect": "Deselect",
-
   "formulaire.form.create.button": "Create form",
   "formulaire.form.create.title": "Title of my form",
 
+  "formulaire.form.edit.modified": "Form saved at ",
   "formulaire.form.edit.add": "Add",
   "formulaire.form.edit.organize": "Organize",
   "formulaire.form.edit.preview": "Preview",
@@ -54,6 +54,9 @@
   "formulaire.question.type.DATE": "Date",
   "formulaire.question.type.TIME": "Time",
   "formulaire.question.type.FILE": "File repository",
+  "formulaire.question.title.empty": "Title of my text area",
+  "formulaire.question.statement.empty": "Statement of my question",
+
 
   "formulaire.error": "Error",
   "formulaire.error.404": "Sorry, the page you're looking for doesn't exist",
@@ -77,5 +80,9 @@
   "formulaire.error.questionTypeService.list": "An error occurred during the question type's retrieving",
   "formulaire.error.questionTypeService.get": "An error occurred during the question types' retrieving",
 
-  "formulaire.success.create": "You form has been successfully created !"
+  "formulaire.success.form.create": "You form has been successfully created !",
+  "formulaire.success.form.save": "You form has been successfully saved !",
+  "formulaire.success.forms.delete": "All the selected forms have been successfully archived !",
+
+  "formulaire.warning.forms.delete": "Be careful, some forms you want to delete have already been to users !"
 }

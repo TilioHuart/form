@@ -9,11 +9,11 @@ export class Form implements Selectable {
     picture: string;
     owner_id: string;
     owner_name: string;
-    created: Date;
-    modified: Date;
+    date_creation: Date;
+    date_modification: Date;
     sent: boolean;
     shared: boolean;
-    archived: boolean; // TODO: comment on gère les form archivé ? Autre table dans bdd ou simple prop comme ici ?
+    archived: boolean;
     selected: boolean;
 
     constructor() {
@@ -23,11 +23,11 @@ export class Form implements Selectable {
         this.picture = null;
         this.owner_id = null;
         this.owner_name = null;
-        this.created = null;
-        this.modified = null;
+        this.date_creation = null;
+        this.date_modification = null;
         this.sent = false;
         this.shared = false;
-        this.archived = false; // TODO
+        this.archived = false;
         this.selected = null;
     }
 
@@ -39,11 +39,11 @@ export class Form implements Selectable {
             picture: this.picture,
             owner_id: this.owner_id,
             owner_name: this.owner_name,
-            created: this.created,
-            modified: this.modified,
+            date_creation: this.date_creation,
+            date_modification: this.date_modification,
             sent: this.sent,
             shared: this.shared,
-            archived: this.archived, // TODO
+            archived: this.archived,
             selected: this.selected
         }
     }

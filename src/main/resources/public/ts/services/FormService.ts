@@ -4,10 +4,12 @@ import {Form} from '../models/Form';
 
 export interface FormService {
     list(): Promise<AxiosResponse>;
-    create(Form): Promise<AxiosResponse>;
     get(number): Promise<AxiosResponse>;
+    save(Form): Promise<AxiosResponse>;
+    create(Form): Promise<AxiosResponse>;
     update(Form): Promise<AxiosResponse>;
     delete(number): Promise<AxiosResponse>;
+    archive(number): Promise<AxiosResponse>;
 }
 
 export const formService: FormService = {
@@ -21,15 +23,6 @@ export const formService: FormService = {
         }
     },
 
-    async create(form : Form): Promise<AxiosResponse> {
-        try {
-            return await http.post('/formulaire/forms', form);
-        } catch (err) {
-            notify.error(idiom.translate('formulaire.error.formService.create'));
-            throw err;
-        }
-    },
-
     async get(id : number): Promise<AxiosResponse> {
         try {
             return await http.get(`/formulaire/forms/${id}`);
@@ -39,9 +32,22 @@ export const formService: FormService = {
         }
     },
 
+    async save(form : Form): Promise<AxiosResponse> {
+        return form.id ? await this.update(form) : await this.create(form);
+    },
+
+    async create(form : Form): Promise<AxiosResponse> {
+        try {
+            return await http.post('/formulaire/forms', form);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.formService.create'));
+            throw err;
+        }
+    },
+
     async update(form : Form): Promise<AxiosResponse> {
         try {
-            return await http.post(`/formulaire/forms/${form}`);
+            return await http.put(`/formulaire/forms/${form.id}`, form);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.update'));
             throw err;
@@ -53,6 +59,16 @@ export const formService: FormService = {
             return await http.delete(`/formulaire/forms/${id}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.delete'));
+            throw err;
+        }
+    },
+
+    async archive(form : Form): Promise<AxiosResponse> {
+        try {
+            form.archived = true;
+            return await this.update(form);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.formService.update'));
             throw err;
         }
     }

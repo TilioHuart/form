@@ -9,9 +9,9 @@ import org.entcore.common.user.UserInfos;
 public interface FormService {
     void list(UserInfos user, Handler<Either<String, JsonArray>> handler);
 
-    void create(JsonObject form, UserInfos user, Handler<Either<String, JsonObject>> handler);
-
     void get(String id, Handler<Either<String, JsonObject>> handler);
+
+    void create(JsonObject form, UserInfos user, Handler<Either<String, JsonObject>> handler);
 
     void update(String id, JsonObject form, Handler<Either<String, JsonObject>> handler);
 

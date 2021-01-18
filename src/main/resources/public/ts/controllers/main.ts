@@ -44,6 +44,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 
 		// Utils
 
+		$scope.getTypeNameByCode = (code: number) : string => {
+			return $scope.questionTypes.all.filter(type => type.code === code)[0].name;
+		};
+
 		$scope.redirectTo = (path: string) => {
 			$location.path(path);
 		};

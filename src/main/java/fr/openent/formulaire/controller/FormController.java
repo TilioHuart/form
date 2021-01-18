@@ -8,10 +8,7 @@ import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
-import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
@@ -30,28 +27,12 @@ public class FormController extends ControllerHelper {
     }
 
     @Get("/forms")
-    @ApiDoc("List forms")
+    @ApiDoc("List all the forms created by me")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void list(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
                 formService.list(user, arrayResponseHandler(request));
-            } else {
-                log.debug("User not found in session.");
-                Renders.unauthorized(request);
-            }
-        });
-    }
-
-    @Post("/forms")
-    @ApiDoc("Create a form")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
-    public void create(HttpServerRequest request) {
-        UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                RequestUtils.bodyToJson(request, form -> {
-                    formService.create(form, user, defaultResponseHandler(request));
-                });
             } else {
                 log.debug("User not found in session.");
                 Renders.unauthorized(request);
@@ -68,12 +49,28 @@ public class FormController extends ControllerHelper {
     }
 
     @Put("/forms/:id")
-    @ApiDoc("Upate given form")
+    @ApiDoc("Update given form")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void update(HttpServerRequest request) {
         String id = request.getParam("id");
         RequestUtils.bodyToJson(request, form -> {
             formService.update(id, form, defaultResponseHandler(request));
+        });
+    }
+
+    @Post("/forms")
+    @ApiDoc("Create a form")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void create(HttpServerRequest request) {
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user != null) {
+                RequestUtils.bodyToJson(request, form -> {
+                    formService.create(form, user, defaultResponseHandler(request));
+                });
+            } else {
+                log.debug("User not found in session.");
+                Renders.unauthorized(request);
+            }
         });
     }
 

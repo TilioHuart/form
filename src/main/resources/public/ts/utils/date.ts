@@ -10,12 +10,20 @@ export class DateUtils {
         'YEAR-MONTH': 'YYYY-MM',
         'DAY-MONTH-YEAR': 'DD/MM/YYYY',
         'DAY-MONTH': 'DD/MM', // e.g "04/11"
-        'HOUR-MINUTES': 'kk[h]mm', // e.g "09:00"
+        'HOUR-MINUTES': 'HH[h]mm', // e.g "09:00"
         'BIRTHDATE': 'L',
         'DAY-MONTH-YEAR-LETTER': 'LL',  // e.g "9 juin 2019"
         'DAY-DATE': 'dddd L',
         'DATE-FULL-LETTER': 'dddd LL'
     };
+
+    /**
+     * Transform time based on your timezone using moment
+     * @param date date to localise
+     */
+    static localise(date: any) {
+        return moment(new Date(date + "Z"));
+    }
 
     /**
      * Format date based on given format using moment

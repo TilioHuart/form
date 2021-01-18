@@ -1,6 +1,16 @@
 i {
   &.spaced {
-    margin-right: 15px;
+    &-right {
+      margin-right: 15px;
+    }
+
+    &-left {
+      margin-right: 15px;
+    }
+
+    &-both {
+      margin: 0 5px;
+    }
   }
 
   &.xs-icon {
@@ -34,6 +44,20 @@ i {
   }
 
   &.selected {
+    opacity: 0.6;
+  }
+
+  &.clock::before {
+    @include fonticon();
+    content: '\f017';
+    vertical-align: middle;
+    opacity: 0.6;
+  }
+
+  &.drag::before {
+    @include fonticon();
+    content: '\e913';
+    vertical-align: middle;
     opacity: 0.6;
   }
 }

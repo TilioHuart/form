@@ -6,17 +6,17 @@ CREATE TABLE formulaire.scripts (
 );
 
 CREATE TABLE formulaire.form (
-    id          bigserial PRIMARY KEY,
-    title       VARCHAR NOT NULL,
-    description VARCHAR,
-    picture     VARCHAR,
-    owner_id    VARCHAR(36) NOT NULL,
-    owner_name  VARCHAR NOT NULL,
-    created     timestamp without time zone NOT NULL DEFAULT now(),
-    modified    timestamp without time zone NOT NULL DEFAULT now(),
-    sent        boolean NOT NULL DEFAULT FALSE,
-    shared      boolean NOT NULL DEFAULT FALSE,
-    archived    boolean NOT NULL DEFAULT FALSE
+    id                  bigserial PRIMARY KEY,
+    title               VARCHAR NOT NULL,
+    description         VARCHAR,
+    picture             VARCHAR,
+    owner_id            VARCHAR(36) NOT NULL,
+    owner_name          VARCHAR NOT NULL,
+    date_creation       timestamp without time zone NOT NULL DEFAULT now(),
+    date_modification   timestamp without time zone NOT NULL DEFAULT now(),
+    sent                boolean NOT NULL DEFAULT FALSE,
+    shared              boolean NOT NULL DEFAULT FALSE,
+    archived            boolean NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE formulaire.question_type (
@@ -28,6 +28,7 @@ CREATE TABLE formulaire.question_type (
 CREATE TABLE formulaire.question (
     id              bigserial PRIMARY KEY,
     form_id         bigint NOT NULL,
+    title           VARCHAR,
     position        bigint NOT NULL,
     question_type   bigint NOT NULL,
     statement       VARCHAR NOT NULL,
@@ -44,23 +45,27 @@ CREATE TABLE formulaire.question_choice (
     CONSTRAINT fk_question_id FOREIGN KEY (question_id) REFERENCES formulaire.question (id) ON UPDATE NO ACTION ON DELETE CASCADE
 );
 
-CREATE TABLE formulaire.response (
-    id              bigserial PRIMARY KEY,
-    question_id     bigint NOT NULL,
-    answer          VARCHAR NOT NULL,
-    respondent_id   VARCHAR(36) NOT NULL,
-    created         timestamp without time zone NOT NULL DEFAULT now(),
-    CONSTRAINT fk_question_id FOREIGN KEY (question_id) REFERENCES formulaire.question (id) ON UPDATE NO ACTION ON DELETE CASCADE
-);
-
 CREATE TABLE formulaire.distribution (
     id                  bigserial PRIMARY KEY,
     form_id             bigint NOT NULL,
+    sender_id           VARCHAR(36) NOT NULL,
+    sender_name         VARCHAR NOT NULL,
     respondent_id       VARCHAR(36) NOT NULL,
     respondent_name     VARCHAR NOT NULL,
     status              VARCHAR NOT NULL,
-    created             timestamp without time zone NOT NULL DEFAULT now(),
+    date_sending        timestamp without time zone NOT NULL DEFAULT now(),
+    date_response       timestamp without time zone,
     CONSTRAINT fk_form_id FOREIGN KEY (form_id) REFERENCES formulaire.form (id) ON UPDATE NO ACTION ON DELETE CASCADE
+);
+
+CREATE TABLE formulaire.response (
+    id                  bigserial PRIMARY KEY,
+    question_id         bigint NOT NULL,
+    distribution_id     bigint NOT NULL,
+    answer              VARCHAR NOT NULL,
+    respondent_id       VARCHAR(36) NOT NULL,
+    CONSTRAINT fk_question_id FOREIGN KEY (question_id) REFERENCES formulaire.question (id) ON UPDATE NO ACTION ON DELETE CASCADE,
+    CONSTRAINT fk_distribution_id FOREIGN KEY (distribution_id) REFERENCES formulaire.distribution (id) ON UPDATE NO ACTION ON DELETE CASCADE
 );
 
 INSERT INTO formulaire.question_type(code, name)

@@ -1,5 +1,6 @@
 package fr.openent.formulaire.controller;
 
+import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.service.QuestionTypeService;
 import fr.openent.formulaire.service.impl.DefaultQuestionTypeService;
 import fr.wseduc.rs.*;
@@ -31,7 +32,7 @@ public class QuestionTypeController extends ControllerHelper {
     }
 
     @Get("/types/:code")
-    @ApiDoc("Get one questio ntype thanks to its code")
+    @ApiDoc("Get one question type thanks to its code")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void get(HttpServerRequest request) {
         String id = request.getParam("code");

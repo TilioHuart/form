@@ -31,24 +31,28 @@ public class DefaultQuestionService implements QuestionService {
                 "VALUES (?, ?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(form_id)
-                .add(question.getString("position", ""))
-                .add(question.getString("question_type", "1"))
+                .add(question.getInteger("position", 0))
+                .add(question.getInteger("question_type", 1))
                 .add(question.getString("statement", ""))
-                .add(question.getString("mandatory", "false"));
+                .add(question.getBoolean("mandatory", false));
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override
     public void update(String id, JsonObject question, Handler<Either<String, JsonObject>> handler) {
-        String query = "UPDATE " + Formulaire.QUESTION_TABLE + " SET position = ?, question_type = ?, statement = ?, mandatory = ? " +
-                "WHERE id = ?;";
+        String query = "UPDATE " + Formulaire.QUESTION_TABLE + " SET title=  ?, position = ?, question_type = ?, " +
+                "statement = ?, mandatory = ? WHERE id = ?;";
         JsonArray params = new JsonArray()
-                .add(question.getString("position", ""))
-                .add(question.getString("question_type", "1"))
+                .add(question.getString("title", ""))
+                .add(question.getInteger("position", 0))
+                .add(question.getInteger("question_type", 1))
                 .add(question.getString("statement", ""))
-                .add(question.getString("mandatory", "false"))
+                .add(question.getBoolean("mandatory", false))
                 .add(id);
+
+        query += "UPDATE " + Formulaire.FORM_TABLE + " SET date_modification = ? WHERE id = ?;";
+        params.add("NOW()").add(question.getInteger("form_id"));
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }

@@ -28,21 +28,19 @@ public class DefaultResponseService implements ResponseService {
 
     @Override
     public void create(JsonObject response, UserInfos user, String question_id, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO " + Formulaire.RESPONSE_TABLE + " (question_id, answer, respondent_id, created) " +
-                "VALUES (?, ?, ?, ?) RETURNING *;";
+        String query = "INSERT INTO " + Formulaire.RESPONSE_TABLE + " (question_id, answer, respondent_id) " +
+                "VALUES (?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(question_id)
                 .add(response.getString("answer", ""))
-                .add(user.getUserId())
-                .add("NOW()");
+                .add(user.getUserId());
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override
     public void update(UserInfos user, String id, JsonObject response, Handler<Either<String, JsonObject>> handler) {
-        String query = "UPDATE " + Formulaire.RESPONSE_TABLE + " SET answer = ? " +
-                "WHERE respondent_id = ? AND id = ?;";
+        String query = "UPDATE " + Formulaire.RESPONSE_TABLE + " SET answer = ? WHERE respondent_id = ? AND id = ?;";
         JsonArray params = new JsonArray()
                 .add(response.getString("answer", ""))
                 .add(user.getUserId())

@@ -5,6 +5,7 @@ import {questionService} from "../services";
 export class Question implements Selectable {
     id: number;
     form_id: number;
+    title: string;
     position: number;
     question_type: any;
     statement: string;
@@ -13,6 +14,7 @@ export class Question implements Selectable {
 
     constructor() {
         this.id = null;
+        this.title = null;
         this.form_id = null;
         this.position = null;
         this.question_type = null;
@@ -25,6 +27,7 @@ export class Question implements Selectable {
         return {
             id: this.id,
             form_id: this.form_id,
+            title: this.title,
             position: this.position,
             question_type: this.question_type,
             statement: this.statement,

@@ -8,7 +8,7 @@
     @media screen and (max-width: $formulaire-screen-laptop) { width: calc(90%/2); }
     @media screen and (max-width: $formulaire-screen-tablet) { width: calc(90%); }
 
-    &.selected { background: rgba(75 ,175,213,0.3); }
+    &.selected { background: $formulaire-blue-transparent }
 
     .domino {
       display: flex;

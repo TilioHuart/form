@@ -2,32 +2,31 @@ import {Mix, Selectable, Selection} from "entcore-toolkit";
 import {idiom, notify} from "entcore";
 import {questionTypeService} from "../services";
 
-export class QuestionType implements Selectable {
+export class QuestionType {
     id: number;
     code: number;
     name: string;
-    selected: boolean;
 
     constructor () {
         this.id = null;
         this.code = 0;
         this.name = "";
-        this.selected = false;
     }
 
     toJson(): Object {
         return {
             id: this.id,
             code: this.code,
-            name: this.name,
-            selected: this.selected
+            name: this.name
         }
     }
 }
 
-export class QuestionTypes extends Selection<QuestionType> {
+export class QuestionTypes {
+    all: QuestionType[];
+
     constructor() {
-        super([]);
+        this.all = [];
     }
 
     async sync () {

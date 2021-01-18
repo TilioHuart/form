@@ -10,6 +10,13 @@
   "formulaire.at": " à ",
   "formulaire.save": "Enregistrer",
   "formulaire.cancel": "Annuler",
+  "formulaire.open": "Ouvrir",
+  "formulaire.properties": "Propriétés",
+  "formulaire.send": "Envoyer",
+  "formulaire.share": "Partager",
+  "formulaire.export": "Exporter",
+  "formulaire.delete": "Suprimer",
+  "formulaire.deselect": "Déselectionner",
 
   "formulaire.tab.list": "Mes formulaires",
   "formulaire.tab.responses": "Mes réponses",
@@ -28,17 +35,10 @@
   "formulaire.table.modified": "Dernière modification",
   "formulaire.table.sent": "Date d'envoi",
 
-  "formulaire.toaster.open": "Ouvrir",
-  "formulaire.toaster.properties": "Propriétés",
-  "formulaire.toaster.send": "Envoyer",
-  "formulaire.toaster.share": "Partager",
-  "formulaire.toaster.export": "Exporter",
-  "formulaire.toaster.delete": "Suprimer",
-  "formulaire.toaster.deselect": "Déselectionner",
-
   "formulaire.form.create.button": "Créer un formulaire",
   "formulaire.form.create.title": "Titre de mon formulaire",
 
+  "formulaire.form.edit.modified": "Formulaire enregistré à ",
   "formulaire.form.edit.add": "Ajouter",
   "formulaire.form.edit.organize": "Organiser",
   "formulaire.form.edit.preview": "Aperçu",
@@ -54,6 +54,9 @@
   "formulaire.question.type.DATE": "Date",
   "formulaire.question.type.TIME": "Heure",
   "formulaire.question.type.FILE": "Dépôt de fichier",
+  "formulaire.question.title.empty": "Titre de ma zone de texte",
+  "formulaire.question.statement.empty": "Énoncé de ma question",
+
 
   "formulaire.error": "Erreur",
   "formulaire.error.404": "Désolé, la page que vous cherchez n'existe pas",
@@ -77,5 +80,9 @@
   "formulaire.error.questionTypeService.list": "Une erreur est survenue lors de la récupération des types de question",
   "formulaire.error.questionTypeService.get": "Une erreur est survenue lors de la récupération du type de question",
 
-  "formulaire.success.create": "Votre formulaire a bien été créé !"
+  "formulaire.success.form.create": "Votre formulaire a bien été créé !",
+  "formulaire.success.form.save": "Votre formulaire a bien été sauvegardé !",
+  "formulaire.success.forms.delete": "Tous les formulaires sélectionnés ont bien été archivés !",
+
+  "formulaire.warning.forms.delete": "Attention, certains formulaires que vous souhaitez supprimer ont été envoyés à des utilisateurs !"
 }

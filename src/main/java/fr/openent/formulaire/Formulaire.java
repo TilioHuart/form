@@ -13,8 +13,14 @@ public class Formulaire extends BaseServer {
 	public static String QUESTION_TABLE;
 	public static String QUESTION_TYPE_TABLE;
 	public static String RESPONSE_TABLE;
+	public static String DISTRIBUTION_TABLE;
 
-	public static final String view = "formulaire.view";
+	public static final String ACCESS_RIGHT = "formulaire.access";
+	public static final String CREATION_RIGHT = "formulaire.creation";
+
+	public static final String TO_DO = "TO_DO";
+	public static final String IN_PROGRESS = "IN_PROGRESS";
+	public static final String FINISHED = "FINISHED";
 
 	@Override
 	public void start() throws Exception {
@@ -25,6 +31,7 @@ public class Formulaire extends BaseServer {
 		QUESTION_TABLE = DB_SCHEMA + ".question";
 		QUESTION_TYPE_TABLE = DB_SCHEMA + ".question_type";
 		RESPONSE_TABLE = DB_SCHEMA + ".response";
+		DISTRIBUTION_TABLE = DB_SCHEMA + ".distribution";
 
 		addController(new FormulaireController());
 		addController(new FormController());

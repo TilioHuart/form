@@ -1,5 +1,6 @@
 package fr.openent.formulaire.controller;
 
+import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.service.QuestionService;
 import fr.openent.formulaire.service.impl.DefaultQuestionService;
 import fr.wseduc.rs.*;
@@ -31,6 +32,14 @@ public class QuestionController extends ControllerHelper {
         questionService.list(form_id, arrayResponseHandler(request));
     }
 
+    @Get("/questions/:id")
+    @ApiDoc("Get form thanks to the id")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void get(HttpServerRequest request) {
+        String id = request.getParam("id");
+        questionService.get(id, defaultResponseHandler(request));
+    }
+
     @Post("/forms/:formId/questions")
     @ApiDoc("Create a question")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
@@ -41,16 +50,8 @@ public class QuestionController extends ControllerHelper {
         });
     }
 
-    @Get("/questions/:id")
-    @ApiDoc("Get form thanks to the id")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
-    public void get(HttpServerRequest request) {
-        String id = request.getParam("id");
-        questionService.get(id, defaultResponseHandler(request));
-    }
-
     @Put("/questions/:id")
-    @ApiDoc("Upate given question")
+    @ApiDoc("Update given question")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void update(HttpServerRequest request) {
         String id = request.getParam("id");
