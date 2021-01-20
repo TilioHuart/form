@@ -1,6 +1,6 @@
 {
 	"main" : "fr.openent.formulaire.Formulaire",
-	"port" : 8065,
+	"port" : 8067,
 	"app-name" : "Formulaire",
 	"app-address" : "/formulaire",
 	"app-icon" : "formulaire-large",
