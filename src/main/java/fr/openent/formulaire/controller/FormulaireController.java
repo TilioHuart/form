@@ -15,7 +15,7 @@ public class FormulaireController extends ControllerHelper {
 
     @Get("")
     @ApiDoc("Render view")
-    @SecuredAction(value = Formulaire.ACCESS_RIGHT, type = ActionType.WORKFLOW)
+    @SecuredAction(Formulaire.ACCESS_RIGHT)
     public void render(HttpServerRequest request) {
         renderView(request);
     }

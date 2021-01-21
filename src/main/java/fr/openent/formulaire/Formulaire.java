@@ -17,6 +17,9 @@ public class Formulaire extends BaseServer {
 
 	public static final String ACCESS_RIGHT = "formulaire.access";
 	public static final String CREATION_RIGHT = "formulaire.creation";
+	public static final String SHARING_RIGHT = "formulaire.sharing";
+	public static final String SENDING_RIGHT = "formulaire.sending";
+	public static final String RESPONSE_RIGHT = "formulaire.response";
 
 	public static final String TO_DO = "TO_DO";
 	public static final String IN_PROGRESS = "IN_PROGRESS";
@@ -38,5 +41,6 @@ public class Formulaire extends BaseServer {
 		addController(new QuestionController());
 		addController(new QuestionTypeController());
 		addController(new ResponseController());
+		addController(new DistributionController());
 	}
 }

@@ -1,18 +1,13 @@
-<lightbox class="new-question"
-        show="vm.display.lightbox.newQuestion"
-        on-close="vm.display.lightbox.newQuestion = false">
+<lightbox class="new-question" show="vm.display.lightbox.newQuestion" on-close="vm.display.lightbox.newQuestion = false">
     <h1><i18n>formulaire.question.selectType</i18n></h1>
     <div class="dominos">
-        <div ng-repeat="type in vm.questionTypes.all"
-             ng-click="vm.createNewQuestion(type.code)"
-             class="item">
+        <div ng-repeat="type in questionTypes.all" ng-click="vm.doCreateNewQuestion(type.code)" class="item">
             <div class="domino">
                 <div class="data-text">
                     <h5>[[vm.displayTypeName(type.name)]]</h5>
                 </div>
                 <div class="picture">
-                    <img src="[[vm.displayTypeIcon(type.code)]]"
-                         onerror="this.src='/formulaire/public/img/empty-image.png';"/>
+                    <img src="[[vm.displayTypeIcon(type.code)]]" onerror="this.src='/formulaire/public/img/empty-image.png';"/>
                 </div>
             </div>
         </div>

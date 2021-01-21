@@ -27,10 +27,11 @@ public class DefaultQuestionService implements QuestionService {
 
     @Override
     public void create(JsonObject question, String form_id, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, position, question_type, statement, mandatory) " +
-                "VALUES (?, ?, ?, ?, ?) RETURNING *;";
+        String query = "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, statement, mandatory) " +
+                "VALUES (?, ?, ?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(form_id)
+                .add(question.getString("title", ""))
                 .add(question.getInteger("position", 0))
                 .add(question.getInteger("question_type", 1))
                 .add(question.getString("statement", ""))

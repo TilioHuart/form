@@ -1,6 +1,8 @@
 package fr.openent.formulaire.controller;
 
 import fr.openent.formulaire.Formulaire;
+import fr.openent.formulaire.security.AccessRight;
+import fr.openent.formulaire.security.ResponseRight;
 import fr.openent.formulaire.service.ResponseService;
 import fr.openent.formulaire.service.impl.DefaultResponseService;
 import fr.wseduc.rs.*;
@@ -12,6 +14,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
+import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserUtils;
 
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
@@ -28,7 +31,8 @@ public class ResponseController extends ControllerHelper {
 
     @Get("/questions/:id/responses")
     @ApiDoc("List responses")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
         String question_id = request.getParam("id");
         responseService.list(question_id, arrayResponseHandler(request));
@@ -36,7 +40,8 @@ public class ResponseController extends ControllerHelper {
 
     @Get("/responses/:id")
     @ApiDoc("Get form thanks to the id")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String id = request.getParam("id");
         responseService.get(id, defaultResponseHandler(request));
@@ -44,7 +49,7 @@ public class ResponseController extends ControllerHelper {
 
     @Post("/questions/:id/responses")
     @ApiDoc("Create a response")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @SecuredAction(Formulaire.RESPONSE_RIGHT)
     public void create(HttpServerRequest request) {
         String question_id = request.getParam("id");
         UserUtils.getUserInfos(eb, request, user -> {
@@ -61,7 +66,8 @@ public class ResponseController extends ControllerHelper {
 
     @Put("/responses/:id")
     @ApiDoc("Update given response")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(ResponseRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
         String id = request.getParam("id");
         UserUtils.getUserInfos(eb, request, user -> {
@@ -78,7 +84,8 @@ public class ResponseController extends ControllerHelper {
 
     @Delete("/responses/:id")
     @ApiDoc("Delete given response")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(ResponseRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String id = request.getParam("id");
         responseService.delete(id, defaultResponseHandler(request));

@@ -4,57 +4,63 @@
             <i class="drag lg-icon"></i>
             <i class="drag lg-icon"></i>
         </div>
-        <div ng-if="question.selected">
-            <select ng-change="" ng-model="vm.question.question_type" style="height: 24px;">
-                <option ng-repeat="type in questionTypes" value="[[type.code]]">[[vm.displayTypeName(type.name)]]</option>
-            </select>
-        </div>
     </div>
-    <div ng-click="question.selected = !question.selected">
+    <div class="focusable" id="[[question.id]]">
         <div class="question-title">
-            <div ng-if="question.question_type == 1">
-                <h4 ng-if="!!question.statement">[[question.title]]</h4>
-                <h4 ng-if="!!!question.statement"><i18n>formulaire.question.title.empty</i18n></h4>
+            <div ng-if="!question.selected">
+                <div ng-if="question.question_type == 1">
+                    <h4 ng-if="!!question.title">[[question.title]]</h4>
+                    <h4 ng-if="!!!question.title"><i18n>formulaire.question.title.free.empty</i18n></h4>
+                </div>
+                <div ng-if="question.question_type != 1">
+                    <h4 ng-if="!!question.title">[[question.title]]</h4>
+                    <h4 ng-if="!!!question.title"><i18n>formulaire.question.title.empty</i18n></h4>
+                </div>
             </div>
-            <div ng-if="question.question_type != 1">
-                <h4><i18n>formulaire.question.statement.empty</i18n></h4>
+            <div ng-if="question.selected">
+                <div ng-if="question.question_type == 1">
+                    <input type="text" ng-model="question.title" i18n-placeholder="formulaire.question.title.free.empty"/>
+                </div>
+                <div ng-if="question.question_type != 1">
+                    <input type="text" ng-model="question.title" i18n-placeholder="formulaire.question.title.empty"/>
+                </div>
+            </div>
+            <div ng-if="question.selected">
+                <select ng-model="question.question_type" style="height: 24px;">
+                    <option ng-repeat="type in questionTypes.all" ng-value="type.code"
+                            ng-selected="type.code === question.question_type">
+                        [[vm.displayTypeName(type.name)]]
+                    </option>
+                </select>
             </div>
         </div>
         <div class="question-main">
-            <div ng-if="!!question.statement">[[question.statement]]</div>
-            <textarea disabled ng-if="!!!question.statement"
-                      placeholder="[[vm.displayTypeName(question.question_type)]]"></textarea>
+            <div ng-if="!question.selected">
+                <div ng-if="question.question_type == 1">
+                    <div ng-if="!!question.statement" bind-html="question.statement"></div>
+                    <textarea disabled ng-if="!!!question.statement"
+                              placeholder="[[vm.displayTypeName(question.question_type)]]"></textarea>
+                </div>
+                <div ng-if="question.question_type != 1">
+                    <textarea disabled i18n-placeholder="formulaire.question.type.SHORTANSWER"></textarea>
+                </div>
+            </div>
+            <div ng-if="question.selected">
+                <div ng-if="question.question_type == 1">
+                    <editor ng-model="question.statement"></editor>
+                </div>
+                <div ng-if="question.question_type != 1">
+                    <textarea disabled i18n-placeholder="formulaire.question.type.SHORTANSWER"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="question-bottom" ng-if="question.selected">
+            <div class="mandatory">
+                <switch ng-model="question.mandatory"></switch><i18n>formulaire.mandatory</i18n>
+            </div>
+            <img src="formulaire/public/img/icons/duplicate.svg" ng-click="vm.duplicateQuestion()"/>
+            <img src="formulaire/public/img/icons/delete.svg" ng-click="vm.deleteQuestion()"/>
+            <img src="formulaire/public/img/icons/undo.svg" ng-click="vm.undoQuestionChanges()"/>
         </div>
     </div>
 </div>
-
-
-<!--<div class="domino" ng-if="question.selected">-->
-<!--    <div class="question-top">-->
-<!--        <i>(An icon here)</i>-->
-<!--        <select ng-change="" ng-model="vm.editedQuestion">-->
-<!--            <option ng-repeat="type in questionTypes" value="[[type.code]]">[[vm.displayTypeName(type.name)]]</option>-->
-<!--        </select>-->
-<!--    </div>-->
-<!--    <div class="question-title">-->
-
-<!--    </div>-->
-<!--    <div class="question-main">-->
-<!--        <div class="statement">-->
-<!--            [[question.statement]]-->
-<!--        </div>-->
-<!--        <div class="icons">-->
-<!--            <i></i>-->
-<!--            <i></i>-->
-<!--        </div>-->
-<!--    </div>-->
-<!--    <div class="question-bottom">-->
-<!--        [[question.question_type]]-->
-<!--    </div>-->
-<!--    <div>Question : [[question.statement]]</div>-->
-<!--    <div>Type de question : [[question.question_type]]</div>-->
-<!--    <div>Position : [[question.position]]</div>-->
-<!--    <div>Obligatoire ? : [[question.mandatory]]</div>-->
-<!--</div>-->
-
-<!--<editor ng-model="editedQuestion.statement" ng-change=""></editor>-->

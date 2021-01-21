@@ -1,6 +1,8 @@
 package fr.openent.formulaire.controller;
 
 import fr.openent.formulaire.Formulaire;
+import fr.openent.formulaire.security.AccessRight;
+import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.service.FormService;
 import fr.openent.formulaire.service.impl.DefaultFormService;
 import fr.wseduc.rs.*;
@@ -12,6 +14,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
+import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserUtils;
 
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
@@ -28,7 +31,8 @@ public class FormController extends ControllerHelper {
 
     @Get("/forms")
     @ApiDoc("List all the forms created by me")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
@@ -42,7 +46,8 @@ public class FormController extends ControllerHelper {
 
     @Get("/forms/:id")
     @ApiDoc("Get form thanks to the id")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String id = request.getParam("id");
         formService.get(id, defaultResponseHandler(request));
@@ -50,7 +55,7 @@ public class FormController extends ControllerHelper {
 
     @Put("/forms/:id")
     @ApiDoc("Update given form")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @SecuredAction(Formulaire.CREATION_RIGHT)
     public void update(HttpServerRequest request) {
         String id = request.getParam("id");
         RequestUtils.bodyToJson(request, form -> {
@@ -60,7 +65,8 @@ public class FormController extends ControllerHelper {
 
     @Post("/forms")
     @ApiDoc("Create a form")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(CreationRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
@@ -76,7 +82,8 @@ public class FormController extends ControllerHelper {
 
     @Delete("/forms/:id")
     @ApiDoc("Delete given form")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(CreationRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String id = request.getParam("id");
         formService.delete(id, defaultResponseHandler(request));

@@ -1,19 +1,19 @@
 <div ng-controller="FormEditorController as vm">
     <div class="row">
-        <section class="cell eight">
+        <section class="cell seven">
             <div>
                 <h1>
-                    <a href="#/mine"><i18n>formulaire.title</i18n></a><span>/ [[edit.form.title]]</span>
+                    <a href="#/mine"><i18n>formulaire.title</i18n></a><i18n>formulaire.title.separator</i18n>[[edit.form.title]]
                 </h1>
             </div>
         </section>
 
-        <section class="cell four">
+        <section class="cell five">
             <div class="main-button">
                 <div class="date">
-                    <i class="clock sm-icon spaced-both"></i><i18n>formulaire.form.edit.modified</i18n>[[vm.displayLastSave()]]
+                    <i class="clock sm-icon spaced-right"></i><i18n>formulaire.form.edit.modified</i18n>[[vm.displayLastSave()]]
                 </div>
-                <button class="cell" ng-click="vm.openNewQuestion()"><i18n>formulaire.form.edit.add</i18n></button>
+                <button class="cell" ng-click="vm.createNewQuestion()"><i18n>formulaire.form.edit.add</i18n></button>
                 <button class="cell" ng-click=""><i18n>formulaire.form.edit.organize</i18n></button>
                 <button class="cell" ng-click=""><i18n>formulaire.form.edit.preview</i18n></button>
             </div>
@@ -27,11 +27,11 @@
             </div>
         </div>
         <div class="buttons">
-            <button class="cell" ng-click="vm.openNewQuestion()"><i18n>formulaire.form.edit.add</i18n></button>
+            <button class="cell" ng-click="vm.createNewQuestion()"><i18n>formulaire.form.edit.add</i18n></button>
         </div>
         <div class="buttons">
             <button class="cell" ng-click="" ng-disabled="false"><i18n>formulaire.cancel</i18n></button>
-            <button class="cell" ng-click="vm.saveQuestions()"><i18n>formulaire.save</i18n></button>
+            <button class="cell" ng-click="vm.saveQuestions(true)"><i18n>formulaire.save</i18n></button>
         </div>
     </div>
 

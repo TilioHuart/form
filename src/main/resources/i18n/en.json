@@ -1,5 +1,6 @@
 {
   "formulaire.title": "Forms",
+  "formulaire.title.separator": " / ",
   "formulaire.mine": "My form",
   "formulaire.created": "Created on ",
   "formulaire.modified": "Modified on ",
@@ -17,6 +18,7 @@
   "formulaire.export": "Export",
   "formulaire.delete": "Delete",
   "formulaire.deselect": "Deselect",
+  "formulaire.mandatory": "Mandatory",
 
   "formulaire.tab.list": "My forms",
   "formulaire.tab.responses": "My responses",
@@ -54,8 +56,9 @@
   "formulaire.question.type.DATE": "Date",
   "formulaire.question.type.TIME": "Time",
   "formulaire.question.type.FILE": "File repository",
-  "formulaire.question.title.empty": "Title of my text area",
-  "formulaire.question.statement.empty": "Statement of my question",
+  "formulaire.question.title.free.empty": "Title of my text area",
+  "formulaire.question.title.empty": "Statement of my question",
+  "formulaire.question.delete.confirmation": "Do you really want to delete this question ?",
 
 
   "formulaire.error": "Error",
@@ -80,9 +83,12 @@
   "formulaire.error.questionTypeService.list": "An error occurred during the question type's retrieving",
   "formulaire.error.questionTypeService.get": "An error occurred during the question types' retrieving",
 
+  "formulaire.warning.forms.delete": "Be careful, some forms you want to delete have already been to users !",
+
   "formulaire.success.form.create": "You form has been successfully created !",
   "formulaire.success.form.save": "You form has been successfully saved !",
   "formulaire.success.forms.delete": "All the selected forms have been successfully archived !",
+  "formulaire.success.question.duplicate": "Your question has been successfully duplicated !",
+  "formulaire.success.question.delete": "Your question has been successfully deleted !"
 
-  "formulaire.warning.forms.delete": "Be careful, some forms you want to delete have already been to users !"
 }

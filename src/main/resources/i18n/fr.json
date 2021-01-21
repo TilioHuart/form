@@ -1,5 +1,6 @@
 {
   "formulaire.title": "Formulaires",
+  "formulaire.title.separator": " / ",
   "formulaire.mine": "Mon formulaire",
   "formulaire.created": "Créé le ",
   "formulaire.modified": "Modifié le ",
@@ -17,6 +18,7 @@
   "formulaire.export": "Exporter",
   "formulaire.delete": "Suprimer",
   "formulaire.deselect": "Déselectionner",
+  "formulaire.mandatory": "Obligatoire",
 
   "formulaire.tab.list": "Mes formulaires",
   "formulaire.tab.responses": "Mes réponses",
@@ -54,8 +56,9 @@
   "formulaire.question.type.DATE": "Date",
   "formulaire.question.type.TIME": "Heure",
   "formulaire.question.type.FILE": "Dépôt de fichier",
-  "formulaire.question.title.empty": "Titre de ma zone de texte",
-  "formulaire.question.statement.empty": "Énoncé de ma question",
+  "formulaire.question.title.free.empty": "Titre de ma zone de texte",
+  "formulaire.question.title.empty": "Énoncé de ma question",
+  "formulaire.question.delete.confirmation": "Êtes-vous sûr(e) de vouloir supprimer cette question ?",
 
 
   "formulaire.error": "Erreur",
@@ -80,9 +83,11 @@
   "formulaire.error.questionTypeService.list": "Une erreur est survenue lors de la récupération des types de question",
   "formulaire.error.questionTypeService.get": "Une erreur est survenue lors de la récupération du type de question",
 
+  "formulaire.warning.forms.delete": "Attention, certains formulaires que vous souhaitez supprimer ont été envoyés à des utilisateurs !",
+
   "formulaire.success.form.create": "Votre formulaire a bien été créé !",
   "formulaire.success.form.save": "Votre formulaire a bien été sauvegardé !",
   "formulaire.success.forms.delete": "Tous les formulaires sélectionnés ont bien été archivés !",
-
-  "formulaire.warning.forms.delete": "Attention, certains formulaires que vous souhaitez supprimer ont été envoyés à des utilisateurs !"
+  "formulaire.success.question.duplicate": "Votre question a bien été dupliquée !",
+  "formulaire.success.question.delete": "Votre question a bien été supprimée !"
 }
