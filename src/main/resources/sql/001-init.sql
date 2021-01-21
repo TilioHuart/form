@@ -28,10 +28,10 @@ CREATE TABLE formulaire.question_type (
 CREATE TABLE formulaire.question (
     id              bigserial PRIMARY KEY,
     form_id         bigint NOT NULL,
-    title           VARCHAR,
+    title           VARCHAR NOT NULL,
     position        bigint NOT NULL,
     question_type   bigint NOT NULL,
-    statement       VARCHAR NOT NULL,
+    statement       VARCHAR,
     mandatory       boolean NOT NULL DEFAULT FALSE,
     CONSTRAINT fk_form_id FOREIGN KEY (form_id) REFERENCES formulaire.form (id) ON UPDATE NO ACTION ON DELETE CASCADE,
     CONSTRAINT fk_question_type FOREIGN KEY (question_type) REFERENCES formulaire.question_type (code) ON UPDATE NO ACTION ON DELETE CASCADE
