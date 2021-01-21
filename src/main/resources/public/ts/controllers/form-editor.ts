@@ -1,12 +1,13 @@
 import {idiom, ng, notify, template} from 'entcore';
-import {Form, Question, Questions} from "../models";
+import {Form, Question, Questions, QuestionTypes} from "../models";
 import {formService, questionService} from "../services";
 import {DateUtils} from "../utils/date";
 
 interface ViewModel {
     form: Form;
+    questionTypes: QuestionTypes;
     questions: Questions;
-    editedQuestion: Question;
+    newQuestion: Question;
     display: {
         lightbox: {
             newQuestion: boolean
@@ -14,10 +15,11 @@ interface ViewModel {
     };
 
     openNewQuestion(): void;
-    createNewQuestion(): void;
+    createNewQuestion(number): void;
     saveQuestions(): void;
     displayLastSave(): string;
     displayTypeName(string): string;
+    displayTypeIcon(number): string;
 }
 
 
@@ -26,8 +28,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
     const vm: ViewModel = this;
     vm.form = new Form();
+    vm.questionTypes = new QuestionTypes();
     vm.questions = new Questions();
-    vm.editedQuestion = new Question();
+    vm.newQuestion = new Question();
     vm.display = {
         lightbox: {
             newQuestion: false
@@ -36,7 +39,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
     const init = async (): Promise<void> => {
         vm.form = $scope.edit.form;
+        await vm.questionTypes.sync();
         await vm.questions.sync(vm.form.id);
+        vm.newQuestion.form_id = vm.form.id;
         $scope.safeApply();
     };
 
@@ -48,9 +53,13 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         $scope.safeApply();
     };
 
-    vm.createNewQuestion = async () => {
-        let response = await questionService.save(vm.editedQuestion);
+    vm.createNewQuestion = async (code: number) => {
+        vm.newQuestion.question_type = code;
+        vm.newQuestion.position = vm.questions.all.length;
+        let response = await questionService.save(vm.newQuestion);
         await vm.questions.sync(vm.form.id);
+        vm.display.lightbox.newQuestion = false;
+        template.close('lightbox');
         $scope.safeApply();
     };
 
@@ -88,8 +97,28 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         else {
             return "ERROR_TEXT";
         }
-
     };
+
+    vm.displayTypeIcon = (code: number) : string => {
+        switch (code) {
+            case 1 :
+                return "/formulaire/public/img/icons/text-long.svg";
+            case 2 :
+                return "/formulaire/public/img/icons/text-short.svg";
+            case 3 :
+                return "/formulaire/public/img/icons/text.svg";
+            case 4 :
+                return "/formulaire/public/img/icons/order-bool-descending.svg";
+            case 5 :
+                return "/formulaire/public/img/icons/order-bool-ascending-variant.svg";
+            case 6 :
+                return "/formulaire/public/img/icons/calendar-today.svg";
+            case 7 :
+                return "/formulaire/public/img/icons/clock-outline.svg";
+            case 8 :
+                return "/formulaire/public/img/icons/tray-arrow-down.svg";
+        }
+    }
 
     init();
 }]);

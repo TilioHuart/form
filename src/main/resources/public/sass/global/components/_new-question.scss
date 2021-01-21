@@ -1,0 +1,44 @@
+.new-question {
+
+  .content{
+    width: 600px;
+    margin-top: 100px;
+  }
+
+  h1 {
+    font-size: x-large;
+    margin-left: 25px;
+  }
+
+  .dominos {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    height: 250px;
+    width: 500px;
+    margin: auto;
+
+    .item {
+      width: 100px;
+      height: 100px;
+      margin: auto;
+
+      .domino {
+        display: block;
+
+        .data-text {
+          text-align: center;
+          font-size: 14px;
+        }
+
+        .picture {
+          width: 64px;
+          margin: auto;
+
+          img {
+            width: 44px;
+          }
+        }
+      }
+    }
+  }
+}
