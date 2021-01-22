@@ -8,6 +8,7 @@ import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
@@ -25,7 +26,7 @@ public class DistributionController extends ControllerHelper {
         this.distributionService = new DefaultDistributionService();
     }
 
-    @Get("/distribution")
+    @Get("/distributions")
     @ApiDoc("List all the forms sent and created by me")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void list(HttpServerRequest request) {
@@ -39,7 +40,7 @@ public class DistributionController extends ControllerHelper {
         });
     }
 
-    @Get("/distribution/:id")
+    @Get("/distributions/:id")
     @ApiDoc("Get the info of a distribution thanks to the id")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void get(HttpServerRequest request) {
@@ -47,15 +48,15 @@ public class DistributionController extends ControllerHelper {
         distributionService.get(id, defaultResponseHandler(request));
     }
 
-    @Post("/forms/:formId/distribution")
+    @Post("/forms/:id/distributions")
     @ApiDoc("Distribute a form to a list of respondents")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void create(HttpServerRequest request) {
         String formId = request.getParam("id");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
-                RequestUtils.bodyToJson(request, form -> {
-                    distributionService.create(formId, user, defaultResponseHandler(request));
+                RequestUtils.bodyToJsonArray(request, respondents -> {
+                    distributionService.create(formId, user, respondents, defaultResponseHandler(request));
                 });
             } else {
                 log.debug("User not found in session.");
@@ -64,7 +65,7 @@ public class DistributionController extends ControllerHelper {
         });
     }
 
-    @Put("/distribution/:id")
+    @Put("/distributions/:id")
     @ApiDoc("Update given distribution")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void update(HttpServerRequest request) {
@@ -74,7 +75,7 @@ public class DistributionController extends ControllerHelper {
         });
     }
 
-    @Delete("/distribution/:id")
+    @Delete("/distributions/:id")
     @ApiDoc("Delete given distribution")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void delete(HttpServerRequest request) {

@@ -11,7 +11,7 @@ public interface DistributionService {
 
     void get(String id, Handler<Either<String, JsonObject>> handler);
 
-    void create(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler);
+    void create(String formId, UserInfos user, JsonArray respondents, Handler<Either<String, JsonObject>> handler);
 
     void update(String id, JsonObject distribution, Handler<Either<String, JsonObject>> handler);
 
