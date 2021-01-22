@@ -11,14 +11,17 @@
   "formulaire.at": " at ",
   "formulaire.save": "Save",
   "formulaire.cancel": "Cancel",
+  "formulaire.mandatory": "Mandatory",
   "formulaire.open": "Open",
   "formulaire.properties": "Properties",
   "formulaire.send": "Send",
   "formulaire.share": "Share",
   "formulaire.export": "Export",
   "formulaire.delete": "Delete",
+  "formulaire.confirm": "Confirm",
   "formulaire.deselect": "Deselect",
-  "formulaire.mandatory": "Mandatory",
+
+  "formulaire.respond": "Répondre",
 
   "formulaire.tab.list": "My forms",
   "formulaire.tab.responses": "My responses",
@@ -59,9 +62,11 @@
   "formulaire.question.title.free.empty": "Title of my text area",
   "formulaire.question.title.empty": "Statement of my question",
   "formulaire.question.delete.confirmation": "Do you really want to delete this question ?",
+  "formulaire.question.undo.confirmation": "Do you really want to cancel your changes ?",
 
 
   "formulaire.error": "Error",
+  "formulaire.error.403": "Sorry, you doesn't have enough rights to access this page",
   "formulaire.error.404": "Sorry, the page you're looking for doesn't exist",
   "formulaire.error.backToMenu": "Back to forms list",
 
@@ -79,7 +84,7 @@
   "formulaire.error.questionService.update": "An error occurred during the question's saving",
   "formulaire.error.questionService.delete": "An error occurred during the question's suppression",
 
-  "formulaire.error.questionTypeService.sync": "An error occurred during the questions type's synchronisation",
+  "formulaire.error.questionType.sync": "An error occurred during the questions type's synchronisation",
   "formulaire.error.questionTypeService.list": "An error occurred during the question type's retrieving",
   "formulaire.error.questionTypeService.get": "An error occurred during the question types' retrieving",
 

@@ -1,5 +1,4 @@
-import {idiom, model, ng, template} from 'entcore';
-import rights from "../rights";
+import {Behaviours, idiom, model, ng, template} from 'entcore';
 import {Form, QuestionTypes} from "../models";
 import {formService} from "../services";
 
@@ -20,6 +19,17 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		// Routing & template opening
 
 		route({
+			list: () => {
+				if ($scope.canCreate()) {
+					$scope.redirectTo('/list/mine');
+				}
+				else if ($scope.canRespond()) {
+					$scope.redirectTo('/list/responses');
+				}
+				else {
+					$scope.redirectTo('/e403');
+				}
+			},
 			formsList: () => {
 				$scope.currentTab = 'formsList';
 				template.open('main', 'containers/forms-list');
@@ -31,11 +41,22 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			createForm: () => {
 				template.open('main', 'containers/create-form');
 			},
-			editForm: async (params) => {
-				let { data } = await formService.get(params.idForm);
-				$scope.edit.form = data;
-				$scope.edit.mode = true;
-				template.open('main', 'containers/edit-form');
+			openForm: async (params) => {
+				if ($scope.canCreate()) {
+					let { data } = await formService.get(params.idForm);
+					$scope.edit.form = data;
+					$scope.edit.mode = true;
+					template.open('main', 'containers/edit-form');
+				}
+				else if ($scope.canRespond()) {
+					// TODO open view response to form
+				}
+				else {
+					$scope.redirectTo('/e403');
+				}
+			},
+			e403: () => {
+				template.open('main', 'containers/e403');
 			},
 			e404: () => {
 				template.open('main', 'containers/e404');
@@ -52,7 +73,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			$location.path(path);
 		};
 
-		$scope.safeApply = function (fn?) {
+		$scope.safeApply = (fn?) => {
 			const phase = $scope.$root.$$phase;
 			if (phase == '$apply' || phase == '$digest') {
 				if (fn && (typeof (fn) === 'function')) {
@@ -63,7 +84,27 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			}
 		};
 
-		$scope.hasRight = function (right: string) {
-			return model.me.hasWorkflow(rights.workflow[right]);
+		$scope.hasRight = (right: string) => {
+			return model.me.hasWorkflow(right);
 		};
+
+		$scope.hasAccess = () => {
+			return $scope.hasRight(Behaviours.applicationsBehaviours.formulaire.rights.workflow.access);
+		};
+
+		$scope.canCreate = () => {
+			return $scope.hasRight(Behaviours.applicationsBehaviours.formulaire.rights.workflow.creation);
+		};
+
+		$scope.canRespond = () => {
+			return $scope.hasRight(Behaviours.applicationsBehaviours.formulaire.rights.workflow.response);
+		};
+
+		// $scope.canSend = () => {
+		// 	return $scope.hasRight(Behaviours.applicationsBehaviours.formulaire.rights.workflow.sending);
+		// };
+		//
+		// $scope.canShare = () => {
+		// 	return $scope.hasRight(Behaviours.applicationsBehaviours.formulaire.rights.workflow.sharing);
+		// };
 }]);

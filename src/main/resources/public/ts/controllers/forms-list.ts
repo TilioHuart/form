@@ -14,7 +14,6 @@ interface ViewModel {
             prop: boolean,
             sending: boolean,
             sharing: boolean,
-            export: boolean,
             delete: boolean
         },
         warning: boolean
@@ -30,7 +29,7 @@ interface ViewModel {
     sendForm(): void;
     doSendForm(): void;
     shareForm(): void;
-    exportForms(): void;
+    exportForm(): void;
     deleteForms(): void;
     doDeleteForms(): Promise<void>;
 }
@@ -50,7 +49,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             prop: false,
             sending: false,
             sharing: false,
-            export: false,
             delete: false
         },
         warning: false
@@ -64,7 +62,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         // Check if the folder is ok
         switch (vm.folder) {
             case "mine": vm.forms.all = vm.forms.all.filter(form => form.archived === false); break;
-            case "shared": vm.forms.all = vm.forms.all.filter(form => form.shared === true); break;
+            case "shared": vm.forms.all = vm.forms.all.filter(form => form.collab === true); break;
             case "sent": vm.forms.all = vm.forms.all.filter(form => form.sent === true); break;
             case "archived": vm.forms.all = vm.forms.all.filter(form => form.archived === true); break;
             default : vm.openFolder('mine'); break;
@@ -73,7 +71,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         $scope.safeApply();
     };
 
-    // Functions
+
+    // Global functions
 
     vm.openFolder = (foldeName:string) : void => {
         vm.folder = foldeName;
@@ -84,7 +83,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         value ? vm.forms.selectAll() : vm.forms.deselectAll();
     };
 
-    // Utils
+
+    // Display functions
 
     vm.displayFolder = () : string => {
         return idiom.translate("formulaire.forms." + vm.folder);
@@ -138,11 +138,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         vm.display.lightbox.sharing = true;
     };
 
-    vm.exportForms = (): void => {
-        //TODO : Lightbox pour confirmation de l'export (afficher la liste des forms  concernés)
-        template.open('lightbox', 'lightbox/form-confirm-export');
-        vm.display.lightbox.export = true;
-
+    vm.exportForm = (): void => {
+        window.open(window.location.pathname + `/export/${vm.forms.selected[0].id}`);
     };
 
     vm.deleteForms = (): void => {

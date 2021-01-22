@@ -1,9 +1,8 @@
-package fr.openent.formulaire.controller;
+package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.Formulaire;
 import fr.wseduc.rs.Get;
 import fr.wseduc.rs.ApiDoc;
-import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.logging.Logger;

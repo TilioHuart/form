@@ -12,22 +12,28 @@ for (let service in services) {
 
 routes.define(function($routeProvider){
 	$routeProvider
-		.when('/forms-list', {
+		.when('/list', {
+			action: 'list'
+		})
+		.when('/list/mine', {
 			action: 'formsList'
 		})
-		.when('/forms-responses', {
+		.when('/list/responses', {
 			action: 'formsResponses'
 		})
 		.when('/form/create', {
 			action: 'createForm'
 		})
 		.when('/form/:idForm', {
-			action: 'editForm'
+			action: 'openForm'
+		})
+		.when('/e403', {
+			action: 'e403'
 		})
 		.when('/e404', {
 			action: 'e404'
 		})
 		.otherwise({
-			redirectTo: '/forms-list'
+			redirectTo: '/list'
 		});
 });

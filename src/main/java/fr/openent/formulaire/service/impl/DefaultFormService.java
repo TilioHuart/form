@@ -44,14 +44,14 @@ public class DefaultFormService implements FormService {
     @Override
     public void update(String id, JsonObject form, Handler<Either<String, JsonObject>> handler) {
         String query = "UPDATE " + Formulaire.FORM_TABLE + " SET title = ?, description = ?, picture = ?, " +
-                "date_modification = ?, sent = ?, shared = ?, archived = ? WHERE id = ?;";
+                "date_modification = ?, sent = ?, collab = ?, archived = ? WHERE id = ?;";
         JsonArray params = new JsonArray()
                 .add(form.getString("title", ""))
                 .add(form.getString("description", ""))
                 .add(form.getString("picture", ""))
                 .add("NOW()")
                 .add(form.getBoolean("sent", false))
-                .add(form.getBoolean("shared", false))
+                .add(form.getBoolean("collab", false))
                 .add(form.getBoolean("archived", false))
                 .add(id);
 

@@ -1,6 +1,6 @@
 package fr.openent.formulaire;
 
-import fr.openent.formulaire.controller.*;
+import fr.openent.formulaire.controllers.*;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.http.BaseServer;

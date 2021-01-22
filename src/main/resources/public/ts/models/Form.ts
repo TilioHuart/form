@@ -1,8 +1,12 @@
 import {Mix, Selectable, Selection} from "entcore-toolkit";
-import {idiom, notify} from "entcore";
+import {idiom, notify, Rights, Shareable} from "entcore";
 import {formService} from "../services";
 
-export class Form implements Selectable {
+export class Form implements Selectable, Shareable  {
+    shared: any;
+    owner: { userId: string; displayName: string };
+    myRights: Rights<Form>;
+
     id: number;
     title: string;
     description: string;
@@ -12,7 +16,7 @@ export class Form implements Selectable {
     date_creation: Date;
     date_modification: Date;
     sent: boolean;
-    shared: boolean;
+    collab: boolean;
     archived: boolean;
     selected: boolean;
 
@@ -26,7 +30,7 @@ export class Form implements Selectable {
         this.date_creation = null;
         this.date_modification = null;
         this.sent = false;
-        this.shared = false;
+        this.collab = false;
         this.archived = false;
         this.selected = null;
     }
@@ -42,7 +46,7 @@ export class Form implements Selectable {
             date_creation: this.date_creation,
             date_modification: this.date_modification,
             sent: this.sent,
-            shared: this.shared,
+            collab: this.collab,
             archived: this.archived,
             selected: this.selected
         }

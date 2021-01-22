@@ -11,7 +11,8 @@ interface ViewModel {
     display: {
         lightbox: {
             newQuestion: boolean,
-            delete: boolean
+            delete: boolean,
+            undo: boolean
         }
     };
 
@@ -23,6 +24,7 @@ interface ViewModel {
     deleteQuestion(): void;
     doDeleteQuestion(): void;
     undoQuestionChanges(): void;
+    doUndoQuestionChanges(): void;
     displayLastSave(): string;
     displayTypeName(string): string;
     displayTypeIcon(number): string;
@@ -40,7 +42,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
     vm.display = {
         lightbox: {
             newQuestion: false,
-            delete: false
+            delete: false,
+            undo: false
         }
     };
 
@@ -51,7 +54,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         $scope.safeApply();
     };
 
-    // Functions
+
+    // Global functions
 
     vm.switchAll = (value:boolean) : void => {
         value ? vm.questions.selectAll() : vm.questions.deselectAll();
@@ -88,6 +92,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             throw e;
         }
     };
+
+
+    // Question functions
 
     vm.duplicateQuestion = async () => {
         try {
@@ -132,9 +139,29 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
     };
 
     vm.undoQuestionChanges = async () => {
+        if (vm.questions.selected.length > 0) {
+            let question = vm.questions.selected[0];
+            if (question.title != "" || question.statement != "" || question.mandatory != false) {
+                vm.dontSave = true;
+                template.open('lightbox', 'lightbox/question-confirm-undo');
+                vm.display.lightbox.undo = true;
+            }
+            else {
+                vm.doDeleteQuestion();
+            }
+        }
+    };
+
+    vm.doUndoQuestionChanges = async () => {
         await vm.questions.sync(vm.form.id);
+        template.close('lightbox');
+        vm.display.lightbox.undo = true;
+        vm.dontSave = false;
         $scope.safeApply();
     };
+
+
+    // Display functions
 
     vm.displayLastSave = () : string => {
         let localDateTime = DateUtils.localise(vm.form.date_modification);
@@ -177,6 +204,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         }
     };
 
+
+    // Utils
 
     const onClickQuestion = async (event) : Promise<void> => {
         if (!vm.dontSave) {

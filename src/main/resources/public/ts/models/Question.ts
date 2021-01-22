@@ -9,7 +9,7 @@ export class Question implements Selectable {
     position: number;
     question_type: any;
     statement: string;
-    mandatory: string;
+    mandatory: boolean;
     selected: boolean;
 
     constructor() {

@@ -11,14 +11,17 @@
   "formulaire.at": " à ",
   "formulaire.save": "Enregistrer",
   "formulaire.cancel": "Annuler",
+  "formulaire.mandatory": "Obligatoire",
   "formulaire.open": "Ouvrir",
   "formulaire.properties": "Propriétés",
   "formulaire.send": "Envoyer",
   "formulaire.share": "Partager",
   "formulaire.export": "Exporter",
-  "formulaire.delete": "Suprimer",
+  "formulaire.delete": "Supprimer",
+  "formulaire.confirm": "Confirmer",
   "formulaire.deselect": "Déselectionner",
-  "formulaire.mandatory": "Obligatoire",
+
+  "formulaire.respond": "Répondre",
 
   "formulaire.tab.list": "Mes formulaires",
   "formulaire.tab.responses": "Mes réponses",
@@ -59,9 +62,11 @@
   "formulaire.question.title.free.empty": "Titre de ma zone de texte",
   "formulaire.question.title.empty": "Énoncé de ma question",
   "formulaire.question.delete.confirmation": "Êtes-vous sûr(e) de vouloir supprimer cette question ?",
+  "formulaire.question.undo.confirmation": "Êtes-vous sûr(e) de vouloir annuler vos changements ?",
 
 
   "formulaire.error": "Erreur",
+  "formulaire.error.403": "Désolé, vous n'avez pas les droits pour accéder à cette page",
   "formulaire.error.404": "Désolé, la page que vous cherchez n'existe pas",
   "formulaire.error.backToMenu": "Retour à la liste des formulaires",
 
@@ -79,7 +84,7 @@
   "formulaire.error.questionService.update": "Une erreur est survenue lors de la sauvearde de la question",
   "formulaire.error.questionService.delete": "Une erreur est survenue lors de la suppression de la question",
 
-  "formulaire.error.questionTypeService.sync": "Une erreur est survenue lors de la synchronisation des types de question",
+  "formulaire.error.questionType.sync": "Une erreur est survenue lors de la synchronisation des types de question",
   "formulaire.error.questionTypeService.list": "Une erreur est survenue lors de la récupération des types de question",
   "formulaire.error.questionTypeService.get": "Une erreur est survenue lors de la récupération du type de question",
 

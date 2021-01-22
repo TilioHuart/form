@@ -12,9 +12,9 @@ import org.entcore.common.sql.SqlResult;
 public class DefaultQuestionService implements QuestionService {
 
     @Override
-    public void list(String form_id, Handler<Either<String, JsonArray>> handler) {
+    public void list(String formId, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT * FROM " + Formulaire.QUESTION_TABLE + " WHERE form_id = ? ORDER BY position;";
-        JsonArray params = new JsonArray().add(form_id);
+        JsonArray params = new JsonArray().add(formId);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
@@ -26,11 +26,11 @@ public class DefaultQuestionService implements QuestionService {
     }
 
     @Override
-    public void create(JsonObject question, String form_id, Handler<Either<String, JsonObject>> handler) {
+    public void create(JsonObject question, String formId, Handler<Either<String, JsonObject>> handler) {
         String query = "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, statement, mandatory) " +
                 "VALUES (?, ?, ?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
-                .add(form_id)
+                .add(formId)
                 .add(question.getString("title", ""))
                 .add(question.getInteger("position", 0))
                 .add(question.getInteger("question_type", 1))

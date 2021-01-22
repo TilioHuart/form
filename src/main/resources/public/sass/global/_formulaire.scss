@@ -9,7 +9,7 @@ $formulaire-blue-transparent: rgba(75 ,175,213,0.3);
 body.formulaire {
   @import "components/index";
 
-  .e404 {
+  .error {
     display: flex;
     flex-direction: column;
     justify-content: center;

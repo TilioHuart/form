@@ -1,4 +1,4 @@
-package fr.openent.formulaire.controller;
+package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.impl.DefaultDistributionService;

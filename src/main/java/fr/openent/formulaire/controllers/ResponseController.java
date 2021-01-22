@@ -1,4 +1,4 @@
-package fr.openent.formulaire.controller;
+package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.security.AccessRight;

@@ -32,7 +32,7 @@ export class QuestionTypes {
     async sync () {
         try {
             let { data } = await questionTypeService.list();
-            this.all = Mix.castArrayAs(QuestionType, data);
+            this.all = Mix.castArrayAs(QuestionType, data).slice(0,2);
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.questionType.sync'));
             throw e;

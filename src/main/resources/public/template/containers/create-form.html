@@ -3,7 +3,7 @@
         <section class="cell eight">
             <div>
                 <h1>
-                    <a href="#/mine"><i18n>formulaire.title</i18n></a>
+                    <a href="#/"><i18n>formulaire.title</i18n></a>
                 </h1>
             </div>
         </section>
@@ -22,7 +22,7 @@
                         <input type="text" ng-model="vm.form.title" size="30" i18n-placeholder="formulaire.form.create.title">
                     </div>
                     <div class="data-icons">
-                        <button class="cell" ng-click="redirectTo('/forms-list')"><i18n>formulaire.cancel</i18n></button>
+                        <button class="cell" ng-click="redirectTo('/list/mine')"><i18n>formulaire.cancel</i18n></button>
                         <button class="cell" ng-click="vm.save()" ng-disabled="!vm.form.title"><i18n>formulaire.save</i18n></button>
                     </div>
                 </div>

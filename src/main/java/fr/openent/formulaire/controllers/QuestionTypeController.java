@@ -1,13 +1,11 @@
-package fr.openent.formulaire.controller;
+package fr.openent.formulaire.controllers;
 
-import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.service.QuestionTypeService;
 import fr.openent.formulaire.service.impl.DefaultQuestionTypeService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
-import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;

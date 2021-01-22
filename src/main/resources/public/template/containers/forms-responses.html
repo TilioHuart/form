@@ -3,7 +3,7 @@
         <section class="cell twelve">
             <div>
                 <h1>
-                    <a href="#/mine"><i18n>formulaire.title</i18n></a>
+                    <a href="#/"><i18n>formulaire.title</i18n></a>
                 </h1>
             </div>
         </section>
@@ -12,11 +12,11 @@
     <div class="row twelve cell tabs zero-mobile" style="min-height: 60px;">
         <div class="cell">
             <header class="horizontal-spacing" ng-class="{ selected : currentTab === 'formsList' }"
-                    ng-click="redirectTo('/forms-list')">
+                    ng-if="canCreate()" ng-click="redirectTo('/list/mine')">
                 <i18n>formulaire.tab.list</i18n>
             </header>
             <header class="horizontal-spacing " ng-class="{ selected : currentTab === 'formsResponses' }"
-                    ng-click="redirectTo('/forms-responses')">
+                    ng-if="canRespond()" ng-click="redirectTo('/list/responses')">
                 <i18n>formulaire.tab.responses</i18n>
             </header>
         </div>
@@ -99,7 +99,7 @@
             </tbody>
         </table>
 
-        <div class="e404" ng-if="vm.forms.all.empty()">
+        <div class="error" ng-if="vm.forms.all.empty()">
             <img src="/formulaire/public/img/onboarding.svg"/>
             <i18n>formulaire.forms.empty</i18n>
         </div>
