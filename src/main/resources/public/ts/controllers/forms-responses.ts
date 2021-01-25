@@ -32,11 +32,6 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
         $scope.edit.mode = false;
         await vm.forms.sync();
 
-        vm.forms.all[0].sent_date = "06/06/26";
-        vm.forms.all[0].resp_date = "07/07/27";
-        vm.forms.all[1].sent_date = "02/01/21";
-        vm.forms.all[2].resp_date = "01/02/21";
-
         $scope.safeApply();
     };
 
