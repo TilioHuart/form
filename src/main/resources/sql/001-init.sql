@@ -15,7 +15,7 @@ CREATE TABLE formulaire.form (
     date_creation       timestamp without time zone NOT NULL DEFAULT now(),
     date_modification   timestamp without time zone NOT NULL DEFAULT now(),
     sent                boolean NOT NULL DEFAULT FALSE,
-    shared              boolean NOT NULL DEFAULT FALSE,
+    collab              boolean NOT NULL DEFAULT FALSE,
     archived            boolean NOT NULL DEFAULT FALSE
 );
 

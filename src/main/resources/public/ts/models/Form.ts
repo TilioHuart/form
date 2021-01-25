@@ -1,12 +1,8 @@
 import {Mix, Selectable, Selection} from "entcore-toolkit";
-import {idiom, notify, Rights, Shareable} from "entcore";
+import {idiom, notify} from "entcore";
 import {formService} from "../services";
 
-export class Form implements Selectable, Shareable  {
-    shared: any;
-    owner: { userId: string; displayName: string };
-    myRights: Rights<Form>;
-
+export class Form implements Selectable  {
     id: number;
     title: string;
     description: string;
