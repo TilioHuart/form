@@ -55,13 +55,13 @@
                         <div class="data-text">
                             <h4>[[form.title]]</h4>
                             <h5>[[form.owner_name]]</h5>
-                            <div class="date"><i18n>formulaire.sent</i18n>[[vm.displayDate(form.sent_date)]]</div>
+                            <div class="date"><i18n>formulaire.sent</i18n>[[vm.displayDate(form.date_sending)]]</div>
                         </div>
                         <div class="data-status">
-                            <span ng-if="!!form.resp_date" style="color: green">
-                                <i18n>formulaire.responded.date</i18n>[[vm.displayDate(form.resp_date)]]
+                            <span ng-if="!!form.date_response" style="color: green">
+                                <i18n>formulaire.responded.date</i18n>[[vm.displayDate(form.date_response)]]
                             </span>
-                            <span ng-if="!!!form.resp_date" style="color: #b50000">
+                            <span ng-if="!!!form.date_response" style="color: #b50000">
                                 <i18n>formulaire.responded.waiting</i18n>
                             </span>
                         </div>

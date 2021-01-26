@@ -63,4 +63,14 @@ export class Forms extends Selection<Form> {
             throw e;
         }
     }
+
+    async syncSent () {
+        try {
+            let { data } = await formService.listSentForms();
+            this.all = Mix.castArrayAs(Form, data);
+        } catch (e) {
+            notify.error(idiom.translate('formulaire.error.form.sync'));
+            throw e;
+        }
+    }
 }

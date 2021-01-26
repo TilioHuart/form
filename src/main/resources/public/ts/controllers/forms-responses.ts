@@ -1,10 +1,11 @@
 import {idiom, ng, notify, toasts} from 'entcore';
-import {Form, Forms} from "../models";
+import {Form, Forms, Distribution, Distributions} from "../models";
 import {DateUtils} from "../utils/date";
 
 interface ViewModel {
     forms: Forms;
-    allFormsSelected: boolean;
+    dists: Distributions;
+    allDistsSelected: boolean;
     searchInput: string;
     display: {
         grid: boolean
@@ -22,16 +23,16 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
 
     const vm: ViewModel = this;
     vm.forms = new Forms();
+    vm.dists = new Distributions();
     vm.searchInput = "";
-    vm.allFormsSelected = false;
+    vm.allDistsSelected = false;
     vm.display = {
         grid: true
     };
 
     vm.init = async (): Promise<void> => {
         $scope.edit.mode = false;
-        await vm.forms.sync();
-
+        await vm.forms.syncSent();
         $scope.safeApply();
     };
 
@@ -43,8 +44,11 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
 
     // Utils
 
-    vm.displayDate = (dateToFormat) : string => {
-        return dateToFormat;
+    vm.displayDate = (dateToFormat:Date) : string => {
+        let localDateTime = DateUtils.localise(dateToFormat);
+        let date = DateUtils.format(localDateTime, DateUtils.FORMAT["DAY-MONTH-YEAR"]);
+        let time = DateUtils.format(localDateTime, DateUtils.FORMAT["HOUR-MINUTES"]);
+        return date + idiom.translate('formulaire.at') + time;
     };
 
 

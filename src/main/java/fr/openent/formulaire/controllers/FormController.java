@@ -44,6 +44,21 @@ public class FormController extends ControllerHelper {
         });
     }
 
+    @Get("/sentForms")
+    @ApiDoc("List all the forms sent to me")
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void listSentForms(HttpServerRequest request) {
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user != null) {
+                formService.listSentForms(user, arrayResponseHandler(request));
+            } else {
+                log.debug("User not found in session.");
+                Renders.unauthorized(request);
+            }
+        });
+    }
+
     @Get("/forms/:id")
     @ApiDoc("Get form thanks to the id")
     @ResourceFilter(AccessRight.class)

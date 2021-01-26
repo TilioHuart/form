@@ -4,6 +4,7 @@ import {Form} from '../models/Form';
 
 export interface FormService {
     list(): Promise<AxiosResponse>;
+    listSentForms(): Promise<AxiosResponse>;
     get(number): Promise<AxiosResponse>;
     save(Form): Promise<AxiosResponse>;
     create(Form): Promise<AxiosResponse>;
@@ -17,6 +18,15 @@ export const formService: FormService = {
     async list (): Promise<AxiosResponse> {
         try {
             return await http.get('/formulaire/forms');
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.formService.list'));
+            throw err;
+        }
+    },
+
+    async listSentForms (): Promise<AxiosResponse> {
+        try {
+            return await http.get('/formulaire/sentForms');
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.list'));
             throw err;

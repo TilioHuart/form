@@ -88,6 +88,13 @@
   "formulaire.error.questionTypeService.list": "Une erreur est survenue lors de la récupération des types de question",
   "formulaire.error.questionTypeService.get": "Une erreur est survenue lors de la récupération du type de question",
 
+  "formulaire.error.distribution.sync": "Une erreur est survenue lors de la synchronisation des distributions",
+  "formulaire.error.distributionService.list": "Une erreur est survenue lors de la récupération des distributions",
+  "formulaire.error.distributionService.create": "Une erreur est survenue lors de la création de la nouvelle distribution",
+  "formulaire.error.distributionService.get": "Une erreur est survenue lors de la récupération de la distribution",
+  "formulaire.error.distributionService.update": "Une erreur est survenue lors de la sauvegarde de la distribution",
+  "formulaire.error.distributionService.delete": "Une erreur est survenue lors de la suppression de la distribution",
+
   "formulaire.warning.forms.delete": "Attention, certains formulaires que vous souhaitez supprimer ont été envoyés à des utilisateurs !",
 
   "formulaire.success.form.create": "Votre formulaire a bien été créé !",

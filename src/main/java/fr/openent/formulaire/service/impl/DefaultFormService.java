@@ -14,7 +14,20 @@ public class DefaultFormService implements FormService {
 
     @Override
     public void list(UserInfos user, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT * FROM " + Formulaire.FORM_TABLE + " WHERE owner_id = ? ORDER BY date_modification DESC;";
+        String query = "SELECT * FROM " + Formulaire.FORM_TABLE + " WHERE owner_id = ? " +
+                "ORDER BY date_modification DESC;";
+        JsonArray params = new JsonArray().add(user.getUserId());
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public void listSentForms(UserInfos user, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT f.id, title, description, picture, owner_id, owner_name," +
+                "date_creation, date_modification, form_id, status, date_sending, date_response " +
+                "FROM " + Formulaire.FORM_TABLE + " f " +
+                "INNER JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON f.id = d.form_id " +
+                "WHERE d.respondent_id = ? " +
+                "ORDER BY d.date_sending DESC;";
         JsonArray params = new JsonArray().add(user.getUserId());
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
@@ -28,8 +41,8 @@ public class DefaultFormService implements FormService {
 
     @Override
     public void create(JsonObject form, UserInfos user, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, picture, " +
-                "date_creation, date_modification) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+        String query = "INSERT INTO " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, " +
+                "picture, date_creation, date_modification) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(user.getUserId())
                 .add(user.getUsername())

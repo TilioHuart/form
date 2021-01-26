@@ -88,6 +88,13 @@
   "formulaire.error.questionTypeService.list": "An error occurred during the question type's retrieving",
   "formulaire.error.questionTypeService.get": "An error occurred during the question types' retrieving",
 
+  "formulaire.error.distribution.sync": "An error occurred during the distributions' synchronisation",
+  "formulaire.error.distributionService.list": "An error occurred during the distributions' retrieving",
+  "formulaire.error.distributionService.create": "An error occurred during the distribution's creation",
+  "formulaire.error.distributionService.get": "An error occurred during the distribution's retrieving",
+  "formulaire.error.distributionService.update": "An error occurred during the distribution's saving",
+  "formulaire.error.distributionService.delete": "An error occurred during the distribution's suppression",
+
   "formulaire.warning.forms.delete": "Be careful, some forms you want to delete have already been to users !",
 
   "formulaire.success.form.create": "You form has been successfully created !",
