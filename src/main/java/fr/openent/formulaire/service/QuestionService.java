@@ -10,6 +10,8 @@ public interface QuestionService {
 
     void get(String id, Handler<Either<String, JsonObject>> handler);
 
+    void getByPosition(String form_id, String position, Handler<Either<String, JsonObject>> handler);
+
     void create(JsonObject question, String form_id, Handler<Either<String, JsonObject>> handler);
 
     void update(String id, JsonObject question, Handler<Either<String, JsonObject>> handler);

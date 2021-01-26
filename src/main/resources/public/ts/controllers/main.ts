@@ -1,6 +1,6 @@
 import {Behaviours, idiom, model, ng, template} from 'entcore';
-import {Form, QuestionTypes} from "../models";
-import {formService} from "../services";
+import {Form, Question, QuestionTypes} from "../models";
+import {formService, questionService} from "../services";
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', 'FormService',
 	($scope, route, $location) => {
@@ -13,6 +13,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			mode: false,
 			form: new Form()
 		};
+		$scope.respondQuestion = new Question();
 		$scope.questionTypes = new QuestionTypes();
 		$scope.questionTypes.sync();
 
@@ -48,8 +49,18 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 					$scope.edit.mode = true;
 					template.open('main', 'containers/edit-form');
 				}
-				else if ($scope.canRespond()) {
-					// TODO open view response to form
+				if ($scope.canRespond()) {
+					$scope.redirectTo(`/form/${params.idForm}/question/1`);
+				}
+				else {
+					$scope.redirectTo('/e403');
+				}
+			},
+			respondQuestion: async (params) => {
+				if ($scope.canRespond()) {
+					let { data } = await questionService.getByPosition(params.idForm, params.position);
+					$scope.respondQuestion = data;
+					template.open('main', 'containers/respond-question');
 				}
 				else {
 					$scope.redirectTo('/e403');

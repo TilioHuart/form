@@ -44,6 +44,16 @@ public class QuestionController extends ControllerHelper {
         questionService.get(id, defaultResponseHandler(request));
     }
 
+    @Get("/forms/:formId/questions/:position")
+    @ApiDoc("Get question in a form by position")
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void getByPosition(HttpServerRequest request) {
+        String form_id = request.getParam("formId");
+        String position = request.getParam("position");
+        questionService.getByPosition(form_id, position, defaultResponseHandler(request));
+    }
+
     @Post("/forms/:formId/questions")
     @ApiDoc("Create a question")
     @ResourceFilter(CreationRight.class)

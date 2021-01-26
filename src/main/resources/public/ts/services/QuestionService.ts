@@ -3,12 +3,13 @@ import http, {AxiosResponse} from 'axios';
 import {Question} from "../models";
 
 export interface QuestionService {
-    list(number): Promise<AxiosResponse>;
-    get(number): Promise<AxiosResponse>;
-    save(Question): Promise<AxiosResponse>;
-    create(Question): Promise<AxiosResponse>;
-    update(Question): Promise<AxiosResponse>;
-    delete(number): Promise<AxiosResponse>;
+    list(formId : number): Promise<AxiosResponse>;
+    get(questionId : number): Promise<AxiosResponse>;
+    getByPosition(idForm : number, position : number): Promise<AxiosResponse>;
+    save(question : Question): Promise<AxiosResponse>;
+    create(question : Question): Promise<AxiosResponse>;
+    update(question : Question): Promise<AxiosResponse>;
+    delete(questionId : number): Promise<AxiosResponse>;
 }
 
 export const questionService: QuestionService = {
@@ -22,9 +23,18 @@ export const questionService: QuestionService = {
         }
     },
 
-    async get(id : number): Promise<AxiosResponse> {
+    async get(questionId : number): Promise<AxiosResponse> {
         try {
-            return await http.get(`/formulaire/questions/${id}`);
+            return await http.get(`/formulaire/questions/${questionId}`);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.questionService.get'));
+            throw err;
+        }
+    },
+
+    async getByPosition(idForm : number, position : number): Promise<AxiosResponse> {
+        try {
+            return await http.get(`/formulaire/forms/${idForm}/questions/${position}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.get'));
             throw err;
@@ -53,9 +63,9 @@ export const questionService: QuestionService = {
         }
     },
 
-    async delete(id : number): Promise<AxiosResponse> {
+    async delete(questionId : number): Promise<AxiosResponse> {
         try {
-            return await http.delete(`/formulaire/questions/${id}`);
+            return await http.delete(`/formulaire/questions/${questionId}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.delete'));
             throw err;
