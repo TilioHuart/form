@@ -10,7 +10,7 @@ export const questionTypeService: QuestionTypeService = {
 
     async list (): Promise<AxiosResponse> {
         try {
-            return await http.get(`/formulaire/types`);
+            return http.get(`/formulaire/types`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionTypeService.list'));
             throw err;
@@ -19,7 +19,7 @@ export const questionTypeService: QuestionTypeService = {
 
     async get(code : number): Promise<AxiosResponse> {
         try {
-            return await http.get(`/formulaire/types/${code}`);
+            return http.get(`/formulaire/types/${code}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionTypeService.get'));
             throw err;

@@ -25,7 +25,7 @@
                     <input type="text" ng-model="question.title" i18n-placeholder="formulaire.question.title.empty"/>
                 </div>
             </div>
-            <div ng-if="question.selected">
+            <div ng-if="question.selected" ng-show="false">
                 <select ng-model="question.question_type" style="height: 24px;">
                     <option ng-repeat="type in questionTypes.all" ng-value="type.code"
                             ng-selected="type.code === question.question_type">

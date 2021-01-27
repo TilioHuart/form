@@ -4,13 +4,13 @@
             <button ng-click="vm.openForm(vm.forms.selected[0])" class="cell" ng-show="vm.forms.selected.length === 1">
                 <i18n>formulaire.open</i18n>
             </button>
-            <button ng-click="vm.openPropertiesForm()" class="cell" ng-show="vm.forms.selected.length === 1" disabled>
+            <button ng-click="vm.openPropertiesForm()" class="cell" ng-show="vm.forms.selected.length === 1" ng-disabled="true">
                 <i18n>formulaire.properties</i18n>
             </button>
             <button ng-click="vm.sendForm()" class="cell" ng-show="vm.forms.selected.length === 1">
                 <i18n>formulaire.send</i18n>
             </button>
-            <button ng-click="vm.shareForm()" class="cell" ng-show="vm.forms.selected.length === 1" disabled>
+            <button ng-click="vm.shareForm()" class="cell" ng-show="vm.forms.selected.length === 1" ng-disabled="true">
                 <i18n>formulaire.share</i18n>
             </button>
             <button ng-click="vm.exportForm()" class="cell" ng-show="vm.forms.selected.length === 1">

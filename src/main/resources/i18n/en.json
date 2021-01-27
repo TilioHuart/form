@@ -11,6 +11,7 @@
   "formulaire.at": " at ",
   "formulaire.save": "Save",
   "formulaire.cancel": "Cancel",
+  "formulaire.return": "Return",
   "formulaire.mandatory": "Mandatory",
   "formulaire.open": "Open",
   "formulaire.properties": "Properties",
@@ -21,7 +22,10 @@
   "formulaire.confirm": "Confirm",
   "formulaire.deselect": "Deselect",
 
-  "formulaire.respond": "Répondre",
+  "formulaire.contrib": "Contribution",
+  "formulaire.read": "Read",
+  "formulaire.manager": "Management",
+  "formulaire.respond": "Respond",
 
   "formulaire.tab.list": "My forms",
   "formulaire.tab.responses": "My responses",

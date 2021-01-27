@@ -14,8 +14,8 @@
                     <i class="clock sm-icon spaced-right"></i><i18n>formulaire.form.edit.modified</i18n>[[vm.displayLastSave()]]
                 </div>
                 <button class="cell" ng-click="vm.createNewQuestion()"><i18n>formulaire.form.edit.add</i18n></button>
-                <button class="cell" ng-click="" disabled><i18n>formulaire.form.edit.organize</i18n></button>
-                <button class="cell" ng-click="" disabled><i18n>formulaire.form.edit.preview</i18n></button>
+                <button class="cell" ng-click="" ng-disabled="true"><i18n>formulaire.form.edit.organize</i18n></button>
+                <button class="cell" ng-click="" ng-disabled="true"><i18n>formulaire.form.edit.preview</i18n></button>
             </div>
         </section>
     </div>
@@ -30,7 +30,7 @@
             <button class="cell" ng-click="vm.createNewQuestion()"><i18n>formulaire.form.edit.add</i18n></button>
         </div>
         <div class="buttons">
-            <button class="cell" ng-click="vm.undoQuestionChanges()" ng-disabled="false"><i18n>formulaire.cancel</i18n></button>
+            <button class="cell" ng-click="redirectTo('/list/mine')"><i18n>formulaire.return</i18n></button>
             <button class="cell" ng-click="vm.saveQuestions(true)"><i18n>formulaire.save</i18n></button>
         </div>
     </div>

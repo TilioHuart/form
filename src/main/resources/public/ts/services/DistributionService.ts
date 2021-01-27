@@ -14,7 +14,7 @@ export const distributionService: DistributionService = {
 
     async list (): Promise<AxiosResponse> {
         try {
-            return await http.get('/formulaire/distributions');
+            return http.get('/formulaire/distributions');
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.list'));
             throw err;
@@ -23,7 +23,7 @@ export const distributionService: DistributionService = {
 
     async get(id : number): Promise<AxiosResponse> {
         try {
-            return await http.get(`/formulaire/distributions/${id}`);
+            return http.get(`/formulaire/distributions/${id}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.get'));
             throw err;
@@ -32,7 +32,7 @@ export const distributionService: DistributionService = {
 
     async create(form: Form, dist : Distribution): Promise<AxiosResponse> {
         try {
-            return await http.post(`/formulaire/forms/${form.id}/distributions`, dist);
+            return http.post(`/formulaire/forms/${form.id}/distributions`, dist);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.create'));
             throw err;
@@ -41,7 +41,7 @@ export const distributionService: DistributionService = {
 
     async update(dist : Distribution): Promise<AxiosResponse> {
         try {
-            return await http.put(`/formulaire/distributions/${dist.id}`, dist);
+            return http.put(`/formulaire/distributions/${dist.id}`, dist);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.update'));
             throw err;
@@ -50,7 +50,7 @@ export const distributionService: DistributionService = {
 
     async delete(id : number): Promise<AxiosResponse> {
         try {
-            return await http.delete(`/formulaire/distributions/${id}`);
+            return http.delete(`/formulaire/distributions/${id}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.delete'));
             throw err;
@@ -58,5 +58,4 @@ export const distributionService: DistributionService = {
     }
 };
 
-export const DistributionService = ng.service('DistributionService',
-    (): DistributionService => distributionService);
+export const DistributionService = ng.service('DistributionService',(): DistributionService => distributionService);

@@ -16,7 +16,7 @@ export const questionService: QuestionService = {
 
     async list (formId : number): Promise<AxiosResponse> {
         try {
-            return await http.get(`/formulaire/forms/${formId}/questions`);
+            return http.get(`/formulaire/forms/${formId}/questions`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.list'));
             throw err;
@@ -25,7 +25,7 @@ export const questionService: QuestionService = {
 
     async get(questionId : number): Promise<AxiosResponse> {
         try {
-            return await http.get(`/formulaire/questions/${questionId}`);
+            return http.get(`/formulaire/questions/${questionId}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.get'));
             throw err;
@@ -34,7 +34,7 @@ export const questionService: QuestionService = {
 
     async getByPosition(idForm : number, position : number): Promise<AxiosResponse> {
         try {
-            return await http.get(`/formulaire/forms/${idForm}/questions/${position}`);
+            return http.get(`/formulaire/forms/${idForm}/questions/${position}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.get'));
             throw err;
@@ -47,7 +47,7 @@ export const questionService: QuestionService = {
 
     async create(question : Question): Promise<AxiosResponse> {
         try {
-            return await http.post(`/formulaire/forms/${question.form_id}/questions`, question);
+            return http.post(`/formulaire/forms/${question.form_id}/questions`, question);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.create'));
             throw err;
@@ -56,7 +56,7 @@ export const questionService: QuestionService = {
 
     async update(question : Question): Promise<AxiosResponse> {
         try {
-            return await http.put(`/formulaire/questions/${question.id}`, question);
+            return http.put(`/formulaire/questions/${question.id}`, question);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.update'));
             throw err;
@@ -65,7 +65,7 @@ export const questionService: QuestionService = {
 
     async delete(questionId : number): Promise<AxiosResponse> {
         try {
-            return await http.delete(`/formulaire/questions/${questionId}`);
+            return http.delete(`/formulaire/questions/${questionId}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.delete'));
             throw err;

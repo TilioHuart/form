@@ -23,7 +23,7 @@ export class Distribution  {
         this.respondent_name = null;
         this.status = null;
         this.date_sending = null;
-        this.date_response = false;
+        this.date_response = null;
     }
 
     toJson(): Object {
@@ -48,7 +48,7 @@ export class Distributions {
         this.all = [];
     }
 
-    async sync () {
+    async sync () : Promise<void> {
         try {
             let { data } = await distributionService.list();
             this.all = Mix.castArrayAs(Distribution, data);

@@ -29,7 +29,7 @@ export class QuestionTypes {
         this.all = [];
     }
 
-    async sync () {
+    async sync () : Promise<void> {
         try {
             let { data } = await questionTypeService.list();
             this.all = Mix.castArrayAs(QuestionType, data).slice(0,2);

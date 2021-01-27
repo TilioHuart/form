@@ -17,7 +17,7 @@ export const formService: FormService = {
 
     async list (): Promise<AxiosResponse> {
         try {
-            return await http.get('/formulaire/forms');
+            return http.get('/formulaire/forms');
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.list'));
             throw err;
@@ -26,7 +26,7 @@ export const formService: FormService = {
 
     async listSentForms (): Promise<AxiosResponse> {
         try {
-            return await http.get('/formulaire/sentForms');
+            return http.get('/formulaire/sentForms');
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.list'));
             throw err;
@@ -35,7 +35,7 @@ export const formService: FormService = {
 
     async get(id : number): Promise<AxiosResponse> {
         try {
-            return await http.get(`/formulaire/forms/${id}`);
+            return http.get(`/formulaire/forms/${id}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.get'));
             throw err;
@@ -48,7 +48,7 @@ export const formService: FormService = {
 
     async create(form : Form): Promise<AxiosResponse> {
         try {
-            return await http.post('/formulaire/forms', form);
+            return http.post('/formulaire/forms', form);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.create'));
             throw err;
@@ -57,7 +57,7 @@ export const formService: FormService = {
 
     async update(form : Form): Promise<AxiosResponse> {
         try {
-            return await http.put(`/formulaire/forms/${form.id}`, form);
+            return http.put(`/formulaire/forms/${form.id}`, form);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.update'));
             throw err;

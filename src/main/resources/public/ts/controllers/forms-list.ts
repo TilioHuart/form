@@ -1,4 +1,4 @@
-import {idiom, ng, notify, template, toasts} from 'entcore';
+import {Behaviours, idiom, ng, notify, Rights, template, toasts} from 'entcore';
 import {Form, Forms} from "../models";
 import {DateUtils} from "../utils/date";
 import {formService, questionService} from "../services";
@@ -58,7 +58,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         $scope.edit.mode = false;
         await vm.forms.sync();
 
-
         // Check if the folder is ok
         switch (vm.folder) {
             case "mine": vm.forms.all = vm.forms.all.filter(form => form.archived === false); break;
@@ -74,8 +73,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     // Global functions
 
-    vm.openFolder = (foldeName:string) : void => {
-        vm.folder = foldeName;
+    vm.openFolder = (folderName:string) : void => {
+        vm.folder = folderName;
         vm.init();
     };
 

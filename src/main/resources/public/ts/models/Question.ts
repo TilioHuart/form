@@ -38,11 +38,13 @@ export class Question implements Selectable {
 }
 
 export class Questions extends Selection<Question> {
+    all: Question[];
+
     constructor() {
         super([]);
     }
 
-    async sync (formId:number) {
+    async sync (formId:number) : Promise<void> {
         try {
             let { data } = await questionService.list(formId);
             this.all = Mix.castArrayAs(Question, data);

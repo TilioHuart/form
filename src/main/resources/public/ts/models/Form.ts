@@ -1,8 +1,13 @@
 import {Mix, Selectable, Selection} from "entcore-toolkit";
-import {idiom, notify} from "entcore";
+import {idiom, notify, Rights, Shareable} from "entcore";
 import {formService} from "../services";
 
-export class Form implements Selectable  {
+export class Form implements Selectable, Shareable  {
+    shared: any;
+    owner: { userId: string; displayName: string };
+    rights: Rights<Form>;
+    _id: number;
+
     id: number;
     title: string;
     description: string;
@@ -47,24 +52,44 @@ export class Form implements Selectable  {
             selected: this.selected
         }
     }
+
+    get myRights(){
+        return this.rights.myRights;
+    }
+
+    setFromJson(data: any) {
+        for (let key in data) {
+            this[key] = data[key];
+        }
+        this._id = this.id;
+        this.owner = { userId: this.owner_id, displayName: this.owner_name };
+        this.rights = new Rights<Form>(this);
+    }
 }
 
 export class Forms extends Selection<Form> {
+    all: Form[];
+
     constructor() {
         super([]);
     }
 
-    async sync () {
+    async sync () : Promise<void> {
+        this.all = [];
         try {
             let { data } = await formService.list();
-            this.all = Mix.castArrayAs(Form, data);
+            for (let i = 0; i < data.length; i++) {
+                let tempForm = new Form();
+                tempForm.setFromJson(data[i]);
+                this.all.push(tempForm);
+            }
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.form.sync'));
             throw e;
         }
     }
 
-    async syncSent () {
+    async syncSent () : Promise<void> {
         try {
             let { data } = await formService.listSentForms();
             this.all = Mix.castArrayAs(Form, data);
