@@ -49,7 +49,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 					$scope.edit.mode = true;
 					template.open('main', 'containers/edit-form');
 				}
-				if ($scope.canRespond()) {
+				else if ($scope.canRespond()) {
 					$scope.redirectTo(`/form/${params.idForm}/question/1`);
 				}
 				else {
