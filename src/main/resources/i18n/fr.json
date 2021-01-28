@@ -16,6 +16,7 @@
   "formulaire.open": "Ouvrir",
   "formulaire.properties": "Propriétés",
   "formulaire.send": "Envoyer",
+  "formulaire.sendTo": "Envoyer à ...",
   "formulaire.share": "Partager",
   "formulaire.export": "Exporter",
   "formulaire.delete": "Supprimer",
@@ -26,6 +27,7 @@
   "formulaire.read": "Lecture",
   "formulaire.manager": "Gestion",
   "formulaire.respond": "Répondre",
+  "formulaire.responder": "Repondant",
 
   "formulaire.tab.list": "Mes formulaires",
   "formulaire.tab.responses": "Mes réponses",
@@ -103,6 +105,7 @@
 
   "formulaire.success.form.create": "Votre formulaire a bien été créé !",
   "formulaire.success.form.save": "Votre formulaire a bien été sauvegardé !",
+  "formulaire.success.form.sent": "Votre formulaire a bien été envoyé !",
   "formulaire.success.forms.delete": "Tous les formulaires sélectionnés ont bien été archivés !",
   "formulaire.success.question.duplicate": "Votre question a bien été dupliquée !",
   "formulaire.success.question.delete": "Votre question a bien été supprimée !"

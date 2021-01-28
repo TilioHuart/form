@@ -30,24 +30,23 @@ public class DefaultDistributionService implements DistributionService {
     }
 
     @Override
-    public void create(String formId, UserInfos user, JsonArray respondents, Handler<Either<String,
-            JsonObject>> handler) {
-        ArrayList<JsonObject> respondentsArray = new ArrayList<>();
-        if (respondents != null) {
-            for (int i=0; i < respondents.size(); i++){
-                respondentsArray.add(respondents.getJsonObject(i));
+    public void create(String formId, UserInfos user, JsonArray responders, Handler<Either<String, JsonObject>> handler) {
+        ArrayList<JsonObject> respondersArray = new ArrayList<>();
+        if (responders != null) {
+            for (int i=0; i < responders.size(); i++){
+                respondersArray.add(responders.getJsonObject(i));
             }
         }
-        for (JsonObject respondent : respondentsArray) {
+        for (JsonObject responder : respondersArray) {
             String query = "INSERT INTO " + Formulaire.DISTRIBUTION_TABLE + " (form_id, sender_id, sender_name, " +
-                    "respondent_id, respondent_name, status, date_sending) " +
+                    "responder_id, responder_name, status, date_sending) " +
                     " VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *;";
             JsonArray params = new JsonArray()
                     .add(formId)
                     .add(user.getUserId())
                     .add(user.getUsername())
-                    .add(respondent.getString("id", ""))
-                    .add(respondent.getString("name", ""))
+                    .add(responder.getString("id", ""))
+                    .add(responder.getString("name", ""))
                     .add(Formulaire.TO_DO)
                     .add("NOW()");
             Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
@@ -68,6 +67,115 @@ public class DefaultDistributionService implements DistributionService {
     public void delete(String id, Handler<Either<String, JsonObject>> handler) {
         String query = "DELETE FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE id = ?;";
         JsonArray params = new JsonArray().add(id);
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    @Override
+    public void getDuplicates(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler) {
+        ArrayList<String> respondersIdsArray = new ArrayList<>();
+        if (responders != null) {
+            for (int i=0; i < responders.size(); i++){
+                respondersIdsArray.add(responders.getJsonObject(i).getJsonArray("users").getJsonObject(0).getString("id"));
+            }
+        }
+
+        JsonArray params = new JsonArray().add(formId);
+        String query = "SELECT responder_id FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? ";
+
+        if (respondersIdsArray.size() > 0) {
+            query += "AND responder_id IN (";
+            for (String id : respondersIdsArray) {
+                query += "?, ";
+                params.add(id);
+            }
+            query = query.substring(0, query.length() - 2) + ");";
+        }
+
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public void getRemoved(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler) {
+        ArrayList<String> respondersIdsArray = new ArrayList<>();
+        if (responders != null) {
+            for (int i=0; i < responders.size(); i++){
+                respondersIdsArray.add(responders.getJsonObject(i).getJsonArray("users").getJsonObject(0).getString("id"));
+            }
+        }
+
+        JsonArray params = new JsonArray().add(formId);
+        String query = "SELECT responder_id FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? ";
+
+        if (respondersIdsArray.size() > 0) {
+            query += "AND responder_id NOT IN (";
+            for (String id : respondersIdsArray) {
+                query += "?, ";
+                params.add(id);
+            }
+            query = query.substring(0, query.length() - 2) + ");";
+        }
+
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public void createMultiple(String formId, UserInfos user, JsonArray responders, JsonArray duplicates, Handler<Either<String, JsonObject>> handler) {
+        ArrayList<String> idsToFilter = new ArrayList<>();
+        if (duplicates != null) {
+            for (int i=0; i < duplicates.size(); i++) {
+                idsToFilter.add(duplicates.getJsonObject(i).getString("responder_id"));
+            }
+        }
+
+        ArrayList<JsonObject> respondersArray = new ArrayList<>();
+        if (responders != null) {
+            for (int i=0; i < responders.size(); i++) {
+                JsonObject info = responders.getJsonObject(i).getJsonArray("users").getJsonObject(0);
+                if (!idsToFilter.contains(info.getString("id"))) {
+                    respondersArray.add(info);
+                }
+            }
+        }
+
+        JsonArray params = new JsonArray();
+        String query = "INSERT INTO " + Formulaire.DISTRIBUTION_TABLE + " (form_id, sender_id, sender_name, responder_id, " +
+                "responder_name, status, date_sending) VALUES ";
+
+        for (JsonObject responder : respondersArray) {
+            query += "(?, ?, ?, ?, ?, ?, ?), ";
+            params.add(formId)
+                    .add(user.getUserId())
+                    .add(user.getUsername())
+                    .add(responder.getString("id", ""))
+                    .add(responder.getString("username", ""))
+                    .add(Formulaire.TO_DO)
+                    .add("NOW()");
+        }
+
+        query = query.substring(0, query.length() - 2) + ";";
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    @Override
+    public void removeMultiple(String formId, JsonArray removed, Handler<Either<String, JsonObject>> handler) {
+        ArrayList<String> idsToRemove = new ArrayList<>();
+        if (removed != null) {
+            for (int i=0; i < removed.size(); i++) {
+                idsToRemove.add(removed.getJsonObject(i).getString("responder_id"));
+            }
+        }
+
+        JsonArray params = new JsonArray().add(formId);
+        String query = "DELETE FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? ";
+
+        if (idsToRemove.size() > 0) {
+            query += "AND responder_id IN (";
+            for (String id : idsToRemove) {
+                query += "?, ";
+                params.add(id);
+            }
+            query = query.substring(0, query.length() - 2) + ");";
+        }
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 }

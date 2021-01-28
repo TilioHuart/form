@@ -16,4 +16,6 @@ public interface ResponseService {
     void update(UserInfos user, String id, JsonObject response, Handler<Either<String, JsonObject>> handler);
 
     void delete(String id, Handler<Either<String, JsonObject>> handler);
+
+    void exportResponses(String formId, Handler<Either<String, JsonArray>> handler);
 }

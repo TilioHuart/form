@@ -1,7 +1,17 @@
-import {Behaviours, model} from 'entcore';
+import {Behaviours} from 'entcore';
 
 const rights = {
-    resources: {},
+    resources: {
+        read: {
+            right: "fr-openent-formulaire-controllers-FormController|initReadResourceRight"
+        },
+        contrib: {
+            right: "fr-openent-formulaire-controllers-DistributionController|create"
+        },
+        manager: {
+            right: "fr-openent-formulaire-controllers-DistributionController|update"
+        }
+    },
     workflow: {
         access: 'fr.openent.formulaire.controllers.FormulaireController|render',
         creation: 'fr.openent.formulaire.controllers.FormController|update',
@@ -12,5 +22,11 @@ const rights = {
 };
 
 Behaviours.register('formulaire', {
-    rights: rights
+    rights: rights,
+    dependencies: {},
+    loadResources: function (callback) { },
+
+    resourceRights: function () {
+        return ['read'];
+    }
 });

@@ -48,14 +48,14 @@ public class DistributionController extends ControllerHelper {
     }
 
     @Post("/forms/:id/distributions")
-    @ApiDoc("Distribute a form to a list of respondents")
+    @ApiDoc("Distribute a form to a list of responders")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void create(HttpServerRequest request) {
         String formId = request.getParam("id");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
-                RequestUtils.bodyToJsonArray(request, respondents -> {
-                    distributionService.create(formId, user, respondents, defaultResponseHandler(request));
+                RequestUtils.bodyToJsonArray(request, responders -> {
+                    distributionService.create(formId, user, responders, defaultResponseHandler(request));
                 });
             } else {
                 log.debug("User not found in session.");

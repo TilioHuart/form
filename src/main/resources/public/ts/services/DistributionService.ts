@@ -30,7 +30,7 @@ export const distributionService: DistributionService = {
         }
     },
 
-    async create(form: Form, dist : Distribution): Promise<AxiosResponse> {
+    async create(form: Form, dist : Distribution): Promise<AxiosResponse> { // TODO distrib unique ou plusieurs ?
         try {
             return http.post(`/formulaire/forms/${form.id}/distributions`, dist);
         } catch (err) {

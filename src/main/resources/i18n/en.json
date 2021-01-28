@@ -16,6 +16,7 @@
   "formulaire.open": "Open",
   "formulaire.properties": "Properties",
   "formulaire.send": "Send",
+  "formulaire.sendTo": "Send to ...",
   "formulaire.share": "Share",
   "formulaire.export": "Export",
   "formulaire.delete": "Delete",
@@ -26,6 +27,7 @@
   "formulaire.read": "Read",
   "formulaire.manager": "Management",
   "formulaire.respond": "Respond",
+  "formulaire.responder": "Responder",
 
   "formulaire.tab.list": "My forms",
   "formulaire.tab.responses": "My responses",
@@ -103,6 +105,7 @@
 
   "formulaire.success.form.create": "You form has been successfully created !",
   "formulaire.success.form.save": "You form has been successfully saved !",
+  "formulaire.success.form.sent": "You form has been successfully sent !",
   "formulaire.success.forms.delete": "All the selected forms have been successfully archived !",
   "formulaire.success.question.duplicate": "Your question has been successfully duplicated !",
   "formulaire.success.question.delete": "Your question has been successfully deleted !"

@@ -11,9 +11,17 @@ public interface DistributionService {
 
     void get(String id, Handler<Either<String, JsonObject>> handler);
 
-    void create(String formId, UserInfos user, JsonArray respondents, Handler<Either<String, JsonObject>> handler);
+    void create(String formId, UserInfos user, JsonArray responders, Handler<Either<String, JsonObject>> handler);
 
     void update(String id, JsonObject distribution, Handler<Either<String, JsonObject>> handler);
 
     void delete(String id, Handler<Either<String, JsonObject>> handler);
+
+    void getDuplicates(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler);
+
+    void getRemoved(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler);
+
+    void createMultiple(String formId, UserInfos user, JsonArray responders, JsonArray duplicates, Handler<Either<String, JsonObject>> handler);
+
+    void removeMultiple(String formId, JsonArray removed, Handler<Either<String, JsonObject>> handler);
 }

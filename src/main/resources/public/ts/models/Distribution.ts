@@ -8,8 +8,8 @@ export class Distribution  {
     form_id: number;
     sender_id: number;
     sender_name: string;
-    respondent_id: number;
-    respondent_name: string;
+    responder_id: number;
+    responder_name: string;
     status: string;
     date_sending: Date;
     date_response: Date;
@@ -19,8 +19,8 @@ export class Distribution  {
         this.form_id = null;
         this.sender_id = null;
         this.sender_name = null;
-        this.respondent_id = null;
-        this.respondent_name = null;
+        this.responder_id = null;
+        this.responder_name = null;
         this.status = null;
         this.date_sending = null;
         this.date_response = null;
@@ -32,8 +32,8 @@ export class Distribution  {
             form_id: this.form_id,
             sender_id: this.sender_id,
             sender_name: this.sender_name,
-            respondent_id: this.respondent_id,
-            respondent_name: this.respondent_name,
+            responder_id: this.responder_id,
+            responder_name: this.responder_name,
             status: this.status,
             date_sending: this.date_sending,
             date_response: this.date_response,

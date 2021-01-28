@@ -4,27 +4,24 @@
             <button ng-click="vm.openForm(vm.forms.selected[0])" class="cell" ng-show="vm.forms.selected.length === 1">
                 <i18n>formulaire.open</i18n>
             </button>
-            <button ng-click="vm.openPropertiesForm()" class="cell" ng-show="vm.forms.selected.length === 1" ng-disabled="true">
+            <button ng-click="vm.openPropertiesForm()" class="cell" ng-show="vm.forms.selected.length === 1" workflow="formulaire.creation" ng-disabled="true">
                 <i18n>formulaire.properties</i18n>
             </button>
-            <button ng-click="vm.sendForm()" class="cell" ng-show="vm.forms.selected.length === 1">
+            <button ng-click="vm.sendForm()" class="cell" ng-show="vm.forms.selected.length === 1" workflow="formulaire.creation">
                 <i18n>formulaire.send</i18n>
             </button>
-            <button ng-click="vm.shareForm()" class="cell" ng-show="vm.forms.selected.length === 1" ng-disabled="true">
+            <button ng-click="vm.shareForm()" class="cell" ng-show="vm.forms.selected.length === 1" workflow="formulaire.creation" ng-disabled="true">
                 <i18n>formulaire.share</i18n>
             </button>
-            <button ng-click="vm.exportForm()" class="cell" ng-show="vm.forms.selected.length === 1">
+            <button ng-click="vm.exportForm()" class="cell" ng-show="vm.forms.selected.length === 1" workflow="formulaire.creation">
                 <i18n>formulaire.export</i18n>
             </button>
-            <button ng-click="vm.deleteForms()" class="cell">
+            <button ng-click="vm.deleteForms()" class="cell" workflow="formulaire.creation">
                 <i18n>formulaire.delete</i18n>
             </button>
             <button ng-click="vm.forms.deselectAll()" class="cell toaster-right">
                 <i18n>formulaire.deselect</i18n>
             </button>
-<!--            <button ng-click="functionToCall()" class="cell" ng-show="nbFormsSelect >= 1" workflow="">-->
-<!--                <i18n>formulaire.example</i18n>-->
-<!--            </button>-->
         </div>
     </div>
 </section>

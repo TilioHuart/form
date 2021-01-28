@@ -26,7 +26,7 @@ public class DefaultFormService implements FormService {
                 "date_creation, date_modification, form_id, status, date_sending, date_response " +
                 "FROM " + Formulaire.FORM_TABLE + " f " +
                 "INNER JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON f.id = d.form_id " +
-                "WHERE d.respondent_id = ? " +
+                "WHERE d.responder_id = ? " +
                 "ORDER BY d.date_sending DESC;";
         JsonArray params = new JsonArray().add(user.getUserId());
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));

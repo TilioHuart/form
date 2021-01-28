@@ -50,8 +50,8 @@ CREATE TABLE formulaire.distribution (
     form_id             bigint NOT NULL,
     sender_id           VARCHAR(36) NOT NULL,
     sender_name         VARCHAR NOT NULL,
-    respondent_id       VARCHAR(36) NOT NULL,
-    respondent_name     VARCHAR NOT NULL,
+    responder_id       VARCHAR(36) NOT NULL,
+    responder_name     VARCHAR NOT NULL,
     status              VARCHAR NOT NULL,
     date_sending        timestamp without time zone NOT NULL DEFAULT now(),
     date_response       timestamp without time zone,
@@ -63,7 +63,7 @@ CREATE TABLE formulaire.response (
     question_id         bigint NOT NULL,
     distribution_id     bigint NOT NULL,
     answer              VARCHAR NOT NULL,
-    respondent_id       VARCHAR(36) NOT NULL,
+    responder_id       VARCHAR(36) NOT NULL,
     CONSTRAINT fk_question_id FOREIGN KEY (question_id) REFERENCES formulaire.question (id) ON UPDATE NO ACTION ON DELETE CASCADE,
     CONSTRAINT fk_distribution_id FOREIGN KEY (distribution_id) REFERENCES formulaire.distribution (id) ON UPDATE NO ACTION ON DELETE CASCADE
 );
