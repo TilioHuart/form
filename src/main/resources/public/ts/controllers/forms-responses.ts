@@ -1,10 +1,9 @@
-import {idiom, ng, notify, toasts} from 'entcore';
-import {Form, Forms, Distribution, Distributions} from "../models";
+import {idiom, ng} from 'entcore';
+import {Form, Forms} from "../models";
 import {DateUtils} from "../utils/date";
 
 interface ViewModel {
     forms: Forms;
-    dists: Distributions;
     allDistsSelected: boolean;
     searchInput: string;
     display: {
@@ -23,7 +22,6 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
 
     const vm: ViewModel = this;
     vm.forms = new Forms();
-    vm.dists = new Distributions();
     vm.searchInput = "";
     vm.allDistsSelected = false;
     vm.display = {
@@ -31,7 +29,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
     };
 
     vm.init = async (): Promise<void> => {
-        $scope.edit.mode = false;
+        $scope.editMode = false;
         await vm.forms.syncSent();
         $scope.safeApply();
     };

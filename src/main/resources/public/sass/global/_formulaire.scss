@@ -147,4 +147,74 @@ body.formulaire {
       margin-top: 20px;
     }
   }
+
+  // Respond-question
+
+  .respond-question {
+    display: flex;
+    flex-direction: column;
+    align-content: space-between;
+
+    .question {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      display: flex;
+      flex-direction: column;
+      padding: 2% 2% 2% 0.3%;
+
+      .question-top {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1%;
+
+        .dots {
+          display: flex;
+          flex-direction: column;
+          line-height: 7px;
+        }
+      }
+
+      .focusable {
+        display: flex;
+        flex-direction: column;
+
+        .question-title {
+          display: flex;
+          justify-content: space-between;
+        }
+
+        .question-main {
+          font-size: 12px;
+
+          textarea {
+            width: 100%;
+            height: 60px;
+            resize: none;
+            background: none;
+          }
+        }
+
+        .question-bottom {
+          display: flex;
+          justify-content: flex-end;
+
+          .mandatory {
+            margin: 0 20px;
+          }
+
+          img {
+            margin: 0 5px;
+            opacity: 0.6;
+          }
+        }
+      }
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+  }
 }

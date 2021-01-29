@@ -10,6 +10,7 @@
   "formulaire.status": "Status",
   "formulaire.at": " at ",
   "formulaire.save": "Save",
+  "formulaire.end": "Finish and send",
   "formulaire.cancel": "Cancel",
   "formulaire.return": "Return",
   "formulaire.mandatory": "Mandatory",
@@ -22,6 +23,8 @@
   "formulaire.delete": "Delete",
   "formulaire.confirm": "Confirm",
   "formulaire.deselect": "Deselect",
+  "formulaire.next": "Next",
+  "formulaire.prev": "Previous",
 
   "formulaire.contrib": "Contribution",
   "formulaire.read": "Read",
@@ -100,6 +103,13 @@
   "formulaire.error.distributionService.get": "An error occurred during the distribution's retrieving",
   "formulaire.error.distributionService.update": "An error occurred during the distribution's saving",
   "formulaire.error.distributionService.delete": "An error occurred during the distribution's suppression",
+
+  "formulaire.error.response.send": "An error occurred during the response's sending",
+  "formulaire.error.responseService.list": "An error occurred during the responses' retrieving",
+  "formulaire.error.responseService.create": "An error occurred during the response's creation",
+  "formulaire.error.responseService.get": "An error occurred during the response's retrieving",
+  "formulaire.error.responseService.update": "An error occurred during the response's saving",
+  "formulaire.error.responseService.delete": "An error occurred during the response's suppression",
 
   "formulaire.warning.forms.delete": "Be careful, some forms you want to delete have already been to users !",
 

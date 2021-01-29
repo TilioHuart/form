@@ -20,9 +20,9 @@ public class DefaultResponseService implements ResponseService {
     }
 
     @Override
-    public void get(String id, Handler<Either<String, JsonObject>> handler) {
-        String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " WHERE id = ?;";
-        JsonArray params = new JsonArray().add(id);
+    public void get(String question_id, UserInfos user, Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " WHERE question_id = ? AND responder_id = ?;";
+        JsonArray params = new JsonArray().add(question_id).add(user.getUserId());
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 

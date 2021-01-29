@@ -53,7 +53,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     vm.init = async (): Promise<void> => {
-        $scope.edit.mode = false;
+        $scope.editMode = false;
         await vm.forms.sync();
 
         // Check if the folder is ok
@@ -98,8 +98,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     // Toaster
 
     vm.openForm = (form: Form): void => {
-        $scope.edit.mode = true;
-        $scope.edit.form = form;
+        $scope.editMode = true;
+        $scope.form = form;
         $scope.redirectTo(`/form/${form.id}`);
         $scope.safeApply();
     };

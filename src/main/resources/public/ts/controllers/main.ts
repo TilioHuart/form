@@ -9,11 +9,9 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 
 		// Init variables
 		$scope.currentTab = 'formsList';
-		$scope.edit = {
-			mode: false,
-			form: new Form()
-		};
-		$scope.respondQuestion = new Question();
+		$scope.editMode = false;
+		$scope.form = new Form();
+		$scope.question = new Question();
 		$scope.questionTypes = new QuestionTypes();
 		$scope.questionTypes.sync();
 
@@ -45,8 +43,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			openForm: async (params) => {
 				if ($scope.canCreate()) {
 					let { data } = await formService.get(params.idForm);
-					$scope.edit.form = data;
-					$scope.edit.mode = true;
+					$scope.form = data;
+					$scope.editMode = true;
 					template.open('main', 'containers/edit-form');
 				}
 				else if ($scope.canRespond()) {
@@ -58,8 +56,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			},
 			respondQuestion: async (params) => {
 				if ($scope.canRespond()) {
-					let { data } = await questionService.getByPosition(params.idForm, params.position);
-					$scope.respondQuestion = data;
+					let response = await formService.get(params.idForm);
+					$scope.form = response.data;
+					response = await questionService.getByPosition(params.idForm, params.position);
+					$scope.question = response.data;
 					template.open('main', 'containers/respond-question');
 				}
 				else {
