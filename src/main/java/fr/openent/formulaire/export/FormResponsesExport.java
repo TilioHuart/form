@@ -5,13 +5,13 @@ import fr.openent.formulaire.service.ResponseService;
 import fr.openent.formulaire.service.impl.DefaultQuestionService;
 import fr.openent.formulaire.service.impl.DefaultResponseService;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class FormResponsesExport {
   private static final Logger log = LoggerFactory.getLogger(FormResponsesExport.class);
@@ -39,6 +39,7 @@ public class FormResponsesExport {
 
       JsonArray questions = getQuestionsEvt.right().getValue();
       Integer nbQuestions = questions.size();
+      content.append(header(questions));
 
       responseService.exportResponses(formId, getResponsesEvt -> {
         if (getResponsesEvt.isLeft()) {
@@ -46,13 +47,25 @@ public class FormResponsesExport {
           return;
         }
 
-        List<JsonObject> responses = getResponsesEvt.right().getValue().<List<JsonObject>>getList();
-        content.append(header(questions));
+        List<JsonObject> allResponses = getResponsesEvt.right().getValue().<List<JsonObject>>getList();
+        List<String> responders = new ArrayList<>();
 
-        Integer questionCount = 1;
-        for (JsonObject response : responses) {
-          content.append(generateLine(response, questionCount%nbQuestions == 0));
-          questionCount++;
+        for (JsonObject response : allResponses) {
+          responders.add(response.getString("responder_id"));
+        }
+
+        for (String responder : responders) {
+          ArrayList<JsonObject> responses = new ArrayList<>();
+          for (JsonObject response : allResponses) {
+            if (response.getString("responder_id").equals(responder)) {
+              responses.add(response);
+            }
+          }
+          int questionCount = 1;
+          for (JsonObject response : responses) {
+            content.append(addResponse(response, questionCount%nbQuestions == 0));
+            questionCount++;
+          }
         }
 
         send();
@@ -60,10 +73,9 @@ public class FormResponsesExport {
     });
   }
 
-  private String generateLine(JsonObject response, Boolean endLine) {
+  private String addResponse(JsonObject response, Boolean endLine) {
     String value = response.getString("answer");
     value += endLine ? EOL : SEPARATOR;
-
     return value;
   }
 
