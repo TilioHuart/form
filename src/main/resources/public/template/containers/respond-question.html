@@ -1,4 +1,4 @@
-<div ng-controller="QuestionRespondentController as vm">
+<div ng-controller="QuestionResponderController as vm">
     <div class="row">
         <section class="cell seven">
             <div>
@@ -12,31 +12,31 @@
     <div class="respond-question">
         <div class="question">
             <div class="question-title">
-                <div ng-if="question.question_type == 1">
-                    <h4 ng-if="!!question.title">[[question.title]]</h4>
+                <div ng-if="vm.question.question_type == 1">
+                    <h4 ng-if="!!vm.question.title">[[vm.question.title]]</h4>
                 </div>
-                <div ng-if="question.question_type != 1">
-                    <h4 ng-if="!!question.title">[[question.title]]</h4>
+                <div ng-if="vm.question.question_type != 1">
+                    <h4 ng-if="!!vm.question.title">[[vm.question.title]]</h4>
                 </div>
             </div>
             <div class="question-main">
-                <div ng-if="question.question_type == 1">
-                    <div ng-if="!!question.statement" bind-html="question.statement"></div>
+                <div ng-if="vm.question.question_type == 1">
+                    <div ng-if="!!vm.question.statement" bind-html="vm.question.statement"></div>
                 </div>
-                <div ng-if="question.question_type != 1">
+                <div ng-if="vm.question.question_type != 1">
                     <textarea ng-model="vm.response.answer" i18n-placeholder="formulaire.question.type.SHORTANSWER">
                     </textarea>
                 </div>
             </div>
         </div>
         <div class="buttons">
-            <button class="cell" ng-click="vm.prev()" ng-disabled="question.position == 1">
+            <button class="cell" ng-click="vm.prev()" ng-disabled="vm.question.position == 1">
                 <i18n>formulaire.prev</i18n></button>
             <button class="cell" ng-click="vm.save()" ng-if="!vm.last">
                 <i18n>formulaire.save</i18n></button>
             <button class="cell" ng-click="vm.next()" ng-if="!vm.last">
                 <i18n>formulaire.next</i18n></button>
-            <button class="cell" ng-click="vm.save()" ng-if="vm.last">
+            <button class="cell" ng-click="vm.send()" ng-if="vm.last">
                 <i18n>formulaire.end</i18n></button>
         </div>
     </div>

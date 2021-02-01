@@ -1,16 +1,16 @@
 import {idiom, ng} from 'entcore';
-import {Form, Forms} from "../models";
+import {Distribution, DistributionStatus, Form, Forms} from "../models";
 import {DateUtils} from "../utils/date";
+import {distributionService} from "../services";
 
 interface ViewModel {
     forms: Forms;
-    allDistsSelected: boolean;
+    allFormsSelected: boolean;
     searchInput: string;
     display: {
         grid: boolean
     };
 
-    init(): void;
     switchAll(boolean): void;
     displayDate(Date): string;
     openForm(Form): void;
@@ -23,12 +23,12 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
     const vm: ViewModel = this;
     vm.forms = new Forms();
     vm.searchInput = "";
-    vm.allDistsSelected = false;
+    vm.allFormsSelected = false;
     vm.display = {
         grid: true
     };
 
-    vm.init = async (): Promise<void> => {
+    const init = async (): Promise<void> => {
         $scope.editMode = false;
         await vm.forms.syncSent();
         $scope.safeApply();
@@ -52,11 +52,14 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
 
     // Toaster
 
-    vm.openForm = (form:Form): void => {
+    vm.openForm = async (form:Form): Promise<void> => {
         vm.forms.deselectAll();
-        $scope.redirectTo(`/form/${form.id}`);
+        let distrib: Distribution = $scope.getDataIf200(await distributionService.get(form.id));
+        if (distrib.status != DistributionStatus.FINISHED) {
+            $scope.redirectTo(`/form/${form.id}/question/1`);
+        }
         $scope.safeApply();
     };
 
-    vm.init();
+    init();
 }]);

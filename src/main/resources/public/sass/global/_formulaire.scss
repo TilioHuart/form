@@ -55,6 +55,10 @@ body.formulaire {
 
   .toaster-right { float: right; }
 
+  // Responses-list
+  .domi
+
+
   // Create-form
 
   .create-form {
@@ -153,60 +157,21 @@ body.formulaire {
   .respond-question {
     display: flex;
     flex-direction: column;
-    align-content: space-between;
 
     .question {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      display: flex;
-      flex-direction: column;
-      padding: 2% 2% 2% 0.3%;
+      padding: 2% 2% 2% 2%;
+      margin: 10px;
+      background: #fff;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 
-      .question-top {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 1%;
+      .question-main {
+        font-size: 12px;
 
-        .dots {
-          display: flex;
-          flex-direction: column;
-          line-height: 7px;
-        }
-      }
-
-      .focusable {
-        display: flex;
-        flex-direction: column;
-
-        .question-title {
-          display: flex;
-          justify-content: space-between;
-        }
-
-        .question-main {
-          font-size: 12px;
-
-          textarea {
-            width: 100%;
-            height: 60px;
-            resize: none;
-            background: none;
-          }
-        }
-
-        .question-bottom {
-          display: flex;
-          justify-content: flex-end;
-
-          .mandatory {
-            margin: 0 20px;
-          }
-
-          img {
-            margin: 0 5px;
-            opacity: 0.6;
-          }
+        textarea {
+          width: 100%;
+          height: 60px;
+          resize: none;
+          background: none;
         }
       }
     }
@@ -214,7 +179,7 @@ body.formulaire {
     .buttons {
       display: flex;
       justify-content: space-between;
-      margin-top: 20px;
+      margin: 20px 10px;
     }
   }
 }

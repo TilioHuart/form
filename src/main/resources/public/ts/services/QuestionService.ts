@@ -4,6 +4,7 @@ import {Question} from "../models";
 
 export interface QuestionService {
     list(formId : number): Promise<AxiosResponse>;
+    countQuestions(formId : number): Promise<AxiosResponse>;
     get(questionId : number): Promise<AxiosResponse>;
     getByPosition(idForm : number, position : number): Promise<AxiosResponse>;
     save(question : Question): Promise<AxiosResponse>;
@@ -19,6 +20,15 @@ export const questionService: QuestionService = {
             return http.get(`/formulaire/forms/${formId}/questions`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.list'));
+            throw err;
+        }
+    },
+
+    async countQuestions (formId : number): Promise<AxiosResponse> {
+        try {
+            return http.get(`/formulaire/forms/${formId}/questions/count`);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.questionService.count'));
             throw err;
         }
     },

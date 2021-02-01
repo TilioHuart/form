@@ -12,10 +12,17 @@ import org.entcore.common.sql.SqlResult;
 public class DefaultQuestionService implements QuestionService {
 
     @Override
-    public void list(String form_id, Handler<Either<String, JsonArray>> handler) {
+    public void list(String formId, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT * FROM " + Formulaire.QUESTION_TABLE + " WHERE form_id = ? ORDER BY position;";
-        JsonArray params = new JsonArray().add(form_id);
+        JsonArray params = new JsonArray().add(formId);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public void countQuestions(String formId, Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT COUNT (*) FROM " + Formulaire.QUESTION_TABLE + " WHERE form_id = ?;";
+        JsonArray params = new JsonArray().add(formId);
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override
@@ -26,9 +33,9 @@ public class DefaultQuestionService implements QuestionService {
     }
 
     @Override
-    public void getByPosition(String form_id, String position, Handler<Either<String, JsonObject>> handler) {
+    public void getByPosition(String formId, String position, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT * FROM " + Formulaire.QUESTION_TABLE + " WHERE form_id = ? AND position = ?;";
-        JsonArray params = new JsonArray().add(form_id).add(position);
+        JsonArray params = new JsonArray().add(formId).add(position);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 

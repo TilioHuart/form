@@ -1,6 +1,7 @@
 import {Behaviours, idiom, model, ng, template} from 'entcore';
 import {Form, Question, QuestionTypes} from "../models";
 import {formService, questionService} from "../services";
+import {AxiosResponse} from "axios";
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', 'FormService',
 	($scope, route, $location) => {
@@ -60,7 +61,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 					let { data } = await formService.get(params.idForm);
 					$scope.form = data;
 					$scope.editMode = true;
-					template.open('main', 'containers/edit-form');
+					await template.open('main', 'containers/edit-form');
 				}
 				else if ($scope.canRespond()) {
 					$scope.redirectTo(`/form/${params.idForm}/question/1`);
@@ -71,11 +72,19 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			},
 			respondQuestion: async (params) => {
 				if ($scope.canRespond()) {
-					let response = await formService.get(params.idForm);
-					$scope.form = response.data;
-					response = await questionService.getByPosition(params.idForm, params.position);
-					$scope.question = response.data;
-					template.open('main', 'containers/respond-question');
+					$scope.form = $scope.getDataIf200(await formService.get(params.idForm));
+					$scope.form.nbQuestions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
+
+					if (params.position < 1) {
+						$scope.redirectTo(`/form/${params.idForm}/question/1`);
+					}
+					else if (params.position > $scope.form.nbQuestions) {
+						$scope.redirectTo(`/form/${params.idForm}/question/${$scope.form.nbQuestions}`);
+					}
+					else {
+						$scope.question = $scope.getDataIf200(await questionService.getByPosition(params.idForm, params.position));
+						await template.open('main', 'containers/respond-question');
+					}
 				}
 				else {
 					$scope.redirectTo('/e403');
@@ -95,6 +104,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			return $scope.questionTypes.all.filter(type => type.code === code)[0].name;
 		};
 
+		$scope.getDataIf200 = (response: AxiosResponse) : any => {
+			if (response.status == 200) { return response.data; }
+		};
+
 		$scope.redirectTo = (path: string) => {
 			$location.path(path);
 		};
@@ -109,6 +122,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				$scope.$apply(fn);
 			}
 		};
+
+		// Rights
 
 		$scope.hasRight = (right: string) => {
 			return model.me.hasWorkflow(right);

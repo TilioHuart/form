@@ -9,7 +9,7 @@ import org.entcore.common.user.UserInfos;
 public interface DistributionService {
     void list(UserInfos user, Handler<Either<String, JsonArray>> handler);
 
-    void get(String id, Handler<Either<String, JsonObject>> handler);
+    void get(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler);
 
     void create(String formId, UserInfos user, JsonArray responders, Handler<Either<String, JsonObject>> handler);
 

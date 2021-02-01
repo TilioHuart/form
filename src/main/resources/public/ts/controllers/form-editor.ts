@@ -31,7 +31,7 @@ interface ViewModel {
 }
 
 
-export const formEditorController = ng.controller('FormEditorController', ['$scope', 'QuestionService',
+export const formEditorController = ng.controller('FormEditorController', ['$scope',
     function ($scope) {
 
     const vm: ViewModel = this;
@@ -235,4 +235,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
     init();
 
     document.onclick = e => { onClickQuestion(e); };
+
+    $scope.$on('init', init());
 }]);

@@ -5,12 +5,12 @@ import {Form} from '../models/Form';
 export interface FormService {
     list(): Promise<AxiosResponse>;
     listSentForms(): Promise<AxiosResponse>;
-    get(number): Promise<AxiosResponse>;
-    save(Form): Promise<AxiosResponse>;
-    create(Form): Promise<AxiosResponse>;
-    update(Form): Promise<AxiosResponse>;
-    delete(number): Promise<AxiosResponse>;
-    archive(number): Promise<AxiosResponse>;
+    get(formId: number): Promise<AxiosResponse>;
+    save(form: Form): Promise<AxiosResponse>;
+    create(form: Form): Promise<AxiosResponse>;
+    update(form: Form): Promise<AxiosResponse>;
+    delete(formId: number): Promise<AxiosResponse>;
+    archive(form: Form): Promise<AxiosResponse>;
 }
 
 export const formService: FormService = {
@@ -33,9 +33,9 @@ export const formService: FormService = {
         }
     },
 
-    async get(id : number): Promise<AxiosResponse> {
+    async get(formId : number): Promise<AxiosResponse> {
         try {
-            return http.get(`/formulaire/forms/${id}`);
+            return http.get(`/formulaire/forms/${formId}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.get'));
             throw err;
@@ -64,9 +64,9 @@ export const formService: FormService = {
         }
     },
 
-    async delete(id : number): Promise<AxiosResponse> {
+    async delete(formId : number): Promise<AxiosResponse> {
         try {
-            return await http.delete(`/formulaire/forms/${id}`);
+            return await http.delete(`/formulaire/forms/${formId}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.delete'));
             throw err;

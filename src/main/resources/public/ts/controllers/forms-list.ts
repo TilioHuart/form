@@ -18,7 +18,6 @@ interface ViewModel {
         warning: boolean
     };
 
-    init(): void;
     openFolder(string): void;
     switchAll(boolean): void;
     displayFolder(): string;
@@ -52,7 +51,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         warning: false
     };
 
-    vm.init = async (): Promise<void> => {
+    const init = async (): Promise<void> => {
         $scope.editMode = false;
         await vm.forms.sync();
 
@@ -73,7 +72,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.openFolder = (folderName:string) : void => {
         vm.folder = folderName;
-        vm.init();
+        init();
     };
 
     vm.switchAll = (value:boolean) : void => {
@@ -127,7 +126,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
                 //         rows[i].deleteCell(j);
                 //     }
                 // }
-            }}, 200);
+            }
+        }, 200);
     };
 
     vm.doSendForm = async (): Promise<void> => {
@@ -166,7 +166,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             vm.display.lightbox.delete = false;
             vm.display.warning = false;
             notify.success(idiom.translate('formulaire.success.forms.delete'));
-            vm.init();
+            init();
             $scope.safeApply();
         }
         catch (e) {
@@ -174,5 +174,5 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         }
     };
 
-    vm.init();
+    init();
 }]);

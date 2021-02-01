@@ -26,6 +26,7 @@
         padding: 10px;
         display: flex;
         flex-direction: column;
+        justify-content: space-between;
 
         &-text {
           h4, h5 { margin: 0; }
@@ -49,7 +50,7 @@
           display: flex;
           flex-direction: row;
           justify-content: flex-end;
-          align-items: flex-end;
+          font-size: 14px;
           font-weight: bold;
         }
       }

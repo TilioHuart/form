@@ -3,7 +3,7 @@ import http, {AxiosResponse} from 'axios';
 
 export interface QuestionTypeService {
     list(): Promise<AxiosResponse>;
-    get(code): Promise<AxiosResponse>;
+    get(code: number): Promise<AxiosResponse>;
 }
 
 export const questionTypeService: QuestionTypeService = {

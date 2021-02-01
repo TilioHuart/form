@@ -2,6 +2,12 @@ import {Mix} from "entcore-toolkit";
 import {idiom, notify} from "entcore";
 import {distributionService} from "../services";
 
+export enum DistributionStatus {
+    TO_DO = 'TO_DO',
+    IN_PROGRESS = 'IN_PROGRESS',
+    FINISHED = 'FINISHED'
+}
+
 export class Distribution  {
 
     id: number;

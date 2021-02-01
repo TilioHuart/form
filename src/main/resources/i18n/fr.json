@@ -88,6 +88,7 @@
 
   "formulaire.error.question.sync": "Une erreur est survenue lors de la synchronisation des questions",
   "formulaire.error.questionService.list": "Une erreur est survenue lors de la récupération des questions",
+  "formulaire.error.questionService.count": "Une erreur est survenue lors du décompte des questions",
   "formulaire.error.questionService.create": "Une erreur est survenue lors de la création de la nouvelle question",
   "formulaire.error.questionService.get": "Une erreur est survenue lors de la récupération de la question",
   "formulaire.error.questionService.update": "Une erreur est survenue lors de la sauvearde de la question",
@@ -118,5 +119,6 @@
   "formulaire.success.form.sent": "Votre formulaire a bien été envoyé !",
   "formulaire.success.forms.delete": "Tous les formulaires sélectionnés ont bien été archivés !",
   "formulaire.success.question.duplicate": "Votre question a bien été dupliquée !",
-  "formulaire.success.question.delete": "Votre question a bien été supprimée !"
+  "formulaire.success.question.delete": "Votre question a bien été supprimée !",
+  "formulaire.success.responses.save": "Vos réponses ont bien été enregistrées !"
 }

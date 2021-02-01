@@ -31,8 +31,17 @@ public class QuestionController extends ControllerHelper {
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
-        String form_id = request.getParam("formId");
-        questionService.list(form_id, arrayResponseHandler(request));
+        String formId = request.getParam("formId");
+        questionService.list(formId, arrayResponseHandler(request));
+    }
+
+    @Get("/forms/:formId/questions/count")
+    @ApiDoc("Get form thanks to the id")
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void countQuestions(HttpServerRequest request) {
+        String id = request.getParam("formId");
+        questionService.countQuestions(id, defaultResponseHandler(request));
     }
 
     @Get("/questions/:id")
@@ -49,9 +58,9 @@ public class QuestionController extends ControllerHelper {
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void getByPosition(HttpServerRequest request) {
-        String form_id = request.getParam("formId");
+        String formId = request.getParam("formId");
         String position = request.getParam("position");
-        questionService.getByPosition(form_id, position, defaultResponseHandler(request));
+        questionService.getByPosition(formId, position, defaultResponseHandler(request));
     }
 
     @Post("/forms/:formId/questions")
@@ -59,9 +68,9 @@ public class QuestionController extends ControllerHelper {
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
-        String form_id = request.getParam("formId");
+        String formId = request.getParam("formId");
         RequestUtils.bodyToJson(request, question -> {
-            questionService.create(question, form_id, defaultResponseHandler(request));
+            questionService.create(question, formId, defaultResponseHandler(request));
         });
     }
 

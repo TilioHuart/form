@@ -88,6 +88,7 @@
 
   "formulaire.error.question.sync": "An error occurred during the questions' synchronisation",
   "formulaire.error.questionService.list": "An error occurred during the questions' retrieving",
+  "formulaire.error.questionService.count": "An error occurred during the questions' counting",
   "formulaire.error.questionService.create": "An error occurred during the question's creation",
   "formulaire.error.questionService.get": "An error occurred during the question's retrieving",
   "formulaire.error.questionService.update": "An error occurred during the question's saving",
@@ -118,6 +119,7 @@
   "formulaire.success.form.sent": "You form has been successfully sent !",
   "formulaire.success.forms.delete": "All the selected forms have been successfully archived !",
   "formulaire.success.question.duplicate": "Your question has been successfully duplicated !",
-  "formulaire.success.question.delete": "Your question has been successfully deleted !"
+  "formulaire.success.question.delete": "Your question has been successfully deleted !",
+  "formulaire.success.responses.save": "Your reponses has been successfully saved !"
 
 }

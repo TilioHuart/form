@@ -39,12 +39,19 @@ public class DistributionController extends ControllerHelper {
         });
     }
 
-    @Get("/distributions/:id")
+    @Get("/distributions/forms/:formId")
     @ApiDoc("Get the info of a distribution thanks to the id")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void get(HttpServerRequest request) {
-        String id = request.getParam("id");
-        distributionService.get(id, defaultResponseHandler(request));
+        String formId = request.getParam("formId");
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user != null) {
+                distributionService.get(formId, user, defaultResponseHandler(request));
+            } else {
+                log.debug("User not found in session.");
+                Renders.unauthorized(request);
+            }
+        });
     }
 
     @Post("/forms/:id/distributions")

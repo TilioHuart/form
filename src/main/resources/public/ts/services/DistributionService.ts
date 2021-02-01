@@ -4,10 +4,10 @@ import {Distribution, Form} from '../models';
 
 export interface DistributionService {
     list(): Promise<AxiosResponse>;
-    get(number): Promise<AxiosResponse>;
-    create(Form, Distribution): Promise<AxiosResponse>;
-    update(Distribution): Promise<AxiosResponse>;
-    delete(number): Promise<AxiosResponse>;
+    get(formId: number): Promise<AxiosResponse>;
+    create(form: Form, distribution: Distribution): Promise<AxiosResponse>;
+    update(distribution: Distribution): Promise<AxiosResponse>;
+    delete(distributionId: number): Promise<AxiosResponse>;
 }
 
 export const distributionService: DistributionService = {
@@ -21,36 +21,36 @@ export const distributionService: DistributionService = {
         }
     },
 
-    async get(id : number): Promise<AxiosResponse> {
+    async get(formId : number): Promise<AxiosResponse> {
         try {
-            return http.get(`/formulaire/distributions/${id}`);
+            return http.get(`/formulaire/distributions/forms/${formId}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.get'));
             throw err;
         }
     },
 
-    async create(form: Form, dist : Distribution): Promise<AxiosResponse> { // TODO distrib unique ou plusieurs ?
+    async create(form: Form, distribution : Distribution): Promise<AxiosResponse> { // TODO distrib unique ou plusieurs ?
         try {
-            return http.post(`/formulaire/forms/${form.id}/distributions`, dist);
+            return http.post(`/formulaire/forms/${form.id}/distributions`, distribution);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.create'));
             throw err;
         }
     },
 
-    async update(dist : Distribution): Promise<AxiosResponse> {
+    async update(distribution : Distribution): Promise<AxiosResponse> {
         try {
-            return http.put(`/formulaire/distributions/${dist.id}`, dist);
+            return http.put(`/formulaire/distributions/${distribution.id}`, distribution);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.update'));
             throw err;
         }
     },
 
-    async delete(id : number): Promise<AxiosResponse> {
+    async delete(distributionId : number): Promise<AxiosResponse> {
         try {
-            return http.delete(`/formulaire/distributions/${id}`);
+            return http.delete(`/formulaire/distributions/${distributionId}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.delete'));
             throw err;
