@@ -30,15 +30,30 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				}
 			},
 			formsList: () => {
-				$scope.currentTab = 'formsList';
-				template.open('main', 'containers/forms-list');
+				if ($scope.canCreate()) {
+					$scope.currentTab = 'formsList';
+					template.open('main', 'containers/forms-list');
+				}
+				else {
+					$scope.redirectTo('/list');
+				}
 			},
 			formsResponses: () => {
-				$scope.currentTab = 'formsResponses';
-				template.open('main', 'containers/forms-responses');
+				if ($scope.canRespond()) {
+					$scope.currentTab = 'formsResponses';
+					template.open('main', 'containers/forms-responses');
+				}
+				else {
+					$scope.redirectTo('/list');
+				}
 			},
 			createForm: () => {
-				template.open('main', 'containers/create-form');
+				if ($scope.canCreate()) {
+					template.open('main', 'containers/create-form');
+				}
+				else {
+					$scope.redirectTo('/list');
+				}
 			},
 			openForm: async (params) => {
 				if ($scope.canCreate()) {

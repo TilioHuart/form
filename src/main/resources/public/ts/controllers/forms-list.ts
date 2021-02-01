@@ -109,6 +109,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     vm.sendForm = (): void => {
+        vm.forms.selected[0].generateRights();
         template.open('lightbox', 'lightbox/form-sending');
         vm.display.lightbox.sending = true;
         let checker = window.setInterval(function() {
@@ -119,13 +120,13 @@ export const formsListController = ng.controller('FormsListController', ['$scope
                 let sharePanel = document.getElementsByTagName('share-panel')[0];
                 sharePanel.getElementsByTagName('h2')[0].textContent = idiom.translate('formulaire.sendTo');
                 sharePanel.getElementsByClassName('panel-button')[0].textContent = idiom.translate('formulaire.send');
-                let rows = sharePanel.getElementsByTagName('table')[0].rows;
-                rows[0].cells[1].textContent = idiom.translate('formulaire.send');
-                for (let i = 0; i < rows.length; i++) {
-                    for (let j = 2; j < rows[i].cells.length - 1; j++) {
-                        rows[i].deleteCell(j);
-                    }
-                }
+                // let rows = sharePanel.getElementsByTagName('table')[0].rows;
+                // rows[0].cells[1].textContent = idiom.translate('formulaire.send');
+                // for (let i = 0; i < rows.length; i++) {
+                //     for (let j = 2; j < rows[i].cells.length - 1; j++) {
+                //         rows[i].deleteCell(j);
+                //     }
+                // }
             }}, 200);
     };
 

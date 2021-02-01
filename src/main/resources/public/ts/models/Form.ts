@@ -5,7 +5,7 @@ import {formService} from "../services";
 export class Form implements Selectable, Shareable  {
     shared: any;
     owner: { userId: string; displayName: string };
-    rights: Rights<Form>;
+    myRights: Rights<Form>;
     _id: number;
 
     id: number;
@@ -53,17 +53,16 @@ export class Form implements Selectable, Shareable  {
         }
     }
 
-    get myRights(){
-        return this.rights.myRights;
-    }
-
     setFromJson(data: any) {
         for (let key in data) {
             this[key] = data[key];
         }
+    }
+
+    generateRights() {
         this._id = this.id;
         this.owner = { userId: this.owner_id, displayName: this.owner_name };
-        this.rights = new Rights<Form>(this);
+        this.myRights = new Rights<Form>(this);
     }
 }
 

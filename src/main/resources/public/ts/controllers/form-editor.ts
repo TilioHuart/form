@@ -48,7 +48,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
     };
 
     const init = async (): Promise<void> => {
-        vm.form = $scope.edit.form;
+        vm.form = $scope.form;
         await vm.questions.sync(vm.form.id);
         vm.newQuestion.form_id = vm.form.id;
         $scope.safeApply();
