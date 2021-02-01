@@ -1,4 +1,4 @@
 <lightbox show="vm.display.lightbox.sending" on-close="vm.display.lightbox.sending = false">
     <share-panel app-prefix="formulaire" resources="vm.forms.selected[0]"
-                 auto-close="true" on-validate="doSendForm()" ng-if="vm.forms.selected[0]"></share-panel>
+                 auto-close="true" on-validate="vm.doSendForm()" ng-if="vm.forms.selected[0]"></share-panel>
 </lightbox>

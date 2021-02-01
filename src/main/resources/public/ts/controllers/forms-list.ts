@@ -130,15 +130,10 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         }, 200);
     };
 
-    vm.doSendForm = async (): Promise<void> => {
-        // TODO seems useless
-        try {
-            template.close('lightbox');
-            vm.display.lightbox.sending = false;
-        }
-        catch (e) {
-            throw e;
-        }
+    vm.doSendForm = (): void => {
+        template.close('lightbox');
+        vm.display.lightbox.sending = false;
+        window.setTimeout(init(), 2000);
     };
 
     vm.shareForm = (): void => {
