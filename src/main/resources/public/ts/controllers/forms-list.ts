@@ -23,6 +23,7 @@ interface ViewModel {
     switchAll(boolean): void;
     displayFolder(): string;
     displayDate(Date): string;
+    checkOpenButton(): boolean;
     openForm(Form): void;
     openPropertiesForm(): void;
     sendForm(): void;
@@ -100,6 +101,10 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
 
     // Toaster
+
+    vm.checkOpenButton = (): boolean => {
+        return vm.forms.selected.length === 1;
+    };
 
     vm.openForm = (form: Form): void => {
         $scope.editMode = true;
