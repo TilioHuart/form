@@ -13,6 +13,7 @@ interface ViewModel {
         lightbox: {
             sending: boolean,
             sharing: boolean,
+            archive: boolean,
             delete: boolean
         },
         warning: boolean
@@ -28,6 +29,9 @@ interface ViewModel {
     closeSendFormLightbox(): void;
     shareForm(): void;
     exportForm(): void;
+    restoreForms(): Promise<void>;
+    archiveForms(): void;
+    doArchiveForms(): Promise<void>;
     deleteForms(): void;
     doDeleteForms(): Promise<void>;
 }
@@ -46,6 +50,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         lightbox: {
             sending: false,
             sharing: false,
+            archive: false,
             delete: false
         },
         warning: false
@@ -145,8 +150,46 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         window.open(window.location.pathname + `/export/${vm.forms.selected[0].id}`);
     };
 
-    vm.deleteForms = (): void => {
+    vm.restoreForms = async (): Promise<void> => {
+        try {
+            for (let form of vm.forms.selected) {
+                await formService.restore(form);
+            }
+            template.close('lightbox');
+            notify.success(idiom.translate('formulaire.success.forms.restore'));
+            init();
+            $scope.safeApply();
+        }
+        catch (e) {
+            throw e;
+        }
+    };
+
+    vm.archiveForms = (): void => {
         vm.display.warning = !!vm.forms.selected.find(form => form.sent === true);
+        template.open('lightbox', 'lightbox/form-confirm-archive');
+        vm.display.lightbox.archive = true;
+    };
+
+    vm.doArchiveForms = async (): Promise<void> => {
+        try {
+            for (let form of vm.forms.selected) {
+                await formService.archive(form);
+            }
+            template.close('lightbox');
+            vm.display.lightbox.archive = false;
+            vm.display.warning = false;
+            notify.success(idiom.translate('formulaire.success.forms.archive'));
+            init();
+            $scope.safeApply();
+        }
+        catch (e) {
+            throw e;
+        }
+    };
+
+    vm.deleteForms = (): void => {
+        vm.display.warning = true;
         template.open('lightbox', 'lightbox/form-confirm-delete');
         vm.display.lightbox.delete = true;
     };
@@ -154,7 +197,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.doDeleteForms = async (): Promise<void> => {
         try {
             for (let form of vm.forms.selected) {
-                let response = await formService.archive(form);
+                await formService.delete(form.id);
             }
             template.close('lightbox');
             vm.display.lightbox.delete = false;

@@ -11,6 +11,7 @@ export interface FormService {
     update(form: Form): Promise<AxiosResponse>;
     delete(formId: number): Promise<AxiosResponse>;
     archive(form: Form): Promise<AxiosResponse>;
+    restore(form: Form): Promise<AxiosResponse>;
 }
 
 export const formService: FormService = {
@@ -76,6 +77,16 @@ export const formService: FormService = {
     async archive(form : Form): Promise<AxiosResponse> {
         try {
             form.archived = true;
+            return await this.update(form);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.formService.update'));
+            throw err;
+        }
+    },
+
+    async restore(form : Form): Promise<AxiosResponse> {
+        try {
+            form.archived = false;
             return await this.update(form);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.update'));

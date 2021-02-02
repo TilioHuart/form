@@ -1,6 +1,6 @@
-<lightbox show="vm.display.lightbox.delete" on-close="vm.display.lightbox.delete = false">
+<lightbox show="vm.display.lightbox.archive" on-close="vm.display.lightbox.archive = false">
     <div class="warning" ng-if="vm.display.warning" style="margin-top: 20px;">
-        <i18n>formulaire.warning.forms.delete</i18n>
+        <i18n>formulaire.warning.forms.archive</i18n>
     </div>
     <table class="table" style="margin: 20px 10px;">
         <thead>
@@ -18,5 +18,5 @@
         </tr>
         </tbody>
     </table>
-    <button class="cell" ng-click="vm.doDeleteForms()" style="float: right;"><i18n>formulaire.delete</i18n></button>
+    <button class="cell" ng-click="vm.doArchiveForms()" style="float: right;"><i18n>formulaire.archive</i18n></button>
 </lightbox>

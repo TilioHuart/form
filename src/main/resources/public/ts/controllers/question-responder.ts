@@ -71,6 +71,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
             await distributionService.update(vm.distribution);
         }
         notify.success(idiom.translate('formulaire.success.responses.save'));
+        // TODO go back to list forms responses & sync
     };
 
     vm.send = async () => {

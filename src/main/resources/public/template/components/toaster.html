@@ -1,6 +1,6 @@
 <section class="toggle-buttons" ng-if="vm.forms.selected.length > 0">
     <div class="toggle">
-        <div class="row">
+        <div class="row" ng-if="!vm.forms.selected[0].archived">
             <button ng-click="vm.openForm(vm.forms.selected[0])" class="cell" ng-show="vm.forms.selected.length === 1">
                 <i18n>formulaire.open</i18n>
             </button>
@@ -15,6 +15,17 @@
             </button>
             <button ng-click="vm.exportForm()" class="cell" ng-show="vm.forms.selected.length === 1" workflow="formulaire.creation">
                 <i18n>formulaire.export</i18n>
+            </button>
+            <button ng-click="vm.archiveForms()" class="cell" workflow="formulaire.creation">
+                <i18n>formulaire.archive</i18n>
+            </button>
+            <button ng-click="vm.forms.deselectAll()" class="cell toaster-right">
+                <i18n>formulaire.deselect</i18n>
+            </button>
+        </div>
+        <div class="row" ng-if="vm.forms.selected[0].archived">
+            <button ng-click="vm.restoreForms()" class="cell" workflow="formulaire.creation">
+                <i18n>formulaire.restore</i18n>
             </button>
             <button ng-click="vm.deleteForms()" class="cell" workflow="formulaire.creation">
                 <i18n>formulaire.delete</i18n>
