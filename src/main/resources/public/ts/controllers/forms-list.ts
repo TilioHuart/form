@@ -25,7 +25,7 @@ interface ViewModel {
     openForm(Form): void;
     openPropertiesForm(): void;
     sendForm(): void;
-    doSendForm(): void;
+    closeSendFormLightbox(): void;
     shareForm(): void;
     exportForm(): void;
     deleteForms(): void;
@@ -112,15 +112,15 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         template.open('lightbox', 'lightbox/form-sending');
         vm.display.lightbox.sending = true;
         let checker = window.setInterval(function() {
-            let list = document.getElementsByTagName('share-panel');
-            if (list.length > 0) {
+            let sharePanel = document.getElementsByTagName('share-panel')[0];
+            if (!!sharePanel) {
                 clearInterval(checker);
 
-                let sharePanel = document.getElementsByTagName('share-panel')[0];
+                // let sharePanel = document.getElementsByTagName('share-panel')[0];
                 sharePanel.getElementsByTagName('h2')[0].textContent = idiom.translate('formulaire.sendTo');
                 sharePanel.getElementsByClassName('panel-button')[0].textContent = idiom.translate('formulaire.send');
-                // let rows = sharePanel.getElementsByTagName('table')[0].rows;
-                // rows[0].cells[1].textContent = idiom.translate('formulaire.send');
+                let rows = sharePanel.getElementsByTagName('table')[0].rows;
+                rows[0].cells[1].textContent = idiom.translate('formulaire.send');
                 // for (let i = 0; i < rows.length; i++) {
                 //     for (let j = 2; j < rows[i].cells.length - 1; j++) {
                 //         rows[i].deleteCell(j);
@@ -130,7 +130,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         }, 200);
     };
 
-    vm.doSendForm = (): void => {
+    vm.closeSendFormLightbox = (): void => {
         template.close('lightbox');
         vm.display.lightbox.sending = false;
         window.setTimeout(init(), 2000);
