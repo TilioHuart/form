@@ -28,10 +28,10 @@ public class DistributionController extends ControllerHelper {
     @Get("/distributions")
     @ApiDoc("List all the forms sent and created by me")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
-    public void list(HttpServerRequest request) {
+    public void listBySender(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
-                distributionService.list(user, arrayResponseHandler(request));
+                distributionService.listBySender(user, arrayResponseHandler(request));
             } else {
                 log.debug("User not found in session.");
                 Renders.unauthorized(request);

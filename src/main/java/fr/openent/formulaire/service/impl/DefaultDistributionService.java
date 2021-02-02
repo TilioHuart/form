@@ -15,10 +15,17 @@ import java.util.ArrayList;
 public class DefaultDistributionService implements DistributionService {
 
     @Override
-    public void list(UserInfos user, Handler<Either<String, JsonArray>> handler) {
+    public void listBySender(UserInfos user, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE sender_id = ? " +
                 "ORDER BY date_sending DESC;";
         JsonArray params = new JsonArray().add(user.getUserId());
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+    @Override
+    public void listByForm(String formId, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? " +
+                "ORDER BY date_sending DESC;";
+        JsonArray params = new JsonArray().add(formId);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 

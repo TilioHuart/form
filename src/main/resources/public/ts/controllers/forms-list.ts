@@ -116,7 +116,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             if (!!sharePanel) {
                 clearInterval(checker);
 
-                // let sharePanel = document.getElementsByTagName('share-panel')[0];
                 sharePanel.getElementsByTagName('h2')[0].textContent = idiom.translate('formulaire.sendTo');
                 sharePanel.getElementsByClassName('panel-button')[0].textContent = idiom.translate('formulaire.send');
                 let rows = sharePanel.getElementsByTagName('table')[0].rows;
@@ -133,7 +132,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.closeSendFormLightbox = (): void => {
         template.close('lightbox');
         vm.display.lightbox.sending = false;
-        window.setTimeout(init(), 2000);
+        window.setTimeout(async function () { await init(); }, 3000);
     };
 
     vm.shareForm = (): void => {

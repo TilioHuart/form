@@ -7,7 +7,9 @@ import io.vertx.core.json.JsonObject;
 import org.entcore.common.user.UserInfos;
 
 public interface DistributionService {
-    void list(UserInfos user, Handler<Either<String, JsonArray>> handler);
+    void listBySender(UserInfos user, Handler<Either<String, JsonArray>> handler);
+
+    void listByForm(String formId, Handler<Either<String, JsonArray>> handler);
 
     void get(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler);
 

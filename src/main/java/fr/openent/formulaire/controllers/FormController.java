@@ -1,5 +1,6 @@
 package fr.openent.formulaire.controllers;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.export.FormResponsesExport;
 import fr.openent.formulaire.security.AccessRight;
@@ -14,8 +15,10 @@ import fr.openent.formulaire.service.impl.DefaultNeoService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
+import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -211,12 +214,13 @@ public class FormController extends ControllerHelper {
                             JsonArray infos = eventUsers.right().getValue();
                             removeDeletedDistributions(formId, infos);
                             addNewDistributions(formId, user, infos);
+                            updateFormSentProp(formId);
                         } else {
                             log.error("[Formulaire@getUserIds] Fail to get users' ids from groups' ids");
                         }
                     });
 
-                    super.shareResource(request, "formulaire.share", false, null, null);
+                    super.shareResource(request, null, false, null, null);
                 } else {
                     log.debug("User not found in session.");
                     unauthorized(request);
@@ -224,7 +228,6 @@ public class FormController extends ControllerHelper {
             });
         });
     }
-
 
     @Put("/share/remove/:id")
     @ApiDoc("Removes rights for a given form.")
@@ -278,4 +281,28 @@ public class FormController extends ControllerHelper {
         }
     }
 
+    private void updateFormSentProp(String formId) {
+        distributionService.listByForm(formId, getDistributionsEvent -> {
+            if (getDistributionsEvent.isRight()) {
+                Boolean value = getDistributionsEvent.right().getValue().isEmpty();
+                formService.get(formId, getEvent -> {
+                    if (getEvent.isRight()) {
+                        JsonObject form = getEvent.right().getValue();
+                        form.put("sent", value);
+                        formService.update(formId, form, updateEvent -> {
+                            if (updateEvent.isRight()) {
+                                log.info("[Formulaire@updateFormSentProp] Form's sent property has been updated");
+                            } else {
+                                log.error("[Formulaire@updateFormSentProp] Fail to update form : " + updateEvent.left().getValue());
+                            }
+                        });
+                    } else {
+                        log.error("[Formulaire@updateFormSentProp] Fail to get form : " + getEvent.left().getValue());
+                    }
+                });
+            } else {
+                log.error("[Formulaire@updateFormSentProp] Fail to get distributions of the form : " + getDistributionsEvent.left().getValue());
+            }
+        });
+    }
 }
