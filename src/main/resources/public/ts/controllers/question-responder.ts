@@ -12,7 +12,7 @@ interface ViewModel {
 
     prev(): void;
     next(): void;
-    save(): void;
+    saveAndQuit(): void;
     send(): void;
     checkNext(): boolean;
 }
@@ -64,14 +64,15 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         }
     };
 
-    vm.save = async () => {
+    vm.saveAndQuit = async () => {
         await responseService.save(vm.response);
         if (vm.distribution.status == DistributionStatus.TO_DO) {
             vm.distribution.status = DistributionStatus.IN_PROGRESS;
             await distributionService.update(vm.distribution);
         }
         notify.success(idiom.translate('formulaire.success.responses.save'));
-        // TODO go back to list forms responses & sync
+        $scope.redirectTo(`/list/responses`);
+        $scope.safeApply();
     };
 
     vm.send = async () => {

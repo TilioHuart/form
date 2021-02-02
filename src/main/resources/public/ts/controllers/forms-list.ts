@@ -117,7 +117,12 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         //TODO : Open view 'create-form' (modif possible du titre, de l'image, ...) avec props en  plus ?
     };
 
-    vm.sendForm = (): void => {
+    vm.sendForm = async (): Promise<void> => {
+        let nbQuestions = $scope.getDataIf200(await questionService.countQuestions(vm.forms.selected[0].id)).count;
+        if (nbQuestions < 1) {
+            notify.info(idiom.translate('formulaire.warning.send.form.empty'));
+            return;
+        }
         vm.forms.selected[0].generateRights();
         template.open('lightbox', 'lightbox/form-sending');
         vm.display.lightbox.sending = true;

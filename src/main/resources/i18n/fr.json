@@ -10,6 +10,7 @@
   "formulaire.status": "Statut",
   "formulaire.at": " à ",
   "formulaire.save": "Enregistrer",
+  "formulaire.saveAndQuit": "Enregistrer et quitter",
   "formulaire.end": "Terminer et envoyer",
   "formulaire.cancel": "Annuler",
   "formulaire.return": "Retour",
@@ -114,6 +115,7 @@
   "formulaire.error.responseService.update": "Une erreur est survenue lors de la sauvearde de la réponse",
   "formulaire.error.responseService.delete": "Une erreur est survenue lors de la suppression de la réponse",
 
+  "formulaire.warning.send.form.empty": "Vous ne pouvez pas envoyer un formulaire vide !",
   "formulaire.warning.forms.archive": "Attention, certains formulaires que vous souhaitez supprimer ont été envoyés à des utilisateurs !",
   "formulaire.warning.forms.delete": "Supprimer définitivement ce(s) formulaire(s) ? Cette opération est irréversible",
 

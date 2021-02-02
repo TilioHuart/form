@@ -7,6 +7,12 @@
                 </h1>
             </div>
         </section>
+
+        <section class="cell five">
+            <div class="main-button">
+                <button class="cell" ng-click="vm.saveAndQuit()" ng-if="!vm.last"><i18n>formulaire.saveAndQuit</i18n></button>
+            </div>
+        </section>
     </div>
 
     <div class="respond-question">
@@ -30,14 +36,9 @@
             </div>
         </div>
         <div class="buttons">
-            <button class="cell" ng-click="vm.prev()" ng-disabled="vm.question.position == 1">
-                <i18n>formulaire.prev</i18n></button>
-            <button class="cell" ng-click="vm.save()" ng-if="!vm.last">
-                <i18n>formulaire.save</i18n></button>
-            <button class="cell" ng-click="vm.next()" ng-if="!vm.last">
-                <i18n>formulaire.next</i18n></button>
-            <button class="cell" ng-click="vm.send()" ng-if="vm.last">
-                <i18n>formulaire.end</i18n></button>
+            <button class="cell" ng-click="vm.prev()" ng-disabled="vm.question.position == 1"><i18n>formulaire.prev</i18n></button>
+            <button class="cell" ng-click="vm.next()" ng-if="!vm.last"><i18n>formulaire.next</i18n></button>
+            <button class="cell" ng-click="vm.send()" ng-if="vm.last"><i18n>formulaire.end</i18n></button>
         </div>
     </div>
 </div>

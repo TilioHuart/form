@@ -10,6 +10,7 @@
   "formulaire.status": "Status",
   "formulaire.at": " at ",
   "formulaire.save": "Save",
+  "formulaire.saveAndQuit": "Save and quit",
   "formulaire.end": "Finish and send",
   "formulaire.cancel": "Cancel",
   "formulaire.return": "Return",
@@ -114,6 +115,7 @@
   "formulaire.error.responseService.update": "An error occurred during the response's saving",
   "formulaire.error.responseService.delete": "An error occurred during the response's suppression",
 
+  "formulaire.warning.send.form.empty": "You can not send an empty form !",
   "formulaire.warning.forms.archive": "Be careful, some forms you want to delete have already been to users !",
   "formulaire.warning.forms.delete": "Delete these forms forever ? This action can not be undone",
 
