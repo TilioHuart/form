@@ -1,0 +1,22 @@
+<lightbox show="vm.display.lightbox.delete" on-close="vm.display.lightbox.delete = false">
+    <div class="warning" ng-if="vm.display.warning" style="margin-top: 20px;">
+        <i18n>formulaire.warning.forms.delete</i18n>
+    </div>
+    <table class="table" style="margin: 20px 10px;">
+        <thead>
+        <tr>
+            <th class="four"><i18n>formulaire.table.title</i18n></th>
+            <th class="three"><i18n>formulaire.table.author</i18n></th>
+            <th class="three"><i18n>formulaire.table.modified</i18n></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="form in vm.forms.selected">
+            <td>[[form.title]]</td>
+            <td>[[form.owner_name]]</td>
+            <td><i18n>formulaire.modified</i18n>[[vm.displayDate(form.date_modification)]]</td>
+        </tr>
+        </tbody>
+    </table>
+    <button class="cell" ng-click="vm.doDeleteForms()" style="float: right;"><i18n>formulaire.delete</i18n></button>
+</lightbox>
