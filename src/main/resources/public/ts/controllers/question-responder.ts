@@ -1,6 +1,6 @@
-import {idiom, ng, notify} from "entcore";
+import {idiom, ng, notify, template} from "entcore";
 import {Distribution, DistributionStatus, Question, Response} from "../models";
-import {distributionService, questionService} from "../services";
+import {distributionService, formService, questionService} from "../services";
 import {responseService} from "../services/ResponseService";
 
 interface ViewModel {
@@ -10,11 +10,10 @@ interface ViewModel {
     nbQuestions: number;
     last: boolean;
 
-    prev(): void;
-    next(): void;
-    saveAndQuit(): void;
-    send(): void;
-    checkNext(): boolean;
+    prev(): Promise<void>;
+    next(): Promise<void>;
+    saveAndQuit(): Promise<void>;
+    send(): Promise<void>;
 }
 
 export const questionResponderController = ng.controller('QuestionResponderController', ['$scope',
@@ -38,7 +37,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         $scope.safeApply();
     };
 
-    vm.prev = async () => {
+    vm.prev = async (): Promise<void> => {
         await responseService.save(vm.response);
         let prevPosition: number = vm.question.position - 1;
 
@@ -51,7 +50,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         }
     };
 
-    vm.next = async () => {
+    vm.next = async (): Promise<void> => {
         await responseService.save(vm.response);
         let nextPosition: number = vm.question.position + 1;
 
@@ -64,7 +63,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         }
     };
 
-    vm.saveAndQuit = async () => {
+    vm.saveAndQuit = async (): Promise<void> => {
         await responseService.save(vm.response);
         if (vm.distribution.status == DistributionStatus.TO_DO) {
             vm.distribution.status = DistributionStatus.IN_PROGRESS;
@@ -75,13 +74,35 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         $scope.safeApply();
     };
 
-    vm.send = async () => {
+    vm.send = async (): Promise<void> => {
         await responseService.save(vm.response);
-        vm.distribution.status = DistributionStatus.FINISHED;
-        await distributionService.update(vm.distribution);
-        await notify.success(idiom.translate('formulaire.success.responses.save'));
-        $scope.redirectTo(`/list/responses`);
-        $scope.safeApply();
+        if (await checkMandatoryQuestions()) {
+            vm.distribution.status = DistributionStatus.FINISHED;
+            await distributionService.update(vm.distribution);
+            notify.success(idiom.translate('formulaire.success.responses.save'));
+            $scope.redirectTo(`/list/responses`);
+            $scope.safeApply();
+        }
+        else {
+            notify.error(idiom.translate('formulaire.warning.send.missing.responses.missing'));
+        }
+    };
+
+    const checkMandatoryQuestions = async (): Promise<boolean> => {
+        try {
+            let questions = $scope.getDataIf200(await questionService.list(vm.question.form_id));
+            questions = questions.filter(question => question.mandatory === true);
+            for (let question of questions) {
+                let response = $scope.getDataIf200(await responseService.get(question.id));
+                if (!!!response.answer) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        catch (e) {
+            throw e;
+        }
     };
 
     init();

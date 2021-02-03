@@ -10,7 +10,7 @@
 
         <section class="cell five">
             <div class="main-button">
-                <button class="cell" ng-click="vm.saveAndQuit()" ng-if="!vm.last"><i18n>formulaire.saveAndQuit</i18n></button>
+                <button class="cell" ng-click="vm.saveAndQuit()"><i18n>formulaire.saveAndQuit</i18n></button>
             </div>
         </section>
     </div>
@@ -18,12 +18,7 @@
     <div class="respond-question">
         <div class="question">
             <div class="question-title">
-                <div ng-if="vm.question.question_type == 1">
-                    <h4 ng-if="!!vm.question.title">[[vm.question.title]]</h4>
-                </div>
-                <div ng-if="vm.question.question_type != 1">
-                    <h4 ng-if="!!vm.question.title">[[vm.question.title]]</h4>
-                </div>
+                <h4>[[vm.question.title]]<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span></h4>
             </div>
             <div class="question-main">
                 <div ng-if="vm.question.question_type == 1">

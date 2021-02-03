@@ -4,6 +4,9 @@
             <button ng-click="vm.openForm(vm.forms.selected[0])" class="cell" ng-show="vm.checkOpenButton()">
                 <i18n>formulaire.open</i18n>
             </button>
+            <button ng-click="vm.forms.deselectAll()" class="cell toaster-right">
+                <i18n>formulaire.deselect</i18n>
+            </button>
         </div>
         <div class="row" ng-if="currentTab === 'formsList' && !vm.forms.selected[0].archived">
             <button ng-click="vm.openForm(vm.forms.selected[0])" class="cell" ng-show="vm.checkOpenButton()">
