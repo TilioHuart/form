@@ -58,9 +58,17 @@ public class DefaultResponseService implements ResponseService {
 
     @Override
     public void exportResponses(String formId, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT responder_id, position, answer FROM " + Formulaire.RESPONSE_TABLE + " r " +
-                "JOIN " + Formulaire.QUESTION_TABLE + " q ON r.question_id = q.id " +
-                "WHERE q.form_id = ? ORDER BY responder_id, position;";
+        String query = "SELECT d.form_id, d.responder_id, d.date_response, rep.position, rep.answer " +
+            "FROM " + Formulaire.DISTRIBUTION_TABLE + " d JOIN " +
+            "( " +
+                "SELECT form_id, responder_id, q.id as question_id, title, answer, q.position as position " +
+                "FROM " + Formulaire.QUESTION_TABLE + " q " +
+                "JOIN " + Formulaire.RESPONSE_TABLE + " r ON r.question_id = q.id " +
+                "WHERE form_id = ? " +
+            ") rep ON d.form_id = rep.form_id AND d.responder_id = rep.responder_id " +
+            "WHERE d.status = '" + Formulaire.FINISHED + "' " +
+            "ORDER BY d.form_id, d.responder_id, rep.position;";
+
         JsonArray params = new JsonArray().add(formId);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }

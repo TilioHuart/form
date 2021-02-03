@@ -1,6 +1,5 @@
 package fr.openent.formulaire.controllers;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.export.FormResponsesExport;
 import fr.openent.formulaire.security.AccessRight;
@@ -15,10 +14,8 @@ import fr.openent.formulaire.service.impl.DefaultNeoService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
-import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
-import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -142,7 +139,7 @@ public class FormController extends ControllerHelper {
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void export(HttpServerRequest request) {
-        new FormResponsesExport(request).launch();
+        new FormResponsesExport(eb, request).launch();
     }
 
 
