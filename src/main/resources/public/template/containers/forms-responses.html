@@ -88,10 +88,10 @@
                     <td ng-click="form.selected=!form.selected">[[form.owner_name]]</td>
                     <td ng-click="form.selected=!form.selected"><i18n>formulaire.sent</i18n>[[vm.displayDate(form.date_sending)]]</td>
                     <td ng-click="form.selected=!form.selected">
-                        <span ng-if="!!form.resp_date" style="color: green">
+                        <span ng-if="!!form.date_response" style="color: green">
                             <i18n>formulaire.responded.date</i18n>[[vm.displayDate(form.date_response)]]
                         </span>
-                        <span ng-if="!!!form.resp_date" style="color: #b50000">
+                        <span ng-if="!!!form.date_response" style="color: #b50000">
                             <i18n>formulaire.responded.waiting</i18n>
                         </span>
                     </td>
