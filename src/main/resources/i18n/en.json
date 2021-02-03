@@ -76,6 +76,10 @@
   "formulaire.question.delete.confirmation": "Do you really want to delete this question ?",
   "formulaire.question.undo.confirmation": "Do you really want to cancel your changes ?",
 
+  "formulaire.responses.send.title": "Confirm sending",
+  "formulaire.responses.send.text": "Once your form sent, you won't be able to modify your answers.",
+  "formulaire.responses.send.continue": "Do you want to proceed anyway ?",
+
 
   "formulaire.error": "Error",
   "formulaire.error.403": "Sorry, you doesn't have enough rights to access this page",

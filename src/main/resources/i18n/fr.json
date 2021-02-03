@@ -76,6 +76,10 @@
   "formulaire.question.delete.confirmation": "Êtes-vous sûr(e) de vouloir supprimer cette question ?",
   "formulaire.question.undo.confirmation": "Êtes-vous sûr(e) de vouloir annuler vos changements ?",
 
+  "formulaire.responses.send.title": "Valider l'envoi",
+  "formulaire.responses.send.text": "Une fois votre formulaire envoyé vous ne pourrez plus modifier vos réponses.",
+  "formulaire.responses.send.continue": "Voulez-vous continuez ?",
+
 
   "formulaire.error": "Erreur",
   "formulaire.error.403": "Désolé, vous n'avez pas les droits pour accéder à cette page",

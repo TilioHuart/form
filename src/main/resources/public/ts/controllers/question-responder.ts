@@ -9,11 +9,17 @@ interface ViewModel {
     distribution: Distribution;
     nbQuestions: number;
     last: boolean;
+    display: {
+        lightbox: {
+            sending: boolean
+        }
+    };
 
     prev(): Promise<void>;
     next(): Promise<void>;
     saveAndQuit(): Promise<void>;
     send(): Promise<void>;
+    doSend(): Promise<void>;
 }
 
 export const questionResponderController = ng.controller('QuestionResponderController', ['$scope',
@@ -25,6 +31,11 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     vm.distribution = new Distribution();
     vm.nbQuestions = 1;
     vm.last = false;
+    vm.display = {
+        lightbox: {
+            sending: false
+        }
+    };
 
     const init = async (): Promise<void> => {
         vm.question = $scope.question;
@@ -75,17 +86,24 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     };
 
     vm.send = async (): Promise<void> => {
-        await responseService.save(vm.response);
         if (await checkMandatoryQuestions()) {
-            vm.distribution.status = DistributionStatus.FINISHED;
-            await distributionService.update(vm.distribution);
-            notify.success(idiom.translate('formulaire.success.responses.save'));
-            $scope.redirectTo(`/list/responses`);
-            $scope.safeApply();
+            template.open('lightbox', 'lightbox/responses-confirm-sending');
+            vm.display.lightbox.sending = true;
         }
         else {
             notify.error(idiom.translate('formulaire.warning.send.missing.responses.missing'));
         }
+    };
+
+    vm.doSend = async (): Promise<void> => {
+        await responseService.save(vm.response);
+        vm.distribution.status = DistributionStatus.FINISHED;
+        await distributionService.update(vm.distribution);
+        template.close('lightbox');
+        vm.display.lightbox.sending = false;
+        notify.success(idiom.translate('formulaire.success.responses.save'));
+        $scope.redirectTo(`/list/responses`);
+        $scope.safeApply();
     };
 
     const checkMandatoryQuestions = async (): Promise<boolean> => {

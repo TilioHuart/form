@@ -1,6 +1,6 @@
 import {Behaviours, idiom, model, ng, template} from 'entcore';
-import {Form, Question, QuestionTypes} from "../models";
-import {formService, questionService} from "../services";
+import {DistributionStatus, Form, Question, QuestionTypes} from "../models";
+import {distributionService, formService, questionService} from "../services";
 import {AxiosResponse} from "axios";
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', 'FormService',
@@ -72,18 +72,24 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			},
 			respondQuestion: async (params) => {
 				if ($scope.canRespond()) {
-					$scope.form = $scope.getDataIf200(await formService.get(params.idForm));
-					$scope.form.nbQuestions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
+					let distribution = $scope.getDataIf200(await distributionService.get(params.idForm));
+					if (!!distribution.status && distribution.status != DistributionStatus.FINISHED) {
+						$scope.form = $scope.getDataIf200(await formService.get(params.idForm));
+						$scope.form.nbQuestions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
 
-					if (params.position < 1) {
-						$scope.redirectTo(`/form/${params.idForm}/question/1`);
-					}
-					else if (params.position > $scope.form.nbQuestions) {
-						$scope.redirectTo(`/form/${params.idForm}/question/${$scope.form.nbQuestions}`);
+						if (params.position < 1) {
+							$scope.redirectTo(`/form/${params.idForm}/question/1`);
+						}
+						else if (params.position > $scope.form.nbQuestions) {
+							$scope.redirectTo(`/form/${params.idForm}/question/${$scope.form.nbQuestions}`);
+						}
+						else {
+							$scope.question = $scope.getDataIf200(await questionService.getByPosition(params.idForm, params.position));
+							await template.open('main', 'containers/respond-question');
+						}
 					}
 					else {
-						$scope.question = $scope.getDataIf200(await questionService.getByPosition(params.idForm, params.position));
-						await template.open('main', 'containers/respond-question');
+						$scope.redirectTo('/list/responses');
 					}
 				}
 				else {
