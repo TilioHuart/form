@@ -16,6 +16,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.user.UserUtils;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class FormResponsesExport {
@@ -30,6 +33,8 @@ public class FormResponsesExport {
   private HttpServerRequest request;
   // Creates  new String builder with UTF-8 BOM. Used to open on excel
   private StringBuilder content = new StringBuilder(UTF8_BOM);
+  private SimpleDateFormat dateGetter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+  private SimpleDateFormat dateFormatter = new SimpleDateFormat("DD/MM/YYYY kk[h]mm");
 
   public FormResponsesExport(EventBus eb, HttpServerRequest request) {
     this.eb = eb;
@@ -140,15 +145,17 @@ public class FormResponsesExport {
     return value;
   }
 
-  private void getUserInfos(String userId, String date, Handler<AsyncResult<String>> handler) {
+  private void getUserInfos(String userId, String sqlDate, Handler<AsyncResult<String>> handler) {
     UserUtils.getUserInfos(eb, userId, user -> {
       if (user != null) {
         StringBuilder builder = new StringBuilder();
+        Date date = null;
+        try { date = dateGetter.parse(sqlDate); } catch (ParseException e) { e.printStackTrace(); }
 
         builder.append(user.getUserId()).append(SEPARATOR);
         builder.append(user.getLastName()).append(SEPARATOR);
         builder.append(user.getFirstName()).append(SEPARATOR);
-        builder.append(date).append(SEPARATOR);
+        builder.append(dateFormatter.format(date)).append(SEPARATOR);
         builder.append(user.getStructureNames().get(0)).append(SEPARATOR); // TODO et si on a plusieurs etab on affiche lequel ?
 
         handler.handle(Future.succeededFuture(builder.toString()));
