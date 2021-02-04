@@ -25,6 +25,7 @@
   "formulaire.restore": "Restore",
   "formulaire.delete": "Delete",
   "formulaire.confirm": "Confirm",
+  "formulaire.selectAll": "Select all",
   "formulaire.deselect": "Deselect",
   "formulaire.next": "Next",
   "formulaire.prev": "Previous",
@@ -126,7 +127,7 @@
 
   "formulaire.warning.send.form.empty": "You can not send an empty form !",
   "formulaire.warning.send.missing.responses.missing": "You have to answer to all the mandatory questions !",
-  "formulaire.warning.forms.archive": "Be careful, some forms you want to delete have already been to users !",
+  "formulaire.warning.forms.archive": "Be careful, some forms you want to delete have already been sent to users and they won't be able to access them anymore !",
   "formulaire.warning.forms.delete": "Delete these forms forever ? This action can not be undone",
 
   "formulaire.success.form.create": "You form has been successfully created !",

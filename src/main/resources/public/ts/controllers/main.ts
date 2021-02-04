@@ -51,7 +51,19 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			createForm: () => {
 				$scope.currentPage = 'createForm';
 				if ($scope.canCreate()) {
-					template.open('main', 'containers/create-form');
+					$scope.form = new Form();
+					template.open('main', 'containers/prop-form');
+				}
+				else {
+					$scope.redirectTo('/list');
+				}
+			},
+			propForm: async (params) => {
+				$scope.currentPage = 'propForm';
+				if ($scope.canCreate()) {
+					let { data } = await formService.get(params.idForm);
+					$scope.form = data;
+					template.open('main', 'containers/prop-form');
 				}
 				else {
 					$scope.redirectTo('/list');

@@ -4,6 +4,9 @@
             <button ng-click="vm.openForm(vm.forms.selected[0])" class="cell" ng-show="vm.checkOpenButton()">
                 <i18n>formulaire.open</i18n>
             </button>
+            <button ng-click="vm.switchAll(true)" class="cell toaster-right">
+                <i18n>formulaire.selectAll</i18n>
+            </button>
             <button ng-click="vm.switchAll(false)" class="cell toaster-right">
                 <i18n>formulaire.deselect</i18n>
             </button>
@@ -12,7 +15,7 @@
             <button ng-click="vm.openForm(vm.forms.selected[0])" class="cell" ng-show="vm.checkOpenButton()">
                 <i18n>formulaire.open</i18n>
             </button>
-            <button ng-click="vm.openPropertiesForm()" class="cell" ng-show="vm.forms.selected.length === 1" workflow="formulaire.creation" ng-disabled="true">
+            <button ng-click="vm.openPropertiesForm()" class="cell" ng-show="vm.forms.selected.length === 1" workflow="formulaire.creation">
                 <i18n>formulaire.properties</i18n>
             </button>
             <button ng-click="vm.sendForm()" class="cell" ng-show="vm.forms.selected.length === 1" workflow="formulaire.creation">
@@ -27,6 +30,9 @@
             <button ng-click="vm.archiveForms()" class="cell" workflow="formulaire.creation">
                 <i18n>formulaire.archive</i18n>
             </button>
+            <button ng-click="vm.switchAll(true)" class="cell toaster-right">
+                <i18n>formulaire.selectAll</i18n>
+            </button>
             <button ng-click="vm.switchAll(false)" class="cell toaster-right">
                 <i18n>formulaire.deselect</i18n>
             </button>
@@ -37,6 +43,9 @@
             </button>
             <button ng-click="vm.deleteForms()" class="cell" workflow="formulaire.creation">
                 <i18n>formulaire.delete</i18n>
+            </button>
+            <button ng-click="vm.switchAll(true)" class="cell toaster-right">
+                <i18n>formulaire.selectAll</i18n>
             </button>
             <button ng-click="vm.switchAll(false)" class="cell toaster-right">
                 <i18n>formulaire.deselect</i18n>

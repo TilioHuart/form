@@ -1,4 +1,4 @@
-<div ng-controller="FormCreatorController as vm">
+<div ng-controller="FormPropController as vm">
     <div class="row">
         <section class="cell eight">
             <div>
@@ -9,7 +9,7 @@
         </section>
     </div>
 
-    <div class="create-form dominos">
+    <div class="prop-form dominos">
         <div class="item">
             <div class="domino">
                 <div class="two cell picture" ng-class="{'empty': !vm.form.picture}">
@@ -19,6 +19,9 @@
                     <div class="data-text">
                         <h4><i18n>formulaire.form.create.title</i18n></h4>
                         <input type="text" ng-model="vm.form.title" size="30" i18n-placeholder="formulaire.form.create.title">
+                    </div>
+                    <div class="data-date" ng-if="currentPage === 'propForm'">
+                        <i18n>formulaire.form.edit.modified</i18n>[[vm.displayLastSave()]]
                     </div>
                     <div class="data-icons">
                         <button class="cell" ng-click="redirectTo('/list/mine')"><i18n>formulaire.cancel</i18n></button>
