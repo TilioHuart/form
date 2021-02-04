@@ -1,9 +1,10 @@
 import {$, idiom, ng, notify, template} from 'entcore';
-import {Form, Question, Questions} from "../models";
+import {Form, Question, Questions, Types} from "../models";
 import {formService, questionService} from "../services";
 import {DateUtils} from "../utils/date";
 
 interface ViewModel {
+    types: typeof Types;
     form: Form;
     questions: Questions;
     newQuestion: Question;
@@ -35,6 +36,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
     function ($scope) {
 
     const vm: ViewModel = this;
+        vm.types = Types;
     vm.form = new Form();
     vm.questions = new Questions();
     vm.newQuestion = new Question();
@@ -63,6 +65,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
     };
 
     vm.createNewQuestion = () => {
+        vm.dontSave = true;
         template.open('lightbox', 'lightbox/question-new');
         vm.display.lightbox.newQuestion = true;
         $scope.safeApply();
@@ -71,17 +74,18 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
     vm.doCreateNewQuestion = async (code: number) => {
         vm.newQuestion.question_type = code;
         vm.newQuestion.position = vm.questions.all.length + 1;
-        let response = await questionService.save(vm.newQuestion);
+        await questionService.save(vm.newQuestion);
         await vm.questions.sync(vm.form.id);
         vm.display.lightbox.newQuestion = false;
         template.close('lightbox');
+        vm.dontSave = false;
         $scope.safeApply();
     };
 
     vm.saveQuestions = async (displaySuccess:boolean = false) => {
         try {
             for (let question of vm.questions.all) {
-                let response = await questionService.save(question);
+                await questionService.save(question);
             }
             if (displaySuccess) { notify.success(idiom.translate('formulaire.success.form.save')); }
             let response = await formService.get(vm.form.id);
@@ -210,11 +214,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
     const onClickQuestion = async (event) : Promise<void> => {
         if (!vm.dontSave && $scope.currentPage === 'openForm') {
-            let wrongQuestions = vm.questions.filter(question => !!!question.title); // TODO check more than just titles later
-            if (wrongQuestions.length > 0) {
-                notify.error(idiom.translate('formulaire.question.save.missing.field'));
-            }
-
             let questionId: number = isInFocusable(event.target);
             if (!!questionId && questionId > 0) {
                 let question = vm.questions.all.filter(question => question.id == questionId)[0];
@@ -225,11 +224,25 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     // Reselection of the question because the sync has removed the selections
                     vm.questions.all.filter(question => question.id == questionId)[0].selected = true;
                 }
-            } else {
+            }
+            else if (isInCheckZone(event.target)) {
+                let wrongQuestions = vm.questions.filter(question => !!!question.title); // TODO check more than just titles later
+                if (wrongQuestions.length > 0) {
+                    notify.error(idiom.translate('formulaire.question.save.missing.field'));
+                }
+                await vm.saveQuestions();
+            }
+            else {
                 await vm.saveQuestions();
             }
             $scope.safeApply();
         }
+    };
+
+    const isInCheckZone = (el): boolean => {
+        if (!!!el) { return true; }
+        else if (el.classList && el.classList.contains("dontCheck")) { return false; }
+        return isInCheckZone(el.parentNode);
     };
 
     const isInFocusable = (el): number => {

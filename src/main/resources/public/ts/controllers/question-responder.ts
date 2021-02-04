@@ -1,9 +1,11 @@
 import {idiom, ng, notify, template} from "entcore";
-import {Distribution, DistributionStatus, Question, Response} from "../models";
+import {Distribution, DistributionStatus, Question, QuestionType, Response, Types} from "../models";
 import {distributionService, formService, questionService} from "../services";
 import {responseService} from "../services/ResponseService";
+import {DateUtils} from "../utils/date";
 
 interface ViewModel {
+    types: typeof Types;
     question: Question;
     response: Response;
     distribution: Distribution;
@@ -26,6 +28,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     function ($scope) {
 
     const vm: ViewModel = this;
+    vm.types = Types;
     vm.question = new Question();
     vm.response = new Response();
     vm.distribution = new Distribution();
@@ -39,11 +42,14 @@ export const questionResponderController = ng.controller('QuestionResponderContr
 
     const init = async (): Promise<void> => {
         vm.question = $scope.question;
+        vm.nbQuestions = $scope.form.nbQuestions;
+        vm.last = vm.question.position == vm.nbQuestions;
         vm.response = $scope.getDataIf200(await responseService.get(vm.question.id));
         if (!!!vm.response.question_id) { vm.response.question_id = vm.question.id; }
         vm.distribution = $scope.getDataIf200(await distributionService.get(vm.question.form_id));
-        vm.nbQuestions = $scope.form.nbQuestions;
-        vm.last = vm.question.position == vm.nbQuestions;
+
+        if (vm.question.question_type === Types.DATE) { formatDate() }
+        if (vm.question.question_type === Types.TIME) { formatTime() }
 
         $scope.safeApply();
     };
@@ -109,6 +115,14 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         notify.success(idiom.translate('formulaire.success.responses.save'));
         $scope.redirectTo(`/list/responses`);
         $scope.safeApply();
+    };
+
+    const formatDate = (): void => {
+        vm.response.answer = DateUtils.format(vm.response.answer, DateUtils.FORMAT["YEAR-MONTH-DAY"]);
+    };
+
+    const formatTime = (): void => {
+        vm.response.answer = new Date(vm.response.answer.toString());
     };
 
     const checkMandatoryQuestions = async (): Promise<boolean> => {
