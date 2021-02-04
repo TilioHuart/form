@@ -1,22 +1,25 @@
 import {idiom, ng, notify} from 'entcore';
 import {formService} from "../services";
 import {Form} from "../models";
+import {DateUtils} from "../utils/date";
 
 interface ViewModel {
     form: Form;
 
     save(): Promise<void>;
     getImage(): void;
+    displayLastSave(): string;
 }
 
 
-export const formCreatorController = ng.controller('FormCreatorController', ['$scope', 'FormService',
+export const formPropController = ng.controller('FormPropController', ['$scope', 'FormService',
     function ($scope) {
 
     const vm: ViewModel = this;
     vm.form = new Form();
 
     const init = async (): Promise<void> => {
+        vm.form = $scope.form;
     };
 
     // Functions
@@ -39,6 +42,13 @@ export const formCreatorController = ng.controller('FormCreatorController', ['$s
             }, 1000)
         }
         $scope.safeApply();
+    };
+
+    vm.displayLastSave = () : string => {
+        let localDateTime = DateUtils.localise(vm.form.date_modification);
+        let date = DateUtils.format(localDateTime, DateUtils.FORMAT["DAY-MONTH-YEAR"]);
+        let time = DateUtils.format(localDateTime, DateUtils.FORMAT["HOUR-MINUTES"]);
+        return date + idiom.translate('formulaire.at') + time;
     };
 
     init();

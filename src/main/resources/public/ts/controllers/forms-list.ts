@@ -112,7 +112,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     vm.openPropertiesForm = (): void => {
-        //TODO : Open view 'create-form' (modif possible du titre, de l'image, ...) avec props en  plus ?
+        $scope.redirectTo(`/form/${vm.forms.selected[0].id}/properties`);
+        $scope.safeApply();
     };
 
     vm.sendForm = async (): Promise<void> => {
@@ -182,7 +183,9 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.doArchiveForms = async (): Promise<void> => {
         try {
             for (let form of vm.forms.selected) {
-                await formService.archive(form);
+                if ($scope.isStatusXXX(await formService.unshare(form.id), 200)) {
+                    await formService.archive(form);
+                }
             }
             template.close('lightbox');
             vm.display.lightbox.archive = false;
@@ -205,9 +208,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.doDeleteForms = async (): Promise<void> => {
         try {
             for (let form of vm.forms.selected) {
-                if ($scope.isStatusXXX(await formService.unshare(form.id), 200)) {
-                    await formService.delete(form.id);
-                }
+                await formService.delete(form.id);
             }
             template.close('lightbox');
             vm.display.lightbox.delete = false;

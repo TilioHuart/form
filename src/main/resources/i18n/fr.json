@@ -25,6 +25,7 @@
   "formulaire.restore": "Restaurer",
   "formulaire.delete": "Supprimer",
   "formulaire.confirm": "Confirmer",
+  "formulaire.selectAll": "Tout sélectionner",
   "formulaire.deselect": "Déselectionner",
   "formulaire.next": "Suivant",
   "formulaire.prev": "Précédent",
@@ -126,7 +127,7 @@
 
   "formulaire.warning.send.form.empty": "Vous ne pouvez pas envoyer un formulaire vide !",
   "formulaire.warning.send.missing.responses.missing": "Vous n'avez pas répondu à toutes les questions obligatoires !",
-  "formulaire.warning.forms.archive": "Attention, certains formulaires que vous souhaitez supprimer ont été envoyés à des utilisateurs !",
+  "formulaire.warning.forms.archive": "Attention, certains formulaires que vous souhaitez supprimer ont été envoyés à des utilisateurs et ne leur seront désormais plus accessibles",
   "formulaire.warning.forms.delete": "Supprimer définitivement ce(s) formulaire(s) ? Cette opération est irréversible",
 
   "formulaire.success.form.create": "Votre formulaire a bien été créé !",
