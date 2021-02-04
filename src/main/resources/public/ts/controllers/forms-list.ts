@@ -105,7 +105,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.sort = () : void => {
         vm.forms.orderForms();
         $scope.safeApply();
-    }
+    };
 
     // Toaster
 

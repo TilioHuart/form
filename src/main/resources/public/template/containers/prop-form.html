@@ -26,6 +26,9 @@
                     <div class="data-date" ng-if="currentPage === 'propForm'">
                         <i18n>formulaire.form.edit.modified</i18n>[[vm.displayLastSave()]]
                     </div>
+                    <div class="data-date" ng-if="currentPage === 'propForm'">
+                        <i18n>formulaire.form.edit.modified</i18n>[[vm.displayLastSave()]]
+                    </div>
                     <div class="data-icons">
                         <button class="cell" ng-click="redirectTo('/list/mine')"><i18n>formulaire.cancel</i18n></button>
                         <button class="cell" ng-click="vm.save()" ng-disabled="!vm.form.title"><i18n>formulaire.save</i18n></button>
