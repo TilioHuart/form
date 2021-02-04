@@ -72,6 +72,7 @@ export const formService: FormService = {
             form.sent = false;
             form.collab = false;
             form.archived = true;
+            form.sent = false;
             return await this.update(form);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.archive'));
