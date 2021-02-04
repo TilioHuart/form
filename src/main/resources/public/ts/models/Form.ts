@@ -20,6 +20,11 @@ export class Form implements Selectable, Shareable  {
     collab: boolean;
     archived: boolean;
     selected: boolean;
+    infoImg: {
+        name: string;
+        type: string;
+        compatible: boolean;
+    };
 
     constructor() {
         this.id = null;
@@ -63,6 +68,21 @@ export class Form implements Selectable, Shareable  {
         this._id = this.id;
         this.owner = { userId: this.owner_id, displayName: this.owner_name };
         this.myRights = new Rights<Form>(this);
+    }
+
+    async setInfoImage() {
+        const typesImgNoSend = ["image/png", "image/jpg", "image/jpeg", "image/gif"];
+        try {
+            let { data: { metadata } } = await formService.getInfoImage(this);
+            this.infoImg = {
+                name: metadata.filename,
+                type: metadata["content-type"],
+                compatible: !typesImgNoSend.some(type => type === metadata["content-type"]),
+            };
+        } catch (e) {
+            notify.error(idiom.translate('formulaire.error.form.image'));
+            throw e;
+        }
     }
 }
 

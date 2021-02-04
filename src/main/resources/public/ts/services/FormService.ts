@@ -9,9 +9,11 @@ export interface FormService {
     save(form: Form): Promise<AxiosResponse>;
     create(form: Form): Promise<AxiosResponse>;
     update(form: Form): Promise<AxiosResponse>;
-    delete(formId: number): Promise<AxiosResponse>;
     archive(form: Form): Promise<AxiosResponse>;
     restore(form: Form): Promise<AxiosResponse>;
+    delete(formId: number): Promise<AxiosResponse>;
+    unshare(formId: number): Promise<AxiosResponse>;
+    getInfoImage(form: Form): Promise<AxiosResponse>;
 }
 
 export const formService: FormService = {
@@ -65,21 +67,12 @@ export const formService: FormService = {
         }
     },
 
-    async delete(formId : number): Promise<AxiosResponse> {
-        try {
-            return await http.delete(`/formulaire/forms/${formId}`);
-        } catch (err) {
-            notify.error(idiom.translate('formulaire.error.formService.delete'));
-            throw err;
-        }
-    },
-
     async archive(form : Form): Promise<AxiosResponse> {
         try {
             form.archived = true;
             return await this.update(form);
         } catch (err) {
-            notify.error(idiom.translate('formulaire.error.formService.update'));
+            notify.error(idiom.translate('formulaire.error.formService.archive'));
             throw err;
         }
     },
@@ -89,8 +82,36 @@ export const formService: FormService = {
             form.archived = false;
             return await this.update(form);
         } catch (err) {
-            notify.error(idiom.translate('formulaire.error.formService.update'));
+            notify.error(idiom.translate('formulaire.error.formService.restore'));
             throw err;
+        }
+    },
+
+    async delete(formId : number): Promise<AxiosResponse> {
+        try {
+            return await http.delete(`/formulaire/forms/${formId}`);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.formService.delete'));
+            throw err;
+        }
+    },
+
+    async unshare(formId : number): Promise<AxiosResponse> {
+        try {
+            let emptyBody = {"users":{},"groups":{},"bookmarks":{}};
+            return await http.put(`/formulaire/share/resource/${formId}`, emptyBody);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.formService.unshare'));
+            throw err;
+        }
+    },
+
+    async getInfoImage(form : Form): Promise<AxiosResponse> {
+        try {
+            return await http.get(`/formulaire/info/image/${form.picture ? form.picture.split("/").slice(-1)[0] : null}`);
+        } catch (e) {
+            notify.error(idiom.translate('formulaire.error.formService.image'));
+            throw e;
         }
     }
 };

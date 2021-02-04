@@ -11,11 +11,11 @@
 
     <div class="row twelve cell tabs zero-mobile" style="min-height: 60px;">
         <div class="cell">
-            <header class="horizontal-spacing" ng-class="{ selected : currentTab === 'formsList' }"
+            <header class="horizontal-spacing" ng-class="{ selected : currentPage === 'formsList' }"
                     ng-if="canCreate()" ng-click="redirectTo('/list/mine')">
                 <i18n>formulaire.tab.list</i18n>
             </header>
-            <header class="horizontal-spacing " ng-class="{ selected : currentTab === 'formsResponses' }"
+            <header class="horizontal-spacing " ng-class="{ selected : currentPage === 'formsResponses' }"
                     ng-if="canRespond()" ng-click="redirectTo('/list/responses')">
                 <i18n>formulaire.tab.responses</i18n>
             </header>

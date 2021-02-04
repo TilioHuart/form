@@ -29,13 +29,14 @@ export const formCreatorController = ng.controller('FormCreatorController', ['$s
         }
     };
 
-    vm.getImage = function () {
+    vm.getImage = async (): Promise<void> => {
         if (vm.form.picture) {
-            // TODO : cf Moodle (+ back)
-            // vm.form.setInfoImg();
-            // $timeout(() =>
-            //         $scope.imgCompatibleMoodle = $scope.course.infoImg.compatibleMoodle
-            //     , 1000)
+            await vm.form.setInfoImage();
+            window.setTimeout(function() {
+                if(!vm.form.infoImg.compatible) {
+                    notify.error(idiom.translate('formulaire.image.incompatible'));
+                };
+            }, 1000)
         }
         $scope.safeApply();
     };

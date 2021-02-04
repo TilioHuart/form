@@ -12,9 +12,8 @@
     <div class="create-form dominos">
         <div class="item">
             <div class="domino">
-                <div class="two picture" ng-class="{'empty': !vm.form.picture}">
-                    <img src="[[vm.form.picture]]" onerror="this.src='/formulaire/public/img/empty-image.png';"/>
-<!--                <image-select ng-change="vm.getImage()" ng-model="vm.form.picture" default="/formulaire/public/img/empty-image.png"></image-select>-->
+                <div class="two cell picture" ng-class="{'empty': !vm.form.picture}">
+                    <image-select ng-change="vm.getImage()" ng-model="vm.form.picture" default="/img/illustrations/image-default.svg"/>
                 </div>
                 <div class="ten data">
                     <div class="data-text">
