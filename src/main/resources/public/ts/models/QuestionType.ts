@@ -2,6 +2,17 @@ import {Mix, Selectable, Selection} from "entcore-toolkit";
 import {idiom, notify} from "entcore";
 import {questionTypeService} from "../services";
 
+export enum Types {
+    FREETEXT = 1,
+    SHORTANSWER = 2,
+    LONGANSWER = 3,
+    SINGLEANSWER = 4,
+    MULTIPLEANSWER = 5,
+    DATE = 6,
+    TIME = 7,
+    FILE = 8
+}
+
 export class QuestionType {
     id: number;
     code: number;

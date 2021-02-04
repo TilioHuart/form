@@ -4,7 +4,7 @@ import {responseService} from "../services/ResponseService";
 export class Response {
     id: number;
     question_id: number;
-    answer: string;
+    answer: string | Date;
 
     constructor() {
         this.id = null;

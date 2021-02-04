@@ -1,0 +1,46 @@
+<!--Free text-->
+<div ng-if="question.question_type == vm.types.FREETEXT">
+    <div ng-if="!question.selected">
+        <div ng-if="!!question.statement" bind-html="question.statement"></div>
+        <textarea disabled ng-if="!!!question.statement"
+                  placeholder="[[vm.displayTypeName(question.question_type)]]"></textarea>
+    </div>
+    <div ng-if="question.selected">
+        <editor ng-model="question.statement"></editor>
+    </div>
+</div>
+
+<!--Short answer-->
+<div ng-if="question.question_type == vm.types.SHORTANSWER">
+    <textarea disabled i18n-placeholder="formulaire.question.type.SHORTANSWER"></textarea>
+</div>
+
+<!--Long answer-->
+<div ng-if="question.question_type == vm.types.LONGANSWER">
+    <textarea disabled i18n-placeholder="formulaire.question.type.LONGANSWER"></textarea>
+</div>
+
+<!--Single answer-->
+<div ng-if="question.question_type == vm.types.SINGLEANSWER">
+    <textarea disabled i18n-placeholder="formulaire.question.type.SINGLEANSWER"></textarea>
+</div>
+
+<!--Multiple answer-->
+<div ng-if="question.question_type == vm.types.MULTIPLEANSWER">
+    <textarea disabled i18n-placeholder="formulaire.question.type.MULTIPLEANSWER"></textarea>
+</div>
+
+<!--Date-->
+<div ng-if="question.question_type == vm.types.DATE">
+    <textarea disabled i18n-placeholder="formulaire.question.type.DATE"></textarea>
+</div>
+
+<!--Time-->
+<div ng-if="question.question_type == vm.types.TIME">
+    <textarea disabled i18n-placeholder="formulaire.question.type.TIME"></textarea>
+</div>
+
+<!--File-->
+<div ng-if="question.question_type == vm.types.FILE">
+    <textarea disabled i18n-placeholder="formulaire.question.type.FILE"></textarea>
+</div>

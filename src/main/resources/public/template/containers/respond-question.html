@@ -21,12 +21,28 @@
                 <h4>[[vm.question.title]]<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span></h4>
             </div>
             <div class="question-main">
-                <div ng-if="vm.question.question_type == 1">
+                <div ng-if="vm.question.question_type == vm.types.FREETEXT">
                     <div ng-if="!!vm.question.statement" bind-html="vm.question.statement"></div>
                 </div>
-                <div ng-if="vm.question.question_type != 1">
+                <div ng-if="vm.question.question_type == vm.types.SHORTANSWER">
                     <textarea ng-model="vm.response.answer" i18n-placeholder="formulaire.question.type.SHORTANSWER">
                     </textarea>
+                </div>
+                <div ng-if="vm.question.question_type == vm.types.LONGANSWER">
+                    <editor ng-model="vm.response.answer"></editor>
+                </div>
+                <div ng-if="vm.question.question_type == vm.types.SINGLEANSWER">
+                </div>
+                <div ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER">
+                </div>
+                <div ng-if="vm.question.question_type == vm.types.DATE">
+                    <date-picker ng-model="vm.response.answer"></date-picker>
+                </div>
+                <div ng-if="vm.question.question_type == vm.types.TIME">
+                    <input type="time" ng-model="vm.response.answer">
+                </div>
+                <div ng-if="vm.question.question_type == vm.types.FILE">
+                    <files-picker></files-picker>
                 </div>
             </div>
         </div>

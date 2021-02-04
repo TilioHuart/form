@@ -13,7 +13,7 @@
                 <div class="date">
                     <i class="clock sm-icon spaced-right"></i><i18n>formulaire.form.edit.modified</i18n>[[vm.displayLastSave()]]
                 </div>
-                <button class="cell" ng-click="vm.createNewQuestion()"><i18n>formulaire.form.edit.add</i18n></button>
+                <button class="cell dontCheck" ng-click="vm.createNewQuestion()"><i18n>formulaire.form.edit.add</i18n></button>
                 <button class="cell" ng-click="" ng-disabled="true"><i18n>formulaire.form.edit.organize</i18n></button>
                 <button class="cell" ng-click="" ng-disabled="true"><i18n>formulaire.form.edit.preview</i18n></button>
             </div>
@@ -23,11 +23,11 @@
     <div class="edit-form" ng-if="vm.questions.all.length > 0">
         <div class="questions" ng-class="{'dominos': vm.questions.all.length > 0}">
             <div ng-repeat="question in vm.questions.all | orderBy:question.position" class="item">
-                <div ng-include="'formulaire/public/template/components/question-item.html'"></div>
+                <div ng-include="'formulaire/public/template/components/question-item/question-item.html'"></div>
             </div>
         </div>
         <div class="buttons">
-            <button class="cell" ng-click="vm.createNewQuestion()"><i18n>formulaire.form.edit.add</i18n></button>
+            <button class="cell dontCheck" ng-click="vm.createNewQuestion()"><i18n>formulaire.form.edit.add</i18n></button>
         </div>
         <div class="buttons">
             <button class="cell" ng-click="redirectTo('/list/mine')"><i18n>formulaire.return</i18n></button>
