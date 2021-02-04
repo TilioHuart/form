@@ -61,7 +61,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			propForm: async (params) => {
 				$scope.currentPage = 'propForm';
 				if ($scope.canCreate()) {
-					$scope.form = $scope.getDataIf200(await formService.get(params.idForm));
+					let { data } = await formService.get(params.idForm);
+					$scope.form = data;
 					template.open('main', 'containers/prop-form');
 				}
 				else {
@@ -71,13 +72,9 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			openForm: async (params) => {
 				$scope.currentPage = 'openForm';
 				if ($scope.canCreate()) {
-					$scope.form = $scope.getDataIf200(await formService.get(params.idForm));
-					if (!!$scope.form.id) {
-						template.open('main', 'containers/edit-form');
-					}
-					else {
-						$scope.redirectTo('/list/mine');
-					}
+					let { data } = await formService.get(params.idForm);
+					$scope.form = data;
+					await template.open('main', 'containers/edit-form');
 				}
 				else if ($scope.canRespond()) {
 					$scope.redirectTo(`/form/${params.idForm}/question/1`);
@@ -102,7 +99,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 						}
 						else {
 							$scope.question = $scope.getDataIf200(await questionService.getByPosition(params.idForm, params.position));
-							template.open('main', 'containers/respond-question');
+							await template.open('main', 'containers/respond-question');
 						}
 					}
 					else {

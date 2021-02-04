@@ -70,14 +70,87 @@ body.formulaire {
         cursor: pointer;
       }
 
-      .data-text input {
-        width: 60%;
-      }
-
       .data-date {
         margin-top: 10px;
         font-size: 12px;
       }
+    }
+  }
+
+  // Edit-form
+
+  .edit-form {
+    display: flex;
+    flex-direction: column;
+    align-content: space-between;
+
+    .questions {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      .item {
+        width: 100%;
+
+        .domino {
+          display: flex;
+          flex-direction: column;
+          padding: 1% 2% 2% 2%;
+
+          .question-top {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1%;
+
+            .dots {
+              display: flex;
+              flex-direction: column;
+              line-height: 7px;
+            }
+          }
+
+          .focusable {
+            display: flex;
+            flex-direction: column;
+
+            .question-title {
+              display: flex;
+              justify-content: space-between;
+            }
+
+            .question-main {
+              font-size: 12px;
+
+              textarea {
+                width: 100%;
+                height: 60px;
+                resize: none;
+                background: none;
+              }
+            }
+
+            .question-bottom {
+              display: flex;
+              justify-content: flex-end;
+
+              .mandatory {
+                margin: 0 20px;
+              }
+
+              img {
+                margin: 0 5px;
+                opacity: 0.6;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 20px;
     }
   }
 
