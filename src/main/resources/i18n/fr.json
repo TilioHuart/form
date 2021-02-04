@@ -75,6 +75,7 @@
   "formulaire.question.title.empty": "Énoncé de ma question",
   "formulaire.question.delete.confirmation": "Êtes-vous sûr(e) de vouloir supprimer cette question ?",
   "formulaire.question.undo.confirmation": "Êtes-vous sûr(e) de vouloir annuler vos changements ?",
+  "formulaire.question.save.missing.field": "Attention, certaines questions manquent d'informations pour être valides !",
 
   "formulaire.responses.send.title": "Valider l'envoi",
   "formulaire.responses.send.text": "Une fois votre formulaire envoyé vous ne pourrez plus modifier vos réponses.",
@@ -91,7 +92,11 @@
   "formulaire.error.formService.create": "Une erreur est survenue lors de la création du nouveau formulaire",
   "formulaire.error.formService.get": "Une erreur est survenue lors de la récupération du formulaire",
   "formulaire.error.formService.update": "Une erreur est survenue lors de la sauvegarde du formulaire",
+  "formulaire.error.formService.archive": "Une erreur est survenue lors de l'archivage du formulaire",
+  "formulaire.error.formService.restore": "Une erreur est survenue lors de la restauration du formulaire",
   "formulaire.error.formService.delete": "Une erreur est survenue lors de la suppression du formulaire",
+  "formulaire.error.formService.unshare": "Une erreur est survenue lors de la suppression du partage du formulaire",
+  "formulaire.error.formService.image": "Une erreur est survenue lors de la récupération de l'image",
 
   "formulaire.error.question.sync": "Une erreur est survenue lors de la synchronisation des questions",
   "formulaire.error.questionService.list": "Une erreur est survenue lors de la récupération des questions",

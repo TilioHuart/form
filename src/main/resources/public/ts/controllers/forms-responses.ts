@@ -32,7 +32,6 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
     };
 
     const init = async (): Promise<void> => {
-        $scope.editMode = false;
         await vm.forms.syncSent();
         try {
             for (let form of vm.forms.all) {

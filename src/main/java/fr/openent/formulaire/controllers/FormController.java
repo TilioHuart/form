@@ -14,8 +14,11 @@ import fr.openent.formulaire.service.impl.DefaultNeoService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.http.Renders;
+import fr.wseduc.webutils.http.response.DefaultResponseHandler;
 import fr.wseduc.webutils.request.RequestUtils;
+import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -87,22 +90,22 @@ public class FormController extends ControllerHelper {
         });
     }
 
-    @Get("/forms/:id")
+    @Get("/forms/:formId")
     @ApiDoc("Get form thanks to the id")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
-        String id = request.getParam("id");
-        formService.get(id, defaultResponseHandler(request));
+        String formId = request.getParam("formId");
+        formService.get(formId, defaultResponseHandler(request));
     }
 
-    @Put("/forms/:id")
+    @Put("/forms/:formId")
     @ApiDoc("Update given form")
     @SecuredAction(Formulaire.CREATION_RIGHT)
     public void update(HttpServerRequest request) {
-        String id = request.getParam("id");
+        String formId = request.getParam("formId");
         RequestUtils.bodyToJson(request, form -> {
-            formService.update(id, form, defaultResponseHandler(request));
+            formService.update(formId, form, defaultResponseHandler(request));
         });
     }
 
@@ -128,8 +131,8 @@ public class FormController extends ControllerHelper {
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
-        String id = request.getParam("id");
-        formService.delete(id, defaultResponseHandler(request));
+        String formId = request.getParam("id");
+        formService.delete(formId, defaultResponseHandler(request));
     }
 
     // Export
@@ -142,6 +145,16 @@ public class FormController extends ControllerHelper {
         new FormResponsesExport(eb, request).launch();
     }
 
+    // Image
+
+    @Get("/info/image/:id")
+    @ApiDoc("get info image workspace")
+    @ResourceFilter(CreationRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void getInfoImg(final HttpServerRequest request) {
+        String id = request.getParam("id");
+        formService.getImage(eb, id, DefaultResponseHandler.defaultResponseHandler(request));
+    }
 
     // Share/Sending functions
 
@@ -164,23 +177,7 @@ public class FormController extends ControllerHelper {
                     request.resume();
                     final String formName = getFormHandler.right().getValue().getString("title");
                     JsonObject params = new fr.wseduc.webutils.collections.JsonObject();
-//                    params.put("username", user.getUsername());
-//                    params.put("uri", pathPrefix + "#/subject/copy/preview/perform/"+formId);
-//                    params.put("userUri", "/userbook/annuaire#" + user.getUserId() + "#" + user.getType());
-//                    params.put("subjectName", formName);
-//                    params.put("resourceUri", params.getString("uri"));
-//                    JsonObject pushNotif = new JsonObject()
-//                            .put("title", "exercizer.share")
-//                            .put("body", I18n.getInstance().translate(
-//                                    "exercizer.push.notif.share.body",
-//                                    getHost(request),
-//                                    I18n.acceptLanguage(request),
-//                                    user.getUsername(),
-//                                    formName
-//                            ));
-//
-//                    params.put("pushNotif", pushNotif);
-                    FormController.super.shareJsonSubmit(request, "formulaire.share", false, params, null);
+                    FormController.super.shareJsonSubmit(request, null, false, params, null);
                 });
             }
             else {
@@ -213,7 +210,7 @@ public class FormController extends ControllerHelper {
                             addNewDistributions(formId, user, infos);
                             updateFormSentProp(formId);
                         } else {
-                            log.error("[Formulaire@getUserIds] Fail to get users' ids from groups' ids");
+                            log.error("[Formulaire@GetUserIds] Fail to get users' ids from groups' ids");
                         }
                     });
 

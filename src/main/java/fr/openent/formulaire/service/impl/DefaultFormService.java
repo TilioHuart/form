@@ -4,11 +4,14 @@ import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.service.FormService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
+
+import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 
 public class DefaultFormService implements FormService {
 
@@ -76,5 +79,18 @@ public class DefaultFormService implements FormService {
         String query = "DELETE FROM " + Formulaire.FORM_TABLE + " WHERE id = ?;";
         JsonArray params = new JsonArray().add(id);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    @Override
+    public void getImage(EventBus eb, String idImage, Handler<Either<String, JsonObject>> handler) {
+        JsonObject action = new JsonObject().put("action", "getDocument").put("id", idImage);
+        String WORKSPACE_BUS_ADDRESS = "org.entcore.workspace";
+        eb.send(WORKSPACE_BUS_ADDRESS, action, handlerToAsyncHandler(message -> {
+            if (idImage.equals("")) {
+                handler.handle(new Either.Left<>("[DefaultDocumentService@get] An error id image"));
+            } else {
+                handler.handle(new Either.Right<>(message.body().getJsonObject("result")));
+            }
+        }));
     }
 }

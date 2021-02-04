@@ -75,6 +75,7 @@
   "formulaire.question.title.empty": "Statement of my question",
   "formulaire.question.delete.confirmation": "Do you really want to delete this question ?",
   "formulaire.question.undo.confirmation": "Do you really want to cancel your changes ?",
+  "formulaire.question.save.missing.field": "Careful, some questions are missing information to be valid !",
 
   "formulaire.responses.send.title": "Confirm sending",
   "formulaire.responses.send.text": "Once your form sent, you won't be able to modify your answers.",
@@ -91,7 +92,11 @@
   "formulaire.error.formService.create": "An error occurred during the form's creation",
   "formulaire.error.formService.get": "An error occurred during the form's retrieving",
   "formulaire.error.formService.update": "An error occurred during the form's saving",
+  "formulaire.error.formService.archive": "An error occurred during the form's archiving",
+  "formulaire.error.formService.restore": "An error occurred during the form's restoration",
   "formulaire.error.formService.delete": "An error occurred during the form's suppression",
+  "formulaire.error.formService.unshare": "An error occurred during the suppression of the form's sharing",
+  "formulaire.error.formService.image": "An error occurred during the retrieving of the form's image",
 
   "formulaire.error.question.sync": "An error occurred during the questions' synchronisation",
   "formulaire.error.questionService.list": "An error occurred during the questions' retrieving",

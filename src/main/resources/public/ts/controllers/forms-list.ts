@@ -1,4 +1,4 @@
-import {Behaviours, idiom, ng, notify, Rights, template, toasts} from 'entcore';
+import {idiom, ng, notify, template} from 'entcore';
 import {Form, Forms} from "../models";
 import {DateUtils} from "../utils/date";
 import {formService, questionService} from "../services";
@@ -58,7 +58,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     const init = async (): Promise<void> => {
-        $scope.editMode = false;
         await vm.forms.sync();
 
         // Check if the folder is ok
@@ -107,7 +106,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     vm.openForm = (form: Form): void => {
-        $scope.editMode = true;
         $scope.form = form;
         $scope.redirectTo(`/form/${form.id}`);
         $scope.safeApply();
@@ -207,7 +205,9 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.doDeleteForms = async (): Promise<void> => {
         try {
             for (let form of vm.forms.selected) {
-                await formService.delete(form.id);
+                if ($scope.isStatusXXX(await formService.unshare(form.id), 200)) {
+                    await formService.delete(form.id);
+                }
             }
             template.close('lightbox');
             vm.display.lightbox.delete = false;

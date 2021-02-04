@@ -9,8 +9,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.template = template;
 
 		// Init variables
-		$scope.currentTab = 'formsList';
-		$scope.editMode = false;
+		$scope.currentPage = 'formsList';
 		$scope.form = new Form();
 		$scope.question = new Question();
 		$scope.questionTypes = new QuestionTypes();
@@ -20,6 +19,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 
 		route({
 			list: () => {
+				$scope.currentPage = 'list';
 				if ($scope.canCreate()) {
 					$scope.redirectTo('/list/mine');
 				}
@@ -31,8 +31,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				}
 			},
 			formsList: () => {
+				$scope.currentPage = 'formsList';
 				if ($scope.canCreate()) {
-					$scope.currentTab = 'formsList';
 					template.open('main', 'containers/forms-list');
 				}
 				else {
@@ -40,8 +40,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				}
 			},
 			formsResponses: () => {
+				$scope.currentPage = 'formsResponses';
 				if ($scope.canRespond()) {
-					$scope.currentTab = 'formsResponses';
 					template.open('main', 'containers/forms-responses');
 				}
 				else {
@@ -49,6 +49,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				}
 			},
 			createForm: () => {
+				$scope.currentPage = 'createForm';
 				if ($scope.canCreate()) {
 					template.open('main', 'containers/create-form');
 				}
@@ -57,10 +58,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				}
 			},
 			openForm: async (params) => {
+				$scope.currentPage = 'openForm';
 				if ($scope.canCreate()) {
 					let { data } = await formService.get(params.idForm);
 					$scope.form = data;
-					$scope.editMode = true;
 					await template.open('main', 'containers/edit-form');
 				}
 				else if ($scope.canRespond()) {
@@ -71,6 +72,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				}
 			},
 			respondQuestion: async (params) => {
+				$scope.currentPage = 'respondQuestion';
 				if ($scope.canRespond()) {
 					let distribution = $scope.getDataIf200(await distributionService.get(params.idForm));
 					if (!!distribution.status && distribution.status != DistributionStatus.FINISHED) {
@@ -97,9 +99,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				}
 			},
 			e403: () => {
+				$scope.currentPage = 'e403';
 				template.open('main', 'containers/e403');
 			},
 			e404: () => {
+				$scope.currentPage = 'e404';
 				template.open('main', 'containers/e404');
 			}
 		});
@@ -111,7 +115,12 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		};
 
 		$scope.getDataIf200 = (response: AxiosResponse) : any => {
-			if (response.status == 200) { return response.data; }
+			if ($scope.isStatusXXX(response, 200)) { return response.data; }
+			else { return null; }
+		};
+
+		$scope.isStatusXXX = (response: AxiosResponse, status: number) : any => {
+			return response.status === status;
 		};
 
 		$scope.redirectTo = (path: string) => {

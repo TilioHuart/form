@@ -51,6 +51,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.form = $scope.form;
         await vm.questions.sync(vm.form.id);
         vm.newQuestion.form_id = vm.form.id;
+        vm.dontSave = false;
         $scope.safeApply();
     };
 
@@ -101,10 +102,10 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             vm.dontSave = true;
             for (let i = vm.questions.selected[0].position; i < vm.questions.all.length; i++) {
                 vm.questions.all[i].position++;
-                let response = await questionService.save(vm.questions.all[i]);
+                await questionService.save(vm.questions.all[i]);
             }
             vm.questions.selected[0].position++;
-            let response = await questionService.create(vm.questions.selected[0]);
+            await questionService.create(vm.questions.selected[0]);
             template.close('lightbox');
             vm.display.lightbox.delete = false;
             notify.success(idiom.translate('formulaire.success.question.duplicate'));
@@ -125,7 +126,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
     vm.doDeleteQuestion = async () => {
         try {
-            let response = await questionService.delete(vm.questions.selected[0].id);
+            await questionService.delete(vm.questions.selected[0].id);
             template.close('lightbox');
             vm.display.lightbox.delete = false;
             notify.success(idiom.translate('formulaire.success.question.delete'));
@@ -208,7 +209,12 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
     // Utils
 
     const onClickQuestion = async (event) : Promise<void> => {
-        if (!vm.dontSave) {
+        if (!vm.dontSave && $scope.currentPage === 'openForm') {
+            let wrongQuestions = vm.questions.filter(question => !!!question.title); // TODO check more than just titles later
+            if (wrongQuestions.length > 0) {
+                notify.error(idiom.translate('formulaire.question.save.missing.field'));
+            }
+
             let questionId: number = isInFocusable(event.target);
             if (!!questionId && questionId > 0) {
                 let question = vm.questions.all.filter(question => question.id == questionId)[0];
