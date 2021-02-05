@@ -1,6 +1,6 @@
-import {$, idiom, ng, notify, template} from 'entcore';
-import {Form, Question, Questions, Types} from "../models";
-import {formService, questionService} from "../services";
+import {idiom, ng, notify, template} from 'entcore';
+import {Form, Question, QuestionChoice, Questions, Types} from "../models";
+import {formService, questionChoiceService, questionService} from "../services";
 import {DateUtils} from "../utils/date";
 
 interface ViewModel {
@@ -17,18 +17,20 @@ interface ViewModel {
         }
     };
 
-    switchAll(boolean): void;
+    switchAll(value: boolean): void;
     createNewQuestion(): void;
-    doCreateNewQuestion(number): void;
-    saveQuestions(boolean?): void;
+    doCreateNewQuestion(code: number): void;
+    saveQuestions(displaySuccess?: boolean): void;
     duplicateQuestion(): void;
     deleteQuestion(): void;
     doDeleteQuestion(): void;
     undoQuestionChanges(): void;
     doUndoQuestionChanges(): void;
+    createNewChoice(question: Question): void;
+    deleteChoice(question: Question, index: number): Promise<void>;
     displayLastSave(): string;
-    displayTypeName(string): string;
-    displayTypeIcon(number): string;
+    displayTypeName(typeInfo: string): string;
+    displayTypeIcon(code: number): string;
 }
 
 
@@ -86,6 +88,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         try {
             for (let question of vm.questions.all) {
                 await questionService.save(question);
+                for (let choice of question.choices.all) {
+                    if (!!choice.value) await questionChoiceService.save(choice);
+                }
             }
             if (displaySuccess) { notify.success(idiom.translate('formulaire.success.form.save')); }
             let response = await formService.get(vm.form.id);
@@ -162,6 +167,27 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         template.close('lightbox');
         vm.display.lightbox.undo = true;
         vm.dontSave = false;
+        $scope.safeApply();
+    };
+
+    // Choices functions
+
+    vm.createNewChoice = (question: Question) : void => {
+        question.choices.all.push(new QuestionChoice(question.id));
+        $scope.safeApply();
+    };
+
+    vm.deleteChoice = async (question: Question, index: number) : Promise<void> => {
+        if (!!question.choices.all[index].id) {
+            await questionChoiceService.delete(question.choices.all[index].id);
+        }
+
+        let temp = question.choices.all;
+        question.choices.all = [];
+        for (let i = 0; i < temp.length; i++) {
+            if (i != index) question.choices.all.push(temp[i]);
+        }
+
         $scope.safeApply();
     };
 

@@ -54,11 +54,11 @@ public class DistributionController extends ControllerHelper {
         });
     }
 
-    @Post("/forms/:id/distributions")
+    @Post("/forms/:formId/distributions")
     @ApiDoc("Distribute a form to a list of responders")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void create(HttpServerRequest request) {
-        String formId = request.getParam("id");
+        String formId = request.getParam("formId");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
                 RequestUtils.bodyToJsonArray(request, responders -> {
@@ -71,21 +71,21 @@ public class DistributionController extends ControllerHelper {
         });
     }
 
-    @Put("/distributions/:id")
+    @Put("/distributions/:distributionId")
     @ApiDoc("Update given distribution")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void update(HttpServerRequest request) {
-        String id = request.getParam("id");
+        String distributionId = request.getParam("distributionId");
         RequestUtils.bodyToJson(request, distribution -> {
-            distributionService.update(id, distribution, defaultResponseHandler(request));
+            distributionService.update(distributionId, distribution, defaultResponseHandler(request));
         });
     }
 
-    @Delete("/distributions/:id")
+    @Delete("/distributions/:distributionId")
     @ApiDoc("Delete given distribution")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void delete(HttpServerRequest request) {
-        String id = request.getParam("id");
-        distributionService.delete(id, defaultResponseHandler(request));
+        String distributionId = request.getParam("distributionId");
+        distributionService.delete(distributionId, defaultResponseHandler(request));
     }
 }

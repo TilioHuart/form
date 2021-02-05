@@ -22,7 +22,8 @@
 
     <div class="edit-form" ng-if="vm.questions.all.length > 0">
         <div class="questions" ng-class="{'dominos': vm.questions.all.length > 0}">
-            <div ng-repeat="question in vm.questions.all | orderBy:question.position" class="item">
+            <div ng-repeat="question in vm.questions.all | orderBy:question.position"
+                 class="item" ng-class="{'questionError': !!!question.title || question.choices.length === 0 }">
                 <div ng-include="'formulaire/public/template/components/question-item/question-item.html'"></div>
             </div>
         </div>

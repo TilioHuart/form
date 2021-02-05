@@ -13,25 +13,33 @@ import org.entcore.common.user.UserInfos;
 public class DefaultResponseService implements ResponseService {
 
     @Override
-    public void list(String question_id, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " WHERE question_id = ? ORDER BY created;";
-        JsonArray params = new JsonArray().add(question_id);
+    public void list(String questionId, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " WHERE question_id = ?;";
+        JsonArray params = new JsonArray().add(questionId);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
     @Override
-    public void get(String question_id, UserInfos user, Handler<Either<String, JsonObject>> handler) {
+    public void listMine(String questionId, UserInfos user, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " WHERE question_id = ? AND responder_id = ? ORDER BY choice_id;";
+        JsonArray params = new JsonArray().add(questionId).add(user.getUserId());
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public void get(String questionId, UserInfos user, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " WHERE question_id = ? AND responder_id = ?;";
-        JsonArray params = new JsonArray().add(question_id).add(user.getUserId());
+        JsonArray params = new JsonArray().add(questionId).add(user.getUserId());
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override
-    public void create(JsonObject response, UserInfos user, String question_id, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO " + Formulaire.RESPONSE_TABLE + " (question_id, answer, responder_id) " +
-                "VALUES (?, ?, ?) RETURNING *;";
+    public void create(JsonObject response, UserInfos user, String questionId, Handler<Either<String, JsonObject>> handler) {
+        String query = "INSERT INTO " + Formulaire.RESPONSE_TABLE + " (question_id, choice_id, answer, responder_id) " +
+                "VALUES (?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
-                .add(question_id)
+                .add(questionId)
+                .add(response.getInteger("choice_id", null))
                 .add(response.getString("answer", ""))
                 .add(user.getUserId());
 
@@ -39,20 +47,20 @@ public class DefaultResponseService implements ResponseService {
     }
 
     @Override
-    public void update(UserInfos user, String id, JsonObject response, Handler<Either<String, JsonObject>> handler) {
+    public void update(UserInfos user, String responseId, JsonObject response, Handler<Either<String, JsonObject>> handler) {
         String query = "UPDATE " + Formulaire.RESPONSE_TABLE + " SET answer = ? WHERE responder_id = ? AND id = ?;";
         JsonArray params = new JsonArray()
                 .add(response.getString("answer", ""))
                 .add(user.getUserId())
-                .add(id);
+                .add(responseId);
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override
-    public void delete(String id, Handler<Either<String, JsonObject>> handler) {
+    public void delete(String responseId, Handler<Either<String, JsonObject>> handler) {
         String query = "DELETE FROM " + Formulaire.RESPONSE_TABLE + " WHERE id = ?;";
-        JsonArray params = new JsonArray().add(id);
+        JsonArray params = new JsonArray().add(responseId);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 

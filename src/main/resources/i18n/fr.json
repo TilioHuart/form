@@ -74,6 +74,8 @@
   "formulaire.question.type.FILE": "Dépôt de fichier",
   "formulaire.question.title.free.empty": "Titre de ma zone de texte",
   "formulaire.question.title.empty": "Énoncé de ma question",
+  "formulaire.question.date.empty": "jj/mm/aaaa",
+  "formulaire.question.time.empty": "00:00",
   "formulaire.question.delete.confirmation": "Êtes-vous sûr(e) de vouloir supprimer cette question ?",
   "formulaire.question.undo.confirmation": "Êtes-vous sûr(e) de vouloir annuler vos changements ?",
   "formulaire.question.save.missing.field": "Attention, certaines questions manquent d'informations pour être valides !",
@@ -111,6 +113,13 @@
   "formulaire.error.questionTypeService.list": "Une erreur est survenue lors de la récupération des types de question",
   "formulaire.error.questionTypeService.get": "Une erreur est survenue lors de la récupération du type de question",
 
+  "formulaire.error.questionChoice.sync": "Une erreur est survenue lors de la synchronisation des choix de question",
+  "formulaire.error.questionChoiceService.list": "Une erreur est survenue lors de la récupération des choix de question",
+  "formulaire.error.questionChoiceService.create": "Une erreur est survenue lors de la création du nouveau choix de question",
+  "formulaire.error.questionChoiceService.get": "Une erreur est survenue lors de la récupération du choix de question",
+  "formulaire.error.questionChoiceService.update": "Une erreur est survenue lors de la sauvegarde du choix de question",
+  "formulaire.error.questionChoiceService.delete": "Une erreur est survenue lors de la suppression du choix de question",
+
   "formulaire.error.distribution.sync": "Une erreur est survenue lors de la synchronisation des distributions",
   "formulaire.error.distributionService.list": "Une erreur est survenue lors de la récupération des distributions",
   "formulaire.error.distributionService.create": "Une erreur est survenue lors de la création de la nouvelle distribution",
@@ -118,7 +127,7 @@
   "formulaire.error.distributionService.update": "Une erreur est survenue lors de la sauvegarde de la distribution",
   "formulaire.error.distributionService.delete": "Une erreur est survenue lors de la suppression de la distribution",
 
-  "formulaire.error.response.send": "Une erreur est survenue lors de l'envoi de la réponse",
+  "formulaire.error.response.sync": "Une erreur est survenue lors de la synchronisation des réponses",
   "formulaire.error.responseService.list": "Une erreur est survenue lors de la récupération des réponses",
   "formulaire.error.responseService.create": "Une erreur est survenue lors de la création de la nouvelle réponse",
   "formulaire.error.responseService.get": "Une erreur est survenue lors de la récupération de la réponse",

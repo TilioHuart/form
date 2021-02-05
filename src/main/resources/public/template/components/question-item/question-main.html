@@ -21,23 +21,41 @@
 </div>
 
 <!--Single answer-->
-<div ng-if="question.question_type == vm.types.SINGLEANSWER">
-    <textarea disabled i18n-placeholder="formulaire.question.type.SINGLEANSWER"></textarea>
+<div ng-if="question.question_type == vm.types.SINGLEANSWER" class="seven">
+    <div ng-repeat="choice in question.choices.all">
+        <span>[[$index + 1]].</span>
+        <input type="text" class="eleven" ng-model="choice.value" i18n-placeholder="Choix [[$index + 1]]" ng-if="!question.selected" disabled>
+        <input type="text" class="eleven" ng-model="choice.value" i18n-placeholder="Choix [[$index + 1]]" ng-if="question.selected">
+        <img src="/formulaire/public/img/icons/cancel.svg" ng-click="vm.deleteChoice(question, $index)" ng-if="question.selected"/>
+    </div>
+    <div style="display: flex; justify-content: center;" ng-if="question.selected">
+        <img src="/formulaire/public/img/icons/plus-circle.svg" ng-click="vm.createNewChoice(question)"/>
+    </div>
 </div>
 
 <!--Multiple answer-->
-<div ng-if="question.question_type == vm.types.MULTIPLEANSWER">
-    <textarea disabled i18n-placeholder="formulaire.question.type.MULTIPLEANSWER"></textarea>
+<div ng-if="question.question_type == vm.types.MULTIPLEANSWER" class="seven">
+    <div ng-repeat="choice in question.choices.all">
+        <input type="checkbox" id="check-[[choice.id]]" disabled>
+        <label for="check-[[choice.id]]">
+            <input type="text" class="eleven" ng-model="choice.value" i18n-placeholder="Choix [[$index + 1]]" ng-if="!question.selected" disabled>
+            <input type="text" class="eleven" ng-model="choice.value" i18n-placeholder="Choix [[$index + 1]]" ng-if="question.selected">
+        </label>
+        <img src="/formulaire/public/img/icons/cancel.svg" ng-click="vm.deleteChoice(question, $index)" ng-if="question.selected"/>
+    </div>
+    <div style="display: flex; justify-content: center;" ng-if="question.selected">
+        <img src="/formulaire/public/img/icons/plus-circle.svg" ng-click="vm.createNewChoice(question)"/>
+    </div>
 </div>
 
 <!--Date-->
 <div ng-if="question.question_type == vm.types.DATE">
-    <textarea disabled i18n-placeholder="formulaire.question.type.DATE"></textarea>
+    <i18n style="color:grey">formulaire.question.date.empty</i18n>
 </div>
 
 <!--Time-->
 <div ng-if="question.question_type == vm.types.TIME">
-    <textarea disabled i18n-placeholder="formulaire.question.type.TIME"></textarea>
+    <i18n style="color:grey">formulaire.question.time.empty</i18n>
 </div>
 
 <!--File-->

@@ -4,6 +4,7 @@ import {Question, Response} from "../models";
 
 export interface ResponseService {
     list(questionId : number): Promise<AxiosResponse>;
+    listMine(questionId : number): Promise<AxiosResponse>;
     get(questionId : number): Promise<AxiosResponse>;
     save(response : Response): Promise<AxiosResponse>;
     create(response : Response): Promise<AxiosResponse>;
@@ -16,6 +17,15 @@ export const responseService: ResponseService = {
     async list (questionId : number): Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/questions/${questionId}/responses`);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.responseService.list'));
+            throw err;
+        }
+    },
+
+    async listMine (questionId : number): Promise<AxiosResponse> {
+        try {
+            return http.get(`/formulaire/questions/${questionId}/responses/mine`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.list'));
             throw err;

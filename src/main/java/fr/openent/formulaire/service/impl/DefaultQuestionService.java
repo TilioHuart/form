@@ -26,9 +26,9 @@ public class DefaultQuestionService implements QuestionService {
     }
 
     @Override
-    public void get(String id, Handler<Either<String, JsonObject>> handler) {
+    public void get(String questionId, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT * FROM " + Formulaire.QUESTION_TABLE + " WHERE id = ?;";
-        JsonArray params = new JsonArray().add(id);
+        JsonArray params = new JsonArray().add(questionId);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
@@ -55,7 +55,7 @@ public class DefaultQuestionService implements QuestionService {
     }
 
     @Override
-    public void update(String id, JsonObject question, Handler<Either<String, JsonObject>> handler) {
+    public void update(String questionId, JsonObject question, Handler<Either<String, JsonObject>> handler) {
         String query = "UPDATE " + Formulaire.QUESTION_TABLE + " SET title=  ?, position = ?, question_type = ?, " +
                 "statement = ?, mandatory = ? WHERE id = ?;";
         JsonArray params = new JsonArray()
@@ -64,7 +64,7 @@ public class DefaultQuestionService implements QuestionService {
                 .add(question.getInteger("question_type", 1))
                 .add(question.getString("statement", ""))
                 .add(question.getBoolean("mandatory", false))
-                .add(id);
+                .add(questionId);
 
         query += "UPDATE " + Formulaire.FORM_TABLE + " SET date_modification = ? WHERE id = ?;";
         params.add("NOW()").add(question.getInteger("form_id"));
@@ -73,9 +73,9 @@ public class DefaultQuestionService implements QuestionService {
     }
 
     @Override
-    public void delete(String id, Handler<Either<String, JsonObject>> handler) {
+    public void delete(String questionId, Handler<Either<String, JsonObject>> handler) {
         String query = "DELETE FROM " + Formulaire.QUESTION_TABLE + " WHERE id = ?;";
-        JsonArray params = new JsonArray().add(id);
+        JsonArray params = new JsonArray().add(questionId);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 }

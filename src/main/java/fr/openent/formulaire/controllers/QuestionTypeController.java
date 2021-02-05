@@ -37,7 +37,7 @@ public class QuestionTypeController extends ControllerHelper {
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
-        String id = request.getParam("code");
-        questionTypeService.get(id, defaultResponseHandler(request));
+        String code = request.getParam("code");
+        questionTypeService.get(code, defaultResponseHandler(request));
     }
 }

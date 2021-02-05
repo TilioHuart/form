@@ -1,6 +1,13 @@
 import {idiom, ng, notify, template} from "entcore";
-import {Distribution, DistributionStatus, Question, QuestionType, Response, Types} from "../models";
-import {distributionService, formService, questionService} from "../services";
+import {
+    Distribution,
+    DistributionStatus,
+    Question, QuestionChoices,
+    Response,
+    Responses,
+    Types
+} from "../models";
+import {distributionService, questionService} from "../services";
 import {responseService} from "../services/ResponseService";
 import {DateUtils} from "../utils/date";
 
@@ -8,9 +15,11 @@ interface ViewModel {
     types: typeof Types;
     question: Question;
     response: Response;
+    responses: Responses;
     distribution: Distribution;
     nbQuestions: number;
     last: boolean;
+    selectedIndex: Array<boolean>;
     display: {
         lightbox: {
             sending: boolean
@@ -31,9 +40,11 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     vm.types = Types;
     vm.question = new Question();
     vm.response = new Response();
+    vm.responses = new Responses();
     vm.distribution = new Distribution();
     vm.nbQuestions = 1;
     vm.last = false;
+    vm.selectedIndex = new Array<boolean>();
     vm.display = {
         lightbox: {
             sending: false
@@ -42,20 +53,32 @@ export const questionResponderController = ng.controller('QuestionResponderContr
 
     const init = async (): Promise<void> => {
         vm.question = $scope.question;
+        vm.question.choices = new QuestionChoices();
         vm.nbQuestions = $scope.form.nbQuestions;
         vm.last = vm.question.position == vm.nbQuestions;
-        vm.response = $scope.getDataIf200(await responseService.get(vm.question.id));
-        if (!!!vm.response.question_id) { vm.response.question_id = vm.question.id; }
-        vm.distribution = $scope.getDataIf200(await distributionService.get(vm.question.form_id));
-
+        await vm.question.choices.sync(vm.question.id);
+        if (vm.question.question_type === Types.MULTIPLEANSWER) {
+            await vm.responses.syncMine(vm.question.id);
+            vm.selectedIndex = new Array<boolean>(vm.nbQuestions);
+            for (let i = 0; i < vm.question.choices.all.length; i++) {
+                for (let j = 0; j < vm.responses.all.length; j++) {
+                    vm.selectedIndex[i] = vm.question.choices.all[i].id === vm.responses.all[j].choice_id;
+                }
+            }
+        }
+        else {
+            vm.response = $scope.getDataIf200(await responseService.get(vm.question.id));
+            if (!!!vm.response.question_id) { vm.response.question_id = vm.question.id; }
+        }
         if (vm.question.question_type === Types.DATE) { formatDate() }
         if (vm.question.question_type === Types.TIME) { formatTime() }
+        vm.distribution = $scope.getDataIf200(await distributionService.get(vm.question.form_id));
 
         $scope.safeApply();
     };
 
     vm.prev = async (): Promise<void> => {
-        await responseService.save(vm.response);
+        await saveResponses();
         let prevPosition: number = vm.question.position - 1;
 
         if (prevPosition > 0) {
@@ -70,7 +93,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     };
 
     vm.next = async (): Promise<void> => {
-        await responseService.save(vm.response);
+        await saveResponses();
         let nextPosition: number = vm.question.position + 1;
 
         if (nextPosition <= vm.nbQuestions) {
@@ -85,7 +108,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     };
 
     vm.saveAndQuit = async (): Promise<void> => {
-        await responseService.save(vm.response);
+        await saveResponses();
         if (vm.distribution.status == DistributionStatus.TO_DO) {
             vm.distribution.status = DistributionStatus.IN_PROGRESS;
             await distributionService.update(vm.distribution);
@@ -107,7 +130,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     };
 
     vm.doSend = async (): Promise<void> => {
-        await responseService.save(vm.response);
+        await saveResponses();
         vm.distribution.status = DistributionStatus.FINISHED;
         await distributionService.update(vm.distribution);
         template.close('lightbox');
@@ -115,6 +138,30 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         notify.success(idiom.translate('formulaire.success.responses.save'));
         $scope.redirectTo(`/list/responses`);
         $scope.safeApply();
+    };
+
+    const saveResponses = async (): Promise<void> => {
+        if (vm.question.question_type === Types.MULTIPLEANSWER) {
+            for (let i = 0; i < vm.question.choices.all.length; i++) {
+                let checked = vm.selectedIndex[i];
+                let j = 0;
+                let found = false;
+                while (!found && j < vm.responses.all.length) {
+                    found = vm.question.choices.all[i].id === vm.responses.all[j].choice_id;
+                    j++;
+                }
+                if (!found && checked) {
+                    let newResponse = new Response(vm.question.id, vm.question.choices.all[i].id, vm.question.choices.all[i].value);
+                    await responseService.create(newResponse);
+                }
+                else if (found && !checked) {
+                    await responseService.delete(vm.responses.all[j].id);
+                }
+            }
+        }
+        else {
+            await responseService.save(vm.response);
+        }
     };
 
     const formatDate = (): void => {

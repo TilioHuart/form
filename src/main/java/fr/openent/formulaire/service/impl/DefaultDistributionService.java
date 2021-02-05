@@ -61,19 +61,19 @@ public class DefaultDistributionService implements DistributionService {
     }
 
     @Override
-    public void update(String id, JsonObject distribution, Handler<Either<String, JsonObject>> handler) {
+    public void update(String distributionId, JsonObject distribution, Handler<Either<String, JsonObject>> handler) {
         String query = "UPDATE " + Formulaire.DISTRIBUTION_TABLE + " SET status = '"
                 + distribution.getString("status") + "' ";
         if (distribution.getString("status").equals(Formulaire.FINISHED)) { query += ", date_response = NOW() "; }
-        query += "WHERE id = " + id + " ;";
+        query += "WHERE id = " + distributionId + " ;";
 
         Sql.getInstance().raw(query, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override
-    public void delete(String id, Handler<Either<String, JsonObject>> handler) {
+    public void delete(String distributionId, Handler<Either<String, JsonObject>> handler) {
         String query = "DELETE FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE id = ?;";
-        JsonArray params = new JsonArray().add(id);
+        JsonArray params = new JsonArray().add(distributionId);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
