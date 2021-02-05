@@ -126,12 +126,12 @@ public class FormController extends ControllerHelper {
         });
     }
 
-    @Delete("/forms/:id")
+    @Delete("/forms/:formId")
     @ApiDoc("Delete given form")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
-        String formId = request.getParam("id");
+        String formId = request.getParam("formId");
         formService.delete(formId, defaultResponseHandler(request));
     }
 
@@ -147,13 +147,13 @@ public class FormController extends ControllerHelper {
 
     // Image
 
-    @Get("/info/image/:id")
+    @Get("/info/image/:idImage")
     @ApiDoc("get info image workspace")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void getInfoImg(final HttpServerRequest request) {
-        String id = request.getParam("id");
-        formService.getImage(eb, id, DefaultResponseHandler.defaultResponseHandler(request));
+        String idImage = request.getParam("idImage");
+        formService.getImage(eb, idImage, DefaultResponseHandler.defaultResponseHandler(request));
     }
 
     // Share/Sending functions

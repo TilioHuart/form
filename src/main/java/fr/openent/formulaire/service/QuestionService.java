@@ -10,13 +10,13 @@ public interface QuestionService {
 
     void countQuestions(String formId, Handler<Either<String, JsonObject>> handler);
 
-    void get(String id, Handler<Either<String, JsonObject>> handler);
+    void get(String questionId, Handler<Either<String, JsonObject>> handler);
 
     void getByPosition(String formId, String position, Handler<Either<String, JsonObject>> handler);
 
     void create(JsonObject question, String formId, Handler<Either<String, JsonObject>> handler);
 
-    void update(String id, JsonObject question, Handler<Either<String, JsonObject>> handler);
+    void update(String questionId, JsonObject question, Handler<Either<String, JsonObject>> handler);
 
-    void delete(String id, Handler<Either<String, JsonObject>> handler);
+    void delete(String questionId, Handler<Either<String, JsonObject>> handler);
 }

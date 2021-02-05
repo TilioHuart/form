@@ -29,24 +29,40 @@ public class ResponseController extends ControllerHelper {
         this.responseService = new DefaultResponseService();
     }
 
-    @Get("/questions/:id/responses")
+    @Get("/questions/:questionId/responses")
     @ApiDoc("List responses")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
-        String question_id = request.getParam("id");
-        responseService.list(question_id, arrayResponseHandler(request));
+        String questionId = request.getParam("questionId");
+        responseService.list(questionId, arrayResponseHandler(request));
     }
 
-    @Get("/questions/:id/response")
+    @Get("/questions/:questionId/responses/mine")
+    @ApiDoc("List responses")
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void listMine(HttpServerRequest request) {
+        String questionId = request.getParam("questionId");
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user != null) {
+                responseService.listMine(questionId, user, arrayResponseHandler(request));
+            } else {
+                log.debug("User not found in session.");
+                Renders.unauthorized(request);
+            }
+        });
+    }
+
+    @Get("/questions/:questionId/response")
     @ApiDoc("Get form thanks to the id")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
-        String question_id = request.getParam("id");
+        String questionId = request.getParam("questionId");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
-                responseService.get(question_id, user, defaultResponseHandler(request));
+                responseService.get(questionId, user, defaultResponseHandler(request));
             } else {
                 log.debug("User not found in session.");
                 Renders.unauthorized(request);
@@ -54,15 +70,15 @@ public class ResponseController extends ControllerHelper {
         });
     }
 
-    @Post("/questions/:id/responses")
+    @Post("/questions/:questionId/responses")
     @ApiDoc("Create a response")
     @SecuredAction(Formulaire.RESPONSE_RIGHT)
     public void create(HttpServerRequest request) {
-        String question_id = request.getParam("id");
+        String questionId = request.getParam("questionId");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
                 RequestUtils.bodyToJson(request, response -> {
-                    responseService.create(response, user, question_id, defaultResponseHandler(request));
+                    responseService.create(response, user, questionId, defaultResponseHandler(request));
                 });
             } else {
                 log.debug("User not found in session.");
@@ -71,16 +87,16 @@ public class ResponseController extends ControllerHelper {
         });
     }
 
-    @Put("/responses/:id")
+    @Put("/responses/:responseId")
     @ApiDoc("Update given response")
     @ResourceFilter(ResponseRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
-        String id = request.getParam("id");
+        String responseId = request.getParam("responseId");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
                 RequestUtils.bodyToJson(request, response -> {
-                    responseService.update(user, id, response, defaultResponseHandler(request));
+                    responseService.update(user, responseId, response, defaultResponseHandler(request));
                 });
             } else {
                 log.debug("User not found in session.");
@@ -89,12 +105,12 @@ public class ResponseController extends ControllerHelper {
         });
     }
 
-    @Delete("/responses/:id")
+    @Delete("/responses/:responseId")
     @ApiDoc("Delete given response")
     @ResourceFilter(ResponseRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
-        String id = request.getParam("id");
-        responseService.delete(id, defaultResponseHandler(request));
+        String responseId = request.getParam("responseId");
+        responseService.delete(responseId, defaultResponseHandler(request));
     }
 }

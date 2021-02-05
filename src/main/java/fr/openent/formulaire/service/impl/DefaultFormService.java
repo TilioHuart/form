@@ -58,7 +58,7 @@ public class DefaultFormService implements FormService {
     }
 
     @Override
-    public void update(String id, JsonObject form, Handler<Either<String, JsonObject>> handler) {
+    public void update(String formId, JsonObject form, Handler<Either<String, JsonObject>> handler) {
         String query = "UPDATE " + Formulaire.FORM_TABLE + " SET title = ?, description = ?, picture = ?, " +
                 "date_modification = ?, sent = ?, collab = ?, archived = ? WHERE id = ?;";
         JsonArray params = new JsonArray()
@@ -69,15 +69,15 @@ public class DefaultFormService implements FormService {
                 .add(form.getBoolean("sent", false))
                 .add(form.getBoolean("collab", false))
                 .add(form.getBoolean("archived", false))
-                .add(id);
+                .add(formId);
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override
-    public void delete(String id, Handler<Either<String, JsonObject>> handler) {
+    public void delete(String formId, Handler<Either<String, JsonObject>> handler) {
         String query = "DELETE FROM " + Formulaire.FORM_TABLE + " WHERE id = ?;";
-        JsonArray params = new JsonArray().add(id);
+        JsonArray params = new JsonArray().add(formId);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 

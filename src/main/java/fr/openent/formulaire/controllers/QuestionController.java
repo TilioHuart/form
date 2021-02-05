@@ -40,17 +40,17 @@ public class QuestionController extends ControllerHelper {
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void countQuestions(HttpServerRequest request) {
-        String id = request.getParam("formId");
-        questionService.countQuestions(id, defaultResponseHandler(request));
+        String formId = request.getParam("formId");
+        questionService.countQuestions(formId, defaultResponseHandler(request));
     }
 
-    @Get("/questions/:id")
+    @Get("/questions/:questionId")
     @ApiDoc("Get form thanks to the id")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
-        String id = request.getParam("id");
-        questionService.get(id, defaultResponseHandler(request));
+        String questionId = request.getParam("questionId");
+        questionService.get(questionId, defaultResponseHandler(request));
     }
 
     @Get("/forms/:formId/questions/:position")
@@ -74,23 +74,23 @@ public class QuestionController extends ControllerHelper {
         });
     }
 
-    @Put("/questions/:id")
+    @Put("/questions/:questionId")
     @ApiDoc("Update given question")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
-        String id = request.getParam("id");
+        String questionId = request.getParam("questionId");
         RequestUtils.bodyToJson(request, question -> {
-            questionService.update(id, question, defaultResponseHandler(request));
+            questionService.update(questionId, question, defaultResponseHandler(request));
         });
     }
 
-    @Delete("/questions/:id")
+    @Delete("/questions/:questionId")
     @ApiDoc("Delete given question")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
-        String id = request.getParam("id");
-        questionService.delete(id, defaultResponseHandler(request));
+        String questionId = request.getParam("questionId");
+        questionService.delete(questionId, defaultResponseHandler(request));
     }
 }

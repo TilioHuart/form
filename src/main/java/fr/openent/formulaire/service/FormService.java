@@ -16,9 +16,9 @@ public interface FormService {
 
     void create(JsonObject form, UserInfos user, Handler<Either<String, JsonObject>> handler);
 
-    void update(String id, JsonObject form, Handler<Either<String, JsonObject>> handler);
+    void update(String formId, JsonObject form, Handler<Either<String, JsonObject>> handler);
 
-    void delete(String id, Handler<Either<String, JsonObject>> handler);
+    void delete(String formId, Handler<Either<String, JsonObject>> handler);
 
     void getImage (EventBus eb, String idImage, Handler<Either<String,JsonObject>> handler);
 }

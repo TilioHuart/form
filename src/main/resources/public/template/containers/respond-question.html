@@ -32,14 +32,21 @@
                     <editor ng-model="vm.response.answer"></editor>
                 </div>
                 <div ng-if="vm.question.question_type == vm.types.SINGLEANSWER">
+                    <select ng-model="vm.response.answer">
+                        <option ng-repeat="choice in vm.question.choices.all" ng-value="choice.value">[[choice.value]]</option>
+                    </select>
                 </div>
                 <div ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER">
+                    <div ng-repeat="choice in question.choices.all">
+                        <input type="checkbox" id="check-[[choice.id]]" ng-model="vm.selectedIndex[$index]">
+                        <label for="check-[[choice.id]]">[[choice.value]]</label>
+                    </div>
                 </div>
                 <div ng-if="vm.question.question_type == vm.types.DATE">
                     <date-picker ng-model="vm.response.answer"></date-picker>
                 </div>
                 <div ng-if="vm.question.question_type == vm.types.TIME">
-                    <input type="time" ng-model="vm.response.answer">
+                    <input type="time" ng-model="vm.response.answer"/>
                 </div>
                 <div ng-if="vm.question.question_type == vm.types.FILE">
                     <files-picker></files-picker>

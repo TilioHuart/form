@@ -24,7 +24,7 @@ export const questionTypeService: QuestionTypeService = {
             notify.error(idiom.translate('formulaire.error.questionTypeService.get'));
             throw err;
         }
-    },
+    }
 };
 
 export const QuestionTypeService = ng.service('QuestionTypeService', (): QuestionTypeService => questionTypeService);

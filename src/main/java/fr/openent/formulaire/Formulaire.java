@@ -19,6 +19,7 @@ public class Formulaire extends BaseServer {
 	public static String FORM_TABLE;
 	public static String QUESTION_TABLE;
 	public static String QUESTION_TYPE_TABLE;
+	public static String QUESTION_CHOICE_TABLE;
 	public static String RESPONSE_TABLE;
 	public static String DISTRIBUTION_TABLE;
 
@@ -47,6 +48,7 @@ public class Formulaire extends BaseServer {
 		FORM_TABLE = DB_SCHEMA + ".form";
 		QUESTION_TABLE = DB_SCHEMA + ".question";
 		QUESTION_TYPE_TABLE = DB_SCHEMA + ".question_type";
+		QUESTION_CHOICE_TABLE = DB_SCHEMA + ".question_choice";
 		RESPONSE_TABLE = DB_SCHEMA + ".response";
 		DISTRIBUTION_TABLE = DB_SCHEMA + ".distribution";
 
@@ -65,6 +67,7 @@ public class Formulaire extends BaseServer {
 		addController(formController);
 		addController(new QuestionController());
 		addController(new QuestionTypeController());
+		addController(new QuestionChoiceController());
 		addController(new ResponseController());
 		addController(new DistributionController());
 	}

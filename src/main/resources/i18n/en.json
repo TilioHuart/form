@@ -74,6 +74,8 @@
   "formulaire.question.type.FILE": "File repository",
   "formulaire.question.title.free.empty": "Title of my text area",
   "formulaire.question.title.empty": "Statement of my question",
+  "formulaire.question.date.empty": "jj/mm/aaaa",
+  "formulaire.question.time.empty": "00:00",
   "formulaire.question.delete.confirmation": "Do you really want to delete this question ?",
   "formulaire.question.undo.confirmation": "Do you really want to cancel your changes ?",
   "formulaire.question.save.missing.field": "Careful, some questions are missing information to be valid !",
@@ -111,6 +113,13 @@
   "formulaire.error.questionTypeService.list": "An error occurred during the question type's retrieving",
   "formulaire.error.questionTypeService.get": "An error occurred during the question types' retrieving",
 
+  "formulaire.error.questionChoice.sync": "An error occurred during the question choices' synchronisation",
+  "formulaire.error.questionChoiceService.list": "An error occurred during the question choices' retrieving",
+  "formulaire.error.questionChoiceService.create": "An error occurred during the question choice's creation",
+  "formulaire.error.questionChoiceService.get": "An error occurred during the question choice's retrieving",
+  "formulaire.error.questionChoiceService.update": "An error occurred during the question choice's saving",
+  "formulaire.error.questionChoiceService.delete": "An error occurred during the question choice's suppression",
+
   "formulaire.error.distribution.sync": "An error occurred during the distributions' synchronisation",
   "formulaire.error.distributionService.list": "An error occurred during the distributions' retrieving",
   "formulaire.error.distributionService.create": "An error occurred during the distribution's creation",
@@ -118,7 +127,7 @@
   "formulaire.error.distributionService.update": "An error occurred during the distribution's saving",
   "formulaire.error.distributionService.delete": "An error occurred during the distribution's suppression",
 
-  "formulaire.error.response.send": "An error occurred during the response's sending",
+  "formulaire.error.response.sync": "An error occurred during the responses' synchronisation",
   "formulaire.error.responseService.list": "An error occurred during the responses' retrieving",
   "formulaire.error.responseService.create": "An error occurred during the response's creation",
   "formulaire.error.responseService.get": "An error occurred during the response's retrieving",

@@ -15,9 +15,9 @@ public interface DistributionService {
 
     void create(String formId, UserInfos user, JsonArray responders, Handler<Either<String, JsonObject>> handler);
 
-    void update(String id, JsonObject distribution, Handler<Either<String, JsonObject>> handler);
+    void update(String distributionId, JsonObject distribution, Handler<Either<String, JsonObject>> handler);
 
-    void delete(String id, Handler<Either<String, JsonObject>> handler);
+    void delete(String distributionId, Handler<Either<String, JsonObject>> handler);
 
     void getDuplicates(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler);
 
