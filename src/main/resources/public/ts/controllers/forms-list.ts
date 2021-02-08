@@ -26,9 +26,11 @@ interface ViewModel {
     checkOpenButton(): boolean;
     openForm(Form): void;
     openPropertiesForm(): void;
+    duplicateForms(): void;
     sendForm(): void;
     closeSendFormLightbox(): void;
     shareForm(): void;
+    seeResultsForm(): void;
     exportForm(): void;
     restoreForms(): Promise<void>;
     archiveForms(): void;
@@ -116,6 +118,10 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         $scope.safeApply();
     };
 
+    vm.duplicateForms = (): void => {
+        // TODO duplication
+    };
+
     vm.sendForm = async (): Promise<void> => {
         let nbQuestions = $scope.getDataIf200(await questionService.countQuestions(vm.forms.selected[0].id)).count;
         if (nbQuestions < 1) {
@@ -153,6 +159,10 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         //TODO : Lightbox pour confirmation du partage
         template.open('lightbox', 'lightbox/form-sharing');
         vm.display.lightbox.sharing = true;
+    };
+
+    vm.seeResultsForm = (): void => {
+        //TODO display results d'un form
     };
 
     vm.exportForm = (): void => {
