@@ -72,9 +72,16 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			openForm: async (params) => {
 				$scope.currentPage = 'openForm';
 				if ($scope.canCreate()) {
-					let { data } = await formService.get(params.idForm);
-					$scope.form = data;
-					await template.open('main', 'containers/edit-form');
+					// let { data } = await formService.get(params.idForm);
+					// $scope.form = data;
+					// template.open('main', 'containers/edit-form');
+					$scope.form = $scope.getDataIf200(await formService.get(params.idForm));
+					if (!!$scope.form) {
+						template.open('main', 'containers/edit-form');
+					}
+					else {
+						$scope.redirectTo('/list/mine');
+					}
 				}
 				else if ($scope.canRespond()) {
 					$scope.redirectTo(`/form/${params.idForm}/question/1`);
