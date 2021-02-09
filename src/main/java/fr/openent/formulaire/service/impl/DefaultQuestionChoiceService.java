@@ -39,7 +39,7 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
 
     @Override
     public void update(String choiceId, JsonObject choice, Handler<Either<String, JsonObject>> handler) {
-        String query = "UPDATE " + Formulaire.QUESTION_CHOICE_TABLE + " SET value = ?, position = ?, type = ? WHERE id = ?;";
+        String query = "UPDATE " + Formulaire.QUESTION_CHOICE_TABLE + " SET value = ?, position = ?, type = ? WHERE id = ? RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(choice.getString("value", ""))
                 .add(choice.getInteger("position", 0))
