@@ -14,10 +14,10 @@ export class QuestionChoice {
     value: string;
     type: ChoiceTypes;
 
-    constructor (questionId: number, type?: ChoiceTypes) {
+    constructor (questionId: number, value?: string, type?: ChoiceTypes) {
         this.id = null;
         this.question_id = questionId;
-        this.value = "";
+        this.value = value ? value : "";
         this.type = type ? type : ChoiceTypes.TXT;
     }
 

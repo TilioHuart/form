@@ -76,7 +76,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
     vm.doCreateNewQuestion = async (code: number) => {
         vm.newQuestion.question_type = code;
         vm.newQuestion.position = vm.questions.all.length + 1;
-        await questionService.save(vm.newQuestion);
+        await questionService.create(vm.newQuestion);
         await vm.questions.sync(vm.form.id);
         vm.display.lightbox.newQuestion = false;
         template.close('lightbox');
@@ -114,7 +114,13 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 await questionService.save(vm.questions.all[i]);
             }
             vm.questions.selected[0].position++;
-            await questionService.create(vm.questions.selected[0]);
+            let newQuestion = $scope.getDataIf200(await questionService.create(vm.questions.selected[0]));
+            for (let i = 0; i < vm.questions.selected[0].choices.all.length; i++) {
+                let choice = vm.questions.selected[0].choices.all[i];
+                if (!!choice.value) {
+                    await questionChoiceService.create(new QuestionChoice(newQuestion.id, choice.value));
+                }
+            }
             template.close('lightbox');
             vm.display.lightbox.delete = false;
             notify.success(idiom.translate('formulaire.success.question.duplicate'));

@@ -65,7 +65,7 @@ public class DefaultDistributionService implements DistributionService {
         String query = "UPDATE " + Formulaire.DISTRIBUTION_TABLE + " SET status = '"
                 + distribution.getString("status") + "' ";
         if (distribution.getString("status").equals(Formulaire.FINISHED)) { query += ", date_response = NOW() "; }
-        query += "WHERE id = " + distributionId + " ;";
+        query += "WHERE id = " + distributionId + " RETURNING *;";
 
         Sql.getInstance().raw(query, SqlResult.validUniqueResultHandler(handler));
     }
