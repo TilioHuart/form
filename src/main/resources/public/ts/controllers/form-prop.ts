@@ -25,11 +25,9 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
     // Functions
 
     vm.save = async () : Promise<void> => {
-        let response = await formService.create(vm.form);
-        if (response.status == 200) {
-            $scope.redirectTo(`/form/${response.data.id}`);
-            $scope.safeApply();
-        }
+        let form = $scope.getDataIf200(await formService.save(vm.form));
+        $scope.redirectTo(`/form/${form.id}`);
+        $scope.safeApply();
     };
 
     vm.getImage = async (): Promise<void> => {
@@ -38,8 +36,8 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
             window.setTimeout(function() {
                 if(!vm.form.infoImg.compatible) {
                     notify.error(idiom.translate('formulaire.image.incompatible'));
-                };
-            }, 1000)
+                }
+            }, 2000)
         }
         $scope.safeApply();
     };

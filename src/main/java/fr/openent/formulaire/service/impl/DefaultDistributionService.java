@@ -81,8 +81,9 @@ public class DefaultDistributionService implements DistributionService {
     public void getDuplicates(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler) {
         ArrayList<String> respondersIdsArray = new ArrayList<>();
         if (responders != null) {
-            for (int i=0; i < responders.size(); i++){
-                respondersIdsArray.add(responders.getJsonObject(i).getJsonArray("users").getJsonObject(0).getString("id"));
+            JsonArray users = responders.getJsonObject(0).getJsonArray("users");
+            for (int i = 0; i < users.size(); i++){
+                respondersIdsArray.add(users.getJsonObject(i).getString("id"));
             }
         }
 
@@ -105,8 +106,9 @@ public class DefaultDistributionService implements DistributionService {
     public void getRemoved(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler) {
         ArrayList<String> respondersIdsArray = new ArrayList<>();
         if (responders != null) {
-            for (int i=0; i < responders.size(); i++){
-                respondersIdsArray.add(responders.getJsonObject(i).getJsonArray("users").getJsonObject(0).getString("id"));
+            JsonArray users = responders.getJsonObject(0).getJsonArray("users");
+            for (int i = 0; i < users.size(); i++){
+                respondersIdsArray.add(users.getJsonObject(i).getString("id"));
             }
         }
 
@@ -129,15 +131,16 @@ public class DefaultDistributionService implements DistributionService {
     public void createMultiple(String formId, UserInfos user, JsonArray responders, JsonArray duplicates, Handler<Either<String, JsonObject>> handler) {
         ArrayList<String> idsToFilter = new ArrayList<>();
         if (duplicates != null) {
-            for (int i=0; i < duplicates.size(); i++) {
+            for (int i = 0; i < duplicates.size(); i++) {
                 idsToFilter.add(duplicates.getJsonObject(i).getString("responder_id"));
             }
         }
 
         ArrayList<JsonObject> respondersArray = new ArrayList<>();
         if (responders != null) {
-            for (int i=0; i < responders.size(); i++) {
-                JsonObject info = responders.getJsonObject(i).getJsonArray("users").getJsonObject(0);
+            JsonArray users = responders.getJsonObject(0).getJsonArray("users");
+            for (int i = 0; i < users.size(); i++) {
+                JsonObject info = users.getJsonObject(i);
                 if (!idsToFilter.contains(info.getString("id"))) {
                     respondersArray.add(info);
                 }

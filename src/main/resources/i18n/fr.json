@@ -57,6 +57,7 @@
 
   "formulaire.form.create.button": "Créer un formulaire",
   "formulaire.form.create.title": "Titre de mon formulaire",
+  "formulaire.image.incompatible": "Seuls les formats d'image suivants sont acceptés : .jpg, .jpeg, .png, .gif",
 
   "formulaire.form.edit.modified": "Formulaire enregistré à ",
   "formulaire.form.edit.add": "Ajouter",
