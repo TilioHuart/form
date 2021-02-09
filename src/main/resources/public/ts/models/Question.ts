@@ -1,6 +1,6 @@
 import {Mix, Selectable, Selection} from "entcore-toolkit";
 import {idiom, notify} from "entcore";
-import {questionChoiceService, questionService} from "../services";
+import {questionService} from "../services";
 import {QuestionChoice, QuestionChoices} from "./QuestionChoice";
 
 export class Question implements Selectable {
@@ -53,7 +53,12 @@ export class Questions extends Selection<Question> {
             let { data } = await questionService.list(formId);
             this.all = Mix.castArrayAs(Question, data);
             for (let i = 0; i < this.all.length; i++) {
-                await this.all[i].choices.sync(this.all[i].id);
+                let questionChoices = this.all[i].choices;
+                await questionChoices.sync(this.all[i].id);
+                let nbChoices = questionChoices.all.length;
+                for (let j = 3; j > nbChoices; j--) {
+                    questionChoices.all.push(new QuestionChoice(this.all[i].id));
+                }
             }
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.question.sync'));

@@ -57,7 +57,7 @@ public class DefaultQuestionService implements QuestionService {
     @Override
     public void update(String questionId, JsonObject question, Handler<Either<String, JsonObject>> handler) {
         String query = "UPDATE " + Formulaire.QUESTION_TABLE + " SET title=  ?, position = ?, question_type = ?, " +
-                "statement = ?, mandatory = ? WHERE id = ?;";
+                "statement = ?, mandatory = ? WHERE id = ? RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(question.getString("title", ""))
                 .add(question.getInteger("position", 0))
