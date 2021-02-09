@@ -62,7 +62,7 @@ CREATE TABLE formulaire.response (
     id                  bigserial PRIMARY KEY,
     question_id         bigint NOT NULL,
     answer              VARCHAR NOT NULL,
-    responder_id        VARCHAR(36) NOT NULL,
+    responder_id       VARCHAR(36) NOT NULL,
     CONSTRAINT fk_question_id FOREIGN KEY (question_id) REFERENCES formulaire.question (id) ON UPDATE NO ACTION ON DELETE CASCADE
 );
 
