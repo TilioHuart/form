@@ -12,12 +12,14 @@ export class QuestionChoice {
     id: number;
     question_id: number;
     value: string;
+    position: number;
     type: ChoiceTypes;
 
-    constructor (questionId: number, value?: string, type?: ChoiceTypes) {
+    constructor (questionId: number, type?: ChoiceTypes) {
         this.id = null;
         this.question_id = questionId;
-        this.value = value ? value : "";
+        this.value = "";
+        this.position = null;
         this.type = type ? type : ChoiceTypes.TXT;
     }
 
@@ -26,6 +28,7 @@ export class QuestionChoice {
             id: this.id,
             question_id: this.question_id,
             value: this.value,
+            position: this.position,
             type: this.type
         }
     }

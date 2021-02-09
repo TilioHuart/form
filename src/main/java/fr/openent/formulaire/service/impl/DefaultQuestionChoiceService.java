@@ -1,7 +1,6 @@
 package fr.openent.formulaire.service.impl;
 
 import fr.openent.formulaire.Formulaire;
-import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.QuestionChoiceService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
@@ -9,9 +8,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
-import org.entcore.common.user.UserInfos;
-
-import java.util.ArrayList;
 
 public class DefaultQuestionChoiceService implements QuestionChoiceService {
 
@@ -31,20 +27,22 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
 
     @Override
     public void create(String questionId, JsonObject choice, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO " + Formulaire.QUESTION_CHOICE_TABLE + " (question_id, value, type) " +
+        String query = "INSERT INTO " + Formulaire.QUESTION_CHOICE_TABLE + " (question_id, value, position, type) " +
                 "VALUES (?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(questionId)
                 .add(choice.getString("value", ""))
+                .add(choice.getInteger("position", 0))
                 .add(choice.getString("type", ""));
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override
     public void update(String choiceId, JsonObject choice, Handler<Either<String, JsonObject>> handler) {
-        String query = "UPDATE " + Formulaire.QUESTION_CHOICE_TABLE + " SET value = ?, type = ? WHERE id = ? RETURNING *;";
+        String query = "UPDATE " + Formulaire.QUESTION_CHOICE_TABLE + " SET value = ?, position = ?, type = ? WHERE id = ?;";
         JsonArray params = new JsonArray()
                 .add(choice.getString("value", ""))
+                .add(choice.getInteger("position", 0))
                 .add(choice.getString("type", ""))
                 .add(choiceId);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));

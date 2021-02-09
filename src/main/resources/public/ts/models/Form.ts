@@ -16,6 +16,8 @@ export class Form implements Selectable, Shareable  {
     owner_name: string;
     date_creation: Date;
     date_modification: Date;
+    date_opening: Date;
+    date_ending: Date;
     sent: boolean;
     collab: boolean;
     archived: boolean;
@@ -35,6 +37,8 @@ export class Form implements Selectable, Shareable  {
         this.owner_name = null;
         this.date_creation = null;
         this.date_modification = null;
+        this.date_opening = null;
+        this.date_ending = null;
         this.sent = false;
         this.collab = false;
         this.archived = false;
@@ -51,6 +55,8 @@ export class Form implements Selectable, Shareable  {
             owner_name: this.owner_name,
             date_creation: this.date_creation,
             date_modification: this.date_modification,
+            date_opening: this.date_opening,
+            date_ending: this.date_ending,
             sent: this.sent,
             collab: this.collab,
             archived: this.archived,
