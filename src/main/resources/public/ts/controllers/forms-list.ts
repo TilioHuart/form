@@ -118,8 +118,18 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         $scope.safeApply();
     };
 
-    vm.duplicateForms = (): void => {
-        // TODO duplication
+    vm.duplicateForms = async (): void => {
+        try {
+            for (let form of vm.forms.selected) {
+                await formService.create(form);
+            }
+            notify.success(idiom.translate('formulaire.success.forms.duplicate'));
+            init();
+            $scope.safeApply();
+        }
+        catch (e) {
+            throw e;
+        }
     };
 
     vm.sendForm = async (): Promise<void> => {
@@ -162,7 +172,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     vm.seeResultsForm = (): void => {
-        //TODO display results d'un form
+        // TODO display results d'un form
     };
 
     vm.exportForm = (): void => {
