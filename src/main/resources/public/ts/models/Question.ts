@@ -56,10 +56,8 @@ export class Questions extends Selection<Question> {
                 let questionChoices = this.all[i].choices;
                 await questionChoices.sync(this.all[i].id);
                 let nbChoices = questionChoices.all.length;
-                if (nbChoices <= 0) {
-                    for (let j = 0; j < 3; j++) {
-                        questionChoices.all.push(new QuestionChoice(this.all[i].id));
-                    }
+                for (let j = 3; j > nbChoices; j--) {
+                    questionChoices.all.push(new QuestionChoice(this.all[i].id));
                 }
             }
         } catch (e) {
