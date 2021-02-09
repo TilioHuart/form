@@ -61,8 +61,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			propForm: async (params) => {
 				$scope.currentPage = 'propForm';
 				if ($scope.canCreate()) {
-					let { data } = await formService.get(params.idForm);
-					$scope.form = data;
+					$scope.form = $scope.getDataIf200(await formService.get(params.idForm));
 					template.open('main', 'containers/prop-form');
 				}
 				else {
@@ -72,11 +71,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			openForm: async (params) => {
 				$scope.currentPage = 'openForm';
 				if ($scope.canCreate()) {
-					// let { data } = await formService.get(params.idForm);
-					// $scope.form = data;
-					// template.open('main', 'containers/edit-form');
 					$scope.form = $scope.getDataIf200(await formService.get(params.idForm));
-					if (!!$scope.form) {
+					if (!!$scope.form.id) {
 						template.open('main', 'containers/edit-form');
 					}
 					else {

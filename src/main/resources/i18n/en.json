@@ -57,6 +57,7 @@
 
   "formulaire.form.create.button": "Create form",
   "formulaire.form.create.title": "Title of my form",
+  "formulaire.image.incompatible": "Only those image format are accepted : .jpg, .jpeg, .png, .gif",
 
   "formulaire.form.edit.modified": "Form saved at ",
   "formulaire.form.edit.add": "Add",
