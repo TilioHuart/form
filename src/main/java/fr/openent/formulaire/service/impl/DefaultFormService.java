@@ -26,10 +26,10 @@ public class DefaultFormService implements FormService {
     @Override
     public void listSentForms(UserInfos user, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT f.id, title, description, picture, owner_id, owner_name," +
-                "date_creation, date_modification, form_id, status, date_sending, date_response " +
+                "date_creation, date_modification, date_opening, date_ending, form_id, status, date_sending, date_response " +
                 "FROM " + Formulaire.FORM_TABLE + " f " +
                 "INNER JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON f.id = d.form_id " +
-                "WHERE d.responder_id = ? " +
+                "WHERE d.responder_id = ? AND NOW() BETWEEN f.date_opening AND f.date_ending " +
                 "ORDER BY d.date_sending DESC;";
         JsonArray params = new JsonArray().add(user.getUserId());
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
@@ -45,14 +45,16 @@ public class DefaultFormService implements FormService {
     @Override
     public void create(JsonObject form, UserInfos user, Handler<Either<String, JsonObject>> handler) {
         String query = "INSERT INTO " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, " +
-                "picture, date_creation, date_modification) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+                "picture, date_creation, date_modification, date_opening, date_ending) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(user.getUserId())
                 .add(user.getUsername())
                 .add(form.getString("title", ""))
                 .add(form.getString("description", ""))
                 .add(form.getString("picture", ""))
-                .add("NOW()").add("NOW()");
+                .add("NOW()").add("NOW()")
+                .add(form.getString("date_opening", "NOW()"))
+                .add(form.getString("date_ending", "NOW() + INTERVAL '1 YEAR'"));
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
@@ -60,12 +62,14 @@ public class DefaultFormService implements FormService {
     @Override
     public void update(String formId, JsonObject form, Handler<Either<String, JsonObject>> handler) {
         String query = "UPDATE " + Formulaire.FORM_TABLE + " SET title = ?, description = ?, picture = ?, " +
-                "date_modification = ?, sent = ?, collab = ?, archived = ? WHERE id = ?;";
+                "date_modification = ?, date_opening = ?, date_ending = ?, sent = ?, collab = ?, archived = ? WHERE id = ? RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(form.getString("title", ""))
                 .add(form.getString("description", ""))
                 .add(form.getString("picture", ""))
                 .add("NOW()")
+                .add(form.getString("date_opening", "NOW()"))
+                .add(form.getString("date_ending", "NOW() + INTERVAL '1 YEAR'"))
                 .add(form.getBoolean("sent", false))
                 .add(form.getBoolean("collab", false))
                 .add(form.getBoolean("archived", false))
