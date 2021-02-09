@@ -146,8 +146,9 @@
   "formulaire.success.form.save": "You form has been successfully saved !",
   "formulaire.success.form.sent": "You form has been successfully sent !",
   "formulaire.success.forms.archive": "All the selected forms have been successfully archived !",
-  "formulaire.success.forms.restore": "All te selected forms have been successfully restored !",
-  "formulaire.success.forms.delete": "All the selected forms have been successfully archived !",
+  "formulaire.success.forms.restore": "All the selected forms have been successfully restored !",
+  "formulaire.success.forms.delete": "All the selected forms have been successfully deleted !",
+  "formulaire.success.forms.duplicate": "All the selected forms have been successfully duplicated !",
   "formulaire.success.question.duplicate": "Your question has been successfully duplicated !",
   "formulaire.success.question.delete": "Your question has been successfully deleted !",
   "formulaire.success.responses.save": "Your reponses has been successfully saved !"
