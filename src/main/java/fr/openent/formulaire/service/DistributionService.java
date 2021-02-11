@@ -13,6 +13,8 @@ public interface DistributionService {
 
     void get(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler);
 
+    void count(String formId, Handler<Either<String, JsonObject>> handler);
+
     void create(String formId, UserInfos user, JsonArray responders, Handler<Either<String, JsonObject>> handler);
 
     void update(String distributionId, JsonObject distribution, Handler<Either<String, JsonObject>> handler);

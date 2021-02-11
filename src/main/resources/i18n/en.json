@@ -7,6 +7,7 @@
   "formulaire.sent": "Sent on ",
   "formulaire.responded.date": "Responded on ",
   "formulaire.responded.waiting": "Waiting for response",
+  "formulaire.responses.count": "Responses : ",
   "formulaire.status": "Status",
   "formulaire.at": " at ",
   "formulaire.save": "Save",
@@ -124,6 +125,7 @@
 
   "formulaire.error.distribution.sync": "An error occurred during the distributions' synchronisation",
   "formulaire.error.distributionService.list": "An error occurred during the distributions' retrieving",
+  "formulaire.error.distributionService.count": "An error occurred during the distributions' counting",
   "formulaire.error.distributionService.create": "An error occurred during the distribution's creation",
   "formulaire.error.distributionService.get": "An error occurred during the distribution's retrieving",
   "formulaire.error.distributionService.update": "An error occurred during the distribution's saving",

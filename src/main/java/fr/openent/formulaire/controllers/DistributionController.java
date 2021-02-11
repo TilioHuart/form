@@ -39,6 +39,14 @@ public class DistributionController extends ControllerHelper {
         });
     }
 
+    @Get("/distributions/forms/:formId/count")
+    @ApiDoc("Get the number of distributions of the form")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void count(HttpServerRequest request) {
+        String formId = request.getParam("formId");
+        distributionService.count(formId, defaultResponseHandler(request));
+    }
+
     @Get("/distributions/forms/:formId")
     @ApiDoc("Get the info of a distribution thanks to the id")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
@@ -54,7 +62,7 @@ public class DistributionController extends ControllerHelper {
         });
     }
 
-    @Post("/forms/:formId/distributions")
+    @Post("/distributions/forms/:formId")
     @ApiDoc("Distribute a form to a list of responders")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void create(HttpServerRequest request) {

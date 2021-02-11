@@ -7,6 +7,7 @@
   "formulaire.sent": "Envoyé le ",
   "formulaire.responded.date": "Répondu le ",
   "formulaire.responded.waiting": "En attente de réponse",
+  "formulaire.responses.count": "Réponses : ",
   "formulaire.status": "Statut",
   "formulaire.at": " à ",
   "formulaire.save": "Enregistrer",
@@ -124,6 +125,7 @@
 
   "formulaire.error.distribution.sync": "Une erreur est survenue lors de la synchronisation des distributions",
   "formulaire.error.distributionService.list": "Une erreur est survenue lors de la récupération des distributions",
+  "formulaire.error.distributionService.count": "Une erreur est survenue lors du comptage des distributions",
   "formulaire.error.distributionService.create": "Une erreur est survenue lors de la création de la nouvelle distribution",
   "formulaire.error.distributionService.get": "Une erreur est survenue lors de la récupération de la distribution",
   "formulaire.error.distributionService.update": "Une erreur est survenue lors de la sauvegarde de la distribution",
