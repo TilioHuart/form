@@ -26,7 +26,7 @@ public class FormResponsesExport {
 
   private String UTF8_BOM = "\uFEFF";
   private String EOL = "\n";
-  private String SEPARATOR = ";"; // TODO Change for a less used separator
+  private String SEPARATOR = ";";
   private ResponseService responseService = new DefaultResponseService();
   private QuestionService questionService = new DefaultQuestionService();
   private EventBus eb;
@@ -34,7 +34,7 @@ public class FormResponsesExport {
   // Creates  new String builder with UTF-8 BOM. Used to open on excel
   private StringBuilder content = new StringBuilder(UTF8_BOM);
   private SimpleDateFormat dateGetter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-  private SimpleDateFormat dateFormatter = new SimpleDateFormat("DD/MM/YYYY kk[h]mm");
+  private SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
   public FormResponsesExport(EventBus eb, HttpServerRequest request) {
     this.eb = eb;
@@ -140,7 +140,7 @@ public class FormResponsesExport {
   }
 
   private String addResponse(JsonObject response, Boolean endLine) {
-    String value = response.getString("answer");
+    String value = "\"" + response.getString("answer") + "\"";
     value += endLine ? EOL : SEPARATOR;
     return value;
   }
@@ -153,10 +153,10 @@ public class FormResponsesExport {
         try { date = dateGetter.parse(sqlDate); } catch (ParseException e) { e.printStackTrace(); }
 
         builder.append(user.getUserId()).append(SEPARATOR);
-        builder.append(user.getLastName()).append(SEPARATOR);
-        builder.append(user.getFirstName()).append(SEPARATOR);
+        builder.append("\"" + user.getLastName() + "\"").append(SEPARATOR);
+        builder.append("\"" + user.getFirstName() + "\"").append(SEPARATOR);
         builder.append(dateFormatter.format(date)).append(SEPARATOR);
-        builder.append(user.getStructureNames().get(0)).append(SEPARATOR); // TODO et si on a plusieurs etab on affiche lequel ?
+        builder.append("\"" + user.getStructureNames().get(0) + "\"").append(SEPARATOR); // TODO et si on a plusieurs etab on affiche lequel ?
 
         handler.handle(Future.succeededFuture(builder.toString()));
       } else {
