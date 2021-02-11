@@ -29,8 +29,9 @@ interface ViewModel {
     openPropertiesForm(): void;
     duplicateForms(): void;
     sendForm(): void;
-    closeSendFormLightbox(): void;
+    closeSendFormLightbox(): Promise<void>;
     shareForm(): void;
+    closeShareFormLightbox(): Promise<void>;
     seeResultsForm(): void;
     exportForm(): void;
     restoreForms(): Promise<void>;
@@ -150,24 +151,20 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     vm.sendForm = async (): Promise<void> => {
-        let nbQuestions = $scope.getDataIf200(await questionService.countQuestions(vm.forms.selected[0].id)).count;
-        if (nbQuestions < 1) {
-            notify.info(idiom.translate('formulaire.warning.send.form.empty'));
-            return;
-        }
+        if (!isFormEmpty(vm.forms.selected[0].id)) return;
         vm.forms.selected[0].generateRights();
         template.open('lightbox', 'lightbox/form-sending');
         vm.display.lightbox.sending = true;
         let checker = window.setInterval(function() {
             let sharePanel = document.getElementsByTagName('share-panel')[0];
             if (!!sharePanel) {
-                clearInterval(checker);
+                window.clearInterval(checker);
 
                 sharePanel.getElementsByTagName('h2')[0].textContent = idiom.translate('formulaire.sendTo');
                 sharePanel.getElementsByClassName('panel-button')[0].textContent = idiom.translate('formulaire.send');
-                let rows = sharePanel.getElementsByTagName('table')[0].rows;
-                rows[0].cells[1].textContent = idiom.translate('formulaire.send');
-                // for (let i = 0; i < rows.length; i++) {
+                // let rows = sharePanel.getElementsByTagName('table')[0].rows;
+                // let rowLength = rows.length;
+                // for (let i = 0; i < rowsLength; i++) {
                 //     for (let j = 2; j < rows[i].cells.length - 1; j++) {
                 //         rows[i].deleteCell(j);
                 //     }
@@ -176,16 +173,34 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         }, 200);
     };
 
-    vm.closeSendFormLightbox = (): void => {
+    vm.closeSendFormLightbox = async (): Promise<void> => {
         template.close('lightbox');
         vm.display.lightbox.sending = false;
-        window.setTimeout(async function () { await init(); }, 3000);
+        await init();
     };
 
     vm.shareForm = (): void => {
-        //TODO : Lightbox pour confirmation du partage
+        if (!isFormEmpty(vm.forms.selected[0].id)) return;
+        vm.forms.selected[0].generateRights();
         template.open('lightbox', 'lightbox/form-sharing');
         vm.display.lightbox.sharing = true;
+        // let checker = window.setInterval(function() {
+        //     let sharePanel = document.getElementsByTagName('share-panel')[0];
+        //     if (!!sharePanel) {
+        //         window.clearInterval(checker);
+        //         let rows = sharePanel.getElementsByTagName('table')[0].rows;
+        //         let rowLength = rows.length;
+        //         for (let i = 0; i < rowsLength; i++) {
+        //              rows[i].deleteCell(1);
+        //         }
+        //     }
+        // }, 200);
+    };
+
+    vm.closeShareFormLightbox = async (): Promise<void> => {
+        template.close('lightbox');
+        vm.display.lightbox.sharing = false;
+        await init();
     };
 
     vm.seeResultsForm = (): void => {
@@ -257,6 +272,17 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         catch (e) {
             throw e;
         }
+    };
+
+    // Utils
+
+    const isFormEmpty = async (formId: number) : Promise<boolean> => {
+        let nbQuestions = $scope.getDataIf200(await questionService.countQuestions(formId)).count;
+        if (nbQuestions < 1) {
+            notify.info(idiom.translate('formulaire.warning.send.form.empty'));
+            return true;
+        }
+        return false;
     };
 
     init();

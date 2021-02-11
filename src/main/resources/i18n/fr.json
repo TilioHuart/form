@@ -33,11 +33,9 @@
   "formulaire.next": "Suivant",
   "formulaire.prev": "Précédent",
 
+  "formulaire.read": "Envoyer",
   "formulaire.contrib": "Contribution",
-  "formulaire.read": "Lecture",
   "formulaire.manager": "Gestion",
-  "formulaire.respond": "Répondre",
-  "formulaire.responder": "Repondant",
 
   "formulaire.tab.list": "Mes formulaires",
   "formulaire.tab.responses": "Mes réponses",

@@ -11,16 +11,32 @@ import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
 
+import java.util.List;
+
 import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
+import static org.entcore.common.sql.SqlResult.parseShared;
 
 public class DefaultFormService implements FormService {
 
     @Override
-    public void list(UserInfos user, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT * FROM " + Formulaire.FORM_TABLE + " WHERE owner_id = ? " +
-                "ORDER BY date_modification DESC;";
-        JsonArray params = new JsonArray().add(user.getUserId());
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    public void list(List<String> groupsAndUserIds, UserInfos user, Handler<Either<String, JsonArray>> handler) {
+        StringBuilder query = new StringBuilder();
+        JsonArray params = new JsonArray();
+
+        query.append("SELECT f.*")
+                .append(" FROM ").append(Formulaire.FORM_TABLE).append(" f")
+                .append(" LEFT JOIN ").append(Formulaire.FORM_SHARES_TABLE).append(" fs ON f.id = fs.resource_id")
+                .append(" LEFT JOIN ").append(Formulaire.MEMBERS_TABLE).append(" m ON (fs.member_id = m.id AND m.group_id IS NOT NULL)");
+
+        query.append(" WHERE (fs.member_id IN ").append(Sql.listPrepared(groupsAndUserIds.toArray()));
+        for (String groupOrUser : groupsAndUserIds) {
+            params.add(groupOrUser);
+        }
+
+        query.append(" AND fs.action != ?) OR f.owner_id = ? GROUP BY f.id ORDER BY f.date_modification DESC;");
+        params.add(Formulaire.RESPONDER_RESOURCE_BEHAVIOUR).add(user.getUserId());
+
+        Sql.getInstance().prepared(query.toString(), params, SqlResult.validResultHandler(handler));
     }
 
     @Override

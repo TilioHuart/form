@@ -7,8 +7,10 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.user.UserInfos;
 
+import java.util.List;
+
 public interface FormService {
-    void list(UserInfos user, Handler<Either<String, JsonArray>> handler);
+    void list(List<String> groupsAndUserIds, UserInfos user, Handler<Either<String, JsonArray>> handler);
 
     void listSentForms(UserInfos user, Handler<Either<String, JsonArray>> handler);
 

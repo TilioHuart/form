@@ -160,7 +160,7 @@ public class FormResponsesExport {
 
         handler.handle(Future.succeededFuture(builder.toString()));
       } else {
-        log.debug("User not found in session.");
+        log.error("User not found in session.");
         Renders.unauthorized(request);
       }
     });
