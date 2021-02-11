@@ -31,6 +31,7 @@ import org.entcore.common.user.UserUtils;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -210,6 +211,10 @@ public class FormController extends ControllerHelper {
                     Map<String, Object> idGroups = shareFormObject.getJsonObject("groups").getMap();
                     Map<String, Object> idBookmarks = shareFormObject.getJsonObject("bookmarks").getMap();
 
+                    idUsers = filterIdsForSending(idUsers);
+                    idGroups = filterIdsForSending(idGroups);
+                    idBookmarks = filterIdsForSending(idBookmarks);
+
                     JsonArray usersIds = new JsonArray(new ArrayList<>(idUsers.keySet()));
                     JsonArray groupsIds = new JsonArray(new ArrayList<>(idGroups.keySet()));
                     JsonArray bookmarksIds = new JsonArray(new ArrayList<>(idBookmarks.keySet()));
@@ -246,6 +251,16 @@ public class FormController extends ControllerHelper {
     public void sharePublish(final HttpServerRequest request) {
         // This route is used to create publish Workflow right, nothing to do
         return;
+    }
+
+    private Map<String, Object> filterIdsForSending(Map<String, Object> map) {
+        Map<String, Object> filteredMap = new HashMap<>();
+        for (String key : map.keySet()) {
+            if (map.get(key).equals(Formulaire.RESPONDER_RESOURCE_BEHAVIOUR)) {
+                filteredMap.put(key, map.get(key));
+            }
+        }
+        return filteredMap;
     }
 
     private void removeDeletedDistributions(String formId, JsonArray users) {
