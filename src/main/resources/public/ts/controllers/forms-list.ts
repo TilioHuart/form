@@ -1,7 +1,7 @@
 import {idiom, ng, notify, template} from 'entcore';
-import {Form, Forms} from "../models";
+import {Form, Forms, QuestionChoice, Questions} from "../models";
 import {DateUtils} from "../utils/date";
-import {formService, questionService} from "../services";
+import {formService, questionService, questionChoiceService} from "../services";
 
 interface ViewModel {
     forms: Forms;
@@ -121,7 +121,18 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.duplicateForms = async (): void => {
         try {
             for (let form of vm.forms.selected) {
-                await formService.create(form);
+                let duplicata = $scope.getDataIf200(await formService.create(form));
+                let questions = new Questions();
+                await questions.sync(form.id);
+                for (let question of questions.all) {
+                    question.form_id = duplicata.id;
+                    let newQuestion = $scope.getDataIf200(await questionService.create(question));
+                    for (let choice of question.choices.all) {
+                        if (!!choice.value) {
+                            await questionChoiceService.create(new QuestionChoice(newQuestion.id, choice.value));
+                        }
+                    }
+                }
             }
             notify.success(idiom.translate('formulaire.success.forms.duplicate'));
             init();
