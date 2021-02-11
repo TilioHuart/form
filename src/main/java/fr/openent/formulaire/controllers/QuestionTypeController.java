@@ -26,16 +26,14 @@ public class QuestionTypeController extends ControllerHelper {
 
     @Get("/types")
     @ApiDoc("List questions types")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void list(HttpServerRequest request) {
         questionTypeService.list(arrayResponseHandler(request));
     }
 
     @Get("/types/:code")
     @ApiDoc("Get one question type thanks to its code")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void get(HttpServerRequest request) {
         String code = request.getParam("code");
         questionTypeService.get(code, defaultResponseHandler(request));

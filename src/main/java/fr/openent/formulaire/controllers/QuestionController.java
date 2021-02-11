@@ -37,8 +37,7 @@ public class QuestionController extends ControllerHelper {
 
     @Get("/forms/:formId/questions/count")
     @ApiDoc("Get form thanks to the id")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void countQuestions(HttpServerRequest request) {
         String formId = request.getParam("formId");
         questionService.countQuestions(formId, defaultResponseHandler(request));
@@ -46,8 +45,7 @@ public class QuestionController extends ControllerHelper {
 
     @Get("/questions/:questionId")
     @ApiDoc("Get form thanks to the id")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void get(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         questionService.get(questionId, defaultResponseHandler(request));
@@ -55,8 +53,7 @@ public class QuestionController extends ControllerHelper {
 
     @Get("/forms/:formId/questions/:position")
     @ApiDoc("Get question in a form by position")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void getByPosition(HttpServerRequest request) {
         String formId = request.getParam("formId");
         String position = request.getParam("position");

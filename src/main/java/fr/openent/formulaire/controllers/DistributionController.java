@@ -33,7 +33,7 @@ public class DistributionController extends ControllerHelper {
             if (user != null) {
                 distributionService.listBySender(user, arrayResponseHandler(request));
             } else {
-                log.debug("User not found in session.");
+                log.error("User not found in session.");
                 Renders.unauthorized(request);
             }
         });
@@ -48,7 +48,7 @@ public class DistributionController extends ControllerHelper {
             if (user != null) {
                 distributionService.get(formId, user, defaultResponseHandler(request));
             } else {
-                log.debug("User not found in session.");
+                log.error("User not found in session.");
                 Renders.unauthorized(request);
             }
         });
@@ -65,7 +65,7 @@ public class DistributionController extends ControllerHelper {
                     distributionService.create(formId, user, responders, defaultResponseHandler(request));
                 });
             } else {
-                log.debug("User not found in session.");
+                log.error("User not found in session.");
                 Renders.unauthorized(request);
             }
         });

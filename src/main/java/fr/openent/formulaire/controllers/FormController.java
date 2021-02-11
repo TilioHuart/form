@@ -14,7 +14,6 @@ import fr.openent.formulaire.service.impl.DefaultNeoService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
-import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.http.response.DefaultResponseHandler;
 import fr.wseduc.webutils.request.RequestUtils;
@@ -55,21 +54,35 @@ public class FormController extends ControllerHelper {
 
 
     @ResourceFilter(canShareResourceFilter.class)
-    @SecuredAction(value = Formulaire.READ_RESOURCE_RIGHT, type = ActionType.RESOURCE)
-    public void initReadResourceRight(final HttpServerRequest request) {
+    @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void initResponderResourceRight(final HttpServerRequest request) {
+    }
+
+    @ResourceFilter(canShareResourceFilter.class)
+    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void initContribResourceRight(final HttpServerRequest request) {
+    }
+
+    @ResourceFilter(canShareResourceFilter.class)
+    @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void initManagerResourceRight(final HttpServerRequest request) {
     }
 
 
     @Get("/forms")
     @ApiDoc("List all the forms created by me")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void list(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
-                formService.list(user, arrayResponseHandler(request));
+                final List<String> groupsAndUserIds = new ArrayList<>();
+                groupsAndUserIds.add(user.getUserId());
+                if (user.getGroupsIds() != null) {
+                    groupsAndUserIds.addAll(user.getGroupsIds());
+                }
+                formService.list(groupsAndUserIds, user, arrayResponseHandler(request));
             } else {
-                log.debug("User not found in session.");
+                log.error("User not found in session.");
                 Renders.unauthorized(request);
             }
         });
@@ -77,14 +90,13 @@ public class FormController extends ControllerHelper {
 
     @Get("/sentForms")
     @ApiDoc("List all the forms sent to me")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void listSentForms(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
                 formService.listSentForms(user, arrayResponseHandler(request));
             } else {
-                log.debug("User not found in session.");
+                log.error("User not found in session.");
                 Renders.unauthorized(request);
             }
         });
@@ -92,8 +104,7 @@ public class FormController extends ControllerHelper {
 
     @Get("/forms/:formId")
     @ApiDoc("Get form thanks to the id")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void get(HttpServerRequest request) {
         String formId = request.getParam("formId");
         formService.get(formId, defaultResponseHandler(request));
@@ -120,7 +131,7 @@ public class FormController extends ControllerHelper {
                     formService.create(form, user, defaultResponseHandler(request));
                 });
             } else {
-                log.debug("User not found in session.");
+                log.error("User not found in session.");
                 Renders.unauthorized(request);
             }
         });
@@ -181,7 +192,7 @@ public class FormController extends ControllerHelper {
                 });
             }
             else {
-                log.debug("User not found in session.");
+                log.error("User not found in session.");
                 unauthorized(request);
             }
         });
@@ -216,7 +227,7 @@ public class FormController extends ControllerHelper {
 
                     super.shareResource(request, null, false, null, null);
                 } else {
-                    log.debug("User not found in session.");
+                    log.error("User not found in session.");
                     unauthorized(request);
                 }
             });

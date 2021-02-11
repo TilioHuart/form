@@ -22,17 +22,22 @@ public class Formulaire extends BaseServer {
 	public static String QUESTION_CHOICE_TABLE;
 	public static String RESPONSE_TABLE;
 	public static String DISTRIBUTION_TABLE;
+	public static String FORM_SHARES_TABLE;
+	public static String MEMBERS_TABLE;
+	public static String USERS_TABLE;
+	public static String GROUPS_TABLE;
 
 	public static final String ACCESS_RIGHT = "formulaire.access";
 	public static final String CREATION_RIGHT = "formulaire.creation";
-	public static final String SHARING_RIGHT = "formulaire.sharing";
-	public static final String SENDING_RIGHT = "formulaire.sending";
 	public static final String RESPONSE_RIGHT = "formulaire.response";
 
-	public static final String READ_RESOURCE_RIGHT = "formulaire.read";
-	public static final String RESPONDER_RESOURCE_RIGHT = "formulaire.responder";
+	public static final String RESPONDER_RESOURCE_RIGHT = "formulaire.read";
 	public static final String CONTRIB_RESOURCE_RIGHT = "formulaire.contrib";
 	public static final String MANAGER_RESOURCE_RIGHT = "formulaire.manager";
+
+	public static final String RESPONDER_RESOURCE_BEHAVIOUR = "fr-openent-formulaire-controllers-FormController|initResponderResourceRight";
+	public static final String CONTRIB_RESOURCE_BEHAVIOUR = "fr-openent-formulaire-controllers-FormController|initContribResourceRight";
+	public static final String MANAGER_RESOURCE_BEHAVIOUR = "fr-openent-formulaire-controllers-FormController|initManagerResourceRight";
 
 	public static final String TO_DO = "TO_DO";
 	public static final String IN_PROGRESS = "IN_PROGRESS";
@@ -51,6 +56,10 @@ public class Formulaire extends BaseServer {
 		QUESTION_CHOICE_TABLE = DB_SCHEMA + ".question_choice";
 		RESPONSE_TABLE = DB_SCHEMA + ".response";
 		DISTRIBUTION_TABLE = DB_SCHEMA + ".distribution";
+		FORM_SHARES_TABLE = DB_SCHEMA + ".form_shares";
+		MEMBERS_TABLE = DB_SCHEMA + ".members";
+		USERS_TABLE = DB_SCHEMA + ".users";
+		GROUPS_TABLE = DB_SCHEMA + ".groups";
 
 		final Storage storage = new StorageFactory(vertx, config, null).getStorage();
 

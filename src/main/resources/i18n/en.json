@@ -32,11 +32,9 @@
   "formulaire.next": "Next",
   "formulaire.prev": "Previous",
 
+  "formulaire.read": "Envoyer",
   "formulaire.contrib": "Contribution",
-  "formulaire.read": "Read",
   "formulaire.manager": "Management",
-  "formulaire.respond": "Respond",
-  "formulaire.responder": "Responder",
 
   "formulaire.tab.list": "My forms",
   "formulaire.tab.responses": "My responses",

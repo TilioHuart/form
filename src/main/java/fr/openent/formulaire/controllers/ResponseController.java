@@ -31,8 +31,7 @@ public class ResponseController extends ControllerHelper {
 
     @Get("/questions/:questionId/responses")
     @ApiDoc("List responses")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void list(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         responseService.list(questionId, arrayResponseHandler(request));
@@ -40,15 +39,14 @@ public class ResponseController extends ControllerHelper {
 
     @Get("/questions/:questionId/responses/mine")
     @ApiDoc("List responses")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void listMine(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
                 responseService.listMine(questionId, user, arrayResponseHandler(request));
             } else {
-                log.debug("User not found in session.");
+                log.error("User not found in session.");
                 Renders.unauthorized(request);
             }
         });
@@ -56,15 +54,14 @@ public class ResponseController extends ControllerHelper {
 
     @Get("/questions/:questionId/response")
     @ApiDoc("Get form thanks to the id")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void get(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
                 responseService.get(questionId, user, defaultResponseHandler(request));
             } else {
-                log.debug("User not found in session.");
+                log.error("User not found in session.");
                 Renders.unauthorized(request);
             }
         });
@@ -81,7 +78,7 @@ public class ResponseController extends ControllerHelper {
                     responseService.create(response, user, questionId, defaultResponseHandler(request));
                 });
             } else {
-                log.debug("User not found in session.");
+                log.error("User not found in session.");
                 Renders.unauthorized(request);
             }
         });
@@ -99,7 +96,7 @@ public class ResponseController extends ControllerHelper {
                     responseService.update(user, responseId, response, defaultResponseHandler(request));
                 });
             } else {
-                log.debug("User not found in session.");
+                log.error("User not found in session.");
                 Renders.unauthorized(request);
             }
         });
