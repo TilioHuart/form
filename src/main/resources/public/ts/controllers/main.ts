@@ -85,7 +85,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 						}
 						else {
 							$scope.question = $scope.getDataIf200(await questionService.getByPosition(params.idForm, params.position));
-							await template.open('main', 'containers/respond-question');
+							template.open('main', 'containers/respond-question');
 						}
 					}
 					else {
