@@ -37,6 +37,13 @@ public class DefaultDistributionService implements DistributionService {
     }
 
     @Override
+    public void count(String formId, Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT COUNT(*) FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? AND status = ?;";
+        JsonArray params = new JsonArray().add(formId).add(Formulaire.FINISHED);
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    @Override
     public void create(String formId, UserInfos user, JsonArray responders, Handler<Either<String, JsonObject>> handler) {
         ArrayList<JsonObject> respondersArray = new ArrayList<>();
         if (responders != null) {
