@@ -115,31 +115,12 @@ public class FormResponsesExport {
             for (int j = 1; j <= nbQuestions; j++) {
               JsonObject response = responses.get(0);
               if (response.getInteger("position") == j) {
-                String answer = "";
-                boolean choice = true;
-                int question_id = response.getInteger("question_id");
-                while (choice && responses.size() > 0) {
-                  if (response.getInteger("question_id") == question_id) {
-                    answer += response.getString("answer") + ";";
-                    question_id = response.getInteger("question_id");
-                    responses.remove(0);
-                    if (responses.size() > 0) {
-                      response = responses.get(0);
-                    }
-                    else {
-                      answer = answer.substring(0, answer.length() - 1);
-                    }
-                  } else {
-                    answer = answer.substring(0, answer.length() - 1);
-                    choice = false;
-                  }
-                }
-                content.append(addResponse(answer, j == nbQuestions));
+                content.append(addResponse(response, j == nbQuestions));
+                responses.remove(0);
               }
               else {
                 response.put("answer", "");
-                String answer = response.getString("answer");
-                content.append(addResponse(answer, j == nbQuestions));
+                content.append(addResponse(response, j == nbQuestions));
               }
             }
           }
@@ -158,8 +139,8 @@ public class FormResponsesExport {
     });
   }
 
-  private String addResponse(String answer, Boolean endLine) {
-    String value = "\"" + answer.replace("\"", "\"\"") + "\"";
+  private String addResponse(JsonObject response, Boolean endLine) {
+    String value = "\"" + response.getString("answer") + "\"";
     value += endLine ? EOL : SEPARATOR;
     return value;
   }
@@ -179,7 +160,7 @@ public class FormResponsesExport {
 
         handler.handle(Future.succeededFuture(builder.toString()));
       } else {
-        log.error("User not found in session.");
+        log.debug("User not found in session.");
         Renders.unauthorized(request);
       }
     });
