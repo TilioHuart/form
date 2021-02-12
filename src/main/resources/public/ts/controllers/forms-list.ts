@@ -85,6 +85,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.switchAll = (value:boolean) : void => {
         value ? vm.forms.selectAll() : vm.forms.deselectAll();
+        vm.allFormsSelected = value;
     };
 
 
