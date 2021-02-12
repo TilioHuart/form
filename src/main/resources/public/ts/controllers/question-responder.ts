@@ -74,6 +74,9 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         if (vm.question.question_type === Types.TIME) { formatTime() }
         vm.distribution = $scope.getDataIf200(await distributionService.get(vm.question.form_id));
 
+        $("#current-bar").css("width", vm.question.position / vm.nbQuestions * 100 + "%")
+            .css("width", "-=8px");
+
         $scope.safeApply();
     };
 
