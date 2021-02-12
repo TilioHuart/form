@@ -19,12 +19,12 @@ interface ViewModel {
         warning: boolean
     };
 
-    openFolder(string): void;
-    switchAll(boolean): void;
+    openFolder(folderName : string): void;
+    switchAll(value : boolean): void;
     displayFolder(): string;
-    displayDate(Date): string;
+    displayDate(date : Date): string;
     checkOpenButton(): boolean;
-    openForm(Form): void;
+    openForm(form : Form): void;
     openPropertiesForm(): void;
     duplicateForms(): void;
     sendForm(): void;

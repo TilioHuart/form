@@ -1,6 +1,6 @@
 import {Mix, Selectable, Selection} from "entcore-toolkit";
 import {idiom, notify, Rights, Shareable} from "entcore";
-import {formService} from "../services";
+import {distributionService, formService} from "../services";
 
 export class Form implements Selectable, Shareable  {
     shared: any;
@@ -27,6 +27,7 @@ export class Form implements Selectable, Shareable  {
         type: string;
         compatible: boolean;
     };
+    nbResponses: number;
 
     constructor() {
         this.id = null;
@@ -106,6 +107,7 @@ export class Forms extends Selection<Form> {
             for (let i = 0; i < data.length; i++) {
                 let tempForm = new Form();
                 tempForm.setFromJson(data[i]);
+                tempForm.nbResponses = (await distributionService.count(tempForm.id)).data.count;
                 this.all.push(tempForm);
             }
         } catch (e) {
