@@ -74,6 +74,7 @@
                         <div class="data-text">
                             <h4>[[form.title]]</h4>
                             <h5>[[form.owner_name]]</h5>
+                            <div class="count"><i18n>formulaire.responses.count</i18n>[[form.nbResponses]]</div>
                             <div class="date"><i18n>formulaire.modified</i18n>[[vm.displayDate(form.date_modification)]]</div>
                         </div>
                         <div class="data-icons">
@@ -90,8 +91,9 @@
             <thead>
                 <tr>
                     <th class="one"><input type="checkbox" ng-change="vm.switchAll(vm.allFormsSelected)" ng-model="vm.allFormsSelected"/></th>
-                    <th class="four"><i18n>formulaire.table.title</i18n></th>
+                    <th class="three"><i18n>formulaire.table.title</i18n></th>
                     <th class="three"><i18n>formulaire.table.author</i18n></th>
+                    <th class="one"><i18n>formulaire.responses.count</i18n></th>
                     <th class="three"><i18n>formulaire.table.modified</i18n></th>
                     <th class="one"></th>
                 </tr>
@@ -101,6 +103,7 @@
                     <td><input type="checkbox" ng-model="form.selected"/></td>
                     <td ng-click="form.selected=!form.selected">[[form.title]]</td>
                     <td ng-click="form.selected=!form.selected">[[form.owner_name]]</td>
+                    <td ng-click="form.selected=!form.selected">[[form.nbResponses]]</td>
                     <td ng-click="form.selected=!form.selected"><i18n>formulaire.modified</i18n>[[vm.displayDate(form.date_modification)]]</td>
                     <td ng-click="form.selected=!form.selected">
                         <img src="formulaire/public/img/icons/send.svg" ng-class="{'selected': form.sent}"/>
