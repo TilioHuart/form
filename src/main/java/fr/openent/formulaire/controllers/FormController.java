@@ -239,20 +239,6 @@ public class FormController extends ControllerHelper {
         });
     }
 
-    @Put("/share/remove/:id")
-    @ApiDoc("Removes rights for a given form.")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
-    public void shareRemove(final HttpServerRequest request) {
-        super.removeShare(request, false);
-    }
-
-    @Get("/publish")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
-    public void sharePublish(final HttpServerRequest request) {
-        // This route is used to create publish Workflow right, nothing to do
-        return;
-    }
-
     private Map<String, Object> filterIdsForSending(Map<String, Object> map) {
         Map<String, Object> filteredMap = new HashMap<>();
         for (String key : map.keySet()) {
