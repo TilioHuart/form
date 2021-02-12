@@ -31,13 +31,13 @@ public class Formulaire extends BaseServer {
 	public static final String CREATION_RIGHT = "formulaire.creation";
 	public static final String RESPONSE_RIGHT = "formulaire.response";
 
-	public static final String RESPONDER_RESOURCE_RIGHT = "formulaire.read";
 	public static final String CONTRIB_RESOURCE_RIGHT = "formulaire.contrib";
 	public static final String MANAGER_RESOURCE_RIGHT = "formulaire.manager";
+	public static final String RESPONDER_RESOURCE_RIGHT = "formulaire.comment";
 
-	public static final String RESPONDER_RESOURCE_BEHAVIOUR = "fr-openent-formulaire-controllers-FormController|initResponderResourceRight";
 	public static final String CONTRIB_RESOURCE_BEHAVIOUR = "fr-openent-formulaire-controllers-FormController|initContribResourceRight";
 	public static final String MANAGER_RESOURCE_BEHAVIOUR = "fr-openent-formulaire-controllers-FormController|initManagerResourceRight";
+	public static final String RESPONDER_RESOURCE_BEHAVIOUR = "fr-openent-formulaire-controllers-FormController|initResponderResourceRight";
 
 	public static final String TO_DO = "TO_DO";
 	public static final String IN_PROGRESS = "IN_PROGRESS";

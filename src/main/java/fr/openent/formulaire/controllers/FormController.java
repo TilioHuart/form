@@ -53,12 +53,6 @@ public class FormController extends ControllerHelper {
         this.neoService = new DefaultNeoService();
     }
 
-
-    @ResourceFilter(canShareResourceFilter.class)
-    @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
-    public void initResponderResourceRight(final HttpServerRequest request) {
-    }
-
     @ResourceFilter(canShareResourceFilter.class)
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void initContribResourceRight(final HttpServerRequest request) {
@@ -67,6 +61,11 @@ public class FormController extends ControllerHelper {
     @ResourceFilter(canShareResourceFilter.class)
     @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void initManagerResourceRight(final HttpServerRequest request) {
+    }
+
+    @ResourceFilter(canShareResourceFilter.class)
+    @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void initResponderResourceRight(final HttpServerRequest request) {
     }
 
 
@@ -242,8 +241,11 @@ public class FormController extends ControllerHelper {
     private Map<String, Object> filterIdsForSending(Map<String, Object> map) {
         Map<String, Object> filteredMap = new HashMap<>();
         for (String key : map.keySet()) {
-            if (map.get(key).equals(Formulaire.RESPONDER_RESOURCE_BEHAVIOUR)) {
-                filteredMap.put(key, map.get(key));
+            ArrayList<String> values = (ArrayList<String>)map.get(key);
+            for (String value : values) {
+                if (value.equals(Formulaire.RESPONDER_RESOURCE_BEHAVIOUR)) {
+                    filteredMap.put(key, map.get(key));
+                }
             }
         }
         return filteredMap;
