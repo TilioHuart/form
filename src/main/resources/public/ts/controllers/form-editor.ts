@@ -90,7 +90,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 await questionService.save(question);
                 let registeredChoices = [];
                 for (let choice of question.choices.all) {
-                    if (!!choice.value && !!registeredChoices.find(c => c === choice.value) ) {
+                    if (!!choice.value && !registeredChoices.find(c => c === choice.value) ) {
                         await questionChoiceService.save(choice);
                         registeredChoices.push(choice.value);
                     }
