@@ -122,6 +122,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     };
 
     vm.send = async (): Promise<void> => {
+        await responseService.save(vm.response);
         if (await checkMandatoryQuestions()) {
             template.open('lightbox', 'lightbox/responses-confirm-sending');
             vm.display.lightbox.sending = true;
