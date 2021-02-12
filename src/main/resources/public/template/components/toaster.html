@@ -4,7 +4,7 @@
             <button ng-click="vm.openForm(vm.forms.selected[0])" class="cell" ng-show="vm.checkOpenButton()">
                 <i18n>formulaire.open</i18n>
             </button>
-            <button ng-click="vm.forms.deselectAll()" class="cell toaster-right">
+            <button ng-click="vm.switchAll(false)" class="cell toaster-right">
                 <i18n>formulaire.deselect</i18n>
             </button>
         </div>
@@ -27,7 +27,7 @@
             <button ng-click="vm.archiveForms()" class="cell" workflow="formulaire.creation">
                 <i18n>formulaire.archive</i18n>
             </button>
-            <button ng-click="vm.forms.deselectAll()" class="cell toaster-right">
+            <button ng-click="vm.switchAll(false)" class="cell toaster-right">
                 <i18n>formulaire.deselect</i18n>
             </button>
         </div>
@@ -38,7 +38,7 @@
             <button ng-click="vm.deleteForms()" class="cell" workflow="formulaire.creation">
                 <i18n>formulaire.delete</i18n>
             </button>
-            <button ng-click="vm.forms.deselectAll()" class="cell toaster-right">
+            <button ng-click="vm.switchAll(false)" class="cell toaster-right">
                 <i18n>formulaire.deselect</i18n>
             </button>
         </div>

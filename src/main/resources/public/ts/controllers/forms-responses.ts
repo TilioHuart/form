@@ -49,6 +49,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
 
     vm.switchAll = (value:boolean) : void => {
         value ? vm.forms.selectAll() : vm.forms.deselectAll();
+        vm.allFormsSelected = value;
     };
 
     // Utils
