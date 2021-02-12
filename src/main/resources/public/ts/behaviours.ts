@@ -2,14 +2,14 @@ import {Behaviours} from 'entcore';
 
 const rights = {
     resources: {
-        read: {
-            right: "fr-openent-formulaire-controllers-FormController|initResponderResourceRight"
-        },
         contrib: {
             right: "fr-openent-formulaire-controllers-FormController|initContribResourceRight"
         },
         manager: {
             right: "fr-openent-formulaire-controllers-FormController|initManagerResourceRight"
+        },
+        comment: {
+            right: "fr-openent-formulaire-controllers-FormController|initResponderResourceRight"
         }
     },
     workflow: {
@@ -25,6 +25,6 @@ Behaviours.register('formulaire', {
     loadResources: function (callback) { },
 
     resourceRights: function () {
-        return ['read', 'contrib', 'manager'];
+        return ['contrib', 'manager', 'comment'];
     }
 });
