@@ -14,9 +14,13 @@ import fr.openent.formulaire.service.impl.DefaultNeoService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.http.response.DefaultResponseHandler;
 import fr.wseduc.webutils.request.RequestUtils;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
@@ -30,10 +34,7 @@ import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
@@ -211,26 +212,25 @@ public class FormController extends ControllerHelper {
                     Map<String, Object> idGroups = shareFormObject.getJsonObject("groups").getMap();
                     Map<String, Object> idBookmarks = shareFormObject.getJsonObject("bookmarks").getMap();
 
-                    idUsers = filterIdsForSending(idUsers);
-                    idGroups = filterIdsForSending(idGroups);
-                    idBookmarks = filterIdsForSending(idBookmarks);
-
-                    JsonArray usersIds = new JsonArray(new ArrayList<>(idUsers.keySet()));
-                    JsonArray groupsIds = new JsonArray(new ArrayList<>(idGroups.keySet()));
-                    JsonArray bookmarksIds = new JsonArray(new ArrayList<>(idBookmarks.keySet()));
+                    JsonArray usersIds = new JsonArray(new ArrayList<>(filterIdsForSending(idUsers).keySet()));
+                    JsonArray groupsIds = new JsonArray(new ArrayList<>(filterIdsForSending(idGroups).keySet()));
+                    JsonArray bookmarksIds = new JsonArray(new ArrayList<>(filterIdsForSending(idBookmarks).keySet()));
 
                     neoService.getUsersInfosFromIds(usersIds, groupsIds, eventUsers -> {
                         if (eventUsers.isRight()) {
                             JsonArray infos = eventUsers.right().getValue();
-                            removeDeletedDistributions(formId, infos);
-                            addNewDistributions(formId, user, infos);
-                            updateFormSentProp(formId);
+                            syncDistributions(formId, user, infos);
                         } else {
-                            log.error("[Formulaire@GetUserIds] Fail to get users' ids from groups' ids");
+                            log.error("[Formulaire@getUserIds] Fail to get users' ids from groups' ids");
                         }
                     });
 
                     // Classic sharing stuff (putting or removing ids from form_shares table)
+                    List<Map<String, Object>> idsObjects = new ArrayList<>();
+                    idsObjects.add(idUsers);
+                    idsObjects.add(idGroups);
+                    idsObjects.add(idBookmarks);
+                    updateFormCollabProp(formId, idsObjects);
                     super.shareResource(request, null, false, null, null);
                 } else {
                     log.error("User not found in session.");
@@ -253,65 +253,130 @@ public class FormController extends ControllerHelper {
         return filteredMap;
     }
 
-    private void removeDeletedDistributions(String formId, JsonArray users) {
-        distributionService.getRemoved(formId, users, filteringEvent -> {
+    private void syncDistributions(String formId, UserInfos user, JsonArray responders) {
+        removeDeletedDistributions(formId, responders, removeEvt -> {
+            if (removeEvt.failed()) log.error(removeEvt.cause());
+
+            addNewDistributions(formId, user, responders, addEvt -> {
+                if (addEvt.failed()) log.error(addEvt.cause());
+
+                updateFormSentProp(formId, updateSentPropEvent -> {
+                    if (updateSentPropEvent.failed()) log.error(updateSentPropEvent.cause());
+                });
+            });
+        });
+    }
+
+    private void removeDeletedDistributions(String formId, JsonArray responders, Handler<AsyncResult<String>> handler) {
+        distributionService.getRemoved(formId, responders, filteringEvent -> {
             if (filteringEvent.isRight()) {
                 JsonArray removed = filteringEvent.right().getValue();
                 if (!removed.isEmpty()) {
-                    distributionService.removeMultiple(formId, removed, event -> {
-                        if (event.isRight()) {
+                    distributionService.removeMultiple(formId, removed, removeEvent -> {
+                        if (removeEvent.isRight()) {
+                            handler.handle(Future.succeededFuture());
                             log.info("[Formulaire@removeDeletedDistributions] Successful remove in distribution table");
                         } else {
-                            log.error("[Formulaire@removeDeletedDistributions] Fail to remove distributions : " + event.left().getValue());
+                            handler.handle(Future.failedFuture(removeEvent.left().getValue()));
+                            log.error("[Formulaire@removeDeletedDistributions] Fail to remove distributions");
                         }
                     });
                 }
+                handler.handle(Future.succeededFuture());
             } else {
-                log.error("[Formulaire@removeDeletedDistributions] Fail to filter distributions to remove : " + filteringEvent.left().getValue());
+                handler.handle(Future.failedFuture(filteringEvent.left().getValue()));
+                log.error("[Formulaire@removeDeletedDistributions] Fail to filter distributions to remove");
             }
         });
     }
 
-    private void addNewDistributions(String formId, UserInfos user, JsonArray users) {
-        if (!users.isEmpty()) {
-            distributionService.getDuplicates(formId, users, filteringEvent -> {
+    private void addNewDistributions(String formId, UserInfos user, JsonArray responders, Handler<AsyncResult<String>> handler) {
+        if (!responders.isEmpty()) {
+            distributionService.getDuplicates(formId, responders, filteringEvent -> {
                 if (filteringEvent.isRight()) {
                     JsonArray duplicates = filteringEvent.right().getValue();
-                    distributionService.createMultiple(formId, user, users, duplicates, event -> {
-                        if (event.isRight()) {
+                    distributionService.createMultiple(formId, user, responders, duplicates, addEvent -> {
+                        if (addEvent.isRight()) {
+                            handler.handle(Future.succeededFuture());
                             log.info("[Formulaire@addNewDistributions] Successful adding in distribution table");
                         } else {
-                            log.error("[Formulaire@addNewDistributions] Fail to add distributions : " + event.left().getValue());
+                            handler.handle(Future.failedFuture(addEvent.left().getValue()));
+                            log.error("[Formulaire@addNewDistributions] Fail to add distributions");
                         }
                     });
                 } else {
-                    log.error("[Formulaire@addNewDistributions] Fail to filter existing distributions : " + filteringEvent.left().getValue());
+                    handler.handle(Future.failedFuture(filteringEvent.left().getValue()));
+                    log.error("[Formulaire@addNewDistributions] Fail to filter existing distributions");
                 }
             });
         }
+        handler.handle(Future.succeededFuture());
     }
 
-    private void updateFormSentProp(String formId) {
+    private void updateFormSentProp(String formId, Handler<AsyncResult<String>> handler) {
         distributionService.listByForm(formId, getDistributionsEvent -> {
             if (getDistributionsEvent.isRight()) {
-                Boolean value = getDistributionsEvent.right().getValue().isEmpty();
+                boolean value = !getDistributionsEvent.right().getValue().isEmpty();
                 formService.get(formId, getEvent -> {
                     if (getEvent.isRight()) {
                         JsonObject form = getEvent.right().getValue();
                         form.put("sent", value);
                         formService.update(formId, form, updateEvent -> {
                             if (updateEvent.isRight()) {
-                                log.info("[Formulaire@updateFormSentProp] Form's sent property has been updated");
+                                handler.handle(Future.succeededFuture());
+                                log.info("[Formulaire@updateFormSentProp] Form's sent property has been updated to : " + value);
                             } else {
-                                log.error("[Formulaire@updateFormSentProp] Fail to update form : " + updateEvent.left().getValue());
+                                handler.handle(Future.failedFuture(updateEvent.left().getValue()));
+                                log.error("[Formulaire@updateFormSentProp] Fail to update form");
                             }
                         });
                     } else {
-                        log.error("[Formulaire@updateFormSentProp] Fail to get form : " + getEvent.left().getValue());
+                        handler.handle(Future.failedFuture(getEvent.left().getValue()));
+                        log.error("[Formulaire@updateFormSentProp] Fail to get form");
                     }
                 });
             } else {
-                log.error("[Formulaire@updateFormSentProp] Fail to get distributions of the form : " + getDistributionsEvent.left().getValue());
+                handler.handle(Future.failedFuture(getDistributionsEvent.left().getValue()));
+                log.error("[Formulaire@updateFormSentProp] Fail to get distributions of the form");
+            }
+        });
+    }
+
+    private void updateFormCollabProp(String formId, List<Map<String, Object>> idsObjects) {
+        boolean isShared = false;
+        int i = 0;
+        while (!isShared && i < idsObjects.size()) { // Iterate over "users", "groups", "bookmarks"
+            int j = 0;
+            Map<String, Object> o = idsObjects.get(i);
+            Object[] arrayKeys = o.keySet().toArray();
+            while (!isShared && j < arrayKeys.length) { // Iterate over each pair id-actions
+                ArrayList<String> values = (ArrayList<String>)o.get(arrayKeys[j]);
+                int k = 0;
+                while (!isShared && k < values.size()) { // Iterate over each action for an id
+                    if (!values.get(k).equals(Formulaire.RESPONDER_RESOURCE_BEHAVIOUR)) {
+                        isShared = true;
+                    }
+                    k++;
+                }
+                j++;
+            }
+            i++;
+        }
+
+        final boolean value = isShared;
+        formService.get(formId, getEvent -> {
+            if (getEvent.isRight()) {
+                JsonObject form = getEvent.right().getValue();
+                form.put("collab", value);
+                formService.update(formId, form, updateEvent -> {
+                    if (updateEvent.isRight()) {
+                        log.info("[Formulaire@updateFormCollabProp] Form's collab property has been updated to : " + value);
+                    } else {
+                        log.error("[Formulaire@updateFormCollabProp] Fail to update form : " + updateEvent.left().getValue());
+                    }
+                });
+            } else {
+                log.error("[Formulaire@updateFormCollabProp] Fail to get form : " + getEvent.left().getValue());
             }
         });
     }

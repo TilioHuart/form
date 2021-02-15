@@ -1,4 +1,4 @@
-import {idiom, ng, notify, template} from 'entcore';
+import {idiom, model, ng, notify, template} from 'entcore';
 import {Form, Forms, QuestionChoice, Questions} from "../models";
 import {DateUtils} from "../utils/date";
 import {formService, questionService, questionChoiceService} from "../services";
@@ -67,7 +67,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         // Check if the folder is ok
         switch (vm.folder) {
             case "mine": vm.forms.all = vm.forms.all.filter(form => form.archived === false); break;
-            case "shared": vm.forms.all = vm.forms.all.filter(form => form.collab === true); break;
+            case "shared": vm.forms.all = vm.forms.all.filter(form => form.collab === true && form.owner_id != model.me.userId); break;
             case "sent": vm.forms.all = vm.forms.all.filter(form => form.sent === true); break;
             case "archived": vm.forms.all = vm.forms.all.filter(form => form.archived === true); break;
             default : vm.openFolder('mine'); break;
