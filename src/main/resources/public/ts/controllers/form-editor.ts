@@ -21,6 +21,7 @@ interface ViewModel {
     createNewQuestion(): void;
     doCreateNewQuestion(code: number): void;
     saveQuestions(displaySuccess?: boolean): void;
+    return(): void;
     duplicateQuestion(): void;
     deleteQuestion(): void;
     doDeleteQuestion(): void;
@@ -86,7 +87,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
     vm.saveQuestions = async (displaySuccess:boolean = false) => {
         try {
-            for (let question of vm.questions.all) {
+            let validQuestions = vm.questions.filter(question => !!question.title); // TODO check more than just titles later
+            for (let question of validQuestions) {
                 await questionService.save(question);
                 let registeredChoices = [];
                 for (let choice of question.choices.all) {
@@ -96,7 +98,12 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     }
                 }
             }
-            if (displaySuccess) { notify.success(idiom.translate('formulaire.success.form.save')); }
+            let wrongQuestions = vm.questions.filter(question => !!!question.title); // TODO check more than just titles later
+            if (wrongQuestions.length > 0) {
+                notify.error(idiom.translate('formulaire.question.save.missing.field'));
+            } else if (displaySuccess) {
+                notify.success(idiom.translate('formulaire.success.form.save'));
+            }
             let response = await formService.get(vm.form.id);
             if (response.status) { vm.form = response.data }
             await vm.questions.sync(vm.form.id);
@@ -107,6 +114,14 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         }
     };
 
+    vm.return = () => {
+        let wrongQuestions = vm.questions.filter(question => !!!question.title); // TODO check more than just titles later
+        if (wrongQuestions.length > 0) {
+            notify.error(idiom.translate('formulaire.question.save.missing.field'));
+        } else {
+            $scope.redirectTo('/list/mine');
+        }
+    }
 
     // Question functions
 
