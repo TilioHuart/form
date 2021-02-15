@@ -20,7 +20,7 @@ interface ViewModel {
     switchAll(value: boolean): void;
     createNewQuestion(): void;
     doCreateNewQuestion(code: number): void;
-    saveQuestions(displaySuccess?: boolean): void;
+    saveAll(): Promise<void>;
     return(): void;
     duplicateQuestion(): void;
     deleteQuestion(): void;
@@ -85,43 +85,25 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         $scope.safeApply();
     };
 
-    vm.saveQuestions = async (displaySuccess:boolean = false) => {
-        try {
-            let validQuestions = vm.questions.filter(question => !!question.title); // TODO check more than just titles later
-            for (let question of validQuestions) {
-                await questionService.save(question);
-                let registeredChoices = [];
-                for (let choice of question.choices.all) {
-                    if (!!choice.value && !registeredChoices.find(c => c === choice.value) ) {
-                        await questionChoiceService.save(choice);
-                        registeredChoices.push(choice.value);
-                    }
-                }
-            }
-            let wrongQuestions = vm.questions.filter(question => !!!question.title); // TODO check more than just titles later
-            if (wrongQuestions.length > 0) {
-                notify.error(idiom.translate('formulaire.question.save.missing.field'));
-            } else if (displaySuccess) {
-                notify.success(idiom.translate('formulaire.success.form.save'));
-            }
-            let response = await formService.get(vm.form.id);
-            if (response.status) { vm.form = response.data }
-            await vm.questions.sync(vm.form.id);
-            $scope.safeApply();
+    vm.saveAll = async () : Promise<void> => {
+        vm.dontSave = true;
+        let wrongQuestions = vm.questions.filter(question => !!!question.title); // TODO check more than just titles later
+        if (wrongQuestions.length > 0) {
+            notify.error(idiom.translate('formulaire.question.save.missing.field'));
         }
-        catch (e) {
-            throw e;
-        }
+        await saveQuestions(wrongQuestions.length <= 0);
+        vm.dontSave = false;
     };
 
-    vm.return = () => {
+    vm.return = () : void => {
+        vm.dontSave = true;
         let wrongQuestions = vm.questions.filter(question => !!!question.title); // TODO check more than just titles later
         if (wrongQuestions.length > 0) {
             notify.error(idiom.translate('formulaire.question.save.missing.field'));
         } else {
             $scope.redirectTo('/list/mine');
         }
-    }
+    };
 
     // Question functions
 
@@ -263,6 +245,34 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
     // Utils
 
+    const saveQuestions = async (displaySuccess:boolean = false) => {
+        try {
+            for (let question of vm.questions.all) {
+                if (!!!question.title && !!!question.statement && question.choices.all.length <= 0) {
+                    await questionService.delete(question.id);
+                }
+                else {
+                    await questionService.save(question);
+                    let registeredChoices = [];
+                    for (let choice of question.choices.all) {
+                        if (!!choice.value && !registeredChoices.find(c => c === choice.value) ) {
+                            await questionChoiceService.save(choice);
+                            registeredChoices.push(choice.value);
+                        }
+                    }
+                }
+            }
+            if (displaySuccess) { notify.success(idiom.translate('formulaire.success.form.save')); }
+            let response = await formService.get(vm.form.id);
+            if (response.status) { vm.form = response.data }
+            await vm.questions.sync(vm.form.id);
+            $scope.safeApply();
+        }
+        catch (e) {
+            throw e;
+        }
+    };
+
     const onClickQuestion = async (event) : Promise<void> => {
         if (!vm.dontSave && $scope.currentPage === 'openForm') {
             let questionId: number = isInFocusable(event.target);
@@ -270,30 +280,30 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 let question = vm.questions.all.filter(question => question.id == questionId)[0];
                 if (!question.selected) {
                     if (vm.questions.selected.length > 0) {
-                        await vm.saveQuestions();
+                        await saveQuestions();
                     }
                     // Reselection of the question because the sync has removed the selections
                     vm.questions.all.filter(question => question.id == questionId)[0].selected = true;
                 }
             }
-            else if (isInCheckZone(event.target)) {
+            else if (isInShowErrorZone(event.target)) {
                 let wrongQuestions = vm.questions.filter(question => !!!question.title); // TODO check more than just titles later
                 if (wrongQuestions.length > 0) {
                     notify.error(idiom.translate('formulaire.question.save.missing.field'));
                 }
-                await vm.saveQuestions();
+                await saveQuestions();
             }
             else {
-                await vm.saveQuestions();
+                await saveQuestions();
             }
             $scope.safeApply();
         }
     };
 
-    const isInCheckZone = (el): boolean => {
+    const isInShowErrorZone = (el): boolean => {
         if (!!!el) { return true; }
-        else if (el.classList && el.classList.contains("dontCheck")) { return false; }
-        return isInCheckZone(el.parentNode);
+        else if (el.classList && el.classList.contains("dontShowError")) { return false; }
+        return isInShowErrorZone(el.parentNode);
     };
 
     const isInFocusable = (el): number => {
