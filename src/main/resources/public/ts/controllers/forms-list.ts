@@ -28,9 +28,9 @@ interface ViewModel {
     openPropertiesForm(): void;
     duplicateForms(): void;
     sendForm(): void;
-    closeSendFormLightbox(): Promise<void>;
+    closeSendFormLightbox(): void;
     shareForm(): void;
-    closeShareFormLightbox(): Promise<void>;
+    closeShareFormLightbox(): void;
     seeResultsForm(): void;
     exportForm(): void;
     restoreForms(): Promise<void>;
@@ -147,10 +147,10 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         }, 200);
     };
 
-    vm.closeSendFormLightbox = async (): Promise<void> => {
+    vm.closeSendFormLightbox = (): void => {
         template.close('lightbox');
         vm.display.lightbox.sending = false;
-        await init();
+        window.setTimeout(async function () { await init(); }, 100);
     };
 
     vm.shareForm = (): void => {
@@ -171,10 +171,10 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         // }, 200);
     };
 
-    vm.closeShareFormLightbox = async (): Promise<void> => {
+    vm.closeShareFormLightbox = (): void => {
         template.close('lightbox');
         vm.display.lightbox.sharing = false;
-        await init();
+        window.setTimeout(async function () { await init(); }, 100);
     };
 
     vm.seeResultsForm = (): void => {
@@ -209,7 +209,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.doArchiveForms = async (): Promise<void> => {
         try {
             for (let form of vm.forms.selected) {
-                if ($scope.isStatusXXX(await formService.unshare(form.id), 200)) {
+                if ($scope.isStatus200(await formService.unshare(form.id))) {
                     await formService.archive(form);
                 }
             }

@@ -119,7 +119,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     };
 
     vm.send = async (): Promise<void> => {
-        await responseService.save(vm.response);
+        await saveResponses();
         if (await checkMandatoryQuestions()) {
             template.open('lightbox', 'lightbox/responses-confirm-sending');
             vm.display.lightbox.sending = true;
@@ -130,7 +130,6 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     };
 
     vm.doSend = async (): Promise<void> => {
-        await saveResponses();
         vm.distribution.status = DistributionStatus.FINISHED;
         await distributionService.update(vm.distribution);
         template.close('lightbox');

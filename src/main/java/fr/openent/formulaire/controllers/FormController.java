@@ -205,6 +205,7 @@ public class FormController extends ControllerHelper {
         RequestUtils.bodyToJson(request, pathPrefix + "share", shareFormObject -> {
             UserUtils.getUserInfos(eb, request, user -> {
                 if (user != null) {
+                    // Get all ids, filter the one about sending (response right) and sync distribution table accordingly
                     final String formId = request.params().get("id");
                     Map<String, Object> idUsers = shareFormObject.getJsonObject("users").getMap();
                     Map<String, Object> idGroups = shareFormObject.getJsonObject("groups").getMap();
@@ -229,6 +230,7 @@ public class FormController extends ControllerHelper {
                         }
                     });
 
+                    // Classic sharing stuff (putting or removing ids from form_shares table)
                     super.shareResource(request, null, false, null, null);
                 } else {
                     log.error("User not found in session.");
