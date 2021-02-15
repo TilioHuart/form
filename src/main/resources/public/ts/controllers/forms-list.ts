@@ -235,7 +235,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.doArchiveForms = async (): Promise<void> => {
         try {
             for (let form of vm.forms.selected) {
-                if ($scope.isStatus200(await formService.unshare(form.id))) {
+                if ($scope.isStatusXXX(await formService.unshare(form.id), 200)) {
                     await formService.archive(form);
                 }
             }
