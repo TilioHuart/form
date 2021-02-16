@@ -69,8 +69,9 @@ export const formService: FormService = {
 
     async archive(form : Form): Promise<AxiosResponse> {
         try {
-            form.archived = true;
             form.sent = false;
+            form.collab = false;
+            form.archived = true;
             return await this.update(form);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.archive'));

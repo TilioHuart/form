@@ -1,13 +1,12 @@
 import {idiom, ng, notify, moment} from 'entcore';
 import http, {AxiosResponse} from 'axios';
 import {Response, Types} from "../models";
-import {DateUtils} from "../utils/date";
 
 export interface ResponseService {
     list(questionId : number): Promise<AxiosResponse>;
     listMine(questionId : number): Promise<AxiosResponse>;
     get(questionId : number): Promise<AxiosResponse>;
-    save(response : Response): Promise<AxiosResponse>;
+    save(response : Response, questionType : number): Promise<AxiosResponse>;
     create(response : Response): Promise<AxiosResponse>;
     update(response : Response): Promise<AxiosResponse>;
     delete(responseId : number): Promise<AxiosResponse>;
@@ -42,10 +41,10 @@ export const responseService: ResponseService = {
         }
     },
 
-    async save(response : Response, question_type? : number): Promise<AxiosResponse> {
-        if (question_type === Types.TIME) {
+    async save(response : Response, questionType? : number): Promise<AxiosResponse> {
+        if (questionType === Types.TIME) {
             response.answer = moment(response.answer).format("HH:mm");
-        } else if (question_type === Types.DATE) {
+        } else if (questionType === Types.DATE) {
             if (typeof response.answer != "string") {
                 response.answer = moment(response.answer).format("DD/MM/YYYY");
             }

@@ -1,6 +1,5 @@
 package fr.openent.formulaire.controllers;
 
-import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.service.QuestionService;
 import fr.openent.formulaire.service.impl.DefaultQuestionService;
@@ -28,8 +27,7 @@ public class QuestionController extends ControllerHelper {
 
     @Get("/forms/:formId/questions")
     @ApiDoc("List questions")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void list(HttpServerRequest request) {
         String formId = request.getParam("formId");
         questionService.list(formId, arrayResponseHandler(request));
