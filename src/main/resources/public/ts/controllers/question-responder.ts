@@ -9,7 +9,6 @@ import {
 } from "../models";
 import {distributionService, formService, questionService} from "../services";
 import {responseService} from "../services/ResponseService";
-import {DateUtils} from "../utils/date";
 
 interface ViewModel {
     types: typeof Types;
@@ -61,16 +60,20 @@ export const questionResponderController = ng.controller('QuestionResponderContr
             await vm.responses.syncMine(vm.question.id);
             vm.selectedIndex = new Array<boolean>(vm.nbQuestions);
             for (let i = 0; i < vm.question.choices.all.length; i++) {
-                for (let j = 0; j < vm.responses.all.length; j++) {
-                    vm.selectedIndex[i] = vm.question.choices.all[i].id === vm.responses.all[j].choice_id;
+                let check = false;
+                let j = 0;
+                while (!check && j < vm.responses.all.length) {
+                    check = vm.question.choices.all[i].id === vm.responses.all[j].choice_id;
+                    j++;
                 }
+                vm.selectedIndex[i] = check;
             }
         }
         else {
             vm.response = $scope.getDataIf200(await responseService.get(vm.question.id));
             if (!!!vm.response.question_id) { vm.response.question_id = vm.question.id; }
         }
-        if (vm.question.question_type === Types.DATE) { formatDate() }
+        // if (vm.question.question_type === Types.DATE) { formatDate() }
         if (vm.question.question_type === Types.TIME) { formatTime() }
         vm.distribution = $scope.getDataIf200(await distributionService.get(vm.question.form_id));
 
@@ -154,7 +157,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
                     await responseService.create(newResponse);
                 }
                 else if (found && !checked) {
-                    await responseService.delete(vm.responses.all[j].id);
+                    await responseService.delete(vm.responses.all[j-1].id);
                 }
             }
         }

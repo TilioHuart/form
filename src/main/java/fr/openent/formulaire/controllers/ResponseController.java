@@ -1,7 +1,6 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.Formulaire;
-import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.ResponseRight;
 import fr.openent.formulaire.service.ResponseService;
 import fr.openent.formulaire.service.impl.DefaultResponseService;

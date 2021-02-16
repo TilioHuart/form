@@ -1,6 +1,5 @@
 package fr.openent.formulaire.controllers;
 
-import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.service.QuestionTypeService;
 import fr.openent.formulaire.service.impl.DefaultQuestionTypeService;
 import fr.wseduc.rs.*;
@@ -10,7 +9,6 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
-import org.entcore.common.http.filter.ResourceFilter;
 
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;

@@ -2,9 +2,7 @@ package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.export.FormResponsesExport;
-import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CreationRight;
-import fr.openent.formulaire.security.canShareResourceFilter;
 import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.FormService;
 import fr.openent.formulaire.service.NeoService;
@@ -14,12 +12,10 @@ import fr.openent.formulaire.service.impl.DefaultNeoService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
-import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.http.response.DefaultResponseHandler;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
@@ -54,20 +50,15 @@ public class FormController extends ControllerHelper {
         this.neoService = new DefaultNeoService();
     }
 
-    @ResourceFilter(canShareResourceFilter.class)
-    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
-    public void initContribResourceRight(final HttpServerRequest request) {
-    }
 
-    @ResourceFilter(canShareResourceFilter.class)
-    @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
-    public void initManagerResourceRight(final HttpServerRequest request) {
-    }
+//    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+//    public void initContribResourceRight(final HttpServerRequest request) { }
 
-    @ResourceFilter(canShareResourceFilter.class)
+//    @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+//    public void initManagerResourceRight(final HttpServerRequest request) { }
+
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
-    public void initResponderResourceRight(final HttpServerRequest request) {
-    }
+    public void initResponderResourceRight(final HttpServerRequest request) { }
 
 
     @Get("/forms")
@@ -201,7 +192,8 @@ public class FormController extends ControllerHelper {
 
     @Put("/share/resource/:id")
     @ApiDoc("Adds rights for a given form.")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(CreationRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void shareResource(final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "share", shareFormObject -> {
             UserUtils.getUserInfos(eb, request, user -> {
@@ -231,6 +223,7 @@ public class FormController extends ControllerHelper {
                     idsObjects.add(idGroups);
                     idsObjects.add(idBookmarks);
                     updateFormCollabProp(formId, idsObjects);
+
                     super.shareResource(request, null, false, null, null);
                 } else {
                     log.error("User not found in session.");
