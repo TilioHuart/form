@@ -140,7 +140,8 @@ public class FormResponsesExport {
   }
 
   private String addResponse(JsonObject response, Boolean endLine) {
-    String value = "\"" + response.getString("answer") + "\"";
+
+    String value = "\"" + response.getString("answer").replace("\"", "\"\"") + "\"";
     value += endLine ? EOL : SEPARATOR;
     return value;
   }
