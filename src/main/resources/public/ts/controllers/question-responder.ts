@@ -159,16 +159,12 @@ export const questionResponderController = ng.controller('QuestionResponderContr
             }
         }
         else {
-            await responseService.save(vm.response);
+            await responseService.save(vm.response, vm.question.question_type);
         }
     };
 
-    const formatDate = (): void => {
-        vm.response.answer = DateUtils.format(vm.response.answer, DateUtils.FORMAT["YEAR-MONTH-DAY"]);
-    };
-
     const formatTime = (): void => {
-        vm.response.answer = new Date(vm.response.answer.toString());
+        vm.response.answer = new Date("January 01 1970 " + vm.response.answer);
     };
 
     const checkMandatoryQuestions = async (): Promise<boolean> => {
