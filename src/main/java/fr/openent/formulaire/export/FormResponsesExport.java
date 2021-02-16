@@ -118,13 +118,19 @@ public class FormResponsesExport {
                 String answer = "";
                 boolean choice = true;
                 int question_id = response.getInteger("question_id");
-                while (choice) {
+                while (choice && responses.size() > 0) {
                   if (response.getInteger("question_id") == question_id) {
                     answer += response.getString("answer") + ";";
                     question_id = response.getInteger("question_id");
                     responses.remove(0);
-                    response = responses.get(0);
+                    if (responses.size() > 0) {
+                      response = responses.get(0);
+                    }
+                    else {
+                      answer = answer.substring(0, answer.length() - 1);
+                    }
                   } else {
+                    answer = answer.substring(0, answer.length() - 1);
                     choice = false;
                   }
                 }
