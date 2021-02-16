@@ -115,12 +115,25 @@ public class FormResponsesExport {
             for (int j = 1; j <= nbQuestions; j++) {
               JsonObject response = responses.get(0);
               if (response.getInteger("position") == j) {
-                content.append(addResponse(response, j == nbQuestions));
-                responses.remove(0);
+                String answer = "";
+                boolean choice = true;
+                int question_id = response.getInteger("question_id");
+                while (choice) {
+                  if (response.getInteger("question_id") == question_id) {
+                    answer += response.getString("answer") + ";";
+                    question_id = response.getInteger("question_id");
+                    responses.remove(0);
+                    response = responses.get(0);
+                  } else {
+                    choice = false;
+                  }
+                }
+                content.append(addResponse(answer, j == nbQuestions));
               }
               else {
                 response.put("answer", "");
-                content.append(addResponse(response, j == nbQuestions));
+                String answer = response.getString("answer");
+                content.append(addResponse(answer, j == nbQuestions));
               }
             }
           }
@@ -139,9 +152,8 @@ public class FormResponsesExport {
     });
   }
 
-  private String addResponse(JsonObject response, Boolean endLine) {
-
-    String value = "\"" + response.getString("answer").replace("\"", "\"\"") + "\"";
+  private String addResponse(String answer, Boolean endLine) {
+    String value = "\"" + answer.replace("\"", "\"\"") + "\"";
     value += endLine ? EOL : SEPARATOR;
     return value;
   }
