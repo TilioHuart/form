@@ -23,6 +23,7 @@ interface ViewModel {
     switchAll(value : boolean): void;
     displayFolder(): string;
     displayDate(date : Date): string;
+    sort() : void;
     checkOpenButton(): boolean;
     openForm(form : Form): void;
     openPropertiesForm(): void;
@@ -100,6 +101,10 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         return date + idiom.translate('formulaire.at') + time;
     };
 
+    vm.sort = () : void => {
+        vm.forms.orderForms();
+        $scope.safeApply();
+    }
 
     // Toaster
 
