@@ -31,13 +31,14 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
     };
 
     vm.getImage = async (): Promise<void> => {
+        // TODO Fix vm.form.setInfoImage() function not found
         if (vm.form.picture) {
-            await vm.form.setInfoImage();
-            window.setTimeout(function() {
-                if(!vm.form.infoImg.compatible) {
-                    notify.error(idiom.translate('formulaire.image.incompatible'));
-                }
-            }, 2000)
+            // await vm.form.setInfoImage();
+            // window.setTimeout(function() {
+            //     if(!vm.form.infoImg.compatible) {
+            //         notify.error(idiom.translate('formulaire.image.incompatible'));
+            //     }
+            // }, 2000)
         }
         $scope.safeApply();
     };

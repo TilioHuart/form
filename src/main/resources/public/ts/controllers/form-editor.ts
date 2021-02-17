@@ -68,7 +68,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
     };
 
     vm.createNewQuestion = () => {
-        vm.dontSave = true;
         template.open('lightbox', 'lightbox/question-new');
         vm.display.lightbox.newQuestion = true;
         $scope.safeApply();
@@ -81,7 +80,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         await vm.questions.sync(vm.form.id);
         vm.display.lightbox.newQuestion = false;
         template.close('lightbox');
-        vm.dontSave = false;
         $scope.safeApply();
     };
 
