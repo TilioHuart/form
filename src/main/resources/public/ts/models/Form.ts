@@ -96,6 +96,11 @@ export class Form implements Selectable, Shareable  {
 export class Forms extends Selection<Form> {
     all: Form[];
 
+    order = {
+        field: "creationDate",
+        desc: false
+    };
+
     constructor() {
         super([]);
     }
@@ -124,5 +129,63 @@ export class Forms extends Selection<Form> {
             notify.error(idiom.translate('formulaire.error.form.sync'));
             throw e;
         }
+    }
+
+    orderForms() {
+        this.all = this.all.sort(
+            (a, b) => {
+                if (this.order.field == "creationDate") {
+                    if (a.date_creation > b.date_creation)
+                        if (this.order.desc)
+                            return 1;
+                        else
+                            return -1;
+                    if (a.date_creation < b.date_creation)
+                        if (this.order.desc)
+                            return -1;
+                        else
+                            return 1;
+                } else if (this.order.field == "modificationDate") {
+                    if (a.date_modification > b.date_modification)
+                        if (this.order.desc)
+                            return 1;
+                        else
+                            return -1;
+                    if (a.date_modification < b.date_modification)
+                        if (this.order.desc)
+                            return -1;
+                        else
+                            return 1;
+                } else if (this.order.field == "name") {
+                    if (a.title.toLowerCase() < b.title.toLowerCase())
+                        if (this.order.desc)
+                            return 1;
+                        else
+                            return -1;
+                    if (a.title.toLowerCase() > b.title.toLowerCase())
+                        if (this.order.desc)
+                            return -1;
+                        else
+                            return 1;
+                }
+            }
+        );
+    }
+
+    orderByField(fieldName) {
+        if (fieldName === this.order.field) {
+            this.order.desc = !this.order.desc;
+        } else {
+            this.order.desc = false;
+            this.order.field = fieldName;
+        }
+    };
+
+    isOrderedAsc(field) {
+        return this.order.field === field && !this.order.desc;
+    }
+
+    isOrderedDesc(field) {
+        return this.order.field === field && this.order.desc;
     }
 }
