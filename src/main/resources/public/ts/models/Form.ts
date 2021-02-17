@@ -65,19 +65,19 @@ export class Form implements Selectable, Shareable  {
         }
     }
 
-    setFromJson(data: any) {
+    setFromJson(data: any) : void {
         for (let key in data) {
             this[key] = data[key];
         }
     }
 
-    generateRights() {
+    generateRights() : void {
         this._id = this.id;
         this.owner = { userId: this.owner_id, displayName: this.owner_name };
         this.myRights = new Rights<Form>(this);
     }
 
-    async setInfoImage() {
+    async setInfoImage() : Promise<void> {
         const typesImgNoSend = ["image/png", "image/jpg", "image/jpeg", "image/gif"];
         try {
             let { data: { metadata } } = await formService.getInfoImage(this);
