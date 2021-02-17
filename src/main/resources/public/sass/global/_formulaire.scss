@@ -55,6 +55,30 @@ body.formulaire {
 
   .toaster-right { float: right; }
 
+  .filter-forms {
+    width: 97%;
+    .drop-down-block, .drop-down-block .drop-down-label {
+      margin-bottom: 0;
+    }
+
+    .checkbox-forms {
+      background-color: $medium-grey;
+      margin-right: 0;
+    }
+
+    label.chip.checkbox-forms.selected {
+      background-color: #e20037;
+    }
+
+    .checkbox-activity {
+      background-color: $medium-grey;
+      margin-right: 0;
+    }
+
+    label.chip.checkbox-activity.selected {
+      background-color: $accent;
+    }
+  }
 
   // Prop-form
 

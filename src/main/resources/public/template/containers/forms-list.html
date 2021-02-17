@@ -60,6 +60,8 @@
             </div>
         </div>
 
+        <div ng-include="'formulaire/public/template/components/filters.html'"></div>
+
         <!--Dominos display-->
         <div class="dominos" ng-if="!vm.forms.all.empty() && vm.display.grid">
             <div ng-repeat="form in vm.forms.all | filter:vm.searchInput"
