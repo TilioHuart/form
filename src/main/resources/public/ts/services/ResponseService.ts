@@ -5,7 +5,7 @@ import {Response, Types} from "../models";
 export interface ResponseService {
     list(questionId : number): Promise<AxiosResponse>;
     listMine(questionId : number): Promise<AxiosResponse>;
-    get(questionId : number): Promise<AxiosResponse>;
+    get(responseId : number): Promise<AxiosResponse>;
     save(response : Response, questionType : number): Promise<AxiosResponse>;
     create(response : Response): Promise<AxiosResponse>;
     update(response : Response): Promise<AxiosResponse>;
@@ -32,9 +32,9 @@ export const responseService: ResponseService = {
         }
     },
 
-    async get(questionId : number): Promise<AxiosResponse> {
+    async get(responseId : number): Promise<AxiosResponse> {
         try {
-            return http.get(`/formulaire/questions/${questionId}/response`);
+            return http.get(`/formulaire/responses/${responseId}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.get'));
             throw err;
@@ -42,11 +42,16 @@ export const responseService: ResponseService = {
     },
 
     async save(response : Response, questionType? : number): Promise<AxiosResponse> {
-        if (questionType === Types.TIME) {
-            response.answer = moment(response.answer).format("HH:mm");
-        } else if (questionType === Types.DATE) {
-            if (typeof response.answer != "string") {
-                response.answer = moment(response.answer).format("DD/MM/YYYY");
+        if (!!!response.answer) {
+            response.answer = "";
+        }
+        else {
+            if (questionType === Types.TIME) {
+                response.answer = moment(response.answer).format("HH:mm");
+            } else if (questionType === Types.DATE) {
+                if (typeof response.answer != "string") {
+                    response.answer = moment(response.answer).format("DD/MM/YYYY");
+                }
             }
         }
         return response.id ? await this.update(response) : await this.create(response);

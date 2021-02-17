@@ -11,7 +11,7 @@ public interface ResponseService {
 
     void listMine(String questionId, UserInfos user, Handler<Either<String, JsonArray>> handler);
 
-    void get(String questionId, UserInfos user, Handler<Either<String, JsonObject>> handler);
+    void get(String responseId, Handler<Either<String, JsonObject>> handler);
 
     void create(JsonObject response, UserInfos user, String questionId, Handler<Either<String, JsonObject>> handler);
 

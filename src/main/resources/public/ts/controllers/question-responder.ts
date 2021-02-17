@@ -70,10 +70,13 @@ export const questionResponderController = ng.controller('QuestionResponderContr
             }
         }
         else {
-            vm.response = $scope.getDataIf200(await responseService.get(vm.question.id));
+            vm.response = new Response();
+            let responses = $scope.getDataIf200(await responseService.listMine(vm.question.id));
+            if (responses.length > 0) {
+                vm.response = responses[0];
+            }
             if (!!!vm.response.question_id) { vm.response.question_id = vm.question.id; }
         }
-        // if (vm.question.question_type === Types.DATE) { formatDate() }
         if (vm.question.question_type === Types.TIME) { formatTime() }
         vm.distribution = $scope.getDataIf200(await distributionService.get(vm.question.form_id));
 
@@ -170,7 +173,9 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     };
 
     const formatTime = (): void => {
-        vm.response.answer = new Date("January 01 1970 " + vm.response.answer);
+        if (!!vm.response.answer) {
+            vm.response.answer = new Date("January 01 1970 " + vm.response.answer);
+        }
     };
 
     const checkMandatoryQuestions = async (): Promise<boolean> => {
@@ -178,8 +183,9 @@ export const questionResponderController = ng.controller('QuestionResponderContr
             let questions = $scope.getDataIf200(await questionService.list(vm.question.form_id));
             questions = questions.filter(question => question.mandatory === true);
             for (let question of questions) {
-                let response = $scope.getDataIf200(await responseService.get(question.id));
-                if (!!!response.answer) {
+                let responses = $scope.getDataIf200(await responseService.listMine(question.id));
+                responses = responses.filter(response => !!!response.answer);
+                if (responses.length > 0) {
                     return false;
                 }
             }

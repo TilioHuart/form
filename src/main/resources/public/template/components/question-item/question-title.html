@@ -10,7 +10,7 @@
 
 <div ng-if="question.question_type != vm.types.FREETEXT">
     <div ng-if="!question.selected">
-        <h4 ng-if="!!question.title">[[question.title]]</h4>
+        <h4 ng-if="!!question.title">[[question.title]]<span ng-if="question.mandatory" style="color:red;margin-left:10px">*</span></h4>
         <h4 ng-if="!!!question.title"><i18n>formulaire.question.title.empty</i18n></h4>
     </div>
     <div ng-if="question.selected">
