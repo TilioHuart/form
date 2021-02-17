@@ -131,15 +131,18 @@ public class DefaultDistributionService implements DistributionService {
         }
 
         ArrayList<JsonObject> respondersArray = new ArrayList<>();
-        responders = responders.getJsonObject(0).getJsonArray("users");
-        if (responders != null && !responders.isEmpty()) {
-            for (int i = 0; i < responders.size(); i++) {
-                JsonObject info = responders.getJsonObject(i);
-                if (!idsToFilter.contains(info.getString("id"))) {
-                    respondersArray.add(info);
+        for (int i = 0; i < responders.size(); i++) {
+            JsonArray infos = responders.getJsonObject(i).getJsonArray("users");
+            if (infos != null && !infos.isEmpty()) {
+                for (int j = 0; j < infos.size(); j++) {
+                    JsonObject info = infos.getJsonObject(j);
+                    if (!idsToFilter.contains(info.getString("id"))) {
+                        respondersArray.add(info);
+                    }
                 }
             }
         }
+
 
         JsonArray params = new JsonArray();
         String query = "INSERT INTO " + Formulaire.DISTRIBUTION_TABLE + " (form_id, sender_id, sender_name, responder_id, " +
