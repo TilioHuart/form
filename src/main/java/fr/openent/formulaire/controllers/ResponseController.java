@@ -51,19 +51,12 @@ public class ResponseController extends ControllerHelper {
         });
     }
 
-    @Get("/questions/:questionId/response")
-    @ApiDoc("Get form thanks to the id")
+    @Get("/responses/:responseId")
+    @ApiDoc("Get response thanks to the id")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void get(HttpServerRequest request) {
-        String questionId = request.getParam("questionId");
-        UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                responseService.get(questionId, user, defaultResponseHandler(request));
-            } else {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
-            }
-        });
+        String responseId = request.getParam("responseId");
+        responseService.get(responseId, defaultResponseHandler(request));
     }
 
     @Post("/questions/:questionId/responses")

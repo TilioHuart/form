@@ -74,12 +74,14 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
     };
 
     vm.doCreateNewQuestion = async (code: number) => {
+        vm.dontSave = true;
         vm.newQuestion.question_type = code;
         vm.newQuestion.position = vm.questions.all.length + 1;
         await questionService.create(vm.newQuestion);
         await vm.questions.sync(vm.form.id);
         vm.display.lightbox.newQuestion = false;
         template.close('lightbox');
+        vm.dontSave = false;
         $scope.safeApply();
     };
 
@@ -98,6 +100,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         let wrongQuestions = vm.questions.filter(question => !!!question.title); // TODO check more than just titles later
         if (wrongQuestions.length > 0) {
             notify.error(idiom.translate('formulaire.question.save.missing.field'));
+            vm.dontSave = false;
         } else {
             $scope.redirectTo('/list/mine');
         }
