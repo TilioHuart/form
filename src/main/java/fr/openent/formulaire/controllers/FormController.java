@@ -29,11 +29,13 @@ import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import java.util.*;
-
-import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
+import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
 
 public class FormController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(FormController.class);
@@ -42,23 +44,26 @@ public class FormController extends ControllerHelper {
     private DistributionService distributionService;
     private NeoService neoService;
 
-    public FormController(final Storage storage) {
+    public FormController(final Storage storage, String table, String shareTable) {
         super();
         this.storage = storage;
-        this.formService = new DefaultFormService();
+        this.formService = new DefaultFormService(Formulaire.DB_SCHEMA, table, shareTable);
         this.distributionService = new DefaultDistributionService();
         this.neoService = new DefaultNeoService();
     }
 
 
-//    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
-//    public void initContribResourceRight(final HttpServerRequest request) { }
+    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void initContribResourceRight(final HttpServerRequest request) {
+    }
 
-//    @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
-//    public void initManagerResourceRight(final HttpServerRequest request) { }
+    @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void initManagerResourceRight(final HttpServerRequest request) {
+    }
 
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
-    public void initResponderResourceRight(final HttpServerRequest request) { }
+    public void initResponderResourceRight(final HttpServerRequest request) {
+    }
 
 
     @Get("/forms")

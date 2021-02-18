@@ -25,6 +25,6 @@ Behaviours.register('formulaire', {
     loadResources: function (callback) { },
 
     resourceRights: function () {
-        return ['comment'];
+        return ['contrib', 'manager', 'comment'];
     }
 });

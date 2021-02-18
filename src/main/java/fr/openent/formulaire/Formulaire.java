@@ -5,6 +5,7 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.http.BaseServer;
+import org.entcore.common.http.filter.sql.ShareAndOwner;
 import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.share.impl.SqlShareService;
 import org.entcore.common.sql.SqlConf;
@@ -68,9 +69,9 @@ public class Formulaire extends BaseServer {
 		formConf.setTable("form");
 		formConf.setShareTable("form_shares");
 
-		FormController formController = new FormController(storage);
-		formController.setShareService(new SqlShareService("formulaire", "form_shares", eb, securedActions, null));
-		formController.setCrudService(new SqlCrudService("formulaire", "form"));
+		FormController formController = new FormController(storage, "form", "form_shares");
+		formController.setShareService(new SqlShareService(DB_SCHEMA, "form_shares", eb, securedActions, null));
+		formController.setCrudService(new SqlCrudService(DB_SCHEMA, "form", "form_shares"));
 
 		addController(new FormulaireController());
 		addController(formController);
@@ -79,5 +80,7 @@ public class Formulaire extends BaseServer {
 		addController(new QuestionChoiceController());
 		addController(new ResponseController());
 		addController(new DistributionController());
+
+		setDefaultResourceFilter(new ShareAndOwner());
 	}
 }

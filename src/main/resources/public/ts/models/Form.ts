@@ -73,7 +73,7 @@ export class Form implements Selectable, Shareable  {
 
     generateRights() : void {
         this._id = this.id;
-        this.owner = { userId: this.owner_id, displayName: this.owner_name };
+        this.owner = {userId: this.owner_id, displayName: this.owner_name};
         this.myRights = new Rights<Form>(this);
     }
 

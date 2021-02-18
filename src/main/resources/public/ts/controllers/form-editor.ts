@@ -316,6 +316,4 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
     init();
 
     document.onclick = e => { onClickQuestion(e); };
-
-    $scope.$on('init', init());
 }]);

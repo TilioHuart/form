@@ -7,6 +7,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
@@ -14,9 +15,12 @@ import org.entcore.common.user.UserInfos;
 import java.util.List;
 
 import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
-import static org.entcore.common.sql.SqlResult.parseShared;
 
-public class DefaultFormService implements FormService {
+public class DefaultFormService extends SqlCrudService implements FormService {
+
+    public DefaultFormService(String schema, String table, String shareTable) {
+        super(schema, table, shareTable);
+    }
 
     @Override
     public void list(List<String> groupsAndUserIds, UserInfos user, Handler<Either<String, JsonArray>> handler) {
