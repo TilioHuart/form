@@ -27,7 +27,7 @@ interface ViewModel {
     checkOpenButton(): boolean;
     openForm(form : Form): void;
     openPropertiesForm(): void;
-    duplicateForms(): void;
+    duplicateForms(): Promise<void>;
     sendForm(): void;
     closeSendFormLightbox(): void;
     shareForm(): void;
@@ -124,7 +124,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         $scope.safeApply();
     };
 
-    vm.duplicateForms = async (): void => {
+    vm.duplicateForms = async (): Promise<void> => {
         try {
             for (let form of vm.forms.selected) {
                 let duplicata = $scope.getDataIf200(await formService.create(form));

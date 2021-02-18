@@ -7,13 +7,18 @@ import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
 
 import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 
-public class DefaultFormService implements FormService {
+public class DefaultFormService extends SqlCrudService implements FormService {
+
+    public DefaultFormService(String schema, String table, String shareTable) {
+        super(schema, table, shareTable);
+    }
 
     @Override
     public void list(UserInfos user, Handler<Either<String, JsonArray>> handler) {
