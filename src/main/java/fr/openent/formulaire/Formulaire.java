@@ -81,6 +81,6 @@ public class Formulaire extends BaseServer {
 		addController(new ResponseController());
 		addController(new DistributionController());
 
-		setDefaultResourceFilter(new ShareAndOwner());
+//		setDefaultResourceFilter(new ShareAndOwner());
 	}
 }
