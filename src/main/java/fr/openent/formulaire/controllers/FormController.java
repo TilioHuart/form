@@ -3,15 +3,19 @@ package fr.openent.formulaire.controllers;
 import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.export.FormResponsesExport;
 import fr.openent.formulaire.security.CreationRight;
+import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.FormService;
+import fr.openent.formulaire.service.FormSharesService;
 import fr.openent.formulaire.service.NeoService;
 import fr.openent.formulaire.service.impl.DefaultDistributionService;
 import fr.openent.formulaire.service.impl.DefaultFormService;
+import fr.openent.formulaire.service.impl.DefaultFormSharesService;
 import fr.openent.formulaire.service.impl.DefaultNeoService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.http.response.DefaultResponseHandler;
 import fr.wseduc.webutils.request.RequestUtils;
@@ -42,6 +46,7 @@ public class FormController extends ControllerHelper {
     private final Storage storage;
     private FormService formService;
     private DistributionService distributionService;
+    private FormSharesService formShareService;
     private NeoService neoService;
 
     public FormController(final Storage storage, String table, String shareTable) {
@@ -49,6 +54,7 @@ public class FormController extends ControllerHelper {
         this.storage = storage;
         this.formService = new DefaultFormService(Formulaire.DB_SCHEMA, table, shareTable);
         this.distributionService = new DefaultDistributionService();
+        this.formShareService = new DefaultFormSharesService();
         this.neoService = new DefaultNeoService();
     }
 
@@ -197,8 +203,8 @@ public class FormController extends ControllerHelper {
 
     @Put("/share/resource/:id")
     @ApiDoc("Adds rights for a given form.")
-    @ResourceFilter(CreationRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void shareResource(final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "share", shareFormObject -> {
             UserUtils.getUserInfos(eb, request, user -> {
@@ -229,7 +235,30 @@ public class FormController extends ControllerHelper {
                     idsObjects.add(idBookmarks);
                     updateFormCollabProp(formId, idsObjects);
 
-                    super.shareResource(request, null, false, null, null);
+                    formShareService.getSharedWithMe(formId, user, event -> {
+                        if (event.isRight() && event.right().getValue() != null) {
+                            JsonArray rights = event.right().getValue();
+                            String id = user.getUserId();
+                            shareFormObject.getJsonObject("users").put(id, new JsonArray());
+
+                            for (int i = 0; i < rights.size(); i++) {
+                                JsonObject right = rights.getJsonObject(i);
+                                shareFormObject.getJsonObject("users").getJsonArray(id).add(right.getString("action"));
+                            }
+
+                            this.getShareService().share(user.getUserId(), formId, shareFormObject, (r) -> {
+                                if (r.isRight()) {
+                                    this.doShareSucceed(request, formId, user, shareFormObject, (JsonObject)r.right().getValue(), false);
+                                } else {
+                                    JsonObject error = (new JsonObject()).put("error", (String)r.left().getValue());
+                                    Renders.renderJson(request, error, 400);
+                                }
+                            });
+                        }
+                        else {
+                            log.error("[Formulaire@getSharedWithMe] Fail to get user's shared rights");
+                        }
+                    });
                 } else {
                     log.error("User not found in session.");
                     unauthorized(request);
