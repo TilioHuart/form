@@ -11,29 +11,26 @@
                 <i18n>formulaire.deselect</i18n>
             </button>
         </div>
-        <div class="row" ng-if="currentPage === 'formsList' && !vm.forms.selected[0].archived">
+        <div class="row" ng-if="currentPage === 'formsList' && !vm.forms.selected[0].archived" workflow="formulaire.creation">
             <button ng-click="vm.openForm(vm.forms.selected[0])" class="cell" ng-show="vm.checkOpenButton()">
                 <i18n>formulaire.open</i18n>
             </button>
-            <button ng-click="vm.openPropertiesForm()" class="cell" ng-show="vm.forms.selected.length === 1" workflow="formulaire.creation">
+            <button ng-click="vm.openPropertiesForm()" class="cell" ng-show="vm.forms.selected.length === 1">
                 <i18n>formulaire.properties</i18n>
             </button>
-            <button ng-click="vm.duplicateForms()" class="cell" workflow="formulaire.creation">
+            <button ng-click="vm.duplicateForms()" class="cell">
                 <i18n>formulaire.duplicate</i18n>
             </button>
-<!--            <button ng-click="vm.sendForm()" class="cell" ng-show="vm.forms.selected.length === 1" workflow="formulaire.creation">-->
-<!--                <i18n>formulaire.send</i18n>-->
-<!--            </button>-->
-            <button ng-click="vm.shareForm()" class="cell" ng-show="vm.forms.selected.length === 1" workflow="formulaire.creation">
+            <button ng-click="vm.shareForm()" class="cell" ng-show="vm.forms.selected.length === 1 && hasShareRightManager(vm.forms.selected[0])">
                 <i18n>formulaire.share</i18n>
             </button>
-            <button ng-click="vm.seeResultsForm()" class="cell" ng-show="vm.forms.selected.length === 1" workflow="formulaire.creation" ng-disabled="true">
+            <button ng-click="vm.seeResultsForm()" class="cell" ng-show="vm.forms.selected.length === 1" ng-disabled="true">
                 <i18n>formulaire.results</i18n>
             </button>
-            <button ng-click="vm.exportForm()" class="cell" ng-show="vm.forms.selected.length === 1" workflow="formulaire.creation">
+            <button ng-click="vm.exportForm()" class="cell" ng-show="vm.forms.selected.length === 1">
                 <i18n>formulaire.export</i18n>
             </button>
-            <button ng-click="vm.archiveForms()" class="cell" workflow="formulaire.creation">
+            <button ng-click="vm.archiveForms()" class="cell" ng-show="hasShareRightManager(vm.forms.selected[0])">
                 <i18n>formulaire.archive</i18n>
             </button>
             <button ng-click="vm.switchAll(true)" class="cell toaster-right">
@@ -43,11 +40,11 @@
                 <i18n>formulaire.deselect</i18n>
             </button>
         </div>
-        <div class="row" ng-if="currentPage === 'formsList' && vm.forms.selected[0].archived">
-            <button ng-click="vm.restoreForms()" class="cell" workflow="formulaire.creation">
+        <div class="row" ng-if="currentPage === 'formsList' && vm.forms.selected[0].archived" workflow="formulaire.creation">
+            <button ng-click="vm.restoreForms()" class="cell" ng-show="hasShareRightManager(vm.forms.selected[0])">
                 <i18n>formulaire.restore</i18n>
             </button>
-            <button ng-click="vm.deleteForms()" class="cell" workflow="formulaire.creation">
+            <button ng-click="vm.deleteForms()" class="cell" ng-show="hasShareRightManager(vm.forms.selected[0])">
                 <i18n>formulaire.delete</i18n>
             </button>
             <button ng-click="vm.switchAll(true)" class="cell toaster-right">

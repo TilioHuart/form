@@ -63,6 +63,21 @@ public class DefaultNeoService implements NeoService {
     }
 
 
+
+    @Override
+    public void getIdsFromBookMarks(final JsonArray bookmarksIds, Handler<Either<String, JsonArray>> handler) {
+        JsonObject params = new JsonObject().put("bookmarksIds", bookmarksIds);
+
+        String queryNeo4j = "WITH {bookmarksIds} AS shareBookmarkIds " +
+                "UNWIND shareBookmarkIds AS shareBookmarkId " +
+                "MATCH (u:User)-[:HAS_SB]->(sb:ShareBookmark) " +
+                "UNWIND TAIL(sb[shareBookmarkId]) as vid MATCH (v:Visible {id : vid}) " +
+                "WITH {ids: COLLECT(DISTINCT{id: v.id, name: v.name})} as sharedBookMark " +
+                "RETURN COLLECT(sharedBookMark) as ids;";
+
+        Neo4j.getInstance().execute(queryNeo4j, params, Neo4jResult.validResultHandler(handler));
+    }
+
     @Override
     public void getUsersInfosFromIds(JsonArray userIds, JsonArray groupIds, Handler<Either<String, JsonArray>> handler) {
         JsonObject params = new JsonObject()

@@ -13,6 +13,7 @@ export interface FormService {
     restore(form: Form): Promise<AxiosResponse>;
     delete(formId: number): Promise<AxiosResponse>;
     unshare(formId: number): Promise<AxiosResponse>;
+    getMyFormRights(formId: number): Promise<AxiosResponse>;
     getInfoImage(form: Form): Promise<AxiosResponse>;
 }
 
@@ -70,7 +71,6 @@ export const formService: FormService = {
     async archive(form : Form): Promise<AxiosResponse> {
         try {
             form.sent = false;
-            form.collab = false;
             form.archived = true;
             form.sent = false;
             return await this.update(form);
@@ -105,6 +105,15 @@ export const formService: FormService = {
             return await http.put(`/formulaire/share/resource/${formId}`, emptyBody);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.unshare'));
+            throw err;
+        }
+    },
+
+    async getMyFormRights(formId : number): Promise<AxiosResponse> {
+        try {
+            return http.get(`/formulaire/forms/${formId}/rights`);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.formService.get'));
             throw err;
         }
     },

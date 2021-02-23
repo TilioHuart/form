@@ -1,5 +1,8 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.formulaire.Formulaire;
+import fr.openent.formulaire.security.CreationRight;
+import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.impl.DefaultDistributionService;
 import fr.wseduc.rs.*;
@@ -11,7 +14,10 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
+import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserUtils;
+
+import javax.swing.*;
 
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
@@ -26,8 +32,9 @@ public class DistributionController extends ControllerHelper {
     }
 
     @Get("/distributions")
-    @ApiDoc("List all the forms sent and created by me")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ApiDoc("List all the forms sent by me")
+    @ResourceFilter(CreationRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listBySender(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
@@ -41,7 +48,8 @@ public class DistributionController extends ControllerHelper {
 
     @Get("/distributions/forms/:formId/count")
     @ApiDoc("Get the number of distributions of the form")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void count(HttpServerRequest request) {
         String formId = request.getParam("formId");
         distributionService.count(formId, defaultResponseHandler(request));
@@ -64,7 +72,8 @@ public class DistributionController extends ControllerHelper {
 
     @Post("/distributions/forms/:formId")
     @ApiDoc("Distribute a form to a list of responders")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
         String formId = request.getParam("formId");
         UserUtils.getUserInfos(eb, request, user -> {
@@ -91,7 +100,8 @@ public class DistributionController extends ControllerHelper {
 
     @Delete("/distributions/:distributionId")
     @ApiDoc("Delete given distribution")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String distributionId = request.getParam("distributionId");
         distributionService.delete(distributionId, defaultResponseHandler(request));

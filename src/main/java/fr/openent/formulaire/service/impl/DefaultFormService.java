@@ -14,11 +14,7 @@ import org.entcore.common.user.UserInfos;
 
 import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 
-public class DefaultFormService extends SqlCrudService implements FormService {
-
-    public DefaultFormService(String schema, String table, String shareTable) {
-        super(schema, table, shareTable);
-    }
+public class DefaultFormService implements FormService {
 
     @Override
     public void list(UserInfos user, Handler<Either<String, JsonArray>> handler) {
@@ -88,6 +84,13 @@ public class DefaultFormService extends SqlCrudService implements FormService {
         String query = "DELETE FROM " + Formulaire.FORM_TABLE + " WHERE id = ?;";
         JsonArray params = new JsonArray().add(formId);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    @Override
+    public void getMyFormRights(String formId, UserInfos user, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT action FROM " + Formulaire.FORM_SHARES_TABLE + " WHERE resource_id = ? AND member_id = ?;";
+        JsonArray params = new JsonArray().add(formId).add(user.getUserId());
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
     @Override

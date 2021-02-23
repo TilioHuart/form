@@ -2,6 +2,7 @@ package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.security.ResponseRight;
+import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.ResponseService;
 import fr.openent.formulaire.service.impl.DefaultResponseService;
 import fr.wseduc.rs.*;
@@ -29,7 +30,7 @@ public class ResponseController extends ControllerHelper {
     }
 
     @Get("/questions/:questionId/responses")
-    @ApiDoc("List responses")
+    @ApiDoc("List all the responses for a question")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void list(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
@@ -37,8 +38,9 @@ public class ResponseController extends ControllerHelper {
     }
 
     @Get("/questions/:questionId/responses/mine")
-    @ApiDoc("List responses")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ApiDoc("List all my responses for a question")
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void listMine(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         UserUtils.getUserInfos(eb, request, user -> {
@@ -61,7 +63,8 @@ public class ResponseController extends ControllerHelper {
 
     @Post("/questions/:questionId/responses")
     @ApiDoc("Create a response")
-    @SecuredAction(Formulaire.RESPONSE_RIGHT)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         UserUtils.getUserInfos(eb, request, user -> {
@@ -78,8 +81,8 @@ public class ResponseController extends ControllerHelper {
 
     @Put("/responses/:responseId")
     @ApiDoc("Update given response")
-    @ResourceFilter(ResponseRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
         String responseId = request.getParam("responseId");
         UserUtils.getUserInfos(eb, request, user -> {
@@ -96,8 +99,8 @@ public class ResponseController extends ControllerHelper {
 
     @Delete("/responses/:responseId")
     @ApiDoc("Delete given response")
-    @ResourceFilter(ResponseRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String responseId = request.getParam("responseId");
         responseService.delete(responseId, defaultResponseHandler(request));

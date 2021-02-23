@@ -14,8 +14,8 @@ const rights = {
     },
     workflow: {
         access: 'fr.openent.formulaire.controllers.FormulaireController|render',
-        creation: 'fr.openent.formulaire.controllers.FormController|update',
-        response: 'fr.openent.formulaire.controllers.ResponseController|create'
+        creation: 'fr.openent.formulaire.controllers.FormController|initCreationRight',
+        response: 'fr.openent.formulaire.controllers.FormController|initResponseRight'
     }
 };
 

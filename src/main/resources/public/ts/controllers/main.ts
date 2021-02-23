@@ -163,7 +163,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			return model.me.hasWorkflow(right);
 		};
 
-		$scope.hasAccess = () => {
+		$scope.canAccess = () => {
 			return $scope.hasRight(Behaviours.applicationsBehaviours.formulaire.rights.workflow.access);
 		};
 
@@ -175,11 +175,15 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			return $scope.hasRight(Behaviours.applicationsBehaviours.formulaire.rights.workflow.response);
 		};
 
-		// $scope.canSend = () => {
-		// 	return $scope.hasRight(Behaviours.applicationsBehaviours.formulaire.rights.workflow.sending);
-		// };
-		//
-		// $scope.canShare = () => {
-		// 	return $scope.hasRight(Behaviours.applicationsBehaviours.formulaire.rights.workflow.sharing);
-		// };
+		$scope.hasShareRightManager = (form : Form) => {
+			return form.owner_id === model.me.userId || form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.manager);
+		};
+
+		$scope.hasShareRightContrib = (form : Form) => {
+			return form.owner_id === model.me.userId || form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.contrib);
+		};
+
+		$scope.hasShareRightResponse = (form : Form) => {
+			return form.owner_id === model.me.userId || form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.comment);
+		};
 }]);
