@@ -13,6 +13,9 @@ import org.entcore.common.sql.SqlConfs;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.storage.StorageFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Formulaire extends BaseServer {
 	private static final Logger log = LoggerFactory.getLogger(Formulaire.class);
 
@@ -65,13 +68,23 @@ public class Formulaire extends BaseServer {
 		final Storage storage = new StorageFactory(vertx, config, null).getStorage();
 
 		SqlConf formConf = SqlConfs.createConf(FormController.class.getName());
-		formConf.setSchema("formulaire");
-		formConf.setTable("form");
-		formConf.setShareTable("form_shares");
+		SqlConf distribConf = SqlConfs.createConf(DistributionController.class.getName());
+		SqlConf responseConf = SqlConfs.createConf(ResponseController.class.getName());
+		List<SqlConf> confs = new ArrayList<>();
+		confs.add(formConf); confs.add(distribConf); confs.add(responseConf);
 
-		FormController formController = new FormController(storage, "form", "form_shares");
+		for (SqlConf conf : confs) {
+			conf.setSchema("formulaire");
+			conf.setTable("form");
+			conf.setShareTable("form_shares");
+		}
+
+		FormController formController = new FormController(storage);
 		formController.setShareService(new SqlShareService(DB_SCHEMA, "form_shares", eb, securedActions, null));
 		formController.setCrudService(new SqlCrudService(DB_SCHEMA, "form", "form_shares"));
+
+
+
 
 		addController(new FormulaireController());
 		addController(formController);
@@ -80,7 +93,5 @@ public class Formulaire extends BaseServer {
 		addController(new QuestionChoiceController());
 		addController(new ResponseController());
 		addController(new DistributionController());
-
-//		setDefaultResourceFilter(new ShareAndOwner());
 	}
 }

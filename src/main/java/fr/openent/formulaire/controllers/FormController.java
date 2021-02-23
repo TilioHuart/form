@@ -23,6 +23,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -49,15 +50,24 @@ public class FormController extends ControllerHelper {
     private FormSharesService formShareService;
     private NeoService neoService;
 
-    public FormController(final Storage storage, String table, String shareTable) {
+    public FormController(final Storage storage) {
         super();
         this.storage = storage;
-        this.formService = new DefaultFormService(Formulaire.DB_SCHEMA, table, shareTable);
+        this.formService = new DefaultFormService();
         this.distributionService = new DefaultDistributionService();
         this.formShareService = new DefaultFormSharesService();
         this.neoService = new DefaultNeoService();
     }
 
+    // Init rights
+
+    @SecuredAction(Formulaire.CREATION_RIGHT)
+    public void initCreationRight(final HttpServerRequest request) {
+    }
+
+    @SecuredAction(Formulaire.RESPONSE_RIGHT)
+    public void initResponseRight(final HttpServerRequest request) {
+    }
 
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void initContribResourceRight(final HttpServerRequest request) {
@@ -71,9 +81,10 @@ public class FormController extends ControllerHelper {
     public void initResponderResourceRight(final HttpServerRequest request) {
     }
 
+    // API
 
     @Get("/forms")
-    @ApiDoc("List all the forms created by me")
+    @ApiDoc("List all the forms created or shared by me")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void list(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
@@ -115,7 +126,8 @@ public class FormController extends ControllerHelper {
 
     @Put("/forms/:formId")
     @ApiDoc("Update given form")
-    @SecuredAction(Formulaire.CREATION_RIGHT)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
         String formId = request.getParam("formId");
         RequestUtils.bodyToJson(request, form -> {
@@ -142,12 +154,56 @@ public class FormController extends ControllerHelper {
 
     @Delete("/forms/:formId")
     @ApiDoc("Delete given form")
-    @ResourceFilter(CreationRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String formId = request.getParam("formId");
         formService.delete(formId, defaultResponseHandler(request));
     }
+
+    @Get("/forms/:formId/rights")
+    @ApiDoc("Export given form")
+    @ResourceFilter(CreationRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void getMyFormRights(HttpServerRequest request) {
+        String formId = request.getParam("formId");
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user != null) {
+                formService.getMyFormRights(formId, user, getRightsEvent -> {
+                    if (getRightsEvent.isRight()) {
+                        JsonArray actions = getRightsEvent.right().getValue();
+                        JsonArray rights = new JsonArray();
+                        for (int i = 0; i < actions.size(); i++) {
+                            String action = actions.getJsonObject(i).getString("action");
+                            if (action.equals(Formulaire.CONTRIB_RESOURCE_BEHAVIOUR) ||
+                                action.equals(Formulaire.MANAGER_RESOURCE_BEHAVIOUR) ||
+                                action.equals(Formulaire.RESPONDER_RESOURCE_BEHAVIOUR)) {
+                                rights.add(Formulaire.RESPONDER_RESOURCE_RIGHT);
+                            }
+//                            if (action.equals(Formulaire.CONTRIB_RESOURCE_BEHAVIOUR)) {
+//                                rights.add(Formulaire.CONTRIB_RESOURCE_RIGHT);
+//                            }
+//                            else if (action.equals(Formulaire.MANAGER_RESOURCE_BEHAVIOUR)) {
+//                                rights.add(Formulaire.MANAGER_RESOURCE_RIGHT);
+//                            }
+//                            else if (action.equals(Formulaire.RESPONDER_RESOURCE_BEHAVIOUR)) {
+//                                rights.add(Formulaire.RESPONDER_RESOURCE_RIGHT);
+//                            }
+                        }
+
+                        Renders.renderJson(request, rights);
+                    }
+                    else {
+                        log.error("[Formulaire@getMyFormRights] Fail to get my form's shared rights : " + getRightsEvent.left().getValue());
+                    }
+                });
+            } else {
+                log.error("User not found in session.");
+                Renders.unauthorized(request);
+            }
+        });
+    }
+
 
     // Export
 
@@ -162,7 +218,7 @@ public class FormController extends ControllerHelper {
     // Image
 
     @Get("/info/image/:idImage")
-    @ApiDoc("get info image workspace")
+    @ApiDoc("Get info image workspace")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void getInfoImg(final HttpServerRequest request) {
@@ -174,14 +230,16 @@ public class FormController extends ControllerHelper {
 
     @Get("/share/json/:id")
     @ApiDoc("Lists rights for a given form.")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void shareJson(final HttpServerRequest request) {
         super.shareJson(request, false);
     }
 
     @Put("/share/json/:id")
     @ApiDoc("Adds rights for a given form.")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void shareSubmit(final HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
@@ -209,7 +267,7 @@ public class FormController extends ControllerHelper {
         RequestUtils.bodyToJson(request, pathPrefix + "share", shareFormObject -> {
             UserUtils.getUserInfos(eb, request, user -> {
                 if (user != null) {
-                    // Get all ids, filter the one about sending (response right) and sync distribution table accordingly
+                    // Get all ids, filter the one about sending (response right)
                     final String formId = request.params().get("id");
                     Map<String, Object> idUsers = shareFormObject.getJsonObject("users").getMap();
                     Map<String, Object> idGroups = shareFormObject.getJsonObject("groups").getMap();
@@ -219,22 +277,38 @@ public class FormController extends ControllerHelper {
                     JsonArray groupsIds = new JsonArray(new ArrayList<>(filterIdsForSending(idGroups).keySet()));
                     JsonArray bookmarksIds = new JsonArray(new ArrayList<>(filterIdsForSending(idBookmarks).keySet()));
 
-                    neoService.getUsersInfosFromIds(usersIds, groupsIds, eventUsers -> {
-                        if (eventUsers.isRight()) {
-                            JsonArray infos = eventUsers.right().getValue();
-                            syncDistributions(formId, user, infos);
+                    // Get group ids and users ids from bookmarks and add them to previous lists
+                    neoService.getIdsFromBookMarks(bookmarksIds, eventBookmarks -> {
+                        if (eventBookmarks.isRight()) {
+                            JsonArray ids = eventBookmarks.right().getValue().getJsonObject(0).getJsonArray("ids").getJsonObject(0).getJsonArray("ids");
+                            for (int i = 0; i < ids.size(); i++) {
+                                JsonObject id = ids.getJsonObject(i);
+                                boolean isGroup = id.getString("name") != null;
+                                (isGroup ? groupsIds : usersIds).add(id.getString("id"));
+                            }
+
+                            // Get all users ids from usersIds & groupsIds and sync with distribution table
+                            neoService.getUsersInfosFromIds(usersIds, groupsIds, eventUsers -> {
+                                if (eventUsers.isRight()) {
+                                    JsonArray infos = eventUsers.right().getValue();
+                                    syncDistributions(formId, user, infos);
+                                } else {
+                                    log.error("[Formulaire@getUserIds] Fail to get users' ids from groups' ids");
+                                }
+                            });
                         } else {
-                            log.error("[Formulaire@getUserIds] Fail to get users' ids from groups' ids");
+                            log.error("[Formulaire@getUserIds] Fail to get ids from bookmarks' ids");
                         }
                     });
 
-                    // Classic sharing stuff (putting or removing ids from form_shares table)
+                    // Update 'collab' property as needed
                     List<Map<String, Object>> idsObjects = new ArrayList<>();
                     idsObjects.add(idUsers);
                     idsObjects.add(idGroups);
                     idsObjects.add(idBookmarks);
                     updateFormCollabProp(formId, idsObjects);
 
+                    // Fix bug auto-unsharing
                     formShareService.getSharedWithMe(formId, user, event -> {
                         if (event.isRight() && event.right().getValue() != null) {
                             JsonArray rights = event.right().getValue();
@@ -246,6 +320,7 @@ public class FormController extends ControllerHelper {
                                 shareFormObject.getJsonObject("users").getJsonArray(id).add(right.getString("action"));
                             }
 
+                            // Classic sharing stuff (putting or removing ids from form_shares table accordingly)
                             this.getShareService().share(user.getUserId(), formId, shareFormObject, (r) -> {
                                 if (r.isRight()) {
                                     this.doShareSucceed(request, formId, user, shareFormObject, (JsonObject)r.right().getValue(), false);
@@ -302,7 +377,6 @@ public class FormController extends ControllerHelper {
                     distributionService.removeMultiple(formId, removed, removeEvent -> {
                         if (removeEvent.isRight()) {
                             handler.handle(Future.succeededFuture());
-                            log.info("[Formulaire@removeDeletedDistributions] Successful remove in distribution table");
                         } else {
                             handler.handle(Future.failedFuture(removeEvent.left().getValue()));
                             log.error("[Formulaire@removeDeletedDistributions] Fail to remove distributions");
@@ -325,7 +399,6 @@ public class FormController extends ControllerHelper {
                     distributionService.createMultiple(formId, user, responders, duplicates, addEvent -> {
                         if (addEvent.isRight()) {
                             handler.handle(Future.succeededFuture());
-                            log.info("[Formulaire@addNewDistributions] Successful adding in distribution table");
                         } else {
                             handler.handle(Future.failedFuture(addEvent.left().getValue()));
                             log.error("[Formulaire@addNewDistributions] Fail to add distributions");
@@ -351,7 +424,6 @@ public class FormController extends ControllerHelper {
                         formService.update(formId, form, updateEvent -> {
                             if (updateEvent.isRight()) {
                                 handler.handle(Future.succeededFuture());
-                                log.info("[Formulaire@updateFormSentProp] Form's sent property has been updated to : " + value);
                             } else {
                                 handler.handle(Future.failedFuture(updateEvent.left().getValue()));
                                 log.error("[Formulaire@updateFormSentProp] Fail to update form");
@@ -396,9 +468,7 @@ public class FormController extends ControllerHelper {
                 JsonObject form = getEvent.right().getValue();
                 form.put("collab", value);
                 formService.update(formId, form, updateEvent -> {
-                    if (updateEvent.isRight()) {
-                        log.info("[Formulaire@updateFormCollabProp] Form's collab property has been updated to : " + value);
-                    } else {
+                    if (updateEvent.isLeft()) {
                         log.error("[Formulaire@updateFormCollabProp] Fail to update form : " + updateEvent.left().getValue());
                     }
                 });

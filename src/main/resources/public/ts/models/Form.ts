@@ -5,7 +5,7 @@ import {distributionService, formService} from "../services";
 export class Form implements Selectable, Shareable  {
     shared: any;
     owner: { userId: string; displayName: string };
-    myRights: Rights<Form>;
+    myRights: any;
     _id: number;
 
     id: number;
@@ -113,6 +113,8 @@ export class Forms extends Selection<Form> {
                 let tempForm = new Form();
                 tempForm.setFromJson(data[i]);
                 tempForm.nbResponses = (await distributionService.count(tempForm.id)).data.count;
+                let rightsResponse = await formService.getMyFormRights(tempForm.id);
+                tempForm.myRights = rightsResponse.data;
                 this.all.push(tempForm);
             }
         } catch (e) {

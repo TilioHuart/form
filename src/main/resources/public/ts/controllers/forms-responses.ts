@@ -1,7 +1,7 @@
-import {idiom, ng, notify, template} from 'entcore';
+import {idiom, ng} from 'entcore';
 import {Distribution, Distributions, DistributionStatus, Form, Forms} from "../models";
 import {DateUtils} from "../utils/date";
-import {distributionService, formService} from "../services";
+import {distributionService} from "../services";
 
 interface ViewModel {
     forms: Forms;
