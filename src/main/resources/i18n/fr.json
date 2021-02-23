@@ -154,5 +154,10 @@
   "formulaire.success.forms.duplicate": "Tous les formulaires sélectionnés ont bien été dupliqués !",
   "formulaire.success.question.duplicate": "Votre question a bien été dupliquée !",
   "formulaire.success.question.delete": "Votre question a bien été supprimée !",
-  "formulaire.success.responses.save": "Vos réponses ont bien été enregistrées !"
+  "formulaire.success.responses.save": "Vos réponses ont bien été enregistrées !",
+
+  "formulaire.filter": "Filtre",
+  "formulaire.filter.creationDate": "Date de création",
+  "formulaire.filter.modificationDate": "Date de modification",
+  "formulaire.filter.name": "Nom"
 }

@@ -154,6 +154,10 @@
   "formulaire.success.forms.duplicate": "All the selected forms have been successfully duplicated !",
   "formulaire.success.question.duplicate": "Your question has been successfully duplicated !",
   "formulaire.success.question.delete": "Your question has been successfully deleted !",
-  "formulaire.success.responses.save": "Your reponses has been successfully saved !"
+  "formulaire.success.responses.save": "Your reponses has been successfully saved !",
 
+  "formulaire.filter": "Filter",
+  "formulaire.filter.creationDate": "Creation date",
+  "formulaire.filter.modificationDate": "Modification date",
+  "formulaire.filter.name": "Name"
 }
