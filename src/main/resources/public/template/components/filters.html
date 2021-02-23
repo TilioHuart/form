@@ -4,28 +4,28 @@
             <div class="twelve cell">
                 <i class="arrow"></i>
                 <span>
-                    <i18n>filter</i18n>
+                    <i18n>formulaire.filter</i18n>
                 </span>
             </div>
         </div>
     </div>
     <div ng-hide="!displayFilterForms">
         <label class="chip margin-left checkbox-activity" ng-class="{ selected: vm.forms.isOrderedAsc('creationDate') || vm.forms.isOrderedDesc('creationDate')}" ng-click="vm.forms.orderByField('creationDate'); vm.sort()">
-            <span translate content="creationDate"></span>
+            <span><i18n>formulaire.filter.creationDate</i18n></span>
             <span class="icons">
                     <i class="arrow orderArrow" ng-if="vm.forms.isOrderedAsc('creationDate')"></i>
                     <i class="arrow orderArrow bottom" ng-if="vm.forms.isOrderedDesc('creationDate')"></i>
             </span>
         </label>
         <label class="chip margin-left checkbox-activity" ng-class="{ selected: vm.forms.isOrderedAsc('modificationDate') || vm.forms.isOrderedDesc('modificationDate')}" ng-click="vm.forms.orderByField('modificationDate'); vm.sort()">
-            <span translate content="modificationDate"></span>
+            <span><i18n>formulaire.filter.modificationDate</i18n></span>
             <span class="icons">
                     <i class="arrow orderArrow" ng-if="vm.forms.isOrderedAsc('modificationDate')"></i>
                     <i class="arrow orderArrow bottom" ng-if="vm.forms.isOrderedDesc('modificationDate')"></i>
             </span>
         </label>
         <label class="chip margin-left checkbox-activity" ng-class="{ selected: vm.forms.isOrderedAsc('name') || vm.forms.isOrderedDesc('name')}" ng-click="vm.forms.orderByField('name'); vm.sort()">
-            <span translate content="name"></span>
+            <span><i18n>formulaire.filter.name</i18n></span>
             <span ng-if="vm.forms.isOrderedAsc('name')" class="leftMarginLetter"> A-Z </span>
             <span ng-if="vm.forms.isOrderedDesc('name')" class="leftMarginLetter"> Z-A </span>
         </label>
