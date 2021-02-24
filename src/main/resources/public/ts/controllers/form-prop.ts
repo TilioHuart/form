@@ -1,15 +1,17 @@
-import {idiom, ng} from 'entcore';
+import {idiom, ng, notify} from 'entcore';
 import {formService} from "../services";
 import {Form} from "../models";
 import {DateUtils} from "../utils/date";
 
 interface ViewModel {
     form: Form;
+    display: {
+        date_ending: boolean;
+    }
 
     save(): Promise<void>;
-
+    checkIntervalDates(): boolean;
     getImage(): void;
-
     displayLastSave(): string;
 }
 
@@ -19,17 +21,32 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
 
         const vm: ViewModel = this;
         vm.form = new Form();
+        vm.display = {
+            date_ending: false
+        };
 
         const init = async (): Promise<void> => {
             vm.form = $scope.form;
+            vm.display.date_ending = !!vm.form.date_ending;
         };
 
         // Functions
 
         vm.save = async (): Promise<void> => {
-            let form = $scope.getDataIf200(await formService.save(vm.form));
+            let form = new Form();
+            form.setFromJson($scope.getDataIf200(await formService.save(vm.form)));
             $scope.redirectTo(`/form/${form.id}`);
             $scope.safeApply();
+        };
+
+        vm.checkIntervalDates = () : boolean => {
+            if (!!!vm.form.date_ending) {
+                vm.form.date_ending = new Date(vm.form.date_opening);
+                vm.form.date_ending.setFullYear(vm.form.date_ending.getFullYear() + 1);
+            }
+            let yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            return vm.form.date_opening > yesterday && vm.form.date_ending > vm.form.date_opening;
         };
 
         vm.getImage = async (): Promise<void> => {

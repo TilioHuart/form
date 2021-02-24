@@ -1,4 +1,4 @@
-import {idiom, ng, notify} from 'entcore';
+import {idiom, moment, ng, notify} from 'entcore';
 import http, {AxiosResponse} from 'axios';
 import {Form} from '../models/Form';
 
@@ -47,6 +47,8 @@ export const formService: FormService = {
     },
 
     async save(form : Form): Promise<AxiosResponse> {
+        if (form.date_opening != null) form.date_opening = moment(form.date_opening).format();
+        if (form.date_ending != null) form.date_ending = moment(form.date_ending).format();
         return form.id ? await this.update(form) : await this.create(form);
     },
 
