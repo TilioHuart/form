@@ -180,15 +180,6 @@ public class FormController extends ControllerHelper {
                                 action.equals(Formulaire.RESPONDER_RESOURCE_BEHAVIOUR)) {
                                 rights.add(Formulaire.RESPONDER_RESOURCE_RIGHT);
                             }
-//                            if (action.equals(Formulaire.CONTRIB_RESOURCE_BEHAVIOUR)) {
-//                                rights.add(Formulaire.CONTRIB_RESOURCE_RIGHT);
-//                            }
-//                            else if (action.equals(Formulaire.MANAGER_RESOURCE_BEHAVIOUR)) {
-//                                rights.add(Formulaire.MANAGER_RESOURCE_RIGHT);
-//                            }
-//                            else if (action.equals(Formulaire.RESPONDER_RESOURCE_BEHAVIOUR)) {
-//                                rights.add(Formulaire.RESPONDER_RESOURCE_RIGHT);
-//                            }
                         }
 
                         Renders.renderJson(request, rights);
@@ -228,6 +219,7 @@ public class FormController extends ControllerHelper {
 
     // Share/Sending functions
 
+    @Override
     @Get("/share/json/:id")
     @ApiDoc("Lists rights for a given form.")
     @ResourceFilter(ShareAndOwner.class)
@@ -306,7 +298,7 @@ public class FormController extends ControllerHelper {
                     idsObjects.add(idUsers);
                     idsObjects.add(idGroups);
                     idsObjects.add(idBookmarks);
-                    updateFormCollabProp(formId, idsObjects);
+                    updateFormCollabProp(formId, user, idsObjects);
 
                     // Fix bug auto-unsharing
                     formShareService.getSharedWithMe(formId, user, event -> {
@@ -441,32 +433,39 @@ public class FormController extends ControllerHelper {
         });
     }
 
-    private void updateFormCollabProp(String formId, List<Map<String, Object>> idsObjects) {
-        boolean isShared = false;
-        int i = 0;
-        while (!isShared && i < idsObjects.size()) { // Iterate over "users", "groups", "bookmarks"
-            int j = 0;
-            Map<String, Object> o = idsObjects.get(i);
-            Object[] arrayKeys = o.keySet().toArray();
-            while (!isShared && j < arrayKeys.length) { // Iterate over each pair id-actions
-                ArrayList<String> values = (ArrayList<String>)o.get(arrayKeys[j]);
-                int k = 0;
-                while (!isShared && k < values.size()) { // Iterate over each action for an id
-                    if (!values.get(k).equals(Formulaire.RESPONDER_RESOURCE_BEHAVIOUR)) {
-                        isShared = true;
-                    }
-                    k++;
-                }
-                j++;
-            }
-            i++;
-        }
-
-        final boolean value = isShared;
+    private void updateFormCollabProp(String formId, UserInfos user, List<Map<String, Object>> idsObjects) {
         formService.get(formId, getEvent -> {
             if (getEvent.isRight()) {
                 JsonObject form = getEvent.right().getValue();
-                form.put("collab", value);
+
+                boolean isShared = false;
+                int i = 0;
+                while (!isShared && i < idsObjects.size()) { // Iterate over "users", "groups", "bookmarks"
+                    int j = 0;
+                    Map<String, Object> o = idsObjects.get(i);
+                    List<List<String>> values = new ArrayList(o.values());
+
+                    while (!isShared && j < values.size()) { // Iterate over each pair id-actions
+                        List<String> actions = new ArrayList<>(values.get(j));
+
+                        int k = 0;
+                        while (!isShared && k < values.size()) { // Iterate over each action for an id
+                            if (actions.get(k).equals(Formulaire.CONTRIB_RESOURCE_BEHAVIOUR) ||
+                                actions.get(k).equals(Formulaire.MANAGER_RESOURCE_BEHAVIOUR)) {
+                                    isShared = true;
+                            }
+                            k++;
+                        }
+                        j++;
+                    }
+                    i++;
+                }
+
+                if (!isShared && !form.getString("owner_id").equals(user.getUserId())) {
+                    isShared = true;
+                }
+
+                form.put("collab", isShared);
                 formService.update(formId, form, updateEvent -> {
                     if (updateEvent.isLeft()) {
                         log.error("[Formulaire@updateFormCollabProp] Fail to update form : " + updateEvent.left().getValue());
