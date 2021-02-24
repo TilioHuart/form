@@ -32,6 +32,8 @@
   "formulaire.deselect": "Deselect",
   "formulaire.next": "Next",
   "formulaire.prev": "Previous",
+  "formulaire.date.opening": "Opening date",
+  "formulaire.date.ending": "Ending date",
 
   "formulaire.read": "Access",
   "formulaire.contrib": "Contribute",

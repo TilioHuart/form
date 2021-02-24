@@ -90,17 +90,36 @@ body.formulaire {
       width: 50%;
       @media screen and (max-width: $formulaire-screen-laptop) { width: 100%; }
 
-      .picture:hover {
-        cursor: pointer;
-      }
+      .domino {
+        .picture:hover {
+          cursor: pointer;
+        }
 
-      .data-text input {
-        width: 60%;
-      }
+        .data-text {
+          .title {
+            font-weight: bold;
+            margin: 10px 0 5px 0;
+          }
 
-      .data-date {
-        margin-top: 10px;
-        font-size: 12px;
+          .interval {
+            font-size: 12px;
+            font-weight: bold;
+
+            .opening {
+              margin-right: 10px;
+            }
+          }
+        }
+
+        .data-date {
+          margin-top: 10px;
+          font-size: 12px;
+        }
+
+        .data-bottom {
+          display: flex;
+          justify-content: flex-end;
+        }
       }
     }
   }
@@ -141,7 +160,7 @@ body.formulaire {
     .question {
       padding: 2% 2% 2% 2%;
       margin: 10px;
-      background: #fff;
+      background: $formulaire-white;
       box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 
       .question-main {

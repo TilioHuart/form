@@ -70,7 +70,7 @@ public class DefaultFormService implements FormService {
                 .add(form.getString("picture", ""))
                 .add("NOW()").add("NOW()")
                 .add(form.getString("date_opening", "NOW()"))
-                .add(form.getString("date_ending", "9999-12-31 23:59:59"));
+                .add(form.getString("date_ending", "NOW() + interval '1 year'"));
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
@@ -85,7 +85,7 @@ public class DefaultFormService implements FormService {
                 .add(form.getString("picture", ""))
                 .add("NOW()")
                 .add(form.getString("date_opening", "NOW()"))
-                .add(form.getString("date_ending", "9999-12-31 23:59:59"))
+                .add(form.getString("date_ending", "NOW() + interval '1 year'"))
                 .add(form.getBoolean("sent", false))
                 .add(form.getBoolean("collab", false))
                 .add(form.getBoolean("archived", false))

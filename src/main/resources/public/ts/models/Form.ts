@@ -36,9 +36,9 @@ export class Form implements Selectable, Shareable  {
         this.picture = null;
         this.owner_id = null;
         this.owner_name = null;
-        this.date_creation = null;
-        this.date_modification = null;
-        this.date_opening = null;
+        this.date_creation = new Date();
+        this.date_modification = new Date();
+        this.date_opening = new Date();
         this.date_ending = null;
         this.sent = false;
         this.collab = false;
@@ -54,10 +54,10 @@ export class Form implements Selectable, Shareable  {
             picture: this.picture,
             owner_id: this.owner_id,
             owner_name: this.owner_name,
-            date_creation: this.date_creation,
-            date_modification: this.date_modification,
-            date_opening: this.date_opening,
-            date_ending: this.date_ending,
+            date_creation: new Date(this.date_creation),
+            date_modification: new Date(this.date_modification),
+            date_opening: new Date(this.date_opening),
+            date_ending: new Date(this.date_ending),
             sent: this.sent,
             collab: this.collab,
             archived: this.archived,
@@ -68,6 +68,9 @@ export class Form implements Selectable, Shareable  {
     setFromJson(data: any) : void {
         for (let key in data) {
             this[key] = data[key];
+            if (key === 'date_creation' || key === 'date_modification' || key === 'date_opening' || key === 'date_ending') {
+                this[key] = new Date(this[key]);
+            }
         }
     }
 
@@ -126,7 +129,11 @@ export class Forms extends Selection<Form> {
     async syncSent () : Promise<void> {
         try {
             let { data } = await formService.listSentForms();
-            this.all = Mix.castArrayAs(Form, data);
+            for (let i = 0; i < data.length; i++) {
+                let tempForm = new Form();
+                tempForm.setFromJson(data[i]);
+                this.all.push(tempForm);
+            }
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.form.sync'));
             throw e;

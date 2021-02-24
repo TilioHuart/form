@@ -93,7 +93,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         if (prevPosition > 0) {
             $scope.redirectTo(`/form/${vm.question.form_id}/question/${prevPosition}`);
             $scope.safeApply();
-            $scope.form = $scope.getDataIf200(await formService.get(vm.question.form_id));
+            $scope.form.setFromJson($scope.getDataIf200(await formService.get(vm.question.form_id)));
             $scope.form.nbQuestions = $scope.getDataIf200(await questionService.countQuestions(vm.question.form_id)).count;
             let question = await questionService.getByPosition(vm.question.form_id, prevPosition);
             $scope.question = question.data;
