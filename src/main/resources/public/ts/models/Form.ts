@@ -1,4 +1,4 @@
-import {Mix, Selectable, Selection} from "entcore-toolkit";
+import {Selectable, Selection} from "entcore-toolkit";
 import {idiom, notify, Rights, Shareable} from "entcore";
 import {distributionService, formService} from "../services";
 import {DistributionStatus} from "./Distribution";
@@ -107,13 +107,13 @@ export class Forms extends Selection<Form> {
         desc: false
     };
 
-    filter = {
+    filters = {
         shared: true,
         sent: true,
         todo: true,
         in_progress: true,
         finished: true
-    }
+    };
 
     constructor() {
         super([]);
