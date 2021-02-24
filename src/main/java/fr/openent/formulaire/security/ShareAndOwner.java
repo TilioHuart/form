@@ -125,7 +125,7 @@ public class ShareAndOwner implements ResourcesProvider {
     }
 
     private boolean isListMineResponse(final Binding binding) {
-        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.ResponseController|listMine");
+        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseController|listMine");
     }
 
     private boolean isCreateResponse(final Binding binding) {
