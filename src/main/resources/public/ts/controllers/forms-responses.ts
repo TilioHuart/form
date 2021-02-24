@@ -13,6 +13,8 @@ interface ViewModel {
     };
 
     switchAll(boolean): void;
+    sort() : void;
+    filter() : void;
     displayDate(Date): string;
     checkOpenButton(): boolean;
     openForm(Form): void;
@@ -51,6 +53,16 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
         vm.allFormsSelected = value;
     };
 
+    vm.sort = () : void => {
+        vm.forms.orderForms();
+        $scope.safeApply();
+    };
+
+    vm.filter = () : void => {
+        vm.forms.filterForms();
+        $scope.safeApply();
+    }
+
     // Utils
 
     vm.displayDate = (dateToFormat:Date) : string => {
@@ -59,7 +71,6 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
         let time = DateUtils.format(localDateTime, DateUtils.FORMAT["HOUR-MINUTES"]);
         return date + idiom.translate('formulaire.at') + time;
     };
-
 
     // Toaster
 

@@ -1,0 +1,44 @@
+<div class="row filter-forms">
+    <div class="drop-down-block" ng-class="{slided: displayFilterForms}">
+        <div class="drop-down-label" ng-click="displayFilterForms = !displayFilterForms">
+            <div class="twelve cell">
+                <i class="arrow"></i>
+                <span>
+                    <i18n>formulaire.filter</i18n>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div ng-hide="!displayFilterForms">
+        <label class="chip margin-left checkbox" ng-class="{ selected: vm.forms.filter.todo}">
+            <span>
+                <i18n>formulaire.filter.todo</i18n>
+            </span>
+            <input type="checkbox" ng-click="vm.forms.checkTypeFilterSelected('todo'); vm.filter()">
+        </label>
+        <label class="chip margin-left checkbox" ng-class="{ selected: vm.forms.filter.in_progress}">
+            <span>
+                <i18n>formulaire.filter.in_progress</i18n>
+            </span>
+            <input type="checkbox" ng-click="vm.forms.checkTypeFilterSelected('in_progress'); vm.filter()">
+        </label>
+        <label class="chip margin-left checkbox" ng-class="{ selected: vm.forms.filter.finished}">
+            <span>
+                <i18n>formulaire.filter.finished</i18n>
+            </span>
+            <input type="checkbox" ng-click="vm.forms.checkTypeFilterSelected('finished'); vm.filter()">
+        </label>
+        <label class="chip margin-left checkbox" ng-class="{ selected: vm.forms.isOrderedAsc('sendingDate') || vm.forms.isOrderedDesc('sendingDate')}" ng-click="vm.forms.orderByField('sendingDate'); vm.sort()">
+            <span><i18n>formulaire.filter.sendingDate</i18n></span>
+            <span class="icons">
+                    <i class="arrow orderArrow" ng-if="vm.forms.isOrderedAsc('sendingDate')"></i>
+                    <i class="arrow orderArrow bottom" ng-if="vm.forms.isOrderedDesc('sendingDate')"></i>
+            </span>
+        </label>
+        <label class="chip margin-left checkbox" ng-class="{ selected: vm.forms.isOrderedAsc('title') || vm.forms.isOrderedDesc('title')}" ng-click="vm.forms.orderByField('title'); vm.sort()">
+            <span><i18n>formulaire.filter.title</i18n></span>
+            <span ng-if="vm.forms.isOrderedAsc('title')" class="leftMarginLetter"> A-Z </span>
+            <span ng-if="vm.forms.isOrderedDesc('title')" class="leftMarginLetter"> Z-A </span>
+        </label>
+    </div>
+</div>

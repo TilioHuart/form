@@ -1,6 +1,7 @@
 import {Mix, Selectable, Selection} from "entcore-toolkit";
 import {idiom, notify, Rights, Shareable} from "entcore";
 import {distributionService, formService} from "../services";
+import {DistributionStatus} from "./Distribution";
 
 export class Form implements Selectable, Shareable  {
     shared: any;
@@ -21,6 +22,7 @@ export class Form implements Selectable, Shareable  {
     sent: boolean;
     collab: boolean;
     archived: boolean;
+    displayed: boolean;
     selected: boolean;
     infoImg: {
         name: string;
@@ -43,6 +45,7 @@ export class Form implements Selectable, Shareable  {
         this.sent = false;
         this.collab = false;
         this.archived = false;
+        this.displayed = true;
         this.selected = null;
     }
 
@@ -103,6 +106,14 @@ export class Forms extends Selection<Form> {
         field: "creationDate",
         desc: false
     };
+
+    filter = {
+        shared: true,
+        sent: true,
+        todo: true,
+        in_progress: true,
+        finished: true
+    }
 
     constructor() {
         super([]);
@@ -165,7 +176,29 @@ export class Forms extends Selection<Form> {
                             return -1;
                         else
                             return 1;
-                } else if (this.order.field == "name") {
+                } else if (this.order.field == "sendingDate") {
+                    if (a.date_sending > b.date_sending)
+                        if (this.order.desc)
+                            return 1;
+                        else
+                            return -1;
+                    if (a.date_sending < b.date_sending)
+                        if (this.order.desc)
+                            return -1;
+                        else
+                            return 1;
+                } else if (this.order.field == "creator") {
+                    if (a.owner_name.toLowerCase() < b.owner_name.toLowerCase())
+                        if (this.order.desc)
+                            return 1;
+                        else
+                            return -1;
+                    if (a.owner_name.toLowerCase() > b.owner_name.toLowerCase())
+                        if (this.order.desc)
+                            return -1;
+                        else
+                            return 1;
+                } else if (this.order.field == "title") {
                     if (a.title.toLowerCase() < b.title.toLowerCase())
                         if (this.order.desc)
                             return 1;
@@ -197,4 +230,29 @@ export class Forms extends Selection<Form> {
     isOrderedDesc(field) {
         return this.order.field === field && this.order.desc;
     }
+
+    filterForms() {
+        for (let form of this.all) {
+            form.displayed = true;
+            if (form.collab && !this.filter.shared) {
+                form.displayed = false;
+            }
+            if (form.sent && !this.filter.sent) {
+                form.displayed = false;
+            }
+            if (form.status === DistributionStatus.TO_DO && !this.filter.todo) {
+                form.displayed = false;
+            }
+            if (form.status === DistributionStatus.IN_PROGRESS && !this.filter.in_progress) {
+                form.displayed = false;
+            }
+            if (form.status === DistributionStatus.FINISHED && !this.filter.finished) {
+                form.displayed = false;
+            }
+        }
+    }
+
+    checkTypeFilterSelected = function (key: string) {
+        this.filter[key] = !this.filter[key];
+    };
 }

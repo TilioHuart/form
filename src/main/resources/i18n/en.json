@@ -159,5 +159,12 @@
   "formulaire.filter": "Filter",
   "formulaire.filter.creationDate": "Creation date",
   "formulaire.filter.modificationDate": "Modification date",
-  "formulaire.filter.name": "Name"
+  "formulaire.filter.sendingDate": "Sending date",
+  "formulaire.filter.creator": "Creator",
+  "formulaire.filter.title": "Title",
+  "formulaire.filter.shared": "Shared",
+  "formulaire.filter.sent": "Sent",
+  "formulaire.filter.todo": "To do",
+  "formulaire.filter.in_progress": "In progress",
+  "formulaire.filter.finished": "Finished"
 }
