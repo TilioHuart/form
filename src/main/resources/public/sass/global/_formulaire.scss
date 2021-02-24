@@ -61,21 +61,12 @@ body.formulaire {
       margin-bottom: 0;
     }
 
-    .checkbox-forms {
+    .checkbox {
       background-color: $medium-grey;
       margin-right: 0;
     }
 
-    label.chip.checkbox-forms.selected {
-      background-color: #e20037;
-    }
-
-    .checkbox-activity {
-      background-color: $medium-grey;
-      margin-right: 0;
-    }
-
-    label.chip.checkbox-activity.selected {
+    label.chip.checkbox.selected {
       background-color: $accent;
     }
   }

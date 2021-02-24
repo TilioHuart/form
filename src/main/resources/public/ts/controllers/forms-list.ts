@@ -21,9 +21,10 @@ interface ViewModel {
 
     openFolder(folderName : string): void;
     switchAll(value : boolean): void;
+    sort() : void;
+    filter() : void;
     displayFolder(): string;
     displayDate(date : Date): string;
-    sort() : void;
     checkOpenButton(): boolean;
     openForm(form : Form): void;
     openPropertiesForm(): void;
@@ -88,6 +89,15 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         vm.allFormsSelected = value;
     };
 
+    vm.sort = () : void => {
+        vm.forms.orderForms();
+        $scope.safeApply();
+    };
+
+    vm.filter = () : void => {
+        vm.forms.filterForms();
+        $scope.safeApply();
+    }
 
     // Display functions
 
@@ -100,11 +110,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         let date = DateUtils.format(localDateTime, DateUtils.FORMAT["DAY-MONTH-YEAR"]);
         let time = DateUtils.format(localDateTime, DateUtils.FORMAT["HOUR-MINUTES"]);
         return date + idiom.translate('formulaire.at') + time;
-    };
-
-    vm.sort = () : void => {
-        vm.forms.orderForms();
-        $scope.safeApply();
     };
 
     // Toaster

@@ -60,12 +60,12 @@
             </div>
         </div>
 
-        <div ng-include="'formulaire/public/template/components/filters.html'"></div>
+        <div ng-include="'formulaire/public/template/components/filters-creator.html'"></div>
 
         <!--Dominos display-->
         <div class="dominos" ng-if="!vm.forms.all.empty() && vm.display.grid">
             <div ng-repeat="form in vm.forms.all | filter:vm.searchInput"
-                 ng-if="!vm.forms.all.empty() && vm.display.grid"
+                 ng-if="!vm.forms.all.empty() && vm.display.grid && form.displayed"
                  ng-click="form.selected = !form.selected" ng-dblclick="vm.openForm(form)"
                  class="item" ng-class="{'selected' : form.selected}">
                 <div class="domino">
@@ -103,7 +103,9 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="form in vm.forms.all | filter:vm.searchInput" ng-dblclick="vm.openForm(form)">
+                <tr ng-repeat="form in vm.forms.all | filter:vm.searchInput"
+                    ng-if="form.displayed"
+                    ng-dblclick="vm.openForm(form)">
                     <td><input type="checkbox" ng-model="form.selected"/></td>
                     <td ng-click="form.selected=!form.selected">[[form.title]]</td>
                     <td ng-click="form.selected=!form.selected">[[form.owner_name]]</td>
