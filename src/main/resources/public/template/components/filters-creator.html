@@ -34,13 +34,13 @@
             <span ng-if="vm.forms.isOrderedAsc('title')" class="leftMarginLetter"> A-Z </span>
             <span ng-if="vm.forms.isOrderedDesc('title')" class="leftMarginLetter"> Z-A </span>
         </label>
-        <label class="chip margin-left checkbox" ng-class="{ selected: vm.forms.filter.shared}">
+        <label class="chip margin-left checkbox" ng-class="{ selected: vm.forms.filters.shared}">
             <span>
                 <i18n>formulaire.filter.shared</i18n>
             </span>
             <input type="checkbox" ng-click="vm.forms.checkTypeFilterSelected('shared'); vm.filter()">
         </label>
-        <label class="chip margin-left checkbox" ng-class="{ selected: vm.forms.filter.sent}">
+        <label class="chip margin-left checkbox" ng-class="{ selected: vm.forms.filters.sent}">
             <span>
                 <i18n>formulaire.filter.sent</i18n>
             </span>

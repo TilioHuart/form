@@ -30,6 +30,8 @@ export class Form implements Selectable, Shareable  {
         compatible: boolean;
     };
     nbResponses: number;
+    date_sending: string;
+    status: string;
 
     constructor() {
         this.id = null;
@@ -234,25 +236,25 @@ export class Forms extends Selection<Form> {
     filterForms() {
         for (let form of this.all) {
             form.displayed = true;
-            if (form.collab && !this.filter.shared) {
+            if (form.collab && !this.filters.shared) {
                 form.displayed = false;
             }
-            if (form.sent && !this.filter.sent) {
+            if (form.sent && !this.filters.sent) {
                 form.displayed = false;
             }
-            if (form.status === DistributionStatus.TO_DO && !this.filter.todo) {
+            if (form.status === DistributionStatus.TO_DO && !this.filters.todo) {
                 form.displayed = false;
             }
-            if (form.status === DistributionStatus.IN_PROGRESS && !this.filter.in_progress) {
+            if (form.status === DistributionStatus.IN_PROGRESS && !this.filters.in_progress) {
                 form.displayed = false;
             }
-            if (form.status === DistributionStatus.FINISHED && !this.filter.finished) {
+            if (form.status === DistributionStatus.FINISHED && !this.filters.finished) {
                 form.displayed = false;
             }
         }
     }
 
-    checkTypeFilterSelected = function (key: string) {
-        this.filter[key] = !this.filter[key];
-    };
+    checkTypeFilterSelected(key: string) {
+        this.filters[key] = !this.filters[key];
+    }
 }
