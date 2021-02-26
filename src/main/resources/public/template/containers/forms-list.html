@@ -66,7 +66,7 @@
         <div class="dominos" ng-if="!vm.forms.all.empty() && vm.display.grid">
             <div ng-repeat="form in vm.forms.all | filter:vm.searchInput"
                  ng-if="!vm.forms.all.empty() && vm.display.grid && form.displayed"
-                 ng-click="form.selected = !form.selected" ng-dblclick="vm.openForm(form)"
+                 ng-click="form.selected = !form.selected; form.setResourceRights()" ng-dblclick="vm.openForm(form)"
                  class="item" ng-class="{'selected' : form.selected}">
                 <div class="domino">
                     <div class="four picture" ng-class="{'empty': !form.picture}">
@@ -79,7 +79,7 @@
                             <div class="date"><i18n>formulaire.modified</i18n>[[vm.displayDate(form.date_modification)]]</div>
                         </div>
                         <div class="data-bottom">
-                            <div class="count"><i18n>formulaire.responses.count</i18n> : [[form.nbResponses]]</div>
+                            <div class="count"><i18n>formulaire.responses.count</i18n> : [[form.nb_responses]]</div>
                             <div class="icons">
                                 <img src="formulaire/public/img/icons/send.svg" ng-class="{'selected': form.sent}">
                                 <img src="formulaire/public/img/icons/share.svg" ng-class="{'selected': form.collab}">
@@ -106,10 +106,10 @@
                 <tr ng-repeat="form in vm.forms.all | filter:vm.searchInput"
                     ng-if="form.displayed"
                     ng-dblclick="vm.openForm(form)">
-                    <td><input type="checkbox" ng-model="form.selected"/></td>
+                    <td><input type="checkbox" ng-model="form.selected" ng-change="form.setResourceRights()"/></td>
                     <td ng-click="form.selected=!form.selected">[[form.title]]</td>
                     <td ng-click="form.selected=!form.selected">[[form.owner_name]]</td>
-                    <td ng-click="form.selected=!form.selected">[[form.nbResponses]]</td>
+                    <td ng-click="form.selected=!form.selected">[[form.nb_responses]]</td>
                     <td ng-click="form.selected=!form.selected"><i18n>formulaire.modified</i18n>[[vm.displayDate(form.date_modification)]]</td>
                     <td ng-click="form.selected=!form.selected">
                         <img src="formulaire/public/img/icons/send.svg" ng-class="{'selected': form.sent}"/>

@@ -115,8 +115,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 vm.questions.all[i].position++;
                 await questionService.save(vm.questions.all[i]);
             }
-            vm.questions.selected[0].position++;
-            let newQuestion = $scope.getDataIf200(await questionService.create(vm.questions.selected[0]));
+            let duplicata = vm.questions.selected[0];
+            duplicata.position++;
+            let newQuestion = $scope.getDataIf200(await questionService.create(duplicata));
             for (let i = 0; i < vm.questions.selected[0].choices.all.length; i++) {
                 let choice = vm.questions.selected[0].choices.all[i];
                 if (!!choice.value) {

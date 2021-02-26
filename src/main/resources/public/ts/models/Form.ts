@@ -29,7 +29,7 @@ export class Form implements Selectable, Shareable  {
         type: string;
         compatible: boolean;
     };
-    nbResponses: number;
+    nb_responses: number;
     date_sending: string;
     status: string;
 
@@ -73,13 +73,21 @@ export class Form implements Selectable, Shareable  {
     setFromJson(data: any) : void {
         for (let key in data) {
             this[key] = data[key];
+            if (key === 'nb_responses' && !!!data[key]) { this[key] = 0; }
             if (key === 'date_creation' || key === 'date_modification' || key === 'date_opening' || key === 'date_ending') {
                 this[key] = new Date(this[key]);
             }
         }
     }
 
-    generateRights() : void {
+    async setResourceRights() : Promise<void> {
+        if (this.selected) {
+            let rightsResponse = await formService.getMyFormRights(this.id);
+            this.myRights = rightsResponse.data;
+        }
+    }
+
+    generateShareRights() : void {
         this._id = this.id;
         this.owner = {userId: this.owner_id, displayName: this.owner_name};
         this.myRights = new Rights<Form>(this);
@@ -128,9 +136,6 @@ export class Forms extends Selection<Form> {
             for (let i = 0; i < data.length; i++) {
                 let tempForm = new Form();
                 tempForm.setFromJson(data[i]);
-                tempForm.nbResponses = (await distributionService.count(tempForm.id)).data.count;
-                let rightsResponse = await formService.getMyFormRights(tempForm.id);
-                tempForm.myRights = rightsResponse.data;
                 this.all.push(tempForm);
             }
         } catch (e) {
