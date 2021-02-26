@@ -5,7 +5,7 @@
     "port" : 8067,
     "app-name" : "Formulaire",
     "app-address" : "/formulaire",
-    "app-icon" : "Formulaire-large",
+    "app-icon" : "${host}/formulaire/public/img/logo.svg",
     "host": "${host}",
     "ssl" : $ssl,
     "auto-redeploy": false,
