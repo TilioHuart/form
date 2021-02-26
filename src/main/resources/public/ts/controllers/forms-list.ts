@@ -128,7 +128,9 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.duplicateForms = async (): Promise<void> => {
         try {
             for (let form of vm.forms.selected) {
-                let duplicata = $scope.getDataIf200(await formService.create(form));
+                let duplicata = form;
+                duplicata.title += " - copie";
+                duplicata = $scope.getDataIf200(await formService.create(duplicata));
                 let questions = new Questions();
                 await questions.sync(form.id);
                 for (let question of questions.all) {
