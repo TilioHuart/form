@@ -159,7 +159,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.sendForm = async (): Promise<void> => {
         if (!isFormEmpty(vm.forms.selected[0].id)) return;
-        vm.forms.selected[0].generateRights();
+        vm.forms.selected[0].generateShareRights();
         template.open('lightbox', 'lightbox/form-sending');
         vm.display.lightbox.sending = true;
         let checker = window.setInterval(function() {
@@ -188,7 +188,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.shareForm = (): void => {
         if (!isFormEmpty(vm.forms.selected[0].id)) return;
-        vm.forms.selected[0].generateRights();
+        vm.forms.selected[0].generateShareRights();
         template.open('lightbox', 'lightbox/form-sharing');
         vm.display.lightbox.sharing = true;
         // let checker = window.setInterval(function() {
