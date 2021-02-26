@@ -41,7 +41,7 @@
 
     <!--List of forms-->
     <section class="cell twelve">
-        <div ng-include="'formulaire/public/template/components/filters-responder.html'"></div>
+        <div ng-include="'formulaire/public/template/components/filters/filters-responder.html'"></div>
         <!--Dominos display-->
         <div class="dominos" ng-if="!vm.forms.all.empty() && vm.display.grid">
             <div ng-repeat="form in vm.forms.all | filter:vm.searchInput"
