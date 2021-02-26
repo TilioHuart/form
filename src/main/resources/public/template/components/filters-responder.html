@@ -10,19 +10,19 @@
         </div>
     </div>
     <div ng-hide="!displayFilterForms">
-        <label class="chip margin-left checkbox" ng-class="{ selected: vm.forms.filter.todo}">
+        <label class="chip margin-left checkbox" ng-class="{ selected: vm.forms.filters.todo}">
             <span>
                 <i18n>formulaire.filter.todo</i18n>
             </span>
             <input type="checkbox" ng-click="vm.forms.checkTypeFilterSelected('todo'); vm.filter()">
         </label>
-        <label class="chip margin-left checkbox" ng-class="{ selected: vm.forms.filter.in_progress}">
+        <label class="chip margin-left checkbox" ng-class="{ selected: vm.forms.filters.in_progress}">
             <span>
                 <i18n>formulaire.filter.in_progress</i18n>
             </span>
             <input type="checkbox" ng-click="vm.forms.checkTypeFilterSelected('in_progress'); vm.filter()">
         </label>
-        <label class="chip margin-left checkbox" ng-class="{ selected: vm.forms.filter.finished}">
+        <label class="chip margin-left checkbox" ng-class="{ selected: vm.forms.filters.finished}">
             <span>
                 <i18n>formulaire.filter.finished</i18n>
             </span>
