@@ -47,8 +47,12 @@ export const formService: FormService = {
     },
 
     async save(form : Form): Promise<AxiosResponse> {
-        if (form.date_opening != null) form.date_opening = moment(form.date_opening).format();
-        if (form.date_ending != null) form.date_ending = moment(form.date_ending).format();
+        if (form.date_opening != null) {
+            form.date_opening = moment(form.date_opening.setHours(0,0,0,0)).format();
+        }
+        if (form.date_ending != null) {
+            form.date_ending = moment(form.date_ending.setHours(23,59,59,999)).format();
+        }
         return form.id ? await this.update(form) : await this.create(form);
     },
 
