@@ -111,17 +111,19 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
     vm.duplicateQuestion = async () => {
         try {
             vm.dontSave = true;
-            for (let i = vm.questions.selected[0].position; i < vm.questions.all.length; i++) {
+            let question = vm.questions.selected[0];
+            for (let i = question.position; i < vm.questions.all.length; i++) {
                 vm.questions.all[i].position++;
                 await questionService.save(vm.questions.all[i]);
             }
-            let duplicata = vm.questions.selected[0];
+            let duplicata = question;
             duplicata.position++;
             let newQuestion = $scope.getDataIf200(await questionService.create(duplicata));
-            for (let i = 0; i < vm.questions.selected[0].choices.all.length; i++) {
-                let choice = vm.questions.selected[0].choices.all[i];
-                if (!!choice.value) {
-                    await questionChoiceService.create(new QuestionChoice(newQuestion.id, choice.value));
+            if (question.question_type === Types.SINGLEANSWER || question.question_type === Types.MULTIPLEANSWER) {
+                for (let choice of question.choices.all) {
+                    if (!!choice.value) {
+                        await questionChoiceService.create(new QuestionChoice(newQuestion.id, choice.value));
+                    }
                 }
             }
             template.close('lightbox');

@@ -1,5 +1,5 @@
 import {idiom, model, ng, notify, template} from 'entcore';
-import {Form, Forms, QuestionChoice, Questions} from "../models";
+import {Form, Forms, QuestionChoice, Questions, Types} from "../models";
 import {DateUtils} from "../utils/date";
 import {formService, questionService, questionChoiceService} from "../services";
 
@@ -141,9 +141,11 @@ export const formsListController = ng.controller('FormsListController', ['$scope
                 for (let question of questions.all) {
                     question.form_id = duplicata.id;
                     let newQuestion = $scope.getDataIf200(await questionService.create(question));
-                    for (let choice of question.choices.all) {
-                        if (!!choice.value) {
-                            await questionChoiceService.create(new QuestionChoice(newQuestion.id, choice.value));
+                    if (question.question_type === Types.SINGLEANSWER || question.question_type === Types.MULTIPLEANSWER) {
+                        for (let choice of question.choices.all) {
+                            if (!!choice.value) {
+                                await questionChoiceService.create(new QuestionChoice(newQuestion.id, choice.value));
+                            }
                         }
                     }
                 }

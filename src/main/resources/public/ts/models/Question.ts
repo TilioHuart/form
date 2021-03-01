@@ -2,6 +2,7 @@ import {Mix, Selectable, Selection} from "entcore-toolkit";
 import {idiom, notify} from "entcore";
 import {questionService} from "../services";
 import {QuestionChoice, QuestionChoices} from "./QuestionChoice";
+import {Types} from "./QuestionType";
 
 export class Question implements Selectable {
     id: number;
@@ -53,11 +54,15 @@ export class Questions extends Selection<Question> {
             let { data } = await questionService.list(formId);
             this.all = Mix.castArrayAs(Question, data);
             for (let i = 0; i < this.all.length; i++) {
-                let questionChoices = this.all[i].choices;
-                await questionChoices.sync(this.all[i].id);
-                let nbChoices = questionChoices.all.length;
-                for (let j = 3; j > nbChoices; j--) {
-                    questionChoices.all.push(new QuestionChoice(this.all[i].id));
+                if (this.all[i].question_type === Types.SINGLEANSWER || this.all[i].question_type === Types.MULTIPLEANSWER) {
+                    let questionChoices = this.all[i].choices;
+                    await questionChoices.sync(this.all[i].id);
+                    let nbChoices = questionChoices.all.length;
+                    if (nbChoices <= 0) {
+                        for (let j = 0; j < 3; j++) {
+                            questionChoices.all.push(new QuestionChoice(this.all[i].id));
+                        }
+                    }
                 }
             }
         } catch (e) {
