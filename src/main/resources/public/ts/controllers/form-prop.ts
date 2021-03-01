@@ -44,9 +44,7 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
                 vm.form.date_ending = new Date(vm.form.date_opening);
                 vm.form.date_ending.setFullYear(vm.form.date_ending.getFullYear() + 1);
             }
-            let yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            return vm.form.date_opening > yesterday && vm.form.date_ending > vm.form.date_opening;
+            return vm.form.date_ending > vm.form.date_opening;
         };
 
         vm.getImage = async (): Promise<void> => {
