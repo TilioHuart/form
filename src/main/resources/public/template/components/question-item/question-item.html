@@ -8,7 +8,7 @@
     <div class="focusable" id="[[question.id]]">
         <div class="question-title">
             <div ng-include="'formulaire/public/template/components/question-item/question-title.html'"></div>
-            <div ng-if="question.selected" ng-disabled="true">
+            <div ng-if="question.selected" ng-show="false">
                 <select ng-model="question.question_type" style="height: 24px;">
                     <option ng-repeat="type in questionTypes.all" ng-value="type.code"
                             ng-selected="type.code === question.question_type">
