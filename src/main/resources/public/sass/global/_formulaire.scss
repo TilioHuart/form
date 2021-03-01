@@ -69,6 +69,14 @@ body.formulaire {
     label.chip.checkbox.selected {
       background-color: $accent;
     }
+
+    i.arrow {
+      margin-top: 0;
+    }
+
+    i.arrow:before {
+      font-size: 14px;
+    }
   }
 
   // Prop-form
