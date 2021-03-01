@@ -15,7 +15,7 @@
         </section>
     </div>
 
-    <div ng-include="'formulaire/public/template/components/progress-bar.html'"></div>
+    <div ng-include="'formulaire/public/template/components/progress-bar.html'" ng-if="form.nbQuestions > 1"></div>
 
     <div class="respond-question">
         <div class="question">
