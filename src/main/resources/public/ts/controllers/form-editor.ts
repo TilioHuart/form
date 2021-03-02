@@ -39,7 +39,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
     function ($scope) {
 
     const vm: ViewModel = this;
-        vm.types = Types;
+    vm.types = Types;
     vm.form = new Form();
     vm.questions = new Questions();
     vm.newQuestion = new Question();
@@ -151,6 +151,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             vm.display.lightbox.delete = false;
             notify.success(idiom.translate('formulaire.success.question.delete'));
             await vm.questions.sync(vm.form.id);
+            rePositionQuestions();
             vm.dontSave = false;
             $scope.safeApply();
         }
@@ -162,14 +163,13 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
     vm.undoQuestionChanges = async () => {
         if (vm.questions.selected.length > 0) {
             let question = vm.questions.selected[0];
-            if (question.title != "" || question.statement != "" || question.mandatory != false) {
+            if (!!question.title || !!question.statement || question.mandatory || question.choices.all.length > 0) {
                 vm.dontSave = true;
                 template.open('lightbox', 'lightbox/question-confirm-undo');
                 vm.display.lightbox.undo = true;
             }
-            else {
-                vm.doDeleteQuestion();
-            }
+            await vm.questions.sync(vm.form.id);
+            $scope.safeApply();
         }
     };
 
@@ -246,14 +246,26 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         }
     };
 
-
     // Utils
+
+    const rePositionQuestions = () => {
+        vm.questions.all.sort(function(a, b){
+            return a.position - b.position;
+        });
+        for (let i = 0; i < vm.questions.all.length; i++) {
+            vm.questions.all[i].position = i + 1;
+        }
+    };
 
     const saveQuestions = async (displaySuccess:boolean = false) => {
         try {
+            rePositionQuestions();
             for (let question of vm.questions.all) {
-                if (!!!question.title && !!!question.statement && question.choices.all.length <= 0) {
-                    await questionService.delete(question.id);
+                if (!!!question.title && !!!question.statement && !question.mandatory && question.choices.all.length <= 0) {
+                    let temp = $scope.getDataIf200(await questionService.get(question.id));
+                    if (!!!temp.title && !!!temp.statement && !temp.mandatory && temp.choices.all.length <= 0) {
+                        await questionService.delete(question.id);
+                    }
                 }
                 else {
                     await questionService.save(question);
