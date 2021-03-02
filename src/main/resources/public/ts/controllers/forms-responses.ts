@@ -61,7 +61,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
     vm.filter = () : void => {
         vm.forms.filterForms();
         $scope.safeApply();
-    }
+    };
 
     // Utils
 
