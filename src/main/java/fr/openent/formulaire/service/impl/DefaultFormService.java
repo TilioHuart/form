@@ -37,7 +37,7 @@ public class DefaultFormService implements FormService {
             params.add(groupOrUser);
         }
 
-        query.append(" AND fs.action = ? OR fs.action = ?) OR f.owner_id = ? GROUP BY f.id, d.nb_responses ")
+        query.append(" AND (fs.action = ? OR fs.action = ?)) OR f.owner_id = ? GROUP BY f.id, d.nb_responses ")
                 .append("ORDER BY f.date_modification DESC;");
         params.add(Formulaire.MANAGER_RESOURCE_BEHAVIOUR).add(Formulaire.CONTRIB_RESOURCE_BEHAVIOUR).add(user.getUserId());
 

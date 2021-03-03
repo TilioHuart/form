@@ -87,8 +87,11 @@ public class DefaultDistributionService implements DistributionService {
     @Override
     public void getDuplicates(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler) {
         ArrayList<String> respondersIdsArray = new ArrayList<>();
-        for (int i = 0; i < responders.size(); i++){
-            respondersIdsArray.add(responders.getJsonObject(i).getJsonArray("users").getJsonObject(0).getString("id"));
+        for (int i = 0; i < responders.size(); i++) {
+            JsonArray users = responders.getJsonObject(i).getJsonArray("users");
+            for (int j = 0; j < users.size(); j++) {
+                respondersIdsArray.add(users.getJsonObject(j).getString("id"));
+            }
         }
 
         JsonArray params = new JsonArray().add(formId);
@@ -109,8 +112,11 @@ public class DefaultDistributionService implements DistributionService {
     @Override
     public void getRemoved(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler) {
         ArrayList<String> respondersIdsArray = new ArrayList<>();
-        for (int i = 0; i < responders.size(); i++){
-            respondersIdsArray.add(responders.getJsonObject(i).getJsonArray("users").getJsonObject(0).getString("id"));
+        for (int i = 0; i < responders.size(); i++) {
+            JsonArray users = responders.getJsonObject(i).getJsonArray("users");
+            for (int j = 0; j < users.size(); j++) {
+                respondersIdsArray.add(users.getJsonObject(j).getString("id"));
+            }
         }
 
         JsonArray params = new JsonArray().add(formId);

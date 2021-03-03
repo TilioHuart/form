@@ -428,6 +428,7 @@ public class FormController extends ControllerHelper {
                     List<List<String>> values = new ArrayList(o.values());
 
                     while (!isShared && j < values.size()) { // Iterate over each pair id-actions
+                        // TODO throw unchecked cast error in vm even if the cast works (how to do it differently ?)
                         List<String> actions = new ArrayList<>(values.get(j));
 
                         int k = 0;
