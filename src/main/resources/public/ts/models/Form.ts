@@ -81,10 +81,8 @@ export class Form implements Selectable, Shareable  {
     }
 
     async setResourceRights() : Promise<void> {
-        if (this.selected) {
-            let rightsResponse = await formService.getMyFormRights(this.id);
-            this.myRights = rightsResponse.data;
-        }
+        let rightsResponse = await formService.getMyFormRights(this.id);
+        this.myRights = rightsResponse.data;
     }
 
     generateShareRights() : void {
@@ -136,6 +134,7 @@ export class Forms extends Selection<Form> {
             for (let i = 0; i < data.length; i++) {
                 let tempForm = new Form();
                 tempForm.setFromJson(data[i]);
+                await tempForm.setResourceRights();
                 this.all.push(tempForm);
             }
         } catch (e) {
