@@ -1,6 +1,5 @@
 import {idiom, model, ng, notify, template} from 'entcore';
 import {Form, Forms, QuestionChoice, Questions, Types} from "../models";
-import {DateUtils} from "../utils/date";
 import {formService, questionService, questionChoiceService} from "../services";
 
 interface ViewModel {
@@ -24,7 +23,6 @@ interface ViewModel {
     sort() : void;
     filter() : void;
     displayFolder(): string;
-    displayDate(date : Date): string;
     checkOpenButton(): boolean;
     openForm(form : Form): void;
     openPropertiesForm(): void;
@@ -104,13 +102,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.displayFolder = () : string => {
         return idiom.translate("formulaire.forms." + vm.folder);
-    };
-
-    vm.displayDate = (dateToFormat:Date) : string => {
-        let localDateTime = DateUtils.localise(dateToFormat);
-        let date = DateUtils.format(localDateTime, DateUtils.FORMAT["DAY-MONTH-YEAR"]);
-        let time = DateUtils.format(localDateTime, DateUtils.FORMAT["HOUR-MINUTES"]);
-        return date + idiom.translate('formulaire.at') + time;
     };
 
     // Toaster

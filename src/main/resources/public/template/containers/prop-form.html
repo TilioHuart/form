@@ -32,7 +32,7 @@
                         </div>
                     </div>
                     <div class="data-date" ng-if="currentPage === 'propForm'">
-                        <i18n>formulaire.form.edit.modified</i18n>[[vm.displayLastSave()]]
+                        <i18n>formulaire.form.edit.modified</i18n>[[vm.form.date_modification.toLocaleString()]]
                     </div>
                     <div class="data-bottom">
                         <button class="cell" ng-click="redirectTo('/list/mine')"><i18n>formulaire.cancel</i18n></button>

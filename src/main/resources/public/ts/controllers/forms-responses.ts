@@ -1,6 +1,5 @@
-import {idiom, ng} from 'entcore';
+import {ng} from 'entcore';
 import {Distribution, Distributions, DistributionStatus, Form, Forms} from "../models";
-import {DateUtils} from "../utils/date";
 import {distributionService} from "../services";
 
 interface ViewModel {
@@ -66,10 +65,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
     // Utils
 
     vm.displayDate = (dateToFormat:Date) : string => {
-        let localDateTime = DateUtils.localise(dateToFormat);
-        let date = DateUtils.format(localDateTime, DateUtils.FORMAT["DAY-MONTH-YEAR"]);
-        let time = DateUtils.format(localDateTime, DateUtils.FORMAT["HOUR-MINUTES"]);
-        return date + idiom.translate('formulaire.at') + time;
+        return new Date(dateToFormat + "Z").toLocaleString();
     };
 
     // Toaster

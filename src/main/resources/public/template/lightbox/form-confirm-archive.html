@@ -14,7 +14,7 @@
         <tr ng-repeat="form in vm.forms.selected">
             <td>[[form.title]]</td>
             <td>[[form.owner_name]]</td>
-            <td><i18n>formulaire.modified</i18n>[[vm.displayDate(form.date_modification)]]</td>
+            <td><i18n>formulaire.modified</i18n>[[form.date_modification.toLocaleString()]]</td>
         </tr>
         </tbody>
     </table>

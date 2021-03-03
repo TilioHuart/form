@@ -29,7 +29,6 @@ interface ViewModel {
     doUndoQuestionChanges(): void;
     createNewChoice(question: Question): void;
     deleteChoice(question: Question, index: number): Promise<void>;
-    displayLastSave(): string;
     displayTypeName(typeInfo: string): string;
     displayTypeIcon(code: number): string;
 }
@@ -204,13 +203,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
 
     // Display functions
-
-    vm.displayLastSave = () : string => {
-        let localDateTime = DateUtils.localise(vm.form.date_modification);
-        let date = DateUtils.format(localDateTime, DateUtils.FORMAT["DAY-MONTH-YEAR"]);
-        let time = DateUtils.format(localDateTime, DateUtils.FORMAT["HOUR-MINUTES"]);
-        return date + idiom.translate('formulaire.at') + time;
-    };
 
     vm.displayTypeName = (typeInfo: string|number) : string => {
         if (typeof typeInfo === "string") {

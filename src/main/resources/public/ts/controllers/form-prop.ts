@@ -12,7 +12,6 @@ interface ViewModel {
     save(): Promise<void>;
     checkIntervalDates(): boolean;
     getImage(): void;
-    displayLastSave(): string;
 }
 
 
@@ -58,13 +57,6 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
                 // }, 2000)
             }
             $scope.safeApply();
-        };
-
-        vm.displayLastSave = (): string => {
-            let localDateTime = DateUtils.localise(vm.form.date_modification);
-            let date = DateUtils.format(localDateTime, DateUtils.FORMAT["DAY-MONTH-YEAR"]);
-            let time = DateUtils.format(localDateTime, DateUtils.FORMAT["HOUR-MINUTES"]);
-            return date + idiom.translate('formulaire.at') + time;
         };
 
         init();

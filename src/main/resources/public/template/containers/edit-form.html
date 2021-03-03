@@ -11,7 +11,7 @@
         <section class="cell five">
             <div class="main-button">
                 <div class="date">
-                    <i class="clock sm-icon spaced-right"></i><i18n>formulaire.form.edit.modified</i18n>[[vm.displayLastSave()]]
+                    <i class="clock sm-icon spaced-right"></i><i18n>formulaire.form.edit.modified</i18n>[[vm.form.date_modification.toLocaleString()]]
                 </div>
                 <button class="cell" ng-click="vm.createNewQuestion()"><i18n>formulaire.form.edit.add</i18n></button>
                 <button class="cell" ng-click="" ng-disabled="true"><i18n>formulaire.form.edit.organize</i18n></button>
