@@ -20,8 +20,6 @@ export class QuestionChoice {
         this.question_id = questionId;
         this.value = value ? value : "";
         this.position = null;
-        this.value = value ? value : "";
-        this.position = null;
         this.type = type ? type : ChoiceTypes.TXT;
     }
 
