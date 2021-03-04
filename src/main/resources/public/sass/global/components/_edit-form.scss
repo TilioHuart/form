@@ -26,6 +26,7 @@
           display: flex;
           justify-content: center;
           margin-bottom: 1%;
+          cursor: grab;
 
           .dots {
             display: flex;
@@ -76,5 +77,63 @@
     display: flex;
     justify-content: flex-end;
     margin-top: 20px;
+  }
+}
+
+.drag {
+  ul {
+    list-style: none;
+    height: auto;
+    padding: 0;
+
+    .hidden {
+      visibility: hidden;
+    }
+
+    .row-shadow-effect {
+      background-color: rgba(0, 0, 0, 0.01);
+      border-radius: 5px;
+      padding: 10px;
+      box-shadow: -2px 5px 5px #bfbfbf7d;
+      z-index: 0;
+      cursor: grab;
+      margin: 1%;
+      width: auto;
+    }
+
+    .top {
+      width: 5%;
+
+      .dots {
+        display: flex;
+        flex-direction: column;
+        line-height: 7px;
+        width: fit-content;
+        transform: rotate(90deg);
+        color: black;
+        opacity: 0.8;
+      }
+    }
+
+    .title {
+      width: 86%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .container-arrow {
+      display: flex;
+      justify-content: space-around;
+
+      .rotateDown {
+        transform: rotate(-90deg);
+        cursor: pointer;
+      }
+
+      .rotateUp {
+        transform: rotate(90deg);
+      }
+    }
   }
 }

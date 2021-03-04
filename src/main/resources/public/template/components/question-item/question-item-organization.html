@@ -1,0 +1,17 @@
+<div class="row row-shadow-effect">
+    <div class="cell top">
+        <div class="dots">
+            <i class="drag md-icon"></i>
+            <i class="drag md-icon"></i>
+        </div>
+    </div>
+    <span class="cell title">[[question.title]]</span>
+    <div class="cell one container-arrow">
+        <div class="rotateUp" ng-class="$first? 'hidden' : ''" ng-click="moveQuestion($index, 'up')">
+            <i class="arrow-simple"></i>
+        </div>
+        <div class="rotateDown" ng-class="$last? 'hidden' : ''" ng-click="moveQuestion($index, 'down')">
+            <i class="arrow-simple"></i>
+        </div>
+    </div>
+</div>

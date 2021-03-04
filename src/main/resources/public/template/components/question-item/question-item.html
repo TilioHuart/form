@@ -7,7 +7,10 @@
     </div>
     <div class="focusable" id="[[question.id]]">
         <div class="question-title">
+            <!-- Title component -->
             <div ng-include="'formulaire/public/template/components/question-item/question-title.html'"></div>
+<!--            <question-title question="question" types="vm.types"></question-title>-->
+
             <div ng-if="question.selected" ng-show="false">
                 <select ng-model="question.question_type" style="height: 24px;">
                     <option ng-repeat="type in questionTypes.all" ng-value="type.code"
@@ -18,7 +21,9 @@
             </div>
         </div>
         <div class="question-main">
+            <!-- Main component -->
             <div ng-include="'formulaire/public/template/components/question-item/question-main.html'"></div>
+<!--            <question-type question="question" type="question.question_type"></question-type>-->
         </div>
         <div class="question-bottom" ng-if="question.selected">
             <div class="mandatory" ng-if="question.question_type != 1">

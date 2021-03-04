@@ -60,4 +60,12 @@ i {
     vertical-align: middle;
     opacity: 0.6;
   }
+
+  &.arrow-simple::before {
+    @include fonticon();
+    content: "\e87b";
+    vertical-align: middle;
+    color: black;
+    opacity: 0.4;
+  }
 }

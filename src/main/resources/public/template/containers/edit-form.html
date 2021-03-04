@@ -13,22 +13,26 @@
                 <div class="date">
                     <i class="clock sm-icon spaced-right"></i><i18n>formulaire.form.edit.modified</i18n>[[vm.form.date_modification.toLocaleString()]]
                 </div>
-                <button class="cell" ng-click="vm.createNewQuestion()"><i18n>formulaire.form.edit.add</i18n></button>
-                <button class="cell" ng-click="" ng-disabled="true"><i18n>formulaire.form.edit.organize</i18n></button>
-                <button class="cell" ng-click="" ng-disabled="true"><i18n>formulaire.form.edit.preview</i18n></button>
+                <button class="cell" ng-click="vm.createNewQuestion()"><i18n>formulaire.add</i18n></button>
+                <button class="cell" ng-click="vm.organizeQuestions()"><i18n>formulaire.organize</i18n></button>
+                <button class="cell" ng-click="" ng-disabled="true"><i18n>formulaire.preview</i18n></button>
             </div>
         </section>
     </div>
 
     <div class="edit-form" ng-if="vm.questions.all.length > 0">
+        <!-- List of questions-->
         <div class="questions" ng-class="{'dominos': vm.questions.all.length > 0}">
             <div ng-repeat="question in vm.questions.all | orderBy:question.position"
                  class="item" ng-class="{'questionError': !!!question.title || question.choices.length === 0 }">
-                <div ng-include="'formulaire/public/template/components/question-item/question-item.html'"></div>
+                <!--  Each questions component -->
+<!--                <div ng-include="'formulaire/public/template/components/question-item/question-item.html'"></div>-->
+                <question-item question="question" questionTypes="questionTypes"></question-item>
             </div>
         </div>
+        <!-- End page buttons -->
         <div class="buttons">
-            <button class="cell" ng-click="vm.createNewQuestion()"><i18n>formulaire.form.edit.add</i18n></button>
+            <button class="cell" ng-click="vm.createNewQuestion()"><i18n>formulaire.add</i18n></button>
         </div>
         <div class="buttons">
             <button class="cell" ng-click="vm.return()"><i18n>formulaire.return</i18n></button>
@@ -36,6 +40,7 @@
         </div>
     </div>
 
+    <!-- Error page, wrong form -->
     <div class="error" ng-if="vm.questions.all.length <= 0">
         <img src="/formulaire/public/img/empty-form.svg" class="img_mini"/>
         <h1><i18n>formulaire.form.edit.empty.main</i18n></h1>

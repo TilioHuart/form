@@ -10,6 +10,9 @@
   "formulaire.responses.count": "Responses",
   "formulaire.status": "Status",
   "formulaire.at": " at ",
+  "formulaire.add": "Add",
+  "formulaire.organize": "Organize",
+  "formulaire.preview": "Preview",
   "formulaire.save": "Save",
   "formulaire.saveAndQuit": "Save and quit",
   "formulaire.end": "Finish and send",
@@ -62,10 +65,7 @@
   "formulaire.image.incompatible": "Only those image format are accepted : .jpg, .jpeg, .png, .gif",
 
   "formulaire.form.edit.modified": "Form saved at ",
-  "formulaire.form.edit.add": "Add",
-  "formulaire.form.edit.organize": "Organize",
-  "formulaire.form.edit.preview": "Preview",
-  "formulaire.form.edit.empty.main": "Yout form is empty",
+  "formulaire.form.edit.empty.main": "Your form is empty",
   "formulaire.form.edit.empty.caption": "Click on 'Add' to create your first element",
 
   "formulaire.question.selectType": "Select a type of section",

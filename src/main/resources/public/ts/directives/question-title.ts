@@ -1,0 +1,51 @@
+import {Directive, ng} from "entcore";
+import {Question, Types} from "../models";
+
+interface IViewModel {
+    question: Question,
+    types: typeof Types
+}
+
+export const questionTitle: Directive = ng.directive('questionTitle', () => {
+
+    return {
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            question: '='
+        },
+        controllerAs: 'vm',
+        bindToController: true,
+        replace: true,
+        template: `
+            <div>
+                <div ng-if="vm.question.question_type == vm.types.FREETEXT">
+                    <div ng-if="!vm.question.selected">
+                        <h4 ng-if="!!vm.question.title">[[vm.question.title]]</h4>
+                        <h4 ng-if="!!!vm.question.title"><i18n>formulaire.question.title.free.empty</i18n></h4>
+                    </div>
+                    <div ng-if="vm.question.selected">
+                        <input type="text" ng-model="vm.question.title" i18n-placeholder="formulaire.question.title.free.empty"/>
+                    </div>
+                </div>
+                <div ng-if="vm.question.question_type != vm.types.FREETEXT">
+                    <div ng-if="!vm.question.selected">
+                        <h4 ng-if="!!vm.question.title">[[vm.question.title]]<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span></h4>
+                        <h4 ng-if="!!!vm.question.title"><i18n>formulaire.question.title.empty</i18n></h4>
+                    </div>
+                    <div ng-if="vm.question.selected">
+                        <input type="text" ng-model="vm.question.title" i18n-placeholder="formulaire.question.title.empty"/>
+                    </div>
+                </div>
+            </div>
+        `,
+
+        controller: async ($scope) => {
+            const vm: IViewModel = <IViewModel> this;
+        },
+        link: ($scope, $element) => {
+            const vm: IViewModel = $scope.vm;
+            vm.types = Types;
+        }
+    };
+});

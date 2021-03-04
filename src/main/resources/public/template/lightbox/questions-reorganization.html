@@ -1,0 +1,69 @@
+<lightbox show="vm.display.lightbox.reorganization" on-close="vm.display.lightbox.reorganization = false;">
+    <h1><i18n>formulaire.organize</i18n></h1>
+    <div class="drag">
+        <ul>
+            <li class="row" ng-repeat="question in vm.questions.all | orderBy:question.position">
+                <div ng-include="'formulaire/public/template/components/question-item/question-item-organization.html'"></div>
+            </li>
+        </ul>
+    </div>
+    <div style="margin-top:20px; float: right;">
+        <button class="cell" ng-click="vm.display.lightbox.reorganization = false;"><i18n>formulaire.cancel</i18n></button>
+        <button class="cell" ng-click="vm.doOrganizeQuestions()"><i18n>formulaire.confirm</i18n></button>
+    </div>
+</lightbox>
+
+
+
+
+
+
+
+<!--<div class="evaluations-sniplet orderShowSubject vsco&#45;&#45;global">-->
+<!--    <div class="row">-->
+<!--        <div class="nine cell">-->
+<!--            <i18n>evaluation.orderShowSubject.description</i18n>-->
+<!--        </div>-->
+<!--        <button class="two cell right-magnet"-->
+<!--                ng-click="initOrderDefault()">-->
+<!--            <i18n>evaluations.perso.delete</i18n>-->
+<!--        </button>-->
+<!--    </div>-->
+
+<!--    <div class="loaderList"-->
+<!--         ng-if="isLoadingOrderShowSubject">-->
+<!--    </div>-->
+<!--    <ul ng-if="!isLoadingOrderShowSubject">-->
+<!--        <li drop-item="dropped($item)"-->
+<!--            ng-class="isDragStart? 'drop-zone' : 'no-drop-zone'"></li>-->
+<!--        <li class="row"-->
+<!--            drop-item="dropped($item, $index)"-->
+<!--            ng-repeat="subject in subjects">-->
+<!--            <div class="row row-shadow-effect"-->
+<!--                 drag-item="subject"-->
+<!--                 draggable="false"-->
+<!--                 ng-class="subject.isDrag? 'row-dragged' : ''"-->
+<!--                 ng-mousedown="startDrag(subject)"-->
+<!--                 ng-mouseup="cleanDrag()">-->
+<!--                <div class="cell one">-->
+<!--                    <i class="move-row"></i>-->
+<!--                </div>-->
+<!--                <span class="cell ten">[[subject.name]] ([[subject.code]])</span>-->
+<!--                <div class="cell one container-arrow">-->
+<!--                    <div class="rotateUp"-->
+<!--                         ng-class="$first? 'hidden' : ''"-->
+<!--                         ng-click="moveSubject($index, 'up')">-->
+<!--                        <i class="arrow-simple"></i>-->
+<!--                    </div>-->
+<!--                    <div class="rotateDown"-->
+<!--                         ng-class="$last? 'hidden' : ''"-->
+<!--                         ng-click="moveSubject($index, 'down')">-->
+<!--                        <i class="arrow-simple"></i>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div ng-class="isDragStart && !subject.isDrag? 'drop-zone' : 'no-drop-zone'">-->
+<!--            </div>-->
+<!--        </li>-->
+<!--    </ul>-->
+<!--</div>-->

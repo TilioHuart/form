@@ -10,6 +10,9 @@
   "formulaire.responses.count": "Réponses",
   "formulaire.status": "Statut",
   "formulaire.at": " à ",
+  "formulaire.add": "Ajouter",
+  "formulaire.organize": "Organiser",
+  "formulaire.preview": "Aperçu",
   "formulaire.save": "Enregistrer",
   "formulaire.saveAndQuit": "Enregistrer et quitter",
   "formulaire.end": "Terminer et envoyer",
@@ -62,9 +65,6 @@
   "formulaire.image.incompatible": "Seuls les formats d'image suivants sont acceptés : .jpg, .jpeg, .png, .gif",
 
   "formulaire.form.edit.modified": "Formulaire enregistré à ",
-  "formulaire.form.edit.add": "Ajouter",
-  "formulaire.form.edit.organize": "Organiser",
-  "formulaire.form.edit.preview": "Aperçu",
   "formulaire.form.edit.empty.main": "Votre formulaire est vide",
   "formulaire.form.edit.empty.caption": "Cliquez sur 'Ajouter' pour créez votre premier élément",
 
