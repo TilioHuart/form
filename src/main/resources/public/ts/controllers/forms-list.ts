@@ -235,9 +235,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.doArchiveForms = async (): Promise<void> => {
         try {
             for (let form of vm.forms.selected) {
-                if ($scope.isStatusXXX(await formService.unshare(form.id), 200)) {
-                    await formService.archive(form);
-                }
+                await formService.archive(form);
             }
             template.close('lightbox');
             vm.display.lightbox.archive = false;
@@ -260,7 +258,9 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.doDeleteForms = async (): Promise<void> => {
         try {
             for (let form of vm.forms.selected) {
-                await formService.delete(form.id);
+                if ($scope.isStatusXXX(await formService.unshare(form.id), 200)) {
+                    await formService.delete(form.id);
+                }
             }
             template.close('lightbox');
             vm.display.lightbox.delete = false;
