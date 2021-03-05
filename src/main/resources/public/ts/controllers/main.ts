@@ -2,6 +2,7 @@ import {Behaviours, idiom, model, ng, template} from 'entcore';
 import {DistributionStatus, Form, Question, QuestionTypes} from "../models";
 import {distributionService, formService, questionService} from "../services";
 import {AxiosResponse} from "axios";
+import {FORMULAIRE_EMIT_EVENT} from "../core/enums/formulaire-event";
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', 'FormService',
 	($scope, route, $location) => {
@@ -155,6 +156,9 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				$scope.$apply(fn);
 			}
 		};
+
+		$scope.$on(FORMULAIRE_EMIT_EVENT.REFRESH, () => { $scope.safeApply() });
+
 
 		// Rights
 

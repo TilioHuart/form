@@ -1,8 +1,9 @@
 <lightbox show="vm.display.lightbox.reorganization" on-close="vm.display.lightbox.reorganization = false;">
     <h1><i18n>formulaire.organize</i18n></h1>
     <div class="drag">
-        <ul>
-            <li class="row" ng-repeat="question in vm.questions.all | orderBy:question.position">
+        <ul sortable-list>
+            <li class="row" ng-repeat="question in vm.questions.all | orderBy:question.position"
+                sortable-element data-ng-change="vm.reOrder()" data-ng-model="question.index">
                 <div ng-include="'formulaire/public/template/components/question-item/question-item-organization.html'"></div>
             </li>
         </ul>

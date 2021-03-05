@@ -106,6 +106,7 @@
   "formulaire.error.formService.unshare": "An error occurred during the suppression of the form's sharing",
   "formulaire.error.formService.image": "An error occurred during the retrieving of the form's image",
 
+  "formulaire.error.question.reorganization": "Wrong reorganization direction, should be : UP or DOWN",
   "formulaire.error.question.sync": "An error occurred during the questions' synchronisation",
   "formulaire.error.questionService.list": "An error occurred during the questions' retrieving",
   "formulaire.error.questionService.count": "An error occurred during the questions' counting",

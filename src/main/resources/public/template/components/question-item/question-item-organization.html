@@ -7,10 +7,10 @@
     </div>
     <span class="cell title">[[question.title]]</span>
     <div class="cell one container-arrow">
-        <div class="rotateUp" ng-class="$first? 'hidden' : ''" ng-click="moveQuestion($index, 'up')">
+        <div class="rotateUp" ng-class="$first? 'hidden' : ''" ng-click="vm.moveQuestion($index, vm.direction.UP)">
             <i class="arrow-simple"></i>
         </div>
-        <div class="rotateDown" ng-class="$last? 'hidden' : ''" ng-click="moveQuestion($index, 'down')">
+        <div class="rotateDown" ng-class="$last? 'hidden' : ''" ng-click="vm.moveQuestion($index, vm.direction.DOWN)">
             <i class="arrow-simple"></i>
         </div>
     </div>

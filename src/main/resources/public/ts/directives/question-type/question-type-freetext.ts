@@ -1,5 +1,5 @@
-import {Directive, ng} from "entcore";
-import {Question} from "../../models";
+import {Directive, idiom, ng} from "entcore";
+import {Question, QuestionTypes} from "../../models";
 
 interface IViewModel {
     question: Question
@@ -20,8 +20,7 @@ export const questionTypeFreetext: Directive = ng.directive('questionTypeFreetex
             <div>
                 <div ng-if="!vm.question.selected">
                     <div ng-if="!!vm.question.statement" bind-html="vm.question.statement"></div>
-                    <textarea disabled ng-if="!!!vm.question.statement"
-                              placeholder="[[vm.displayTypeName(vm.question.question_type)]]"></textarea>
+                    <textarea disabled ng-if="!!!vm.question.statement" i18n-placeholder="formulaire.question.type.FREETEXT"></textarea>
                 </div>
                 <div ng-if="vm.question.selected">
                     <editor ng-model="vm.question.statement"></editor>

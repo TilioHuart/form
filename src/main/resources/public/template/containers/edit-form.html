@@ -22,12 +22,13 @@
 
     <div class="edit-form" ng-if="vm.questions.all.length > 0">
         <!-- List of questions-->
-        <div class="questions" ng-class="{'dominos': vm.questions.all.length > 0}">
+        <div class="questions" ng-class="{'dominos': vm.questions.all.length > 0}" sortable-list>
             <div ng-repeat="question in vm.questions.all | orderBy:question.position"
-                 class="item" ng-class="{'questionError': !!!question.title || question.choices.length === 0 }">
+                 class="item" ng-class="{'questionError': !!!question.title || question.choices.length === 0 }"
+                 sortable-element data-ng-change="vm.reOrder()" data-ng-model="question.index">
                 <!--  Each questions component -->
 <!--                <div ng-include="'formulaire/public/template/components/question-item/question-item.html'"></div>-->
-                <question-item question="question" questionTypes="questionTypes"></question-item>
+                <question-item question="question"></question-item>
             </div>
         </div>
         <!-- End page buttons -->

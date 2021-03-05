@@ -1,6 +1,12 @@
-import {idiom, ng, notify, template} from 'entcore';
+import {idiom, ng, notify, template, angular} from 'entcore';
 import {Form, Question, QuestionChoice, Questions, Types} from "../models";
 import {formService, questionChoiceService, questionService} from "../services";
+import {FORMULAIRE_EMIT_EVENT, FORMULAIRE_QUESTION_EMIT_EVENT} from "../core/enums/formulaire-event";
+
+export enum Direction {
+    UP = 'UP',
+    DOWN = 'DOWN'
+}
 
 interface ViewModel {
     types: typeof Types;
@@ -8,6 +14,7 @@ interface ViewModel {
     questions: Questions;
     newQuestion: Question;
     dontSave: boolean;
+    direction: typeof Direction;
     display: {
         lightbox: {
             newQuestion: boolean,
@@ -20,8 +27,8 @@ interface ViewModel {
     switchAll(value: boolean): void;
     createNewQuestion(): void;
     doCreateNewQuestion(code: number): void;
-    organizeQuestions() : void;
-    doOrganizeQuestions() : void;
+    organizeQuestions(): void;
+    doOrganizeQuestions(): Promise<void>;
     saveAll(): Promise<void>;
     return(): void;
     duplicateQuestion(): void;
@@ -33,6 +40,8 @@ interface ViewModel {
     deleteChoice(question: Question, index: number): Promise<void>;
     displayTypeName(typeInfo: string): string;
     displayTypeIcon(code: number): string;
+    reOrder(): void;
+    moveQuestion(index: number, direction: string): void;
 }
 
 
@@ -45,6 +54,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.questions = new Questions();
         vm.newQuestion = new Question();
         vm.dontSave = false;
+        vm.direction = Direction;
         vm.display = {
             lightbox: {
                 newQuestion: false,
@@ -53,9 +63,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 undo: false
             }
         };
-        // const items = () : any => {
-        //     return $element.find('.domino');
-        // };
 
         const init = async (): Promise<void> => {
             vm.form = $scope.form;
@@ -96,8 +103,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             $scope.safeApply();
         };
 
-        vm.doOrganizeQuestions = () : void => {
+        vm.doOrganizeQuestions = async () : Promise<void> => {
             // Reorganization stuff
+            await saveQuestions();
             vm.display.lightbox.reorganization = false;
             template.close('lightbox');
             $scope.safeApply();
@@ -199,27 +207,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             $scope.safeApply();
         };
 
-        // Choices functions
-
-        vm.createNewChoice = (question: Question) : void => {
-            question.choices.all.push(new QuestionChoice(question.id));
-            $scope.safeApply();
-        };
-
-        vm.deleteChoice = async (question: Question, index: number) : Promise<void> => {
-            if (!!question.choices.all[index].id) {
-                await questionChoiceService.delete(question.choices.all[index].id);
-            }
-
-            let temp = question.choices.all;
-            question.choices.all = [];
-            for (let i = 0; i < temp.length; i++) {
-                if (i != index) question.choices.all.push(temp[i]);
-            }
-
-            $scope.safeApply();
-        };
-
 
         // Display functions
 
@@ -254,6 +241,43 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     return "/formulaire/public/img/icons/question_type/time.svg";
                 case 8 :
                     return "/formulaire/public/img/icons/question_type/file.svg";
+            }
+        };
+
+        vm.reOrder = (): void => {
+            let finished = true;
+            angular.forEach(vm.questions.all, function (question) {
+                if (question.position != parseFloat(question.index) + 1) {
+                    question.position = parseFloat(question.index) + 1;
+                }
+                if (!!!question) { finished = false }
+            });
+            if (finished) {
+                saveQuestions().then(
+                    function() {
+                    },
+                    function(err) {
+                        notify.error(err);
+                    }
+                );
+            }
+        };
+
+        vm.moveQuestion = (index: number, direction: string): void => {
+            switch (direction) {
+                case Direction.UP: {
+                    vm.questions.all[index].position--;
+                    vm.questions.all[index - 1].position++;
+                    break;
+                }
+                case Direction.DOWN: {
+                    vm.questions.all[index].position++;
+                    vm.questions.all[index + 1].position--;
+                    break;
+                }
+                default:
+                    notify.error(idiom.translate('formulaire.error.question.reorganization'));
+                    break;
             }
         };
 
@@ -343,76 +367,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         document.onclick = e => { onClickQuestion(e); };
 
-
-
-
-        // window.setTimeout(() => {
-        //     console.log("In controller ready");
-        //     // Test
-        //     for (let i = 0; i < items().length; i++) {
-        //         ui.extendElement.draggable(angular.element(items()[i]), {
-        //             // When the element is locked in a direction, it can only be moved in the   other direction
-        //             lock: { vertical: false, horizontal: true},
-        //
-        //             // Called when the element is dragged over a compatible element
-        //             dragOver: (e) => {
-        //                 console.log(e);
-        //                 e.addClass('dragover');
-        //                 // TODO change position
-        //             },
-        //
-        //             // Called when the element is dragged out of a compatible element
-        //             dragOut: (e) => {
-        //                 console.log(e);
-        //                 e.removeClass('dragover');
-        //             },
-        //
-        //             // Called when the user starts dragging
-        //             startDrag: () => {
-        //                 console.log("Add dragged css class");
-        //                 items().addClass('dragged');
-        //             },
-        //
-        //             // Called on mouse up
-        //             mouseUp: () => {
-        //                 console.log("Remove dragged css class");
-        //                 $element.removeAttr('style');
-        //                 items().removeClass('dragged');
-        //             },
-        //         });
-        //     }
-        // }, 5000);
+        $scope.$on(FORMULAIRE_QUESTION_EMIT_EVENT.DUPLICATE, () => { vm.duplicateQuestion() });
+        $scope.$on(FORMULAIRE_QUESTION_EMIT_EVENT.DELETE, () => { vm.deleteQuestion() });
+        $scope.$on(FORMULAIRE_QUESTION_EMIT_EVENT.UNDO, () => { vm.undoQuestionChanges() });
     }]);
-
-// list.each((i, el) => {
-//     console.log(el);
-//     entcore.ui.extendElement.draggable(el, {
-//         // When the element is locked in a direction, it can only be moved in the   other direction
-//         lock: { vertical: false, horizontal: true},
-//
-//         // Called when the element is dragged over a compatible element
-//         dragOver: function (e) {
-//             console.log(e);
-//             e.addClass('draggedOver');
-//             // TODO change position
-//         },
-//
-//         // Called when the element is dragged out of a compatible element
-//         dragOut: function (e) {
-//             console.log(e);
-//             e.removeClass('draggedOver');
-//         },
-//
-//         // Called when the user starts dragging
-//         startDrag: function () {
-//             console.log("Add dragged css class");
-//             el.addClass('dragged');
-//         },
-//
-//         // Called on mouse up
-//         mouseUp: function () {
-//             console.log("Remove dragged css class");
-//             el.removeClass('dragged');
-//         },
-//     });
-// })
