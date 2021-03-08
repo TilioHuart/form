@@ -34,7 +34,7 @@ public class QuestionController extends ControllerHelper {
     }
 
     @Get("/forms/:formId/questions/count")
-    @ApiDoc("Get form thanks to the id")
+    @ApiDoc("Count he number of questions in a form")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void countQuestions(HttpServerRequest request) {
         String formId = request.getParam("formId");

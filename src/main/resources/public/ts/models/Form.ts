@@ -1,6 +1,6 @@
 import {Selectable, Selection} from "entcore-toolkit";
 import {idiom, notify, Rights, Shareable} from "entcore";
-import {distributionService, formService} from "../services";
+import {formService} from "../services";
 import {DistributionStatus} from "./Distribution";
 
 export class Form implements Selectable, Shareable  {

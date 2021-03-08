@@ -1,7 +1,7 @@
 import {idiom, ng, notify, template, angular} from 'entcore';
 import {Form, Question, QuestionChoice, Questions, Types} from "../models";
 import {formService, questionChoiceService, questionService} from "../services";
-import {FORMULAIRE_EMIT_EVENT, FORMULAIRE_QUESTION_EMIT_EVENT} from "../core/enums/formulaire-event";
+import {FORMULAIRE_QUESTION_EMIT_EVENT} from "../core/enums/formulaire-event";
 
 export enum Direction {
     UP = 'UP',

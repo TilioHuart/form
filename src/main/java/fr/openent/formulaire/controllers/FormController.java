@@ -124,17 +124,6 @@ public class FormController extends ControllerHelper {
         formService.get(formId, defaultResponseHandler(request));
     }
 
-    @Put("/forms/:formId")
-    @ApiDoc("Update given form")
-    @ResourceFilter(ShareAndOwner.class)
-    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
-    public void update(HttpServerRequest request) {
-        String formId = request.getParam("formId");
-        RequestUtils.bodyToJson(request, form -> {
-            formService.update(formId, form, defaultResponseHandler(request));
-        });
-    }
-
     @Post("/forms")
     @ApiDoc("Create a form")
     @ResourceFilter(CreationRight.class)
@@ -152,6 +141,17 @@ public class FormController extends ControllerHelper {
         });
     }
 
+    @Put("/forms/:formId")
+    @ApiDoc("Update given form")
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void update(HttpServerRequest request) {
+        String formId = request.getParam("formId");
+        RequestUtils.bodyToJson(request, form -> {
+            formService.update(formId, form, defaultResponseHandler(request));
+        });
+    }
+
     @Delete("/forms/:formId")
     @ApiDoc("Delete given form")
     @ResourceFilter(ShareAndOwner.class)
@@ -162,7 +162,7 @@ public class FormController extends ControllerHelper {
     }
 
     @Get("/forms/:formId/rights")
-    @ApiDoc("Export given form")
+    @ApiDoc("Get my rights for a given form")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void getMyFormRights(HttpServerRequest request) {
@@ -203,7 +203,7 @@ public class FormController extends ControllerHelper {
 
     @Override
     @Get("/share/json/:id")
-    @ApiDoc("Lists rights for a given form.")
+    @ApiDoc("List rights for a given form")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void shareJson(final HttpServerRequest request) {
@@ -211,7 +211,7 @@ public class FormController extends ControllerHelper {
     }
 
     @Put("/share/json/:id")
-    @ApiDoc("Adds rights for a given form.")
+    @ApiDoc("Add rights for a given form")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void shareSubmit(final HttpServerRequest request) {
@@ -234,7 +234,7 @@ public class FormController extends ControllerHelper {
     }
 
     @Put("/share/resource/:id")
-    @ApiDoc("Adds rights for a given form.")
+    @ApiDoc("Add rights for a given form")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void shareResource(final HttpServerRequest request) {

@@ -1,4 +1,4 @@
-import {Mix, Selectable, Selection} from "entcore-toolkit";
+import {Mix} from "entcore-toolkit";
 import {idiom, notify} from "entcore";
 import {questionTypeService} from "../services";
 
