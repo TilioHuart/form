@@ -27,7 +27,6 @@
                  class="item" ng-class="{'questionError': !!!question.title || question.choices.length === 0 }"
                  sortable-element data-ng-change="vm.reOrder()" data-ng-model="question.index">
                 <!--  Each questions component -->
-<!--                <div ng-include="'formulaire/public/template/components/question-item/question-item.html'"></div>-->
                 <question-item question="question"></question-item>
             </div>
         </div>
