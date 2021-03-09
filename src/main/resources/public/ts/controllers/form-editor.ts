@@ -314,8 +314,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     }
                 }
                 if (displaySuccess) { notify.success(idiom.translate('formulaire.success.form.save')); }
-                let response = await formService.get(vm.form.id);
-                if (response.status) { vm.form = response.data }
+                vm.form.setFromJson($scope.getDataIf200(await formService.get(vm.form.id)));
                 await vm.questions.sync(vm.form.id);
                 $scope.safeApply();
             }
