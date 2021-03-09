@@ -37,7 +37,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 					template.open('main', 'containers/forms-list');
 				}
 				else {
-					$scope.redirectTo('/list');
+					$scope.redirectTo('/e403');
 				}
 			},
 			formsResponses: () => {
@@ -46,7 +46,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 					template.open('main', 'containers/forms-responses');
 				}
 				else {
-					$scope.redirectTo('/list');
+					$scope.redirectTo('/e403');
 				}
 			},
 			createForm: () => {
@@ -56,7 +56,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 					template.open('main', 'containers/prop-form');
 				}
 				else {
-					$scope.redirectTo('/list');
+					$scope.redirectTo('/e403');
 				}
 			},
 			propForm: async (params) => {
@@ -66,7 +66,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 					template.open('main', 'containers/prop-form');
 				}
 				else {
-					$scope.redirectTo('/list');
+					$scope.redirectTo('/e403');
 				}
 			},
 			openForm: async (params) => {
@@ -92,10 +92,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				if ($scope.canRespond()) {
 					let distribution = $scope.getDataIf200(await distributionService.get(params.idForm));
 					$scope.form.setFromJson($scope.getDataIf200(await formService.get(params.idForm)));
-					if (!!distribution.status &&
-						distribution.status != DistributionStatus.FINISHED &&
+
+					// If form not already responded && date ok
+					if (!!distribution.status && distribution.status != DistributionStatus.FINISHED &&
 						$scope.form.date_opening < new Date() &&
-						$scope.form.date_ending > new Date()) {
+						($scope.form.date_ending ? ($scope.form.date_ending > new Date()) : true)) {
 							$scope.form.nbQuestions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
 
 							if (params.position < 1) {
@@ -110,7 +111,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 							}
 					}
 					else {
-						$scope.redirectTo('/list/responses');
+						$scope.redirectTo('/e403');
 					}
 				}
 				else {
@@ -144,6 +145,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 
 		$scope.redirectTo = (path: string) => {
 			$location.path(path);
+			$scope.safeApply();
 		};
 
 		$scope.safeApply = (fn?) => {

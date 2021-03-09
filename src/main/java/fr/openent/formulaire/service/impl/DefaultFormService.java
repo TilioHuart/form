@@ -50,7 +50,7 @@ public class DefaultFormService implements FormService {
                 "date_creation, date_modification, date_opening, date_ending, form_id, status, date_sending, date_response " +
                 "FROM " + Formulaire.FORM_TABLE + " f " +
                 "INNER JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON f.id = d.form_id " +
-                "WHERE d.responder_id = ? AND NOW() BETWEEN f.date_opening AND f.date_ending " +
+                "WHERE d.responder_id = ? AND NOW() BETWEEN f.date_opening AND COALESCE(date_ending, NOW() + interval '1 year') " +
                 "ORDER BY d.date_sending DESC;";
         JsonArray params = new JsonArray().add(user.getUserId());
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
@@ -75,7 +75,7 @@ public class DefaultFormService implements FormService {
                 .add(form.getString("picture", ""))
                 .add("NOW()").add("NOW()")
                 .add(form.getString("date_opening", "NOW()"))
-                .add(form.getString("date_ending", "NOW() + interval '1 year'"));
+                .add(form.getString("date_ending", null));
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
@@ -90,7 +90,7 @@ public class DefaultFormService implements FormService {
                 .add(form.getString("picture", ""))
                 .add("NOW()")
                 .add(form.getString("date_opening", "NOW()"))
-                .add(form.getString("date_ending", "NOW() + interval '1 year'"))
+                .add(form.getString("date_ending", null))
                 .add(form.getBoolean("sent", false))
                 .add(form.getBoolean("collab", false))
                 .add(form.getBoolean("archived", false))
@@ -125,7 +125,7 @@ public class DefaultFormService implements FormService {
         String WORKSPACE_BUS_ADDRESS = "org.entcore.workspace";
         eb.send(WORKSPACE_BUS_ADDRESS, action, handlerToAsyncHandler(message -> {
             if (idImage.equals("")) {
-                handler.handle(new Either.Left<>("[DefaultDocumentService@get] An error id image"));
+                handler.handle(new Either.Left<>("[DefaultFormService@getImage] An error id image"));
             } else {
                 handler.handle(new Either.Right<>(message.body().getJsonObject("result")));
             }

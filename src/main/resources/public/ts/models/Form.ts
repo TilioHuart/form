@@ -74,8 +74,9 @@ export class Form implements Selectable, Shareable  {
         for (let key in data) {
             this[key] = data[key];
             if (key === 'nb_responses' && !!!data[key]) { this[key] = 0; }
-            if (key === 'date_creation' || key === 'date_modification' || key === 'date_opening' || key === 'date_ending') {
-                this[key] = new Date(this[key]);
+            if ((key === 'date_creation' || key === 'date_modification' || key === 'date_opening' || key === 'date_ending')
+                && !!data[key]) {
+                    this[key] = new Date(this[key]);
             }
         }
     }
