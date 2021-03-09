@@ -36,15 +36,17 @@
     background-color: #c1e3f0;
     top: 15px;
     left: -50%;
-    z-index: -1;
   }
   .progressbar li:first-child:after {
     content: none;
   }
+  .progressbar li.active {
+    z-index: 1;
+  }
   .progressbar li.active:before {
     background-color: #2a9bc7;
   }
-  .progressbar li.active + li:after {
+  .progressbar li.active:after {
     background-color: #2a9bc7;
   }
 }
