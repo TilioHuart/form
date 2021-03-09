@@ -1,12 +1,14 @@
 import {Directive, idiom, ng} from "entcore";
-import {Question, QuestionTypes} from "../models";
-import {FORMULAIRE_EMIT_EVENT, FORMULAIRE_QUESTION_EMIT_EVENT} from "../core/enums/formulaire-event";
+import {Question, QuestionTypes, Types} from "../models";
+import {FORMULAIRE_QUESTION_EMIT_EVENT} from "../core/enums/formulaire-event";
 
 interface IViewModel {
     question: Question,
     questionTypes: QuestionTypes,
+    types: typeof Types
 
-    displayTypeName(typeName: string): string
+    displayTypeName(typeName: string): string,
+    getTitle(title: string): string
 }
 
 export const questionItem: Directive = ng.directive('questionItem', () => {
@@ -47,12 +49,12 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
                         <question-type question="vm.question"></question-type>
                     </div>
                     <div class="question-bottom" ng-if="vm.question.selected">
-                        <div class="mandatory" ng-if="vm.question.question_type != 1">
+                        <div class="mandatory" ng-if="vm.question.question_type != vm.types.FREETEXT">
                             <switch ng-model="vm.question.mandatory"></switch><i18n>formulaire.mandatory</i18n>
                         </div>
-                        <img src="formulaire/public/img/icons/duplicate.svg" ng-click="duplicateQuestion()"/>
-                        <img src="formulaire/public/img/icons/delete.svg" ng-click="deleteQuestion()"/>
-                        <img src="formulaire/public/img/icons/undo.svg" ng-click="undoQuestionChanges()"/>
+                        <img src="formulaire/public/img/icons/duplicate.svg" ng-click="duplicateQuestion()" title="[[vm.getTitle('duplicate')]]"/>
+                        <img src="formulaire/public/img/icons/delete.svg" ng-click="deleteQuestion()" title="[[vm.getTitle('delete')]]"/>
+                        <img src="formulaire/public/img/icons/undo.svg" ng-click="undoQuestionChanges()" title="[[vm.getTitle('cancel')]]"/>
                     </div>
                 </div>
             </div>
@@ -63,9 +65,14 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
         },
         link: ($scope, $element) => {
             const vm: IViewModel = $scope.vm;
+            vm.types = Types;
 
             vm.displayTypeName = (typeInfo: string) : string => {
                 return idiom.translate('formulaire.question.type.' + typeInfo);
+            };
+
+            vm.getTitle = (title: string) : string => {
+                return idiom.translate('formulaire.' + title);
             };
 
             $scope.duplicateQuestion = () : void => {
