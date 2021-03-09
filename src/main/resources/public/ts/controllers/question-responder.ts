@@ -165,7 +165,11 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         else {
             vm.response = $scope.getDataIf200(await responseService.save(vm.response, vm.question.question_type));
             if (vm.question.question_type === Types.FILE && vm.files.length > 0) {
-                let filename = "Form " + vm.question.form_id + " - Question " + vm.question.position + " - " + model.me.username;
+                let usernameString = model.me.firstName + model.me.lastName;
+                let formString = "Form" + vm.question.form_id;
+                let questionString = "Question" + vm.question.position;
+                let extension = vm.files[0].name.substring(vm.files[0].name.lastIndexOf('.'));
+                let filename = usernameString + "-" + formString + "-" + questionString + extension;
                 let file = new FormData();
                 file.append("file", vm.files[0], filename);
                 await responseService.createFile(vm.response.id, file);

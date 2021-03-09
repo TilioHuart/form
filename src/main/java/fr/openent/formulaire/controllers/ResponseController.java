@@ -139,11 +139,12 @@ public class ResponseController extends ControllerHelper {
                 String responseId = request.getParam("responseId");
                 String fileId = entries.getString("_id");
                 String filename = entries.getJsonObject("metadata").getString("filename");
+                String contentType = entries.getJsonObject("metadata").getString("content-type");
 
                 responseService.createFile(responseId, fileId, filename, event -> {
                     if (event.isRight()) {
                         JsonObject response = new JsonObject().put("id", fileId).put("filename", filename);
-                        request.response().setStatusCode(201).putHeader("Content-Type", "application/json").end(response.toString());
+                        request.response().setStatusCode(201).putHeader("Content-Type", contentType).end(response.toString());
                     } else {
                         deleteFileFromStorage(fileId);
                         renderError(request);
