@@ -80,4 +80,25 @@ public class DefaultResponseService implements ResponseService {
         JsonArray params = new JsonArray().add(formId);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
+
+    @Override
+    public void getFile(String responseId, String fileId, Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT * FROM " + Formulaire.RESPONSE_FILE_TABLE + " WHERE id = ? AND response_id = ?;";
+        JsonArray params = new JsonArray().add(fileId).add(responseId);
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    @Override
+    public void createFile(String responseId, String fileId, String filename, Handler<Either<String, JsonObject>> handler) {
+        String query = "INSERT INTO " + Formulaire.RESPONSE_FILE_TABLE + " (id, response_id, filename) VALUES (?, ?, ?);";
+        JsonArray params = new JsonArray().add(fileId).add(responseId).add(filename);
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    @Override
+    public void deleteFile(String responseId, String fileId, Handler<Either<String, JsonObject>> handler) {
+        String query = "DELETE FROM " + Formulaire.RESPONSE_FILE_TABLE + " WHERE id = ? AND response_id = ?;";
+        JsonArray params = new JsonArray().add(fileId).add(responseId);
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
 }
