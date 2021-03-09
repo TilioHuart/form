@@ -17,7 +17,7 @@ export const questionTypeFile: Directive = ng.directive('questionTypeFile', () =
         bindToController: true,
         replace: true,
         template: `
-            <textarea disabled i18n-placeholder="formulaire.question.type.FILE"></textarea>
+            <i18n style="color:grey">formulaire.question.file.empty</i18n>
         `,
 
         controller: async ($scope) => {

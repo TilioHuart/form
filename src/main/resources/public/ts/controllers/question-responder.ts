@@ -1,4 +1,4 @@
-import {idiom, ng, notify, template} from "entcore";
+import {idiom, model, ng, notify, template} from "entcore";
 import {
     Distribution,
     DistributionStatus,
@@ -24,6 +24,7 @@ interface ViewModel {
             sending: boolean
         }
     };
+    files: File[];
 
     prev(): Promise<void>;
     next(): Promise<void>;
@@ -49,6 +50,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
             sending: false
         }
     };
+    vm.files = [];
 
     const init = async (): Promise<void> => {
         vm.question = $scope.question;
@@ -161,7 +163,13 @@ export const questionResponderController = ng.controller('QuestionResponderContr
             }
         }
         else {
-            await responseService.save(vm.response, vm.question.question_type);
+            vm.response = $scope.getDataIf200(await responseService.save(vm.response, vm.question.question_type));
+            if (vm.question.question_type === Types.FILE && vm.files.length > 0) {
+                let filename = "Form " + vm.question.form_id + " - Question " + vm.question.position + " - " + model.me.username;
+                let file = new FormData();
+                file.append("file", vm.files[0], filename);
+                await responseService.createFile(vm.response.id, file);
+            }
         }
     };
 

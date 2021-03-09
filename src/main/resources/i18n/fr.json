@@ -81,6 +81,7 @@
   "formulaire.question.title.empty": "Énoncé de ma question",
   "formulaire.question.date.empty": "Date au format : jj/mm/aaaa",
   "formulaire.question.time.empty": "Heure au format : 00:00",
+  "formulaire.question.file.empty": "Dépôt de fichier",
   "formulaire.question.delete.confirmation": "Êtes-vous sûr(e) de vouloir supprimer cette question ?",
   "formulaire.question.undo.confirmation": "Êtes-vous sûr(e) de vouloir annuler vos changements ?",
   "formulaire.question.missing.field.title": "Attention, la section ci-dessus nécessite un titre pour être valide.",

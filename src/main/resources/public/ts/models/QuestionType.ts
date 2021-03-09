@@ -43,7 +43,7 @@ export class QuestionTypes {
     async sync () : Promise<void> {
         try {
             let { data } = await questionTypeService.list();
-            this.all = Mix.castArrayAs(QuestionType, data).slice(0,7);
+            this.all = Mix.castArrayAs(QuestionType, data);
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.questionType.sync'));
             throw e;

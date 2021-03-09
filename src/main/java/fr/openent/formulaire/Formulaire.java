@@ -26,6 +26,7 @@ public class Formulaire extends BaseServer {
 	public static String QUESTION_CHOICE_TABLE;
 	public static String RESPONSE_TABLE;
 	public static String DISTRIBUTION_TABLE;
+	public static String RESPONSE_FILE_TABLE;
 	public static String FORM_SHARES_TABLE;
 	public static String MEMBERS_TABLE;
 	public static String USERS_TABLE;
@@ -60,12 +61,13 @@ public class Formulaire extends BaseServer {
 		QUESTION_CHOICE_TABLE = DB_SCHEMA + ".question_choice";
 		RESPONSE_TABLE = DB_SCHEMA + ".response";
 		DISTRIBUTION_TABLE = DB_SCHEMA + ".distribution";
+		RESPONSE_FILE_TABLE = DB_SCHEMA + ".response_file";
 		FORM_SHARES_TABLE = DB_SCHEMA + ".form_shares";
 		MEMBERS_TABLE = DB_SCHEMA + ".members";
 		USERS_TABLE = DB_SCHEMA + ".users";
 		GROUPS_TABLE = DB_SCHEMA + ".groups";
 
-		final Storage storage = new StorageFactory(vertx, config, null).getStorage();
+		final Storage storage = new StorageFactory(vertx, config).getStorage();
 
 		SqlConf formConf = SqlConfs.createConf(FormController.class.getName());
 		SqlConf distribConf = SqlConfs.createConf(DistributionController.class.getName());
@@ -91,7 +93,7 @@ public class Formulaire extends BaseServer {
 		addController(new QuestionController());
 		addController(new QuestionTypeController());
 		addController(new QuestionChoiceController());
-		addController(new ResponseController());
+		addController(new ResponseController(storage));
 		addController(new DistributionController());
 	}
 }

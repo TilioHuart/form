@@ -20,4 +20,10 @@ public interface ResponseService {
     void delete(String responseId, Handler<Either<String, JsonObject>> handler);
 
     void exportResponses(String formId, Handler<Either<String, JsonArray>> handler);
+
+    void getFile(String responseId, String fileId, Handler<Either<String, JsonObject>> handler);
+
+    void createFile(String responseId, String fileId, String filename, Handler<Either<String, JsonObject>> handler);
+
+    void deleteFile(String responseId, String formId, Handler<Either<String, JsonObject>> handler);
 }

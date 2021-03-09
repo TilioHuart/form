@@ -51,7 +51,7 @@
                     <input type="time" ng-model="vm.response.answer"/>
                 </div>
                 <div ng-if="vm.question.question_type == vm.types.FILE">
-                    <files-picker></files-picker>
+                    <file-picker-list files="vm.files" multiple="false"></file-picker-list>
                 </div>
             </div>
         </div>
