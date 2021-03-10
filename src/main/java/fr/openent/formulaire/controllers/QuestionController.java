@@ -6,12 +6,14 @@ import fr.openent.formulaire.service.impl.DefaultQuestionService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
+import org.entcore.common.user.UserUtils;
 
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
@@ -66,6 +68,17 @@ public class QuestionController extends ControllerHelper {
         String formId = request.getParam("formId");
         RequestUtils.bodyToJson(request, question -> {
             questionService.create(question, formId, defaultResponseHandler(request));
+        });
+    }
+
+    @Post("/forms/:formId/questions/m")
+    @ApiDoc("Create questions")
+    @ResourceFilter(CreationRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void createMultiple(HttpServerRequest request) {
+        String formId = request.getParam("formId");
+        RequestUtils.bodyToJsonArray(request, questions -> {
+            questionService.createMultiple(questions, formId, arrayResponseHandler(request));
         });
     }
 

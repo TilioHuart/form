@@ -81,6 +81,30 @@ public class DefaultFormService implements FormService {
     }
 
     @Override
+    public void createMultiple(JsonArray forms, UserInfos user, Handler<Either<String, JsonArray>> handler) {
+        String query = "";
+        JsonArray params = new JsonArray();
+
+        List<JsonObject> allForms = forms.getList();
+        for (JsonObject form : allForms) {
+            query += "INSERT INTO " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, " +
+                    "picture, date_creation, date_modification, date_opening, date_ending) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?); ";
+            params.add(user.getUserId())
+                    .add(user.getUsername())
+                    .add(form.getString("title", ""))
+                    .add(form.getString("description", ""))
+                    .add(form.getString("picture", ""))
+                    .add("NOW()").add("NOW()")
+                    .add(form.getString("date_opening", "NOW()"))
+                    .add(form.getString("date_ending", null));
+        }
+
+        query += "RETURNING *;";
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
     public void update(String formId, JsonObject form, Handler<Either<String, JsonObject>> handler) {
         String query = "UPDATE " + Formulaire.FORM_TABLE + " SET title = ?, description = ?, picture = ?, " +
                 "date_modification = ?, date_opening = ?, date_ending = ?, sent = ?, collab = ?, archived = ? WHERE id = ? RETURNING *;";

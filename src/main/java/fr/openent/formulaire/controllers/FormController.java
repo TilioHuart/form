@@ -139,6 +139,23 @@ public class FormController extends ControllerHelper {
         });
     }
 
+    @Post("/forms/m")
+    @ApiDoc("Create forms")
+    @ResourceFilter(CreationRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void createMultiple(HttpServerRequest request) {
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user != null) {
+                RequestUtils.bodyToJsonArray(request, forms -> {
+                    formService.createMultiple(forms, user, arrayResponseHandler(request));
+                });
+            } else {
+                log.error("User not found in session.");
+                Renders.unauthorized(request);
+            }
+        });
+    }
+
     @Put("/forms/:formId")
     @ApiDoc("Update given form")
     @ResourceFilter(ShareAndOwner.class)

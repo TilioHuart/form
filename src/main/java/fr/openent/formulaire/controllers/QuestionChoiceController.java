@@ -1,5 +1,6 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.service.QuestionChoiceService;
 import fr.openent.formulaire.service.impl.DefaultQuestionChoiceService;
 import fr.wseduc.rs.*;
@@ -10,6 +11,8 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
+import org.entcore.common.http.filter.ResourceFilter;
+import org.entcore.common.user.UserUtils;
 
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
@@ -46,6 +49,17 @@ public class QuestionChoiceController extends ControllerHelper {
         String questionId = request.getParam("questionId");
         RequestUtils.bodyToJson(request, choice -> {
             questionChoiceService.create(questionId, choice, defaultResponseHandler(request));
+        });
+    }
+
+    @Post("/questions/:questionId/choices/m")
+    @ApiDoc("Create choices")
+    @ResourceFilter(CreationRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void createMultiple(HttpServerRequest request) {
+        String questionId = request.getParam("questionId");
+        RequestUtils.bodyToJsonArray(request, choices -> {
+            questionChoiceService.createMultiple(choices, questionId, arrayResponseHandler(request));
         });
     }
 

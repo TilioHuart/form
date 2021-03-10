@@ -4,6 +4,7 @@ import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.entcore.common.user.UserInfos;
 
 public interface QuestionService {
     void list(String formId, Handler<Either<String, JsonArray>> handler);
@@ -15,6 +16,8 @@ public interface QuestionService {
     void getByPosition(String formId, String position, Handler<Either<String, JsonObject>> handler);
 
     void create(JsonObject question, String formId, Handler<Either<String, JsonObject>> handler);
+
+    void createMultiple(JsonArray questions, String formId, Handler<Either<String, JsonArray>> handler);
 
     void update(String questionId, JsonObject question, Handler<Either<String, JsonObject>> handler);
 

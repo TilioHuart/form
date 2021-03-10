@@ -8,6 +8,7 @@ export interface FormService {
     get(formId: number): Promise<AxiosResponse>;
     save(form: Form): Promise<AxiosResponse>;
     create(form: Form): Promise<AxiosResponse>;
+    createMultiple(forms: Array<Form>): Promise<AxiosResponse>;
     update(form: Form): Promise<AxiosResponse>;
     archive(form: Form): Promise<AxiosResponse>;
     restore(form: Form): Promise<AxiosResponse>;
@@ -62,6 +63,15 @@ export const formService: FormService = {
             return http.post('/formulaire/forms', form);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.create'));
+            throw err;
+        }
+    },
+
+    async createMultiple(forms : Array<Form>): Promise<AxiosResponse> {
+        try {
+            return http.post('/formulaire/forms/m', forms);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.formService.createMultiple'));
             throw err;
         }
     },

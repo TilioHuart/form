@@ -8,6 +8,9 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
+import org.entcore.common.user.UserInfos;
+
+import java.util.List;
 
 public class DefaultQuestionService implements QuestionService {
 
@@ -52,6 +55,27 @@ public class DefaultQuestionService implements QuestionService {
                 .add(question.getBoolean("mandatory", false));
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    @Override
+    public void createMultiple(JsonArray questions, String formId, Handler<Either<String, JsonArray>> handler) {
+        String query = "";
+        JsonArray params = new JsonArray();
+
+        List<JsonObject> allQuestions = questions.getList();
+        for (JsonObject question : allQuestions) {
+            query += "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, statement, mandatory) " +
+                    "VALUES (?, ?, ?, ?, ?, ?); ";
+            params.add(formId)
+                    .add(question.getString("title", ""))
+                    .add(question.getInteger("position", 0))
+                    .add(question.getInteger("question_type", 1))
+                    .add(question.getString("statement", ""))
+                    .add(question.getBoolean("mandatory", false));
+        }
+
+        query += "RETURNING *;";
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
     @Override

@@ -7,6 +7,7 @@ export interface QuestionChoiceService {
     get(choiceId: number): Promise<AxiosResponse>;
     save(choice : QuestionChoice): Promise<AxiosResponse>;
     create(choice: QuestionChoice): Promise<AxiosResponse>;
+    createMultiple(choices: Array<QuestionChoice>, questionId : number): Promise<AxiosResponse>;
     update(choice: QuestionChoice): Promise<AxiosResponse>;
     delete(choiceId: number): Promise<AxiosResponse>;
 }
@@ -43,6 +44,15 @@ export const questionChoiceService: QuestionChoiceService = {
             else throw new Error();
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionChoiceService.create'));
+            throw err;
+        }
+    },
+
+    async createMultiple(choices : Array<QuestionChoice>, questionId : number): Promise<AxiosResponse> {
+        try {
+            return http.post(`/formulaire/questions/${questionId}/choices/m`, choices);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.questionChoiceService.createMultiple'));
             throw err;
         }
     },
