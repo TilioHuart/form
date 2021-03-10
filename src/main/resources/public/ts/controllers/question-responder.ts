@@ -174,7 +174,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
                 let filename = "Form " + vm.question.form_id + " - Question " + vm.question.position + " - " + model.me.username;
                 let file = new FormData();
                 file.append("file", vm.files[0], filename);
-                await responseService.createFile(vm.response.id, file);
+                await responseFileService.update(vm.response.id, file);
             }
         }
     };
