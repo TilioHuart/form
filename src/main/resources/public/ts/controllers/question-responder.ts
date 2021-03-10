@@ -7,8 +7,7 @@ import {
     Responses,
     Types
 } from "../models";
-import {distributionService, questionService} from "../services";
-import {responseService} from "../services/ResponseService";
+import {distributionService, questionService, responseFileService, responseService} from "../services";
 
 interface ViewModel {
     types: typeof Types;
@@ -80,6 +79,11 @@ export const questionResponderController = ng.controller('QuestionResponderContr
             if (!!!vm.response.question_id) { vm.response.question_id = vm.question.id; }
         }
         if (vm.question.question_type === Types.TIME) { formatTime() }
+        if (vm.question.question_type === Types.FILE && !!vm.response.id) {
+            let responseFile = $scope.getDataIf200(await responseFileService.get(vm.response.id));
+            let file = new File([responseFile.id], responseFile.filename);
+            vm.files.push(file);
+        }
         vm.distribution = $scope.getDataIf200(await distributionService.get(vm.question.form_id));
 
         $scope.safeApply();
@@ -165,14 +169,13 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         else {
             vm.response = $scope.getDataIf200(await responseService.save(vm.response, vm.question.question_type));
             if (vm.question.question_type === Types.FILE && vm.files.length > 0) {
-                let usernameString = model.me.firstName + model.me.lastName;
-                let formString = "Form" + vm.question.form_id;
-                let questionString = "Question" + vm.question.position;
+                let username = model.me.firstName + model.me.lastName;
+                let infoQuestion = "Form" + vm.question.form_id + "-Question" + vm.question.position;
                 let extension = vm.files[0].name.substring(vm.files[0].name.lastIndexOf('.'));
-                let filename = usernameString + "-" + formString + "-" + questionString + extension;
+                let filename = username + "-" + infoQuestion + extension;
                 let file = new FormData();
                 file.append("file", vm.files[0], filename);
-                await responseService.createFile(vm.response.id, file);
+                await responseFileService.update(vm.response.id, file);
             }
         }
     };

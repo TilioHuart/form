@@ -20,17 +20,17 @@ public class Formulaire extends BaseServer {
 	private static final Logger log = LoggerFactory.getLogger(Formulaire.class);
 
 	public static String DB_SCHEMA;
+	public static String DISTRIBUTION_TABLE;
 	public static String FORM_TABLE;
+	public static String FORM_SHARES_TABLE;
+	public static String GROUPS_TABLE;
+	public static String MEMBERS_TABLE;
+	public static String QUESTION_CHOICE_TABLE;
 	public static String QUESTION_TABLE;
 	public static String QUESTION_TYPE_TABLE;
-	public static String QUESTION_CHOICE_TABLE;
 	public static String RESPONSE_TABLE;
-	public static String DISTRIBUTION_TABLE;
 	public static String RESPONSE_FILE_TABLE;
-	public static String FORM_SHARES_TABLE;
-	public static String MEMBERS_TABLE;
 	public static String USERS_TABLE;
-	public static String GROUPS_TABLE;
 
 	public static final String ACCESS_RIGHT = "formulaire.access";
 	public static final String CREATION_RIGHT = "formulaire.creation";
@@ -55,17 +55,17 @@ public class Formulaire extends BaseServer {
 		final EventBus eb = getEventBus(vertx);
 
 		DB_SCHEMA = config.getString("db-schema");
+		DISTRIBUTION_TABLE = DB_SCHEMA + ".distribution";
 		FORM_TABLE = DB_SCHEMA + ".form";
+		FORM_SHARES_TABLE = DB_SCHEMA + ".form_shares";
+		GROUPS_TABLE = DB_SCHEMA + ".groups";
+		MEMBERS_TABLE = DB_SCHEMA + ".members";
+		QUESTION_CHOICE_TABLE = DB_SCHEMA + ".question_choice";
 		QUESTION_TABLE = DB_SCHEMA + ".question";
 		QUESTION_TYPE_TABLE = DB_SCHEMA + ".question_type";
-		QUESTION_CHOICE_TABLE = DB_SCHEMA + ".question_choice";
 		RESPONSE_TABLE = DB_SCHEMA + ".response";
-		DISTRIBUTION_TABLE = DB_SCHEMA + ".distribution";
 		RESPONSE_FILE_TABLE = DB_SCHEMA + ".response_file";
-		FORM_SHARES_TABLE = DB_SCHEMA + ".form_shares";
-		MEMBERS_TABLE = DB_SCHEMA + ".members";
 		USERS_TABLE = DB_SCHEMA + ".users";
-		GROUPS_TABLE = DB_SCHEMA + ".groups";
 
 		final Storage storage = new StorageFactory(vertx, config).getStorage();
 
@@ -88,12 +88,13 @@ public class Formulaire extends BaseServer {
 
 
 
-		addController(new FormulaireController());
+		addController(new DistributionController());
 		addController(formController);
+		addController(new FormulaireController());
+		addController(new QuestionChoiceController());
 		addController(new QuestionController());
 		addController(new QuestionTypeController());
-		addController(new QuestionChoiceController());
-		addController(new ResponseController(storage));
-		addController(new DistributionController());
+		addController(new ResponseController());
+		addController(new ResponseFileController(storage));
 	}
 }
