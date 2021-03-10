@@ -40,8 +40,8 @@ export const responseFileService: ResponseFileService = {
 
     async update(responseId : number, file): Promise<AxiosResponse> {
         try {
-            await this.deleteFile(responseId);
-            return this.uploadFile(responseId, file);
+            await this.delete(responseId);
+            return this.create(responseId, file);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseFileService.update'));
             throw err;
