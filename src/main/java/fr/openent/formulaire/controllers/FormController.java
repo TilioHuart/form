@@ -169,7 +169,19 @@ public class FormController extends ControllerHelper {
         String formId = request.getParam("formId");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
-                formService.getMyFormRights(formId, user, arrayResponseHandler(request));
+                formService.getMyFormRights(formId, user, getRightsEvent -> {
+                    if (getRightsEvent.isRight()) {
+                        JsonArray rights = getRightsEvent.right().getValue();
+                        JsonArray result = new JsonArray();
+                        for (int i = 0; i < rights.size(); i++) {
+                            result.add(rights.getJsonObject(i).getString("action"));
+                        }
+                        Renders.renderJson(request, result);
+                    } else {
+                        log.error("[Formulaire@getMyFormRights] Fail to retrieve rights of form " + formId);
+                        renderError(request);
+                    }
+                });
             } else {
                 log.error("User not found in session.");
                 Renders.unauthorized(request);

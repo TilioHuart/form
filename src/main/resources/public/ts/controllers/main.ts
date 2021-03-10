@@ -181,14 +181,14 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		};
 
 		$scope.hasShareRightManager = (form : Form) => {
-			return form.owner_id === model.me.userId || form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.manager);
+			return form.owner_id === model.me.userId || form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.manager.right);
 		};
 
 		$scope.hasShareRightContrib = (form : Form) => {
-			return form.owner_id === model.me.userId || form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.contrib);
+			return form.owner_id === model.me.userId || form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.contrib.right);
 		};
 
 		$scope.hasShareRightResponse = (form : Form) => {
-			return form.owner_id === model.me.userId || form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.comment);
+			return form.owner_id === model.me.userId || form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.comment.right);
 		};
 }]);
