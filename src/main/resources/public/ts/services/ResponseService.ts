@@ -10,11 +10,6 @@ export interface ResponseService {
     create(response : Response): Promise<AxiosResponse>;
     update(response : Response): Promise<AxiosResponse>;
     delete(responseId : number): Promise<AxiosResponse>;
-
-
-    getFile(responseId : number, fileId : number): Promise<AxiosResponse>;
-    createFile(responseId: number, file): Promise<AxiosResponse>;
-    deleteFile(responseId : number, fileId : number): Promise<AxiosResponse>;
 }
 
 export const responseService: ResponseService = {
@@ -85,36 +80,6 @@ export const responseService: ResponseService = {
             return http.delete(`/formulaire/responses/${responseId}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.delete'));
-            throw err;
-        }
-    },
-
-
-
-
-    async getFile(responseId : number, fileId : number): Promise<AxiosResponse> {
-        try {
-            return http.get(`/formulaire/responses/${responseId}/files/${fileId}`);
-        } catch (err) {
-            notify.error(idiom.translate('formulaire.error.responseService.getFile'));
-            throw err;
-        }
-    },
-
-    async createFile(responseId : number, file): Promise<AxiosResponse> {
-        try {
-            return http.post(`/formulaire/responses/${responseId}/files`, file, {'headers': {'Content-Type': 'multipart/form-data'}});
-        } catch (err) {
-            notify.error(idiom.translate('formulaire.error.responseService.createFile'));
-            throw err;
-        }
-    },
-
-    async deleteFile(responseId : number, fileId : number): Promise<AxiosResponse> {
-        try {
-            return http.delete(`/formulaire/responses/${responseId}/files/${fileId}`);
-        } catch (err) {
-            notify.error(idiom.translate('formulaire.error.responseService.deleteFile'));
             throw err;
         }
     }
