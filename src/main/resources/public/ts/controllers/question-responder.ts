@@ -167,7 +167,6 @@ export const questionResponderController = ng.controller('QuestionResponderContr
             }
         }
         else {
-            vm.response = $scope.getDataIf200(await responseService.save(vm.response, vm.question.question_type));
             if (vm.question.question_type === Types.FILE && vm.files.length > 0) {
                 let username = model.me.firstName + model.me.lastName;
                 let infoQuestion = "Form" + vm.question.form_id + "-Question" + vm.question.position;
@@ -176,7 +175,9 @@ export const questionResponderController = ng.controller('QuestionResponderContr
                 let file = new FormData();
                 file.append("file", vm.files[0], filename);
                 await responseFileService.update(vm.response.id, file);
+                vm.response.answer = idiom.translate('formulaire.response.file.send');
             }
+            vm.response = $scope.getDataIf200(await responseService.save(vm.response, vm.question.question_type));
         }
     };
 

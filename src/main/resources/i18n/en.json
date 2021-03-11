@@ -88,6 +88,7 @@
   "formulaire.question.missing.field.choice": "Careful, the section above needs at least one choice to be valid.",
   "formulaire.question.save.missing.field": "Careful, some questions are missing information to be valid !",
 
+  "formulaire.response.file.send": "File submitted",
   "formulaire.responses.send.title": "Confirm sending",
   "formulaire.responses.send.text": "Once your form sent, you won't be able to modify your answers.",
   "formulaire.responses.send.continue": "Do you want to proceed anyway ?",

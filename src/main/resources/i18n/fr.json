@@ -88,6 +88,7 @@
   "formulaire.question.missing.field.choice": "Attention, la section ci-dessus nécessite au moins un choix pour être valide.",
   "formulaire.question.save.missing.field": "Attention, certaines questions manquent d'informations pour être valides !",
 
+  "formulaire.response.file.send": "Fichier déposé",
   "formulaire.responses.send.title": "Valider l'envoi",
   "formulaire.responses.send.text": "Une fois votre formulaire envoyé vous ne pourrez plus modifier vos réponses.",
   "formulaire.responses.send.continue": "Voulez-vous continuez ?",
