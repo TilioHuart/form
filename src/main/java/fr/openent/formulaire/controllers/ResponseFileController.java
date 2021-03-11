@@ -3,7 +3,6 @@ package fr.openent.formulaire.controllers;
 import fr.openent.formulaire.service.ResponseFileService;
 import fr.openent.formulaire.service.impl.DefaultResponseFileService;
 import fr.wseduc.rs.*;
-import fr.wseduc.webutils.http.Renders;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -26,16 +25,16 @@ public class ResponseFileController extends ControllerHelper {
 
     @Get("/responses/:responseId/files")
     @ApiDoc("Get a specific file")
-    public void getFile(HttpServerRequest request) {
+    public void get(HttpServerRequest request) {
         String responseId = request.getParam("responseId");
-        responseFileService.getFile(responseId, defaultResponseHandler(request));
+        responseFileService.get(responseId, defaultResponseHandler(request));
     }
 
     @Get("/responses/:responseId/files/download")
     @ApiDoc("Download specific file")
-    public void downloadFile(HttpServerRequest request) {
+    public void download(HttpServerRequest request) {
         String responseId = request.getParam("responseId");
-        responseFileService.getFile(responseId, event -> {
+        responseFileService.get(responseId, event -> {
             if (event.isRight()) {
                 JsonObject file = event.right().getValue();
                 String fileId = file.getString("id");
@@ -48,7 +47,7 @@ public class ResponseFileController extends ControllerHelper {
 
     @Post("/responses/:responseId/files")
     @ApiDoc("Upload a file for a specific response")
-    public void uploadFile(HttpServerRequest request) {
+    public void upload(HttpServerRequest request) {
         storage.writeUploadFile(request, entries -> {
             if (!"ok".equals(entries.getString("status"))) {
                 renderError(request);
@@ -60,12 +59,12 @@ public class ResponseFileController extends ControllerHelper {
                 String filename = entries.getJsonObject("metadata").getString("filename");
                 String type = entries.getJsonObject("metadata").getString("content-type");
 
-                responseFileService.createFile(responseId, fileId, filename, type, event -> {
+                responseFileService.create(responseId, fileId, filename, type, event -> {
                     if (event.isRight()) {
                         JsonObject response = new JsonObject().put("id", fileId).put("filename", filename);
                         request.response().setStatusCode(201).putHeader("Content-Type", type).end(response.toString());
                     } else {
-                        deleteFileFromStorage(fileId);
+                        deleteFile(fileId);
                         renderError(request);
                     }
                 });
@@ -77,15 +76,15 @@ public class ResponseFileController extends ControllerHelper {
 
     @Delete("/responses/:responseId/files")
     @ApiDoc("Delete file from basket")
-    public void deleteFile(HttpServerRequest request) {
+    public void delete(HttpServerRequest request) {
         String responseId = request.getParam("responseId");
 
-        responseFileService.deleteFile(responseId, deleteEvent -> {
+        responseFileService.delete(responseId, deleteEvent -> {
             if (deleteEvent.isRight()) {
                 JsonObject deletedFile = deleteEvent.right().getValue();
                 request.response().setStatusCode(204).end();
                 if (!deletedFile.isEmpty()) {
-                    deleteFileFromStorage(deletedFile.getString("id"));
+                    deleteFile(deletedFile.getString("id"));
                 }
             } else {
                 renderError(request);
@@ -93,7 +92,7 @@ public class ResponseFileController extends ControllerHelper {
         });
     }
 
-    private void deleteFileFromStorage(String fileId) {
+    private void deleteFile(String fileId) {
         storage.removeFile(fileId, e -> {
             if (!"ok".equals(e.getString("status"))) {
                 log.error("[Formulaire@deleteFile] An error occurred while removing " + fileId + " file.");

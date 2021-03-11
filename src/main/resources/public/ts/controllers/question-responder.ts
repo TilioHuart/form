@@ -168,10 +168,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         }
         else {
             if (vm.question.question_type === Types.FILE && vm.files.length > 0) {
-                let username = model.me.firstName + model.me.lastName;
-                let infoQuestion = "Form" + vm.question.form_id + "-Question" + vm.question.position;
-                let extension = vm.files[0].name.substring(vm.files[0].name.lastIndexOf('.'));
-                let filename = username + "-" + infoQuestion + extension;
+                let filename = model.me.firstName + model.me.lastName + "_" + vm.files[0].name;
                 let file = new FormData();
                 file.append("file", vm.files[0], filename);
                 await responseFileService.update(vm.response.id, file);
