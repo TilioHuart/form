@@ -298,8 +298,16 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 for (let question of vm.questions.all) {
                     if (!!!question.title && !!!question.statement && !question.mandatory && question.choices.all.length <= 0) {
                         let temp = $scope.getDataIf200(await questionService.get(question.id));
-                        if (!!!temp.title && !!!temp.statement && !temp.mandatory && temp.choices.all.length <= 0) {
-                            await questionService.delete(question.id);
+                        if (!!!temp.title && !!!temp.statement && !temp.mandatory) {
+                            if (temp.question_type === Types.SINGLEANSWER || temp.question_type === Types.MULTIPLEANSWER) {
+                                let choices = $scope.getDataIf200(await questionChoiceService.list(temp.id));
+                                if (choices.length <= 0) {
+                                    await questionService.delete(question.id);
+                                }
+                            }
+                            else {
+                                await questionService.delete(question.id);
+                            }
                         }
                     }
                     else {
@@ -336,13 +344,13 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         vm.questions.all.filter(question => question.id == questionId)[0].selected = true;
                     }
                 }
-                else if (isInShowErrorZone(event.target)) {
-                    let wrongQuestions = vm.questions.filter(question => !!!question.title); // TODO check more than just titles later
-                    if (wrongQuestions.length > 0) {
-                        notify.error(idiom.translate('formulaire.question.save.missing.field'));
-                    }
-                    await saveQuestions();
-                }
+                // else if (isInShowErrorZone(event.target)) {
+                //     let wrongQuestions = vm.questions.filter(question => !!!question.title); // TODO check more than just titles later
+                //     if (wrongQuestions.length > 0) {
+                //         notify.error(idiom.translate('formulaire.question.save.missing.field'));
+                //     }
+                //     await saveQuestions();
+                // }
                 else {
                     await saveQuestions();
                 }

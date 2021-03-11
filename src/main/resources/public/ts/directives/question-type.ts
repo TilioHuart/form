@@ -18,7 +18,7 @@ export const questionType: Directive = ng.directive('questionType', () => {
         bindToController: true,
         replace: true,
         template: `
-            <div>
+            <div class="question-type">
                 <question-type-freetext question="vm.question" ng-if="vm.question.question_type == vm.types.FREETEXT"></question-type-freetext>
                 <question-type-shortanswer question="vm.question" ng-if="vm.question.question_type == vm.types.SHORTANSWER"></question-type-shortanswer>
                 <question-type-longanswer question="vm.question" ng-if="vm.question.question_type == vm.types.LONGANSWER"></question-type-longanswer>
