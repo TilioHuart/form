@@ -23,7 +23,7 @@
     <div class="edit-form" ng-if="vm.questions.all.length > 0">
         <!-- List of questions-->
         <div class="questions" sortable-list>
-            <div ng-repeat="question in vm.questions.all | orderBy:question.position"
+            <div ng-repeat="question in vm.questions.all | orderBy:question.position" class="twelve"
                  sortable-element data-ng-change="vm.reOrder()" data-ng-model="question.index">
                 <!--  Each questions component -->
                 <question-item question="question"></question-item>

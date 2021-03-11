@@ -38,11 +38,17 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
         };
 
         vm.checkIntervalDates = () : boolean => {
-            if (!!!vm.form.date_ending) {
-                vm.form.date_ending = new Date(vm.form.date_opening);
-                vm.form.date_ending.setFullYear(vm.form.date_ending.getFullYear() + 1);
+            if (vm.display.date_ending) {
+                if (!!!vm.form.date_ending) {
+                    vm.form.date_ending = new Date(vm.form.date_opening);
+                    vm.form.date_ending.setFullYear(vm.form.date_ending.getFullYear() + 1);
+                }
+                return vm.form.date_ending > vm.form.date_opening;
             }
-            return vm.form.date_ending > vm.form.date_opening;
+            else {
+                vm.form.date_ending = null;
+                return true;
+            }
         };
 
         vm.getImage = async (): Promise<void> => {
