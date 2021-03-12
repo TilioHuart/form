@@ -83,8 +83,8 @@
   "formulaire.question.time.empty": "Heure au format : 00:00",
   "formulaire.question.delete.confirmation": "Êtes-vous sûr(e) de vouloir supprimer cette question ?",
   "formulaire.question.undo.confirmation": "Êtes-vous sûr(e) de vouloir annuler vos changements ?",
-  "formulaire.question.missing.field.title": "Attention, la question ci-dessus nécessite un titre pour être valide",
-  "formulaire.question.missing.field.choice": "Attention, la question ci-dessus nécessite au moins un choix pour être valide",
+  "formulaire.question.missing.field.title": "Attention, la section ci-dessus nécessite un titre pour être valide.",
+  "formulaire.question.missing.field.choice": "Attention, la section ci-dessus nécessite au moins un choix pour être valide.",
   "formulaire.question.save.missing.field": "Attention, certaines questions manquent d'informations pour être valides !",
 
   "formulaire.responses.send.title": "Valider l'envoi",

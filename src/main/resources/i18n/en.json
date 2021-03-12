@@ -83,8 +83,8 @@
   "formulaire.question.time.empty": "Time with format : 00:00",
   "formulaire.question.delete.confirmation": "Do you really want to delete this question ?",
   "formulaire.question.undo.confirmation": "Do you really want to cancel your changes ?",
-  "formulaire.question.missing.field.title": "Careful, the question above needs a title to be valid",
-  "formulaire.question.missing.field.choice": "Careful, the question above needs at least one choice to be valid",
+  "formulaire.question.missing.field.title": "Careful, the section above needs a title to be valid.",
+  "formulaire.question.missing.field.choice": "Careful, the section above needs at least one choice to be valid.",
   "formulaire.question.save.missing.field": "Careful, some questions are missing information to be valid !",
 
   "formulaire.responses.send.title": "Confirm sending",
