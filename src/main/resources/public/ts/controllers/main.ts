@@ -69,6 +69,27 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 					$scope.redirectTo('/e403');
 				}
 			},
+			resultsForm: async (params) => {
+				$scope.currentPage = 'resultsForm';
+				if ($scope.canCreate()) {
+					$scope.form.setFromJson($scope.getDataIf200(await formService.get(params.idForm)));
+					$scope.form.nbQuestions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
+
+					if (params.position < 1) {
+						$scope.redirectTo(`/form/${params.idForm}/results/1`);
+					}
+					else if (params.position > $scope.form.nbQuestions) {
+						$scope.redirectTo(`/form/${params.idForm}/results/${$scope.form.nbQuestions}`);
+					}
+					else {
+						$scope.question = $scope.getDataIf200(await questionService.getByPosition(params.idForm, params.position));
+						template.open('main', 'containers/results-form');
+					}
+				}
+				else {
+					$scope.redirectTo('/e403');
+				}
+			},
 			openForm: async (params) => {
 				$scope.currentPage = 'openForm';
 				if ($scope.canCreate()) {

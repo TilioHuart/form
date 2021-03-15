@@ -26,6 +26,7 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
         const init = async (): Promise<void> => {
             vm.form = $scope.form;
             vm.display.date_ending = !!vm.form.date_ending;
+            $scope.safeApply();
         };
 
         // Functions

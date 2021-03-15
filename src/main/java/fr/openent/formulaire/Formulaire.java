@@ -72,8 +72,9 @@ public class Formulaire extends BaseServer {
 		SqlConf formConf = SqlConfs.createConf(FormController.class.getName());
 		SqlConf distribConf = SqlConfs.createConf(DistributionController.class.getName());
 		SqlConf responseConf = SqlConfs.createConf(ResponseController.class.getName());
+		SqlConf responseFileConf = SqlConfs.createConf(ResponseFileController.class.getName());
 		List<SqlConf> confs = new ArrayList<>();
-		confs.add(formConf); confs.add(distribConf); confs.add(responseConf);
+		confs.add(formConf); confs.add(distribConf); confs.add(responseConf); confs.add(responseFileConf);
 
 		for (SqlConf conf : confs) {
 			conf.setSchema("formulaire");

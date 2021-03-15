@@ -1,0 +1,67 @@
+<div ng-controller="FormResultsController as vm">
+    <div class="row">
+        <section class="cell">
+            <div>
+                <h1>
+                    <a href="#/"><i18n>formulaire.title</i18n></a>
+                    <i18n>formulaire.title.separator</i18n>[[form.title]]
+                    <i18n>formulaire.title.separator</i18n><i18n>formulaire.results</i18n>
+                </h1>
+            </div>
+        </section>
+
+        <section class="cell" style="float:right;">
+            <div class="main-button">
+                <button class="cell" ng-click="vm.exportForm()"><i18n>formulaire.form.download.all.results</i18n></button>
+            </div>
+        </section>
+    </div>
+
+    <div class="results-form">
+        <div class="result">
+            <!-- Question title -->
+            <div class="title">
+                <h4>
+                    [[vm.question.title]] ([[vm.nbResults]]
+                    <i18n ng-if="vm.nbResults > 1">formulaire.responses</i18n>
+                    <i18n ng-if="vm.nbResults <= 1">formulaire.response</i18n>)
+                </h4>
+                <button class="cell" ng-click="" ng-disabled="true" ng-if="vm.question.question_type == vm.types.FILE">
+                    <i18n>formulaire.form.download.all.files</i18n>
+                </button>
+            </div>
+            <!-- List of results -->
+            <div ng-if="vm.question.question_type != vm.types.FILE" class="info">
+                Affichage des réponses à venir dans une prochaine version
+            </div>
+            <div ng-if="vm.question.question_type == vm.types.FILE">
+                <div ng-repeat="file in vm.files | limitTo:vm.nbResultsDisplay">
+                    <div class="file">
+                        <a ng-click="vm.downloadFile(file.response_id)">
+                            <img src="formulaire/public/img/icons/download.svg"> [[file.filename]]
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- Naviguation buttons -->
+            <div ng-if="vm.nbResults >= vm.nbResultsDisplay" style="margin: 1%;">
+                <a ng-click="vm.nbResultsDisplay = vm.nbResultsDisplay + 10" ng-if="vm.question.question_type == vm.types.FILE">
+                    <i18n>formulaire.seeMore</i18n>
+                </a>
+            </div>
+        </div>
+        <div class="buttons">
+            <button class="cell" ng-click="vm.prev()" ng-disabled="vm.question.position == 1"><i18n>formulaire.prev</i18n></button>
+            <div class="goto">
+                <i18n style="margin-right:10px">formulaire.goTo</i18n>
+                <select ng-change="vm.goTo(vm.navigatorValue)" ng-model="vm.navigatorValue" style="height: 24px;">
+                    <option ng-repeat="question in vm.questions.all" ng-value="question.position"
+                            ng-selected="vm.navigatorValue == question.position">
+                        [[question.position]]. [[question.title]]
+                    </option>
+                </select>
+            </div>
+            <button class="cell" ng-click="vm.next()" ng-disabled="vm.last"><i18n>formulaire.next</i18n></button>
+        </div>
+    </div>
+</div>

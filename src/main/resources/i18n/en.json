@@ -35,6 +35,8 @@
   "formulaire.deselect": "Deselect",
   "formulaire.next": "Next",
   "formulaire.prev": "Previous",
+  "formulaire.seeMore": "See more...",
+  "formulaire.goTo": "Go to ",
   "formulaire.date.opening": "Opening date",
   "formulaire.date.ending": "Ending date",
 
@@ -62,9 +64,11 @@
 
   "formulaire.form.create.button": "Create form",
   "formulaire.form.create.title": "Title of my form",
+  "formulaire.form.download.all.results": "Download all the results (CSV)",
+  "formulaire.form.download.all.files": "Download all (ZIP)",
   "formulaire.image.incompatible": "Only those image format are accepted : .jpg, .jpeg, .png, .gif",
 
-  "formulaire.form.edit.modified": "Form saved at ",
+  "formulaire.form.edit.modified": "Form saved on ",
   "formulaire.form.edit.empty.main": "Your form is empty",
   "formulaire.form.edit.empty.caption": "Click on 'Add' to create your first element",
 
@@ -88,7 +92,10 @@
   "formulaire.question.missing.field.choice": "Careful, the section above needs at least one choice to be valid.",
   "formulaire.question.save.missing.field": "Careful, some questions are missing information to be valid !",
 
+  "formulaire.response": "response",
   "formulaire.response.file.send": "File submitted",
+  "formulaire.response.file.already.exist": "A file has already been submitted : ",
+  "formulaire.responses": "responses",
   "formulaire.responses.send.title": "Confirm sending",
   "formulaire.responses.send.text": "Once your form sent, you won't be able to modify your answers.",
   "formulaire.responses.send.continue": "Do you want to proceed anyway ?",

@@ -24,7 +24,7 @@
             <button ng-click="vm.shareForm()" class="cell" ng-show="vm.forms.selected.length === 1 && hasShareRightManager(vm.forms.selected[0])">
                 <i18n>formulaire.share</i18n>
             </button>
-            <button ng-click="vm.seeResultsForm()" class="cell" ng-show="vm.forms.selected.length === 1" ng-disabled="true">
+            <button ng-click="vm.seeResultsForm()" class="cell" ng-show="vm.forms.selected.length === 1">
                 <i18n>formulaire.results</i18n>
             </button>
             <button ng-click="vm.exportForm()" class="cell" ng-show="vm.forms.selected.length === 1">

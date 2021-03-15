@@ -55,7 +55,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         vm.question = $scope.question;
         vm.question.choices = new QuestionChoices();
         vm.nbQuestions = $scope.form.nbQuestions;
-        vm.last = vm.question.position == vm.nbQuestions;
+        vm.last = vm.question.position === vm.nbQuestions;
         await vm.question.choices.sync(vm.question.id);
         if (vm.question.question_type === Types.MULTIPLEANSWER) {
             await vm.responses.syncMine(vm.question.id);
@@ -81,8 +81,10 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         if (vm.question.question_type === Types.TIME) { formatTime() }
         if (vm.question.question_type === Types.FILE && !!vm.response.id) {
             let responseFile = $scope.getDataIf200(await responseFileService.get(vm.response.id));
-            let file = new File([responseFile.id], responseFile.filename);
-            vm.files.push(file);
+            if (!!responseFile.id) {
+                let file = new File([responseFile.id], responseFile.filename);
+                vm.files.push(file);
+            }
         }
         vm.distribution = $scope.getDataIf200(await distributionService.get(vm.question.form_id));
 

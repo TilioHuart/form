@@ -51,6 +51,9 @@
                     <input type="time" ng-model="vm.response.answer"/>
                 </div>
                 <div ng-if="vm.question.question_type == vm.types.FILE">
+                    <div class="info" ng-if="vm.files.length > 0">
+                        <i18n>formulaire.response.file.already.exist</i18n>[[vm.files[0].name]]
+                    </div>
                     <file-picker-list files="vm.files" multiple="false"></file-picker-list>
                 </div>
             </div>

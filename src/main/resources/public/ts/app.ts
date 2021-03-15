@@ -35,6 +35,9 @@ routes.define(function($routeProvider){
 		.when('/form/:idForm/properties', {
 			action: 'propForm'
 		})
+		.when('/form/:idForm/results/:position', {
+			action: 'resultsForm'
+		})
 		.when('/form/:idForm/question/:position', {
 			action: 'respondQuestion'
 		})

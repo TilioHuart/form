@@ -71,16 +71,16 @@ public class ShareAndOwner implements ResourcesProvider {
 
 
     private String getKeyByBinding(Binding binding) {
-        if (isUpdateForm(binding) || isDeleteForm(binding) || isCountDistribution(binding) || isCreateDistribution(binding)) {
+        if (isUpdateForm(binding) || isDeleteForm(binding) || isExportForm(binding) || isCountDistribution(binding) || isCreateDistribution(binding)) {
             return "formId";
         }
         else if (isDeleteDistribution(binding)) {
             return "distributionId";
         }
-        else if (isListMineResponse(binding) || isCreateResponse(binding)) {
+        else if (isListMineResponse(binding) || isCreateResponse(binding) || isListResponseFile(binding)) {
             return "questionId";
         }
-        else if (isUpdateResponse(binding) || isDeleteResponse(binding)) {
+        else if (isUpdateResponse(binding) || isDeleteResponse(binding) || isDownloadResponseFile(binding)) {
             return "responseId";
         }
         else {
@@ -98,6 +98,10 @@ public class ShareAndOwner implements ResourcesProvider {
 
     private boolean isDeleteForm(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.FormController|delete");
+    }
+
+    private boolean isExportForm(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.FormController|export");
     }
 
     private boolean isShareJson(final Binding binding) {
@@ -138,5 +142,13 @@ public class ShareAndOwner implements ResourcesProvider {
 
     private boolean isDeleteResponse(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.ResponseController|delete");
+    }
+
+    private boolean isListResponseFile(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseFileController|list");
+    }
+
+    private boolean isDownloadResponseFile(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseFileController|download");
     }
 }

@@ -194,8 +194,8 @@ public class FormController extends ControllerHelper {
 
     @Get("/export/:formId")
     @ApiDoc("Export given form")
-    @ResourceFilter(CreationRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void export(HttpServerRequest request) {
         new FormResponsesExport(eb, request).launch();
     }

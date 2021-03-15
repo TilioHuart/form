@@ -12,6 +12,16 @@ import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
 
 public class DefaultResponseFileService implements ResponseFileService {
+
+    @Override
+    public void list(String questionId, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT rf.* FROM " + Formulaire.RESPONSE_FILE_TABLE + " rf " +
+                "INNER JOIN " + Formulaire.RESPONSE_TABLE + " r ON r.id = rf.response_id " +
+                "WHERE r.question_id = ?;";
+        JsonArray params = new JsonArray().add(questionId);
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
     @Override
     public void get(String responseId, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT * FROM " + Formulaire.RESPONSE_FILE_TABLE + " WHERE response_id = ?;";
