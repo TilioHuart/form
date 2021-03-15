@@ -121,8 +121,10 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.duplicateForms = async (): Promise<void> => {
         try {
+            let forms = [];
             for (let form of vm.forms.selected) {
-                let duplicata = form;
+                forms.push(form.id);
+                /*let duplicata = form;
                 duplicata.title += " - copie";
                 duplicata = $scope.getDataIf200(await formService.create(duplicata));
                 let questions = new Questions();
@@ -137,8 +139,9 @@ export const formsListController = ng.controller('FormsListController', ['$scope
                             }
                         }
                     }
-                }
+                }*/
             }
+            await formService.duplicate(forms);
             notify.success(idiom.translate('formulaire.success.forms.duplicate'));
             init();
             $scope.safeApply();

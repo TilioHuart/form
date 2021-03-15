@@ -52,7 +52,7 @@ public class QuestionChoiceController extends ControllerHelper {
         });
     }
 
-    @Post("/questions/:questionId/choices/m")
+    @Post("/questions/:questionId/choices/multiple")
     @ApiDoc("Create choices")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)

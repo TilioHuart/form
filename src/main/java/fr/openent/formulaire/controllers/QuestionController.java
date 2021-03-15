@@ -71,7 +71,7 @@ public class QuestionController extends ControllerHelper {
         });
     }
 
-    @Post("/forms/:formId/questions/m")
+    @Post("/forms/:formId/questions/multiple")
     @ApiDoc("Create questions")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)

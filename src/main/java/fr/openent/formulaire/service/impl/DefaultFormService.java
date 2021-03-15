@@ -7,12 +7,10 @@ import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
 
-import java.text.Normalizer;
 import java.util.List;
 
 import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
@@ -101,6 +99,18 @@ public class DefaultFormService implements FormService {
         }
 
         query += "RETURNING *;";
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public void duplicate(int id, UserInfos user, Handler<Either<String, JsonArray>> handler) {
+        String query = "WITH dForm_id as (INSERT INTO  formulaire.form  (owner_id, owner_name, title, description, picture, date_ending) " +
+                "SELECT 'toto', 'toto', title, description, picture, NOW() FROM formulaire.form WHERE id = ? " +
+                "RETURNING id) " +
+                "INSERT INTO formulaire.question (form_id, title, position, question_type, statement, mandatory, duplicate_question_id) " +
+                "SELECT (SELECT id from dForm_id), title, position, question_type, statement, mandatory, id FROM formulaire.question WHERE form_id = ? " +
+                "RETURNING id, duplicate_question_id, question_type";
+        JsonArray params = new JsonArray().add(id).add(id);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 

@@ -2,25 +2,18 @@ package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.export.FormResponsesExport;
+import fr.openent.formulaire.helpers.FutureHelper;
 import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.security.ShareAndOwner;
-import fr.openent.formulaire.service.DistributionService;
-import fr.openent.formulaire.service.FormService;
-import fr.openent.formulaire.service.FormSharesService;
-import fr.openent.formulaire.service.NeoService;
-import fr.openent.formulaire.service.impl.DefaultDistributionService;
-import fr.openent.formulaire.service.impl.DefaultFormService;
-import fr.openent.formulaire.service.impl.DefaultFormSharesService;
-import fr.openent.formulaire.service.impl.DefaultNeoService;
+import fr.openent.formulaire.service.*;
+import fr.openent.formulaire.service.impl.*;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.http.response.DefaultResponseHandler;
 import fr.wseduc.webutils.request.RequestUtils;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
+import io.vertx.core.*;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -45,6 +38,7 @@ public class FormController extends ControllerHelper {
     private final Storage storage;
     private FormService formService;
     private DistributionService distributionService;
+    private QuestionChoiceService questionChoiceService;
     private FormSharesService formShareService;
     private NeoService neoService;
 
@@ -53,6 +47,7 @@ public class FormController extends ControllerHelper {
         this.storage = storage;
         this.formService = new DefaultFormService();
         this.distributionService = new DefaultDistributionService();
+        this.questionChoiceService = new DefaultQuestionChoiceService();
         this.formShareService = new DefaultFormSharesService();
         this.neoService = new DefaultNeoService();
     }
@@ -139,7 +134,7 @@ public class FormController extends ControllerHelper {
         });
     }
 
-    @Post("/forms/m")
+    @Post("/forms/multiple")
     @ApiDoc("Create forms")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
@@ -148,6 +143,56 @@ public class FormController extends ControllerHelper {
             if (user != null) {
                 RequestUtils.bodyToJsonArray(request, forms -> {
                     formService.createMultiple(forms, user, arrayResponseHandler(request));
+                });
+            } else {
+                log.error("User not found in session.");
+                Renders.unauthorized(request);
+            }
+        });
+    }
+
+    @Post("/forms/duplicate")
+    @ApiDoc("Duplicate forms")
+    @ResourceFilter(CreationRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void duplicate(HttpServerRequest request) {
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user != null) {
+                RequestUtils.bodyToJsonArray(request, forms -> {
+                    List<Future> formsInfos= new ArrayList<>();
+                    for (int i = 0; i < forms.size(); i++) {
+                        Promise<JsonArray> promise = Promise.promise();
+                        formsInfos.add(promise.future());
+                        formService.duplicate(forms.getInteger(i), user, FutureHelper.handlerJsonArray(promise));
+                    }
+                    CompositeFuture.all(formsInfos).onComplete(evt -> {
+                        if (evt.failed()) {
+                            log.error("[Formulaire@] Failed to retrieve info ", evt.cause());
+                            badRequest(request);
+                        }
+                        List<Future> questionsInfosFutures = new ArrayList<>();
+                        for (Object questions : evt.result().list()) {
+                            JsonArray questionsInfos = ((JsonArray) questions);
+                            for (int i = 0; i < questionsInfos.size(); i++) {
+                                JsonObject questionInfo = questionsInfos.getJsonObject(i);
+                                Promise<JsonArray> promise = Promise.promise();
+                                questionsInfos.add(promise.future());
+                                int questionId = questionInfo.getInteger("id");
+                                int duplicateQuestionId = questionInfo.getInteger("duplicate_question_id");
+                                int question_type = questionInfo.getInteger("question_type");
+                                if (question_type == 4 || question_type == 5) {
+                                    questionChoiceService.duplicate(questionId, duplicateQuestionId, FutureHelper.handlerJsonArray(promise));
+                                }
+                            }
+                        }
+                        CompositeFuture.all(questionsInfosFutures).onComplete(evt1 -> {
+                            if (evt1.failed()) {
+                                log.error("[Formulaire@] Failed to retrieve info from questions", evt1.cause());
+                                badRequest(request);
+                            }
+                            created(request);
+                        });
+                    });
                 });
             } else {
                 log.error("User not found in session.");
