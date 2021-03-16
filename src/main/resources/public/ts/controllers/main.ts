@@ -166,6 +166,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 
 		$scope.redirectTo = (path: string) => {
 			$location.path(path);
+			$scope.safeApply();
 		};
 
 		$scope.safeApply = (fn?) => {

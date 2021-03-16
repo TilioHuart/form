@@ -80,6 +80,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         }
         if (vm.question.question_type === Types.TIME) { formatTime() }
         if (vm.question.question_type === Types.FILE && !!vm.response.id) {
+            vm.files = [];
             let responseFile = $scope.getDataIf200(await responseFileService.get(vm.response.id));
             if (!!responseFile.id) {
                 let file = new File([responseFile.id], responseFile.filename);
@@ -170,7 +171,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         }
         else {
             if (vm.question.question_type === Types.FILE && vm.files.length > 0) {
-                let filename = "Form " + vm.question.form_id + " - Question " + vm.question.position + " - " + model.me.username;
+                let filename = model.me.firstName + model.me.lastName + "_" + vm.files[0].name;
                 let file = new FormData();
                 file.append("file", vm.files[0], filename);
                 await responseFileService.update(vm.response.id, file);

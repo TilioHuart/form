@@ -2,14 +2,12 @@ package fr.openent.formulaire.service.impl;
 
 import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.service.ResponseFileService;
-import fr.openent.formulaire.service.ResponseService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
-import org.entcore.common.user.UserInfos;
 
 public class DefaultResponseFileService implements ResponseFileService {
 
