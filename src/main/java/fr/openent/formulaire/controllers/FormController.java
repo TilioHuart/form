@@ -175,13 +175,13 @@ public class FormController extends ControllerHelper {
                             JsonArray questionsInfos = ((JsonArray) questions);
                             for (int i = 0; i < questionsInfos.size(); i++) {
                                 JsonObject questionInfo = questionsInfos.getJsonObject(i);
-                                Promise<JsonArray> promise = Promise.promise();
-                                questionsInfos.add(promise.future());
                                 int questionId = questionInfo.getInteger("id");
                                 int duplicateQuestionId = questionInfo.getInteger("duplicate_question_id");
                                 int question_type = questionInfo.getInteger("question_type");
                                 if (question_type == 4 || question_type == 5) {
-                                    questionChoiceService.duplicate(questionId, duplicateQuestionId, FutureHelper.handlerJsonArray(promise));
+                                    Promise<JsonObject> promise = Promise.promise();
+                                    questionsInfosFutures.add(promise.future());
+                                    questionChoiceService.duplicate(questionId, duplicateQuestionId, FutureHelper.handlerJsonObject(promise));
                                 }
                             }
                         }

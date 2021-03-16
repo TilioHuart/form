@@ -105,12 +105,12 @@ public class DefaultFormService implements FormService {
     @Override
     public void duplicate(int id, UserInfos user, Handler<Either<String, JsonArray>> handler) {
         String query = "WITH dForm_id as (INSERT INTO  formulaire.form  (owner_id, owner_name, title, description, picture, date_ending) " +
-                "SELECT 'toto', 'toto', title, description, picture, NOW() FROM formulaire.form WHERE id = ? " +
+                "SELECT ?, ?, concat(title, ' - Copie'), description, picture, NOW() FROM formulaire.form WHERE id = ? " +
                 "RETURNING id) " +
                 "INSERT INTO formulaire.question (form_id, title, position, question_type, statement, mandatory, duplicate_question_id) " +
                 "SELECT (SELECT id from dForm_id), title, position, question_type, statement, mandatory, id FROM formulaire.question WHERE form_id = ? " +
                 "RETURNING id, duplicate_question_id, question_type";
-        JsonArray params = new JsonArray().add(id).add(id);
+        JsonArray params = new JsonArray().add(user.getUserId()).add(user.getUsername()).add(id).add(id);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
