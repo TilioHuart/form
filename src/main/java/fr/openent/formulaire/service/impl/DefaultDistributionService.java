@@ -156,24 +156,28 @@ public class DefaultDistributionService implements DistributionService {
             }
         }
 
+        if (!respondersArray.isEmpty()) {
+            JsonArray params = new JsonArray();
+            String query = "INSERT INTO " + Formulaire.DISTRIBUTION_TABLE + " (form_id, sender_id, sender_name, responder_id, " +
+                    "responder_name, status, date_sending) VALUES ";
 
-        JsonArray params = new JsonArray();
-        String query = "INSERT INTO " + Formulaire.DISTRIBUTION_TABLE + " (form_id, sender_id, sender_name, responder_id, " +
-                "responder_name, status, date_sending) VALUES ";
+            for (JsonObject responder : respondersArray) {
+                query += "(?, ?, ?, ?, ?, ?, ?), ";
+                params.add(formId)
+                        .add(user.getUserId())
+                        .add(user.getUsername())
+                        .add(responder.getString("id", ""))
+                        .add(responder.getString("username", ""))
+                        .add(Formulaire.TO_DO)
+                        .add("NOW()");
+            }
 
-        for (JsonObject responder : respondersArray) {
-            query += "(?, ?, ?, ?, ?, ?, ?), ";
-            params.add(formId)
-                    .add(user.getUserId())
-                    .add(user.getUsername())
-                    .add(responder.getString("id", ""))
-                    .add(responder.getString("username", ""))
-                    .add(Formulaire.TO_DO)
-                    .add("NOW()");
+            query = query.substring(0, query.length() - 2) + ";";
+            Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
         }
-
-        query = query.substring(0, query.length() - 2) + ";";
-        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+        else {
+            handler.handle(new Either.Right<>(new JsonObject()));
+        }
     }
 
     @Override
