@@ -120,6 +120,18 @@ public class DefaultFormService implements FormService {
     }
 
     @Override
+    public void getAllMyFormRights(UserInfos user, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT resource_id, action FROM " + Formulaire.FORM_SHARES_TABLE +
+                " WHERE member_id = ? AND action IN (?, ?, ?);";
+        JsonArray params = new JsonArray()
+                .add(user.getUserId())
+                .add(Formulaire.CONTRIB_RESOURCE_BEHAVIOUR)
+                .add(Formulaire.MANAGER_RESOURCE_BEHAVIOUR)
+                .add(Formulaire.RESPONDER_RESOURCE_BEHAVIOUR);
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
     public void getImage(EventBus eb, String idImage, Handler<Either<String, JsonObject>> handler) {
         JsonObject action = new JsonObject().put("action", "getDocument").put("id", idImage);
         String WORKSPACE_BUS_ADDRESS = "org.entcore.workspace";

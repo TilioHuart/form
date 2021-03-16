@@ -176,10 +176,26 @@ public class FormController extends ControllerHelper {
                         }
                         Renders.renderJson(request, result);
                     } else {
-                        log.error("[Formulaire@getMyFormRights] Fail to retrieve rights of form " + formId);
+                        String error = getRightsEvent.left().getValue();
+                        log.error("[Formulaire@getMyFormRights] Fail to retrieve rights of form " + formId + " : " + error);
                         renderError(request);
                     }
                 });
+            } else {
+                log.error("User not found in session.");
+                Renders.unauthorized(request);
+            }
+        });
+    }
+
+    @Get("/forms/rights/all")
+    @ApiDoc("Get my rights for all the forms")
+    @ResourceFilter(CreationRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void getAllMyFormRights(HttpServerRequest request) {
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user != null) {
+                formService.getAllMyFormRights(user, arrayResponseHandler(request));
             } else {
                 log.error("User not found in session.");
                 Renders.unauthorized(request);

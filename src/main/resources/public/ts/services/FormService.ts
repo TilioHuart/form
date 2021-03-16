@@ -14,6 +14,7 @@ export interface FormService {
     delete(formId: number): Promise<AxiosResponse>;
     unshare(formId: number): Promise<AxiosResponse>;
     getMyFormRights(formId: number): Promise<AxiosResponse>;
+    getAllMyFormRights(): Promise<AxiosResponse>;
     getInfoImage(form: Form): Promise<AxiosResponse>;
 }
 
@@ -118,6 +119,15 @@ export const formService: FormService = {
     async getMyFormRights(formId : number): Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/forms/${formId}/rights`);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.formService.get'));
+            throw err;
+        }
+    },
+
+    async getAllMyFormRights(): Promise<AxiosResponse> {
+        try {
+            return http.get(`/formulaire/forms/rights/all`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.get'));
             throw err;

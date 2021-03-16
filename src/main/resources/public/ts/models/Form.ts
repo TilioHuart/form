@@ -81,11 +81,6 @@ export class Form implements Selectable, Shareable  {
         }
     }
 
-    async setResourceRights() : Promise<void> {
-        let rightsResponse = await formService.getMyFormRights(this.id);
-        this.myRights = rightsResponse.data;
-    }
-
     generateShareRights() : void {
         this._id = this.id;
         this.owner = {userId: this.owner_id, displayName: this.owner_name};
@@ -135,9 +130,9 @@ export class Forms extends Selection<Form> {
             for (let i = 0; i < data.length; i++) {
                 let tempForm = new Form();
                 tempForm.setFromJson(data[i]);
-                await tempForm.setResourceRights();
                 this.all.push(tempForm);
             }
+            await this.setResourceRights();
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.form.sync'));
             throw e;
@@ -155,6 +150,16 @@ export class Forms extends Selection<Form> {
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.form.sync'));
             throw e;
+        }
+    }
+
+    async setResourceRights() : Promise<void> {
+        let { data } = await formService.getAllMyFormRights();
+        let ids = this.all.map(form => form.id);
+        for (let i = 0; i < ids.length; i++) {
+            let formId = ids[i];
+            let rights = data.filter(right => right.resource_id === formId).map(right => right.action);
+            this.all.filter(form => form.id === formId)[0].myRights = rights;
         }
     }
 

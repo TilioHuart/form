@@ -24,5 +24,7 @@ public interface FormService {
 
     void getMyFormRights(String formId, UserInfos user, Handler<Either<String, JsonArray>> handler);
 
+    void getAllMyFormRights(UserInfos user, Handler<Either<String, JsonArray>> handler);
+
     void getImage (EventBus eb, String idImage, Handler<Either<String,JsonObject>> handler);
 }
