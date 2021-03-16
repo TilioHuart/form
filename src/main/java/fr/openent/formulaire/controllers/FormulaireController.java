@@ -19,7 +19,7 @@ import java.util.Map;
 public class FormulaireController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(FormulaireController.class);
     private EventStore eventStore;
-    private enum FormulaireEvent { ACCESS }
+    private enum FormulaireEvent { ACCESS, CREATE }
 
     public FormulaireController() {
         super();
@@ -37,5 +37,6 @@ public class FormulaireController extends ControllerHelper {
     public void render(HttpServerRequest request) {
         renderView(request);
         eventStore.createAndStoreEvent(FormulaireEvent.ACCESS.name(), request);
+        eventStore.createAndStoreEvent(FormulaireEvent.CREATE.name(), request);
     }
 }
