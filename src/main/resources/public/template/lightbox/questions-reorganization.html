@@ -1,5 +1,5 @@
 <lightbox show="vm.display.lightbox.reorganization" on-close="vm.display.lightbox.reorganization = false;">
-    <h1><i18n>formulaire.organize</i18n></h1>
+    <h2 style="margin-bottom: 20px"><i18n>formulaire.organize</i18n></h2>
     <div class="drag">
         <ul sortable-list>
             <li class="row" ng-repeat="question in vm.questions.all | orderBy:question.position"

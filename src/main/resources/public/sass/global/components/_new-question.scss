@@ -8,15 +8,14 @@
 
   h1 {
     font-size: x-large;
-    margin-left: 25px;
   }
 
   .dominos {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
-    height: 250px;
-    width: 500px;
-    margin: auto;
+    grid-row-gap: 10%;
+    grid-column-gap: 2%;
+    margin: 5%;
 
     .item {
       width: 100px;
@@ -24,19 +23,24 @@
       margin: auto;
 
       .domino {
-        display: block;
+        display: flex;
+        flex-direction: column;
+        margin: 13px auto;
 
         .data-text {
           text-align: center;
           font-size: 14px;
+
+          h5 {
+            margin: 0;
+          }
         }
 
         .picture {
-          width: 64px;
-          margin: auto;
+          opacity: 0.6;
 
           img {
-            width: 44px;
+            width: 40%;
           }
         }
       }
