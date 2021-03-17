@@ -1,12 +1,7 @@
 import {idiom, ng, notify, template, angular} from 'entcore';
 import {Form, Question, QuestionChoice, Questions, Types} from "../models";
 import {formService, questionChoiceService, questionService} from "../services";
-import {FORMULAIRE_QUESTION_EMIT_EVENT} from "../core/enums/formulaire-event";
-
-export enum Direction {
-    UP = 'UP',
-    DOWN = 'DOWN'
-}
+import {Direction, FORMULAIRE_QUESTION_EMIT_EVENT} from "../core/enums";
 
 interface ViewModel {
     types: typeof Types;
@@ -45,8 +40,8 @@ interface ViewModel {
 }
 
 
-export const formEditorController = ng.controller('FormEditorController', ['$scope', '$element',
-    function ($scope, $element) {
+export const formEditorController = ng.controller('FormEditorController', ['$scope', '$rootScope',
+    function ($scope, $rootScope) {
 
         const vm: ViewModel = this;
         vm.types = Types;
@@ -373,6 +368,10 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         init();
 
         document.onclick = e => { onClickQuestion(e); };
+
+        $rootScope.$on( "$routeChangeSuccess", function(event, next, current) {
+            window.location.reload();
+        });
 
         $scope.$on(FORMULAIRE_QUESTION_EMIT_EVENT.DUPLICATE, () => { vm.duplicateQuestion() });
         $scope.$on(FORMULAIRE_QUESTION_EMIT_EVENT.DELETE, () => { vm.deleteQuestion() });

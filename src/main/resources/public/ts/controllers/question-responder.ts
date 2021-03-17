@@ -8,6 +8,7 @@ import {
     Types
 } from "../models";
 import {distributionService, questionService, responseFileService, responseService} from "../services";
+import {Direction} from "../core/enums";
 
 interface ViewModel {
     types: typeof Types;
@@ -32,8 +33,8 @@ interface ViewModel {
     doSend(): Promise<void>;
 }
 
-export const questionResponderController = ng.controller('QuestionResponderController', ['$scope',
-    function ($scope) {
+export const questionResponderController = ng.controller('QuestionResponderController', ['$scope', '$rootScope',
+    function ($scope, $rootScope) {
 
     const vm: ViewModel = this;
     vm.types = Types;
@@ -98,10 +99,6 @@ export const questionResponderController = ng.controller('QuestionResponderContr
 
         if (prevPosition > 0) {
             $scope.redirectTo(`/form/${vm.question.form_id}/question/${prevPosition}`);
-            $scope.safeApply();
-            let question = await questionService.getByPosition(vm.question.form_id, prevPosition);
-            $scope.question = question.data;
-            init();
         }
     };
 
@@ -111,10 +108,6 @@ export const questionResponderController = ng.controller('QuestionResponderContr
 
         if (nextPosition <= vm.nbQuestions) {
             $scope.redirectTo(`/form/${vm.question.form_id}/question/${nextPosition}`);
-            $scope.safeApply();
-            let question = await questionService.getByPosition(vm.question.form_id, nextPosition);
-            $scope.question = question.data;
-            init();
         }
     };
 
@@ -170,14 +163,17 @@ export const questionResponderController = ng.controller('QuestionResponderContr
             }
         }
         else {
+            vm.response = $scope.getDataIf200(await responseService.save(vm.response, vm.question.question_type));
             if (vm.question.question_type === Types.FILE && vm.files.length > 0) {
-                let filename = model.me.firstName + model.me.lastName + "_" + vm.files[0].name;
+                let filename = vm.files[0].name;
+                if (!!vm.files[0].type) {
+                    filename = model.me.firstName + model.me.lastName + "_" + filename;
+                }
                 let file = new FormData();
                 file.append("file", vm.files[0], filename);
                 await responseFileService.update(vm.response.id, file);
                 vm.response.answer = idiom.translate('formulaire.response.file.send');
             }
-            vm.response = $scope.getDataIf200(await responseService.save(vm.response, vm.question.question_type));
         }
     };
 
@@ -206,4 +202,8 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     };
 
     init();
+
+    $rootScope.$on( "$routeChangeSuccess", function(event, next, current) {
+        window.location.reload();
+    });
 }]);

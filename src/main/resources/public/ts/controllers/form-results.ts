@@ -22,8 +22,8 @@ interface ViewModel {
 }
 
 
-export const formResultsController = ng.controller('FormResultsController', ['$scope',
-    function ($scope) {
+export const formResultsController = ng.controller('FormResultsController', ['$scope', '$rootScope',
+    function ($scope, $rootScope) {
 
         const vm: ViewModel = this;
         vm.types = Types;
@@ -82,12 +82,12 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
         vm.goTo = async (position: number) : Promise<void> => {
             $scope.redirectTo(`/form/${vm.question.form_id}/results/${position}`);
-            $scope.safeApply();
-            let question = await questionService.getByPosition(vm.question.form_id, position);
-            $scope.question = question.data;
-            init();
         }
 
 
         init();
+
+        $rootScope.$on( "$routeChangeSuccess", function(event, next, current) {
+            window.location.reload();
+        });
     }]);
