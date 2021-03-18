@@ -29,7 +29,7 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
                             <i class="drag lg-icon"></i>
                         </div>
                     </div>
-                    <div class="focusable" id="[[vm.question.id]]">
+                    <div class="focusable" id="[[vm.question.position]]">
                         <!-- Title component -->
                         <question-title question="vm.question"></question-title>
                         <!-- Main component -->

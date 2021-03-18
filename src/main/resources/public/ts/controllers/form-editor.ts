@@ -19,7 +19,6 @@ interface ViewModel {
         }
     };
 
-    switchAll(value: boolean): void;
     createNewQuestion(): void;
     doCreateNewQuestion(code: number): void;
     organizeQuestions(): void;
@@ -70,10 +69,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         // Global functions
 
-        vm.switchAll = (value:boolean) : void => {
-            value ? vm.questions.selectAll() : vm.questions.deselectAll();
-        };
-
         vm.createNewQuestion = () => {
             template.open('lightbox', 'lightbox/question-new');
             vm.display.lightbox.newQuestion = true;
@@ -82,10 +77,11 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         vm.doCreateNewQuestion = async (code: number) => {
             vm.dontSave = true;
+            vm.newQuestion = new Question();
+            vm.newQuestion.form_id = vm.form.id;
             vm.newQuestion.question_type = code;
             vm.newQuestion.position = vm.questions.all.length + 1;
-            await questionService.create(vm.newQuestion);
-            await vm.questions.sync(vm.form.id);
+            await vm.questions.all.push(vm.newQuestion);
             vm.display.lightbox.newQuestion = false;
             template.close('lightbox');
             vm.dontSave = false;
@@ -252,7 +248,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     function() {
                     },
                     function(err) {
-                        notify.error(err);
                     }
                 );
             }
@@ -292,17 +287,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 rePositionQuestions();
                 for (let question of vm.questions.all) {
                     if (!!!question.title && !!!question.statement && !question.mandatory && question.choices.all.length <= 0) {
-                        let temp = $scope.getDataIf200(await questionService.get(question.id));
-                        if (!!!temp.title && !!!temp.statement && !temp.mandatory) {
-                            if (temp.question_type === Types.SINGLEANSWER || temp.question_type === Types.MULTIPLEANSWER) {
-                                let choices = $scope.getDataIf200(await questionChoiceService.list(temp.id));
-                                if (choices.length <= 0) {
-                                    await questionService.delete(question.id);
-                                }
-                            }
-                            else {
-                                await questionService.delete(question.id);
-                            }
+                        if (!!question.id) {
+                            question = $scope.getDataIf200(await questionService.get(question.id));
                         }
                     }
                     else {
@@ -318,7 +304,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 }
                 if (displaySuccess) { notify.success(idiom.translate('formulaire.success.form.save')); }
                 vm.form.setFromJson($scope.getDataIf200(await formService.get(vm.form.id)));
-                await vm.questions.sync(vm.form.id);
+                vm.questions.deselectAll();
                 $scope.safeApply();
             }
             catch (e) {
@@ -328,25 +314,18 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         const onClickQuestion = async (event) : Promise<void> => {
             if (!vm.dontSave && $scope.currentPage === 'openForm') {
-                let questionId: number = isInFocusable(event.target);
-                if (!!questionId && questionId > 0) {
-                    let question = vm.questions.all.filter(question => question.id == questionId)[0];
+                let questionPos: number = isInFocusable(event.target);
+                if (!!questionPos && questionPos > 0) {
+                    let question = vm.questions.all.filter(question => question.position == questionPos)[0];
                     if (!question.selected) {
                         if (vm.questions.selected.length > 0) {
                             await saveQuestions();
                         }
                         // Reselection of the question because the sync has removed the selections
-                        vm.questions.all.filter(question => question.id == questionId)[0].selected = true;
+                        vm.questions.all.filter(question => question.position == questionPos)[0].selected = true;
                     }
                 }
-                // else if (isInShowErrorZone(event.target)) {
-                //     let wrongQuestions = vm.questions.filter(question => !!!question.title); // TODO check more than just titles later
-                //     if (wrongQuestions.length > 0) {
-                //         notify.error(idiom.translate('formulaire.question.save.missing.field'));
-                //     }
-                //     await saveQuestions();
-                // }
-                else {
+                else if(!isInDontSave(event.target)) {
                     await saveQuestions();
                 }
                 $scope.safeApply();
@@ -363,6 +342,12 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             if (!!!el) { return -1; }
             else if (el.classList && el.classList.contains("focusable")) { return el.id; }
             return isInFocusable(el.parentNode);
+        };
+
+        const isInDontSave = (el): boolean => {
+            if (!!!el) { return false; }
+            else if (el.classList && el.classList.contains("dontSave")) { return true; }
+            return isInDontSave(el.parentNode);
         };
 
         init();
