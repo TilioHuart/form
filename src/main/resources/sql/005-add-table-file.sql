@@ -1,5 +1,6 @@
 ALTER TABLE formulaire.form
-    ALTER COLUMN date_ending DROP NOT NULL;
+    DROP COLUMN date_ending,
+    ADD date_ending     timestamp without time zone;
 
 CREATE TABLE formulaire.response_file (
     id              VARCHAR(36) PRIMARY KEY,
