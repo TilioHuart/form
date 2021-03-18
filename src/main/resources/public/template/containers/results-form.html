@@ -43,7 +43,7 @@
                     </div>
                 </div>
             </div>
-            <!-- Naviguation buttons -->
+            <!-- Navigation buttons -->
             <div ng-if="vm.nbResults >= vm.nbResultsDisplay" style="margin: 1%;">
                 <a ng-click="vm.nbResultsDisplay = vm.nbResultsDisplay + 10" ng-if="vm.question.question_type == vm.types.FILE">
                     <i18n>formulaire.seeMore</i18n>
@@ -64,4 +64,6 @@
             <button class="cell" ng-click="vm.next()" ng-disabled="vm.last"><i18n>formulaire.next</i18n></button>
         </div>
     </div>
+
+    <container template='lightbox'></container>
 </div>

@@ -1,0 +1,10 @@
+<lightbox show="vm.display.lightbox.download" on-close="vm.display.lightbox.download = false;">
+    <h2 style="margin-bottom: 20px"><i18n>formulaire.form.download.all.results.lightbox.title</i18n></h2>
+    <div>
+        <i18n>formulaire.form.download.all.results.lightbox.description</i18n>
+    </div>
+    <div style="margin-top:20px; float: right;">
+        <button class="cell cancel" ng-click="vm.display.lightbox.download = false;"><i18n>formulaire.cancel</i18n></button>
+        <button class="cell" ng-click="vm.doExportForm()"><i18n>formulaire.confirm</i18n></button>
+    </div>
+</lightbox>

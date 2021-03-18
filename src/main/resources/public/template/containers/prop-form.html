@@ -35,7 +35,7 @@
                         <i18n>formulaire.form.edit.modified</i18n>[[vm.form.date_modification.toLocaleString()]]
                     </div>
                     <div class="data-bottom">
-                        <button class="cell" ng-click="redirectTo('/list/mine')"><i18n>formulaire.cancel</i18n></button>
+                        <button class="cell cancel" ng-click="redirectTo('/list/mine')"><i18n>formulaire.cancel</i18n></button>
                         <button class="cell" ng-click="vm.save()" ng-disabled="!!!vm.form.title || !vm.checkIntervalDates()"><i18n>formulaire.save</i18n></button>
                     </div>
                 </div>

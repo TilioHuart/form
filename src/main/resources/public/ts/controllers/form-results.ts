@@ -1,4 +1,4 @@
-import {ng} from 'entcore';
+import {ng, template} from 'entcore';
 import {Question, Questions, Responses, Types} from "../models";
 import {questionService, responseFileService} from "../services";
 
@@ -13,8 +13,14 @@ interface ViewModel {
     last: boolean;
     navigatorValue: number;
     files: File[];
+    display: {
+        lightbox: {
+            download: boolean;
+        }
+    }
 
-    exportForm() : void;
+    exportForm(): void;
+    doExportForm(): void;
     downloadFile(responseId: number): Promise<void>;
     prev(): Promise<void>;
     next(): Promise<void>;
@@ -36,6 +42,11 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         vm.nbQuestions = 1;
         vm.last = false;
         vm.navigatorValue = 1;
+        vm.display = {
+            lightbox: {
+                download: false
+            }
+        };
 
         const init = async (): Promise<void> => {
             vm.question = $scope.question;
@@ -59,7 +70,16 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         // Functions
 
         vm.exportForm = () : void => {
+            template.open('lightbox', 'lightbox/results-confirm-download-all');
+            vm.display.lightbox.download = true;
+            $scope.safeApply();
+        };
+
+        vm.doExportForm = () : void => {
             window.open(window.location.pathname + `/export/${vm.question.form_id}`);
+            vm.display.lightbox.download = false;
+            template.close('lightbox');
+            $scope.safeApply();
         };
 
         vm.downloadFile = async (responseId: number) : Promise<void> => {
