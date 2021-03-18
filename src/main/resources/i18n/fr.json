@@ -66,7 +66,7 @@
   "formulaire.form.create.title": "Titre de mon formulaire",
   "formulaire.form.download.all.results": "Télécharger tous les résultats (CSV)",
   "formulaire.form.download.all.results.lightbox.title": "Téléchargement des résultats",
-  "formulaire.form.download.all.results.lightbox.description": "Les réponses du formulaire vont être téléchargés au format CSV. Les documents déposés dans les questions de types 'Dépôt de fichier' ne seront pas téléchargés lors de cet export.",
+  "formulaire.form.download.all.results.lightbox.description": "Les réponses du formulaire vont être téléchargées au format CSV. Les documents déposés dans les questions de type \"Dépôt de fichier\" ne seront pas téléchargés lors de cet export.",
   "formulaire.form.download.all.files": "Télécharger tout (ZIP)",
   "formulaire.image.incompatible": "Seuls les formats d'image suivants sont acceptés : .jpg, .jpeg, .png, .gif",
 

@@ -1,4 +1,4 @@
-<lightbox show="vm.display.lightbox.undo" on-close="vm.display.lightbox.undo = false; vm.dontSave = false;">
+<lightbox class="dontSave" show="vm.display.lightbox.undo" on-close="vm.display.lightbox.undo = false; vm.dontSave = false;">
     <div style="margin-top: 20px;">
         <i18n>formulaire.question.undo.confirmation</i18n>
         <button class="cell" ng-click="vm.doUndoQuestionChanges()" style="float: right;"><i18n>formulaire.confirm</i18n></button>

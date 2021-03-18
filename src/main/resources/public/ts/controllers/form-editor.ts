@@ -28,6 +28,7 @@ interface ViewModel {
     duplicateQuestion(): void;
     deleteQuestion(): void;
     doDeleteQuestion(): void;
+    cancelOrganizeQuestions(): void;
     undoQuestionChanges(): void;
     doUndoQuestionChanges(): void;
     createNewChoice(question: Question): void;
@@ -107,6 +108,13 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             $scope.safeApply();
         };
 
+        vm.cancelOrganizeQuestions = async () : Promise<void> => {
+            await vm.questions.sync(vm.form.id);
+            vm.display.lightbox.reorganization = false;
+            template.close('lightbox');
+            $scope.safeApply();
+        };
+
         vm.saveAll = async () : Promise<void> => {
             vm.dontSave = true;
             let wrongQuestions = vm.questions.filter(question => !!!question.title); // TODO check more than just titles later
@@ -134,6 +142,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             try {
                 vm.dontSave = true;
                 let question = vm.questions.selected[0];
+                await questionService.save(question);
                 for (let i = question.position; i < vm.questions.all.length; i++) {
                     vm.questions.all[i].position++;
                     await questionService.save(vm.questions.all[i]);
@@ -148,8 +157,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         }
                     }
                 }
-                template.close('lightbox');
-                vm.display.lightbox.delete = false;
                 notify.success(idiom.translate('formulaire.success.question.duplicate'));
                 await vm.questions.sync(vm.form.id);
                 vm.dontSave = false;
@@ -168,7 +175,10 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         vm.doDeleteQuestion = async () => {
             try {
-                await questionService.delete(vm.questions.selected[0].id);
+                let question = vm.questions.selected[0];
+                if (!!question.id) {
+                    await questionService.delete(question.id);
+                }
                 template.close('lightbox');
                 vm.display.lightbox.delete = false;
                 notify.success(idiom.translate('formulaire.success.question.delete'));
@@ -299,12 +309,12 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         }
                     }
                     else {
-                        let newQuestion = $scope.getDataIf200(await questionService.save(question));
-                        // await questionService.save(question);
+                        let newId = $scope.getDataIf200(await questionService.save(question)).id;
+                        question.id = newId;
                         let registeredChoices = [];
                         for (let choice of question.choices.all) {
                             if (!!choice.value && !registeredChoices.find(c => c === choice.value) ) {
-                                choice.question_id = newQuestion.id;
+                                choice.question_id = newId;
                                 await questionChoiceService.save(choice);
                                 registeredChoices.push(choice.value);
                             }
