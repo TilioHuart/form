@@ -1,6 +1,6 @@
 import {ng, template} from 'entcore';
 import {Question, Questions, Responses, Types} from "../models";
-import {questionService, responseFileService} from "../services";
+import {responseFileService} from "../services";
 
 interface ViewModel {
     types: typeof Types;

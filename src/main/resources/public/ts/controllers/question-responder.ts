@@ -8,7 +8,6 @@ import {
     Types
 } from "../models";
 import {distributionService, questionService, responseFileService, responseService} from "../services";
-import {Direction} from "../core/enums";
 
 interface ViewModel {
     types: typeof Types;

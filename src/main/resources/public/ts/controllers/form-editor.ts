@@ -81,6 +81,11 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             vm.newQuestion.form_id = vm.form.id;
             vm.newQuestion.question_type = code;
             vm.newQuestion.position = vm.questions.all.length + 1;
+            if (vm.newQuestion.question_type === Types.MULTIPLEANSWER || vm.newQuestion.question_type === Types.SINGLEANSWER) {
+                for (let i = 0; i < 3; i++) {
+                    vm.newQuestion.choices.all.push(new QuestionChoice());
+                }
+            }
             await vm.questions.all.push(vm.newQuestion);
             vm.display.lightbox.newQuestion = false;
             template.close('lightbox');
@@ -269,6 +274,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     notify.error(idiom.translate('formulaire.error.question.reorganization'));
                     break;
             }
+            rePositionQuestions();
+            $scope.safeApply();
         };
 
         // Utils
@@ -292,10 +299,12 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         }
                     }
                     else {
-                        await questionService.save(question);
+                        let newQuestion = $scope.getDataIf200(await questionService.save(question));
+                        // await questionService.save(question);
                         let registeredChoices = [];
                         for (let choice of question.choices.all) {
                             if (!!choice.value && !registeredChoices.find(c => c === choice.value) ) {
+                                choice.question_id = newQuestion.id;
                                 await questionChoiceService.save(choice);
                                 registeredChoices.push(choice.value);
                             }

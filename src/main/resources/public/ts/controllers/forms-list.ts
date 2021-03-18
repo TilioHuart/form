@@ -1,6 +1,6 @@
 import {idiom, model, ng, notify, template} from 'entcore';
-import {Form, Forms, QuestionChoice, Questions, Types} from "../models";
-import {formService, questionService, questionChoiceService} from "../services";
+import {Form, Forms} from "../models";
+import {formService, questionService} from "../services";
 
 interface ViewModel {
     forms: Forms;
@@ -124,22 +124,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             let forms = [];
             for (let form of vm.forms.selected) {
                 forms.push(form.id);
-                /*let duplicata = form;
-                duplicata.title += " - copie";
-                duplicata = $scope.getDataIf200(await formService.create(duplicata));
-                let questions = new Questions();
-                await questions.sync(form.id);
-                for (let question of questions.all) {
-                    question.form_id = duplicata.id;
-                    let newQuestion = $scope.getDataIf200(await questionService.create(question));
-                    if (question.question_type === Types.SINGLEANSWER || question.question_type === Types.MULTIPLEANSWER) {
-                        for (let choice of question.choices.all) {
-                            if (!!choice.value) {
-                                await questionChoiceService.create(new QuestionChoice(newQuestion.id, choice.value));
-                            }
-                        }
-                    }
-                }*/
             }
             await formService.duplicate(forms);
             notify.success(idiom.translate('formulaire.success.forms.duplicate'));
