@@ -104,12 +104,12 @@ public class DefaultFormService implements FormService {
 
     @Override
     public void duplicate(int id, UserInfos user, Handler<Either<String, JsonArray>> handler) {
-        String query = "WITH dForm_id as (INSERT INTO  formulaire.form  (owner_id, owner_name, title, description, picture, date_ending) " +
-                "SELECT ?, ?, concat(title, ' - Copie'), description, picture, NOW() FROM formulaire.form WHERE id = ? " +
-                "RETURNING id) " +
-                "INSERT INTO formulaire.question (form_id, title, position, question_type, statement, mandatory, duplicate_question_id) " +
-                "SELECT (SELECT id from dForm_id), title, position, question_type, statement, mandatory, id FROM formulaire.question WHERE form_id = ? " +
-                "RETURNING id, duplicate_question_id, question_type";
+        String query = "WITH dForm_id as (INSERT INTO  " + Formulaire.FORM_TABLE + "  (owner_id, owner_name, title, description, picture) " +
+                "SELECT ?, ?, concat(title, ' - Copie'), description, picture FROM " + Formulaire.FORM_TABLE +
+                " WHERE id = ? RETURNING id) " +
+                "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, statement, mandatory, duplicate_question_id) " +
+                "SELECT (SELECT id from dForm_id), title, position, question_type, statement, mandatory, id FROM " + Formulaire.QUESTION_TABLE +
+                " WHERE form_id = ? RETURNING id, duplicate_question_id, question_type";
         JsonArray params = new JsonArray().add(user.getUserId()).add(user.getUsername()).add(id).add(id);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
