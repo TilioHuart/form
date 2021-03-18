@@ -173,6 +173,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
                 file.append("file", vm.files[0], filename);
                 await responseFileService.update(vm.response.id, file);
                 vm.response.answer = idiom.translate('formulaire.response.file.send');
+                vm.response = $scope.getDataIf200(await responseService.update(vm.response));
             }
         }
     };
