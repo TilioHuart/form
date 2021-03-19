@@ -21,22 +21,22 @@ export const questionTitle: Directive = ng.directive('questionTitle', () => {
         replace: true,
         template: `
             <div class="question-title">
-                <div ng-if="vm.question.question_type == vm.types.FREETEXT">
+                <div class="seven" ng-if="vm.question.question_type == vm.types.FREETEXT">
                     <div ng-if="!vm.question.selected">
                         <h4 ng-if="!!vm.question.title">[[vm.question.title]]</h4>
                         <h4 ng-if="!!!vm.question.title" class="empty"><i18n>formulaire.question.title.free.empty</i18n></h4>
                     </div>
                     <div ng-if="vm.question.selected">
-                        <input type="text" ng-model="vm.question.title" i18n-placeholder="formulaire.question.title.free.empty"/>
+                        <input type="text" class="twelve" ng-model="vm.question.title" i18n-placeholder="formulaire.question.title.free.empty"/>
                     </div>
                 </div>
-                <div ng-if="vm.question.question_type != vm.types.FREETEXT">
+                <div class="seven" ng-if="vm.question.question_type != vm.types.FREETEXT">
                     <div ng-if="!vm.question.selected">
                         <h4 ng-if="!!vm.question.title">[[vm.question.title]]<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span></h4>
                         <h4 ng-if="!!!vm.question.title" class="empty"><i18n>formulaire.question.title.empty</i18n></h4>
                     </div>
                     <div ng-if="vm.question.selected">
-                        <input type="text" ng-model="vm.question.title" i18n-placeholder="formulaire.question.title.empty"/>
+                        <input type="text" class="twelve" ng-model="vm.question.title" i18n-placeholder="formulaire.question.title.empty"/>
                     </div>
                 </div>
                 <div ng-if="vm.question.selected" ng-show="false">
