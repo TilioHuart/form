@@ -256,15 +256,10 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 if (question.position != parseFloat(question.index) + 1) {
                     question.position = parseFloat(question.index) + 1;
                 }
-                if (!!!question) { finished = false }
+                if (!!!question.position) { finished = false }
             });
             if (finished) {
-                saveQuestions().then(
-                    function() {
-                    },
-                    function(err) {
-                    }
-                );
+                rePositionQuestions();
             }
         };
 
@@ -291,12 +286,11 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         // Utils
 
         const rePositionQuestions = () => {
-            vm.questions.all.sort(function(a, b){
-                return a.position - b.position;
-            });
+            vm.questions.all.sort((a, b) => a.position - b.position);
             for (let i = 0; i < vm.questions.all.length; i++) {
                 vm.questions.all[i].position = i + 1;
             }
+            $scope.safeApply();
         };
 
         const saveQuestions = async (displaySuccess:boolean = false) => {

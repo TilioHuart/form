@@ -246,10 +246,16 @@ export class Forms extends Selection<Form> {
     filterForms() {
         for (let form of this.all) {
             form.displayed = true;
-            if (form.collab && !this.filters.shared) {
+            if ((form.sent && form.collab) && (!this.filters.sent || !this.filters.shared)) {
                 form.displayed = false;
             }
-            if (form.sent && !this.filters.sent) {
+            if ((form.sent && !form.collab) && (!this.filters.sent || this.filters.shared)) {
+                form.displayed = false;
+            }
+            if ((!form.sent && form.collab) && (this.filters.sent || !this.filters.shared)) {
+                form.displayed = false;
+            }
+            if ((!form.sent && !form.collab) && (this.filters.sent || this.filters.shared)) {
                 form.displayed = false;
             }
             if (form.status === DistributionStatus.TO_DO && !this.filters.todo) {
