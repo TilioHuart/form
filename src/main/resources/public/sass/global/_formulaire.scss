@@ -4,9 +4,26 @@ $formulaire-screen-laptop: 1200px;
 
 $formulaire-white: white;
 $formulaire-blue: #2a9bc7;
+$formulaire-blue-light: #c1e3f0;
+
+$formulaire-grey-2: #5b6472; // from body text color
+$formulaire-grey-light-2: #b1b6bf; // from disabled button
+$formulaire-grey-very-light-2: #e9ebef; // from cancel button
+
 $formulaire-blue-transparent: rgba(75, 175, 213, 0.3);
 $formulaire-lightgrey: lightgrey;
 $formulaire-darkgrey: darkgrey;
+
+@font-face {
+  font-family: 'material-icons';
+  src: url('/formulaire/public/font/material-design/fonts/materialdesignicons-webfont.eot');
+  src: url('/formulaire/public/font/material-design/fonts/materialdesignicons-webfont.eot') format('embedded-opentype'),
+  url('/formulaire/public/font/material-design/fonts/materialdesignicons-webfont.woff2') format('woff2'),
+  url('/formulaire/public/font/material-design/fonts/materialdesignicons-webfont.woff2') format('woff'),
+  url('/formulaire/public/font/material-design/fonts/materialdesignicons-webfont.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
 
 body.formulaire {
   @import "components/index";

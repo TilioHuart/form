@@ -22,6 +22,11 @@ gulp.task('copy-files', ['drop-cache'], () => {
     return merge(html, bundle);
 })
 
+gulp.task('copy-mdi-font', ['copy-files'], function () {
+    return gulp.src('./node_modules/@mdi/font/fonts/*')
+        .pipe(gulp.dest('./src/main/resources/public/font/material-design/fonts'));
+});
+
 gulp.task('webpack', ['copy-mdi-font'], () => {
     return gulp.src('./src/main/resources/public')
         .pipe(webpack(require('./webpack.config.js')))
@@ -30,12 +35,6 @@ gulp.task('webpack', ['copy-mdi-font'], () => {
         })
         .pipe(gulp.dest('./src/main/resources/public/dist'));
 });
-
-gulp.task('copy-mdi-font', ['copy-files'], function () {
-    return gulp.src('./node_modules/@mdi/font/fonts/*')
-        .pipe(gulp.dest('./crre/src/main/resources/public/font/material-design/fonts'));
-});
-
 
 gulp.task('rev', ['webpack'], () => {
     return gulp.src('./src/main/resources/public/dist/**/*.js')
