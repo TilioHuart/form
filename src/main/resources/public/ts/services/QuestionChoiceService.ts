@@ -38,10 +38,7 @@ export const questionChoiceService: QuestionChoiceService = {
 
     async create(choice: QuestionChoice): Promise<AxiosResponse> {
         try {
-            let response = await http.post(`/formulaire/questions/${choice.question_id}/choices`, choice);
-            console.log(response);
-            if (response.status == 200) return response.data;
-            else throw new Error();
+            return await http.post(`/formulaire/questions/${choice.question_id}/choices`, choice);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionChoiceService.create'));
             throw err;
