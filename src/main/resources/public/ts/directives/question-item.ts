@@ -25,8 +25,8 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
                 <div class="domino" ng-class="{'questionError': !!!vm.question.title || vm.question.choices.length === 0 }">
                     <div class="question-top">
                         <div class="dots">
-                            <i class="drag lg-icon"></i>
-                            <i class="drag lg-icon"></i>
+                            <i class="drag hg-icon"></i>
+                            <i class="drag hg-icon"></i>
                         </div>
                     </div>
                     <div class="focusable" id="[[vm.question.position]]">
@@ -39,9 +39,9 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
                             <div class="mandatory" ng-if="vm.question.question_type != vm.types.FREETEXT">
                                 <switch ng-model="vm.question.mandatory"></switch><i18n>formulaire.mandatory</i18n>
                             </div>
-                            <img src="formulaire/public/img/icons/duplicate.svg" ng-click="duplicateQuestion()" title="[[vm.getTitle('duplicate')]]"/>
-                            <img src="formulaire/public/img/icons/delete.svg" ng-click="deleteQuestion()" title="[[vm.getTitle('delete')]]"/>
-                            <img src="formulaire/public/img/icons/undo.svg" ng-click="undoQuestionChanges()" title="[[vm.getTitle('cancel')]]"/>
+                            <i class="duplicate lg-icon spaced-right" ng-click="duplicateQuestion()" title="[[vm.getTitle('duplicate')]]"></i>
+                            <i class="delete lg-icon spaced-right" ng-click="deleteQuestion()" title="[[vm.getTitle('delete')]]"></i>
+                            <i class="undo lg-icon spaced-right" ng-click="undoQuestionChanges()" title="[[vm.getTitle('cancel')]]"></i>
                         </div>
                     </div>
                 </div>

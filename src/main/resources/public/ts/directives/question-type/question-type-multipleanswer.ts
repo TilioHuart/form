@@ -29,10 +29,10 @@ export const questionTypeMultipleanswer: Directive = ng.directive('questionTypeM
                         <input type="text" class="eleven" ng-model="choice.value" placeholder="Choix [[$index + 1]]" ng-if="!vm.question.selected" disabled>
                         <input type="text" class="eleven" ng-model="choice.value" placeholder="Choix [[$index + 1]]" ng-if="vm.question.selected">
                     </label>
-                    <img src="/formulaire/public/img/icons/cancel.svg" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected"/>
+                    <i class="cancel lg-icon" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected"></i>
                 </div>
                 <div style="display: flex; justify-content: center;" ng-if="vm.question.selected">
-                    <img src="/formulaire/public/img/icons/plus-circle.svg" ng-click="vm.createNewChoice()"/>
+                    <i class="plus-circle lg-icon" ng-click="vm.createNewChoice()"></i>
                 </div>
             </div>
         `,

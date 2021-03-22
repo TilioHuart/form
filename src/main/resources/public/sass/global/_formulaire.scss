@@ -5,14 +5,13 @@ $formulaire-screen-laptop: 1200px;
 $formulaire-white: white;
 $formulaire-blue: #2a9bc7;
 $formulaire-blue-light: #c1e3f0;
-
-$formulaire-grey-2: #5b6472; // from body text color
-$formulaire-grey-light-2: #b1b6bf; // from disabled button
-$formulaire-grey-very-light-2: #e9ebef; // from cancel button
-
 $formulaire-blue-transparent: rgba(75, 175, 213, 0.3);
-$formulaire-lightgrey: lightgrey;
-$formulaire-darkgrey: darkgrey;
+
+$formulaire-grey-dark: #5b6472; // from body text color
+$formulaire-grey: #b1b6bf; // from disabled button
+$formulaire-grey-light: #c9ced5; // from medium-grey from moodle ?
+$formulaire-grey-very-light: #e9ebef; // from cancel button
+
 
 @font-face {
   font-family: 'material-icons';
@@ -24,6 +23,7 @@ $formulaire-darkgrey: darkgrey;
   font-weight: normal;
   font-style: normal;
 }
+
 
 body.formulaire {
   @import "components/index";
@@ -63,14 +63,7 @@ body.formulaire {
     align-content: center;
   }
 
-  .table {
-    margin: 10px;
-
-    img {
-      opacity: 0.1;
-      &.selected { opacity: 0.6; }
-    }
-  }
+  .table { margin: 10px; }
 
   .toaster-right { float: right; }
 
@@ -81,7 +74,7 @@ body.formulaire {
     }
 
     .checkbox {
-      background-color: $medium-grey;
+      background-color: $formulaire-grey-light;
       margin-right: 0;
     }
 
@@ -192,19 +185,14 @@ body.formulaire {
 
       .file {
         display: flex;
-        border: thin solid $formulaire-lightgrey;
+        border: thin solid $formulaire-grey-very-light;
         padding: 5px;
         margin: 5px 0;
         font-size: 14px;
-        color: $formulaire-darkgrey;
 
         a {
           display: inline-flex;
           align-items: center;
-
-          img {
-            margin-right: 10px;
-          }
         }
       }
     }
@@ -216,7 +204,7 @@ body.formulaire {
       margin: 20px 10px;
 
       .goto {
-        color: #5b6472;
+        color: $formulaire-grey-dark;
         font-weight: bold;
         margin-right: 10px;
       }

@@ -44,7 +44,7 @@
           .date {
             font-size: 12px;
             font-style: italic;
-            opacity: 0.6;
+            color: $formulaire-grey;
           }
         }
 
@@ -59,11 +59,7 @@
             align-items: center;
             height: 100%;
 
-            img {
-              height: 70%;
-              opacity: 0.1;
-              &.selected { opacity: 0.6; }
-            }
+            i .selected { color: $formulaire-grey-dark; }
           }
         }
 

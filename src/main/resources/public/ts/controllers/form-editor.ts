@@ -232,21 +232,21 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.displayTypeIcon = (code: number) : string => {
             switch (code) {
                 case 1 :
-                    return "/formulaire/public/img/icons/question_type/long-answer.svg";
+                    return "/formulaire/public/img/question_type/long-answer.svg";
                 case 2 :
-                    return "/formulaire/public/img/icons/question_type/short-answer.svg";
+                    return "/formulaire/public/img/question_type/short-answer.svg";
                 case 3 :
-                    return "/formulaire/public/img/icons/question_type/free-text.svg";
+                    return "/formulaire/public/img/question_type/free-text.svg";
                 case 4 :
-                    return "/formulaire/public/img/icons/question_type/unic-answer.svg";
+                    return "/formulaire/public/img/question_type/unic-answer.svg";
                 case 5 :
-                    return "/formulaire/public/img/icons/question_type/multiple-answer.svg";
+                    return "/formulaire/public/img/question_type/multiple-answer.svg";
                 case 6 :
-                    return "/formulaire/public/img/icons/question_type/date.svg";
+                    return "/formulaire/public/img/question_type/date.svg";
                 case 7 :
-                    return "/formulaire/public/img/icons/question_type/time.svg";
+                    return "/formulaire/public/img/question_type/time.svg";
                 case 8 :
-                    return "/formulaire/public/img/icons/question_type/file.svg";
+                    return "/formulaire/public/img/question_type/file.svg";
             }
         };
 

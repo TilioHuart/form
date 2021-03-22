@@ -38,7 +38,7 @@
                 <div ng-repeat="file in vm.files | limitTo:vm.nbResultsDisplay">
                     <div class="file">
                         <a ng-click="vm.downloadFile(file.response_id)">
-                            <img src="formulaire/public/img/icons/download.svg"> [[file.filename]]
+                            <i class="download lg-icon spaced-right"></i> [[file.filename]]
                         </a>
                     </div>
                 </div>

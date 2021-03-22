@@ -1,11 +1,14 @@
 i {
+  font-family: 'material-icons';
+  margin: 0;
+
   &.spaced {
     &-right {
       margin-right: 5px;
     }
 
     &-left {
-      margin-right: 5px;
+      margin-left: 5px;
     }
 
     &-both {
@@ -13,64 +16,112 @@ i {
     }
   }
 
-  &.xs-icon {
+  // Icons sizes
+
+  &.xs-icon::before {
     font-size: 10px;
   }
 
-  &.sm-icon {
+  &.sm-icon::before {
     font-size: 16px;
   }
 
-  &.md-icon {
+  &.md-icon::before {
     font-size: 20px;
   }
 
-  &.lg-icon {
+  &.lg-icon::before {
     font-size: 24px;
   }
 
-  &.hg-icon {
-    font-size: 40px;
+  &.hg-icon::before {
+    font-size: 36px;
   }
 
-  &.show-icons {
-    vertical-align: middle;
-    opacity: 0.2;
+  &.selected::before {
+    color: $formulaire-grey-dark !important;
   }
 
-  &.show-list {
-    vertical-align: middle;
-    opacity: 0.2;
+  // Icons color
+
+  &.dark-grey::before {
+    color: $formulaire-grey-dark;
   }
 
-  &.selected {
-    opacity: 0.6;
+  &.grey::before {
+    color: $formulaire-grey;
+  }
+
+  &.light-grey::before {
+    color: $formulaire-grey-light;
+  }
+
+  &.very-light-grey::before {
+    color: $formulaire-grey-very-light;
+  }
+
+  // Icons content
+
+  &.cancel::before {
+    content: "\F156";
+  }
+
+  &.chevron-up::before {
+    content: "\F143";
+  }
+
+  &.chevron-down::before {
+    content: "\F140";
   }
 
   &.clock::before {
-    @include fonticon();
-    content: '\f017';
-    vertical-align: middle;
-    opacity: 0.6;
+    content: "\F150";
+    color: $formulaire-grey-dark;
+  }
+
+  &.delete::before {
+    content: "\F1C0";
+  }
+
+  &.download::before {
+    content: "\F1DA";
+    color: $formulaire-grey-dark;
   }
 
   &.drag::before {
-    @include fonticon();
-    content: '\e913';
-    vertical-align: middle;
-    opacity: 0.6;
+    content: "\F1D8";
+    color: $formulaire-grey;
   }
 
-  &.arrow-simple::before {
-    @include fonticon();
-    content: "\e87b";
-    vertical-align: middle;
-    color: black;
-    opacity: 0.4;
+  &.duplicate::before {
+    content: "\F18F";
   }
 
-  //&.exampleMdi:before {
-  //  font-family: 'material-icons';
-  //  content: "\F8B4";
-  //}
+  &.plus-circle::before {
+    content: "\F417";
+  }
+
+  &.send::before {
+    content: "\F0108";
+    color: $formulaire-grey-very-light;
+  }
+
+  &.share::before {
+    content: "\F497";
+    color: $formulaire-grey-very-light;
+  }
+
+  &.view-cards::before {
+    content: "\FE4D";
+    color: $formulaire-grey-light;
+  }
+
+  &.view-tab::before {
+    content: "\F572";
+    color: $formulaire-grey-light;
+  }
+
+  &.undo::before {
+    content: "\F54C";
+  }
 }

@@ -55,8 +55,8 @@
         <div class="folder-info">
             <div><h4><i class="folder spaced-right"></i>[[vm.displayFolder()]]</h4></div>
             <div>
-                <i class="show-icons hg-icon" ng-click="vm.display.grid = true" ng-class="{'selected': vm.display.grid}"></i>
-                <i class="show-list hg-icon" ng-click="vm.display.grid = false" ng-class="{'selected': !vm.display.grid}"></i>
+                <i class="view-cards hg-icon" ng-click="vm.display.grid = true" ng-class="{'selected': vm.display.grid}"></i>
+                <i class="view-tab hg-icon" ng-click="vm.display.grid = false" ng-class="{'selected': !vm.display.grid}"></i>
             </div>
         </div>
 
@@ -81,8 +81,8 @@
                         <div class="data-bottom">
                             <div class="count"><i18n>formulaire.responses.count</i18n> : [[form.nb_responses]]</div>
                             <div class="icons">
-                                <img src="formulaire/public/img/icons/send.svg" ng-class="{'selected': form.sent}">
-                                <img src="formulaire/public/img/icons/share.svg" ng-class="{'selected': form.collab}">
+                                <i class="send md-icon" ng-class="{'selected': form.sent}"></i>
+                                <i class="share md-icon" ng-class="{'selected': form.collab}"></i>
                             </div>
                         </div>
                     </div>
@@ -112,8 +112,8 @@
                     <td ng-click="form.selected=!form.selected">[[form.nb_responses]]</td>
                     <td ng-click="form.selected=!form.selected"><i18n>formulaire.modified</i18n>[[form.date_modification.toLocaleString()]]</td>
                     <td ng-click="form.selected=!form.selected">
-                        <img src="formulaire/public/img/icons/send.svg" ng-class="{'selected': form.sent}"/>
-                        <img src="formulaire/public/img/icons/share.svg" ng-class="{'selected': form.collab}"/>
+                        <i class="send md-icon" ng-class="{'selected': form.sent}"></i>
+                        <i class="share md-icon" ng-class="{'selected': form.collab}"></i>
                     </td>
                 </tr>
             </tbody>

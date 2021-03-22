@@ -22,7 +22,7 @@
       .dots {
         display: flex;
         flex-direction: column;
-        line-height: 7px;
+        line-height: 2px;
       }
     }
 
@@ -37,7 +37,7 @@
         .empty {
           font-weight: normal;
           font-style: italic;
-          opacity: 0.6;
+          color: $formulaire-grey;
         }
       }
 
@@ -47,11 +47,6 @@
 
         .mandatory {
           margin: 0 20px;
-        }
-
-        img {
-          margin: 0 5px;
-          opacity: 0.6;
         }
       }
     }
@@ -67,10 +62,6 @@
     height: 60px;
     resize: none;
     background: none;
-  }
-
-  img {
-    opacity: 0.6;
   }
 }
 
@@ -105,6 +96,7 @@
     }
 
     .row-shadow-effect {
+      display: flex;
       background-color: rgba(0, 0, 0, 0.01);
       border-radius: 5px;
       padding: 10px;
@@ -116,37 +108,33 @@
     }
 
     .top {
-      width: 5%;
+      width: 6%;
+      display: flex;
 
       .dots {
         display: flex;
         flex-direction: column;
-        line-height: 7px;
-        width: fit-content;
+        line-height: 6px;
         transform: rotate(90deg);
-        color: black;
-        opacity: 0.8;
       }
     }
 
-    .title {
-      width: 86%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .container-arrow {
+    .main {
+      width: 95%;
       display: flex;
-      justify-content: space-around;
+      justify-content: space-between;
+      align-items: center;
 
-      .rotateDown {
-        transform: rotate(-90deg);
-        cursor: pointer;
+      .title {
+        width: 86%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
-      .rotateUp {
-        transform: rotate(90deg);
+      .container-arrow {
+        display: flex;
+        justify-content: space-around;
       }
     }
   }
