@@ -309,7 +309,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         for (let choice of question.choices.all) {
                             if (!!choice.value && !registeredChoices.find(c => c === choice.value) ) {
                                 choice.question_id = newId;
-                                await questionChoiceService.save(choice);
+                                choice.id = $scope.getDataIf200(await questionChoiceService.save(choice)).id;
                                 registeredChoices.push(choice.value);
                             }
                         }
