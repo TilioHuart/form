@@ -30,6 +30,10 @@
                                 <date-picker ng-model="vm.form.date_ending" ng-if="vm.display.date_ending" size="7"></date-picker>
                             </span>
                         </div>
+                        <div class="multiple">
+                            <input type="checkbox" id="multiple" ng-model="vm.form.multiple"/>
+                            <label for="multiple"><i18n>formulaire.multiple</i18n></label>
+                        </div>
                         <div class="anonymous">
                             <input type="checkbox" id="isAnonymous" ng-model="vm.display.anonymous" ng-disabled="vm.form.nb_responses > 0"/>
                             <div class="text">

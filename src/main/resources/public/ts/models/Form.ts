@@ -22,6 +22,7 @@ export class Form implements Selectable, Shareable  {
     sent: boolean;
     collab: boolean;
     archived: boolean;
+    multiple: boolean;
     anonymous: boolean;
     displayed: boolean;
     selected: boolean;
@@ -48,6 +49,7 @@ export class Form implements Selectable, Shareable  {
         this.sent = false;
         this.collab = false;
         this.archived = false;
+        this.multiple = false;
         this.anonymous = false;
         this.displayed = true;
         this.selected = null;
@@ -68,6 +70,7 @@ export class Form implements Selectable, Shareable  {
             sent: this.sent,
             collab: this.collab,
             archived: this.archived,
+            multiple: this.multiple,
             anonymous: this.anonymous,
             selected: this.selected
         }

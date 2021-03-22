@@ -45,7 +45,7 @@ public class DefaultFormService implements FormService {
     @Override
     public void listSentForms(UserInfos user, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT f.id, title, description, picture, owner_id, owner_name," +
-                "date_creation, date_modification, date_opening, date_ending, form_id, status, date_sending, date_response " +
+                "date_creation, date_modification, date_opening, date_ending, multiple, form_id, status, date_sending, date_response " +
                 "FROM " + Formulaire.FORM_TABLE + " f " +
                 "INNER JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON f.id = d.form_id " +
                 "WHERE d.responder_id = ? AND NOW() BETWEEN f.date_opening AND COALESCE(date_ending, NOW() + interval '1 year') " +
@@ -64,7 +64,7 @@ public class DefaultFormService implements FormService {
     @Override
     public void create(JsonObject form, UserInfos user, Handler<Either<String, JsonObject>> handler) {
         String query = "INSERT INTO " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, " +
-                "picture, date_creation, date_modification, date_opening, date_ending, anonymous) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+                "picture, date_creation, date_modification, date_opening, date_ending, multiple, anonymous) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(user.getUserId())
                 .add(user.getUsername())
@@ -74,6 +74,7 @@ public class DefaultFormService implements FormService {
                 .add("NOW()").add("NOW()")
                 .add(form.getString("date_opening", "NOW()"))
                 .add(form.getString("date_ending", null))
+                .add(form.getBoolean("multiple", false))
                 .add(form.getBoolean("anonymous", false));
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
@@ -87,8 +88,8 @@ public class DefaultFormService implements FormService {
         List<JsonObject> allForms = forms.getList();
         for (JsonObject form : allForms) {
             query += "INSERT INTO " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, " +
-                    "picture, date_creation, date_modification, date_opening, date_ending, anonymous) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?); ";
+                    "picture, date_creation, date_modification, date_opening, date_ending, multiple, anonymous) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?); ";
             params.add(user.getUserId())
                     .add(user.getUsername())
                     .add(form.getString("title", ""))
@@ -97,6 +98,7 @@ public class DefaultFormService implements FormService {
                     .add("NOW()").add("NOW()")
                     .add(form.getString("date_opening", "NOW()"))
                     .add(form.getString("date_ending", null))
+                    .add(form.getBoolean("multiple", false))
                     .add(form.getBoolean("anonymous", false));
         }
 
@@ -106,8 +108,8 @@ public class DefaultFormService implements FormService {
 
     @Override
     public void duplicate(int id, UserInfos user, Handler<Either<String, JsonArray>> handler) {
-        String query = "WITH dForm_id as (INSERT INTO  " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, picture, date_opening, date_ending, anonymous) " +
-                "SELECT ?, ?, concat(title, ' - Copie'), description, picture, date_opening, date_ending, anonymous FROM " + Formulaire.FORM_TABLE +
+        String query = "WITH dForm_id as (INSERT INTO  " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, picture, date_opening, date_ending, multiple) " +
+                "SELECT ?, ?, concat(title, ' - Copie'), description, picture, date_opening, date_ending, multiple, anonymous FROM " + Formulaire.FORM_TABLE +
                 " WHERE id = ? RETURNING id) " +
                 "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, statement, mandatory, duplicate_question_id) " +
                 "SELECT (SELECT id from dForm_id), title, position, question_type, statement, mandatory, id FROM " + Formulaire.QUESTION_TABLE +
@@ -121,7 +123,7 @@ public class DefaultFormService implements FormService {
         String query = "WITH nbResponses AS (SELECT COUNT(*) FROM " + Formulaire.DISTRIBUTION_TABLE +
                 " WHERE form_id = ? AND status = ?)" +
                 "UPDATE " + Formulaire.FORM_TABLE + " SET title = ?, description = ?, picture = ?, " +
-                "date_modification = ?, date_opening = ?, date_ending = ?, sent = ?, collab = ?, archived = ?, " +
+                "date_modification = ?, date_opening = ?, date_ending = ?, sent = ?, collab = ?, archived = ?, multiple = ? " +
                 "anonymous = CASE (SELECT count > 0 FROM nbResponses) WHEN false THEN ? " +
                 "WHEN true THEN (SELECT anonymous FROM " + Formulaire.FORM_TABLE + " WHERE id = ?) END WHERE id = ? RETURNING *;";
 
@@ -137,6 +139,7 @@ public class DefaultFormService implements FormService {
                 .add(form.getBoolean("sent", false))
                 .add(form.getBoolean("collab", false))
                 .add(form.getBoolean("archived", false))
+                .add(form.getBoolean("multiple", false))
                 .add(form.getBoolean("anonymous", false))
                 .add(formId).add(formId);
 

@@ -12,3 +12,6 @@ CREATE TABLE formulaire.response_file (
 
 ALTER TABLE formulaire.question
     ADD COLUMN duplicate_question_id bigint;
+
+ALTER TABLE formulaire.form
+    ADD COLUMN multiple boolean NOT NULL DEFAULT FALSE;
