@@ -103,12 +103,12 @@ i {
 
   &.send::before {
     content: "\F0108";
-    color: $formulaire-grey-very-light;
+    color: $formulaire-grey-dark;
   }
 
   &.share::before {
     content: "\F497";
-    color: $formulaire-grey-very-light;
+    color: $formulaire-grey-dark;
   }
 
   &.view-cards::before {

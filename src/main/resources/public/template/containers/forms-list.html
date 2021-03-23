@@ -81,8 +81,8 @@
                         <div class="data-bottom">
                             <div class="count"><i18n>formulaire.responses.count</i18n> : [[form.nb_responses]]</div>
                             <div class="icons">
-                                <i class="send md-icon" ng-class="{'selected': form.sent}"></i>
-                                <i class="share md-icon" ng-class="{'selected': form.collab}"></i>
+                                <i class="send md-icon" ng-if="form.sent"></i>
+                                <i class="share md-icon" ng-if="form.collab"></i>
                             </div>
                         </div>
                     </div>
@@ -112,8 +112,8 @@
                     <td ng-click="form.selected=!form.selected">[[form.nb_responses]]</td>
                     <td ng-click="form.selected=!form.selected"><i18n>formulaire.modified</i18n>[[form.date_modification.toLocaleString()]]</td>
                     <td ng-click="form.selected=!form.selected">
-                        <i class="send md-icon" ng-class="{'selected': form.sent}"></i>
-                        <i class="share md-icon" ng-class="{'selected': form.collab}"></i>
+                        <i class="send md-icon" ng-if="form.sent"></i>
+                        <i class="share md-icon" ng-if="form.collab"></i>
                     </td>
                 </tr>
             </tbody>
