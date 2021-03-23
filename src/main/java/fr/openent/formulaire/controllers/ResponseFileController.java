@@ -1,6 +1,7 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.Formulaire;
+import fr.openent.formulaire.helpers.FolderExporterZip;
 import fr.openent.formulaire.security.ResponseRight;
 import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.ResponseFileService;
@@ -9,12 +10,18 @@ import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.storage.Storage;
+
+import java.io.*;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
@@ -23,11 +30,13 @@ public class ResponseFileController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(ResponseFileController.class);
     private ResponseFileService responseFileService;
     private Storage storage;
+    private static byte[] BUFFER;
 
     public ResponseFileController(Storage storage) {
         super();
         this.responseFileService = new DefaultResponseFileService();
         this.storage = storage;
+        BUFFER = new byte[4096 * 1024];
     }
 
     @Get("/responses/:questionId/files/all")
@@ -59,7 +68,28 @@ public class ResponseFileController extends ControllerHelper {
                 String fileId = file.getString("id");
                 storage.sendFile(fileId, file.getString("filename"), request, false, new JsonObject());
             } else {
-                notFound(request);
+                renderError(request);
+            }
+        });
+    }
+
+    @Get("/responses/:questionId/files/download/zip")
+    @ApiDoc("Download all file")
+    public void zipAndDownload(HttpServerRequest request) {
+        String questionId = request.getParam("questionId");
+        responseFileService.list(questionId, event -> {
+            if (event.isRight()) {
+                JsonArray files = event.right().getValue();
+                List<JsonObject> listFiles = files.getList();
+
+                FolderExporterZip zipBuilder = new FolderExporterZip(storage, vertx.fileSystem(), false);
+                zipBuilder.exportAndSendZip(null, listFiles, request,false).onComplete(zipEvent -> {
+                    if (zipEvent.failed()) {
+                        renderError(request);
+                    }
+                });
+            } else {
+                renderError(request);
             }
         });
     }
@@ -121,5 +151,40 @@ public class ResponseFileController extends ControllerHelper {
                 log.error("[Formulaire@deleteFile] An error occurred while removing " + fileId + " file.");
             }
         });
+    }
+
+    private ZipOutputStream zipFiles(String zipName, JsonArray files) {
+        try {
+            ZipOutputStream zipOutput = new ZipOutputStream(new FileOutputStream(zipName));
+
+            int i = 0;
+            while (i < files.size()) {
+                JsonObject file = files.getJsonObject(i);
+                String filename = file.getString("filename");
+
+                zipOutput.putNextEntry(new ZipEntry(filename));
+                FileInputStream input = new FileInputStream("path to file ?");
+                copy(input, zipOutput);
+                input.close();
+                zipOutput.closeEntry();
+
+                i++;
+            }
+
+            zipOutput.close();
+            return zipOutput;
+        }
+        catch (IOException ex) {
+            log.error("[Formulaire@zipAndDownload] Fail to zip files.");
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    public static void copy(InputStream input, OutputStream output) throws IOException {
+        int bytesRead;
+        while ((bytesRead = input.read(BUFFER))!= -1) {
+            output.write(BUFFER, 0, bytesRead);
+        }
     }
 }

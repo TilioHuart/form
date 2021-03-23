@@ -5,6 +5,7 @@ export interface ResponseFileService {
     list(questionId : number): Promise<AxiosResponse>;
     get(responseId : number): Promise<AxiosResponse>;
     download(responseId : number): Promise<AxiosResponse>;
+    zipAndDownload(questionId : number): Promise<AxiosResponse>;
     create(responseId: number, file): Promise<AxiosResponse>;
     update(responseId: number, file): Promise<AxiosResponse>;
     delete(responseId : number, fileId : number): Promise<AxiosResponse>;
@@ -33,6 +34,15 @@ export const responseFileService: ResponseFileService = {
     async download(responseId : number): Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/responses/${responseId}/files/download`);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.responseFileService.download'));
+            throw err;
+        }
+    },
+
+    async zipAndDownload(questionId : number): Promise<AxiosResponse> {
+        try {
+            return http.get(`/formulaire/responses/${questionId}/files/download/zip`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseFileService.download'));
             throw err;
