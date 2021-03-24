@@ -13,9 +13,10 @@
                 <div class="date">
                     <i class="clock sm-icon spaced-right"></i><i18n>formulaire.form.edit.modified</i18n>[[vm.form.date_modification.toLocaleString()]]
                 </div>
-                <button class="cell" ng-click="vm.createNewQuestion()"><i18n>formulaire.add</i18n></button>
-                <button class="cell dontSave" ng-click="vm.organizeQuestions()"><i18n>formulaire.organize</i18n></button>
+                <button class="cell cancel" ng-click="vm.return()"><i18n>formulaire.return</i18n></button>
+                <button class="cell cancel dontSave" ng-click="vm.organizeQuestions()"><i18n>formulaire.organize</i18n></button>
                 <button class="cell dontSave" ng-click="" ng-disabled="true"><i18n>formulaire.preview</i18n></button>
+                <button class="cell" ng-click="vm.saveAll(true)"><i18n>formulaire.save</i18n></button>
             </div>
         </section>
     </div>
@@ -23,7 +24,7 @@
     <div class="edit-form" ng-if="vm.questions.all.length > 0">
         <!-- List of questions-->
         <div class="questions" sortable-list>
-            <div ng-repeat="question in vm.questions.all | orderBy:question.position" class="twelve"
+            <div ng-repeat="question in vm.questions.all | orderBy:question.position" class="nine"
                  sortable-element data-ng-change="vm.reOrder()" data-ng-model="question.index">
                 <!--  Each questions component -->
                 <question-item question="question"></question-item>
@@ -31,11 +32,9 @@
         </div>
         <!-- End page buttons -->
         <div class="buttons">
-            <button class="cell" ng-click="vm.createNewQuestion()"><i18n>formulaire.add</i18n></button>
-        </div>
-        <div class="buttons">
-            <button class="cell" ng-click="vm.return()"><i18n>formulaire.return</i18n></button>
-            <button class="cell" ng-click="vm.saveAll(true)"><i18n>formulaire.save</i18n></button>
+            <div class="flexend nine">
+                <button class="cell blueButton" ng-click="vm.createNewQuestion()"><i18n>formulaire.add.element</i18n></button>
+            </div>
         </div>
     </div>
 
@@ -45,6 +44,10 @@
         <h1><i18n>formulaire.form.edit.empty.main</i18n></h1>
         <br>
         <div><i18n>formulaire.form.edit.empty.caption</i18n></div>
+        <br>
+        <div class="buttons">
+            <button class="cell blueButton" ng-click="vm.createNewQuestion()"><i18n>formulaire.add.element</i18n></button>
+        </div>
     </div>
 
     <container template='lightbox'></container>

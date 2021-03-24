@@ -1,14 +1,13 @@
 // Progress-bar
 
 .progressbar-container {
-  display: inline-block;
-  width: 95%;
-  margin: auto;
+  display: flex;
+  justify-content: center;
 
   .progressbar {
     display: flex;
-    justify-content: center;
     margin: 20px 10px;
+    padding: 0;
   }
   .progressbar li {
     list-style-type: none;
@@ -18,13 +17,11 @@
     z-index: 0;
   }
   .progressbar li:before {
-    width: 30px;
-    height: 30px;
+    width: 22px;
+    height: 22px;
     content: '';
-    line-height: 30px;
     display: block;
-    text-align: center;
-    margin: 0 auto 10px auto;
+    margin: 0 auto;
     border-radius: 50%;
     background-color: $formulaire-blue-light;
   }
@@ -34,7 +31,7 @@
     content: '';
     position: absolute;
     background-color: $formulaire-blue-light;
-    top: 15px;
+    top: 10px;
     left: -50%;
   }
   .progressbar li:first-child:after {

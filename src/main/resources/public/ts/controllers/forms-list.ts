@@ -65,7 +65,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         switch (vm.folder) {
             case "mine": vm.forms.all = vm.forms.all.filter(form => form.archived === false); break;
             case "shared": vm.forms.all = vm.forms.all.filter(form => form.collab === true && form.owner_id != model.me.userId); break;
-            case "sent": vm.forms.all = vm.forms.all.filter(form => form.sent === true); break;
             case "archived": vm.forms.all = vm.forms.all.filter(form => form.archived === true); break;
             default : vm.openFolder('mine'); break;
         }
