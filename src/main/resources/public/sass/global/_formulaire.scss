@@ -25,7 +25,7 @@ $formulaire-grey-very-light: #e9ebef; // from cancel button
 }
 
 
-body.formulaire {
+body.formulaire section.main {
   @import "components/index";
 
   .error {
