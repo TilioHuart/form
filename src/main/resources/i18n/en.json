@@ -21,6 +21,7 @@
   "formulaire.mandatory": "Mandatory",
   "formulaire.open": "Open",
   "formulaire.properties": "Properties",
+  "formulaire.myResponses": "My responses",
   "formulaire.duplicate": "Duplicate",
   "formulaire.send": "Send",
   "formulaire.sendTo": "Send to ...",
@@ -56,9 +57,6 @@
   "formulaire.forms.sent": "Forms sent",
   "formulaire.forms.archived": "Archive",
   "formulaire.forms.empty": "Sorry, you don't have any form ...",
-
-  "formulaire.distribution.status.waiting": "Waiting for response",
-  "formulaire.distribution.status.done": "Responded on ",
 
   "formulaire.table.title": "Form title",
   "formulaire.table.author": "Author",

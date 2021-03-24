@@ -153,7 +153,8 @@ export const questionResponderController = ng.controller('QuestionResponderContr
                     j++;
                 }
                 if (!found && checked) {
-                    let newResponse = new Response(vm.question.id, vm.question.choices.all[i].id, vm.question.choices.all[i].value);
+                    let newResponse = new Response(vm.question.id, vm.question.choices.all[i].id,
+                        vm.question.choices.all[i].value, vm.distribution.id);
                     await responseService.create(newResponse);
                 }
                 else if (found && !checked) {

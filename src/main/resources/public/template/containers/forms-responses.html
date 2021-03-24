@@ -53,12 +53,22 @@
                             <div class="date"><i18n>formulaire.sent</i18n>[[vm.displayDate(form.date_sending)]]</div>
                         </div>
                         <div class="data-status">
-                            <span ng-if="!!form.date_response" style="color: green">
-                                <i18n>formulaire.responded.date</i18n>[[vm.displayDate(form.date_response)]]
-                            </span>
-                            <span ng-if="!!!form.date_response" style="color: #b50000">
-                                <i18n>formulaire.responded.waiting</i18n>
-                            </span>
+                            <div ng-if="!form.multiple">
+                                <span ng-if="!!form.date_response" style="color: green">
+                                    <i18n>formulaire.responded.date</i18n>[[vm.displayDate(form.date_response)]]
+                                </span>
+                                    <span ng-if="!!!form.date_response" style="color: #b50000">
+                                    <i18n>formulaire.responded.waiting</i18n>
+                                </span>
+                            </div>
+                            <div ng-if="form.multiple">
+                                <span ng-if="vm.getMyResponses(form).length > 0" style="color: green">
+                                    <i18n>formulaire.responses.count</i18n> : [[vm.getMyResponses(form).length]]
+                                </span>
+                                <span ng-if="vm.getMyResponses(form).length == 0" style="color: #b50000">
+                                    <i18n>formulaire.responses.count</i18n> : [[vm.getMyResponses(form).length]]
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>

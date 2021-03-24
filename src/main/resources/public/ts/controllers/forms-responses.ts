@@ -1,4 +1,4 @@
-import {ng} from 'entcore';
+import {ng, template} from 'entcore';
 import {Distribution, Distributions, DistributionStatus, Form, Forms} from "../models";
 import {distributionService} from "../services";
 
@@ -8,15 +8,22 @@ interface ViewModel {
     allFormsSelected: boolean;
     searchInput: string;
     display: {
-        grid: boolean
+        grid: boolean,
+        lightbox: {
+            myResponses: boolean
+        }
     };
 
-    switchAll(boolean): void;
+    switchAll(boolean) : void;
     sort() : void;
     filter() : void;
-    displayDate(Date): string;
-    checkOpenButton(): boolean;
-    openForm(Form): void;
+    displayDate(date:Date) : string;
+    checkOpenButton() : boolean;
+    checkMyResponsesButton() : boolean;
+    openForm(form:Form) : void;
+    myResponses() : void;
+    closeMyResponses() : void;
+    getMyResponses(form:Form) : Array<Distribution>;
 }
 
 
@@ -29,7 +36,10 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
     vm.searchInput = "";
     vm.allFormsSelected = false;
     vm.display = {
-        grid: true
+        grid: true,
+        lightbox: {
+            myResponses: false
+        }
     };
 
     const init = async (): Promise<void> => {
@@ -68,23 +78,56 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
         return new Date(dateToFormat + "Z").toLocaleString();
     };
 
+    vm.getMyResponses = (form:Form): Array<Distribution> => {
+        return vm.distributions.all.filter(distrib => distrib.form_id === form.id);
+    }
+
     // Toaster
 
     vm.checkOpenButton = (): boolean => {
         let formId = vm.forms.selected[0].id;
         let status = vm.distributions.all.filter(distrib => distrib.form_id === formId)[0].status;
-        return vm.forms.selected.length === 1 && status != DistributionStatus.FINISHED;
+        return (vm.forms.selected.length === 1 &&
+            (vm.forms.selected[0].multiple || status != DistributionStatus.FINISHED));
+    };
+
+    vm.checkMyResponsesButton = (): boolean => {
+        return (vm.forms.selected.length === 1 && vm.forms.selected[0].multiple);
     };
 
     vm.openForm = async (form:Form): Promise<void> => {
         vm.forms.deselectAll();
-        // let distrib: Distribution = $scope.getDataIf200(await distributionService.get(form.id));
-        let distrib: Distribution = vm.distributions.all.filter(distrib => distrib.form_id === form.id)[0];
-        if (distrib.status != DistributionStatus.FINISHED) {
+        if (!form.multiple) {
+            let distrib: Distribution = vm.distributions.all.filter(distrib => distrib.form_id === form.id)[0];
+            if (distrib.status != DistributionStatus.FINISHED) {
+                $scope.redirectTo(`/form/${form.id}/question/1`);
+            }
+        } else {
+            let distribs = vm.distributions.all.filter(distrib => distrib.form_id === form.id);
+            let distrib: Distribution = null;
+            for (let d of distribs) {
+                if (distrib.status != DistributionStatus.FINISHED) {
+                    distrib = d;
+                }
+            }
+            if (distrib == null) {
+                await distributionService.newDist(distribs[0]);
+            }
             $scope.redirectTo(`/form/${form.id}/question/1`);
         }
         $scope.safeApply();
     };
+
+    vm.myResponses = (): void => {
+        template.open('lightbox', 'lightbox/my-responses');
+        vm.display.lightbox.myResponses = true;
+    }
+
+    vm.closeMyResponses = (): void => {
+        template.close('lightbox');
+        vm.display.lightbox.myResponses = false;
+        window.setTimeout(async function () { await init(); }, 100);
+    }
 
     init();
 }]);

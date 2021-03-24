@@ -56,7 +56,7 @@ public class DistributionController extends ControllerHelper {
     }
 
     @Get("/distributions/forms/:formId")
-    @ApiDoc("Get the info of a distribution thanks to the id")
+    @ApiDoc("Get the in progress distribution or to do for given form and responder")
     @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
     public void get(HttpServerRequest request) {
         String formId = request.getParam("formId");
@@ -85,6 +85,17 @@ public class DistributionController extends ControllerHelper {
                 log.error("User not found in session.");
                 Renders.unauthorized(request);
             }
+        });
+    }
+
+    @Post("/distributions")
+    @ApiDoc("Create a new distribution based an already existing one")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void newDist(HttpServerRequest request) {
+        UserUtils.getUserInfos(eb, request, user -> {
+            RequestUtils.bodyToJson(request, distribution -> {
+                distributionService.newDist(distribution, defaultResponseHandler(request));
+            });
         });
     }
 

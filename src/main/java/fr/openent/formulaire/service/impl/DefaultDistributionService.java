@@ -32,8 +32,10 @@ public class DefaultDistributionService implements DistributionService {
 
     @Override
     public void get(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler) {
-        String query = "SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? AND responder_id = ?;";
-        JsonArray params = new JsonArray().add(formId).add(user.getUserId());
+        String query = "SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE +
+                " WHERE form_id = ? AND responder_id = ? AND status = ? OR status = ?;";
+        JsonArray params = new JsonArray().add(formId).add(user.getUserId())
+                .add(Formulaire.TO_DO).add(Formulaire.IN_PROGRESS);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
@@ -66,6 +68,18 @@ public class DefaultDistributionService implements DistributionService {
                     .add("NOW()");
             Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
         }
+    }
+
+    @Override
+    public void newDist(JsonObject distribution, Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT create_distrib(?, ?, ?, ?, ?) AS created;";
+        JsonArray params = new JsonArray()
+                .add(distribution.getInteger("form_id"))
+                .add(distribution.getString("sender_id", ""))
+                .add(distribution.getString("sender_name", ""))
+                .add(distribution.getString("responder_id", ""))
+                .add(distribution.getString("responder_name", ""));
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override

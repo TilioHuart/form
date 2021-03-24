@@ -21,6 +21,7 @@
   "formulaire.mandatory": "Obligatoire",
   "formulaire.open": "Ouvrir",
   "formulaire.properties": "Propriétés",
+  "formulaire.myResponses": "Mes réponses",
   "formulaire.duplicate": "Dupliquer",
   "formulaire.send": "Envoyer",
   "formulaire.sendTo": "Envoyer à ...",
@@ -56,9 +57,6 @@
   "formulaire.forms.sent": "Formulaires envoyés",
   "formulaire.forms.archived": "Corbeille",
   "formulaire.forms.empty": "Désolé, vous n'avez aucun formulaire ...",
-
-  "formulaire.distribution.status.waiting": "En attente de réponse",
-  "formulaire.distribution.status.done": "Répondu le ",
 
   "formulaire.table.title": "Titre du formulaire",
   "formulaire.table.author": "Auteur",

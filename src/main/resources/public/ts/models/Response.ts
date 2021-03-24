@@ -7,12 +7,14 @@ export class Response {
     question_id: number;
     choice_id: number;
     answer: string|Date;
+    distribution_id: number;
 
-    constructor(question_id?: number, choice_id?: number, answer?: string|Date) {
+    constructor(question_id?: number, choice_id?: number, answer?: string|Date, distribution_id?: number) {
         this.id = null;
         this.question_id = question_id ? question_id : null;
         this.choice_id = choice_id ? choice_id : null;
         this.answer =  answer ? answer : null;
+        this.distribution_id = distribution_id ? distribution_id : null;
     }
 
     toJson(): Object {
@@ -21,6 +23,7 @@ export class Response {
             question_id: this.question_id,
             choice_id: this.choice_id,
             answer: this.answer,
+            distribution_id: this.distribution_id
         }
     }
 }
