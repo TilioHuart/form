@@ -106,7 +106,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
             let distribs = vm.distributions.all.filter(distrib => distrib.form_id === form.id);
             let distrib: Distribution = null;
             for (let d of distribs) {
-                if (distrib.status != DistributionStatus.FINISHED) {
+                if (d.status != DistributionStatus.FINISHED) {
                     distrib = d;
                 }
             }
