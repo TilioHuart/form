@@ -20,9 +20,9 @@ public class DefaultResponseService implements ResponseService {
     }
 
     @Override
-    public void listMine(String questionId, UserInfos user, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " WHERE question_id = ? AND responder_id = ? ORDER BY choice_id;";
-        JsonArray params = new JsonArray().add(questionId).add(user.getUserId());
+    public void listMine(String questionId, String distributionId, UserInfos user, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " WHERE question_id = ? AND responder_id = ?  AND distribution_id = ? ORDER BY choice_id;";
+        JsonArray params = new JsonArray().add(questionId).add(user.getUserId()).add(distributionId);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
@@ -35,13 +35,14 @@ public class DefaultResponseService implements ResponseService {
 
     @Override
     public void create(JsonObject response, UserInfos user, String questionId, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO " + Formulaire.RESPONSE_TABLE + " (question_id, choice_id, answer, responder_id) " +
-                "VALUES (?, ?, ?, ?) RETURNING *;";
+        String query = "INSERT INTO " + Formulaire.RESPONSE_TABLE + " (question_id, choice_id, answer, responder_id, distribution_id) " +
+                "VALUES (?, ?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(questionId)
                 .add(response.getInteger("choice_id", null))
                 .add(response.getString("answer", ""))
-                .add(user.getUserId());
+                .add(user.getUserId())
+                .add(response.getInteger("distribution_id", null));
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }

@@ -45,9 +45,9 @@ export class Responses {
         }
     }
 
-    async syncMine (questionId: number) : Promise<void> {
+    async syncMine (questionId: number, distributionId: number) : Promise<void> {
         try {
-            let { data } = await responseService.listMine(questionId);
+            let { data } = await responseService.listMine(questionId, distributionId);
             this.all = Mix.castArrayAs(Response, data);
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.response.sync'));

@@ -9,7 +9,7 @@ import org.entcore.common.user.UserInfos;
 public interface ResponseService {
     void list(String questionId, Handler<Either<String, JsonArray>> handler);
 
-    void listMine(String questionId, UserInfos user, Handler<Either<String, JsonArray>> handler);
+    void listMine(String questionId, String distributionId, UserInfos user, Handler<Either<String, JsonArray>> handler);
 
     void get(String responseId, Handler<Either<String, JsonObject>> handler);
 

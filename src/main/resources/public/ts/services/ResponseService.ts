@@ -23,9 +23,9 @@ export const responseService: ResponseService = {
         }
     },
 
-    async listMine (questionId : number): Promise<AxiosResponse> {
+    async listMine (questionId : number, distributionId : number): Promise<AxiosResponse> {
         try {
-            return http.get(`/formulaire/questions/${questionId}/responses/mine`);
+            return http.get(`/formulaire/questions/${questionId}/responses/${distributionId}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.list'));
             throw err;

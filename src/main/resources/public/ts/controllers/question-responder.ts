@@ -55,10 +55,11 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         vm.question = $scope.question;
         vm.question.choices = new QuestionChoices();
         vm.nbQuestions = $scope.form.nbQuestions;
+        vm.distribution = $scope.getDataIf200(await distributionService.get(vm.question.form_id));
         vm.last = vm.question.position === vm.nbQuestions;
         await vm.question.choices.sync(vm.question.id);
         if (vm.question.question_type === Types.MULTIPLEANSWER) {
-            await vm.responses.syncMine(vm.question.id);
+            await vm.responses.syncMine(vm.question.id, vm.distribution.id);
             vm.selectedIndex = new Array<boolean>(vm.nbQuestions);
             for (let i = 0; i < vm.question.choices.all.length; i++) {
                 let check = false;
@@ -72,11 +73,12 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         }
         else {
             vm.response = new Response();
-            let responses = $scope.getDataIf200(await responseService.listMine(vm.question.id));
+            let responses = $scope.getDataIf200(await responseService.listMine(vm.question.id, vm.distribution.id));
             if (responses.length > 0) {
                 vm.response = responses[0];
             }
             if (!!!vm.response.question_id) { vm.response.question_id = vm.question.id; }
+            if (!!!vm.response.distribution_id) { vm.response.distribution_id = vm.distribution.id; }
         }
         if (vm.question.question_type === Types.TIME) { formatTime() }
         if (vm.question.question_type === Types.FILE && !!vm.response.id) {
@@ -87,7 +89,6 @@ export const questionResponderController = ng.controller('QuestionResponderContr
                 vm.files.push(file);
             }
         }
-        vm.distribution = $scope.getDataIf200(await distributionService.get(vm.question.form_id));
 
         $scope.safeApply();
     };
@@ -189,7 +190,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
             let questions = $scope.getDataIf200(await questionService.list(vm.question.form_id));
             questions = questions.filter(question => question.mandatory === true);
             for (let question of questions) {
-                let responses = $scope.getDataIf200(await responseService.listMine(question.id));
+                let responses = $scope.getDataIf200(await responseService.listMine(question.id, vm.distribution.id));
                 responses = responses.filter(response => !!!response.answer);
                 if (responses.length > 0) {
                     return false;

@@ -74,7 +74,7 @@ public class DefaultDistributionService implements DistributionService {
     public void newDist(JsonObject distribution, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT create_distrib(?, ?, ?, ?, ?) AS created;";
         JsonArray params = new JsonArray()
-                .add(distribution.getInteger("form_id"))
+                .add(distribution.getInteger("form_id", null))
                 .add(distribution.getString("sender_id", ""))
                 .add(distribution.getString("sender_name", ""))
                 .add(distribution.getString("responder_id", ""))

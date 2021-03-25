@@ -36,15 +36,16 @@ public class ResponseController extends ControllerHelper {
         responseService.list(questionId, arrayResponseHandler(request));
     }
 
-    @Get("/questions/:questionId/responses/mine")
+    @Get("/questions/:questionId/responses/:distributionId")
     @ApiDoc("List all my responses for a question")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void listMine(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
+        String distributionId = request.getParam("distributionId");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
-                responseService.listMine(questionId, user, arrayResponseHandler(request));
+                responseService.listMine(questionId, distributionId, user, arrayResponseHandler(request));
             } else {
                 log.error("User not found in session.");
                 Renders.unauthorized(request);
