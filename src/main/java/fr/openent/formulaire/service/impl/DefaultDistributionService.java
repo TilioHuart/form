@@ -30,6 +30,13 @@ public class DefaultDistributionService implements DistributionService {
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
+    public void listByFormAndResponder(String formId, UserInfos user, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? AND responder_id = ? " +
+                "ORDER BY date_sending DESC;";
+        JsonArray params = new JsonArray().add(formId).add(user.getUserId());
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
     @Override
     public void get(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE +

@@ -46,6 +46,21 @@ public class DistributionController extends ControllerHelper {
         });
     }
 
+    @Get("/distributions/forms/:formId/list")
+    @ApiDoc("Get the distributions for given form and responder")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void listByFormAndResponder(HttpServerRequest request) {
+        String formId = request.getParam("formId");
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user != null) {
+                distributionService.listByFormAndResponder(formId, user, arrayResponseHandler(request));
+            } else {
+                log.error("User not found in session.");
+                Renders.unauthorized(request);
+            }
+        });
+    }
+
     @Get("/distributions/forms/:formId/count")
     @ApiDoc("Get the number of distributions of the form")
     @ResourceFilter(ShareAndOwner.class)

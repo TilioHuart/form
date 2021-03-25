@@ -46,7 +46,10 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
         await vm.forms.syncSent();
         try {
             for (let form of vm.forms.all) {
-                vm.distributions.all.push($scope.getDataIf200(await distributionService.get(form.id)));
+                let distribs = $scope.getDataIf200(await distributionService.listByFormAndResponder(form.id));
+                for (let d of distribs) {
+                    vm.distributions.all.push(d);
+                }
             }
         }
         catch (e) {
