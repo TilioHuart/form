@@ -79,7 +79,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
     };
 
     vm.getMyResponses = (form:Form): Array<Distribution> => {
-        return vm.distributions.all.filter(distrib => distrib.form_id === form.id);
+        return vm.distributions.all.filter(distrib => distrib.form_id === form.id && distrib.status === "FINISHED");
     }
 
     // Toaster
