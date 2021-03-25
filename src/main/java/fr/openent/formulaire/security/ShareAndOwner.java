@@ -75,7 +75,7 @@ public class ShareAndOwner implements ResourcesProvider {
         else if (isDeleteDistribution(binding)) {
             return "distributionId";
         }
-        else if (isListMineResponse(binding) || isCreateResponse(binding) || isListResponseFile(binding)) {
+        else if (isListMineResponse(binding) || isCreateResponse(binding) || isListResponseFile(binding) || isZipAndDownloadResponseFile(binding)) {
             return "questionId";
         }
         else if (isUpdateResponse(binding) || isDeleteResponse(binding) || isDownloadResponseFile(binding)) {
@@ -148,5 +148,9 @@ public class ShareAndOwner implements ResourcesProvider {
 
     private boolean isDownloadResponseFile(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseFileController|download");
+    }
+
+    private boolean isZipAndDownloadResponseFile(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseFileController|zipAndDownload");
     }
 }

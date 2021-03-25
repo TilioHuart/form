@@ -20,8 +20,6 @@ import org.entcore.common.storage.Storage;
 
 import java.io.*;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
@@ -36,7 +34,7 @@ public class ResponseFileController extends ControllerHelper {
         super();
         this.responseFileService = new DefaultResponseFileService();
         this.storage = storage;
-        BUFFER = new byte[4096 * 1024];
+        BUFFER = new byte[4096];
     }
 
     @Get("/responses/:questionId/files/all")
@@ -74,18 +72,31 @@ public class ResponseFileController extends ControllerHelper {
     }
 
     @Get("/responses/:questionId/files/download/zip")
-    @ApiDoc("Download all file")
+    @ApiDoc("Download all response files of a specific question")
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void zipAndDownload(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         responseFileService.list(questionId, event -> {
             if (event.isRight()) {
-                JsonArray files = event.right().getValue();
-                List<JsonObject> listFiles = files.getList();
+                List<JsonObject> listFiles = event.right().getValue().getList();
+                JsonObject root = new JsonObject().put("type", "folder").put("name", Formulaire.ARCHIVE_ZIP_NAME);
 
+                // Adapt properties for exportAndSendZip functions
+                for (JsonObject file : listFiles) {
+                    file.put("name", file.getString("filename"));
+                    file.put("file", file.getString("id"));
+                    file.put("type", "file");
+                }
+
+                // Export all files of the 'listFiles' in a folder defined by the 'root' object
                 FolderExporterZip zipBuilder = new FolderExporterZip(storage, vertx.fileSystem(), false);
-                zipBuilder.exportAndSendZip(null, listFiles, request,false).onComplete(zipEvent -> {
+                zipBuilder.exportAndSendZip(root, listFiles, request,false).onComplete(zipEvent -> {
                     if (zipEvent.failed()) {
                         renderError(request);
+                    }
+                    else {
+                        log.info("Zip folder downloaded !");
                     }
                 });
             } else {
@@ -107,12 +118,12 @@ public class ResponseFileController extends ControllerHelper {
             try {
                 String responseId = request.getParam("responseId");
                 String fileId = entries.getString("_id");
-                String filename = entries.getJsonObject("metadata").getString("filename");
+                String name = entries.getJsonObject("metadata").getString("filename");
                 String type = entries.getJsonObject("metadata").getString("content-type");
 
-                responseFileService.create(responseId, fileId, filename, type, event -> {
+                responseFileService.create(responseId, fileId, name, type, event -> {
                     if (event.isRight()) {
-                        JsonObject response = new JsonObject().put("id", fileId).put("filename", filename);
+                        JsonObject response = new JsonObject().put("id", fileId).put("filename", name);
                         request.response().setStatusCode(201).putHeader("Content-Type", type).end(response.toString());
                     } else {
                         deleteFile(fileId);
@@ -151,40 +162,5 @@ public class ResponseFileController extends ControllerHelper {
                 log.error("[Formulaire@deleteFile] An error occurred while removing " + fileId + " file.");
             }
         });
-    }
-
-    private ZipOutputStream zipFiles(String zipName, JsonArray files) {
-        try {
-            ZipOutputStream zipOutput = new ZipOutputStream(new FileOutputStream(zipName));
-
-            int i = 0;
-            while (i < files.size()) {
-                JsonObject file = files.getJsonObject(i);
-                String filename = file.getString("filename");
-
-                zipOutput.putNextEntry(new ZipEntry(filename));
-                FileInputStream input = new FileInputStream("path to file ?");
-                copy(input, zipOutput);
-                input.close();
-                zipOutput.closeEntry();
-
-                i++;
-            }
-
-            zipOutput.close();
-            return zipOutput;
-        }
-        catch (IOException ex) {
-            log.error("[Formulaire@zipAndDownload] Fail to zip files.");
-            ex.printStackTrace();
-            return null;
-        }
-    }
-
-    public static void copy(InputStream input, OutputStream output) throws IOException {
-        int bytesRead;
-        while ((bytesRead = input.read(BUFFER))!= -1) {
-            output.write(BUFFER, 0, bytesRead);
-        }
     }
 }

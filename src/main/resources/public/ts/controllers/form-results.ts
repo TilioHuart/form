@@ -21,7 +21,8 @@ interface ViewModel {
 
     exportForm(): void;
     doExportForm(): void;
-    downloadFile(responseId: number): Promise<void>;
+    downloadFile(responseId: number): void;
+    zipAndDownload(): void;
     prev(): Promise<void>;
     next(): Promise<void>;
     goTo(position: number): Promise<void>;
@@ -82,9 +83,13 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             $scope.safeApply();
         };
 
-        vm.downloadFile = async (responseId: number) : Promise<void> => {
+        vm.downloadFile = (responseId: number) : void => {
             window.open(`/formulaire/responses/${responseId}/files/download`);
-        }
+        };
+
+        vm.zipAndDownload = () : void => {
+            window.open(`/formulaire/responses/${vm.question.id}/files/download/zip`);
+        };
 
         vm.prev = async (): Promise<void> => {
             let prevPosition: number = vm.question.position - 1;
@@ -102,8 +107,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
         vm.goTo = async (position: number) : Promise<void> => {
             $scope.redirectTo(`/form/${vm.question.form_id}/results/${position}`);
-        }
-
+        };
 
         init();
 

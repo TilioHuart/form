@@ -26,7 +26,7 @@
                     <i18n ng-if="vm.nbResults > 1">formulaire.responses</i18n>
                     <i18n ng-if="vm.nbResults <= 1">formulaire.response</i18n>)
                 </h4>
-                <button class="cell" ng-click="" ng-disabled="true" ng-if="vm.question.question_type == vm.types.FILE">
+                <button class="cell" ng-click="vm.zipAndDownload()" ng-if="vm.question.question_type == vm.types.FILE">
                     <i18n>formulaire.form.download.all.files</i18n>
                 </button>
             </div>

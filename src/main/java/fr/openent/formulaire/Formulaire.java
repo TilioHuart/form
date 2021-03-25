@@ -47,6 +47,8 @@ public class Formulaire extends BaseServer {
 	public static final String IN_PROGRESS = "IN_PROGRESS";
 	public static final String FINISHED = "FINISHED";
 
+	public static final String ARCHIVE_ZIP_NAME = "Fichiers déposés";
+
 	@Override
 	public void start() throws Exception {
 		super.start();
