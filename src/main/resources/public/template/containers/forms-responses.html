@@ -54,19 +54,19 @@
                         </div>
                         <div class="data-status">
                             <div ng-if="!form.multiple">
-                                <span ng-if="!!form.date_response" style="color: green">
-                                    <i18n>formulaire.responded.date</i18n>[[vm.displayDate(form.date_response)]]
+                                <span ng-if="!!vm.getMyResponses(form)[0].date_response" class="responded">
+                                    <i18n>formulaire.responded.date</i18n>[[vm.displayDate(vm.getMyResponses(form)[0].date_response)]]
                                 </span>
-                                    <span ng-if="!!!form.date_response" style="color: #b50000">
+                                    <span ng-if="!!!vm.getMyResponses(form)[0].date_response" class="notResponded">
                                     <i18n>formulaire.responded.waiting</i18n>
                                 </span>
                             </div>
                             <div ng-if="form.multiple">
-                                <span ng-if="vm.getMyResponses(form).length > 0" style="color: green">
+                                <span ng-if="vm.getMyResponses(form).length > 0" class="responded">
                                     <i18n>formulaire.responses.count</i18n> : [[vm.getMyResponses(form).length]]
                                 </span>
-                                <span ng-if="vm.getMyResponses(form).length == 0" style="color: #b50000">
-                                    <i18n>formulaire.responses.count</i18n> : [[vm.getMyResponses(form).length]]
+                                <span ng-if="vm.getMyResponses(form).length == 0" class="notResponded">
+                                    <i18n>formulaire.responses.count</i18n> : 0
                                 </span>
                             </div>
                         </div>
@@ -112,5 +112,6 @@
         </div>
     </section>
 
+    <container template='lightbox'></container>
     <div ng-include="'formulaire/public/template/components/toaster.html'"></div>
 </div>

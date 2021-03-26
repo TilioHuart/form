@@ -44,12 +44,11 @@ public class DefaultFormService implements FormService {
 
     @Override
     public void listSentForms(UserInfos user, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT f.id, title, description, picture, owner_id, owner_name," +
-                "date_creation, date_modification, date_opening, date_ending, multiple, form_id, status, date_sending, date_response " +
-                "FROM " + Formulaire.FORM_TABLE + " f " +
-                "INNER JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON f.id = d.form_id " +
-                "WHERE d.responder_id = ? AND NOW() BETWEEN f.date_opening AND COALESCE(date_ending, NOW() + interval '1 year') " +
-                "ORDER BY d.date_sending DESC;";
+        String query = "SELECT f.* FROM " + Formulaire.FORM_TABLE + " f " +
+                "LEFT OUTER JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON f.id = d.form_id " +
+                "WHERE d.responder_id = ? AND NOW() BETWEEN date_opening AND COALESCE(date_ending, NOW() + interval '1 year') " +
+                "GROUP BY f.id " +
+                "ORDER BY date_opening DESC;";
         JsonArray params = new JsonArray().add(user.getUserId());
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }

@@ -44,11 +44,21 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
 
     const init = async (): Promise<void> => {
         await vm.forms.syncSent();
+        vm.distributions = new Distributions();
         try {
             for (let form of vm.forms.all) {
                 let distribs = $scope.getDataIf200(await distributionService.listByFormAndResponder(form.id));
                 for (let d of distribs) {
                     vm.distributions.all.push(d);
+                }
+                form.date_sending = distribs[0].date_sending;
+                form.status = distribs[0].status;
+                if (form.multiple) {
+                    for (let d of distribs) {
+                        if (d.status === "FINISHED") {
+                            form.status = "FINISHED";
+                        }
+                    }
                 }
             }
         }
@@ -129,7 +139,6 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
     vm.closeMyResponses = (): void => {
         template.close('lightbox');
         vm.display.lightbox.myResponses = false;
-        window.setTimeout(async function () { await init(); }, 100);
     }
 
     init();

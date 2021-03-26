@@ -1,7 +1,6 @@
 <lightbox show="vm.display.lightbox.myResponses" on-close="vm.closeMyResponses()">
     <h2><i18n>formulaire.myResponses</i18n> - [[vm.forms.selected[0].title]]</h2>
     <div ng-repeat="dist in vm.getMyResponses(vm.forms.selected[0])">
-        [[$index]]. <i18n>formulaire.responded.date</i18n>[[vm.displayDate(dist.date_response)]]
+        [[$index + 1]]. <i18n>formulaire.responded.date</i18n>[[vm.displayDate(dist.date_response)]]
     </div>
-    <share-panel app-prefix="formulaire" resources="vm.forms.selected[0]" auto-close="true"></share-panel>
 </lightbox>
