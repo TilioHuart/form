@@ -1,11 +1,12 @@
 import {ng} from 'entcore';
-import {formService} from "../services";
+import {distributionService, formService} from "../services";
 import {Form} from "../models";
 
 interface ViewModel {
     form: Form;
     display: {
-        date_ending: boolean;
+        date_ending: boolean,
+        anonymous: boolean
     }
 
     save(): Promise<void>;
@@ -20,11 +21,13 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
         const vm: ViewModel = this;
         vm.form = new Form();
         vm.display = {
-            date_ending: false
+            date_ending: false,
+            anonymous: false
         };
 
         const init = async (): Promise<void> => {
             vm.form = $scope.form;
+            vm.form.nb_responses = $scope.getDataIf200(await distributionService.count(vm.form.id)).count;
             vm.display.date_ending = !!vm.form.date_ending;
             $scope.safeApply();
         };

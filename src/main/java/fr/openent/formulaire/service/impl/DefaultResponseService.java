@@ -74,10 +74,10 @@ public class DefaultResponseService implements ResponseService {
                 "JOIN " + Formulaire.RESPONSE_TABLE + " r ON r.question_id = q.id " +
                 "WHERE form_id = ? " +
             ") rep ON d.form_id = rep.form_id AND d.responder_id = rep.responder_id " +
-            "WHERE d.status = '" + Formulaire.FINISHED + "' " +
+            "WHERE d.status = ? " +
             "ORDER BY d.form_id, d.responder_id, rep.position;";
 
-        JsonArray params = new JsonArray().add(formId);
+        JsonArray params = new JsonArray().add(formId).add(Formulaire.FINISHED);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 }

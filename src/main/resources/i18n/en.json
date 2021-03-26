@@ -39,6 +39,8 @@
   "formulaire.goTo": "Go to ",
   "formulaire.date.opening": "Opening date",
   "formulaire.date.ending": "Ending date",
+  "formulaire.anonymous.label": "Anonymize the responses",
+  "formulaire.anonymous.description": "The identifiers, first names, last names and school names of the responders won't be save.",
 
   "formulaire.read": "Access",
   "formulaire.contrib": "Contribute",

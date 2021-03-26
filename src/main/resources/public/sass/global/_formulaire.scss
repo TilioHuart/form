@@ -108,38 +108,68 @@ body.formulaire section.main {
     justify-content: center;
 
     .item {
-      width: 50%;
+      width: 60%;
       @media screen and (max-width: $formulaire-screen-laptop) { width: 100%; }
 
       .domino {
-        .picture:hover {
-          cursor: pointer;
-        }
-
-        .data-text {
-          .title {
-            font-weight: bold;
-            margin: 10px 0 5px 0;
+        .picture {
+          &:hover {
+            cursor: pointer;
           }
 
-          .interval {
-            font-size: 12px;
-            font-weight: bold;
+          image-select {
+            width: 100%;
+          }
+        }
 
-            .opening {
-              margin-right: 10px;
+        .data {
+          padding: 10px 20px;
+
+          &-text {
+            .title {
+              font-weight: bold;
+              margin: 10px 0 5px 0;
+            }
+
+            .interval {
+              font-size: 12px;
+              font-weight: bold;
+
+              .opening {
+                margin-right: 10px;
+              }
+            }
+
+            .anonymous {
+              font-size: 12px;
+              font-weight: bold;
+              display: flex;
+              align-items: baseline;
+
+              .text {
+                display: flex;
+                flex-direction: column;
+                margin-left: 5px;
+
+                .subdescription {
+                  font-style: italic;
+                  font-weight: normal;
+                  color: $formulaire-grey;
+                  margin-top: -8px;
+                }
+              }
             }
           }
-        }
 
-        .data-date {
-          margin-top: 10px;
-          font-size: 12px;
-        }
+          &-bottom {
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-end;
 
-        .data-bottom {
-          display: flex;
-          justify-content: flex-end;
+            &.date {
+              justify-content: space-between;
+            }
+          }
         }
       }
     }
@@ -218,7 +248,6 @@ body.formulaire section.main {
       .goto {
         color: $formulaire-grey-dark;
         font-weight: bold;
-        margin-right: 10px;
       }
     }
   }

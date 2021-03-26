@@ -93,7 +93,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.filter = () : void => {
         vm.forms.filterForms();
         $scope.safeApply();
-    }
+    };
 
     // Display functions
 

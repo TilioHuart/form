@@ -12,10 +12,10 @@
     <div class="prop-form dominos">
         <div class="item">
             <div class="domino">
-                <div class="two cell picture" ng-class="{'empty': !vm.form.picture}">
+                <div class="three cell picture" ng-class="{'empty': !vm.form.picture}">
                     <image-select ng-change="vm.getImage()" ng-model="vm.form.picture" default="/img/illustrations/image-default.svg"/>
                 </div>
-                <div class="ten data">
+                <div class="nine data">
                     <div class="data-text">
                         <div class="title"><i18n>formulaire.form.create.title</i18n></div>
                         <input type="text" ng-model="vm.form.title" i18n-placeholder="formulaire.form.create.title" style="width: 60%;">
@@ -30,13 +30,22 @@
                                 <date-picker ng-model="vm.form.date_ending" ng-if="vm.display.date_ending" size="7"></date-picker>
                             </span>
                         </div>
+                        <div class="anonymous">
+                            <input type="checkbox" id="isAnonymous" ng-model="vm.display.anonymous" ng-disabled="vm.form.nb_responses > 0"/>
+                            <div class="text">
+                                <label for="isAnonymous"><i18n>formulaire.anonymous.label</i18n></label>
+                                <i18n class="subdescription" ng-if="vm.display.anonymous">formulaire.anonymous.description</i18n>
+                            </div>
+                        </div>
                     </div>
-                    <div class="data-date" ng-if="currentPage === 'propForm'">
-                        <i18n>formulaire.form.edit.modified</i18n>[[vm.form.date_modification.toLocaleString()]]
-                    </div>
-                    <div class="data-bottom">
-                        <button class="cell cancel" ng-click="redirectTo('/list/mine')"><i18n>formulaire.cancel</i18n></button>
-                        <button class="cell" ng-click="vm.save()" ng-disabled="!!!vm.form.title || !vm.checkIntervalDates()"><i18n>formulaire.save</i18n></button>
+                    <div class="data-bottom" ng-class="{ date : currentPage === 'propForm' }">
+                        <div ng-if="currentPage === 'propForm'" style="margin-bottom: 10px;">
+                            <i18n>formulaire.form.edit.modified</i18n>[[vm.form.date_modification.toLocaleString()]]
+                        </div>
+                        <div>
+                            <button class="cell cancel" ng-click="redirectTo('/list/mine')"><i18n>formulaire.cancel</i18n></button>
+                            <button class="cell" ng-click="vm.save()" ng-disabled="!!!vm.form.title || !vm.checkIntervalDates()"><i18n>formulaire.save</i18n></button>
+                        </div>
                     </div>
                 </div>
             </div>

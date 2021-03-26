@@ -10,6 +10,7 @@ import fr.openent.formulaire.service.impl.*;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.http.response.DefaultResponseHandler;
 import fr.wseduc.webutils.request.RequestUtils;
@@ -273,7 +274,15 @@ public class FormController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void export(HttpServerRequest request) {
-        new FormResponsesExport(eb, request).launch();
+        String formId = request.getParam("formId");
+        formService.get(formId, getEvent -> {
+            if (getEvent.isRight()) {
+                new FormResponsesExport(eb, request, getEvent.right().getValue()).launch();
+            }
+            else {
+                log.error("[Formulaire@export] Error in getting form to export infos");
+            }
+        });
     }
 
     // Image

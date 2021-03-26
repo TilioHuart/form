@@ -31,14 +31,18 @@ public class FormResponsesExport {
   private QuestionService questionService = new DefaultQuestionService();
   private EventBus eb;
   private HttpServerRequest request;
+  private boolean anonymous;
+  private String formName;
   // Creates  new String builder with UTF-8 BOM. Used to open on excel
   private StringBuilder content = new StringBuilder(UTF8_BOM);
   private SimpleDateFormat dateGetter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
   private SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
-  public FormResponsesExport(EventBus eb, HttpServerRequest request) {
+  public FormResponsesExport(EventBus eb, HttpServerRequest request, JsonObject form) {
     this.eb = eb;
     this.request = request;
+    this.anonymous = form.getBoolean("anonymous");
+    this.formName = form.getString("title");
   }
 
   public void launch() {
@@ -171,11 +175,13 @@ public class FormResponsesExport {
         Date date = null;
         try { date = dateGetter.parse(sqlDate); } catch (ParseException e) { e.printStackTrace(); }
 
-        builder.append(user.getUserId()).append(SEPARATOR);
-        builder.append("\"" + user.getLastName() + "\"").append(SEPARATOR);
-        builder.append("\"" + user.getFirstName() + "\"").append(SEPARATOR);
+        if (!anonymous) {
+          builder.append(user.getUserId()).append(SEPARATOR);
+          builder.append("\"" + user.getLastName() + "\"").append(SEPARATOR);
+          builder.append("\"" + user.getFirstName() + "\"").append(SEPARATOR);
+          builder.append("\"" + user.getStructureNames().get(0) + "\"").append(SEPARATOR); // TODO et si on a plusieurs etab on affiche lequel ?
+        }
         builder.append(dateFormatter.format(date)).append(SEPARATOR);
-        builder.append("\"" + user.getStructureNames().get(0) + "\"").append(SEPARATOR); // TODO et si on a plusieurs etab on affiche lequel ?
 
         handler.handle(Future.succeededFuture(builder.toString()));
       } else {
@@ -188,11 +194,13 @@ public class FormResponsesExport {
 
   private String header(JsonArray questions) {
     ArrayList<String> headers = new ArrayList<>();
-    headers.add("ID");
-    headers.add("Nom");
-    headers.add("Prénom");
+    if (!anonymous) {
+      headers.add("ID");
+      headers.add("Nom");
+      headers.add("Prénom");
+      headers.add("Établissement");
+    }
     headers.add("Date de réponse");
-    headers.add("Établissement");
 
     for (Object o : questions) {
       if (o instanceof JsonObject) {
@@ -213,7 +221,7 @@ public class FormResponsesExport {
   private void send() {
     request.response()
       .putHeader("Content-Type", "text/csv; charset=utf-8")
-      .putHeader("Content-Disposition", "attachment; filename=responsesExport.csv") // TODO later bring here name of the form
+      .putHeader("Content-Disposition", "attachment; filename=Réponses_" + formName + ".csv")
       .end(content.toString());
   }
 }

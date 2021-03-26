@@ -52,9 +52,9 @@
         </div>
         <div class="buttons">
             <button class="cell" ng-click="vm.prev()" ng-disabled="vm.question.position == 1"><i18n>formulaire.prev</i18n></button>
-            <div class="goto">
-                <i18n style="margin-right:10px">formulaire.goTo</i18n>
-                <select ng-change="vm.goTo(vm.navigatorValue)" ng-model="vm.navigatorValue" style="height: 24px;">
+            <div class="goto six">
+                <i18n class="one" style="margin-right:10px">formulaire.goTo</i18n>
+                <select class="ten" ng-change="vm.goTo(vm.navigatorValue)" ng-model="vm.navigatorValue" style="height: 24px;">
                     <option ng-repeat="question in vm.questions.all" ng-value="question.position"
                             ng-selected="vm.navigatorValue == question.position">
                         [[question.position]]. [[question.title]]

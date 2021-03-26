@@ -165,7 +165,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
             vm.response = $scope.getDataIf200(await responseService.save(vm.response, vm.question.question_type));
             if (vm.question.question_type === Types.FILE && vm.files.length > 0) {
                 let filename = vm.files[0].name;
-                if (!!vm.files[0].type) {
+                if (!!vm.files[0].type && !$scope.form.anonymous) {
                     filename = model.me.firstName + model.me.lastName + "_" + filename;
                 }
                 let file = new FormData();
