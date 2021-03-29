@@ -24,10 +24,11 @@ export const questionTypeMultipleanswer: Directive = ng.directive('questionTypeM
         template: `
             <div class="seven">
                 <div ng-repeat="choice in vm.question.choices.all">
-                    <input type="checkbox" id="check-[[choice.id]]" disabled>
                     <label for="check-[[choice.id]]">
-                        <input type="text" class="eleven" ng-model="choice.value" placeholder="Choix [[$index + 1]]" ng-if="!vm.question.selected" disabled>
-                        <input type="text" class="eleven" ng-model="choice.value" placeholder="Choix [[$index + 1]]" ng-if="vm.question.selected">
+                        <input type="checkbox" id="check-[[choice.id]]" disabled>
+                        <span></span>
+                        <input type="text" class="ten" ng-model="choice.value" placeholder="Choix [[$index + 1]]" ng-if="!vm.question.selected" disabled>
+                        <input type="text" class="ten" ng-model="choice.value" placeholder="Choix [[$index + 1]]" ng-if="vm.question.selected">
                     </label>
                     <i class="cancel lg-icon" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected"></i>
                 </div>

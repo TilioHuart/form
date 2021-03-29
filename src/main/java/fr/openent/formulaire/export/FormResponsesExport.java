@@ -63,12 +63,12 @@ public class FormResponsesExport {
           Renders.renderError(request);
         }
 
-        List<JsonObject> allResponses = getResponsesEvt.right().getValue().<List<JsonObject>>getList();
+        List<JsonObject> allResponses = getResponsesEvt.right().getValue().getList();
         List<String> responders = new ArrayList<>();
         List<String> response_dates = new ArrayList<>();
 
         for (JsonObject response : allResponses) {
-          if (!responders.contains(response.getString("responder_id"))) {
+          if (!response_dates.contains(response.getString("date_response"))) {
             responders.add(response.getString("responder_id"));
             response_dates.add(response.getString("date_response"));
           }
@@ -89,6 +89,7 @@ public class FormResponsesExport {
 
           for (int i = 0; i < responders.size(); i++) {
             String responderId = responders.get(i);
+            String responseDate = response_dates.get(i);
 
             // Add responder infos
             content.append(usersInfos.get(i).result());
@@ -96,7 +97,8 @@ public class FormResponsesExport {
             // Get responses of this responder
             ArrayList<JsonObject> responses = new ArrayList<>();
             for (JsonObject response : allResponses) {
-              if (response.getString("responder_id").equals(responderId)) {
+              if (response.getString("responder_id").equals(responderId) &&
+                      response.getString("date_response").equals(responseDate)) {
                 responses.add(response);
               }
             }

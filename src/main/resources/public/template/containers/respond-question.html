@@ -41,8 +41,10 @@
                     </div>
                     <div ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER">
                         <div ng-repeat="choice in question.choices.all">
-                            <input type="checkbox" id="check-[[choice.id]]" ng-model="vm.selectedIndex[$index]">
-                            <label for="check-[[choice.id]]">[[choice.value]]</label>
+                            <label for="check-[[choice.id]]">
+                                <input type="checkbox" id="check-[[choice.id]]" ng-model="vm.selectedIndex[$index]">
+                                <span>[[choice.value]]</span>
+                            </label>
                         </div>
                     </div>
                     <div ng-if="vm.question.question_type == vm.types.DATE">

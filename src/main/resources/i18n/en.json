@@ -41,7 +41,7 @@
   "formulaire.date.opening": "Opening date",
   "formulaire.date.ending": "Ending date",
   "formulaire.multiple": "Allow multiple responses from the same user",
-  "formulaire.anonymous.label": "Anonymize the responses",
+  "formulaire.anonymous.label": "Anonymize the responses.",
   "formulaire.anonymous.description": "The identifiers, first names, last names and school names of the responders won't be save.",
 
   "formulaire.read": "Access",
@@ -62,6 +62,18 @@
   "formulaire.table.author": "Author",
   "formulaire.table.modified": "Last modification",
   "formulaire.table.sent": "Sending date",
+
+  "formulaire.filter": "Filter",
+  "formulaire.filter.creation_date": "Creation date",
+  "formulaire.filter.modification_date": "Modification date",
+  "formulaire.filter.sending_date": "Sending date",
+  "formulaire.filter.creator": "Creator",
+  "formulaire.filter.title": "Title",
+  "formulaire.filter.shared": "Shared",
+  "formulaire.filter.sent": "Sent",
+  "formulaire.filter.to_do": "To do",
+  "formulaire.filter.in_progress": "In progress",
+  "formulaire.filter.finished": "Finished",
 
   "formulaire.form.create.button": "Create form",
   "formulaire.form.create.title": "Title of my form",
@@ -173,17 +185,5 @@
   "formulaire.success.forms.duplicate": "All the selected forms have been successfully duplicated !",
   "formulaire.success.question.duplicate": "Your question has been successfully duplicated !",
   "formulaire.success.question.delete": "Your question has been successfully deleted !",
-  "formulaire.success.responses.save": "Your reponses has been successfully saved !",
-
-  "formulaire.filter": "Filter",
-  "formulaire.filter.creationDate": "Creation date",
-  "formulaire.filter.modificationDate": "Modification date",
-  "formulaire.filter.sendingDate": "Sending date",
-  "formulaire.filter.creator": "Creator",
-  "formulaire.filter.title": "Title",
-  "formulaire.filter.shared": "Shared",
-  "formulaire.filter.sent": "Sent",
-  "formulaire.filter.todo": "To do",
-  "formulaire.filter.in_progress": "In progress",
-  "formulaire.filter.finished": "Finished"
+  "formulaire.success.responses.save": "Your reponses has been successfully saved !"
 }

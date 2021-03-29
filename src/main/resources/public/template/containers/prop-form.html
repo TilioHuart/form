@@ -25,19 +25,27 @@
                                 <date-picker ng-change="vm.checkIntervalDates()" ng-model="vm.form.date_opening" size="7"></date-picker>
                             </span>
                             <span class="ending">
-                                <input type="checkbox" id="hasEnding" ng-change="vm.checkIntervalDates()" ng-model="vm.display.date_ending"/>
-                                <label for="hasEnding"><i18n>formulaire.date.ending</i18n></label>
+                                <label for="hasEnding">
+                                    <input type="checkbox" id="hasEnding" ng-change="vm.checkIntervalDates()" ng-model="vm.display.date_ending"/>
+                                    <span><i18n>formulaire.date.ending</i18n></span>
+                                </label>
                                 <date-picker ng-model="vm.form.date_ending" ng-if="vm.display.date_ending" size="7"></date-picker>
                             </span>
                         </div>
                         <div class="multiple">
-                            <input type="checkbox" id="multiple" ng-model="vm.form.multiple"/>
-                            <label for="multiple"><i18n>formulaire.multiple</i18n></label>
+                            <div class="text">
+                                <label for="multiple">
+                                    <input type="checkbox" id="multiple" ng-model="vm.form.multiple" ng-disabled="vm.form.nb_responses > 0"/>
+                                    <span><i18n>formulaire.multiple</i18n></span>
+                                </label>
+                            </div>
                         </div>
                         <div class="anonymous">
-                            <input type="checkbox" id="isAnonymous" ng-model="vm.display.anonymous" ng-disabled="vm.form.nb_responses > 0"/>
                             <div class="text">
-                                <label for="isAnonymous"><i18n>formulaire.anonymous.label</i18n></label>
+                                <label for="isAnonymous">
+                                    <input type="checkbox" id="isAnonymous" ng-model="vm.display.anonymous" ng-disabled="vm.form.nb_responses > 0"/>
+                                    <span><i18n>formulaire.anonymous.label</i18n></span>
+                                </label>
                                 <i18n class="subdescription" ng-if="vm.display.anonymous">formulaire.anonymous.description</i18n>
                             </div>
                         </div>

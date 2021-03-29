@@ -121,10 +121,13 @@ public class DefaultFormService implements FormService {
     public void update(String formId, JsonObject form, Handler<Either<String, JsonObject>> handler) {
         String query = "WITH nbResponses AS (SELECT COUNT(*) FROM " + Formulaire.DISTRIBUTION_TABLE +
                 " WHERE form_id = ? AND status = ?)" +
-                "UPDATE " + Formulaire.FORM_TABLE + " SET title = ?, description = ?, picture = ?, " +
-                "date_modification = ?, date_opening = ?, date_ending = ?, sent = ?, collab = ?, archived = ?, multiple = ? " +
-                "anonymous = CASE (SELECT count > 0 FROM nbResponses) WHEN false THEN ? " +
-                "WHEN true THEN (SELECT anonymous FROM " + Formulaire.FORM_TABLE + " WHERE id = ?) END WHERE id = ? RETURNING *;";
+                "UPDATE " + Formulaire.FORM_TABLE + " SET title = ?, description = ?, picture = ?, date_modification = ?, " +
+                "date_opening = ?, date_ending = ?, sent = ?, collab = ?, archived = ?, " +
+                "multiple = CASE (SELECT count > 0 FROM nbResponses) " +
+                "WHEN false THEN ? WHEN true THEN (SELECT multiple FROM " + Formulaire.FORM_TABLE +" WHERE id = ?) END, " +
+                "anonymous = CASE (SELECT count > 0 FROM nbResponses) " +
+                "WHEN false THEN ? WHEN true THEN (SELECT anonymous FROM " + Formulaire.FORM_TABLE +" WHERE id = ?) END " +
+                "WHERE id = ? RETURNING *;";
 
         JsonArray params = new JsonArray()
                 .add(formId)
@@ -138,9 +141,9 @@ public class DefaultFormService implements FormService {
                 .add(form.getBoolean("sent", false))
                 .add(form.getBoolean("collab", false))
                 .add(form.getBoolean("archived", false))
-                .add(form.getBoolean("multiple", false))
-                .add(form.getBoolean("anonymous", false))
-                .add(formId).add(formId);
+                .add(form.getBoolean("multiple", false)).add(formId)
+                .add(form.getBoolean("anonymous", false)).add(formId)
+                .add(formId);
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }

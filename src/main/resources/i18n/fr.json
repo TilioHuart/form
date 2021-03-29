@@ -40,9 +40,9 @@
   "formulaire.goTo": "Aller à ",
   "formulaire.date.opening": "Date d'ouverture",
   "formulaire.date.ending": "Date de fermeture",
-  "formulaire.multiple": "Permettre plusieures réponses d'un même utilisateur",
-  "formulaire.anonymous.label": "Anonymiser les réponses",
-  "formulaire.anonymous.description": "Les identifiants, noms, prénoms et établissements des répondant ne seront pas sauvegardés",
+  "formulaire.multiple": "Permettre plusieurs réponses d'un même utilisateur",
+  "formulaire.anonymous.label": "Anonymiser les réponses.",
+  "formulaire.anonymous.description": "Les identifiants, noms, prénoms et établissements des répondant ne seront pas sauvegardés.",
 
   "formulaire.read": "Accès",
   "formulaire.contrib": "Contribuer",
@@ -62,6 +62,18 @@
   "formulaire.table.author": "Auteur",
   "formulaire.table.modified": "Dernière modification",
   "formulaire.table.sent": "Date d'envoi",
+
+  "formulaire.filter": "Filtre",
+  "formulaire.filter.creation_date": "Date de création",
+  "formulaire.filter.modification_date": "Date de modification",
+  "formulaire.filter.sending_date": "Date d'envoi",
+  "formulaire.filter.creator": "Créateur",
+  "formulaire.filter.title": "Titre",
+  "formulaire.filter.shared": "Partagés",
+  "formulaire.filter.sent": "Envoyés",
+  "formulaire.filter.to_do": "À faire",
+  "formulaire.filter.in_progress": "À finir",
+  "formulaire.filter.finished": "Terminé",
 
   "formulaire.form.create.button": "Créer un formulaire",
   "formulaire.form.create.title": "Titre de mon formulaire",
@@ -173,17 +185,5 @@
   "formulaire.success.forms.duplicate": "Tous les formulaires sélectionnés ont bien été dupliqués !",
   "formulaire.success.question.duplicate": "Votre question a bien été dupliquée !",
   "formulaire.success.question.delete": "Votre question a bien été supprimée !",
-  "formulaire.success.responses.save": "Vos réponses ont bien été enregistrées !",
-
-  "formulaire.filter": "Filtre",
-  "formulaire.filter.creationDate": "Date de création",
-  "formulaire.filter.modificationDate": "Date de modification",
-  "formulaire.filter.sendingDate": "Date d'envoi",
-  "formulaire.filter.creator": "Créateur",
-  "formulaire.filter.title": "Titre",
-  "formulaire.filter.shared": "Partagés",
-  "formulaire.filter.sent": "Envoyés",
-  "formulaire.filter.todo": "À faire",
-  "formulaire.filter.in_progress": "À finir",
-  "formulaire.filter.finished": "Terminé"
+  "formulaire.success.responses.save": "Vos réponses ont bien été enregistrées !"
 }

@@ -1,6 +1,7 @@
-import {ng, template} from 'entcore';
+import {idiom, ng, template} from 'entcore';
 import {Distribution, Distributions, DistributionStatus, Form, Forms} from "../models";
 import {distributionService} from "../services";
+import {FiltersFilters, FiltersOrders} from "../core/enums";
 
 interface ViewModel {
     forms: Forms;
@@ -13,10 +14,12 @@ interface ViewModel {
             myResponses: boolean
         }
     };
+    filtersOrders: typeof FiltersOrders;
 
     switchAll(boolean) : void;
-    sort() : void;
+    sort(field : string) : void;
     filter() : void;
+    displayFilterName(name : string) : string;
     displayDate(date:Date) : string;
     checkOpenButton() : boolean;
     checkMyResponsesButton() : boolean;
@@ -41,10 +44,18 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
             myResponses: false
         }
     };
+    vm.filtersOrders = FiltersOrders;
 
     const init = async (): Promise<void> => {
         await vm.forms.syncSent();
         vm.distributions = new Distributions();
+
+        vm.forms.filters.find(f => f.name === FiltersFilters.TO_DO).display = true;
+        vm.forms.filters.find(f => f.name === FiltersFilters.IN_PROGRESS).display = true;
+        vm.forms.filters.find(f => f.name === FiltersFilters.FINISHED).display = true;
+        vm.forms.orders.find(o => o.name === FiltersOrders.SENDING_DATE).display = true;
+        vm.forms.orders.find(o => o.name === FiltersOrders.TITLE).display = true;
+
         try {
             for (let form of vm.forms.all) {
                 let distribs = $scope.getDataIf200(await distributionService.listByFormAndResponder(form.id));
@@ -75,7 +86,8 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
         vm.allFormsSelected = value;
     };
 
-    vm.sort = () : void => {
+    vm.sort = (field : string) : void => {
+        vm.forms.orderByField(field);
         vm.forms.orderForms();
         $scope.safeApply();
     };
@@ -83,6 +95,10 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
     vm.filter = () : void => {
         vm.forms.filterForms();
         $scope.safeApply();
+    };
+
+    vm.displayFilterName = (name : string) : string => {
+        return idiom.translate("formulaire.filter." + name.toLowerCase());
     };
 
     // Utils

@@ -135,16 +135,14 @@ body.formulaire section.main {
 
             .interval {
               font-size: 12px;
-              font-weight: bold;
 
               .opening {
                 margin-right: 10px;
               }
             }
 
-            .anonymous {
+            .multiple, .anonymous {
               font-size: 12px;
-              font-weight: bold;
               display: flex;
               align-items: baseline;
 

@@ -2,6 +2,7 @@ import {Selectable, Selection} from "entcore-toolkit";
 import {idiom, notify, Rights, Shareable} from "entcore";
 import {formService} from "../services";
 import {DistributionStatus} from "./Distribution";
+import {FiltersFilters, FiltersOrders} from "../core/enums";
 
 export class Form implements Selectable, Shareable  {
     shared: any;
@@ -113,17 +114,60 @@ export class Forms extends Selection<Form> {
     all: Form[];
 
     order = {
-        field: "creationDate",
-        desc: false
+        field: FiltersOrders.CREATION_DATE,
+        desc: true
     };
 
-    filters = {
-        shared: true,
-        sent: true,
-        todo: true,
-        in_progress: true,
-        finished: true
-    };
+    orders = [
+        {
+            name: FiltersOrders.CREATION_DATE,
+            display: false
+        },
+        {
+            name: FiltersOrders.MODIFICATION_DATE,
+            display: false
+        },
+        {
+            name: FiltersOrders.SENDING_DATE,
+            display: false
+        },
+        {
+            name: FiltersOrders.CREATOR,
+            display: false
+        },
+        {
+            name: FiltersOrders.TITLE,
+            display: false
+        }
+    ];
+
+    filters = [
+        {
+            name: FiltersFilters.SHARED,
+            value: true,
+            display: false
+        },
+        {
+            name: FiltersFilters.SENT,
+            value: true,
+            display: false
+        },
+        {
+            name: FiltersFilters.TO_DO,
+            value: true,
+            display: false
+        },
+        {
+            name: FiltersFilters.IN_PROGRESS,
+            value: true,
+            display: false
+        },
+        {
+            name: FiltersFilters.FINISHED,
+            value: true,
+            display: false
+        }
+    ];
 
     constructor() {
         super([]);
@@ -172,61 +216,25 @@ export class Forms extends Selection<Form> {
     orderForms() {
         this.all = this.all.sort(
             (a, b) => {
-                if (this.order.field == "creationDate") {
-                    if (a.date_creation > b.date_creation)
-                        if (this.order.desc)
-                            return 1;
-                        else
-                            return -1;
-                    if (a.date_creation < b.date_creation)
-                        if (this.order.desc)
-                            return -1;
-                        else
-                            return 1;
-                } else if (this.order.field == "modificationDate") {
-                    if (a.date_modification > b.date_modification)
-                        if (this.order.desc)
-                            return 1;
-                        else
-                            return -1;
-                    if (a.date_modification < b.date_modification)
-                        if (this.order.desc)
-                            return -1;
-                        else
-                            return 1;
-                } else if (this.order.field == "sendingDate") {
-                    if (a.date_sending > b.date_sending)
-                        if (this.order.desc)
-                            return 1;
-                        else
-                            return -1;
-                    if (a.date_sending < b.date_sending)
-                        if (this.order.desc)
-                            return -1;
-                        else
-                            return 1;
-                } else if (this.order.field == "creator") {
-                    if (a.owner_name.toLowerCase() < b.owner_name.toLowerCase())
-                        if (this.order.desc)
-                            return 1;
-                        else
-                            return -1;
-                    if (a.owner_name.toLowerCase() > b.owner_name.toLowerCase())
-                        if (this.order.desc)
-                            return -1;
-                        else
-                            return 1;
-                } else if (this.order.field == "title") {
-                    if (a.title.toLowerCase() < b.title.toLowerCase())
-                        if (this.order.desc)
-                            return 1;
-                        else
-                            return -1;
-                    if (a.title.toLowerCase() > b.title.toLowerCase())
-                        if (this.order.desc)
-                            return -1;
-                        else
-                            return 1;
+                if (this.order.field == FiltersOrders.CREATION_DATE) {
+                    if (a.date_creation > b.date_creation) return this.order.desc ? 1 : -1;
+                    if (a.date_creation < b.date_creation) return this.order.desc ? -1 : 1;
+                }
+                else if (this.order.field == FiltersOrders.MODIFICATION_DATE) {
+                    if (a.date_modification > b.date_modification) return this.order.desc ? 1 : -1;
+                    if (a.date_modification < b.date_modification) return this.order.desc ? -1 : 1;
+                }
+                else if (this.order.field == FiltersOrders.SENDING_DATE) {
+                    if (a.date_sending > b.date_sending) return this.order.desc ? 1 : -1;
+                    if (a.date_sending < b.date_sending) return this.order.desc ? -1 : 1;
+                }
+                else if (this.order.field == FiltersOrders.CREATOR) {
+                    if (a.owner_name.toLowerCase() < b.owner_name.toLowerCase()) return this.order.desc ? 1 : -1;
+                    if (a.owner_name.toLowerCase() > b.owner_name.toLowerCase()) return this.order.desc ? -1 : 1;
+                }
+                else if (this.order.field == FiltersOrders.TITLE) {
+                    if (a.title.toLowerCase() < b.title.toLowerCase()) return this.order.desc ? 1 : -1;
+                    if (a.title.toLowerCase() > b.title.toLowerCase()) return this.order.desc ? -1 : 1;
                 }
             }
         );
@@ -252,31 +260,40 @@ export class Forms extends Selection<Form> {
     filterForms() {
         for (let form of this.all) {
             form.displayed = true;
-            if ((form.sent && form.collab) && (!this.filters.sent || !this.filters.shared)) {
+            let objectFilters = {};
+            for (let filter of this.filters) {
+                objectFilters[filter.name] = filter;
+            }
+
+            if (objectFilters[FiltersFilters.SENT].display && objectFilters[FiltersFilters.SENT].display) {
+                if ((form.sent && form.collab) && (!objectFilters[FiltersFilters.SENT].value || !objectFilters[FiltersFilters.SHARED].value)) {
+                    form.displayed = false;
+                }
+                if ((form.sent && !form.collab) && (!objectFilters[FiltersFilters.SENT].value || objectFilters[FiltersFilters.SHARED].value)) {
+                    form.displayed = false;
+                }
+                if ((!form.sent && form.collab) && (objectFilters[FiltersFilters.SENT].value || !objectFilters[FiltersFilters.SHARED].value)) {
+                    form.displayed = false;
+                }
+                if ((!form.sent && !form.collab) && (objectFilters[FiltersFilters.SENT].value || objectFilters[FiltersFilters.SHARED].value)) {
+                    form.displayed = false;
+                }
+            }
+
+            if (objectFilters[FiltersFilters.TO_DO].display && form.status === DistributionStatus.TO_DO && !objectFilters[FiltersFilters.TO_DO].value) {
                 form.displayed = false;
             }
-            if ((form.sent && !form.collab) && (!this.filters.sent || this.filters.shared)) {
+            if (objectFilters[FiltersFilters.IN_PROGRESS].display && form.status === DistributionStatus.IN_PROGRESS && !objectFilters[FiltersFilters.IN_PROGRESS].value) {
                 form.displayed = false;
             }
-            if ((!form.sent && form.collab) && (this.filters.sent || !this.filters.shared)) {
-                form.displayed = false;
-            }
-            if ((!form.sent && !form.collab) && (this.filters.sent || this.filters.shared)) {
-                form.displayed = false;
-            }
-            if (form.status === DistributionStatus.TO_DO && !this.filters.todo) {
-                form.displayed = false;
-            }
-            if (form.status === DistributionStatus.IN_PROGRESS && !this.filters.in_progress) {
-                form.displayed = false;
-            }
-            if (form.status === DistributionStatus.FINISHED && !this.filters.finished) {
+            if (objectFilters[FiltersFilters.FINISHED].display && form.status === DistributionStatus.FINISHED && !objectFilters[FiltersFilters.FINISHED].value) {
                 form.displayed = false;
             }
         }
     }
 
-    checkTypeFilterSelected(key: string) {
-        this.filters[key] = !this.filters[key];
+    switchFilter(key: string) {
+        let filter = this.filters.find(f => f.name === key);
+        filter.value = !filter.value;
     }
 }

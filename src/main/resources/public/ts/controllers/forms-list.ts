@@ -1,6 +1,7 @@
 import {idiom, model, ng, notify, template} from 'entcore';
 import {Form, Forms} from "../models";
 import {formService, questionService} from "../services";
+import {FiltersFilters, FiltersOrders} from "../core/enums";
 
 interface ViewModel {
     forms: Forms;
@@ -17,11 +18,13 @@ interface ViewModel {
         },
         warning: boolean
     };
+    filtersOrders: typeof FiltersOrders;
 
     openFolder(folderName : string): void;
     switchAll(value : boolean): void;
-    sort() : void;
+    sort(field : string) : void;
     filter() : void;
+    displayFilterName(name : string) : string;
     displayFolder(): string;
     checkOpenButton(): boolean;
     openForm(form : Form): void;
@@ -57,9 +60,17 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         },
         warning: false
     };
+    vm.filtersOrders = FiltersOrders;
 
     const init = async (): Promise<void> => {
         await vm.forms.sync();
+
+        vm.forms.filters.find(f => f.name === FiltersFilters.SENT).display = true;
+        vm.forms.filters.find(f => f.name === FiltersFilters.SHARED).display = true;
+        vm.forms.orders.find(o => o.name === FiltersOrders.CREATION_DATE).display = true;
+        vm.forms.orders.find(o => o.name === FiltersOrders.MODIFICATION_DATE).display = true;
+        vm.forms.orders.find(o => o.name === FiltersOrders.CREATOR).display = true;
+        vm.forms.orders.find(o => o.name === FiltersOrders.TITLE).display = true;
 
         // Check if the folder is ok
         switch (vm.folder) {
@@ -85,7 +96,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         vm.allFormsSelected = value;
     };
 
-    vm.sort = () : void => {
+    vm.sort = (field : string) : void => {
+        vm.forms.orderByField(field);
         vm.forms.orderForms();
         $scope.safeApply();
     };
@@ -93,6 +105,10 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.filter = () : void => {
         vm.forms.filterForms();
         $scope.safeApply();
+    };
+
+    vm.displayFilterName = (name : string) : string => {
+        return idiom.translate("formulaire.filter." + name.toLowerCase());
     };
 
     // Display functions
