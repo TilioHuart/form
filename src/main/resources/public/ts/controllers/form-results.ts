@@ -19,13 +19,13 @@ interface ViewModel {
         }
     }
 
-    exportForm(): void;
-    doExportForm(): void;
-    downloadFile(responseId: number): void;
-    zipAndDownload(): void;
-    prev(): Promise<void>;
-    next(): Promise<void>;
-    goTo(position: number): Promise<void>;
+    exportForm() : void;
+    doExportForm() : void;
+    downloadFile(responseId: number) : void;
+    zipAndDownload() : void;
+    prev() : Promise<void>;
+    next() : Promise<void>;
+    goTo(position: number) : Promise<void>;
 }
 
 
@@ -49,7 +49,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             }
         };
 
-        const init = async (): Promise<void> => {
+        const init = async () : Promise<void> => {
             vm.question = $scope.question;
             vm.navigatorValue = vm.question.position;
             await vm.questions.sync($scope.form.id);
@@ -91,14 +91,14 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             window.open(`/formulaire/responses/${vm.question.id}/files/download/zip`);
         };
 
-        vm.prev = async (): Promise<void> => {
+        vm.prev = async () : Promise<void> => {
             let prevPosition: number = vm.question.position - 1;
             if (prevPosition > 0) {
                 await vm.goTo(prevPosition);
             }
         };
 
-        vm.next = async (): Promise<void> => {
+        vm.next = async () : Promise<void> => {
             let nextPosition: number = vm.question.position + 1;
             if (nextPosition <= vm.nbQuestions) {
                 await vm.goTo(nextPosition);

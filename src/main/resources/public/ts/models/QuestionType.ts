@@ -24,7 +24,7 @@ export class QuestionType {
         this.name = "";
     }
 
-    toJson(): Object {
+    toJson() : Object {
         return {
             id: this.id,
             code: this.code,
@@ -40,7 +40,7 @@ export class QuestionTypes {
         this.all = [];
     }
 
-    async sync () : Promise<void> {
+    sync = async () : Promise<void> => {
         try {
             let { data } = await questionTypeService.list();
             this.all = Mix.castArrayAs(QuestionType, data);

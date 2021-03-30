@@ -8,9 +8,9 @@ interface ViewModel {
         date_ending: boolean
     }
 
-    save(): Promise<void>;
-    checkIntervalDates(): boolean;
-    getImage(): void;
+    save() : Promise<void>;
+    checkIntervalDates() : boolean;
+    getImage() : void;
 }
 
 
@@ -23,7 +23,7 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
             date_ending: false
         };
 
-        const init = async (): Promise<void> => {
+        const init = async () : Promise<void> => {
             vm.form = $scope.form;
             vm.form.nb_responses = !!vm.form.id ? $scope.getDataIf200(await distributionService.count(vm.form.id)).count : 0;
             vm.display.date_ending = !!vm.form.date_ending;
@@ -32,7 +32,7 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
 
         // Functions
 
-        vm.save = async (): Promise<void> => {
+        vm.save = async () : Promise<void> => {
             let form = new Form();
             form.setFromJson($scope.getDataIf200(await formService.save(vm.form)));
             $scope.redirectTo(`/form/${form.id}`);
@@ -53,7 +53,7 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
             }
         };
 
-        vm.getImage = async (): Promise<void> => {
+        vm.getImage = async () : Promise<void> => {
             // TODO Fix vm.form.setInfoImage() function not found
             if (vm.form.picture) {
                 // await vm.form.setInfoImage();

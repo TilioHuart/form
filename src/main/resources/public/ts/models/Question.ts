@@ -27,7 +27,7 @@ export class Question implements Selectable {
         this.selected = null;
     }
 
-    toJson(): Object {
+    toJson() : Object {
         return {
             id: this.id,
             form_id: this.form_id,
@@ -49,7 +49,7 @@ export class Questions extends Selection<Question> {
         super([]);
     }
 
-    async sync (formId:number) : Promise<void> {
+    sync = async (formId: number) : Promise<void> => {
         try {
             let { data } = await questionService.list(formId);
             this.all = Mix.castArrayAs(Question, data);

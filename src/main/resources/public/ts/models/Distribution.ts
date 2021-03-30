@@ -32,7 +32,7 @@ export class Distribution  {
         this.date_response = null;
     }
 
-    toJson(): Object {
+    toJson() : Object {
         return {
             id: this.id,
             form_id: this.form_id,
@@ -54,7 +54,7 @@ export class Distributions {
         this.all = [];
     }
 
-    async sync () : Promise<void> {
+    sync = async () : Promise<void> => {
         try {
             let { data } = await distributionService.list();
             this.all = Mix.castArrayAs(Distribution, data);

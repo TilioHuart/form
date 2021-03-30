@@ -2,13 +2,13 @@ import {idiom, ng, notify} from 'entcore';
 import http, {AxiosResponse} from 'axios';
 
 export interface QuestionTypeService {
-    list(): Promise<AxiosResponse>;
-    get(code: number): Promise<AxiosResponse>;
+    list() : Promise<AxiosResponse>;
+    get(code: number) : Promise<AxiosResponse>;
 }
 
 export const questionTypeService: QuestionTypeService = {
 
-    async list (): Promise<AxiosResponse> {
+    async list() : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/types`);
         } catch (err) {
@@ -17,7 +17,7 @@ export const questionTypeService: QuestionTypeService = {
         }
     },
 
-    async get(code : number): Promise<AxiosResponse> {
+    async get(code: number) : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/types/${code}`);
         } catch (err) {

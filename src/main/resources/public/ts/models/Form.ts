@@ -56,7 +56,7 @@ export class Form implements Selectable, Shareable  {
         this.selected = null;
     }
 
-    toJson(): Object {
+    toJson() : Object {
         return {
             id: this.id,
             title: this.title,
@@ -77,7 +77,7 @@ export class Form implements Selectable, Shareable  {
         }
     }
 
-    setFromJson(data: any) : void {
+    setFromJson = (data: any) : void => {
         for (let key in data) {
             this[key] = data[key];
             if (key === 'nb_responses' && !!!data[key]) { this[key] = 0; }
@@ -86,15 +86,15 @@ export class Form implements Selectable, Shareable  {
                     this[key] = new Date(this[key] + 'Z');
             }
         }
-    }
+    };
 
-    generateShareRights() : void {
+    generateShareRights = () : void => {
         this._id = this.id;
         this.owner = {userId: this.owner_id, displayName: this.owner_name};
         this.myRights = new Rights<Form>(this);
-    }
+    };
 
-    async setInfoImage() : Promise<void> {
+    setInfoImage = async () : Promise<void> => {
         const typesImgNoSend = ["image/png", "image/jpg", "image/jpeg", "image/gif"];
         try {
             let { data: { metadata } } = await formService.getInfoImage(this);
@@ -107,7 +107,7 @@ export class Form implements Selectable, Shareable  {
             notify.error(idiom.translate('formulaire.error.form.image'));
             throw e;
         }
-    }
+    };
 }
 
 export class Forms extends Selection<Form> {
@@ -138,7 +138,7 @@ export class Forms extends Selection<Form> {
         super([]);
     }
 
-    async sync () : Promise<void> {
+    sync = async () : Promise<void> => {
         this.all = [];
         try {
             let { data } = await formService.list();
@@ -152,9 +152,9 @@ export class Forms extends Selection<Form> {
             notify.error(idiom.translate('formulaire.error.form.sync'));
             throw e;
         }
-    }
+    };
 
-    async syncSent () : Promise<void> {
+    syncSent = async () : Promise<void> => {
         try {
             let { data } = await formService.listSentForms();
             for (let i = 0; i < data.length; i++) {
@@ -166,9 +166,9 @@ export class Forms extends Selection<Form> {
             notify.error(idiom.translate('formulaire.error.form.sync'));
             throw e;
         }
-    }
+    };
 
-    async setResourceRights() : Promise<void> {
+    setResourceRights = async () : Promise<void> => {
         let { data } = await formService.getAllMyFormRights();
         let ids = this.all.map(form => form.id);
         for (let i = 0; i < ids.length; i++) {
@@ -176,9 +176,9 @@ export class Forms extends Selection<Form> {
             let rights = data.filter(right => right.resource_id === formId).map(right => right.action);
             this.all.filter(form => form.id === formId)[0].myRights = rights;
         }
-    }
+    };
 
-    orderForms() {
+    orderForms = () : void => {
         this.all = this.all.sort(
             (a, b) => {
                 if (this.order.field == FiltersOrders.CREATION_DATE) {
@@ -203,26 +203,27 @@ export class Forms extends Selection<Form> {
                 }
             }
         );
-    }
+    };
 
-    orderByField(fieldName) {
+    orderByField = (fieldName: FiltersOrders) : void => {
         if (fieldName === this.order.field) {
             this.order.desc = !this.order.desc;
-        } else {
+        }
+        else {
             this.order.desc = false;
             this.order.field = fieldName;
         }
     };
 
-    isOrderedAsc(field) {
+    isOrderedAsc = (field: FiltersOrders) : boolean => {
         return this.order.field === field && !this.order.desc;
-    }
+    };
 
-    isOrderedDesc(field) {
+    isOrderedDesc = (field: FiltersOrders) : boolean => {
         return this.order.field === field && this.order.desc;
-    }
+    };
 
-    filterForms() {
+    filterForms = () : void => {
         for (let form of this.all) {
             form.displayed = true;
             let objectFilters = {};
@@ -255,10 +256,10 @@ export class Forms extends Selection<Form> {
                 form.displayed = false;
             }
         }
-    }
+    };
 
-    switchFilter(key: string) {
+    switchFilter = (key: string) : void => {
         let filter = this.filters.find(f => f.name === key);
         filter.value = !filter.value;
-    }
+    };
 }

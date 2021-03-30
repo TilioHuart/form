@@ -48,7 +48,7 @@ public class DefaultFormService implements FormService {
                 "LEFT OUTER JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON f.id = d.form_id " +
                 "WHERE d.responder_id = ? AND NOW() BETWEEN date_opening AND COALESCE(date_ending, NOW() + interval '1 year') " +
                 "GROUP BY f.id " +
-                "ORDER BY date_opening DESC;";
+                "ORDER BY date_sending DESC;";
         JsonArray params = new JsonArray().add(user.getUserId());
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }

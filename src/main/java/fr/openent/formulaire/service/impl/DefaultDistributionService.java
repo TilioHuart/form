@@ -40,7 +40,7 @@ public class DefaultDistributionService implements DistributionService {
     @Override
     public void get(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE +
-                " WHERE form_id = ? AND responder_id = ? AND status = ? OR status = ?;";
+                " WHERE form_id = ? AND responder_id = ? AND (status = ? OR status = ?);";
         JsonArray params = new JsonArray().add(formId).add(user.getUserId())
                 .add(Formulaire.TO_DO).add(Formulaire.IN_PROGRESS);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));

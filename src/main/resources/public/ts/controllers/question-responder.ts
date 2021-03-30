@@ -25,11 +25,11 @@ interface ViewModel {
     };
     files: File[];
 
-    prev(): Promise<void>;
-    next(): Promise<void>;
-    saveAndQuit(): Promise<void>;
-    send(): Promise<void>;
-    doSend(): Promise<void>;
+    prev() : Promise<void>;
+    next() : Promise<void>;
+    saveAndQuit() : Promise<void>;
+    send() : Promise<void>;
+    doSend() : Promise<void>;
 }
 
 export const questionResponderController = ng.controller('QuestionResponderController', ['$scope', '$rootScope',
@@ -51,7 +51,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     };
     vm.files = [];
 
-    const init = async (): Promise<void> => {
+    const init = async () : Promise<void> => {
         vm.question = $scope.question;
         vm.question.choices = new QuestionChoices();
         vm.nbQuestions = $scope.form.nbQuestions;
@@ -93,7 +93,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         $scope.safeApply();
     };
 
-    vm.prev = async (): Promise<void> => {
+    vm.prev = async () : Promise<void> => {
         await saveResponses();
         let prevPosition: number = vm.question.position - 1;
 
@@ -102,7 +102,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         }
     };
 
-    vm.next = async (): Promise<void> => {
+    vm.next = async () : Promise<void> => {
         await saveResponses();
         let nextPosition: number = vm.question.position + 1;
 
@@ -111,7 +111,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         }
     };
 
-    vm.saveAndQuit = async (): Promise<void> => {
+    vm.saveAndQuit = async () : Promise<void> => {
         await saveResponses();
         if (vm.distribution.status == DistributionStatus.TO_DO) {
             vm.distribution.status = DistributionStatus.IN_PROGRESS;
@@ -122,7 +122,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         $scope.safeApply();
     };
 
-    vm.send = async (): Promise<void> => {
+    vm.send = async () : Promise<void> => {
         await saveResponses();
         if (await checkMandatoryQuestions()) {
             template.open('lightbox', 'lightbox/responses-confirm-sending');
@@ -133,7 +133,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         }
     };
 
-    vm.doSend = async (): Promise<void> => {
+    vm.doSend = async () : Promise<void> => {
         vm.distribution.status = DistributionStatus.FINISHED;
         await distributionService.update(vm.distribution);
         template.close('lightbox');
@@ -143,7 +143,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         $scope.safeApply();
     };
 
-    const saveResponses = async (): Promise<void> => {
+    const saveResponses = async () : Promise<void> => {
         if (vm.question.question_type === Types.MULTIPLEANSWER) {
             for (let i = 0; i < vm.question.choices.all.length; i++) {
                 let checked = vm.selectedIndex[i];
@@ -179,13 +179,13 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         }
     };
 
-    const formatTime = (): void => {
+    const formatTime = () : void => {
         if (!!vm.response.answer) {
             vm.response.answer = new Date("January 01 1970 " + vm.response.answer);
         }
     };
 
-    const checkMandatoryQuestions = async (): Promise<boolean> => {
+    const checkMandatoryQuestions = async () : Promise<boolean> => {
         try {
             let questions = $scope.getDataIf200(await questionService.list(vm.question.form_id));
             questions = questions.filter(question => question.mandatory === true);

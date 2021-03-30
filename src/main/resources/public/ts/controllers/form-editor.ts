@@ -19,24 +19,24 @@ interface ViewModel {
         }
     };
 
-    createNewQuestion(): void;
-    doCreateNewQuestion(code: number): void;
-    organizeQuestions(): void;
-    doOrganizeQuestions(): Promise<void>;
-    saveAll(): Promise<void>;
-    return(): void;
-    duplicateQuestion(): void;
-    deleteQuestion(): void;
-    doDeleteQuestion(): void;
-    cancelOrganizeQuestions(): void;
-    undoQuestionChanges(): void;
-    doUndoQuestionChanges(): void;
-    createNewChoice(question: Question): void;
-    deleteChoice(question: Question, index: number): Promise<void>;
-    displayTypeName(typeInfo: string): string;
-    displayTypeIcon(code: number): string;
-    reOrder(): void;
-    moveQuestion(index: number, direction: string): void;
+    createNewQuestion() : void;
+    doCreateNewQuestion(code: number) : void;
+    organizeQuestions() : void;
+    doOrganizeQuestions() : Promise<void>;
+    saveAll() : Promise<void>;
+    return() : void;
+    duplicateQuestion() : Promise<void>;
+    deleteQuestion() : void;
+    doDeleteQuestion() : void;
+    cancelOrganizeQuestions() : void;
+    undoQuestionChanges() : void;
+    doUndoQuestionChanges() : void;
+    createNewChoice(question: Question) : void;
+    deleteChoice(question: Question, index: number) : Promise<void>;
+    displayTypeName(typeInfo: string) : string;
+    displayTypeIcon(code: number) : string;
+    reOrder() : void;
+    moveQuestion(index: number, direction: string) : void;
 }
 
 
@@ -59,7 +59,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
         };
 
-        const init = async (): Promise<void> => {
+        const init = async () : Promise<void> => {
             vm.form = $scope.form;
             await vm.questions.sync(vm.form.id);
             vm.newQuestion.form_id = vm.form.id;
@@ -138,7 +138,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         // Question functions
 
-        vm.duplicateQuestion = async () => {
+        vm.duplicateQuestion = async () : Promise<void> => {
             try {
                 vm.dontSave = true;
                 let question = vm.questions.selected[0];
@@ -250,7 +250,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
         };
 
-        vm.reOrder = (): void => {
+        vm.reOrder = () : void => {
             let finished = true;
             angular.forEach(vm.questions.all, function (question) {
                 if (question.position != parseFloat(question.index) + 1) {
@@ -263,7 +263,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
         };
 
-        vm.moveQuestion = (index: number, direction: string): void => {
+        vm.moveQuestion = (index: number, direction: string) : void => {
             switch (direction) {
                 case Direction.UP: {
                     vm.questions.all[index].position--;
@@ -285,7 +285,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         // Utils
 
-        const rePositionQuestions = () => {
+        const rePositionQuestions = () : void => {
             vm.questions.all.sort((a, b) => a.position - b.position);
             for (let i = 0; i < vm.questions.all.length; i++) {
                 vm.questions.all[i].position = i + 1;
@@ -293,7 +293,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             $scope.safeApply();
         };
 
-        const saveQuestions = async (displaySuccess:boolean = false) => {
+        const saveQuestions = async (displaySuccess: boolean = false) : Promise<void> => {
             try {
                 rePositionQuestions();
                 for (let question of vm.questions.all) {
@@ -345,19 +345,19 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
         };
 
-        const isInShowErrorZone = (el): boolean => {
+        const isInShowErrorZone = (el) : boolean => {
             if (!!!el) { return true; }
             else if (el.classList && el.classList.contains("dontShowError")) { return false; }
             return isInShowErrorZone(el.parentNode);
         };
 
-        const isInFocusable = (el): number => {
+        const isInFocusable = (el) : number => {
             if (!!!el) { return -1; }
             else if (el.classList && el.classList.contains("focusable")) { return el.id; }
             return isInFocusable(el.parentNode);
         };
 
-        const isInDontSave = (el): boolean => {
+        const isInDontSave = (el) : boolean => {
             if (!!!el) { return false; }
             else if (el.classList && el.classList.contains("dontSave")) { return true; }
             return isInDontSave(el.parentNode);

@@ -3,19 +3,19 @@ import http, {AxiosResponse} from 'axios';
 import {Distribution, Form} from '../models';
 
 export interface DistributionService {
-    list(): Promise<AxiosResponse>;
-    listByFormAndResponder(formId : number): Promise<AxiosResponse>;
-    count(formId : number): Promise<AxiosResponse>;
-    get(formId: number): Promise<AxiosResponse>;
-    create(form: Form, distribution: Distribution): Promise<AxiosResponse>;
-    newDist(distribution: Distribution): Promise<AxiosResponse>;
-    update(distribution: Distribution): Promise<AxiosResponse>;
-    delete(distributionId: number): Promise<AxiosResponse>;
+    list() : Promise<AxiosResponse>;
+    listByFormAndResponder(formId: number) : Promise<AxiosResponse>;
+    count(formId: number) : Promise<AxiosResponse>;
+    get(formId: number) : Promise<AxiosResponse>;
+    create(form: Form, distribution: Distribution) : Promise<AxiosResponse>;
+    newDist(distribution: Distribution) : Promise<AxiosResponse>;
+    update(distribution: Distribution) : Promise<AxiosResponse>;
+    delete(distributionId: number) : Promise<AxiosResponse>;
 }
 
 export const distributionService: DistributionService = {
 
-    async list (): Promise<AxiosResponse> {
+    async list() : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/distributions`);
         } catch (err) {
@@ -24,7 +24,7 @@ export const distributionService: DistributionService = {
         }
     },
 
-    async listByFormAndResponder (formId : number): Promise<AxiosResponse> {
+    async listByFormAndResponder(formId: number) : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/distributions/forms/${formId}/list`);
         } catch (err) {
@@ -33,7 +33,7 @@ export const distributionService: DistributionService = {
         }
     },
 
-    async count (formId : number): Promise<AxiosResponse> {
+    async count(formId: number) : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/distributions/forms/${formId}/count`);
         } catch (err) {
@@ -42,7 +42,7 @@ export const distributionService: DistributionService = {
         }
     },
 
-    async get(formId : number): Promise<AxiosResponse> {
+    async get(formId: number) : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/distributions/forms/${formId}`);
         } catch (err) {
@@ -51,7 +51,7 @@ export const distributionService: DistributionService = {
         }
     },
 
-    async create(form: Form, distribution : Distribution): Promise<AxiosResponse> { // TODO distrib unique ou plusieurs ?
+    async create(form: Form, distribution: Distribution) : Promise<AxiosResponse> { // TODO distrib unique ou plusieurs ?
         try {
             return http.post(`/formulaire/distributions/forms/${form.id}`, distribution);
         } catch (err) {
@@ -60,7 +60,7 @@ export const distributionService: DistributionService = {
         }
     },
 
-    async newDist(distribution: Distribution): Promise<AxiosResponse> {
+    async newDist(distribution: Distribution) : Promise<AxiosResponse> {
         try {
             return http.post(`/formulaire/distributions`, distribution);
         } catch (err) {
@@ -69,7 +69,7 @@ export const distributionService: DistributionService = {
         }
     },
 
-    async update(distribution : Distribution): Promise<AxiosResponse> {
+    async update(distribution: Distribution) : Promise<AxiosResponse> {
         try {
             return http.put(`/formulaire/distributions/${distribution.id}`, distribution);
         } catch (err) {
@@ -78,7 +78,7 @@ export const distributionService: DistributionService = {
         }
     },
 
-    async delete(distributionId : number): Promise<AxiosResponse> {
+    async delete(distributionId: number) : Promise<AxiosResponse> {
         try {
             return http.delete(`/formulaire/distributions/${distributionId}`);
         } catch (err) {

@@ -17,7 +17,7 @@ export class Response {
         this.distribution_id = distribution_id ? distribution_id : null;
     }
 
-    toJson(): Object {
+    toJson() : Object {
         return {
             id: this.id,
             question_id: this.question_id,
@@ -35,7 +35,7 @@ export class Responses {
         this.all = [];
     }
 
-    async sync (questionId: number) : Promise<void> {
+    sync = async (questionId: number) : Promise<void> => {
         try {
             let { data } = await responseService.list(questionId);
             this.all = Mix.castArrayAs(Response, data);
@@ -45,7 +45,7 @@ export class Responses {
         }
     }
 
-    async syncMine (questionId: number, distributionId: number) : Promise<void> {
+    syncMine = async (questionId: number, distributionId: number) : Promise<void> => {
         try {
             let { data } = await responseService.listMine(questionId, distributionId);
             this.all = Mix.castArrayAs(Response, data);

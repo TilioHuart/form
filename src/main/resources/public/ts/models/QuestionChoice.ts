@@ -23,7 +23,7 @@ export class QuestionChoice {
         this.type = type ? type : ChoiceTypes.TXT;
     }
 
-    toJson(): Object {
+    toJson() : Object {
         return {
             id: this.id,
             question_id: this.question_id,
@@ -41,7 +41,7 @@ export class QuestionChoices {
         this.all = [];
     }
 
-    async sync (questionId: number) : Promise<void> {
+    sync = async (questionId: number) : Promise<void> => {
         try {
             let { data } = await questionChoiceService.list(questionId);
             this.all = Mix.castArrayAs(QuestionChoice, data);

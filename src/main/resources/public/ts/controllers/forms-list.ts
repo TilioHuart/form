@@ -20,25 +20,25 @@ interface ViewModel {
     };
     filtersOrders: typeof FiltersOrders;
 
-    openFolder(folderName : string): void;
-    switchAll(value : boolean): void;
-    sort(field : string) : void;
+    openFolder(folderName: string) : void;
+    switchAll(value: boolean) : void;
+    sort(field: FiltersOrders) : void;
     filter() : void;
-    displayFilterName(name : string) : string;
-    displayFolder(): string;
-    checkOpenButton(): boolean;
-    openForm(form : Form): void;
-    openPropertiesForm(): void;
-    duplicateForms(): Promise<void>;
-    shareForm(): void;
-    closeShareFormLightbox(): void;
-    seeResultsForm(): void;
-    exportForm(): void;
-    restoreForms(): Promise<void>;
-    archiveForms(): void;
-    doArchiveForms(): Promise<void>;
-    deleteForms(): void;
-    doDeleteForms(): Promise<void>;
+    displayFilterName(name: string) : string;
+    displayFolder() : string;
+    checkOpenButton() : boolean;
+    openForm(form: Form) : void;
+    openPropertiesForm() : void;
+    duplicateForms() : Promise<void>;
+    shareForm() : void;
+    closeShareFormLightbox() : void;
+    seeResultsForm() : void;
+    exportForm() : void;
+    restoreForms() : Promise<void>;
+    archiveForms() : void;
+    doArchiveForms() : Promise<void>;
+    deleteForms() : void;
+    doDeleteForms() : Promise<void>;
 }
 
 
@@ -62,7 +62,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
     vm.filtersOrders = FiltersOrders;
 
-    const init = async (): Promise<void> => {
+    const init = async () : Promise<void> => {
         await vm.forms.sync();
 
         vm.forms.filters.find(f => f.name === FiltersFilters.SENT).display = true;
@@ -86,17 +86,17 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     // Global functions
 
-    vm.openFolder = (folderName:string) : void => {
+    vm.openFolder = (folderName: string) : void => {
         vm.folder = folderName;
         init();
     };
 
-    vm.switchAll = (value:boolean) : void => {
+    vm.switchAll = (value: boolean) : void => {
         value ? vm.forms.selectAll() : vm.forms.deselectAll();
         vm.allFormsSelected = value;
     };
 
-    vm.sort = (field : string) : void => {
+    vm.sort = (field: FiltersOrders) : void => {
         vm.forms.orderByField(field);
         vm.forms.orderForms();
         $scope.safeApply();
@@ -107,7 +107,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         $scope.safeApply();
     };
 
-    vm.displayFilterName = (name : string) : string => {
+    vm.displayFilterName = (name: string) : string => {
         return idiom.translate("formulaire.filter." + name.toLowerCase());
     };
 
@@ -119,22 +119,22 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     // Toaster
 
-    vm.checkOpenButton = (): boolean => {
+    vm.checkOpenButton = () : boolean => {
         return vm.forms.selected.length === 1;
     };
 
-    vm.openForm = (form: Form): void => {
+    vm.openForm = (form: Form) : void => {
         $scope.form = form;
         $scope.redirectTo(`/form/${form.id}`);
         $scope.safeApply();
     };
 
-    vm.openPropertiesForm = (): void => {
+    vm.openPropertiesForm = () : void => {
         $scope.redirectTo(`/form/${vm.forms.selected[0].id}/properties`);
         $scope.safeApply();
     };
 
-    vm.duplicateForms = async (): Promise<void> => {
+    vm.duplicateForms = async () : Promise<void> => {
         try {
             let forms = [];
             for (let form of vm.forms.selected) {
@@ -150,29 +150,29 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         }
     };
 
-    vm.shareForm = (): void => {
+    vm.shareForm = () : void => {
         if (!isFormEmpty(vm.forms.selected[0].id)) return;
         vm.forms.selected[0].generateShareRights();
         template.open('lightbox', 'lightbox/form-sharing');
         vm.display.lightbox.sharing = true;
     };
 
-    vm.closeShareFormLightbox = (): void => {
+    vm.closeShareFormLightbox = () : void => {
         template.close('lightbox');
         vm.display.lightbox.sharing = false;
         window.setTimeout(async function () { await init(); }, 100);
     };
 
-    vm.seeResultsForm = (): void => {
+    vm.seeResultsForm = () : void => {
         $scope.redirectTo(`/form/${vm.forms.selected[0].id}/results/1`);
         $scope.safeApply();
     };
 
-    vm.exportForm = (): void => {
+    vm.exportForm = () : void => {
         window.open(window.location.pathname + `/export/${vm.forms.selected[0].id}`);
     };
 
-    vm.restoreForms = async (): Promise<void> => {
+    vm.restoreForms = async () : Promise<void> => {
         try {
             for (let form of vm.forms.selected) {
                 await formService.restore(form);
@@ -187,13 +187,13 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         }
     };
 
-    vm.archiveForms = (): void => {
+    vm.archiveForms = () : void => {
         vm.display.warning = !!vm.forms.selected.find(form => form.sent === true);
         template.open('lightbox', 'lightbox/form-confirm-archive');
         vm.display.lightbox.archive = true;
     };
 
-    vm.doArchiveForms = async (): Promise<void> => {
+    vm.doArchiveForms = async () : Promise<void> => {
         try {
             for (let form of vm.forms.selected) {
                 await formService.archive(form);
@@ -210,13 +210,13 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         }
     };
 
-    vm.deleteForms = (): void => {
+    vm.deleteForms = () : void => {
         vm.display.warning = true;
         template.open('lightbox', 'lightbox/form-confirm-delete');
         vm.display.lightbox.delete = true;
     };
 
-    vm.doDeleteForms = async (): Promise<void> => {
+    vm.doDeleteForms = async () : Promise<void> => {
         try {
             for (let form of vm.forms.selected) {
                 if ($scope.isStatusXXX(await formService.unshare(form.id), 200)) {

@@ -3,18 +3,18 @@ import http, {AxiosResponse} from 'axios';
 import {QuestionChoice} from '../models';
 
 export interface QuestionChoiceService {
-    list(questionId: number): Promise<AxiosResponse>;
-    get(choiceId: number): Promise<AxiosResponse>;
-    save(choice : QuestionChoice): Promise<AxiosResponse>;
-    create(choice: QuestionChoice): Promise<AxiosResponse>;
-    createMultiple(choices: Array<QuestionChoice>, questionId : number): Promise<AxiosResponse>;
-    update(choice: QuestionChoice): Promise<AxiosResponse>;
-    delete(choiceId: number): Promise<AxiosResponse>;
+    list(questionId: number) : Promise<AxiosResponse>;
+    get(choiceId: number) : Promise<AxiosResponse>;
+    save(choice: QuestionChoice) : Promise<AxiosResponse>;
+    create(choice: QuestionChoice) : Promise<AxiosResponse>;
+    createMultiple(choices: Array<QuestionChoice>, questionId: number) : Promise<AxiosResponse>;
+    update(choice: QuestionChoice) : Promise<AxiosResponse>;
+    delete(choiceId: number) : Promise<AxiosResponse>;
 }
 
 export const questionChoiceService: QuestionChoiceService = {
 
-    async list (questionId: number): Promise<AxiosResponse> {
+    async list(questionId: number) : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/questions/${questionId}/choices`);
         } catch (err) {
@@ -23,7 +23,7 @@ export const questionChoiceService: QuestionChoiceService = {
         }
     },
 
-    async get(choiceId : number): Promise<AxiosResponse> {
+    async get(choiceId: number) : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/choices/${choiceId}`);
         } catch (err) {
@@ -32,11 +32,11 @@ export const questionChoiceService: QuestionChoiceService = {
         }
     },
 
-    async save(choice : QuestionChoice): Promise<AxiosResponse> {
+    async save(choice: QuestionChoice) : Promise<AxiosResponse> {
         return choice.id ? await this.update(choice) : await this.create(choice);
     },
 
-    async create(choice: QuestionChoice): Promise<AxiosResponse> {
+    async create(choice: QuestionChoice) : Promise<AxiosResponse> {
         try {
             return await http.post(`/formulaire/questions/${choice.question_id}/choices`, choice);
         } catch (err) {
@@ -45,7 +45,7 @@ export const questionChoiceService: QuestionChoiceService = {
         }
     },
 
-    async createMultiple(choices : Array<QuestionChoice>, questionId : number): Promise<AxiosResponse> {
+    async createMultiple(choices: Array<QuestionChoice>, questionId: number) : Promise<AxiosResponse> {
         try {
             return http.post(`/formulaire/questions/${questionId}/choices/m`, choices);
         } catch (err) {
@@ -54,7 +54,7 @@ export const questionChoiceService: QuestionChoiceService = {
         }
     },
 
-    async update(choice : QuestionChoice): Promise<AxiosResponse> {
+    async update(choice: QuestionChoice) : Promise<AxiosResponse> {
         try {
             return http.put(`/formulaire/choices/${choice.id}`, choice);
         } catch (err) {
@@ -63,7 +63,7 @@ export const questionChoiceService: QuestionChoiceService = {
         }
     },
 
-    async delete(choiceId : number): Promise<AxiosResponse> {
+    async delete(choiceId: number) : Promise<AxiosResponse> {
         try {
             return http.delete(`/formulaire/choices/${choiceId}`);
         } catch (err) {

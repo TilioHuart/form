@@ -57,7 +57,7 @@
                                 <span ng-if="!!vm.getMyResponses(form)[0].date_response" class="responded">
                                     <i18n>formulaire.responded.date</i18n>[[vm.displayDate(vm.getMyResponses(form)[0].date_response)]]
                                 </span>
-                                    <span ng-if="!!!vm.getMyResponses(form)[0].date_response" class="notResponded">
+                                <span ng-if="!!!vm.getMyResponses(form)[0].date_response" class="notResponded">
                                     <i18n>formulaire.responded.waiting</i18n>
                                 </span>
                             </div>
@@ -65,7 +65,7 @@
                                 <span ng-if="vm.getMyResponses(form).length > 0" class="responded">
                                     <i18n>formulaire.responses.count</i18n> : [[vm.getMyResponses(form).length]]
                                 </span>
-                                <span ng-if="vm.getMyResponses(form).length == 0" class="notResponded">
+                                <span ng-if="vm.getMyResponses(form).length <= 0" class="notResponded">
                                     <i18n>formulaire.responses.count</i18n> : 0
                                 </span>
                             </div>

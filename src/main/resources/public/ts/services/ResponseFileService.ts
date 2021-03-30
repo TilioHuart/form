@@ -2,18 +2,18 @@ import {idiom, ng, notify} from 'entcore';
 import http, {AxiosResponse} from 'axios';
 
 export interface ResponseFileService {
-    list(questionId : number): Promise<AxiosResponse>;
-    get(responseId : number): Promise<AxiosResponse>;
-    download(responseId : number): Promise<AxiosResponse>;
-    zipAndDownload(questionId : number): Promise<AxiosResponse>;
-    create(responseId: number, file): Promise<AxiosResponse>;
-    update(responseId: number, file): Promise<AxiosResponse>;
-    delete(responseId : number, fileId : number): Promise<AxiosResponse>;
+    list(questionId: number) : Promise<AxiosResponse>;
+    get(responseId: number) : Promise<AxiosResponse>;
+    download(responseId: number) : Promise<AxiosResponse>;
+    zipAndDownload(questionId: number) : Promise<AxiosResponse>;
+    create(responseId: number, file) : Promise<AxiosResponse>;
+    update(responseId: number, file) : Promise<AxiosResponse>;
+    delete(responseId : number, fileId : number) : Promise<AxiosResponse>;
 }
 
 export const responseFileService: ResponseFileService = {
 
-    async list (questionId: number): Promise<AxiosResponse> {
+    async list(questionId: number) : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/responses/${questionId}/files/all`);
         } catch (err) {
@@ -22,7 +22,7 @@ export const responseFileService: ResponseFileService = {
         }
     },
 
-    async get(responseId : number): Promise<AxiosResponse> {
+    async get(responseId: number) : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/responses/${responseId}/files`);
         } catch (err) {
@@ -31,7 +31,7 @@ export const responseFileService: ResponseFileService = {
         }
     },
 
-    async download(responseId : number): Promise<AxiosResponse> {
+    async download(responseId: number) : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/responses/${responseId}/files/download`);
         } catch (err) {
@@ -40,7 +40,7 @@ export const responseFileService: ResponseFileService = {
         }
     },
 
-    async zipAndDownload(questionId : number): Promise<AxiosResponse> {
+    async zipAndDownload(questionId: number) : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/responses/${questionId}/files/download/zip`);
         } catch (err) {
@@ -49,7 +49,7 @@ export const responseFileService: ResponseFileService = {
         }
     },
 
-    async create(responseId : number, file): Promise<AxiosResponse> {
+    async create(responseId: number, file) : Promise<AxiosResponse> {
         try {
             return http.post(`/formulaire/responses/${responseId}/files`, file, {'headers': {'Content-Type': 'multipart/form-data'}});
         } catch (err) {
@@ -58,7 +58,7 @@ export const responseFileService: ResponseFileService = {
         }
     },
 
-    async update(responseId : number, file): Promise<AxiosResponse> {
+    async update(responseId: number, file) : Promise<AxiosResponse> {
         try {
             await this.delete(responseId);
             return this.create(responseId, file);
@@ -68,7 +68,7 @@ export const responseFileService: ResponseFileService = {
         }
     },
 
-    async delete(responseId : number): Promise<AxiosResponse> {
+    async delete(responseId: number) : Promise<AxiosResponse> {
         try {
             return http.delete(`/formulaire/responses/${responseId}/files`);
         } catch (err) {

@@ -3,26 +3,26 @@ import http, {AxiosResponse} from 'axios';
 import {Form} from '../models/Form';
 
 export interface FormService {
-    list(): Promise<AxiosResponse>;
-    listSentForms(): Promise<AxiosResponse>;
-    get(formId: number): Promise<AxiosResponse>;
-    save(form: Form): Promise<AxiosResponse>;
-    create(form: Form): Promise<AxiosResponse>;
-    createMultiple(forms: Array<Form>): Promise<AxiosResponse>;
-    duplicate(forms: Array<number>): Promise<AxiosResponse>;
-    update(form: Form): Promise<AxiosResponse>;
-    archive(form: Form): Promise<AxiosResponse>;
-    restore(form: Form): Promise<AxiosResponse>;
-    delete(formId: number): Promise<AxiosResponse>;
-    unshare(formId: number): Promise<AxiosResponse>;
-    getMyFormRights(formId: number): Promise<AxiosResponse>;
-    getAllMyFormRights(): Promise<AxiosResponse>;
-    getInfoImage(form: Form): Promise<AxiosResponse>;
+    list() : Promise<AxiosResponse>;
+    listSentForms() : Promise<AxiosResponse>;
+    get(formId: number) : Promise<AxiosResponse>;
+    save(form: Form) : Promise<AxiosResponse>;
+    create(form: Form) : Promise<AxiosResponse>;
+    createMultiple(forms: Array<Form>) : Promise<AxiosResponse>;
+    duplicate(forms: Array<number>) : Promise<AxiosResponse>;
+    update(form: Form) : Promise<AxiosResponse>;
+    archive(form: Form) : Promise<AxiosResponse>;
+    restore(form: Form) : Promise<AxiosResponse>;
+    delete(formId: number) : Promise<AxiosResponse>;
+    unshare(formId: number) : Promise<AxiosResponse>;
+    getMyFormRights(formId: number) : Promise<AxiosResponse>;
+    getAllMyFormRights() : Promise<AxiosResponse>;
+    getInfoImage(form: Form) : Promise<AxiosResponse>;
 }
 
 export const formService: FormService = {
 
-    async list (): Promise<AxiosResponse> {
+    async list() : Promise<AxiosResponse> {
         try {
             return http.get('/formulaire/forms');
         } catch (err) {
@@ -31,7 +31,7 @@ export const formService: FormService = {
         }
     },
 
-    async listSentForms (): Promise<AxiosResponse> {
+    async listSentForms() : Promise<AxiosResponse> {
         try {
             return http.get('/formulaire/sentForms');
         } catch (err) {
@@ -40,7 +40,7 @@ export const formService: FormService = {
         }
     },
 
-    async get(formId : number): Promise<AxiosResponse> {
+    async get(formId: number) : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/forms/${formId}`);
         } catch (err) {
@@ -49,7 +49,7 @@ export const formService: FormService = {
         }
     },
 
-    async save(form : Form): Promise<AxiosResponse> {
+    async save(form: Form) : Promise<AxiosResponse> {
         if (form.date_opening != null) {
             form.date_opening = moment(form.date_opening.setHours(0,0,0,0)).format();
         }
@@ -59,7 +59,7 @@ export const formService: FormService = {
         return form.id ? await this.update(form) : await this.create(form);
     },
 
-    async create(form : Form): Promise<AxiosResponse> {
+    async create(form: Form) : Promise<AxiosResponse> {
         try {
             return http.post('/formulaire/forms', form);
         } catch (err) {
@@ -68,7 +68,7 @@ export const formService: FormService = {
         }
     },
 
-    async createMultiple(forms : Array<Form>): Promise<AxiosResponse> {
+    async createMultiple(forms: Array<Form>) : Promise<AxiosResponse> {
         try {
             return http.post('/formulaire/forms/m', forms);
         } catch (err) {
@@ -77,7 +77,7 @@ export const formService: FormService = {
         }
     },
 
-    async duplicate(forms : Array<number>): Promise<AxiosResponse> {
+    async duplicate(forms: Array<number>) : Promise<AxiosResponse> {
         try {
             return http.post('/formulaire/forms/duplicate', forms);
         } catch (err) {
@@ -86,7 +86,7 @@ export const formService: FormService = {
         }
     },
 
-    async update(form : Form): Promise<AxiosResponse> {
+    async update(form: Form) : Promise<AxiosResponse> {
         try {
             return http.put(`/formulaire/forms/${form.id}`, form);
         } catch (err) {
@@ -95,7 +95,7 @@ export const formService: FormService = {
         }
     },
 
-    async archive(form : Form): Promise<AxiosResponse> {
+    async archive(form: Form) : Promise<AxiosResponse> {
         try {
             form.sent = false;
             form.archived = true;
@@ -107,7 +107,7 @@ export const formService: FormService = {
         }
     },
 
-    async restore(form : Form): Promise<AxiosResponse> {
+    async restore(form: Form) : Promise<AxiosResponse> {
         try {
             form.archived = false;
             return await this.update(form);
@@ -117,7 +117,7 @@ export const formService: FormService = {
         }
     },
 
-    async delete(formId : number): Promise<AxiosResponse> {
+    async delete(formId: number) : Promise<AxiosResponse> {
         try {
             return await http.delete(`/formulaire/forms/${formId}`);
         } catch (err) {
@@ -126,7 +126,7 @@ export const formService: FormService = {
         }
     },
 
-    async unshare(formId : number): Promise<AxiosResponse> {
+    async unshare(formId: number) : Promise<AxiosResponse> {
         try {
             let emptyBody = {"users":{},"groups":{},"bookmarks":{}};
             return await http.put(`/formulaire/share/resource/${formId}`, emptyBody);
@@ -136,7 +136,7 @@ export const formService: FormService = {
         }
     },
 
-    async getMyFormRights(formId : number): Promise<AxiosResponse> {
+    async getMyFormRights(formId: number) : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/forms/${formId}/rights`);
         } catch (err) {
@@ -145,7 +145,7 @@ export const formService: FormService = {
         }
     },
 
-    async getAllMyFormRights(): Promise<AxiosResponse> {
+    async getAllMyFormRights() : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/forms/rights/all`);
         } catch (err) {
@@ -154,7 +154,7 @@ export const formService: FormService = {
         }
     },
 
-    async getInfoImage(form : Form): Promise<AxiosResponse> {
+    async getInfoImage(form: Form) : Promise<AxiosResponse> {
         try {
             return await http.get(`/formulaire/info/image/${form.picture ? form.picture.split("/").slice(-1)[0] : null}`);
         } catch (e) {
