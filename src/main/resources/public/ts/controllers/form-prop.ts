@@ -5,8 +5,7 @@ import {Form} from "../models";
 interface ViewModel {
     form: Form;
     display: {
-        date_ending: boolean,
-        anonymous: boolean
+        date_ending: boolean
     }
 
     save(): Promise<void>;
@@ -21,8 +20,7 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
         const vm: ViewModel = this;
         vm.form = new Form();
         vm.display = {
-            date_ending: false,
-            anonymous: false
+            date_ending: false
         };
 
         const init = async (): Promise<void> => {

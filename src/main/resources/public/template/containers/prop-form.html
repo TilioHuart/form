@@ -43,10 +43,10 @@
                         <div class="anonymous">
                             <div class="text">
                                 <label for="isAnonymous">
-                                    <input type="checkbox" id="isAnonymous" ng-model="vm.display.anonymous" ng-disabled="vm.form.nb_responses > 0"/>
+                                    <input type="checkbox" id="isAnonymous" ng-model="vm.form.anonymous" ng-disabled="vm.form.nb_responses > 0"/>
                                     <span><i18n>formulaire.anonymous.label</i18n></span>
                                 </label>
-                                <i18n class="subdescription" ng-if="vm.display.anonymous">formulaire.anonymous.description</i18n>
+                                <i18n class="subdescription" ng-if="vm.form.anonymous">formulaire.anonymous.description</i18n>
                             </div>
                         </div>
                     </div>
