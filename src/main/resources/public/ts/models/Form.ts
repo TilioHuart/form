@@ -64,10 +64,10 @@ export class Form implements Selectable, Shareable  {
             picture: this.picture,
             owner_id: this.owner_id,
             owner_name: this.owner_name,
-            date_creation: new Date(this.date_creation),
-            date_modification: new Date(this.date_modification),
-            date_opening: new Date(this.date_opening),
-            date_ending: new Date(this.date_ending),
+            date_creation: new Date(this.date_creation + 'Z'),
+            date_modification: new Date(this.date_modification + 'Z'),
+            date_opening: new Date(this.date_opening + 'Z'),
+            date_ending: new Date(this.date_ending + 'Z'),
             sent: this.sent,
             collab: this.collab,
             archived: this.archived,
@@ -83,7 +83,7 @@ export class Form implements Selectable, Shareable  {
             if (key === 'nb_responses' && !!!data[key]) { this[key] = 0; }
             if ((key === 'date_creation' || key === 'date_modification' || key === 'date_opening' || key === 'date_ending')
                 && !!data[key]) {
-                    this[key] = new Date(this[key]);
+                    this[key] = new Date(this[key] + 'Z');
             }
         }
     }
@@ -119,54 +119,19 @@ export class Forms extends Selection<Form> {
     };
 
     orders = [
-        {
-            name: FiltersOrders.CREATION_DATE,
-            display: false
-        },
-        {
-            name: FiltersOrders.MODIFICATION_DATE,
-            display: false
-        },
-        {
-            name: FiltersOrders.SENDING_DATE,
-            display: false
-        },
-        {
-            name: FiltersOrders.CREATOR,
-            display: false
-        },
-        {
-            name: FiltersOrders.TITLE,
-            display: false
-        }
+        { name: FiltersOrders.CREATION_DATE, display: false },
+        { name: FiltersOrders.MODIFICATION_DATE, display: false },
+        { name: FiltersOrders.SENDING_DATE, display: false },
+        { name: FiltersOrders.CREATOR, display: false },
+        { name: FiltersOrders.TITLE, display: false }
     ];
 
     filters = [
-        {
-            name: FiltersFilters.SHARED,
-            value: true,
-            display: false
-        },
-        {
-            name: FiltersFilters.SENT,
-            value: true,
-            display: false
-        },
-        {
-            name: FiltersFilters.TO_DO,
-            value: true,
-            display: false
-        },
-        {
-            name: FiltersFilters.IN_PROGRESS,
-            value: true,
-            display: false
-        },
-        {
-            name: FiltersFilters.FINISHED,
-            value: true,
-            display: false
-        }
+        { name: FiltersFilters.SHARED, value: true, display: false },
+        { name: FiltersFilters.SENT, value: true, display: false },
+        { name: FiltersFilters.TO_DO, value: true, display: false },
+        { name: FiltersFilters.IN_PROGRESS, value: true, display: false },
+        { name: FiltersFilters.FINISHED, value: true, display: false }
     ];
 
     constructor() {
