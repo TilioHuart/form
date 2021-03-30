@@ -44,7 +44,7 @@
                  class="item" ng-class="{'selected' : form.selected}">
                 <div class="domino">
                     <div class="four picture" ng-class="{'empty': !form.picture}">
-                        <img src="[[form.picture]]" onerror="this.src='/formulaire/public/img/empty-image.png';"/>
+                        <img ng-src="[[(form.picture) || '/formulaire/public/img/empty-image.png']]"/>
                     </div>
                     <div class="eight data">
                         <div class="data-text">
