@@ -5,6 +5,9 @@ ALTER TABLE formulaire.form
 ALTER TABLE formulaire.response
     ADD COLUMN distribution_id bigint NOT NULL;
 
+ALTER TABLE formulaire.question
+    RENAME COLUMN duplicate_question_id TO original_question_id;
+
 CREATE OR REPLACE FUNCTION create_distrib(f_id bigint, s_id VARCHAR(36), s_name VARCHAR, r_id VARCHAR(36), r_name VARCHAR) RETURNS boolean AS
 $$
 DECLARE

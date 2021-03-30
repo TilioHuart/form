@@ -15,7 +15,7 @@ public interface QuestionChoiceService {
 
     void createMultiple(JsonArray choices, String questionId, Handler<Either<String, JsonArray>> handler);
 
-    void duplicate(int questionId, int duplicateQuestionId, Handler<Either<String, JsonObject>> handler);
+    void duplicate(int questionId, int originalQuestionId, Handler<Either<String, JsonObject>> handler);
 
     void update(String choiceId, JsonObject choice, Handler<Either<String, JsonObject>> handler);
 

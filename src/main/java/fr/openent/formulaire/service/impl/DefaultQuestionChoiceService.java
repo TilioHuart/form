@@ -59,11 +59,10 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
     }
 
     @Override
-    public void duplicate(int questionId, int duplicateQuestionId, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO formulaire.question_choice (question_id, value, type) " +
-                "SELECT ?, value, type FROM formulaire.question_choice " +
-                "WHERE question_id = ?";
-        JsonArray params = new JsonArray().add(duplicateQuestionId).add(questionId);
+    public void duplicate(int questionId, int originalQuestionId, Handler<Either<String, JsonObject>> handler) {
+        String query = "INSERT INTO " + Formulaire.QUESTION_CHOICE_TABLE + " (question_id, value, type) " +
+                "SELECT ?, value, type FROM " + Formulaire.QUESTION_CHOICE_TABLE + " WHERE question_id = ?";
+        JsonArray params = new JsonArray().add(questionId).add(originalQuestionId);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 

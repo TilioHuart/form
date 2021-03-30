@@ -110,9 +110,9 @@ public class DefaultFormService implements FormService {
         String query = "WITH dForm_id as (INSERT INTO  " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, picture, date_opening, date_ending, multiple, anonymous) " +
                 "SELECT ?, ?, concat(title, ' - Copie'), description, picture, date_opening, date_ending, multiple, anonymous FROM " + Formulaire.FORM_TABLE +
                 " WHERE id = ? RETURNING id) " +
-                "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, statement, mandatory, duplicate_question_id) " +
+                "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, statement, mandatory, original_question_id) " +
                 "SELECT (SELECT id from dForm_id), title, position, question_type, statement, mandatory, id FROM " + Formulaire.QUESTION_TABLE +
-                " WHERE form_id = ? RETURNING id, duplicate_question_id, question_type";
+                " WHERE form_id = ? RETURNING id, original_question_id, question_type";
         JsonArray params = new JsonArray().add(user.getUserId()).add(user.getUsername()).add(id).add(id);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }

@@ -168,7 +168,7 @@ public class FormController extends ControllerHelper {
                     }
                     CompositeFuture.all(formsInfos).onComplete(evt -> {
                         if (evt.failed()) {
-                            log.error("[Formulaire@] Failed to retrieve info ", evt.cause());
+                            log.error("[Formulaire@duplicate] Failed to retrieve info ", evt.cause());
                             badRequest(request);
                         }
                         List<Future> questionsInfosFutures = new ArrayList<>();
@@ -177,18 +177,18 @@ public class FormController extends ControllerHelper {
                             for (int i = 0; i < questionsInfos.size(); i++) {
                                 JsonObject questionInfo = questionsInfos.getJsonObject(i);
                                 int questionId = questionInfo.getInteger("id");
-                                int duplicateQuestionId = questionInfo.getInteger("duplicate_question_id");
+                                int originalQuestionId = questionInfo.getInteger("original_question_id");
                                 int question_type = questionInfo.getInteger("question_type");
                                 if (question_type == 4 || question_type == 5) {
                                     Promise<JsonObject> promise = Promise.promise();
                                     questionsInfosFutures.add(promise.future());
-                                    questionChoiceService.duplicate(questionId, duplicateQuestionId, FutureHelper.handlerJsonObject(promise));
+                                    questionChoiceService.duplicate(questionId, originalQuestionId, FutureHelper.handlerJsonObject(promise));
                                 }
                             }
                         }
                         CompositeFuture.all(questionsInfosFutures).onComplete(evt1 -> {
                             if (evt1.failed()) {
-                                log.error("[Formulaire@] Failed to retrieve info from questions", evt1.cause());
+                                log.error("[Formulaire@duplicate] Failed to retrieve info from questions", evt1.cause());
                                 badRequest(request);
                             }
                             created(request);
