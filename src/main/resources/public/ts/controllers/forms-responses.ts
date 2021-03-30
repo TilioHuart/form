@@ -68,8 +68,8 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
                 form.status = distribs[0].status;
                 if (form.multiple) {
                     for (let d of distribs) {
-                        if (d.status === "FINISHED") {
-                            form.status = "FINISHED";
+                        if (d.status === DistributionStatus.FINISHED) {
+                            form.status = DistributionStatus.FINISHED;
                         }
                     }
                 }
