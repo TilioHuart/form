@@ -119,33 +119,36 @@ public class FormResponsesExport {
 
             // Add responses of this responder
             for (int j = 1; j <= nbQuestions; j++) {
-              JsonObject response = responses.get(0);
-              if (response.getInteger("position") == j) {
-                String answer = "";
-                boolean choice = true;
-                int question_id = response.getInteger("question_id");
-                while (choice && responses.size() > 0) {
-                  if (response.getInteger("question_id") == question_id) {
-                    answer += response.getString("answer") + ";";
-                    question_id = response.getInteger("question_id");
-                    responses.remove(0);
-                    if (responses.size() > 0) {
-                      response = responses.get(0);
-                    }
-                    else {
+              if (responses.size() > 0) {
+                JsonObject response = responses.get(0);
+                if (response.getInteger("position") == j) {
+                  String answer = "";
+                  boolean choice = true;
+                  int question_id = response.getInteger("question_id");
+                  while (choice && responses.size() > 0) {
+                    if (response.getInteger("question_id") == question_id) {
+                      answer += response.getString("answer") + ";";
+                      question_id = response.getInteger("question_id");
+                      responses.remove(0);
+                      if (responses.size() > 0) {
+                        response = responses.get(0);
+                      }
+                      else {
+                        answer = answer.substring(0, answer.length() - 1);
+                      }
+                    } else {
                       answer = answer.substring(0, answer.length() - 1);
+                      choice = false;
                     }
-                  } else {
-                    answer = answer.substring(0, answer.length() - 1);
-                    choice = false;
                   }
+                  content.append(addResponse(answer, j == nbQuestions));
                 }
-                content.append(addResponse(answer, j == nbQuestions));
+                else {
+                  content.append(addResponse("", j == nbQuestions));
+                }
               }
               else {
-                response.put("answer", "");
-                String answer = response.getString("answer");
-                content.append(addResponse(answer, j == nbQuestions));
+                content.append(addResponse("", j == nbQuestions));
               }
             }
           }
