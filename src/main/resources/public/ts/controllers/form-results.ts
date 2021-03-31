@@ -54,7 +54,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             vm.navigatorValue = vm.question.position;
             await vm.questions.sync($scope.form.id);
             await vm.results.sync(vm.question.id);
-            vm.nbResults = vm.results.all.length;
+            vm.nbResults = new Set(vm.results.all.map(r => r.distribution_id)).size;
             vm.nbQuestions = $scope.form.nbQuestions;
             vm.last = vm.question.position === vm.nbQuestions;
             if (vm.question.question_type === Types.FILE) {
