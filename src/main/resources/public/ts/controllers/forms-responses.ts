@@ -56,15 +56,13 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
         vm.forms.orders.find(o => o.name === FiltersOrders.SENDING_DATE).display = true;
         vm.forms.orders.find(o => o.name === FiltersOrders.TITLE).display = true;
 
-        vm.sort(FiltersOrders.SENDING_DATE);
-
         try {
             for (let form of vm.forms.all) {
                 let distribs = $scope.getDataIf200(await distributionService.listByFormAndResponder(form.id));
                 for (let d of distribs) {
                     vm.distributions.all.push(d);
                 }
-                form.date_sending = distribs[0].date_sending;
+                form.date_sending = distribs[distribs.length - 1].date_sending;
                 form.status = distribs[0].status;
                 if (form.multiple) {
                     for (let d of distribs) {
@@ -78,6 +76,8 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
         catch (e) {
             throw e;
         }
+
+        vm.sort(FiltersOrders.SENDING_DATE);
         $scope.safeApply();
     };
 
