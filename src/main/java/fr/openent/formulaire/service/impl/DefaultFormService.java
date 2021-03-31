@@ -47,9 +47,10 @@ public class DefaultFormService implements FormService {
         String query = "SELECT f.* FROM " + Formulaire.FORM_TABLE + " f " +
                 "LEFT OUTER JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON f.id = d.form_id " +
                 "WHERE d.responder_id = ? AND NOW() BETWEEN date_opening AND COALESCE(date_ending, NOW() + interval '1 year') " +
+                "AND active = ?" +
                 "GROUP BY f.id " +
                 "ORDER BY title;";
-        JsonArray params = new JsonArray().add(user.getUserId());
+        JsonArray params = new JsonArray().add(user.getUserId()).add(true);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 

@@ -63,7 +63,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
                     vm.distributions.all.push(d);
                 }
                 form.date_sending = distribs[distribs.length - 1].date_sending;
-                form.status = distribs[0].status;
+                form.status = distribs[distribs.length - 1].status;
                 if (form.multiple) {
                     for (let d of distribs) {
                         if (d.status === DistributionStatus.FINISHED) {

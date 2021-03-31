@@ -25,11 +25,16 @@ public interface DistributionService {
 
     void delete(String distributionId, Handler<Either<String, JsonObject>> handler);
 
-    void getDuplicates(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler);
+    void getDeactivated(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler);
 
-    void getRemoved(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler);
+    void getDuplicates(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler);
 
     void createMultiple(String formId, UserInfos user, JsonArray responders, JsonArray duplicates, Handler<Either<String, JsonObject>> handler);
 
-    void removeMultiple(String formId, JsonArray removed, Handler<Either<String, JsonObject>> handler);
+    void setActiveValue(boolean active, String formId, JsonArray duplicates, Handler<Either<String, JsonObject>> handler);
+
+//    void deactivateMultiple(String formId, JsonArray removed, Handler<Either<String, JsonObject>> handler);
+//
+//    void updateDuplicates(String formId, JsonArray duplicates, Handler<Either<String, JsonObject>> handler);
+
 }

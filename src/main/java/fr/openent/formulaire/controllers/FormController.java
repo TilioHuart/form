@@ -40,6 +40,7 @@ public class FormController extends ControllerHelper {
     private FormService formService;
     private DistributionService distributionService;
     private QuestionChoiceService questionChoiceService;
+    private ResponseService responseService;
     private FormSharesService formShareService;
     private NeoService neoService;
 
@@ -49,6 +50,7 @@ public class FormController extends ControllerHelper {
         this.formService = new DefaultFormService();
         this.distributionService = new DefaultDistributionService();
         this.questionChoiceService = new DefaultQuestionChoiceService();
+        this.responseService = new DefaultResponseService();
         this.formShareService = new DefaultFormSharesService();
         this.neoService = new DefaultNeoService();
     }
@@ -358,7 +360,8 @@ public class FormController extends ControllerHelper {
                                 (isGroup ? groupsIds : usersIds).add(id.getString("id"));
                             }
 
-                            // Get all users ids from usersIds & groupsIds and sync with distribution table
+                            // Get all users ids from usersIds & groupsIds
+                            // Sync with distribution table
                             neoService.getUsersInfosFromIds(usersIds, groupsIds, eventUsers -> {
                                 if (eventUsers.isRight()) {
                                     JsonArray infos = eventUsers.right().getValue();
@@ -441,16 +444,16 @@ public class FormController extends ControllerHelper {
     }
 
     private void removeDeletedDistributions(String formId, JsonArray responders, Handler<AsyncResult<String>> handler) {
-        distributionService.getRemoved(formId, responders, filteringEvent -> {
+        distributionService.getDeactivated(formId, responders, filteringEvent -> {
             if (filteringEvent.isRight()) {
-                JsonArray removed = filteringEvent.right().getValue();
-                if (!removed.isEmpty()) {
-                    distributionService.removeMultiple(formId, removed, removeEvent -> {
-                        if (removeEvent.isRight()) {
+                JsonArray deactivated = filteringEvent.right().getValue();
+                if (!deactivated.isEmpty()) {
+                    distributionService.setActiveValue(false, formId, deactivated, deactivateEvent -> {
+                        if (deactivateEvent.isRight()) {
                             handler.handle(Future.succeededFuture());
                         } else {
-                            handler.handle(Future.failedFuture(removeEvent.left().getValue()));
-                            log.error("[Formulaire@removeDeletedDistributions] Fail to remove distributions");
+                            handler.handle(Future.failedFuture(deactivateEvent.left().getValue()));
+                            log.error("[Formulaire@removeDeletedDistributions] Fail to deactivate distributions");
                         }
                     });
                 }
@@ -469,7 +472,14 @@ public class FormController extends ControllerHelper {
                     JsonArray duplicates = filteringEvent.right().getValue();
                     distributionService.createMultiple(formId, user, responders, duplicates, addEvent -> {
                         if (addEvent.isRight()) {
-                            handler.handle(Future.succeededFuture());
+                            distributionService.setActiveValue(true, formId, duplicates, updateEvent -> {
+                                if (updateEvent.isRight()) {
+                                    handler.handle(Future.succeededFuture());
+                                } else {
+                                    handler.handle(Future.failedFuture(updateEvent.left().getValue()));
+                                    log.error("[Formulaire@addNewDistributions] Fail to update distributions");
+                                }
+                            });
                         } else {
                             handler.handle(Future.failedFuture(addEvent.left().getValue()));
                             log.error("[Formulaire@addNewDistributions] Fail to add distributions");
