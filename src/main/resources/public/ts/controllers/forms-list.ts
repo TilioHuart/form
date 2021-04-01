@@ -23,7 +23,7 @@ interface ViewModel {
     openFolder(folderName: string) : void;
     switchAll(value: boolean) : void;
     sort(field: FiltersOrders) : void;
-    filter() : void;
+    filter(filter: FiltersFilters) : void;
     displayFilterName(name: string) : string;
     displayFolder() : string;
     checkOpenButton() : boolean;
@@ -108,7 +108,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         $scope.safeApply();
     };
 
-    vm.filter = () : void => {
+    vm.filter = (filter: FiltersFilters) : void => {
+        vm.forms.switchFilter(filter);
         vm.forms.filterForms();
         $scope.safeApply();
     };

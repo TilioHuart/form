@@ -18,7 +18,7 @@
         <label ng-repeat="filter in vm.forms.filters | filter:{display:true}"
                class="chip checkbox" ng-class="{ selected: filter.value }">
             <i18n>[[vm.displayFilterName(filter.name)]]</i18n>
-            <input type="checkbox" ng-click="vm.forms.switchFilter(filter.name); vm.filter()">
+            <input type="checkbox" ng-click="vm.filter(filter.name)">
         </label>
     </div>
 </div>

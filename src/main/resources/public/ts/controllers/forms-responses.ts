@@ -18,7 +18,7 @@ interface ViewModel {
 
     switchAll(value: boolean) : void;
     sort(field: FiltersOrders) : void;
-    filter() : void;
+    filter(filter: FiltersFilters) : void;
     displayFilterName(name: string) : string;
     displayDate(date: Date) : string;
     checkOpenButton() : boolean;
@@ -94,7 +94,8 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
         $scope.safeApply();
     };
 
-    vm.filter = () : void => {
+    vm.filter = (filter: FiltersFilters) : void => {
+        vm.forms.switchFilter(filter);
         vm.forms.filterForms();
         $scope.safeApply();
     };

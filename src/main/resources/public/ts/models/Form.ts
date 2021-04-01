@@ -224,36 +224,47 @@ export class Forms extends Selection<Form> {
     };
 
     filterForms = () : void => {
+        let objectFilters = {};
+        for (let filter of this.filters) {
+            objectFilters[filter.name] = filter;
+        }
+
         for (let form of this.all) {
             form.displayed = true;
-            let objectFilters = {};
-            for (let filter of this.filters) {
-                objectFilters[filter.name] = filter;
-            }
 
             if (objectFilters[FiltersFilters.SENT].display && objectFilters[FiltersFilters.SENT].display) {
-                if ((form.sent && form.collab) && (!objectFilters[FiltersFilters.SENT].value || !objectFilters[FiltersFilters.SHARED].value)) {
-                    form.displayed = false;
+                // If both unchecked, display form
+                if (!objectFilters[FiltersFilters.SENT].value && !objectFilters[FiltersFilters.SHARED].value) {
+                    form.displayed = true;
                 }
-                if ((form.sent && !form.collab) && (!objectFilters[FiltersFilters.SENT].value || objectFilters[FiltersFilters.SHARED].value)) {
-                    form.displayed = false;
-                }
-                if ((!form.sent && form.collab) && (objectFilters[FiltersFilters.SENT].value || !objectFilters[FiltersFilters.SHARED].value)) {
-                    form.displayed = false;
-                }
-                if ((!form.sent && !form.collab) && (objectFilters[FiltersFilters.SENT].value || objectFilters[FiltersFilters.SHARED].value)) {
-                    form.displayed = false;
+                else {
+                    if (objectFilters[FiltersFilters.SENT].value && !form.sent) {
+                        form.displayed = false;
+                    }
+                    if (objectFilters[FiltersFilters.SHARED].value && !form.shared) {
+                        form.displayed = false;
+                    }
+                    if ((objectFilters[FiltersFilters.SENT].value && objectFilters[FiltersFilters.SHARED].value) && (!form.sent || !form.shared)) {
+                        form.displayed = false;
+                    }
                 }
             }
 
-            if (objectFilters[FiltersFilters.TO_DO].display && form.status === DistributionStatus.TO_DO && !objectFilters[FiltersFilters.TO_DO].value) {
-                form.displayed = false;
-            }
-            if (objectFilters[FiltersFilters.IN_PROGRESS].display && form.status === DistributionStatus.IN_PROGRESS && !objectFilters[FiltersFilters.IN_PROGRESS].value) {
-                form.displayed = false;
-            }
-            if (objectFilters[FiltersFilters.FINISHED].display && form.status === DistributionStatus.FINISHED && !objectFilters[FiltersFilters.FINISHED].value) {
-                form.displayed = false;
+            if (objectFilters[FiltersFilters.TO_DO].display && objectFilters[FiltersFilters.IN_PROGRESS].display &&  objectFilters[FiltersFilters.FINISHED].display) {
+                if (!objectFilters[FiltersFilters.TO_DO].value && !objectFilters[FiltersFilters.IN_PROGRESS].value && !objectFilters[FiltersFilters.FINISHED].value) {
+                    form.displayed = true;
+                }
+                else {
+                    if (form.status === DistributionStatus.TO_DO && !objectFilters[FiltersFilters.TO_DO].value) {
+                        form.displayed = false;
+                    }
+                    if (form.status === DistributionStatus.IN_PROGRESS && !objectFilters[FiltersFilters.IN_PROGRESS].value) {
+                        form.displayed = false;
+                    }
+                    if (form.status === DistributionStatus.FINISHED && !objectFilters[FiltersFilters.FINISHED].value) {
+                        form.displayed = false;
+                    }
+                }
             }
         }
     };
