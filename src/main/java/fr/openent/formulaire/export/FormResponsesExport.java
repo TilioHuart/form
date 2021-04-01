@@ -43,6 +43,7 @@ public class FormResponsesExport {
     this.request = request;
     this.anonymous = form.getBoolean("anonymous");
     this.formName = form.getString("title");
+    dateFormatter.setTimeZone(TimeZone.getTimeZone("Europe/Paris")); // TODO to adapt for not France timezone
   }
 
   public void launch() {
