@@ -3,7 +3,7 @@ ALTER TABLE formulaire.form
     ADD COLUMN anonymous boolean NOT NULL DEFAULT FALSE;
 
 ALTER TABLE formulaire.response
-    ADD COLUMN distribution_id bigint NOT NULL;
+    ADD COLUMN distribution_id bigint NOT NULL DEFAULT 0;
 
 ALTER TABLE formulaire.question
     RENAME COLUMN duplicate_question_id TO original_question_id;
