@@ -195,7 +195,7 @@ public class DefaultDistributionService implements DistributionService {
                     "responder_name, status, date_sending, active) VALUES ";
 
             for (JsonObject responder : respondersArray) {
-                query += "(?, ?, ?, ?, ?, ?, ?), ";
+                query += "(?, ?, ?, ?, ?, ?, ?, ?), ";
                 params.add(formId)
                         .add(user.getUserId())
                         .add(user.getUsername())

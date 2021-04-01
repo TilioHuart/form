@@ -32,9 +32,4 @@ public interface DistributionService {
     void createMultiple(String formId, UserInfos user, JsonArray responders, JsonArray duplicates, Handler<Either<String, JsonObject>> handler);
 
     void setActiveValue(boolean active, String formId, JsonArray duplicates, Handler<Either<String, JsonObject>> handler);
-
-//    void deactivateMultiple(String formId, JsonArray removed, Handler<Either<String, JsonObject>> handler);
-//
-//    void updateDuplicates(String formId, JsonArray duplicates, Handler<Either<String, JsonObject>> handler);
-
 }
