@@ -25,8 +25,8 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
 
         const init = async () : Promise<void> => {
             vm.form = $scope.form;
-            vm.form.nb_responses = !!vm.form.id ? $scope.getDataIf200(await distributionService.count(vm.form.id)).count : 0;
             vm.display.date_ending = !!vm.form.date_ending;
+            vm.form.nb_responses = !!vm.form.id ? $scope.getDataIf200(await distributionService.count(vm.form.id)).count : 0;
             $scope.safeApply();
         };
 
