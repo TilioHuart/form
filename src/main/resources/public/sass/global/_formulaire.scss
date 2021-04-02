@@ -67,6 +67,15 @@ body.formulaire section.main {
     background-color: $formulaire-blue;
   }
 
+  lightbox {
+    h2 { margin-bottom: 20px !important; }
+
+    .action-buttons {
+      margin-top: 10px;
+      float: right;
+    }
+  }
+
   // Forms-list
 
   .folder-info {

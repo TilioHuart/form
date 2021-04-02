@@ -1,5 +1,5 @@
-<lightbox class="new-question dontSave" show="vm.display.lightbox.newQuestion" on-close="vm.display.lightbox.newQuestion = false; vm.dontSave = false;">
-    <h2 style="margin-bottom: 20px"><i18n>formulaire.question.selectType</i18n></h2>
+<lightbox class="new-question dontSave" show="vm.display.lightbox.newQuestion" on-close="vm.closeLightbox('newQuestion')">
+    <h2><i18n>formulaire.question.selectType</i18n></h2>
     <div class="dominos">
         <div ng-repeat="type in questionTypes.all" ng-click="vm.doCreateNewQuestion(type.code)" class="item">
             <div class="domino">
@@ -7,7 +7,7 @@
                     <h5>[[vm.displayTypeName(type.name)]]</h5>
                 </div>
                 <div class="picture">
-                    <img src="[[vm.displayTypeIcon(type.code)]]" onerror="this.src='/formulaire/public/img/empty-image.png';"/>
+                    <img ng-src="[[(vm.displayTypeIcon(type.code)) || '/formulaire/public/img/empty-image.png']]"/>
                 </div>
             </div>
         </div>

@@ -19,18 +19,19 @@ interface ViewModel {
         }
     };
 
+    saveAll() : Promise<void>;
+    return() : void;
     createNewQuestion() : void;
     doCreateNewQuestion(code: number) : void;
     organizeQuestions() : void;
     doOrganizeQuestions() : Promise<void>;
-    saveAll() : Promise<void>;
-    return() : void;
+    cancelOrganizeQuestions() : Promise<void>;
     duplicateQuestion() : Promise<void>;
     deleteQuestion() : void;
-    doDeleteQuestion() : void;
-    cancelOrganizeQuestions() : void;
-    undoQuestionChanges() : void;
-    doUndoQuestionChanges() : void;
+    doDeleteQuestion() : Promise<void>;
+    undoQuestionChanges();
+    doUndoQuestionChanges() : Promise<void>;
+    closeLightbox(action: string): void;
     createNewChoice(question: Question) : void;
     deleteChoice(question: Question, index: number) : Promise<void>;
     displayTypeName(typeInfo: string) : string;
@@ -70,6 +71,27 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         // Global functions
 
+        vm.saveAll = async () : Promise<void> => {
+            vm.dontSave = true;
+            let wrongQuestions = vm.questions.filter(question => !!!question.title); // TODO check more than just titles later
+            if (wrongQuestions.length > 0) {
+                notify.error(idiom.translate('formulaire.question.save.missing.field'));
+            }
+            await saveQuestions(wrongQuestions.length <= 0);
+            vm.dontSave = false;
+        };
+
+        vm.return = () : void => {
+            vm.dontSave = true;
+            let wrongQuestions = vm.questions.filter(question => !!!question.title); // TODO check more than just titles later
+            if (wrongQuestions.length > 0) {
+                notify.error(idiom.translate('formulaire.question.save.missing.field'));
+                vm.dontSave = false;
+            } else {
+                $scope.redirectTo('/list/mine');
+            }
+        };
+
         vm.createNewQuestion = () => {
             template.open('lightbox', 'lightbox/question-new');
             vm.display.lightbox.newQuestion = true;
@@ -101,7 +123,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         };
 
         vm.doOrganizeQuestions = async () : Promise<void> => {
-            // Reorganization stuff
             await saveQuestions();
             vm.display.lightbox.reorganization = false;
             template.close('lightbox');
@@ -110,31 +131,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         vm.cancelOrganizeQuestions = async () : Promise<void> => {
             await vm.questions.sync(vm.form.id);
-            vm.display.lightbox.reorganization = false;
-            template.close('lightbox');
-            $scope.safeApply();
+            vm.closeLightbox('reorganization');
         };
 
-        vm.saveAll = async () : Promise<void> => {
-            vm.dontSave = true;
-            let wrongQuestions = vm.questions.filter(question => !!!question.title); // TODO check more than just titles later
-            if (wrongQuestions.length > 0) {
-                notify.error(idiom.translate('formulaire.question.save.missing.field'));
-            }
-            await saveQuestions(wrongQuestions.length <= 0);
-            vm.dontSave = false;
-        };
-
-        vm.return = () : void => {
-            vm.dontSave = true;
-            let wrongQuestions = vm.questions.filter(question => !!!question.title); // TODO check more than just titles later
-            if (wrongQuestions.length > 0) {
-                notify.error(idiom.translate('formulaire.question.save.missing.field'));
-                vm.dontSave = false;
-            } else {
-                $scope.redirectTo('/list/mine');
-            }
-        };
 
         // Question functions
 
@@ -167,13 +166,13 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
         };
 
-        vm.deleteQuestion = () => {
+        vm.deleteQuestion = () : void => {
             vm.dontSave = true;
             template.open('lightbox', 'lightbox/question-confirm-delete');
             vm.display.lightbox.delete = true;
         };
 
-        vm.doDeleteQuestion = async () => {
+        vm.doDeleteQuestion = async () : Promise<void> => {
             try {
                 let question = vm.questions.selected[0];
                 if (!!question.id) {
@@ -200,15 +199,24 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     template.open('lightbox', 'lightbox/question-confirm-undo');
                     vm.display.lightbox.undo = true;
                 }
-                await vm.questions.sync(vm.form.id);
-                $scope.safeApply();
+                else {
+                    await vm.questions.sync(vm.form.id);
+                    $scope.safeApply();
+                }
             }
         };
 
-        vm.doUndoQuestionChanges = async () => {
+        vm.doUndoQuestionChanges = async () : Promise<void> => {
             await vm.questions.sync(vm.form.id);
             template.close('lightbox');
             vm.display.lightbox.undo = true;
+            vm.dontSave = false;
+            $scope.safeApply();
+        };
+
+        vm.closeLightbox = (action: string) : void => {
+            template.close('lightbox');
+            vm.display.lightbox[action] = false;
             vm.dontSave = false;
             $scope.safeApply();
         };

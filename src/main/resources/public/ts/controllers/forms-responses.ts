@@ -24,7 +24,7 @@ interface ViewModel {
     checkOpenButton() : boolean;
     checkMyResponsesButton() : boolean;
     openForm(form: Form) : void;
-    myResponses() : void;
+    openMyResponses() : void;
     closeMyResponses() : void;
     getMyResponses(form: Form) : Array<Distribution>;
 }
@@ -150,7 +150,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
         $scope.safeApply();
     };
 
-    vm.myResponses = () : void => {
+    vm.openMyResponses = () : void => {
         template.open('lightbox', 'lightbox/my-responses');
         vm.display.lightbox.myResponses = true;
     };
