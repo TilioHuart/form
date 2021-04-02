@@ -115,9 +115,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 					$scope.form.setFromJson($scope.getDataIf200(await formService.get(params.idForm)));
 
 					// If form not already responded && date ok
-					if (!!distribution.status && distribution.status != DistributionStatus.FINISHED &&
-						$scope.form.date_opening < new Date() &&
-						($scope.form.date_ending ? ($scope.form.date_ending > new Date()) : true)) {
+					if ($scope.form.date_opening < new Date() && ($scope.form.date_ending ? ($scope.form.date_ending > new Date()) : true)) {
+						if ($scope.form.multiple || (!!distribution.status && distribution.status != DistributionStatus.FINISHED)) {
 							$scope.form.nbQuestions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
 
 							if (params.position < 1) {
@@ -130,6 +129,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 								$scope.question = $scope.getDataIf200(await questionService.getByPosition(params.idForm, params.position));
 								template.open('main', 'containers/respond-question');
 							}
+						}
+						else {
+							$scope.redirectTo('/e409');
+						}
 					}
 					else {
 						$scope.redirectTo('/e403');
@@ -141,11 +144,15 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			},
 			e403: () => {
 				$scope.currentPage = 'e403';
-				template.open('main', 'containers/e403');
+				template.open('main', 'containers/error/e403');
 			},
 			e404: () => {
 				$scope.currentPage = 'e404';
-				template.open('main', 'containers/e404');
+				template.open('main', 'containers/error/e404');
+			},
+			e409: () => {
+				$scope.currentPage = 'e409';
+				template.open('main', 'containers/error/e409');
 			}
 		});
 
@@ -211,5 +218,13 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 
 		$scope.hasShareRightResponse = (form : Form) => {
 			return form.owner_id === model.me.userId || form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.comment.right);
+		};
+
+		$scope.hasWorkflowZimbra = function () {
+			return model.me.hasWorkflow('fr.openent.zimbra.controllers.ZimbraController|view');
+		};
+
+		$scope.hasWorkflowMessagerie = function () {
+			return model.me.hasWorkflow('org.entcore.conversation.controllers.ConversationController|view');
 		};
 }]);

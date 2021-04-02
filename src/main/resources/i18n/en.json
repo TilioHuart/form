@@ -121,6 +121,7 @@
   "formulaire.error": "Error",
   "formulaire.error.403": "Sorry, you doesn't have enough rights to access this page",
   "formulaire.error.404": "Sorry, the page you're looking for doesn't exist",
+  "formulaire.error.409": "You already have responded to this form",
   "formulaire.error.backToMenu": "Back to forms list",
 
   "formulaire.error.form.sync": "An error occurred during the forms' synchronisation",

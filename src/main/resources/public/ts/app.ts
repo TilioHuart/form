@@ -47,6 +47,9 @@ routes.define(function($routeProvider){
 		.when('/e404', {
 			action: 'e404'
 		})
+		.when('/e409', {
+			action: 'e409'
+		})
 		.otherwise({
 			redirectTo: '/list'
 		});
