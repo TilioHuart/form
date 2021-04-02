@@ -22,14 +22,14 @@
                         <div class="interval">
                             <span class="opening">
                                 <i18n>formulaire.date.opening</i18n>
-                                <date-picker ng-change="vm.checkIntervalDates()" ng-model="vm.form.date_opening" size="7"></date-picker>
+                                <date-picker ng-change="vm.checkIntervalDates()" ng-model="vm.form.date_opening" size="10"></date-picker>
                             </span>
                             <span class="ending">
                                 <label for="hasEnding">
                                     <input type="checkbox" id="hasEnding" ng-change="vm.checkIntervalDates()" ng-model="vm.display.date_ending"/>
                                     <span><i18n>formulaire.date.ending</i18n></span>
                                 </label>
-                                <date-picker ng-model="vm.form.date_ending" ng-if="vm.display.date_ending" size="7"></date-picker>
+                                <date-picker ng-model="vm.form.date_ending" ng-if="vm.display.date_ending" size="10"></date-picker>
                             </span>
                         </div>
                         <div class="multiple">

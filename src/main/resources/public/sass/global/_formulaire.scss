@@ -145,9 +145,9 @@ body.formulaire section.main {
             .interval {
               font-size: 12px;
 
-              .opening {
-                margin-right: 10px;
-              }
+              .opening { margin-right: 10px; }
+
+              input { text-align: center; }
             }
 
             .multiple, .anonymous {
