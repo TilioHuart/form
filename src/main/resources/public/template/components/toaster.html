@@ -7,10 +7,10 @@
             <button ng-click="vm.openMyResponses(vm.forms.selected[0])" class="cell" ng-show="vm.checkMyResponsesButton()">
                 <i18n>formulaire.myResponses</i18n>
             </button>
-            <button ng-click="vm.switchAll(true)" class="cell toaster-right">
+            <button ng-click="vm.switchAll(true)" class="cell toaster-right" ng-if="!vm.isMobile()">
                 <i18n>formulaire.selectAll</i18n>
             </button>
-            <button ng-click="vm.switchAll(false)" class="cell toaster-right">
+            <button ng-click="vm.switchAll(false)" class="cell toaster-right" ng-if="!vm.isMobile()">
                 <i18n>formulaire.deselect</i18n>
             </button>
         </div>
@@ -39,10 +39,10 @@
             <button ng-click="vm.archiveForms()" class="cell" ng-show="hasShareRightManager(vm.forms.selected[0])">
                 <i18n>formulaire.archive</i18n>
             </button>
-            <button ng-click="vm.switchAll(true)" class="cell toaster-right">
+            <button ng-click="vm.switchAll(true)" class="cell toaster-right" ng-if="!vm.isMobile()">
                 <i18n>formulaire.selectAll</i18n>
             </button>
-            <button ng-click="vm.switchAll(false)" class="cell toaster-right">
+            <button ng-click="vm.switchAll(false)" class="cell toaster-right" ng-if="!vm.isMobile()">
                 <i18n>formulaire.deselect</i18n>
             </button>
         </div>
@@ -53,10 +53,10 @@
             <button ng-click="vm.deleteForms()" class="cell" ng-show="hasShareRightManager(vm.forms.selected[0])">
                 <i18n>formulaire.delete</i18n>
             </button>
-            <button ng-click="vm.switchAll(true)" class="cell toaster-right">
+            <button ng-click="vm.switchAll(true)" class="cell toaster-right" ng-if="!vm.isMobile()">
                 <i18n>formulaire.selectAll</i18n>
             </button>
-            <button ng-click="vm.switchAll(false)" class="cell toaster-right">
+            <button ng-click="vm.switchAll(false)" class="cell toaster-right" ng-if="!vm.isMobile()">
                 <i18n>formulaire.deselect</i18n>
             </button>
         </div>

@@ -25,6 +25,10 @@
     margin: 0 auto;
     border-radius: 50%;
     background-color: $formulaire-blue-light;
+    @media screen and (max-width: $formulaire-screen-mobile) {
+      width: 11px;
+      height: 11px;
+    }
   }
   .progressbar li:after {
     width: 100%;
@@ -34,6 +38,9 @@
     background-color: $formulaire-blue-light;
     top: 10px;
     left: -50%;
+    @media screen and (max-width: $formulaire-screen-mobile) {
+      top: 5px;
+    }
   }
   .progressbar li:first-child:after {
     content: none;

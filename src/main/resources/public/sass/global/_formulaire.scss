@@ -147,7 +147,12 @@ body.formulaire section.main {
 
               .opening { margin-right: 10px; }
 
-              input { text-align: center; }
+              input {
+                text-align: center;
+                @media screen and (max-width: $formulaire-screen-mobile) {
+                  font-size: 10px;
+                }
+              }
             }
 
             .multiple, .anonymous {

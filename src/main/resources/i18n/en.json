@@ -46,6 +46,7 @@
   "formulaire.date.opening": "Opening date",
   "formulaire.date.ending": "Ending date",
   "formulaire.multiple": "Allow multiple responses from the same user",
+  "formulaire.multiple.mobile": "Allow multiple responses",
   "formulaire.anonymous.label": "Anonymize the responses",
   "formulaire.anonymous.description": "The identifiers, first names, last names and school names of the responders won't be save.",
 
@@ -94,6 +95,7 @@
 
   "formulaire.form.create.button": "Create form",
   "formulaire.form.create.title": "Title of my form",
+  "formulaire.form.create.title.mobile": "Title",
   "formulaire.form.archive.title": "Delete selected forms",
   "formulaire.form.delete.title": "Delete permanently",
   "formulaire.form.download.all.results": "Download all the results (CSV)",

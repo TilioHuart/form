@@ -1,6 +1,6 @@
 <div class="row" ng-controller="FormsListController as vm">
     <div class="row">
-        <section class="cell seven">
+        <section class="cell five">
             <div>
                 <h1>
                     <a href="#/"><i18n>formulaire.title</i18n></a>
@@ -8,14 +8,14 @@
             </div>
         </section>
 
-        <section class="cell five">
+        <section class="cell seven">
             <div class="main-button">
                 <button class="cell" ng-click="redirectTo('/form/create')"><i18n>formulaire.form.create.button</i18n></button>
             </div>
         </section>
     </div>
 
-    <div class="row twelve cell tabs zero-mobile" style="min-height: 60px;">
+    <div class="row twelve cell tabs" style="min-height: 60px;">
         <div class="cell">
             <header class="horizontal-spacing selected" ng-class="{ selected : currentPage === 'formsList' }"
                     ng-if="canCreate()" ng-click="redirectTo('/list/mine')">
@@ -50,7 +50,7 @@
     <!--List of forms-->
     <section class="cell nine">
         <div class="folder-info">
-            <div><h4><i class="folder spaced-right"></i>[[vm.displayFolder()]]</h4></div>
+            <div><h4><i class="folder spaced-right" ng-if="!vm.isMobile()"></i>[[vm.displayFolder()]]</h4></div>
             <div>
                 <i class="view-cards hg-icon" ng-click="vm.display.grid = true" ng-class="{'selected': vm.display.grid}"></i>
                 <i class="view-tab hg-icon" ng-click="vm.display.grid = false" ng-class="{'selected': !vm.display.grid}"></i>
