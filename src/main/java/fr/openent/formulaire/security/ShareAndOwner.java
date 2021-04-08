@@ -69,13 +69,15 @@ public class ShareAndOwner implements ResourcesProvider {
 
 
     private String getKeyByBinding(Binding binding) {
-        if (isUpdateForm(binding) || isDeleteForm(binding) || isExportForm(binding) || isCountDistribution(binding) || isCreateDistribution(binding)) {
+        if (isUpdateForm(binding) || isDeleteForm(binding) || isExportForm(binding) || isCountDistribution(binding) ||
+                isCreateDistribution(binding) || isSendReminderForm(binding)) {
             return "formId";
         }
         else if (isDeleteDistribution(binding)) {
             return "distributionId";
         }
-        else if (isListMineResponse(binding) || isCreateResponse(binding) || isListResponseFile(binding) || isZipAndDownloadResponseFile(binding)) {
+        else if (isListMineResponse(binding) || isCreateResponse(binding) || isListResponseFile(binding) ||
+                isZipAndDownloadResponseFile(binding)) {
             return "questionId";
         }
         else if (isUpdateResponse(binding) || isDeleteResponse(binding) || isDownloadResponseFile(binding)) {
@@ -96,6 +98,10 @@ public class ShareAndOwner implements ResourcesProvider {
 
     private boolean isDeleteForm(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.FormController|delete");
+    }
+
+    private boolean isSendReminderForm(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.FormController|sendReminder");
     }
 
     private boolean isExportForm(final Binding binding) {

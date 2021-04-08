@@ -1,6 +1,6 @@
-import {Behaviours, idiom, model, ng, template} from 'entcore';
+import {Behaviours, idiom, init, model, ng, template} from 'entcore';
 import {DistributionStatus, Form, Question, QuestionTypes} from "../models";
-import {distributionService, formService, questionService} from "../services";
+import {configService, distributionService, formService, questionService} from "../services";
 import {AxiosResponse} from "axios";
 import {FORMULAIRE_EMIT_EVENT} from "../core/enums/formulaire-event";
 
@@ -8,16 +8,21 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 	($scope, route, $location) => {
 		$scope.lang = idiom;
 		$scope.template = template;
+		$scope.config = {};
 
 		// Init variables
 		$scope.currentPage = 'formsList';
 		$scope.form = new Form();
 		$scope.question = new Question();
 		$scope.questionTypes = new QuestionTypes();
-		$scope.questionTypes.sync();
+
+
+		const init = async () : Promise<void> => {
+			await $scope.getConfig();
+			await $scope.questionTypes.sync();
+		}
 
 		// Routing & template opening
-
 		route({
 			list: () => {
 				$scope.currentPage = 'list';
@@ -156,7 +161,19 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			}
 		});
 
+
 		// Utils
+
+		$scope.getConfig = async (): Promise<void> => {
+			try {
+				$scope.config = $scope.getDataIf200(await configService.get());
+			}
+			catch (err) {
+				console.log("Error in retrieving config : " + err);
+				throw err;
+			}
+			$scope.safeApply();
+		};
 
 		$scope.getTypeNameByCode = (code: number) : string => {
 			return $scope.questionTypes.all.filter(type => type.code === code)[0].name;
@@ -227,4 +244,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.hasWorkflowMessagerie = function () {
 			return model.me.hasWorkflow('org.entcore.conversation.controllers.ConversationController|view');
 		};
+
+
+		init();
 }]);

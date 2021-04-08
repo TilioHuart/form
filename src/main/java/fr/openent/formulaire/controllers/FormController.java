@@ -10,7 +10,6 @@ import fr.openent.formulaire.service.impl.*;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
-import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.http.response.DefaultResponseHandler;
 import fr.wseduc.webutils.request.RequestUtils;
@@ -31,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
 
@@ -222,6 +222,63 @@ public class FormController extends ControllerHelper {
     public void delete(HttpServerRequest request) {
         String formId = request.getParam("formId");
         formService.delete(formId, defaultResponseHandler(request));
+    }
+
+    @Post("/forms/:formId/remind")
+    @ApiDoc("Send a reminder by mail to all the responders")
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void sendReminder(HttpServerRequest request) {
+        String formId = request.getParam("formId");
+        RequestUtils.bodyToJson(request, mail -> {
+            UserUtils.getUserInfos(eb, request, user -> {
+                if (user != null) {
+                    distributionService.listByForm(formId, getDistributions -> {
+                        if (getDistributions.isRight()) {
+                            JsonArray distributions = getDistributions.right().getValue();
+                            JsonArray respondersIds = new JsonArray();
+                            for (int i = 0; i < distributions.size(); i++) {
+                                String id = distributions.getJsonObject(i).getString("responder_id");
+                                if (!respondersIds.contains(id)) {
+                                    respondersIds.add(id);
+                                }
+                            }
+
+                            JsonObject message = new JsonObject()
+                                    .put("subject", mail.getString("subject"))
+                                    .put("body", mail.getString("body"))
+                                    .put("to", respondersIds);
+
+                            JsonObject action = new JsonObject()
+                                    .put("action", "send")
+                                    .put("userId", user.getUserId())
+                                    .put("username", user.getUsername())
+                                    .put("message", message);
+
+                            eb.request("org.entcore.conversation", action, handlerToAsyncHandler(messageEvent -> {
+                                if (!"ok".equals(messageEvent.body().getString("status"))) {
+                                    log.error("[Formulaire@FormController] Failed to send reminder", messageEvent.body().getString("error"));
+                                    renderError(request);
+                                    return;
+                                }
+                                else {
+                                    Renders.renderJson(request, new JsonObject(), 200);
+                                }
+                            }));
+
+                        }
+                        else {
+                            String error = getDistributions.left().getValue();
+                            log.error("[Formulaire@sendReminder] Fail to retrieve distributions of form " + formId + " : " + error);
+                            renderError(request);
+                        }
+                    });
+                } else {
+                    log.error("User not found in session.");
+                    Renders.unauthorized(request);
+                }
+            });
+        });
     }
 
     @Get("/forms/:formId/rights")

@@ -1,3 +1,4 @@
+export * from './ConfigService';
 export * from './DistributionService';
 export * from './FormService';
 export * from './QuestionChoiceService';

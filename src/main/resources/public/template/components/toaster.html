@@ -33,6 +33,9 @@
 <!--            <button ng-click="vm.exportForm()" class="cell" ng-show="vm.forms.selected.length === 1">-->
 <!--                <i18n>formulaire.export</i18n>-->
 <!--            </button>-->
+            <button ng-click="vm.remind()" class="cell" ng-show="vm.forms.selected.length === 1">
+                <i18n>formulaire.reminder</i18n>
+            </button>
             <button ng-click="vm.archiveForms()" class="cell" ng-show="hasShareRightManager(vm.forms.selected[0])">
                 <i18n>formulaire.archive</i18n>
             </button>

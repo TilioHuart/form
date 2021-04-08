@@ -1,0 +1,16 @@
+<lightbox show="vm.display.lightbox.reminder" on-close="vm.cancelRemind()">
+    <h2><i18n>formulaire.reminder</i18n></h2>
+    <div>
+        <input type="text" class="ten" ng-model="vm.mail.subject" i18n-placeholder="formulaire.subject"/>
+        <editor ng-model="vm.mail.body"></editor>
+    </div>
+    <div class="action-buttons">
+        <button class="cell cancel" ng-click="vm.cancelRemind()"><i18n>formulaire.cancel</i18n></button>
+        <button class="cell" ng-click="vm.doRemind()" ng-if="hasWorkflowMessagerie()"><i18n>formulaire.confirm</i18n></button>
+
+        <button class="cell" ng-if="!hasWorkflowMessagerie() && hasWorkflowZimbra()">
+            <i18n>formulaire.confirm</i18n>
+            <sniplet application="zimbra" template="ml" message="vm.mail"></sniplet>
+        </button>
+    </div>
+</lightbox>

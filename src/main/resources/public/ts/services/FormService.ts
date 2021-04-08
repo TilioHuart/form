@@ -14,6 +14,7 @@ export interface FormService {
     archive(form: Form) : Promise<AxiosResponse>;
     restore(form: Form) : Promise<AxiosResponse>;
     delete(formId: number) : Promise<AxiosResponse>;
+    sendReminder(formId: number, mail: {}) : Promise<AxiosResponse>;
     unshare(formId: number) : Promise<AxiosResponse>;
     getMyFormRights(formId: number) : Promise<AxiosResponse>;
     getAllMyFormRights() : Promise<AxiosResponse>;
@@ -122,6 +123,15 @@ export const formService: FormService = {
             return await http.delete(`/formulaire/forms/${formId}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.delete'));
+            throw err;
+        }
+    },
+
+    async sendReminder(formId: number, mail: {}) : Promise<AxiosResponse> {
+        try {
+            return await http.post(`/formulaire/forms/${formId}/remind`, mail);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.formService.remind'));
             throw err;
         }
     },

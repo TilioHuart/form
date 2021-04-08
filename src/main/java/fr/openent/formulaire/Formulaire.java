@@ -90,6 +90,7 @@ public class Formulaire extends BaseServer {
 
 
 
+		addController(new ConfigController());
 		addController(new DistributionController());
 		addController(formController);
 		addController(new FormulaireController());

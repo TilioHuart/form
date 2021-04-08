@@ -28,6 +28,7 @@
   "formulaire.share": "Share",
   "formulaire.results": "Results",
   "formulaire.export": "Export",
+  "formulaire.reminder": "Remind",
   "formulaire.archive": "Delete",
   "formulaire.restore": "Restore",
   "formulaire.delete": "Delete",
@@ -43,6 +44,8 @@
   "formulaire.multiple": "Allow multiple responses from the same user",
   "formulaire.anonymous.label": "Anonymize the responses",
   "formulaire.anonymous.description": "The identifiers, first names, last names and school names of the responders won't be save.",
+  "formulaire.subject": "Title of the reminder",
+  "formulaire.remind.link": "Reminder : the link to the form is ",
 
   "formulaire.read": "Access",
   "formulaire.contrib": "Contribute",
@@ -134,6 +137,7 @@
   "formulaire.error.formService.archive": "An error occurred during the form's archiving",
   "formulaire.error.formService.restore": "An error occurred during the form's restoration",
   "formulaire.error.formService.delete": "An error occurred during the form's suppression",
+  "formulaire.error.formService.remind": "An error occurred during the sending of the reminder",
   "formulaire.error.formService.unshare": "An error occurred during the suppression of the form's sharing",
   "formulaire.error.formService.image": "An error occurred during the retrieving of the form's image",
 
@@ -188,5 +192,6 @@
   "formulaire.success.forms.duplicate": "All the selected forms have been successfully duplicated !",
   "formulaire.success.question.duplicate": "Your question has been successfully duplicated !",
   "formulaire.success.question.delete": "Your question has been successfully deleted !",
-  "formulaire.success.responses.save": "Your reponses has been successfully saved !"
+  "formulaire.success.responses.save": "Your reponses has been successfully saved !",
+  "formulaire.success.reminder.send": "Your reminder has been successfully sent !"
 }

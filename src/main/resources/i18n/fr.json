@@ -28,6 +28,7 @@
   "formulaire.share": "Partager",
   "formulaire.results": "Résultats",
   "formulaire.export": "Exporter",
+  "formulaire.reminder": "Rappel",
   "formulaire.archive": "Supprimer",
   "formulaire.restore": "Restaurer",
   "formulaire.delete": "Supprimer",
@@ -43,6 +44,8 @@
   "formulaire.multiple": "Permettre plusieurs réponses d'un même utilisateur",
   "formulaire.anonymous.label": "Anonymiser les réponses",
   "formulaire.anonymous.description": "Les identifiants, noms, prénoms et établissements des répondant ne seront pas sauvegardés.",
+  "formulaire.subject": "Titre du rappel",
+  "formulaire.remind.link": "Pour rappel le lien vers le formulaire est : ",
 
   "formulaire.read": "Accès",
   "formulaire.contrib": "Contribuer",
@@ -134,6 +137,7 @@
   "formulaire.error.formService.archive": "Une erreur est survenue lors de l'archivage du formulaire",
   "formulaire.error.formService.restore": "Une erreur est survenue lors de la restauration du formulaire",
   "formulaire.error.formService.delete": "Une erreur est survenue lors de la suppression du formulaire",
+  "formulaire.error.formService.remind": "Une erreur est survenue lors de l'envoi du rappel",
   "formulaire.error.formService.unshare": "Une erreur est survenue lors de la suppression du partage du formulaire",
   "formulaire.error.formService.image": "Une erreur est survenue lors de la récupération de l'image",
 
@@ -188,5 +192,6 @@
   "formulaire.success.forms.duplicate": "Tous les formulaires sélectionnés ont bien été dupliqués !",
   "formulaire.success.question.duplicate": "Votre question a bien été dupliquée !",
   "formulaire.success.question.delete": "Votre question a bien été supprimée !",
-  "formulaire.success.responses.save": "Vos réponses ont bien été enregistrées !"
+  "formulaire.success.responses.save": "Vos réponses ont bien été enregistrées !",
+  "formulaire.success.reminder.send": "Votre rappel a bien été envoyé !"
 }
