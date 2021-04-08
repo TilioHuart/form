@@ -10,7 +10,7 @@
 
         <section class="cell" style="float:right;">
             <div class="main-button">
-                <div class="date">
+                <div class="date" ng-if="!vm.isMobile()">
                     <i class="clock sm-icon spaced-right"></i><i18n>formulaire.form.edit.modified</i18n>[[vm.form.date_modification.toLocaleString()]]
                 </div>
                 <button class="cell cancel" ng-click="vm.return()"><i18n>formulaire.return</i18n></button>
@@ -19,6 +19,10 @@
                 <button class="cell" ng-click="vm.saveAll(true)"><i18n>formulaire.save</i18n></button>
             </div>
         </section>
+
+        <div class="cell date" ng-if="vm.isMobile()">
+            <i class="clock sm-icon spaced-right"></i><i18n>formulaire.form.edit.modified</i18n>[[vm.form.date_modification.toLocaleString()]]
+        </div>
     </div>
 
     <div class="edit-form" ng-if="vm.questions.all.length > 0">

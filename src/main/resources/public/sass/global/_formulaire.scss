@@ -26,6 +26,23 @@ $formulaire-green: green;
   font-style: normal;
 }
 
+body.formulaire section.lightbox {
+
+  div.content{
+    @media screen and (max-width: $formulaire-screen-mobile) {
+      min-height: unset;
+    }
+  }
+}
+
+body.formulaire section.toggle-buttons {
+
+  button{
+    @media screen and (max-width: $formulaire-screen-mobile) {
+      min-height: unset;
+    }
+  }
+}
 
 body.formulaire section.main {
   @import "components/index";

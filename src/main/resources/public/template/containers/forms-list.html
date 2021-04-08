@@ -28,10 +28,11 @@
         </div>
     </div>
 
+    <h4 ng-if="vm.isMobile()"><input type="text" ng-model="vm.searchInput" placeholder="Rechercher"></h4>
 
     <!--Navigation menu-->
     <section class="cell three">
-        <h4><input type="text" ng-model="vm.searchInput" placeholder="Rechercher"></h4>
+        <h4 ng-if="!vm.isMobile()"><input type="text" ng-model="vm.searchInput" placeholder="Rechercher"></h4>
         <nav class="vertical row">
             <ul>
                 <li><a ng-click="vm.openFolder('mine')" ng-class="{selected : vm.folder === 'mine'}">
@@ -51,7 +52,7 @@
     <section class="cell nine">
         <div class="folder-info">
             <div><h4><i class="folder spaced-right" ng-if="!vm.isMobile()"></i>[[vm.displayFolder()]]</h4></div>
-            <div>
+            <div ng-if="!vm.isMobile()">
                 <i class="view-cards hg-icon" ng-click="vm.display.grid = true" ng-class="{'selected': vm.display.grid}"></i>
                 <i class="view-tab hg-icon" ng-click="vm.display.grid = false" ng-class="{'selected': !vm.display.grid}"></i>
             </div>
@@ -89,7 +90,7 @@
         </div>
 
         <!--Table display-->
-        <table class="twelve table" ng-if="!vm.forms.all.empty() && !vm.display.grid">
+        <table class="twelve table" ng-if="!vm.forms.all.empty() && !vm.display.grid && !vm.isMobile()">
             <thead>
                 <tr>
                     <th class="one">
