@@ -1,10 +1,12 @@
 import {idiom, model, ng, notify, template} from 'entcore';
-import {Form, Forms} from "../models";
-import {formService, questionService} from "../services";
+import {Distribution, Distributions, Form, Forms} from "../models";
+import {distributionService, formService, questionService} from "../services";
 import {FiltersFilters, FiltersOrders} from "../core/enums";
+import {Mix} from "entcore-toolkit";
 
 interface ViewModel {
     forms: Forms;
+    distributions: Distributions;
     folder: string;
     allFormsSelected: boolean;
     searchInput: string;
@@ -24,7 +26,6 @@ interface ViewModel {
         warning: boolean
     };
     filtersOrders: typeof FiltersOrders;
-    addRemindLink: boolean;
 
     openFolder(folderName: string) : void;
     switchAll(value: boolean) : void;
@@ -40,7 +41,8 @@ interface ViewModel {
     closeShareFormLightbox() : void;
     seeResultsForm() : void;
     exportForm() : void;
-    remind() : void;
+    checkIfFormOpen(): boolean;
+    remind() : Promise<void>;
     doRemind() : Promise<void>;
     cancelRemind() : void;
     restoreForms() : Promise<void>;
@@ -56,6 +58,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     const vm: ViewModel = this;
     vm.forms = new Forms();
+    vm.distributions = new Distributions();
     vm.folder = "mine";
     vm.searchInput = "";
     vm.allFormsSelected = false;
@@ -75,7 +78,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         warning: false
     };
     vm.filtersOrders = FiltersOrders;
-    vm.addRemindLink = true;
 
     const init = async () : Promise<void> => {
         await vm.forms.sync();
@@ -101,7 +103,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             default : vm.openFolder('mine'); break;
         }
 
-        initMail();
         $scope.safeApply();
     };
 
@@ -195,35 +196,34 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         window.open(window.location.pathname + `/export/${vm.forms.selected[0].id}`);
     };
 
-    vm.remind = () : void => {
+    vm.checkIfFormOpen = () : boolean => {
+        let dateOpeningOk = vm.forms.selected[0].date_opening < new Date();
+        let dateEndingOk = (!!!vm.forms.selected[0].date_ending || vm.forms.selected[0].date_ending > new Date());
+        return dateOpeningOk && dateEndingOk;
+    };
+
+    vm.remind = async () : Promise<void> => {
+        initMail();
+        vm.distributions.all = Mix.castArrayAs(Distribution, $scope.getDataIf200(await distributionService.listByForm(vm.forms.selected[0].id)));
         template.open('lightbox', 'lightbox/reminder');
         vm.display.lightbox.reminder = true;
         $scope.safeApply();
     };
 
     vm.doRemind = async () : Promise<void> => {
-        if (vm.addRemindLink) {
-            let link = `${$scope.config.host}/formulaire#/form/${vm.forms.selected[0].id}`;
-            let remindLinkText = idiom.translate('formulaire.remind.link');
-            vm.mail.body += `</br></br>${remindLinkText}<a href='${link}'>${link}</a>`;
-        }
-        try {
-            let { status } = await formService.sendReminder(vm.forms.selected[0].id, vm.mail);
-            if (status === 200) {
-                notify.success(idiom.translate('formulaire.success.reminder.send'));
-                initMail();
-                template.close('lightbox');
-                vm.display.lightbox.reminder = false;
-                $scope.safeApply();
-            }
-        }
-        catch (err) {
-            vm.addRemindLink = false;
+        let { status } = await formService.sendReminder(vm.forms.selected[0].id, vm.mail);
+        if (status === 200) {
+            notify.success(idiom.translate('formulaire.success.reminder.send'));
+            initMail();
+            template.close('lightbox');
+            vm.display.lightbox.reminder = false;
+            $scope.safeApply();
         }
     };
 
     vm.cancelRemind = () : void => {
         initMail();
+        vm.distributions = new Distributions();
         template.close('lightbox');
         vm.display.lightbox.reminder = false;
         $scope.safeApply();
@@ -304,9 +304,9 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     const initMail = () : void => {
-        vm.mail.subject = "Rappel";
-        vm.mail.body = "Test";
-        vm.addRemindLink = true;
+        let link = `${$scope.config.host}/formulaire#/form/${vm.forms.selected[0].id}`;
+        vm.mail.subject = idiom.translate('formulaire.remind.default.subject');
+        vm.mail.body = $scope.getI18nWithParams('formulaire.remind.default.body', [link, link]);
     };
 
     init();

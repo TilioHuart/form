@@ -175,6 +175,14 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			$scope.safeApply();
 		};
 
+		$scope.getI18nWithParams = (key: string, params: string[]) : string => {
+			let finalI18n = idiom.translate(key);
+			for (let i = 0; i < params.length; i++) {
+				finalI18n = finalI18n.replace(`{${i}}`, params[i]);
+			}
+			return finalI18n;
+		};
+
 		$scope.getTypeNameByCode = (code: number) : string => {
 			return $scope.questionTypes.all.filter(type => type.code === code)[0].name;
 		};

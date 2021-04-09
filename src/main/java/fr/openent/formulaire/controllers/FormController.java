@@ -10,6 +10,7 @@ import fr.openent.formulaire.service.impl.*;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.http.response.DefaultResponseHandler;
 import fr.wseduc.webutils.request.RequestUtils;
@@ -233,43 +234,68 @@ public class FormController extends ControllerHelper {
         RequestUtils.bodyToJson(request, mail -> {
             UserUtils.getUserInfos(eb, request, user -> {
                 if (user != null) {
-                    distributionService.listByForm(formId, getDistributions -> {
-                        if (getDistributions.isRight()) {
-                            JsonArray distributions = getDistributions.right().getValue();
-                            JsonArray respondersIds = new JsonArray();
-                            for (int i = 0; i < distributions.size(); i++) {
-                                String id = distributions.getJsonObject(i).getString("responder_id");
-                                if (!respondersIds.contains(id)) {
-                                    respondersIds.add(id);
-                                }
-                            }
+                    formService.get(formId, getFormEvent -> {
+                        if (getFormEvent.isRight()) {
+                            JsonObject form = getFormEvent.right().getValue();
 
-                            JsonObject message = new JsonObject()
-                                    .put("subject", mail.getString("subject"))
-                                    .put("body", mail.getString("body"))
-                                    .put("to", respondersIds);
+                            distributionService.listByForm(formId, getDistributions -> {
+                                if (getDistributions.isRight()) {
+                                    JsonArray distributions = getDistributions.right().getValue();
+                                    JsonArray respondersIds = new JsonArray();
+                                    for (int i = 0; i < distributions.size(); i++) {
+                                        String id = distributions.getJsonObject(i).getString("responder_id");
+                                        if (!respondersIds.contains(id)) {
+                                            if (form.getBoolean("multiple")) {
+                                                respondersIds.add(id);
+                                            }
+                                            else if (distributions.getJsonObject(i).getString("date_response") == null) {
+                                                respondersIds.add(id);
+                                            }
+                                        }
+                                    }
 
-                            JsonObject action = new JsonObject()
-                                    .put("action", "send")
-                                    .put("userId", user.getUserId())
-                                    .put("username", user.getUsername())
-                                    .put("message", message);
+                                    JsonObject message = new JsonObject()
+                                            .put("subject", mail.getString("subject"))
+                                            .put("body", mail.getString("body"))
+                                            .put("to", respondersIds);
 
-                            eb.request("org.entcore.conversation", action, handlerToAsyncHandler(messageEvent -> {
-                                if (!"ok".equals(messageEvent.body().getString("status"))) {
-                                    log.error("[Formulaire@FormController] Failed to send reminder", messageEvent.body().getString("error"));
-                                    renderError(request);
-                                    return;
+                                    JsonObject action = new JsonObject()
+                                            .put("action", "send")
+                                            .put("userId", user.getUserId())
+                                            .put("username", user.getUsername())
+                                            .put("message", message);
+
+                                    // Send mail via Conversation app
+                                    eb.request("org.entcore.conversation", action, handlerToAsyncHandler(messageEvent -> {
+                                        if (!"ok".equals(messageEvent.body().getString("status"))) {
+                                            log.error("[Formulaire@sendReminder] Failed to send reminder", messageEvent.body().getString("error"));
+                                            renderError(request);
+                                        }
+                                        else {
+                                            // Update 'reminded' prop of the form
+                                            form.put("reminded", true);
+                                            formService.update(formId, form, updateEvent -> {
+                                                if (updateEvent.isRight()) {
+                                                    Renders.renderJson(request, updateEvent.right().getValue(), 200);
+                                                }
+                                                else {
+                                                    log.error("[Formulaire@sendReminder] Fail to update form " + formId + " : " + updateEvent.left().getValue());
+                                                    renderError(request);
+                                                }
+                                            });
+                                        }
+                                    }));
+
                                 }
                                 else {
-                                    Renders.renderJson(request, new JsonObject(), 200);
+                                    String error = getDistributions.left().getValue();
+                                    log.error("[Formulaire@sendReminder] Fail to retrieve distributions of form " + formId + " : " + error);
+                                    renderError(request);
                                 }
-                            }));
-
+                            });
                         }
                         else {
-                            String error = getDistributions.left().getValue();
-                            log.error("[Formulaire@sendReminder] Fail to retrieve distributions of form " + formId + " : " + error);
+                            log.error("[Formulaire@sendReminder] Fail to get form " + formId + " : " + getFormEvent.left().getValue());
                             renderError(request);
                         }
                     });

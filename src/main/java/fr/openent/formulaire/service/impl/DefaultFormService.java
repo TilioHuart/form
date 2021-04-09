@@ -64,7 +64,8 @@ public class DefaultFormService implements FormService {
     @Override
     public void create(JsonObject form, UserInfos user, Handler<Either<String, JsonObject>> handler) {
         String query = "INSERT INTO " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, " +
-                "picture, date_creation, date_modification, date_opening, date_ending, multiple, anonymous) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+                "picture, date_creation, date_modification, date_opening, date_ending, multiple, anonymous) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(user.getUserId())
                 .add(user.getUsername())
@@ -123,7 +124,7 @@ public class DefaultFormService implements FormService {
         String query = "WITH nbResponses AS (SELECT COUNT(*) FROM " + Formulaire.DISTRIBUTION_TABLE +
                 " WHERE form_id = ? AND status = ?)" +
                 "UPDATE " + Formulaire.FORM_TABLE + " SET title = ?, description = ?, picture = ?, date_modification = ?, " +
-                "date_opening = ?, date_ending = ?, sent = ?, collab = ?, archived = ?, " +
+                "date_opening = ?, date_ending = ?, sent = ?, collab = ?, reminded = ?, archived = ?, " +
                 "multiple = CASE (SELECT count > 0 FROM nbResponses) " +
                 "WHEN false THEN ? WHEN true THEN (SELECT multiple FROM " + Formulaire.FORM_TABLE +" WHERE id = ?) END, " +
                 "anonymous = CASE (SELECT count > 0 FROM nbResponses) " +
@@ -141,6 +142,7 @@ public class DefaultFormService implements FormService {
                 .add(form.getString("date_ending", null))
                 .add(form.getBoolean("sent", false))
                 .add(form.getBoolean("collab", false))
+                .add(form.getBoolean("reminded", false))
                 .add(form.getBoolean("archived", false))
                 .add(form.getBoolean("multiple", false)).add(formId)
                 .add(form.getBoolean("anonymous", false)).add(formId)

@@ -4,6 +4,7 @@ import {Distribution, Form} from '../models';
 
 export interface DistributionService {
     list() : Promise<AxiosResponse>;
+    listByForm(formId: number) : Promise<AxiosResponse>;
     listByFormAndResponder(formId: number) : Promise<AxiosResponse>;
     count(formId: number) : Promise<AxiosResponse>;
     get(formId: number) : Promise<AxiosResponse>;
@@ -24,9 +25,18 @@ export const distributionService: DistributionService = {
         }
     },
 
-    async listByFormAndResponder(formId: number) : Promise<AxiosResponse> {
+    async listByForm(formId: number) : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/distributions/forms/${formId}/list`);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.distributionService.list'));
+            throw err;
+        }
+    },
+
+    async listByFormAndResponder(formId: number) : Promise<AxiosResponse> {
+        try {
+            return http.get(`/formulaire/distributions/forms/${formId}/listMine`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.list'));
             throw err;

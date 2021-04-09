@@ -22,6 +22,7 @@ export class Form implements Selectable, Shareable  {
     date_ending: Date;
     sent: boolean;
     collab: boolean;
+    reminded: boolean;
     archived: boolean;
     multiple: boolean;
     anonymous: boolean;
@@ -49,6 +50,7 @@ export class Form implements Selectable, Shareable  {
         this.date_ending = null;
         this.sent = false;
         this.collab = false;
+        this.reminded = false;
         this.archived = false;
         this.multiple = false;
         this.anonymous = false;
@@ -70,6 +72,7 @@ export class Form implements Selectable, Shareable  {
             date_ending: new Date(this.date_ending + 'Z'),
             sent: this.sent,
             collab: this.collab,
+            reminded: this.reminded,
             archived: this.archived,
             multiple: this.multiple,
             anonymous: this.anonymous,

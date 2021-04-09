@@ -61,6 +61,11 @@ i {
 
   // Icons content
 
+  &.bell::before {
+    font-family: 'material-icons';
+    content: "\F09C";
+  }
+
   &.cancel::before {
     font-family: 'material-icons';
     content: "\F156";
