@@ -205,8 +205,14 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.remind = async () : Promise<void> => {
         initMail();
         vm.distributions.all = Mix.castArrayAs(Distribution, $scope.getDataIf200(await distributionService.listByForm(vm.forms.selected[0].id)));
-        template.open('lightbox', 'lightbox/reminder');
+        await template.open('lightbox', 'lightbox/reminder');
         vm.display.lightbox.reminder = true;
+        // Set CSS to show text on editor
+        window.setTimeout(async function () {
+            let toolbar = document.getElementsByTagName('editor-toolbar')[0] as HTMLElement;
+            let editor = document.getElementsByTagName('editor')[0] as HTMLElement;
+            editor.style.setProperty('padding-top', `${toolbar.offsetHeight.toString()}px`, "important");
+        }, 1000);
         $scope.safeApply();
     };
 
