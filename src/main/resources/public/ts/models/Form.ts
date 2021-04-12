@@ -130,11 +130,11 @@ export class Forms extends Selection<Form> {
     ];
 
     filters = [
-        { name: FiltersFilters.SHARED, value: true, display: false },
-        { name: FiltersFilters.SENT, value: true, display: false },
-        { name: FiltersFilters.TO_DO, value: true, display: false },
-        { name: FiltersFilters.IN_PROGRESS, value: true, display: false },
-        { name: FiltersFilters.FINISHED, value: true, display: false }
+        { name: FiltersFilters.SHARED, value: false, display: false },
+        { name: FiltersFilters.SENT, value: false, display: false },
+        { name: FiltersFilters.TO_DO, value: false, display: false },
+        { name: FiltersFilters.IN_PROGRESS, value: false, display: false },
+        { name: FiltersFilters.FINISHED, value: false, display: false }
     ];
 
     constructor() {
@@ -235,7 +235,7 @@ export class Forms extends Selection<Form> {
         for (let form of this.all) {
             form.displayed = true;
 
-            if (objectFilters[FiltersFilters.SENT].display && objectFilters[FiltersFilters.SENT].display) {
+            if (objectFilters[FiltersFilters.SENT].display && objectFilters[FiltersFilters.SHARED].display) {
                 // If both unchecked, display form
                 if (!objectFilters[FiltersFilters.SENT].value && !objectFilters[FiltersFilters.SHARED].value) {
                     form.displayed = true;
@@ -244,10 +244,10 @@ export class Forms extends Selection<Form> {
                     if (objectFilters[FiltersFilters.SENT].value && !form.sent) {
                         form.displayed = false;
                     }
-                    if (objectFilters[FiltersFilters.SHARED].value && !form.shared) {
+                    if (objectFilters[FiltersFilters.SHARED].value && !form.collab) {
                         form.displayed = false;
                     }
-                    if ((objectFilters[FiltersFilters.SENT].value && objectFilters[FiltersFilters.SHARED].value) && (!form.sent || !form.shared)) {
+                    if ((objectFilters[FiltersFilters.SENT].value && objectFilters[FiltersFilters.SHARED].value) && (!form.sent || !form.collab)) {
                         form.displayed = false;
                     }
                 }
