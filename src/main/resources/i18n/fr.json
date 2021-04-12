@@ -47,7 +47,8 @@
   "formulaire.anonymous.description": "Les identifiants, noms, prénoms et établissements des répondant ne seront pas sauvegardés.",
 
   "formulaire.remind.title": "Envoyer un rappel",
-  "formulaire.remind.description": "Le message de rappel va être transmis à tous les utilisateurs à qui le formulaire a été envoyé.",
+  "formulaire.remind.description.multipleTrue": "Le message de rappel va être transmis à tous les utilisateurs à qui le formulaire a été envoyé.",
+  "formulaire.remind.description.multipleFalse": "Le message de rappel va être transmis à tous les utilisateurs qui n'ont pas encore répondu au formulaire.",
   "formulaire.remind.subject.label": "Objet du rappel : ",
   "formulaire.remind.subject.placeholder": "Titre du rappel",
   "formulaire.remind.default.subject": "Vous avez un formulaire en attente de réponse",

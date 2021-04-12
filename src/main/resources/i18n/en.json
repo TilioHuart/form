@@ -47,7 +47,8 @@
   "formulaire.anonymous.description": "The identifiers, first names, last names and school names of the responders won't be save.",
 
   "formulaire.remind.title": "Send a reminder",
-  "formulaire.remind.description": "The reminder will be sent to all the users to whom the form has been sent.",
+  "formulaire.remind.description.multipleTrue": "The reminder will be sent to all the users to whom the form has been sent.",
+  "formulaire.remind.description.multipleFalse": "The reminder will be sent to all the users who didn't have answered to the form.",
   "formulaire.remind.subject.label": "Object of the reminder : ",
   "formulaire.remind.subject.placeholder": "Title of the reminder",
   "formulaire.remind.default.subject": "You have a form waiting for your response",

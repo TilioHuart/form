@@ -211,8 +211,10 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         window.setTimeout(async function () {
             let toolbar = document.getElementsByTagName('editor-toolbar')[0] as HTMLElement;
             let editor = document.getElementsByTagName('editor')[0] as HTMLElement;
+            let text = document.getElementsByClassName('drawing-zone')[0] as HTMLElement;
             editor.style.setProperty('padding-top', `${toolbar.offsetHeight.toString()}px`, "important");
-        }, 1000);
+            text.style.setProperty('min-height', `150px`, "important");
+        }, 500);
         $scope.safeApply();
     };
 
