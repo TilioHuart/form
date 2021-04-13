@@ -53,7 +53,7 @@
                         </div>
                     </div>
                     <div class="data-bottom" ng-class="{ date : currentPage === 'propForm' }">
-                        <div ng-if="currentPage === 'propForm'" style="margin-bottom: 10px;">
+                        <div ng-if="currentPage === 'propForm' && !vm.isMobile()" style="margin-bottom: 10px;">
                             <i18n>formulaire.form.edit.modified</i18n>[[vm.form.date_modification.toLocaleString()]]
                         </div>
                         <div>

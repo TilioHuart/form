@@ -96,6 +96,9 @@
     .flexend {
       display: flex;
       justify-content: flex-end;
+      @media screen and (max-width: $formulaire-screen-mobile) {
+        justify-content: center;
+      }
     }
   }
 }
@@ -125,6 +128,9 @@
     .top {
       width: 6%;
       display: flex;
+      @media screen and (max-width: $formulaire-screen-mobile) {
+        width: 15%;
+      }
 
       .dots {
         display: flex;

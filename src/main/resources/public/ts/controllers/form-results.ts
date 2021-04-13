@@ -26,6 +26,7 @@ interface ViewModel {
     prev() : Promise<void>;
     next() : Promise<void>;
     goTo(position: number) : Promise<void>;
+    isMobile() : boolean;
 }
 
 
@@ -108,6 +109,10 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         vm.goTo = async (position: number) : Promise<void> => {
             $scope.redirectTo(`/form/${vm.question.form_id}/results/${position}`);
         };
+
+        vm.isMobile = () : boolean => {
+            return window.screen.width <= 500;
+        }
 
         init();
 

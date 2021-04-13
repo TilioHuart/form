@@ -51,7 +51,10 @@
             </div>
         </div>
         <div class="buttons">
-            <button class="cell" ng-click="vm.prev()" ng-disabled="vm.question.position == 1"><i18n>formulaire.prev</i18n></button>
+            <button class="cell" ng-click="vm.prev()" ng-disabled="vm.question.position == 1">
+                <i18n ng-if="!vm.isMobile()">formulaire.prev</i18n>
+                <i class="chevron-left" ng-if="vm.isMobile()"></i>
+            </button>
             <div class="goto six">
                 <i18n class="one" style="margin-right:10px">formulaire.goTo</i18n>
                 <select class="ten" ng-change="vm.goTo(vm.navigatorValue)" ng-model="vm.navigatorValue" style="height: 24px;">
@@ -61,7 +64,10 @@
                     </option>
                 </select>
             </div>
-            <button class="cell" ng-click="vm.next()" ng-disabled="vm.last"><i18n>formulaire.next</i18n></button>
+            <button class="cell" ng-click="vm.next()" ng-disabled="vm.last">
+                <i18n ng-if="!vm.isMobile()">formulaire.next</i18n>
+                <i class="chevron-right" ng-if="vm.isMobile()"></i>
+            </button>
         </div>
     </div>
 

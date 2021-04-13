@@ -161,6 +161,9 @@ body.formulaire section.main {
 
             .interval {
               font-size: 12px;
+              @media screen and (max-width: $formulaire-screen-mobile) {
+                margin-left: 5px;
+              }
 
               .opening { margin-right: 10px; }
 
@@ -197,6 +200,9 @@ body.formulaire section.main {
             display: flex;
             justify-content: flex-end;
             align-items: flex-end;
+            @media screen and (max-width: $formulaire-screen-mobile) {
+              margin-top: 5%;
+            }
 
             &.date {
               justify-content: space-between;
@@ -230,6 +236,13 @@ body.formulaire section.main {
           resize: none;
           background: none;
         }
+
+        .import-files .default {
+          @media screen and (max-width: $formulaire-screen-mobile) {
+            position: inherit;
+            height: inherit;
+          }
+        }
       }
     }
 
@@ -255,6 +268,9 @@ body.formulaire section.main {
       .title {
         display: flex;
         justify-content: space-between;
+        @media screen and (max-width: $formulaire-screen-mobile) {
+          flex-wrap: wrap;
+        }
       }
 
       .file {

@@ -71,14 +71,24 @@ i {
     content: "\F156";
   }
 
-  &.chevron-up::before {
-    font-family: 'material-icons';
-    content: "\F143";
-  }
-
   &.chevron-down::before {
     font-family: 'material-icons';
     content: "\F140";
+  }
+
+  &.chevron-left::before {
+    font-family: 'material-icons';
+    content: "\F141";
+  }
+
+  &.chevron-right::before {
+    font-family: 'material-icons';
+    content: "\F142";
+  }
+
+  &.chevron-up::before {
+    font-family: 'material-icons';
+    content: "\F143";
   }
 
   &.clock::before {
