@@ -33,6 +33,7 @@ interface ViewModel {
     filter(filter: FiltersFilters) : void;
     displayFilterName(name: string) : string;
     displayFolder() : string;
+    getTitle(title: string): string;
     checkOpenButton() : boolean;
     openForm(form: Form) : void;
     openPropertiesForm() : void;
@@ -131,14 +132,18 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         $scope.safeApply();
     };
 
+    // Display functions
+
     vm.displayFilterName = (name: string) : string => {
         return idiom.translate("formulaire.filter." + name.toLowerCase());
     };
 
-    // Display functions
-
     vm.displayFolder = () : string => {
         return idiom.translate("formulaire.forms." + vm.folder);
+    };
+
+    vm.getTitle = (title: string) : string => {
+        return idiom.translate('formulaire.' + title);
     };
 
     // Toaster

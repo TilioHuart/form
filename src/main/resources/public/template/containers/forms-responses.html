@@ -50,7 +50,7 @@
                         <div class="data-text">
                             <h4 title="[[form.title]]">[[form.title]]</h4>
                             <h5>[[form.owner_name]]</h5>
-                            <div class="date"><i18n>formulaire.sent</i18n>[[vm.displayDate(form.date_sending)]]</div>
+                            <div class="date"><i18n>formulaire.sentAt</i18n>[[vm.displayDate(form.date_sending)]]</div>
                         </div>
                         <div class="data-status">
                             <div ng-if="!form.multiple">
@@ -98,7 +98,7 @@
                     <td><label><input type="checkbox" ng-model="form.selected"/><span></span></label></td>
                     <td ng-click="form.selected=!form.selected">[[form.title]]</td>
                     <td ng-click="form.selected=!form.selected">[[form.owner_name]]</td>
-                    <td ng-click="form.selected=!form.selected"><i18n>formulaire.sent</i18n>[[vm.displayDate(form.date_sending)]]</td>
+                    <td ng-click="form.selected=!form.selected"><i18n>formulaire.sentAt</i18n>[[vm.displayDate(form.date_sending)]]</td>
                     <td ng-click="form.selected=!form.selected">
                         <div ng-if="!form.multiple">
                                 <span ng-if="!!vm.getMyResponses(form)[0].date_response" class="responded">
