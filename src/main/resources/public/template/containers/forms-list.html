@@ -28,11 +28,11 @@
         </div>
     </div>
 
-    <h4 ng-if="vm.isMobile()"><input type="text" ng-model="vm.searchInput" placeholder="Rechercher"></h4>
+    <h4 class="zero-desktop"><input type="text" ng-model="vm.searchInput" placeholder="Rechercher"></h4>
 
     <!--Navigation menu-->
-    <section class="cell three">
-        <h4 ng-if="!vm.isMobile()"><input type="text" ng-model="vm.searchInput" placeholder="Rechercher"></h4>
+    <section class="cell three zero-mobile">
+        <h4><input type="text" ng-model="vm.searchInput" placeholder="Rechercher"></h4>
         <nav class="vertical row">
             <ul>
                 <li><a ng-click="vm.openFolder('mine')" ng-class="{selected : vm.folder === 'mine'}">
@@ -47,6 +47,20 @@
             </ul>
         </nav>
     </section>
+
+    <nav class="vertical mobile-navigation tabs zero-desktop heightNavBar" side-nav >
+        <ul>
+            <li><a ng-click="vm.openFolder('mine')" ng-class="{selected : vm.folder === 'mine'}">
+                <i18n>formulaire.forms.mine</i18n>
+            </a></li>
+            <li><a ng-click="vm.openFolder('shared')" ng-class="{selected : vm.folder === 'shared'}">
+                <i18n>formulaire.forms.shared</i18n>
+            </a></li>
+            <li><a ng-click="vm.openFolder('archived')" ng-class="{selected : vm.folder === 'archived'}">
+                <i18n>formulaire.forms.archived</i18n>
+            </a></li>
+        </ul>
+    </nav>
 
     <!--List of forms-->
     <section class="cell nine">
