@@ -36,8 +36,11 @@
         </div>
         <!-- End page buttons -->
         <div class="buttons">
-            <div class="flexend nine">
+            <div class="flexend nine zero-mobile">
                 <button class="cell blueButton" ng-click="vm.createNewQuestion()"><i18n>formulaire.add.element</i18n></button>
+            </div>
+            <div ng-click="vm.createNewQuestion()" class="fab zero-desktop">
+                +
             </div>
         </div>
     </div>
