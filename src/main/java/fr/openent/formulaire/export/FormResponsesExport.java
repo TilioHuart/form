@@ -67,11 +67,13 @@ public class FormResponsesExport {
         List<JsonObject> allResponses = getResponsesEvt.right().getValue().getList();
         List<String> responders = new ArrayList<>();
         List<String> response_dates = new ArrayList<>();
+        List<String> structures = new ArrayList<>();
 
         for (JsonObject response : allResponses) {
           if (!response_dates.contains(response.getString("date_response"))) {
             responders.add(response.getString("responder_id"));
             response_dates.add(response.getString("date_response"));
+            structures.add(response.getString("structure"));
           }
         }
 
@@ -161,7 +163,8 @@ public class FormResponsesExport {
         for (int i = 0; i < responders.size(); i++) {
           String responderId = responders.get(i);
           String date_response = response_dates.get(i);
-          getUserInfos(responderId, date_response, usersInfos.get(i));
+          String structure = structures.get(i);
+          getUserInfos(responderId, structure, date_response, usersInfos.get(i));
         }
 
       });
@@ -174,7 +177,7 @@ public class FormResponsesExport {
     return value;
   }
 
-  private void getUserInfos(String userId, String sqlDate, Handler<AsyncResult<String>> handler) {
+  private void getUserInfos(String userId, String structure, String sqlDate, Handler<AsyncResult<String>> handler) {
     UserUtils.getUserInfos(eb, userId, user -> {
       if (user != null) {
         StringBuilder builder = new StringBuilder();
@@ -185,7 +188,7 @@ public class FormResponsesExport {
           builder.append(user.getUserId()).append(SEPARATOR);
           builder.append("\"" + user.getLastName() + "\"").append(SEPARATOR);
           builder.append("\"" + user.getFirstName() + "\"").append(SEPARATOR);
-          builder.append("\"" + user.getStructureNames().get(0) + "\"").append(SEPARATOR); // TODO et si on a plusieurs etab on affiche lequel ?
+          builder.append("\"" + (structure != null ? structure : user.getStructureNames().get(0)) + "\"").append(SEPARATOR);
         }
         builder.append(dateFormatter.format(date)).append(SEPARATOR);
 

@@ -20,6 +20,7 @@ export class Distribution  {
     date_sending: Date;
     date_response: Date;
     active: boolean;
+    structure: string;
 
     constructor() {
         this.id = null;
@@ -32,6 +33,7 @@ export class Distribution  {
         this.date_sending = null;
         this.date_response = null;
         this.active = true;
+        this.structure = null;
     }
 
     toJson() : Object {
@@ -45,7 +47,8 @@ export class Distribution  {
             status: this.status,
             date_sending: this.date_sending,
             date_response: this.date_response,
-            active: this.active
+            active: this.active,
+            structure: this.structure
         }
     }
 }

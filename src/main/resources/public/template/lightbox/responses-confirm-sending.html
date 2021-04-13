@@ -1,8 +1,15 @@
 <lightbox show="vm.display.lightbox.sending" on-close="vm.display.lightbox.sending = false;">
     <h2><i18n>formulaire.responses.send.title</i18n></h2>
     <div>
+        <div ng-if="model.me.structureNames.length > 1 && !vm.form.anonymous">
+            <i18n>formulaire.responses.selectStructure.select</i18n>
+            <select ng-model="vm.distribution.structure">
+                <option ng-repeat="struct in model.me.structureNames" ng-value="struct">[[struct]]</option>
+            </select>
+        </div>
+        <br/>
         <i18n>formulaire.responses.send.text</i18n>
-        <br>
+        <br/>
         <i18n>formulaire.responses.send.continue</i18n>
     </div>
     <div class="action-buttons">

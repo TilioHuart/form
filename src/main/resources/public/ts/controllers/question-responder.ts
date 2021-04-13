@@ -1,13 +1,13 @@
 import {idiom, model, ng, notify, template} from "entcore";
 import {
     Distribution,
-    DistributionStatus,
+    DistributionStatus, Form,
     Question, QuestionChoices,
     Response,
     Responses,
     Types
 } from "../models";
-import {distributionService, questionService, responseFileService, responseService} from "../services";
+import {distributionService, formService, questionService, responseFileService, responseService} from "../services";
 
 interface ViewModel {
     types: typeof Types;
@@ -15,6 +15,7 @@ interface ViewModel {
     response: Response;
     responses: Responses;
     distribution: Distribution;
+    form: Form;
     nbQuestions: number;
     last: boolean;
     selectedIndex: Array<boolean>;
@@ -41,6 +42,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     vm.response = new Response();
     vm.responses = new Responses();
     vm.distribution = new Distribution();
+    vm.form = new Form();
     vm.nbQuestions = 1;
     vm.last = false;
     vm.selectedIndex = new Array<boolean>();
@@ -125,6 +127,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     vm.send = async () : Promise<void> => {
         await saveResponses();
         if (await checkMandatoryQuestions()) {
+            vm.form.setFromJson($scope.getDataIf200(await formService.get(vm.question.form_id)));
             template.open('lightbox', 'lightbox/responses-confirm-sending');
             vm.display.lightbox.sending = true;
         }
@@ -135,6 +138,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
 
     vm.doSend = async () : Promise<void> => {
         vm.distribution.status = DistributionStatus.FINISHED;
+        vm.distribution.structure = !!vm.distribution.structure ? vm.distribution.structure : model.me.structureNames[0];
         await distributionService.update(vm.distribution);
         template.close('lightbox');
         vm.display.lightbox.sending = false;
@@ -142,6 +146,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         $scope.redirectTo(`/list/responses`);
         $scope.safeApply();
     };
+
 
     const saveResponses = async () : Promise<void> => {
         if (vm.question.question_type === Types.MULTIPLEANSWER) {

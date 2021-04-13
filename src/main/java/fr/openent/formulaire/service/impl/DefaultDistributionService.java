@@ -93,8 +93,8 @@ public class DefaultDistributionService implements DistributionService {
 
     @Override
     public void update(String distributionId, JsonObject distribution, Handler<Either<String, JsonObject>> handler) {
-        String query = "UPDATE " + Formulaire.DISTRIBUTION_TABLE + " SET status = ?";
-        JsonArray params = new JsonArray().add(distribution.getString("status"));
+        String query = "UPDATE " + Formulaire.DISTRIBUTION_TABLE + " SET status = ?, structure = ?";
+        JsonArray params = new JsonArray().add(distribution.getString("status")).add(distribution.getString("structure"));
 
         if (distribution.getString("status").equals(Formulaire.FINISHED)) {
             query += ", date_response = ?";

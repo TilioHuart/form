@@ -67,7 +67,7 @@ public class DefaultResponseService implements ResponseService {
 
     @Override
     public void exportResponses(String formId, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT d.form_id, d.responder_id, date_response, question_id, position, answer " +
+        String query = "SELECT d.form_id, d.responder_id, date_response, structure, question_id, position, answer " +
             "FROM " + Formulaire.DISTRIBUTION_TABLE + " d " +
             "JOIN " + Formulaire.RESPONSE_TABLE + " r ON r.distribution_id = d.id " +
             "JOIN " + Formulaire.QUESTION_TABLE + " q ON r.question_id = q.id " +
