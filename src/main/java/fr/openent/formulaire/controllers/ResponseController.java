@@ -1,6 +1,7 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.Formulaire;
+import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.ResponseService;
 import fr.openent.formulaire.service.impl.DefaultResponseService;
@@ -30,7 +31,8 @@ public class ResponseController extends ControllerHelper {
 
     @Get("/questions/:questionId/responses")
     @ApiDoc("List all the responses for a question")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         responseService.list(questionId, arrayResponseHandler(request));
@@ -55,7 +57,8 @@ public class ResponseController extends ControllerHelper {
 
     @Get("/responses/:responseId")
     @ApiDoc("Get response thanks to the id")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String responseId = request.getParam("responseId");
         responseService.get(responseId, defaultResponseHandler(request));

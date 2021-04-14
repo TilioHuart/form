@@ -2,7 +2,7 @@ package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.helpers.FolderExporterZip;
-import fr.openent.formulaire.security.ResponseRight;
+import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.ResponseFileService;
 import fr.openent.formulaire.service.impl.DefaultResponseFileService;
@@ -10,7 +10,6 @@ import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -18,7 +17,6 @@ import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.storage.Storage;
 
-import java.io.*;
 import java.util.List;
 
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
@@ -48,7 +46,8 @@ public class ResponseFileController extends ControllerHelper {
 
     @Get("/responses/:responseId/files")
     @ApiDoc("Get a specific file")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String responseId = request.getParam("responseId");
         responseFileService.get(responseId, defaultResponseHandler(request));
@@ -107,8 +106,8 @@ public class ResponseFileController extends ControllerHelper {
 
     @Post("/responses/:responseId/files")
     @ApiDoc("Upload a file for a specific response")
-    @ResourceFilter(ResponseRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void upload(HttpServerRequest request) {
         storage.writeUploadFile(request, entries -> {
             if (!"ok".equals(entries.getString("status"))) {
@@ -138,8 +137,8 @@ public class ResponseFileController extends ControllerHelper {
 
     @Delete("/responses/:responseId/files")
     @ApiDoc("Delete file from basket")
-    @ResourceFilter(ResponseRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String responseId = request.getParam("responseId");
 

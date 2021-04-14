@@ -1,5 +1,6 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.service.QuestionChoiceService;
 import fr.openent.formulaire.service.impl.DefaultQuestionChoiceService;
@@ -12,7 +13,6 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
-import org.entcore.common.user.UserUtils;
 
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
@@ -28,7 +28,8 @@ public class QuestionChoiceController extends ControllerHelper {
 
     @Get("/questions/:questionId/choices")
     @ApiDoc("List all the choices of a given question")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         questionChoiceService.list(questionId, arrayResponseHandler(request));
@@ -36,7 +37,8 @@ public class QuestionChoiceController extends ControllerHelper {
 
     @Get("/choices/:choiceId")
     @ApiDoc("Get a choice thanks to its id")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String choiceId = request.getParam("choiceId");
         questionChoiceService.get(choiceId, defaultResponseHandler(request));
@@ -44,7 +46,8 @@ public class QuestionChoiceController extends ControllerHelper {
 
     @Post("/questions/:questionId/choices")
     @ApiDoc("Create a choice for a given question")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         RequestUtils.bodyToJson(request, choice -> {
@@ -65,7 +68,8 @@ public class QuestionChoiceController extends ControllerHelper {
 
     @Put("/choices/:choiceId")
     @ApiDoc("Update given choice")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
         String choiceId = request.getParam("choiceId");
         RequestUtils.bodyToJson(request, choice -> {
@@ -75,7 +79,8 @@ public class QuestionChoiceController extends ControllerHelper {
 
     @Delete("/choices/:choiceId")
     @ApiDoc("Delete given distribution")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String choiceId = request.getParam("choiceId");
         questionChoiceService.delete(choiceId, defaultResponseHandler(request));

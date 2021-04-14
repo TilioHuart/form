@@ -1,19 +1,18 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.service.QuestionService;
 import fr.openent.formulaire.service.impl.DefaultQuestionService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
-import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
-import org.entcore.common.user.UserUtils;
 
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
@@ -29,7 +28,8 @@ public class QuestionController extends ControllerHelper {
 
     @Get("/forms/:formId/questions")
     @ApiDoc("List questions")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
         String formId = request.getParam("formId");
         questionService.list(formId, arrayResponseHandler(request));
@@ -37,7 +37,8 @@ public class QuestionController extends ControllerHelper {
 
     @Get("/forms/:formId/questions/count")
     @ApiDoc("Count he number of questions in a form")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void countQuestions(HttpServerRequest request) {
         String formId = request.getParam("formId");
         questionService.countQuestions(formId, defaultResponseHandler(request));
@@ -45,7 +46,8 @@ public class QuestionController extends ControllerHelper {
 
     @Get("/questions/:questionId")
     @ApiDoc("Get form thanks to the id")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         questionService.get(questionId, defaultResponseHandler(request));
@@ -53,7 +55,8 @@ public class QuestionController extends ControllerHelper {
 
     @Get("/forms/:formId/questions/:position")
     @ApiDoc("Get question in a form by position")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void getByPosition(HttpServerRequest request) {
         String formId = request.getParam("formId");
         String position = request.getParam("position");

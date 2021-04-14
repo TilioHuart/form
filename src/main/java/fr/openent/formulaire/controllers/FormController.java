@@ -3,6 +3,7 @@ package fr.openent.formulaire.controllers;
 import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.export.FormResponsesExport;
 import fr.openent.formulaire.helpers.FutureHelper;
+import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.*;
@@ -82,7 +83,8 @@ public class FormController extends ControllerHelper {
 
     @Get("/forms")
     @ApiDoc("List all the forms created or shared by me")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
@@ -101,7 +103,8 @@ public class FormController extends ControllerHelper {
 
     @Get("/sentForms")
     @ApiDoc("List all the forms sent to me")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listSentForms(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
@@ -115,7 +118,8 @@ public class FormController extends ControllerHelper {
 
     @Get("/forms/:formId")
     @ApiDoc("Get form thanks to the id")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String formId = request.getParam("formId");
         formService.get(formId, defaultResponseHandler(request));
@@ -615,10 +619,10 @@ public class FormController extends ControllerHelper {
                 while (!isShared && i < idsObjects.size()) { // Iterate over "users", "groups", "bookmarks"
                     int j = 0;
                     Map<String, Object> o = idsObjects.get(i);
-                    List<List<String>> values = new ArrayList(o.values());
+                    List<Object> values = new ArrayList<Object>(o.values());
 
                     while (!isShared && j < values.size()) { // Iterate over each pair id-actions
-                        List<String> actions = new ArrayList<>(values.get(j));
+                        List<String> actions = (ArrayList)(values.get(j));
 
                         int k = 0;
                         while (!isShared && k < actions.size()) { // Iterate over each action for an id

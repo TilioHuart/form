@@ -80,7 +80,8 @@ public class ShareAndOwner implements ResourcesProvider {
                 isZipAndDownloadResponseFile(binding)) {
             return "questionId";
         }
-        else if (isUpdateResponse(binding) || isDeleteResponse(binding) || isDownloadResponseFile(binding)) {
+        else if (isUpdateResponse(binding) || isDeleteResponse(binding) || isDownloadResponseFile(binding) ||
+                isUploadResponseFile(binding) || isDeleteResponseFile(binding)) {
             return "responseId";
         }
         else {
@@ -158,5 +159,13 @@ public class ShareAndOwner implements ResourcesProvider {
 
     private boolean isZipAndDownloadResponseFile(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseFileController|zipAndDownload");
+    }
+
+    private boolean isUploadResponseFile(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.ResponseFileController|upload");
+    }
+
+    private boolean isDeleteResponseFile(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.ResponseFileController|delete");
     }
 }

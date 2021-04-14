@@ -1,6 +1,7 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.Formulaire;
+import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.DistributionService;
@@ -57,7 +58,8 @@ public class DistributionController extends ControllerHelper {
 
     @Get("/distributions/forms/:formId/listMine")
     @ApiDoc("Get the distributions for given form and responder")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listByFormAndResponder(HttpServerRequest request) {
         String formId = request.getParam("formId");
         UserUtils.getUserInfos(eb, request, user -> {
@@ -81,7 +83,8 @@ public class DistributionController extends ControllerHelper {
 
     @Get("/distributions/forms/:formId")
     @ApiDoc("Get the in progress distribution or to do for given form and responder")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String formId = request.getParam("formId");
         UserUtils.getUserInfos(eb, request, user -> {
@@ -114,7 +117,8 @@ public class DistributionController extends ControllerHelper {
 
     @Post("/distributions")
     @ApiDoc("Create a new distribution based an already existing one")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void newDist(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
             RequestUtils.bodyToJson(request, distribution -> {
@@ -125,7 +129,8 @@ public class DistributionController extends ControllerHelper {
 
     @Put("/distributions/:distributionId")
     @ApiDoc("Update given distribution")
-    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
         String distributionId = request.getParam("distributionId");
         RequestUtils.bodyToJson(request, distribution -> {
