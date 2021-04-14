@@ -253,6 +253,16 @@ body.formulaire section.main {
     }
   }
 
+  // Forms-responses
+
+  .responded {
+    color: $formulaire-green;
+  }
+
+  .notResponded {
+    color: $formulaire-red;
+  }
+
   // Results-form
 
   .results-form {
