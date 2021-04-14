@@ -37,6 +37,8 @@
   "formulaire.restore": "Restore",
   "formulaire.delete": "Delete",
   "formulaire.confirm": "Confirm",
+  "formulaire.yes": "Yes",
+  "formulaire.no": "No",
   "formulaire.selectAll": "Select all",
   "formulaire.deselect": "Deselect",
   "formulaire.next": "Next",
