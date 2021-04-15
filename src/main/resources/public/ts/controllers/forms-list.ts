@@ -231,7 +231,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             initMail();
             template.close('lightbox');
             vm.display.lightbox.reminder = false;
-            $scope.safeApply();
+            window.setTimeout(async function () { await init(); }, 100);
         }
     };
 
