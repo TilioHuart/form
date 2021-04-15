@@ -3,6 +3,7 @@ $formulaire-screen-tablet: 800px;
 $formulaire-screen-laptop: 1200px;
 
 $formulaire-white: white;
+$formulaire-orange: #FF8500;
 $formulaire-blue: #2a9bc7;
 $formulaire-blue-light: #c1e3f0;
 $formulaire-blue-transparent: rgba(75, 175, 213, 0.3);
@@ -126,7 +127,17 @@ body.formulaire section.main {
 
   nav.vertical {
     @media screen and (max-width: $formulaire-screen-tablet) {
-      background-color: $formulaire-grey-light;
+      background-color: $formulaire-grey-very-light;
+      box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+
+      a {
+        color: $formulaire-blue;
+      }
+
+      a.selected {
+        color: $formulaire-orange;
+        background: none;
+      }
     }
   }
 
