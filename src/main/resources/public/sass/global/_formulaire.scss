@@ -26,15 +26,6 @@ $formulaire-green: green;
   font-style: normal;
 }
 
-body.formulaire section.lightbox {
-
-  div.content{
-    @media screen and (max-width: $formulaire-screen-mobile) {
-      min-height: unset;
-    }
-  }
-}
-
 body.formulaire section.toggle-buttons {
 
   button{
@@ -71,13 +62,17 @@ body.formulaire section.main {
     justify-content: flex-end;
     align-items: baseline;
 
-    .date{
+    .date {
       font-size: 12px;
       height: fit-content;
       background: $formulaire-blue-transparent;
       margin-right: 10px;
       padding: 0 10px;
     }
+  }
+
+  .date-saved-form {
+    background: $formulaire-blue-transparent;
   }
 
   .blueButton {
