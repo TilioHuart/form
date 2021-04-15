@@ -105,6 +105,12 @@ body.formulaire section.main {
 
   .toaster-right { float: right; }
 
+  nav.vertical {
+    @media screen and (max-width: $formulaire-screen-tablet) {
+      background-color: $formulaire-grey-light;
+    }
+  }
+
   .filter-forms {
     width: 97%;
     .drop-down-block, .drop-down-block .drop-down-label {
