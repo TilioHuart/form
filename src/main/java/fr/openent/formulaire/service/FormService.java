@@ -26,9 +26,9 @@ public interface FormService {
 
     void delete(String formId, Handler<Either<String, JsonObject>> handler);
 
-    void getMyFormRights(String formId, UserInfos user, Handler<Either<String, JsonArray>> handler);
+    void getMyFormRights(String formId, List<String> groupsAndUserIds, Handler<Either<String, JsonArray>> handler);
 
-    void getAllMyFormRights(UserInfos user, Handler<Either<String, JsonArray>> handler);
+    void getAllMyFormRights(List<String> groupsAndUserIds, Handler<Either<String, JsonArray>> handler);
 
     void getImage (EventBus eb, String idImage, Handler<Either<String,JsonObject>> handler);
 }

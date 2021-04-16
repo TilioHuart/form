@@ -159,12 +159,11 @@ public class DefaultFormService implements FormService {
     }
 
     @Override
-    public void getMyFormRights(String formId, UserInfos user, Handler<Either<String, JsonArray>> handler) {
+    public void getMyFormRights(String formId, List<String> groupsAndUserIds, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT action FROM " + Formulaire.FORM_SHARES_TABLE +
-                " WHERE resource_id = ? AND member_id = ? AND action IN (?, ?, ?);";
+                " WHERE resource_id = ? AND member_id IN " + Sql.listPrepared(groupsAndUserIds) + " AND action IN (?, ?, ?);";
         JsonArray params = new JsonArray()
                 .add(formId)
-                .add(user.getUserId())
                 .add(Formulaire.CONTRIB_RESOURCE_BEHAVIOUR)
                 .add(Formulaire.MANAGER_RESOURCE_BEHAVIOUR)
                 .add(Formulaire.RESPONDER_RESOURCE_BEHAVIOUR);
@@ -172,11 +171,10 @@ public class DefaultFormService implements FormService {
     }
 
     @Override
-    public void getAllMyFormRights(UserInfos user, Handler<Either<String, JsonArray>> handler) {
+    public void getAllMyFormRights(List<String> groupsAndUserIds, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT resource_id, action FROM " + Formulaire.FORM_SHARES_TABLE +
-                " WHERE member_id = ? AND action IN (?, ?, ?);";
+                " WHERE member_id IN " + Sql.listPrepared(groupsAndUserIds) + " AND action IN (?, ?, ?);";
         JsonArray params = new JsonArray()
-                .add(user.getUserId())
                 .add(Formulaire.CONTRIB_RESOURCE_BEHAVIOUR)
                 .add(Formulaire.MANAGER_RESOURCE_BEHAVIOUR)
                 .add(Formulaire.RESPONDER_RESOURCE_BEHAVIOUR);

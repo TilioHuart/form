@@ -313,13 +313,18 @@ public class FormController extends ControllerHelper {
 
     @Get("/forms/:formId/rights")
     @ApiDoc("Get my rights for a given form")
-    @ResourceFilter(CreationRight.class)
+    @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void getMyFormRights(HttpServerRequest request) {
         String formId = request.getParam("formId");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
-                formService.getMyFormRights(formId, user, arrayResponseHandler(request));
+                List<String> groupsAndUserIds = new ArrayList();
+                groupsAndUserIds.add(user.getUserId());
+                if (user.getGroupsIds() != null) {
+                    groupsAndUserIds.addAll(user.getGroupsIds());
+                }
+                formService.getMyFormRights(formId, groupsAndUserIds, arrayResponseHandler(request));
             } else {
                 log.error("User not found in session.");
                 Renders.unauthorized(request);
@@ -329,12 +334,17 @@ public class FormController extends ControllerHelper {
 
     @Get("/forms/rights/all")
     @ApiDoc("Get my rights for all the forms")
-    @ResourceFilter(CreationRight.class)
+    @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void getAllMyFormRights(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
-                formService.getAllMyFormRights(user, arrayResponseHandler(request));
+                List<String> groupsAndUserIds = new ArrayList();
+                groupsAndUserIds.add(user.getUserId());
+                if (user.getGroupsIds() != null) {
+                    groupsAndUserIds.addAll(user.getGroupsIds());
+                }
+                formService.getAllMyFormRights(groupsAndUserIds, arrayResponseHandler(request));
             } else {
                 log.error("User not found in session.");
                 Renders.unauthorized(request);
