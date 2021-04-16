@@ -4,6 +4,7 @@ import {FORMULAIRE_QUESTION_EMIT_EVENT} from "../core/enums/formulaire-event";
 
 interface IViewModel {
     question: Question,
+    mobile: boolean,
     types: typeof Types,
 
     getTitle(title: string): string
@@ -15,7 +16,8 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
         restrict: 'E',
         transclude: true,
         scope: {
-            question: '='
+            question: '=',
+            mobile: '='
         },
         controllerAs: 'vm',
         bindToController: true,
@@ -24,7 +26,7 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
             <div class="question-item">                
                 <div class="domino" ng-class="{'questionError': !!!vm.question.title || vm.question.choices.length === 0 }">
                     <div class="question-top">
-                        <div class="dots">
+                        <div class="dots" ng-if="!vm.mobile">
                             <i class="drag hg-icon"></i>
                             <i class="drag hg-icon"></i>
                         </div>
