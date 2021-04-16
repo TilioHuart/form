@@ -125,20 +125,31 @@ body.formulaire section.main {
 
   .toaster-right { float: right; }
 
-  nav.vertical {
-    @media screen and (max-width: $formulaire-screen-tablet) {
-      background-color: $formulaire-grey-very-light;
-      box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+  nav.vertical[side-nav].slide {
+    width: 160px;
+    padding: 0px 10px;
+    overflow: unset;
+  }
 
-      a {
-        color: $formulaire-blue;
-      }
+  nav.vertical[side-nav] {
+    background-color: #F0F0F0;
+    border-radius: 2px;
+    border-left: none;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.26);
+  }
 
-      a.selected {
-        color: $formulaire-orange;
-        background: none;
-      }
-    }
+  .heightNavBar{
+    height: 80px !important;
+  }
+
+  .tabs header {
+    margin-right: 0;
+  }
+
+  .ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .filter-forms {

@@ -19,7 +19,7 @@
         </div>
     </div>
 
-    <div class="row twelve cell tabs" style="min-height: 60px;">
+    <div class="row twelve cell tabs zero-mobile" style="min-height: 60px;">
         <div class="cell">
             <header class="horizontal-spacing selected" ng-class="{ selected : currentPage === 'formsList' }"
                     ng-if="canCreate()" ng-click="redirectTo('/list/mine')">
@@ -31,6 +31,17 @@
             </header>
         </div>
     </div>
+
+    <nav class="vertical mobile-navigation tabs zero-desktop heightNavBar" side-nav >
+        <header class="horizontal-spacing selected row ellipsis" ng-class="{ selected : currentPage === 'formsList' }"
+                ng-if="canCreate()" ng-click="redirectTo('/list/mine')">
+            <i18n>formulaire.tab.list</i18n>
+        </header>
+        <header class="horizontal-spacing row ellipsis" ng-class="{ selected : currentPage === 'formsResponses' }"
+                ng-if="canRespond()" ng-click="redirectTo('/list/responses')">
+            <i18n>formulaire.tab.responses</i18n>
+        </header>
+    </nav>
 
     <h4 class="zero-desktop"><input type="text" ng-model="vm.searchInput" placeholder="Rechercher"></h4>
 
@@ -51,20 +62,6 @@
             </ul>
         </nav>
     </section>
-
-    <nav class="vertical mobile-navigation tabs zero-desktop heightNavBar" side-nav >
-        <ul>
-            <li><a ng-click="vm.openFolder('mine')" ng-class="{selected : vm.folder === 'mine'}">
-                <i18n>formulaire.forms.mine</i18n>
-            </a></li>
-            <li><a ng-click="vm.openFolder('shared')" ng-class="{selected : vm.folder === 'shared'}">
-                <i18n>formulaire.forms.shared</i18n>
-            </a></li>
-            <li><a ng-click="vm.openFolder('archived')" ng-class="{selected : vm.folder === 'archived'}">
-                <i18n>formulaire.forms.archived</i18n>
-            </a></li>
-        </ul>
-    </nav>
 
     <!--List of forms-->
     <section class="cell nine twelve-mobile">
