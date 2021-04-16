@@ -58,8 +58,9 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
         vm.forms.orders.find(o => o.name === FiltersOrders.TITLE).display = true;
 
         try {
+            let allMyDistribs = $scope.getDataIf200(await distributionService.listByResponder());
             for (let form of vm.forms.all) {
-                let distribs = $scope.getDataIf200(await distributionService.listByFormAndResponder(form.id));
+                let distribs = allMyDistribs.filter(d => d.form_id === form.id);
                 for (let d of distribs) {
                     vm.distributions.all.push(d);
                 }

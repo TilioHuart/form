@@ -11,6 +11,8 @@ public interface DistributionService {
 
     void listByForm(String formId, Handler<Either<String, JsonArray>> handler);
 
+    void listByResponder(UserInfos user, Handler<Either<String, JsonArray>> handler);
+
     void listByFormAndResponder(String formId, UserInfos user, Handler<Either<String, JsonArray>> handler);
 
     void get(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler);

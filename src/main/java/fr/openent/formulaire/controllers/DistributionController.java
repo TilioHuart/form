@@ -56,6 +56,21 @@ public class DistributionController extends ControllerHelper {
         distributionService.listByForm(formId, arrayResponseHandler(request));
     }
 
+    @Get("/distributions/listMine")
+    @ApiDoc("Get all my distributions")
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void listByResponder(HttpServerRequest request) {
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user != null) {
+                distributionService.listByResponder(user, arrayResponseHandler(request));
+            } else {
+                log.error("User not found in session.");
+                Renders.unauthorized(request);
+            }
+        });
+    }
+
     @Get("/distributions/forms/:formId/listMine")
     @ApiDoc("Get the distributions for given form and responder")
     @ResourceFilter(AccessRight.class)
