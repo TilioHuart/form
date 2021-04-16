@@ -155,7 +155,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.openForm = (form: Form) : void => {
         $scope.form = form;
-        $scope.redirectTo(`/form/${form.id}`);
+        $scope.redirectTo(`/form/${form.id}/edit`);
         $scope.safeApply();
     };
 

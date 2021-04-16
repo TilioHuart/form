@@ -95,8 +95,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 					$scope.redirectTo('/e403');
 				}
 			},
-			openForm: async (params) => {
-				$scope.currentPage = 'openForm';
+			editForm: async (params) => {
+				$scope.currentPage = 'editForm';
 				if ($scope.canCreate()) {
 					$scope.form.setFromJson($scope.getDataIf200(await formService.get(params.idForm)));
 					if (!!$scope.form.id) {
@@ -106,7 +106,13 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 						$scope.redirectTo('/list/mine');
 					}
 				}
-				else if ($scope.canRespond()) {
+				else {
+					$scope.redirectTo('/e403');
+				}
+			},
+			respondForm: async (params) => {
+				$scope.currentPage = 'respondForm';
+				if ($scope.canRespond()) {
 					$scope.redirectTo(`/form/${params.idForm}/question/1`);
 				}
 				else {

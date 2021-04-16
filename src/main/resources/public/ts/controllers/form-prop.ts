@@ -36,7 +36,7 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
         vm.save = async () : Promise<void> => {
             let form = new Form();
             form.setFromJson($scope.getDataIf200(await formService.save(vm.form)));
-            $scope.redirectTo(`/form/${form.id}`);
+            $scope.redirectTo(`/form/${form.id}/edit`);
             $scope.safeApply();
         };
 

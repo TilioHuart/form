@@ -29,8 +29,11 @@ routes.define(function($routeProvider){
 		.when('/form/create', {
 			action: 'createForm'
 		})
+		.when('/form/:idForm/edit', {
+			action: 'editForm'
+		})
 		.when('/form/:idForm', {
-			action: 'openForm'
+			action: 'respondForm'
 		})
 		.when('/form/:idForm/properties', {
 			action: 'propForm'
