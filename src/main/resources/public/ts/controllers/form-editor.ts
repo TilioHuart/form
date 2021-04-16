@@ -335,7 +335,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         };
 
         const onClickQuestion = async (event) : Promise<void> => {
-            if (!vm.dontSave && $scope.currentPage === 'openForm') {
+            if (!vm.dontSave && $scope.currentPage === 'editForm') {
                 let questionPos: number = isInFocusable(event.target);
                 if (!!questionPos && questionPos > 0) {
                     let question = vm.questions.all.filter(question => question.position == questionPos)[0];
