@@ -66,8 +66,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			},
 			propForm: async (params) => {
 				$scope.currentPage = 'propForm';
-				if ($scope.canCreate()) {
-					$scope.form.setFromJson($scope.getDataIf200(await formService.get(params.idForm)));
+				await $scope.getFormWithRights(params.idForm);
+				if ($scope.canCreate() && $scope.hasShareRightContrib($scope.form)) {
 					template.open('main', 'containers/prop-form');
 				}
 				else {
@@ -76,8 +76,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			},
 			resultsForm: async (params) => {
 				$scope.currentPage = 'resultsForm';
-				if ($scope.canCreate()) {
-					$scope.form.setFromJson($scope.getDataIf200(await formService.get(params.idForm)));
+				await $scope.getFormWithRights(params.idForm);
+				if ($scope.canCreate() && $scope.hasShareRightManager($scope.form)) {
 					$scope.form.nbQuestions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
 
 					if (params.position < 1) {
@@ -97,8 +97,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			},
 			editForm: async (params) => {
 				$scope.currentPage = 'editForm';
-				if ($scope.canCreate()) {
-					$scope.form.setFromJson($scope.getDataIf200(await formService.get(params.idForm)));
+				await $scope.getFormWithRights(params.idForm);
+				if ($scope.canCreate() && $scope.hasShareRightContrib($scope.form)) {
 					if (!!$scope.form.id) {
 						template.open('main', 'containers/edit-form');
 					}
@@ -112,7 +112,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			},
 			respondForm: async (params) => {
 				$scope.currentPage = 'respondForm';
-				if ($scope.canRespond()) {
+				await $scope.getFormWithRights(params.idForm);
+				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form)) {
 					$scope.redirectTo(`/form/${params.idForm}/question/1`);
 				}
 				else {
@@ -121,9 +122,9 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			},
 			respondQuestion: async (params) => {
 				$scope.currentPage = 'respondQuestion';
-				if ($scope.canRespond()) {
+				await $scope.getFormWithRights(params.idForm);
+				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form)) {
 					let distribution = $scope.getDataIf200(await distributionService.get(params.idForm));
-					$scope.form.setFromJson($scope.getDataIf200(await formService.get(params.idForm)));
 
 					// If form not already responded && date ok
 					if ($scope.form.date_opening < new Date() && ($scope.form.date_ending ? ($scope.form.date_ending > new Date()) : true)) {
@@ -191,6 +192,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 
 		$scope.getTypeNameByCode = (code: number) : string => {
 			return $scope.questionTypes.all.filter(type => type.code === code)[0].name;
+		};
+
+		$scope.getFormWithRights = async (formId : number) : Promise<void> => {
+			$scope.form.setFromJson($scope.getDataIf200(await formService.get(formId)));
+			$scope.form.myRights = $scope.getDataIf200(await formService.getMyFormRights(formId)).map(right => right.action);
 		};
 
 		$scope.getDataIf200 = (response: AxiosResponse) : any => {

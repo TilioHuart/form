@@ -165,6 +165,7 @@ export class Forms extends Selection<Form> {
                 tempForm.setFromJson(data[i]);
                 this.all.push(tempForm);
             }
+            await this.setResourceRights();
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.form.sync'));
             throw e;
