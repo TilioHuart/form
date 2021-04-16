@@ -164,6 +164,7 @@ public class DefaultFormService implements FormService {
                 " WHERE resource_id = ? AND member_id IN " + Sql.listPrepared(groupsAndUserIds) + " AND action IN (?, ?, ?);";
         JsonArray params = new JsonArray()
                 .add(formId)
+                .addAll(new fr.wseduc.webutils.collections.JsonArray(groupsAndUserIds))
                 .add(Formulaire.CONTRIB_RESOURCE_BEHAVIOUR)
                 .add(Formulaire.MANAGER_RESOURCE_BEHAVIOUR)
                 .add(Formulaire.RESPONDER_RESOURCE_BEHAVIOUR);
@@ -175,6 +176,7 @@ public class DefaultFormService implements FormService {
         String query = "SELECT resource_id, action FROM " + Formulaire.FORM_SHARES_TABLE +
                 " WHERE member_id IN " + Sql.listPrepared(groupsAndUserIds) + " AND action IN (?, ?, ?);";
         JsonArray params = new JsonArray()
+                .addAll(new fr.wseduc.webutils.collections.JsonArray(groupsAndUserIds))
                 .add(Formulaire.CONTRIB_RESOURCE_BEHAVIOUR)
                 .add(Formulaire.MANAGER_RESOURCE_BEHAVIOUR)
                 .add(Formulaire.RESPONDER_RESOURCE_BEHAVIOUR);
