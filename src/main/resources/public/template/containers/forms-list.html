@@ -33,11 +33,11 @@
     </div>
 
     <nav class="vertical mobile-navigation tabs zero-desktop heightNavBar" side-nav >
-        <header class="horizontal-spacing selected row ellipsis" ng-class="{ selected : currentPage === 'formsList' }"
+        <header class="horizontal-spacing row ellipsis" ng-class="{ selected : currentPage === Pages.FORMS_LIST }"
                 ng-if="canCreate()" ng-click="redirectTo('/list/mine')">
             <i18n>formulaire.tab.list</i18n>
         </header>
-        <header class="horizontal-spacing row ellipsis" ng-class="{ selected : currentPage === 'formsResponses' }"
+        <header class="horizontal-spacing row ellipsis" ng-class="{ selected : currentPage === Pages.FORMS_RESPONSE }"
                 ng-if="canRespond()" ng-click="redirectTo('/list/responses')">
             <i18n>formulaire.tab.responses</i18n>
         </header>
