@@ -126,6 +126,13 @@ body.formulaire section.main {
 
   .toaster-right { float: right; }
 
+  i.dropbtn {
+    color: black;
+    font-size: 20px;
+    border: none;
+    cursor: pointer;
+  }
+
   nav.vertical[side-nav].slide {
     width: 160px;
     padding: 0px 10px;
@@ -139,8 +146,44 @@ body.formulaire section.main {
     box-shadow: 0 6px 18px rgba(0,0,0,0.26);
   }
 
+  nav.vertical ul li a {
+    padding-left: 20px;
+  }
+
   .heightNavBar{
     height: 80px !important;
+  }
+
+  .sideNavMyForms {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #F0F0F0;
+    overflow-x: hidden;
+    transition: 0.5s;
+    top: 52px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.26);
+    border-radius: 3px;
+  }
+
+  .sideNavMyForms .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+    cursor:pointer;
+  }
+
+  .text-font{
+    font-weight: bolder;
+  }
+
+  .titleSideNav{
+    padding-left: 25px;
   }
 
   .tabs header {

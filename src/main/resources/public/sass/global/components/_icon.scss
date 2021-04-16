@@ -61,6 +61,10 @@ i {
 
   // Icons content
 
+  &.dropbtn::before{
+    content: '\e912';
+  }
+
   &.bell::before {
     font-family: 'material-icons';
     content: "\F09C";

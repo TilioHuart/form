@@ -43,6 +43,11 @@
         </header>
     </nav>
 
+    <div class="row zero-desktop">
+        <i ng-click="vm.openNavMyForms()" class="dropbtn"></i>
+        <span>[[vm.displayFolder()]]</span>
+    </div>
+
     <h4 class="zero-desktop"><input type="text" ng-model="vm.searchInput" placeholder="Rechercher"></h4>
 
     <!--Navigation menu-->
@@ -63,11 +68,32 @@
         </nav>
     </section>
 
+    <div id="mySidenavForms" class="sideNavMyForms ellipsis">
+        <div class="vertical-spacing row">
+            <i18n class="text-font titleSideNav">formulaire.forms.folders</i18n>
+            <a class="closebtn" ng-click="vm.closeNavMyForms()">&times;</a>
+        </div>
+        <nav class="vertical row">
+            <ul>
+                <li><a ng-click="vm.openFolder('mine')" ng-class="{selected : vm.folder === 'mine'}">
+                    <i18n>formulaire.forms.mine</i18n>
+                </a></li>
+                <li><a ng-click="vm.openFolder('shared')" ng-class="{selected : vm.folder === 'shared'}">
+                    <i18n>formulaire.forms.shared</i18n>
+                </a></li>
+                <li><a ng-click="vm.openFolder('archived')" ng-class="{selected : vm.folder === 'archived'}">
+                    <i18n>formulaire.forms.archived</i18n>
+                </a></li>
+            </ul>
+        </nav>
+    </div>
+
     <!--List of forms-->
     <section class="cell nine twelve-mobile">
-        <div class="folder-info">
-            <div><h4><i class="folder spaced-right" ng-if="!vm.isMobile()"></i>[[vm.displayFolder()]]</h4></div>
-            <div ng-if="!vm.isMobile()">
+
+        <div class="folder-info zero-mobile">
+            <div><h4><i class="folder spaced-right"></i>[[vm.displayFolder()]]</h4></div>
+            <div>
                 <i class="view-cards hg-icon" ng-click="vm.display.grid = true" ng-class="{'selected': vm.display.grid}"></i>
                 <i class="view-tab hg-icon" ng-click="vm.display.grid = false" ng-class="{'selected': !vm.display.grid}"></i>
             </div>

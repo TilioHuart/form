@@ -31,6 +31,8 @@ interface ViewModel {
     switchAll(value: boolean) : void;
     sort(field: FiltersOrders) : void;
     filter(filter: FiltersFilters) : void;
+    openNavMyForms() : void;
+    closeNavMyForms() : void;
     displayFilterName(name: string) : string;
     displayFolder() : string;
     getTitle(title: string): string;
@@ -131,6 +133,14 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         vm.forms.switchFilter(filter);
         vm.forms.filterForms();
         $scope.safeApply();
+    };
+
+    vm.openNavMyForms = () : void => {
+        document.getElementById("mySidenavForms").style.width = "200px";
+    };
+
+    vm.closeNavMyForms = () : void => {
+        document.getElementById("mySidenavForms").style.width = "0";
     };
 
     // Display functions
