@@ -135,7 +135,7 @@
   "formulaire.response.file.already.exist": "Un fichier a déjà été déposé : ",
   "formulaire.responses": "réponses",
   "formulaire.responses.send.title": "Valider l'envoi",
-  "formulaire.responses.send.selectStructure": "Sélectionnez votre établissement",
+  "formulaire.responses.send.selectStructure": "Veuillez sélectionnez votre établissement : ",
   "formulaire.responses.send.text": "Une fois votre formulaire envoyé vous ne pourrez plus modifier vos réponses.",
   "formulaire.responses.send.continue": "Voulez-vous continuez ?",
 

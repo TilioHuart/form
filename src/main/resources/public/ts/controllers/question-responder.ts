@@ -31,6 +31,8 @@ interface ViewModel {
     saveAndQuit() : Promise<void>;
     send() : Promise<void>;
     doSend() : Promise<void>;
+    checkMultiEtab() : boolean;
+    getStructures() : string[];
 }
 
 export const questionResponderController = ng.controller('QuestionResponderController', ['$scope', '$rootScope',
@@ -128,6 +130,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         await saveResponses();
         if (await checkMandatoryQuestions()) {
             vm.form.setFromJson($scope.getDataIf200(await formService.get(vm.question.form_id)));
+            vm.distribution.structure = model.me.structureNames[0];
             template.open('lightbox', 'lightbox/responses-confirm-sending');
             vm.display.lightbox.sending = true;
         }
@@ -145,6 +148,14 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         notify.success(idiom.translate('formulaire.success.responses.save'));
         $scope.redirectTo(`/list/responses`);
         $scope.safeApply();
+    };
+
+    vm.checkMultiEtab = () : boolean => {
+        return model.me.structureNames.length > 1 && !vm.form.anonymous;
+    };
+
+    vm.getStructures = () : string[] => {
+        return model.me.structureNames;
     };
 
 
