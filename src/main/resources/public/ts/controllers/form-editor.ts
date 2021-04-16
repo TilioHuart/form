@@ -1,7 +1,7 @@
 import {idiom, ng, notify, template, angular} from 'entcore';
 import {Form, Question, QuestionChoice, Questions, Types} from "../models";
 import {formService, questionChoiceService, questionService} from "../services";
-import {Direction, FORMULAIRE_QUESTION_EMIT_EVENT} from "../core/enums";
+import {Direction, FORMULAIRE_QUESTION_EMIT_EVENT, Pages} from "../core/enums";
 
 interface ViewModel {
     types: typeof Types;

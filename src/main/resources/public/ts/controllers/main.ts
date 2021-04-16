@@ -1,8 +1,9 @@
-import {Behaviours, idiom, init, model, ng, template} from 'entcore';
+import {Behaviours, idiom, model, ng, template} from 'entcore';
 import {DistributionStatus, Form, Question, QuestionTypes} from "../models";
 import {configService, distributionService, formService, questionService} from "../services";
 import {AxiosResponse} from "axios";
 import {FORMULAIRE_EMIT_EVENT} from "../core/enums/formulaire-event";
+import {Pages} from "../core/enums";
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', 'FormService',
 	($scope, route, $location) => {
@@ -11,7 +12,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.config = {};
 
 		// Init variables
-		$scope.currentPage = 'formsList';
+		$scope.Pages = Pages;
+		$scope.currentPage = Pages.FORMS_LIST;
 		$scope.form = new Form();
 		$scope.question = new Question();
 		$scope.questionTypes = new QuestionTypes();
@@ -25,7 +27,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		// Routing & template opening
 		route({
 			list: () => {
-				$scope.currentPage = 'list';
 				if ($scope.canCreate()) {
 					$scope.redirectTo('/list/mine');
 				}
@@ -37,7 +38,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				}
 			},
 			formsList: () => {
-				$scope.currentPage = 'formsList';
+				$scope.currentPage = Pages.FORMS_LIST;
 				if ($scope.canCreate()) {
 					template.open('main', 'containers/forms-list');
 				}
@@ -46,7 +47,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				}
 			},
 			formsResponses: () => {
-				$scope.currentPage = 'formsResponses';
+				$scope.currentPage = Pages.FORMS_RESPONSE;
 				if ($scope.canRespond()) {
 					template.open('main', 'containers/forms-responses');
 				}
@@ -55,7 +56,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				}
 			},
 			createForm: () => {
-				$scope.currentPage = 'createForm';
+				$scope.currentPage = Pages.CREATE_FORM;
 				if ($scope.canCreate()) {
 					$scope.form = new Form();
 					template.open('main', 'containers/prop-form');
@@ -65,7 +66,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				}
 			},
 			propForm: async (params) => {
-				$scope.currentPage = 'propForm';
+				$scope.currentPage = Pages.PROP_FORM;
 				await $scope.getFormWithRights(params.idForm);
 				if ($scope.canCreate() && $scope.hasShareRightContrib($scope.form)) {
 					template.open('main', 'containers/prop-form');
@@ -75,7 +76,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				}
 			},
 			resultsForm: async (params) => {
-				$scope.currentPage = 'resultsForm';
+				$scope.currentPage = Pages.RESULTS_FORM;
 				await $scope.getFormWithRights(params.idForm);
 				if ($scope.canCreate() && $scope.hasShareRightManager($scope.form)) {
 					$scope.form.nbQuestions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
@@ -96,7 +97,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				}
 			},
 			editForm: async (params) => {
-				$scope.currentPage = 'editForm';
+				$scope.currentPage = Pages.EDIT_FORM;
 				await $scope.getFormWithRights(params.idForm);
 				if ($scope.canCreate() && $scope.hasShareRightContrib($scope.form)) {
 					if (!!$scope.form.id) {
@@ -111,7 +112,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				}
 			},
 			respondForm: async (params) => {
-				$scope.currentPage = 'respondForm';
 				await $scope.getFormWithRights(params.idForm);
 				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form)) {
 					$scope.redirectTo(`/form/${params.idForm}/question/1`);
@@ -121,7 +121,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				}
 			},
 			respondQuestion: async (params) => {
-				$scope.currentPage = 'respondQuestion';
+				$scope.currentPage = Pages.RESPOND_QUESTION;
 				await $scope.getFormWithRights(params.idForm);
 				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form)) {
 					let distribution = $scope.getDataIf200(await distributionService.get(params.idForm));
@@ -155,15 +155,15 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				}
 			},
 			e403: () => {
-				$scope.currentPage = 'e403';
+				$scope.currentPage = Pages.E403;
 				template.open('main', 'containers/error/e403');
 			},
 			e404: () => {
-				$scope.currentPage = 'e404';
+				$scope.currentPage = Pages.E404;
 				template.open('main', 'containers/error/e404');
 			},
 			e409: () => {
-				$scope.currentPage = 'e409';
+				$scope.currentPage = Pages.E409;
 				template.open('main', 'containers/error/e409');
 			}
 		});

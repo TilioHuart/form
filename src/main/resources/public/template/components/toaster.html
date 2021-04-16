@@ -1,6 +1,6 @@
 <section class="toggle-buttons" ng-if="vm.forms.selected.length > 0">
     <div class="toggle">
-        <div class="row" ng-if="currentPage === 'formsResponses'" workflow="formulaire.response">
+        <div class="row" ng-if="currentPage === Pages.FORMS_RESPONSE" workflow="formulaire.response">
             <button ng-click="vm.openForm(vm.forms.selected[0])" class="cell" ng-show="vm.checkOpenButton()">
                 <i18n>formulaire.open</i18n>
             </button>
@@ -14,7 +14,7 @@
                 <i18n>formulaire.deselect</i18n>
             </button>
         </div>
-        <div class="row" ng-if="currentPage === 'formsList' && !vm.forms.selected[0].archived" workflow="formulaire.creation">
+        <div class="row" ng-if="currentPage === Pages.FORMS_LIST && !vm.forms.selected[0].archived" workflow="formulaire.creation">
             <button ng-click="vm.openForm(vm.forms.selected[0])" class="cell" ng-show="vm.checkOpenButton()">
                 <i18n>formulaire.open</i18n>
             </button>
@@ -46,7 +46,7 @@
                 <i18n>formulaire.deselect</i18n>
             </button>
         </div>
-        <div class="row" ng-if="currentPage === 'formsList' && vm.forms.selected[0].archived" workflow="formulaire.creation">
+        <div class="row" ng-if="currentPage === Pages.FORMS_LIST && vm.forms.selected[0].archived" workflow="formulaire.creation">
             <button ng-click="vm.restoreForms()" class="cell" ng-show="hasShareRightManager(vm.forms.selected[0])">
                 <i18n>formulaire.restore</i18n>
             </button>
