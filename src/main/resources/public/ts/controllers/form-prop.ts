@@ -11,7 +11,6 @@ interface ViewModel {
     save() : Promise<void>;
     checkIntervalDates() : boolean;
     getImage() : void;
-    isMobile() : boolean;
 }
 
 
@@ -66,10 +65,6 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
             }
             $scope.safeApply();
         };
-
-        vm.isMobile = () : boolean => {
-            return window.screen.width <= 500;
-        }
 
         init();
     }]);

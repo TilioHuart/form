@@ -53,7 +53,6 @@ interface ViewModel {
     doArchiveForms() : Promise<void>;
     deleteForms() : void;
     doDeleteForms() : Promise<void>;
-    isMobile() : boolean;
 }
 
 
@@ -332,10 +331,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         vm.mail.subject = idiom.translate('formulaire.remind.default.subject');
         vm.mail.body = $scope.getI18nWithParams('formulaire.remind.default.body', [link, link]);
     };
-
-    vm.isMobile = () : boolean => {
-        return window.screen.width <= 500;
-    }
 
     init();
 }]);

@@ -17,7 +17,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.form = new Form();
 		$scope.question = new Question();
 		$scope.questionTypes = new QuestionTypes();
-
+		$scope.isMobile = window.screen.width <= 500;
 
 		const init = async () : Promise<void> => {
 			await $scope.getConfig();

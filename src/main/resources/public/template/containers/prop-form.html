@@ -17,8 +17,8 @@
                 </div>
                 <div class="nine data">
                     <div class="data-text">
-                        <div class="title" ng-if="!vm.isMobile()"><i18n>formulaire.form.create.title</i18n></div>
-                        <div class="title" ng-if="vm.isMobile()"><i18n>formulaire.form.create.title.mobile</i18n></div>
+                        <div class="title" ng-if="!isMobile"><i18n>formulaire.form.create.title</i18n></div>
+                        <div class="title" ng-if="isMobile"><i18n>formulaire.form.create.title.mobile</i18n></div>
                         <input type="text" ng-model="vm.form.title" i18n-placeholder="formulaire.form.create.title" style="width: 60%;">
                         <div class="interval">
                             <span class="opening">
@@ -37,8 +37,8 @@
                             <div class="text">
                                 <label for="multiple">
                                     <input type="checkbox" id="multiple" ng-model="vm.form.multiple" ng-disabled="vm.form.nb_responses > 0"/>
-                                    <span ng-if="!vm.isMobile()"><i18n>formulaire.multiple</i18n></span>
-                                    <span ng-if="vm.isMobile()"><i18n>formulaire.multiple.mobile</i18n></span>
+                                    <span ng-if="!isMobile"><i18n>formulaire.multiple</i18n></span>
+                                    <span ng-if="isMobile"><i18n>formulaire.multiple.mobile</i18n></span>
                                 </label>
                             </div>
                         </div>
@@ -53,7 +53,7 @@
                         </div>
                     </div>
                     <div class="data-bottom" ng-class="{ date : currentPage === Pages.PROP_FORM }">
-                        <div ng-if="currentPage === Pages.PROP_FORM && !vm.isMobile()" style="margin-bottom: 10px;">
+                        <div ng-if="currentPage === Pages.PROP_FORM && !isMobile" style="margin-bottom: 10px;">
                             <i18n>formulaire.form.edit.modified</i18n>[[vm.form.date_modification.toLocaleString()]]
                         </div>
                         <div>

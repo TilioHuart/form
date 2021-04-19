@@ -4,9 +4,6 @@ import {
     Form,
     Question,
     Questions,
-    Response,
-    ResponseFile,
-    ResponseFiles,
     Responses,
     Types
 } from "../models";
@@ -17,7 +14,6 @@ interface ViewModel {
     questions: Questions;
     results: Responses;
     distributions: Distributions;
-    files: ResponseFiles;
     form: Form;
     nbResults: number;
     nbResultsDisplay: number;
@@ -38,7 +34,6 @@ interface ViewModel {
     prev() : Promise<void>;
     next() : Promise<void>;
     goTo(position: number) : Promise<void>;
-    isMobile() : boolean;
 }
 
 
@@ -51,7 +46,6 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         vm.questions = new Questions();
         vm.results = new Responses();
         vm.distributions = new Distributions();
-        vm.files = new ResponseFiles();
         vm.form = new Form();
         vm.nbResults = 0;
         vm.nbResultsDisplay = 10;
@@ -76,9 +70,6 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             vm.nbResults = vm.distributions.all.length;
             vm.nbQuestions = $scope.form.nbQuestions;
             vm.last = vm.question.position === vm.nbQuestions;
-            // if (vm.question.question_type === Types.FILE) {
-            //     await vm.files.sync(vm.question.id);
-            // }
             $scope.safeApply();
         };
 
@@ -130,10 +121,6 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         vm.goTo = async (position: number) : Promise<void> => {
             $scope.redirectTo(`/form/${vm.question.form_id}/results/${position}`);
         };
-
-        vm.isMobile = () : boolean => {
-            return window.screen.width <= 500;
-        }
 
         init();
 

@@ -38,7 +38,6 @@ interface ViewModel {
     displayTypeIcon(code: number) : string;
     reOrder() : void;
     moveQuestion(index: number, direction: string) : void;
-    isMobile() : boolean;
 }
 
 
@@ -371,10 +370,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             else if (el.classList && el.classList.contains("dontSave")) { return true; }
             return isInDontSave(el.parentNode);
         };
-
-        vm.isMobile = () : boolean => {
-            return window.screen.width <= 500;
-        }
 
         init();
 

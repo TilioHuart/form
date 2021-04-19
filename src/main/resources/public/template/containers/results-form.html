@@ -31,21 +31,22 @@
                 </button>
             </div>
             <!-- List of results -->
-            <div ng-if="vm.question.question_type != vm.types.FILE" class="info">
-                Affichage des réponses à venir dans une prochaine version
-            </div>
-            <div ng-if="vm.question.question_type == vm.types.FILE">
-                <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response' | limitTo:vm.nbResultsDisplay">
-                    <div class="distrib">
-                        <div class="two twelve-mobile">[[distrib.date_response.toLocaleString()]]</div>
-                        <div class="two twelve-mobile ellipsis" ng-if="!vm.form.anonymous">[[distrib.responder_name]]</div>
-                        <div class="eight twelve-mobile ellipsis files">
-                            <div ng-repeat="file in vm.getDataByDistrib(distrib.id) | limitTo:vm.nbResultsDisplay"
-                                ng-class="{'notLast' : !$last}">
-                                <a ng-click="vm.downloadFile(file.response_id)">
-                                    <i class="download lg-icon spaced-right"></i> [[file.filename]]
-                                </a>
-                            </div>
+            <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response' | limitTo:vm.nbResultsDisplay">
+                <div class="distrib">
+                    <div class="two twelve-mobile">[[distrib.date_response.toLocaleString()]]</div>
+                    <div class="two twelve-mobile ellipsis" ng-if="!vm.form.anonymous">[[distrib.responder_name]]</div>
+                    <div class="eight twelve-mobile ellipsis results">
+                        <div ng-repeat="result in vm.getDataByDistrib(distrib.id) | limitTo:vm.nbResultsDisplay"
+                             ng-class="{'notLast' : !$last}">
+                            <div ng-if="vm.question.question_type == vm.types.SHORTANSWER ||
+                                vm.question.question_type == vm.types.LONGANSWER ||
+                                vm.question.question_type == vm.types.DATE ||
+                                vm.question.question_type == vm.types.TIME"
+                                bind-html="result.answer"></div>
+                            <a ng-if="vm.question.question_type == vm.types.FILE"
+                               ng-click="vm.downloadFile(result.response_id)">
+                                <i class="download lg-icon spaced-right"></i> [[result.filename]]
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -59,8 +60,8 @@
         </div>
         <div class="buttons">
             <button class="cell" ng-click="vm.prev()" ng-disabled="vm.question.position == 1">
-                <i18n ng-if="!vm.isMobile()">formulaire.prev</i18n>
-                <i class="chevron-left" ng-if="vm.isMobile()"></i>
+                <i18n class="zero-mobile">formulaire.prev</i18n>
+                <i class="chevron-left zero-desktop"></i>
             </button>
             <div class="goto six">
                 <i18n class="one" style="margin-right:10px">formulaire.goTo</i18n>
@@ -72,8 +73,8 @@
                 </select>
             </div>
             <button class="cell" ng-click="vm.next()" ng-disabled="vm.last">
-                <i18n ng-if="!vm.isMobile()">formulaire.next</i18n>
-                <i class="chevron-right" ng-if="vm.isMobile()"></i>
+                <i18n class="zero-mobile">formulaire.next</i18n>
+                <i class="chevron-right zero-desktop"></i>
             </button>
         </div>
     </div>

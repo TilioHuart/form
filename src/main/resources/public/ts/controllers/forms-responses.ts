@@ -27,7 +27,6 @@ interface ViewModel {
     openMyResponses() : void;
     closeMyResponses() : void;
     getMyResponses(form: Form) : Array<Distribution>;
-    isMobile() : boolean;
 }
 
 
@@ -115,10 +114,6 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
     vm.getMyResponses = (form: Form) : Array<Distribution> => {
         return vm.distributions.all.filter(d => d.form_id === form.id && d.status === DistributionStatus.FINISHED);
     };
-
-    vm.isMobile = () : boolean => {
-        return window.screen.width <= 500;
-    }
 
     // Toaster
 
