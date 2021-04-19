@@ -1,6 +1,9 @@
 import {idiom, notify} from "entcore";
 import {responseService} from "../services/ResponseService";
 import {Mix} from "entcore-toolkit";
+import {ResponseFiles} from "./ResponseFile";
+import {Types} from "./QuestionType";
+import {QuestionChoice} from "./QuestionChoice";
 
 export class Response {
     id: number;
@@ -8,6 +11,7 @@ export class Response {
     choice_id: number;
     answer: string|Date;
     distribution_id: number;
+    files: ResponseFiles;
 
     constructor(question_id?: number, choice_id?: number, answer?: string|Date, distribution_id?: number) {
         this.id = null;
@@ -15,6 +19,7 @@ export class Response {
         this.choice_id = choice_id ? choice_id : null;
         this.answer =  answer ? answer : null;
         this.distribution_id = distribution_id ? distribution_id : null;
+        this.files = new ResponseFiles();
     }
 
     toJson() : Object {
@@ -23,7 +28,8 @@ export class Response {
             question_id: this.question_id,
             choice_id: this.choice_id,
             answer: this.answer,
-            distribution_id: this.distribution_id
+            distribution_id: this.distribution_id,
+            files: this.files
         }
     }
 }
@@ -39,6 +45,9 @@ export class Responses {
         try {
             let { data } = await responseService.list(questionId);
             this.all = Mix.castArrayAs(Response, data);
+            for (let i = 0; i < this.all.length; i++) {
+                await this.all[i].files.sync(this.all[i].id);
+            }
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.response.sync'));
             throw e;

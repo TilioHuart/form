@@ -35,13 +35,13 @@ public class ResponseFileController extends ControllerHelper {
         BUFFER = new byte[4096];
     }
 
-    @Get("/responses/:questionId/files/all")
+    @Get("/responses/:responseId/files/all")
     @ApiDoc("List all files of a specific response")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
-        String questionId = request.getParam("questionId");
-        responseFileService.list(questionId, arrayResponseHandler(request));
+        String responseId = request.getParam("responseId");
+        responseFileService.list(responseId, arrayResponseHandler(request));
     }
 
     @Get("/responses/:responseId/files")

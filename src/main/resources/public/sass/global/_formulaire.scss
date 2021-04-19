@@ -382,16 +382,29 @@ body.formulaire section.main {
         }
       }
 
-      .file {
+      .distrib {
         display: flex;
+        align-items: baseline;
         border: thin solid $formulaire-grey-very-light;
-        padding: 5px;
+        padding: 5px 10px;
         margin: 5px 0;
         font-size: 14px;
+        @media screen and (max-width: $formulaire-screen-mobile) {
+          flex-direction: column;
+        }
 
-        a {
-          display: inline-flex;
-          align-items: center;
+        .files {
+          display: flex;
+          flex-direction: column;
+
+          .notLast {
+            margin-bottom: 5px;
+          }
+
+          a {
+            display: inline-flex;
+            align-items: center;
+          }
         }
       }
     }

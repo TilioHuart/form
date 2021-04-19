@@ -198,6 +198,14 @@
   "formulaire.error.responseService.update": "Une erreur est survenue lors de la sauvearde de la réponse",
   "formulaire.error.responseService.delete": "Une erreur est survenue lors de la suppression de la réponse",
 
+  "formulaire.error.responseFile.sync": "Une erreur est survenue lors de la synchronisation des fichiers",
+  "formulaire.error.responseFileService.list": "Une erreur est survenue lors de la récupération des fichiers",
+  "formulaire.error.responseFileService.create": "Une erreur est survenue lors de la création du nouveau fichier",
+  "formulaire.error.responseFileService.get": "Une erreur est survenue lors de la récupération du fichier",
+  "formulaire.error.responseFileService.update": "Une erreur est survenue lors de la sauvearde du fichier",
+  "formulaire.error.responseFileService.delete": "Une erreur est survenue lors de la suppression du fichier",
+  "formulaire.error.responseFileService.download": "Une erreur est survenue lors du téléchargement des fichiers",
+
   "formulaire.warning.send.form.empty": "Vous ne pouvez pas envoyer un formulaire vide !",
   "formulaire.warning.send.missing.responses.missing": "Vous n'avez pas répondu à toutes les questions obligatoires !",
   "formulaire.warning.forms.archive": "Attention, certains formulaires que vous souhaitez supprimer ont été envoyés à des utilisateurs et ne leur seront désormais plus accessibles",

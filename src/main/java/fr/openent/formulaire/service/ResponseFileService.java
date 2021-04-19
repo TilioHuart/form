@@ -6,7 +6,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 public interface ResponseFileService {
-    void list(String questionId, Handler<Either<String, JsonArray>> handler);
+    void list(String responseId, Handler<Either<String, JsonArray>> handler);
 
     void get(String responseId, Handler<Either<String, JsonObject>> handler);
 

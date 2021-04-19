@@ -4,3 +4,4 @@ export * from './Question';
 export * from './QuestionChoice';
 export * from './QuestionType';
 export * from './Response';
+export * from './ResponseFile';

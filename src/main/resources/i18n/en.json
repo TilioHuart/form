@@ -198,6 +198,14 @@
   "formulaire.error.responseService.update": "An error occurred during the response's saving",
   "formulaire.error.responseService.delete": "An error occurred during the response's suppression",
 
+  "formulaire.error.responseFile.sync": "An error occurred during the files' synchronisation",
+  "formulaire.error.responseFileService.list": "An error occurred during the files' retrieving",
+  "formulaire.error.responseFileService.create": "An error occurred during the file's creation",
+  "formulaire.error.responseFileService.get": "An error occurred during the file's retrieving",
+  "formulaire.error.responseFileService.update": "An error occurred during the file's saving",
+  "formulaire.error.responseFileService.delete": "An error occurred during the file's suppression",
+  "formulaire.error.responseFileService.download": "An error occurred during the files' downloading",
+
   "formulaire.warning.send.form.empty": "You can not send an empty form !",
   "formulaire.warning.send.missing.responses.missing": "You have to answer to all the mandatory questions !",
   "formulaire.warning.forms.archive": "Be careful, some forms you want to delete have already been sent to users and they won't be able to access them anymore !",

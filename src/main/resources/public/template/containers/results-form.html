@@ -35,11 +35,18 @@
                 Affichage des réponses à venir dans une prochaine version
             </div>
             <div ng-if="vm.question.question_type == vm.types.FILE">
-                <div ng-repeat="file in vm.files | limitTo:vm.nbResultsDisplay">
-                    <div class="file">
-                        <a ng-click="vm.downloadFile(file.response_id)">
-                            <i class="download lg-icon spaced-right"></i> [[file.filename]]
-                        </a>
+                <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response' | limitTo:vm.nbResultsDisplay">
+                    <div class="distrib">
+                        <div class="two twelve-mobile">[[distrib.date_response.toLocaleString()]]</div>
+                        <div class="two twelve-mobile ellipsis" ng-if="!vm.form.anonymous">[[distrib.responder_name]]</div>
+                        <div class="eight twelve-mobile ellipsis files">
+                            <div ng-repeat="file in vm.getDataByDistrib(distrib.id) | limitTo:vm.nbResultsDisplay"
+                                ng-class="{'notLast' : !$last}">
+                                <a ng-click="vm.downloadFile(file.response_id)">
+                                    <i class="download lg-icon spaced-right"></i> [[file.filename]]
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

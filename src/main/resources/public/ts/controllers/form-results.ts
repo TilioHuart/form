@@ -1,18 +1,29 @@
 import {ng, template} from 'entcore';
-import {Question, Questions, Responses, Types} from "../models";
-import {responseFileService} from "../services";
+import {
+    Distributions,
+    Form,
+    Question,
+    Questions,
+    Response,
+    ResponseFile,
+    ResponseFiles,
+    Responses,
+    Types
+} from "../models";
 
 interface ViewModel {
     types: typeof Types;
     question: Question;
     questions: Questions;
     results: Responses;
+    distributions: Distributions;
+    files: ResponseFiles;
+    form: Form;
     nbResults: number;
     nbResultsDisplay: number;
     nbQuestions: number;
     last: boolean;
     navigatorValue: number;
-    files: File[];
     display: {
         lightbox: {
             download: boolean;
@@ -23,6 +34,7 @@ interface ViewModel {
     doExportForm() : void;
     downloadFile(responseId: number) : void;
     zipAndDownload() : void;
+    getDataByDistrib(distribId: number) : any;
     prev() : Promise<void>;
     next() : Promise<void>;
     goTo(position: number) : Promise<void>;
@@ -38,7 +50,9 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         vm.question = new Question();
         vm.questions = new Questions();
         vm.results = new Responses();
-        vm.files = [];
+        vm.distributions = new Distributions();
+        vm.files = new ResponseFiles();
+        vm.form = new Form();
         vm.nbResults = 0;
         vm.nbResultsDisplay = 10;
         vm.nbQuestions = 1;
@@ -51,21 +65,20 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         };
 
         const init = async () : Promise<void> => {
+            vm.form = $scope.form;
             vm.question = $scope.question;
             vm.navigatorValue = vm.question.position;
-            await vm.questions.sync($scope.form.id);
+            await vm.questions.sync(vm.form.id);
             await vm.results.sync(vm.question.id);
-            vm.nbResults = new Set(vm.results.all.map(r => r.distribution_id)).size;
+            await vm.distributions.syncByForm(vm.form.id);
+            let validDistribIds : any = vm.results.all.map(r => r.distribution_id);
+            vm.distributions.all = vm.distributions.all.filter(d => validDistribIds.includes(d.id));
+            vm.nbResults = vm.distributions.all.length;
             vm.nbQuestions = $scope.form.nbQuestions;
             vm.last = vm.question.position === vm.nbQuestions;
-            if (vm.question.question_type === Types.FILE) {
-                vm.files = [];
-                let files = $scope.getDataIf200(await responseFileService.list(vm.question.id));
-                for (let i = 0; i < files.length; i++) {
-                    vm.files.push(files[i]);
-                }
-                vm.nbResults = vm.files.length;
-            }
+            // if (vm.question.question_type === Types.FILE) {
+            //     await vm.files.sync(vm.question.id);
+            // }
             $scope.safeApply();
         };
 
@@ -90,6 +103,14 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
         vm.zipAndDownload = () : void => {
             window.open(`/formulaire/responses/${vm.question.id}/files/download/zip`);
+        };
+
+        vm.getDataByDistrib = (distribId: number) : any => {
+            let results =  vm.results.all.filter(r => r.distribution_id === distribId && r.question_id === vm.question.id);
+            if (vm.question.question_type === Types.FILE) {
+                return results.map(r => r.files)[0].all;
+            }
+            return results;
         };
 
         vm.prev = async () : Promise<void> => {

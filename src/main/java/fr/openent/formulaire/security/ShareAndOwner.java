@@ -76,12 +76,11 @@ public class ShareAndOwner implements ResourcesProvider {
         else if (isDeleteDistribution(binding)) {
             return "distributionId";
         }
-        else if (isListMineResponse(binding) || isCreateResponse(binding) || isListResponseFile(binding) ||
-                isZipAndDownloadResponseFile(binding)) {
+        else if (isListMineResponse(binding) || isCreateResponse(binding) || isZipAndDownloadResponseFile(binding)) {
             return "questionId";
         }
-        else if (isUpdateResponse(binding) || isDeleteResponse(binding) || isDownloadResponseFile(binding) ||
-                isUploadResponseFile(binding) || isDeleteResponseFile(binding)) {
+        else if (isUpdateResponse(binding) || isDeleteResponse(binding) || isListResponseFile(binding) ||
+                isDownloadResponseFile(binding) || isUploadResponseFile(binding) || isDeleteResponseFile(binding)) {
             return "responseId";
         }
         else {
