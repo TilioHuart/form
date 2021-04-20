@@ -35,8 +35,8 @@
                         <editor ng-model="vm.response.answer"></editor>
                     </div>
                     <div ng-if="vm.question.question_type == vm.types.SINGLEANSWER">
-                        <select ng-model="vm.response.answer">
-                            <option ng-repeat="choice in vm.question.choices.all" ng-value="choice.value">[[choice.value]]</option>
+                        <select ng-model="vm.response.choice_id">
+                            <option ng-repeat="choice in vm.question.choices.all" ng-value="choice.id">[[choice.value]]</option>
                         </select>
                     </div>
                     <div ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER">

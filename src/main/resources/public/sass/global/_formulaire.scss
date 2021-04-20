@@ -407,6 +407,21 @@ body.formulaire section.main {
           }
         }
       }
+
+      .choices {
+        border: thin solid $formulaire-grey-very-light;
+
+        .choice {
+          display: flex;
+          align-items: baseline;
+          padding: 5px 10px;
+          margin: 5px 0;
+          font-size: 14px;
+          @media screen and (max-width: $formulaire-screen-mobile) {
+            flex-direction: column;
+          }
+        }
+      }
     }
 
     .buttons {

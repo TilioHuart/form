@@ -2,11 +2,12 @@ import {ng, template} from 'entcore';
 import {
     Distributions, DistributionStatus,
     Form,
-    Question,
+    Question, QuestionChoices,
     Questions,
     Responses,
     Types
 } from "../models";
+import {Mix} from "entcore-toolkit";
 
 interface ViewModel {
     types: typeof Types;
@@ -60,8 +61,9 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
         const init = async () : Promise<void> => {
             vm.form = $scope.form;
-            vm.question = $scope.question;
+            vm.question = Mix.castAs(Question, $scope.question);
             vm.navigatorValue = vm.question.position;
+            await vm.question.choices.sync(vm.question.id);
             await vm.questions.sync(vm.form.id);
             await vm.results.sync(vm.question.id);
             await vm.distributions.syncByForm(vm.form.id);
@@ -70,6 +72,16 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             vm.nbResults = vm.distributions.all.length;
             vm.nbQuestions = $scope.form.nbQuestions;
             vm.last = vm.question.position === vm.nbQuestions;
+            if (vm.question.question_type == vm.types.SINGLEANSWER ||
+                vm.question.question_type == vm.types.MULTIPLEANSWER) {
+                for (let result of vm.results.all) {
+                    for (let choice of vm.question.choices.all) {
+                        if (result.choice_id == choice.id) {
+                            choice.nbResponses++;
+                        }
+                    }
+                }
+            }
             $scope.safeApply();
         };
 

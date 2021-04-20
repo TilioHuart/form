@@ -28,24 +28,41 @@
                 </button>
             </div>
             <!-- List of results -->
-            <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response' | limitTo:vm.nbResultsDisplay">
-                <div class="distrib">
+            <div ng-if="vm.question.question_type != vm.types.SINGLEANSWER &&
+                        vm.question.question_type != vm.types.MULTIPLEANSWER">
+                <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response' | limitTo:vm.nbResultsDisplay"
+                     class="distrib">
                     <div class="two twelve-mobile">[[distrib.date_response.toLocaleString()]]</div>
                     <div class="two twelve-mobile ellipsis" ng-if="!vm.form.anonymous">[[distrib.responder_name]]</div>
                     <div class="eight twelve-mobile ellipsis results">
                         <div ng-repeat="result in vm.getDataByDistrib(distrib.id) | limitTo:vm.nbResultsDisplay"
                              ng-class="{'notLast' : !$last}">
                             <div ng-if="vm.question.question_type == vm.types.SHORTANSWER ||
-                                vm.question.question_type == vm.types.LONGANSWER ||
-                                vm.question.question_type == vm.types.DATE ||
-                                vm.question.question_type == vm.types.TIME"
-                                bind-html="result.answer"></div>
+                                        vm.question.question_type == vm.types.LONGANSWER ||
+                                        vm.question.question_type == vm.types.DATE ||
+                                        vm.question.question_type == vm.types.TIME"
+                                 bind-html="result.answer"></div>
                             <a ng-if="vm.question.question_type == vm.types.FILE"
                                ng-click="vm.downloadFile(result.id)">
                                 <i class="download lg-icon spaced-right"></i> [[result.filename]]
                             </a>
                         </div>
                     </div>
+                </div>
+            </div>
+            <div ng-if="vm.question.question_type == vm.types.SINGLEANSWER ||
+                        vm.question.question_type == vm.types.MULTIPLEANSWER"
+                 class="choices">
+                <div ng-repeat="choice in vm.question.choices.all | orderBy:'position' | limitTo:vm.nbResultsDisplay"
+                     class="choice">
+                    <div class="two twelve-mobile">[[$index + 1]]. [[choice.value]]</div>
+                    <div class="two twelve-mobile ellipsis" ng-if="!vm.form.anonymous">
+                        [[choice.nbResponses]]
+                        <i18n ng-if="choice.nbResponses > 1">formulaire.responses</i18n>
+                        <i18n ng-if="choice.nbResponses <= 1">formulaire.response</i18n>
+                        ([[choice.nbResponses / vm.nbResults * 100]]%)
+                    </div>
+                    <div class="eight twelve-mobile graph"></div>
                 </div>
             </div>
             <!-- Navigation buttons -->

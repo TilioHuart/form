@@ -14,6 +14,7 @@ export class QuestionChoice {
     value: string;
     position: number;
     type: ChoiceTypes;
+    nbResponses: number;
 
     constructor (questionId?: number, value?: string, type?: ChoiceTypes) {
         this.id = null;
@@ -21,6 +22,7 @@ export class QuestionChoice {
         this.value = value ? value : "";
         this.position = null;
         this.type = type ? type : ChoiceTypes.TXT;
+        this.nbResponses = 0;
     }
 
     toJson() : Object {
