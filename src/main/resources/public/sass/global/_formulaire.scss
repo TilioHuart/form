@@ -426,6 +426,12 @@ body.formulaire section.main {
           @media screen and (max-width: $formulaire-screen-mobile) {
             flex-direction: column;
           }
+
+          .graph-bar {
+            background-color: $formulaire-blue;
+            height: 25px;
+            margin-left: 25px;
+          }
         }
       }
     }

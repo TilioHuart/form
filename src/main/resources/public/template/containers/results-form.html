@@ -69,7 +69,14 @@
                         <i18n ng-if="choice.nbResponses <= 1">formulaire.response</i18n>
                         ([[choice.nbResponses / vm.nbResults * 100]]%)
                     </div>
-                    <div class="eight twelve-mobile graph"></div>
+                    <div ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER"
+                         class="eight twelve-mobile">
+                        <div class="graph-bar" ng-style="{ width: 95 * choice.nbResponses / vm.nbResults + '%' }"></div>
+                    </div>
+                </div>
+                <div ng-if="vm.question.question_type == vm.types.SINGLEANSWER"
+                     class="eight twelve-mobile graph">
+
                 </div>
             </div>
             <!-- Navigation buttons -->
