@@ -382,6 +382,12 @@ body.formulaire section.main {
         }
       }
 
+      .freetext {
+        border: thin solid $formulaire-grey-very-light;
+        padding: 5px 10px;
+        margin: 5px 0;
+      }
+
       .distrib {
         display: flex;
         align-items: baseline;

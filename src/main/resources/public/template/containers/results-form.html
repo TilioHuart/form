@@ -21,15 +21,22 @@
         <div class="result">
             <!-- Question title -->
             <div class="title">
-                <h4 ng-if="vm.nbResults > 1"> [[vm.question.title]] ([[vm.nbResults]] <i18n>formulaire.responses</i18n>)</h4>
-                <h4 ng-if="vm.nbResults <= 1"> [[vm.question.title]] ([[vm.nbResults]] <i18n>formulaire.response</i18n>)</h4>
+                <h4 ng-if="vm.question.question_type == vm.types.FREETEXT">[[vm.question.title]]</h4>
+                <h4 ng-if="vm.question.question_type != vm.types.FREETEXT && vm.nbResults > 1">
+                    [[vm.question.title]] ([[vm.nbResults]] <i18n>formulaire.responses</i18n>)</h4>
+                <h4 ng-if="vm.question.question_type != vm.types.FREETEXT && vm.nbResults <= 1">
+                    [[vm.question.title]] ([[vm.nbResults]] <i18n>formulaire.response</i18n>)</h4>
                 <button class="cell" ng-click="vm.zipAndDownload()" ng-if="vm.question.question_type == vm.types.FILE">
                     <i18n>formulaire.form.download.all.files</i18n>
                 </button>
             </div>
             <!-- List of results -->
+            <div ng-if="vm.question.question_type == vm.types.FREETEXT"
+                 class="freetext"
+                 bind-html="vm.question.statement"></div>
             <div ng-if="vm.question.question_type != vm.types.SINGLEANSWER &&
-                        vm.question.question_type != vm.types.MULTIPLEANSWER">
+                        vm.question.question_type != vm.types.MULTIPLEANSWER &&
+                        vm.question.question_type != vm.types.FREETEXT">
                 <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response' | limitTo:vm.nbResultsDisplay"
                      class="distrib">
                     <div class="two twelve-mobile">[[distrib.date_response.toLocaleString()]]</div>
