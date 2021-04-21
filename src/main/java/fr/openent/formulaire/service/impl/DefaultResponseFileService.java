@@ -19,9 +19,9 @@ public class DefaultResponseFileService implements ResponseFileService {
     }
 
     @Override
-    public void get(String responseId, Handler<Either<String, JsonObject>> handler) {
-        String query = "SELECT * FROM " + Formulaire.RESPONSE_FILE_TABLE + " WHERE response_id = ?;";
-        JsonArray params = new JsonArray().add(responseId);
+    public void get(String fileId, Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT * FROM " + Formulaire.RESPONSE_FILE_TABLE + " WHERE id = ?;";
+        JsonArray params = new JsonArray().add(fileId);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
@@ -33,9 +33,9 @@ public class DefaultResponseFileService implements ResponseFileService {
     }
 
     @Override
-    public void delete(String responseId, Handler<Either<String, JsonObject>> handler) {
-        String query = "DELETE FROM " + Formulaire.RESPONSE_FILE_TABLE + " WHERE response_id = ? RETURNING *;";
+    public void deleteAll(String responseId, Handler<Either<String, JsonArray>> handler) {
+        String query = "DELETE FROM " + Formulaire.RESPONSE_FILE_TABLE + " WHERE response_id = ? RETURNING id;";
         JsonArray params = new JsonArray().add(responseId);
-        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 }

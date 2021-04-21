@@ -10,6 +10,7 @@ import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -37,8 +38,8 @@ public class ResponseFileController extends ControllerHelper {
 
     @Get("/responses/:responseId/files/all")
     @ApiDoc("List all files of a specific response")
-    @ResourceFilter(ShareAndOwner.class)
-    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
         String responseId = request.getParam("responseId");
         responseFileService.list(responseId, arrayResponseHandler(request));
@@ -53,17 +54,17 @@ public class ResponseFileController extends ControllerHelper {
         responseFileService.get(responseId, defaultResponseHandler(request));
     }
 
-    @Get("/responses/:responseId/files/download")
+    @Get("/responses/files/:fileId/download")
     @ApiDoc("Download specific file")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void download(HttpServerRequest request) {
-        String responseId = request.getParam("responseId");
-        responseFileService.get(responseId, event -> {
+        String fileId = request.getParam("fileId");
+        responseFileService.get(fileId, event -> {
             if (event.isRight()) {
                 JsonObject file = event.right().getValue();
-                String fileId = file.getString("id");
-                storage.sendFile(fileId, file.getString("filename"), request, false, new JsonObject());
+                String id = file.getString("id");
+                storage.sendFile(id, file.getString("filename"), request, false, new JsonObject());
             } else {
                 renderError(request);
             }
@@ -92,6 +93,7 @@ public class ResponseFileController extends ControllerHelper {
                 FolderExporterZip zipBuilder = new FolderExporterZip(storage, vertx.fileSystem(), false);
                 zipBuilder.exportAndSendZip(root, listFiles, request,false).onComplete(zipEvent -> {
                     if (zipEvent.failed()) {
+                        log.error("[Formulaire@zipAndDownload] Fail to zip and export files");
                         renderError(request);
                     }
                     else {
@@ -105,12 +107,13 @@ public class ResponseFileController extends ControllerHelper {
     }
 
     @Post("/responses/:responseId/files")
-    @ApiDoc("Upload a file for a specific response")
+    @ApiDoc("Upload files for a specific response")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void upload(HttpServerRequest request) {
         storage.writeUploadFile(request, entries -> {
             if (!"ok".equals(entries.getString("status"))) {
+                log.error("[Formulaire@upload] Fail to create file in storage");
                 renderError(request);
                 return;
             }
@@ -125,7 +128,8 @@ public class ResponseFileController extends ControllerHelper {
                         JsonObject response = new JsonObject().put("id", fileId).put("filename", name);
                         request.response().setStatusCode(201).putHeader("Content-Type", type).end(response.toString());
                     } else {
-                        deleteFile(fileId);
+                        log.error("[Formulaire@upload] Fail to create in database file " + fileId);
+                        deleteFiles(new JsonArray().add(fileId));
                         renderError(request);
                     }
                 });
@@ -136,29 +140,30 @@ public class ResponseFileController extends ControllerHelper {
     }
 
     @Delete("/responses/:responseId/files")
-    @ApiDoc("Delete file from basket")
+    @ApiDoc("Delete all files for a given response")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
-    public void delete(HttpServerRequest request) {
+    public void deleteAll(HttpServerRequest request) {
         String responseId = request.getParam("responseId");
 
-        responseFileService.delete(responseId, deleteEvent -> {
+        responseFileService.deleteAll(responseId, deleteEvent -> {
             if (deleteEvent.isRight()) {
-                JsonObject deletedFile = deleteEvent.right().getValue();
+                JsonArray deletedFiles = deleteEvent.right().getValue();
                 request.response().setStatusCode(204).end();
-                if (!deletedFile.isEmpty()) {
-                    deleteFile(deletedFile.getString("id"));
+                if (!deletedFiles.isEmpty()) {
+                    deleteFiles(deletedFiles);
                 }
             } else {
+                log.error("[Formulaire@deleteAll] An error occurred while deleting files for reponse " + responseId);
                 renderError(request);
             }
         });
     }
 
-    private void deleteFile(String fileId) {
-        storage.removeFile(fileId, e -> {
+    private void deleteFiles(JsonArray fileIds) {
+        storage.removeFiles(fileIds, e -> {
             if (!"ok".equals(e.getString("status"))) {
-                log.error("[Formulaire@deleteFile] An error occurred while removing " + fileId + " file.");
+                log.error("[Formulaire@deleteFile] An error occurred while removing files " + fileIds);
             }
         });
     }

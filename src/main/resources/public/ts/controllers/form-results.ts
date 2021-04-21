@@ -1,6 +1,6 @@
 import {ng, template} from 'entcore';
 import {
-    Distributions,
+    Distributions, DistributionStatus,
     Form,
     Question,
     Questions,
@@ -66,7 +66,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             await vm.results.sync(vm.question.id);
             await vm.distributions.syncByForm(vm.form.id);
             let validDistribIds : any = vm.results.all.map(r => r.distribution_id);
-            vm.distributions.all = vm.distributions.all.filter(d => validDistribIds.includes(d.id));
+            vm.distributions.all = vm.distributions.all.filter(d => validDistribIds.includes(d.id) && d.status === DistributionStatus.FINISHED);
             vm.nbResults = vm.distributions.all.length;
             vm.nbQuestions = $scope.form.nbQuestions;
             vm.last = vm.question.position === vm.nbQuestions;
@@ -88,8 +88,8 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             $scope.safeApply();
         };
 
-        vm.downloadFile = (responseId: number) : void => {
-            window.open(`/formulaire/responses/${responseId}/files/download`);
+        vm.downloadFile = (fileId: number) : void => {
+            window.open(`/formulaire/responses/files/${fileId}/download`);
         };
 
         vm.zipAndDownload = () : void => {

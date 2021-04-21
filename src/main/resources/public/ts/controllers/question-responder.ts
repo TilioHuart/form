@@ -3,11 +3,12 @@ import {
     Distribution,
     DistributionStatus, Form,
     Question, QuestionChoices,
-    Response,
+    Response, ResponseFiles,
     Responses,
     Types
 } from "../models";
 import {distributionService, formService, questionService, responseFileService, responseService} from "../services";
+import {FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
 
 interface ViewModel {
     types: typeof Types;
@@ -87,43 +88,51 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         if (vm.question.question_type === Types.TIME) { formatTime() }
         if (vm.question.question_type === Types.FILE && !!vm.response.id) {
             vm.files = [];
-            let responseFile = $scope.getDataIf200(await responseFileService.get(vm.response.id));
-            if (!!responseFile.id) {
-                let file = new File([responseFile.id], responseFile.filename);
-                vm.files.push(file);
+            let responseFiles = new ResponseFiles();
+            await responseFiles.sync(vm.response.id);
+            for (let i = 0; i < responseFiles.all.length; i++) {
+                let responseFile = responseFiles.all[i];
+                if (!!responseFile.id) {
+                    let file = new File([responseFile.id], responseFile.filename);
+                    vm.files.push(file);
+                }
             }
+            $scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.DISPLAY_FILES, vm.files);
         }
 
         $scope.safeApply();
     };
 
     vm.prev = async () : Promise<void> => {
-        await saveResponses();
-        let prevPosition: number = vm.question.position - 1;
+        if (await saveResponses()) {
+            let prevPosition: number = vm.question.position - 1;
 
-        if (prevPosition > 0) {
-            $scope.redirectTo(`/form/${vm.question.form_id}/question/${prevPosition}`);
+            if (prevPosition > 0) {
+                $scope.redirectTo(`/form/${vm.question.form_id}/question/${prevPosition}`);
+            }
         }
     };
 
     vm.next = async () : Promise<void> => {
-        await saveResponses();
-        let nextPosition: number = vm.question.position + 1;
+        if (await saveResponses()) {
+            let nextPosition: number = vm.question.position + 1;
 
-        if (nextPosition <= vm.nbQuestions) {
-            $scope.redirectTo(`/form/${vm.question.form_id}/question/${nextPosition}`);
+            if (nextPosition <= vm.nbQuestions) {
+                $scope.redirectTo(`/form/${vm.question.form_id}/question/${nextPosition}`);
+            }
         }
     };
 
     vm.saveAndQuit = async () : Promise<void> => {
-        await saveResponses();
-        if (vm.distribution.status == DistributionStatus.TO_DO) {
-            vm.distribution.status = DistributionStatus.IN_PROGRESS;
-            await distributionService.update(vm.distribution);
+        if (await saveResponses()) {
+            if (vm.distribution.status == DistributionStatus.TO_DO) {
+                vm.distribution.status = DistributionStatus.IN_PROGRESS;
+                await distributionService.update(vm.distribution);
+            }
+            notify.success(idiom.translate('formulaire.success.responses.save'));
+            $scope.redirectTo(`/list/responses`);
+            $scope.safeApply();
         }
-        notify.success(idiom.translate('formulaire.success.responses.save'));
-        $scope.redirectTo(`/list/responses`);
-        $scope.safeApply();
     };
 
     vm.send = async () : Promise<void> => {
@@ -159,7 +168,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     };
 
 
-    const saveResponses = async () : Promise<void> => {
+    const saveResponses = async () : Promise<boolean> => {
         if (vm.question.question_type === Types.MULTIPLEANSWER) {
             for (let i = 0; i < vm.question.choices.all.length; i++) {
                 let checked = vm.selectedIndex[i];
@@ -178,20 +187,38 @@ export const questionResponderController = ng.controller('QuestionResponderContr
                     await responseService.delete(vm.responses.all[j-1].id);
                 }
             }
+            return true;
         }
         else {
             vm.response = $scope.getDataIf200(await responseService.save(vm.response, vm.question.question_type));
             if (vm.question.question_type === Types.FILE && vm.files.length > 0) {
-                let filename = vm.files[0].name;
-                if (!!vm.files[0].type && !$scope.form.anonymous) {
+                return (await saveFiles());
+            }
+            return true;
+        }
+    };
+
+    const saveFiles = async () : Promise<boolean> => {
+        if (vm.files.length > 10) {
+            notify.info(idiom.translate('formulaire.response.file.tooMany'));
+            return false;
+        }
+        else {
+            await responseFileService.deleteAll(vm.response.id);
+
+            for (let i = 0; i < vm.files.length; i++) {
+                let filename = vm.files[i].name;
+                if (!!vm.files[i].type && !$scope.form.anonymous) {
                     filename = model.me.firstName + model.me.lastName + "_" + filename;
                 }
                 let file = new FormData();
-                file.append("file", vm.files[0], filename);
-                await responseFileService.update(vm.response.id, file);
-                vm.response.answer = idiom.translate('formulaire.response.file.send');
-                vm.response = $scope.getDataIf200(await responseService.update(vm.response));
+                file.append("file", vm.files[i], filename);
+                await responseFileService.create(vm.response.id, file);
             }
+
+            vm.response.answer = idiom.translate('formulaire.response.file.send');
+            vm.response = $scope.getDataIf200(await responseService.update(vm.response));
+            return true;
         }
     };
 

@@ -4,11 +4,10 @@ import http, {AxiosResponse} from 'axios';
 export interface ResponseFileService {
     list(responseId: number) : Promise<AxiosResponse>;
     get(responseId: number) : Promise<AxiosResponse>;
-    download(responseId: number) : Promise<AxiosResponse>;
+    download(fileId: number) : Promise<AxiosResponse>;
     zipAndDownload(questionId: number) : Promise<AxiosResponse>;
     create(responseId: number, file) : Promise<AxiosResponse>;
-    update(responseId: number, file) : Promise<AxiosResponse>;
-    delete(responseId : number, fileId : number) : Promise<AxiosResponse>;
+    deleteAll(responseId : number) : Promise<AxiosResponse>;
 }
 
 export const responseFileService: ResponseFileService = {
@@ -31,9 +30,9 @@ export const responseFileService: ResponseFileService = {
         }
     },
 
-    async download(responseId: number) : Promise<AxiosResponse> {
+    async download(fileId: number) : Promise<AxiosResponse> {
         try {
-            return http.get(`/formulaire/responses/${responseId}/files/download`);
+            return http.get(`/formulaire/responses/files/${fileId}/download`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseFileService.download'));
             throw err;
@@ -58,17 +57,7 @@ export const responseFileService: ResponseFileService = {
         }
     },
 
-    async update(responseId: number, file) : Promise<AxiosResponse> {
-        try {
-            await this.delete(responseId);
-            return this.create(responseId, file);
-        } catch (err) {
-            notify.error(idiom.translate('formulaire.error.responseFileService.update'));
-            throw err;
-        }
-    },
-
-    async delete(responseId: number) : Promise<AxiosResponse> {
+    async deleteAll(responseId: number) : Promise<AxiosResponse> {
         try {
             return http.delete(`/formulaire/responses/${responseId}/files`);
         } catch (err) {

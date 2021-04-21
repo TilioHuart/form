@@ -21,11 +21,8 @@
         <div class="result">
             <!-- Question title -->
             <div class="title">
-                <h4>
-                    [[vm.question.title]] ([[vm.nbResults]]
-                    <i18n ng-if="vm.nbResults > 1">formulaire.responses</i18n>
-                    <i18n ng-if="vm.nbResults <= 1">formulaire.response</i18n>)
-                </h4>
+                <h4 ng-if="vm.nbResults > 1"> [[vm.question.title]] ([[vm.nbResults]] <i18n>formulaire.responses</i18n>)</h4>
+                <h4 ng-if="vm.nbResults <= 1"> [[vm.question.title]] ([[vm.nbResults]] <i18n>formulaire.response</i18n>)</h4>
                 <button class="cell" ng-click="vm.zipAndDownload()" ng-if="vm.question.question_type == vm.types.FILE">
                     <i18n>formulaire.form.download.all.files</i18n>
                 </button>
@@ -44,7 +41,7 @@
                                 vm.question.question_type == vm.types.TIME"
                                 bind-html="result.answer"></div>
                             <a ng-if="vm.question.question_type == vm.types.FILE"
-                               ng-click="vm.downloadFile(result.response_id)">
+                               ng-click="vm.downloadFile(result.id)">
                                 <i class="download lg-icon spaced-right"></i> [[result.filename]]
                             </a>
                         </div>

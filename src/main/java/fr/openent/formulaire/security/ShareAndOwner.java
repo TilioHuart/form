@@ -50,7 +50,13 @@ public class ShareAndOwner implements ResourcesProvider {
                     query += "(SELECT form_id FROM " + Formulaire.QUESTION_TABLE + " WHERE id = ?)";
                     break;
                 case "responseId":
-                    query += "(SELECT form_id FROM " + Formulaire.QUESTION_TABLE + " WHERE id = (SELECT question_id FROM " + Formulaire.RESPONSE_TABLE + " WHERE id = ?))";
+                    query += "(SELECT form_id FROM " + Formulaire.QUESTION_TABLE + " WHERE id =" +
+                            "(SELECT question_id FROM " + Formulaire.RESPONSE_TABLE + " WHERE id = ?))";
+                    break;
+                case "fileId":
+                    query += "(SELECT form_id FROM " + Formulaire.QUESTION_TABLE + " WHERE id =" +
+                            "(SELECT question_id FROM " + Formulaire.RESPONSE_TABLE + " WHERE id = " +
+                            "(SELECT response_id FROM " + Formulaire.RESPONSE_FILE_TABLE + " WHERE id = ?)))";
                     break;
                 default: break;
             }
@@ -79,9 +85,12 @@ public class ShareAndOwner implements ResourcesProvider {
         else if (isListMineResponse(binding) || isCreateResponse(binding) || isZipAndDownloadResponseFile(binding)) {
             return "questionId";
         }
-        else if (isUpdateResponse(binding) || isDeleteResponse(binding) || isListResponseFile(binding) ||
-                isDownloadResponseFile(binding) || isUploadResponseFile(binding) || isDeleteResponseFile(binding)) {
+        else if (isUpdateResponse(binding) || isDeleteResponse(binding) || isUploadResponseFile(binding) ||
+                isDeleteAllResponseFile(binding)) {
             return "responseId";
+        }
+        else if (isDownloadResponseFile(binding)) {
+            return "fileId";
         }
         else {
             return "id";
@@ -148,10 +157,6 @@ public class ShareAndOwner implements ResourcesProvider {
         return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.ResponseController|delete");
     }
 
-    private boolean isListResponseFile(final Binding binding) {
-        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseFileController|list");
-    }
-
     private boolean isDownloadResponseFile(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseFileController|download");
     }
@@ -164,7 +169,7 @@ public class ShareAndOwner implements ResourcesProvider {
         return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.ResponseFileController|upload");
     }
 
-    private boolean isDeleteResponseFile(final Binding binding) {
-        return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.ResponseFileController|delete");
+    private boolean isDeleteAllResponseFile(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.ResponseFileController|deleteAll");
     }
 }

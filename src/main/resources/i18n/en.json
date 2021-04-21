@@ -133,7 +133,7 @@
 
   "formulaire.response": "response",
   "formulaire.response.file.send": "File submitted",
-  "formulaire.response.file.already.exist": "A file has already been submitted : ",
+  "formulaire.response.file.tooMany": "There are too many files. Please compress them into a unique .zip folder first.",
   "formulaire.responses": "responses",
   "formulaire.responses.send.title": "Confirm sending",
   "formulaire.responses.send.selectStructure": "Please, select your structure : ",
