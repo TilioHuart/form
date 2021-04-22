@@ -55,6 +55,27 @@ public class DefaultFormService implements FormService {
     }
 
     @Override
+    public void listForLinker(List<String> groupsAndUserIds, UserInfos user, Handler<Either<String, JsonArray>> handler) {
+        StringBuilder query = new StringBuilder();
+        JsonArray params = new JsonArray();
+
+        query.append("SELECT f.* FROM ").append(Formulaire.FORM_TABLE).append(" f ")
+                .append("LEFT JOIN ").append(Formulaire.FORM_SHARES_TABLE).append(" fs ON f.id = fs.resource_id ")
+                .append("LEFT JOIN ").append(Formulaire.MEMBERS_TABLE).append(" m ON (fs.member_id = m.id AND m.group_id IS NOT NULL) ")
+                .append("WHERE (fs.member_id IN ").append(Sql.listPrepared(groupsAndUserIds.toArray()))
+                .append(" AND fs.action = ?) OR f.owner_id = ?")
+                .append("GROUP BY f.id ")
+                .append("ORDER BY f.date_modification DESC;");
+
+        for (String groupOrUser : groupsAndUserIds) {
+            params.add(groupOrUser);
+        }
+        params.add(Formulaire.MANAGER_RESOURCE_BEHAVIOUR).add(user.getUserId());
+
+        Sql.getInstance().prepared(query.toString(), params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
     public void get(String id, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT * FROM " + Formulaire.FORM_TABLE + " WHERE id = ?;";
         JsonArray params = new JsonArray().add(id);

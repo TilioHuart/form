@@ -14,6 +14,8 @@ public interface FormService {
 
     void listSentForms(UserInfos user, Handler<Either<String, JsonArray>> handler);
 
+    void listForLinker(List<String> groupsAndUserIds, UserInfos user, Handler<Either<String, JsonArray>> handler);
+
     void get(String id, Handler<Either<String, JsonObject>> handler);
 
     void create(JsonObject form, UserInfos user, Handler<Either<String, JsonObject>> handler);

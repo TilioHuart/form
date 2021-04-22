@@ -11,7 +11,6 @@ import fr.openent.formulaire.service.impl.*;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
-import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.http.response.DefaultResponseHandler;
 import fr.wseduc.webutils.request.RequestUtils;
@@ -35,6 +34,7 @@ import java.util.Map;
 import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
+import static org.entcore.common.user.UserUtils.getUserInfos;
 
 public class FormController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(FormController.class);
@@ -82,7 +82,7 @@ public class FormController extends ControllerHelper {
     // API
 
     @Get("/forms")
-    @ApiDoc("List all the forms created or shared by me")
+    @ApiDoc("List all the forms created or shared with me")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
@@ -109,6 +109,26 @@ public class FormController extends ControllerHelper {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
                 formService.listSentForms(user, arrayResponseHandler(request));
+            } else {
+                log.error("User not found in session.");
+                Renders.unauthorized(request);
+            }
+        });
+    }
+
+    @Get("/linker")
+    @ApiDoc("List all the forms for the linker")
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void listForLinker(final HttpServerRequest request) {
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user != null) {
+                final List<String> groupsAndUserIds = new ArrayList<>();
+                groupsAndUserIds.add(user.getUserId());
+                if (user.getGroupsIds() != null) {
+                    groupsAndUserIds.addAll(user.getGroupsIds());
+                }
+                formService.listForLinker(groupsAndUserIds, user, arrayResponseHandler(request));
             } else {
                 log.error("User not found in session.");
                 Renders.unauthorized(request);

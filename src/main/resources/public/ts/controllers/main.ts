@@ -254,7 +254,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		};
 
 		$scope.hasShareRightResponse = (form : Form) => {
-			return form.owner_id === model.me.userId || form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.comment.right);
+			return form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.comment.right);
 		};
 
 		$scope.hasWorkflowZimbra = function () {

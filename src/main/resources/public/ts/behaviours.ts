@@ -1,4 +1,5 @@
-import {Behaviours} from 'entcore';
+import {_, Behaviours} from 'entcore';
+import http from "axios";
 
 const rights = {
     resources: {
@@ -22,7 +23,23 @@ const rights = {
 Behaviours.register('formulaire', {
     rights: rights,
     dependencies: {},
-    loadResources: function (callback) { },
+    loadResources: async function(): Promise<any>{
+        const { data } = await http.get('/formulaire/linker');
+        let forms =
+            data.map(function(f) {
+                if (!!!f.picture) f.picture = '../../../../formulaire/public/img/logo.svg';
+
+                return {
+                    id: f.id,
+                    icon: f.picture,
+                    title: f.title,
+                    ownerName: f.owner_name,
+                    path: '/formulaire#/form/' + f.id
+                }
+            });
+
+        this.resources = forms;
+    },
 
     resourceRights: function () {
         return ['contrib', 'manager', 'comment'];
