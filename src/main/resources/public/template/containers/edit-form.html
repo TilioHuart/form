@@ -27,16 +27,17 @@
 
     <div class="edit-form" ng-if="vm.questions.all.length > 0">
         <!-- List of questions-->
-        <div class="questions" sortable-list>
+        <div class="questions" sortable-list ng-if="!isMobile && vm.questions.selected.length == 0">
             <div ng-repeat="question in vm.questions.all | orderBy:'position'" class="nine twelve-mobile"
-                 sortable-element data-ng-change="vm.reOrder()" data-ng-model="question.index" ng-if="!isMobile">
+                 sortable-element data-ng-change="vm.reOrder()" data-ng-model="question.index">
                 <!--  Each questions component -->
-                <question-item question="question" mobile="false"></question-item>
+                <question-item question="question" reorder="true"></question-item>
             </div>
-            <div ng-repeat="question in vm.questions.all | orderBy:'position'" class="nine twelve-mobile"
-                 ng-if="isMobile">
+        </div>
+        <div class="questions" ng-if="isMobile || (!isMobile  && vm.questions.selected.length > 0)">
+            <div ng-repeat="question in vm.questions.all | orderBy:'position'" class="nine twelve-mobile">
                 <!--  Each questions component -->
-                <question-item question="question" mobile="true"></question-item>
+                <question-item question="question" reorder="false"></question-item>
             </div>
         </div>
         <!-- End page buttons -->
