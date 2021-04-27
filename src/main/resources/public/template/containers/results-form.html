@@ -61,7 +61,7 @@
             <div ng-if="vm.question.question_type != vm.types.SINGLEANSWER &&
                         vm.question.question_type != vm.types.MULTIPLEANSWER &&
                         vm.question.question_type != vm.types.FREETEXT">
-                <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':reverse | limitTo:vm.nbLinesDisplay"
+                <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':true | limitTo:vm.nbLinesDisplay"
                      class="distrib">
                     <div class="four twelve-mobile">
                         <div class="eight twelve-mobile">[[distrib.date_response.toLocaleString()]]</div>

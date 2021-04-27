@@ -66,8 +66,8 @@ export class Distributions {
             this.all = Mix.castArrayAs(Distribution, data);
             for (let i = 0; i < this.all.length; i++) {
                 let distrib = this.all[i];
-                distrib.date_response = new Date(distrib.date_response);
-                distrib.date_sending = new Date(distrib.date_sending);
+                distrib.date_response = new Date(distrib.date_response + 'Z');
+                distrib.date_sending = new Date(distrib.date_sending + 'Z');
             }
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.distribution.sync'));
@@ -81,8 +81,8 @@ export class Distributions {
             this.all = Mix.castArrayAs(Distribution, data);
             for (let i = 0; i < this.all.length; i++) {
                 let distrib = this.all[i];
-                distrib.date_response = new Date(distrib.date_response);
-                distrib.date_sending = new Date(distrib.date_sending);
+                distrib.date_response = new Date(distrib.date_response + 'Z');
+                distrib.date_sending = new Date(distrib.date_sending + 'Z');
             }
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.distribution.sync'));
