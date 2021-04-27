@@ -77,7 +77,7 @@ public class ResponseFileController extends ControllerHelper {
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void zipAndDownload(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
-        responseFileService.list(questionId, event -> {
+        responseFileService.listByQuestion(questionId, event -> {
             if (event.isRight()) {
                 List<JsonObject> listFiles = event.right().getValue().getList();
                 JsonObject root = new JsonObject().put("type", "folder").put("name", Formulaire.ARCHIVE_ZIP_NAME);
