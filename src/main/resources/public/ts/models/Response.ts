@@ -41,12 +41,14 @@ export class Responses {
         this.all = [];
     }
 
-    sync = async (questionId: number) : Promise<void> => {
+    sync = async (questionId: number, isFileQuestion: boolean) : Promise<void> => {
         try {
             let { data } = await responseService.list(questionId);
             this.all = Mix.castArrayAs(Response, data);
-            for (let i = 0; i < this.all.length; i++) {
-                await this.all[i].files.sync(this.all[i].id);
+            if (isFileQuestion) {
+                for (let i = 0; i < this.all.length; i++) {
+                    await this.all[i].files.sync(this.all[i].id);
+                }
             }
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.response.sync'));

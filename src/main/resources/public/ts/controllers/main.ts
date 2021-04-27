@@ -2,7 +2,7 @@ import {Behaviours, idiom, model, ng, template} from 'entcore';
 import {DistributionStatus, Form, Question, QuestionTypes} from "../models";
 import {configService, distributionService, formService, questionService} from "../services";
 import {AxiosResponse} from "axios";
-import {FORMULAIRE_EMIT_EVENT} from "../core/enums/formulaire-event";
+import {FORMULAIRE_EMIT_EVENT} from "../core/enums";
 import {Pages} from "../core/enums";
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', 'FormService',

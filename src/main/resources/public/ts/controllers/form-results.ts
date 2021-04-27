@@ -76,9 +76,10 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             vm.navigatorValue = vm.question.position;
             await vm.question.choices.sync(vm.question.id);
             await vm.questions.sync(vm.form.id);
-            await vm.results.sync(vm.question.id);
+            await vm.results.sync(vm.question.id, vm.question.question_type == Types.FILE);
             await vm.distributions.syncByForm(vm.form.id);
             let validDistribIds : any = vm.results.all.map(r => r.distribution_id);
+            vm.nbLines = vm.distributions.all.length;
             vm.distributions.all = vm.distributions.all.filter(d => validDistribIds.includes(d.id) && d.status === DistributionStatus.FINISHED);
             vm.nbResults = vm.distributions.all.length;
             vm.nbLines = vm.nbResults;

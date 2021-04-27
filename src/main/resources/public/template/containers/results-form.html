@@ -67,7 +67,7 @@
                         <div class="eight twelve-mobile">[[distrib.date_response.toLocaleString()]]</div>
                         <div class="four twelve-mobile ellipsis" ng-if="!vm.form.anonymous">[[distrib.responder_name]]</div>
                     </div>
-                    <div class="eight twelve-mobile ellipsis results">
+                    <div class="eight twelve-mobile results">
                         <div ng-repeat="result in vm.getDataByDistrib(distrib.id) | limitTo:vm.nbLinesDisplay"
                              ng-class="{'notLast' : !$last}">
                             <div ng-if="vm.question.question_type == vm.types.SHORTANSWER ||
