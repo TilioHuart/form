@@ -31,18 +31,44 @@
                 </button>
             </div>
             <!-- List of results -->
-            <div ng-if="vm.question.question_type == vm.types.FREETEXT"
-                 class="freetext"
-                 bind-html="vm.question.statement"></div>
+            <div ng-if="vm.question.question_type == vm.types.FREETEXT" class="freetext" bind-html="vm.question.statement"></div>
+            <div ng-if="vm.question.question_type == vm.types.SINGLEANSWER || vm.question.question_type == vm.types.MULTIPLEANSWER"
+                 class="choices">
+                <div class="twelve-mobile" ng-class="vm.question.question_type == vm.types.MULTIPLEANSWER ? 'twelve' : 'four'">
+                    <div ng-repeat="choice in vm.question.choices.all | limitTo:vm.nbLinesDisplay" class="choice">
+                        <div class="twelve-mobile" ng-class="vm.question.question_type == vm.types.MULTIPLEANSWER ? 'four' : 'twelve'">
+                            <div class="eight twelve-mobile choice-value ellipsis">[[$index + 1]]. [[choice.value]]</div>
+                            <div class="four twelve-mobile ellipsis">
+                                [[choice.nbResponses]]
+                                <i18n ng-if="choice.nbResponses > 1">formulaire.responses</i18n>
+                                <i18n ng-if="choice.nbResponses <= 1">formulaire.response</i18n>
+                                ([[(choice.nbResponses / vm.nbResults * 100).toFixed(2)]]%)
+                            </div>
+                        </div>
+                        <div ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER" class="eight zero-mobile">
+                            <div class="graph-bar" ng-style="{ width: 95 * choice.nbResponses / vm.nbResults + '%' }"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div ng-if="vm.question.question_type == vm.types.SINGLEANSWER" class="eight zero-mobile">
+                    <div id="singleanswer-response-chart"></div>
+                </div>
+                <!--                <div ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER" class="eight zero-mobile">-->
+                <!--                    <div id="multipleanswer-response-chart"></div>-->
+                <!--                </div>-->
+            </div>
             <div ng-if="vm.question.question_type != vm.types.SINGLEANSWER &&
                         vm.question.question_type != vm.types.MULTIPLEANSWER &&
                         vm.question.question_type != vm.types.FREETEXT">
-                <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response' | limitTo:vm.nbResultsDisplay"
+                <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':reverse | limitTo:vm.nbLinesDisplay"
                      class="distrib">
-                    <div class="two twelve-mobile">[[distrib.date_response.toLocaleString()]]</div>
-                    <div class="two twelve-mobile ellipsis" ng-if="!vm.form.anonymous">[[distrib.responder_name]]</div>
+                    <div class="four twelve-mobile">
+                        <div class="eight twelve-mobile">[[distrib.date_response.toLocaleString()]]</div>
+                        <div class="four twelve-mobile ellipsis" ng-if="!vm.form.anonymous">[[distrib.responder_name]]</div>
+                    </div>
                     <div class="eight twelve-mobile ellipsis results">
-                        <div ng-repeat="result in vm.getDataByDistrib(distrib.id) | limitTo:vm.nbResultsDisplay"
+                        <div ng-repeat="result in vm.getDataByDistrib(distrib.id) | limitTo:vm.nbLinesDisplay"
                              ng-class="{'notLast' : !$last}">
                             <div ng-if="vm.question.question_type == vm.types.SHORTANSWER ||
                                         vm.question.question_type == vm.types.LONGANSWER ||
@@ -57,35 +83,17 @@
                     </div>
                 </div>
             </div>
-            <div ng-if="vm.question.question_type == vm.types.SINGLEANSWER ||
-                        vm.question.question_type == vm.types.MULTIPLEANSWER"
-                 class="choices">
-                <div ng-repeat="choice in vm.question.choices.all | orderBy:'position' | limitTo:vm.nbResultsDisplay"
-                     class="choice">
-                    <div class="two twelve-mobile">[[$index + 1]]. [[choice.value]]</div>
-                    <div class="two twelve-mobile ellipsis" ng-if="!vm.form.anonymous">
-                        [[choice.nbResponses]]
-                        <i18n ng-if="choice.nbResponses > 1">formulaire.responses</i18n>
-                        <i18n ng-if="choice.nbResponses <= 1">formulaire.response</i18n>
-                        ([[choice.nbResponses / vm.nbResults * 100]]%)
-                    </div>
-                    <div ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER"
-                         class="eight twelve-mobile">
-                        <div class="graph-bar" ng-style="{ width: 95 * choice.nbResponses / vm.nbResults + '%' }"></div>
-                    </div>
-                </div>
-                <div ng-if="vm.question.question_type == vm.types.SINGLEANSWER"
-                     class="eight twelve-mobile graph">
 
-                </div>
-            </div>
-            <!-- Navigation buttons -->
-            <div ng-if="vm.nbResults >= vm.nbResultsDisplay" style="margin: 1%;">
-                <a ng-click="vm.nbResultsDisplay = vm.nbResultsDisplay + 10" ng-if="vm.question.question_type == vm.types.FILE">
+            <!-- See more button -->
+            <div ng-if="vm.nbLines >= vm.nbLinesDisplay" style="margin: 1%;">
+                <a ng-click="vm.nbLinesDisplay = vm.nbLinesDisplay + 10">
                     <i18n>formulaire.seeMore</i18n>
                 </a>
             </div>
         </div>
+
+
+        <!-- Navigation buttons -->
         <div class="buttons">
             <button class="cell" ng-click="vm.prev()" ng-disabled="vm.question.position == 1">
                 <i18n class="zero-mobile">formulaire.prev</i18n>

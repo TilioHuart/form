@@ -32,7 +32,8 @@
     "webpack": "^3.1.0",
     "webpack-stream": "^3.2.0",
     "yargs": "^8.0.2",
-    "ts-loader": "^3.2.0"
+    "ts-loader": "^3.2.0",
+    "apexcharts": "^3.26.0"
   },
   "devDependencies": {
     "@mdi/font": "^4.4.95",

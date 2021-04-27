@@ -399,6 +399,13 @@ body.formulaire section.main {
           flex-direction: column;
         }
 
+        div:first-child {
+          display: flex;
+          @media screen and (max-width: $formulaire-screen-mobile) {
+            flex-direction: column;
+          }
+        }
+
         .results {
           display: flex;
           flex-direction: column;
@@ -415,6 +422,7 @@ body.formulaire section.main {
       }
 
       .choices {
+        display: flex;
         border: thin solid $formulaire-grey-very-light;
 
         .choice {
@@ -423,8 +431,19 @@ body.formulaire section.main {
           padding: 5px 10px;
           margin: 5px 0;
           font-size: 14px;
-          @media screen and (max-width: $formulaire-screen-mobile) {
-            flex-direction: column;
+
+          div:first-child {
+            display: flex;
+            @media screen and (max-width: $formulaire-screen-mobile) {
+              flex-direction: column;
+            }
+          }
+
+          &-value {
+            @media screen and (max-width: $formulaire-screen-mobile) {
+              white-space: normal;
+              font-weight: bold;
+            }
           }
 
           .graph-bar {

@@ -132,6 +132,7 @@
   "formulaire.question.save.missing.field": "Attention, certaines questions manquent d'informations pour être valides !",
 
   "formulaire.response": "réponse",
+  "formulaire.response.empty": "Sans réponse",
   "formulaire.response.file.send": "Fichier déposé",
   "formulaire.response.file.tooMany": "Le nombre de fichiers est trop important. Veuillez les compresser en un unique fichier .zip d'abord.",
   "formulaire.responses": "réponses",
