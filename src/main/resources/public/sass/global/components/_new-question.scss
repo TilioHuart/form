@@ -17,8 +17,8 @@
     }
 
     .item {
-      width: 100px;
-      height: 100px;
+      width: 120px;
+      height: 120px;
       margin: auto;
 
       .domino {
@@ -33,7 +33,11 @@
           h5 { margin: 0; }
         }
 
-        .picture img { width: 40%; }
+        .picture {
+          padding: 10px;
+
+          img { width: 40%; }
+        }
       }
     }
   }
