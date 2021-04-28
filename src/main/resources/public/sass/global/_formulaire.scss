@@ -399,7 +399,7 @@ body.formulaire section.main {
           flex-direction: column;
         }
 
-        div:first-child {
+        .infos {
           display: flex;
           @media screen and (max-width: $formulaire-screen-mobile) {
             flex-direction: column;
@@ -432,7 +432,7 @@ body.formulaire section.main {
           margin: 5px 0;
           font-size: 14px;
 
-          div:first-child {
+          .infos {
             display: flex;
             @media screen and (max-width: $formulaire-screen-mobile) {
               flex-direction: column;

@@ -10,11 +10,18 @@
     @media screen and (max-width: $formulaire-screen-laptop) { width: calc(90%/2); }
     @media screen and (max-width: $formulaire-screen-tablet) { width: calc(90%); }
 
+    &.response {
+      width: calc(90%/4);
+      @media screen and (max-width: $formulaire-screen-laptop) { width: calc(90%/2); }
+      @media screen and (max-width: $formulaire-screen-tablet) { width: calc(90%); }
+    }
+
     &.selected { background: $formulaire-blue-transparent }
 
     .domino {
       display: flex;
       flex-direction: row;
+      height: 100%;
 
       .picture {
         display: flex;
@@ -25,12 +32,13 @@
       }
 
       .data {
-        padding: 10px;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        height: 100%;
 
         &-text {
+          padding: 10px;
+
           .title {
             font-size: 16px;
             font-weight: bold;
@@ -56,6 +64,7 @@
           flex-direction: row;
           justify-content: space-between;
           font-size: 12px;
+          padding: 10px;
 
           .icons {
             display: flex;
@@ -71,6 +80,7 @@
           justify-content: flex-end;
           font-size: 14px;
           font-weight: bold;
+          padding: 10px;
         }
       }
     }

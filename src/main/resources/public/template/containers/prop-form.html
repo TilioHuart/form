@@ -15,50 +15,52 @@
                 <div class="three cell picture" ng-class="{'empty': !vm.form.picture}">
                     <image-select ng-change="vm.getImage()" ng-model="vm.form.picture" default="/img/illustrations/image-default.svg"/>
                 </div>
-                <div class="nine data">
-                    <div class="data-text">
-                        <div class="title" ng-if="!isMobile"><i18n>formulaire.form.create.title</i18n></div>
-                        <div class="title" ng-if="isMobile"><i18n>formulaire.form.create.title.mobile</i18n></div>
-                        <input type="text" ng-model="vm.form.title" i18n-placeholder="formulaire.form.create.title" style="width: 60%;">
-                        <div class="interval">
-                            <span class="opening">
-                                <i18n>formulaire.date.opening</i18n>
-                                <date-picker ng-change="vm.checkIntervalDates()" ng-model="vm.form.date_opening" size="10"></date-picker>
-                            </span>
-                            <span class="ending">
-                                <label for="hasEnding">
-                                    <input type="checkbox" id="hasEnding" ng-change="vm.checkIntervalDates()" ng-model="vm.display.date_ending"/>
-                                    <span><i18n>formulaire.date.ending</i18n></span>
-                                </label>
-                                <date-picker ng-model="vm.form.date_ending" ng-if="vm.display.date_ending" size="10"></date-picker>
-                            </span>
-                        </div>
-                        <div class="multiple">
-                            <div class="text">
-                                <label for="multiple">
-                                    <input type="checkbox" id="multiple" ng-model="vm.form.multiple" ng-disabled="vm.form.nb_responses > 0"/>
-                                    <span ng-if="!isMobile"><i18n>formulaire.multiple</i18n></span>
-                                    <span ng-if="isMobile"><i18n>formulaire.multiple.mobile</i18n></span>
-                                </label>
+                <div class="nine">
+                    <div class="data">
+                        <div class="data-text">
+                            <div class="title" ng-if="!isMobile"><i18n>formulaire.form.create.title</i18n></div>
+                            <div class="title" ng-if="isMobile"><i18n>formulaire.form.create.title.mobile</i18n></div>
+                            <input type="text" ng-model="vm.form.title" i18n-placeholder="formulaire.form.create.title" style="width: 60%;">
+                            <div class="interval">
+                                <span class="opening">
+                                    <i18n>formulaire.date.opening</i18n>
+                                    <date-picker ng-change="vm.checkIntervalDates()" ng-model="vm.form.date_opening" size="10"></date-picker>
+                                </span>
+                                <span class="ending">
+                                    <label for="hasEnding">
+                                        <input type="checkbox" id="hasEnding" ng-change="vm.checkIntervalDates()" ng-model="vm.display.date_ending"/>
+                                        <span><i18n>formulaire.date.ending</i18n></span>
+                                    </label>
+                                    <date-picker ng-model="vm.form.date_ending" ng-if="vm.display.date_ending" size="10"></date-picker>
+                                </span>
+                            </div>
+                            <div class="multiple">
+                                <div class="text">
+                                    <label for="multiple">
+                                        <input type="checkbox" id="multiple" ng-model="vm.form.multiple" ng-disabled="vm.form.nb_responses > 0"/>
+                                        <span ng-if="!isMobile"><i18n>formulaire.multiple</i18n></span>
+                                        <span ng-if="isMobile"><i18n>formulaire.multiple.mobile</i18n></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="anonymous">
+                                <div class="text">
+                                    <label for="isAnonymous">
+                                        <input type="checkbox" id="isAnonymous" ng-model="vm.form.anonymous" ng-disabled="vm.form.nb_responses > 0"/>
+                                        <span><i18n>formulaire.anonymous.label</i18n></span>
+                                    </label>
+                                    <i18n class="subdescription" ng-if="vm.form.anonymous">formulaire.anonymous.description</i18n>
+                                </div>
                             </div>
                         </div>
-                        <div class="anonymous">
-                            <div class="text">
-                                <label for="isAnonymous">
-                                    <input type="checkbox" id="isAnonymous" ng-model="vm.form.anonymous" ng-disabled="vm.form.nb_responses > 0"/>
-                                    <span><i18n>formulaire.anonymous.label</i18n></span>
-                                </label>
-                                <i18n class="subdescription" ng-if="vm.form.anonymous">formulaire.anonymous.description</i18n>
+                        <div class="data-bottom" ng-class="{ date : currentPage === Pages.PROP_FORM }">
+                            <div ng-if="currentPage === Pages.PROP_FORM && !isMobile" style="margin-bottom: 10px;">
+                                <i18n>formulaire.form.edit.modified</i18n>[[vm.form.date_modification.toLocaleString()]]
                             </div>
-                        </div>
-                    </div>
-                    <div class="data-bottom" ng-class="{ date : currentPage === Pages.PROP_FORM }">
-                        <div ng-if="currentPage === Pages.PROP_FORM && !isMobile" style="margin-bottom: 10px;">
-                            <i18n>formulaire.form.edit.modified</i18n>[[vm.form.date_modification.toLocaleString()]]
-                        </div>
-                        <div>
-                            <button class="cell cancel" ng-click="redirectTo('/list/mine')"><i18n>formulaire.cancel</i18n></button>
-                            <button class="cell" ng-click="vm.save()" ng-disabled="!!!vm.form.title || !vm.checkIntervalDates()"><i18n>formulaire.save</i18n></button>
+                            <div>
+                                <button class="cell cancel" ng-click="redirectTo('/list/mine')"><i18n>formulaire.cancel</i18n></button>
+                                <button class="cell" ng-click="vm.save()" ng-disabled="!!!vm.form.title || !vm.checkIntervalDates()"><i18n>formulaire.save</i18n></button>
+                            </div>
                         </div>
                     </div>
                 </div>

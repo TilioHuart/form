@@ -111,18 +111,20 @@
                     <div class="four picture" ng-class="{'empty': !form.picture}">
                         <img ng-src="[[(form.picture) || '/formulaire/public/img/empty-image.png']]"/>
                     </div>
-                    <div class="eight data">
-                        <div class="data-text">
-                            <div class="title" title="[[form.title]]">[[form.title]]</div>
-                            <div class="owner">[[form.owner_name]]</div>
-                            <div class="date"><i18n>formulaire.modified</i18n>[[form.date_modification.toLocaleString()]]</div>
-                        </div>
-                        <div class="data-bottom">
-                            <div class="count"><i18n>formulaire.responses.count</i18n> : [[form.nb_responses]]</div>
-                            <div class="icons">
-                                <i class="send md-icon" ng-if="form.sent" title="[[vm.getTitle('sent')]]"></i>
-                                <i class="share md-icon" ng-if="form.collab" title="[[vm.getTitle('shared')]]"></i>
-                                <i class="bell md-icon" ng-if="form.reminded" title="[[vm.getTitle('reminded')]]"></i>
+                    <div class="eight">
+                        <div class="data">
+                            <div class="data-text">
+                                <div class="title" title="[[form.title]]">[[form.title]]</div>
+                                <div class="owner">[[form.owner_name]]</div>
+                                <div class="date"><i18n>formulaire.modified</i18n>[[form.date_modification.toLocaleString()]]</div>
+                            </div>
+                            <div class="data-bottom">
+                                <div class="count"><i18n>formulaire.responses.count</i18n> : [[form.nb_responses]]</div>
+                                <div class="icons">
+                                    <i class="send md-icon" ng-if="form.sent" title="[[vm.getTitle('sent')]]"></i>
+                                    <i class="share md-icon" ng-if="form.collab" title="[[vm.getTitle('shared')]]"></i>
+                                    <i class="bell md-icon" ng-if="form.reminded" title="[[vm.getTitle('reminded')]]"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
