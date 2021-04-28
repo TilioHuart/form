@@ -130,8 +130,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
                 await distributionService.update(vm.distribution);
             }
             notify.success(idiom.translate('formulaire.success.responses.save'));
-            $scope.redirectTo(`/list/responses`);
-            $scope.safeApply();
+            window.setTimeout(function () { $scope.redirectTo(`/list/responses`); }, 1000);
         }
     };
 
@@ -155,8 +154,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         template.close('lightbox');
         vm.display.lightbox.sending = false;
         notify.success(idiom.translate('formulaire.success.responses.save'));
-        $scope.redirectTo(`/list/responses`);
-        $scope.safeApply();
+        window.setTimeout(function () { $scope.redirectTo(`/list/responses`); }, 1000);
     };
 
     vm.checkMultiEtab = () : boolean => {
