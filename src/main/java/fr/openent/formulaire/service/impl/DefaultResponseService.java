@@ -49,9 +49,11 @@ public class DefaultResponseService implements ResponseService {
 
     @Override
     public void update(UserInfos user, String responseId, JsonObject response, Handler<Either<String, JsonObject>> handler) {
-        String query = "UPDATE " + Formulaire.RESPONSE_TABLE + " SET answer = ? WHERE responder_id = ? AND id = ? RETURNING *;";
+        String query = "UPDATE " + Formulaire.RESPONSE_TABLE + " SET answer = ?, choice_id = ? " +
+                "WHERE responder_id = ? AND id = ? RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(response.getString("answer", ""))
+                .add(response.getInteger("choice_id", null))
                 .add(user.getUserId())
                 .add(responseId);
 

@@ -34,6 +34,7 @@ interface ViewModel {
     doSend() : Promise<void>;
     checkMultiEtab() : boolean;
     getStructures() : string[];
+    displayDefaultOption() : string;
 }
 
 export const questionResponderController = ng.controller('QuestionResponderController', ['$scope', '$rootScope',
@@ -165,6 +166,10 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         return model.me.structureNames;
     };
 
+    vm.displayDefaultOption = () : string => {
+        return idiom.translate('formulaire.options.select');
+    };
+
 
     const saveResponses = async () : Promise<boolean> => {
         if (vm.question.question_type === Types.MULTIPLEANSWER) {
@@ -187,20 +192,23 @@ export const questionResponderController = ng.controller('QuestionResponderContr
             }
             return true;
         }
-        else {
-            if (vm.question.question_type == Types.SINGLEANSWER) {
+        if (vm.question.question_type == Types.SINGLEANSWER) {
+            if (!!!vm.response.choice_id) {
+                vm.response.answer = "";
+            }
+            else {
                 for (let choice of vm.question.choices.all) {
                     if (vm.response.choice_id == choice.id) {
                         vm.response.answer = choice.value;
                     }
                 }
             }
-            vm.response = $scope.getDataIf200(await responseService.save(vm.response, vm.question.question_type));
-            if (vm.question.question_type === Types.FILE && vm.files.length > 0) {
-                return (await saveFiles());
-            }
-            return true;
         }
+        vm.response = $scope.getDataIf200(await responseService.save(vm.response, vm.question.question_type));
+        if (vm.question.question_type === Types.FILE && vm.files.length > 0) {
+            return (await saveFiles());
+        }
+        return true;
     };
 
     const saveFiles = async () : Promise<boolean> => {

@@ -47,6 +47,7 @@
   "formulaire.goTo": "Go to ",
   "formulaire.date.opening": "Opening date",
   "formulaire.date.ending": "Ending date",
+  "formulaire.options.select": "-- Select an option --",
   "formulaire.multiple": "Allow multiple responses from the same user",
   "formulaire.multiple.mobile": "Allow multiple responses",
   "formulaire.anonymous.label": "Anonymize the responses",
