@@ -37,10 +37,10 @@
                 <div class="twelve-mobile" ng-class="vm.question.question_type == vm.types.MULTIPLEANSWER ? 'twelve' : 'four'">
                     <div ng-repeat="choice in vm.question.choices.all | limitTo:vm.nbLinesDisplay" class="choice">
                         <div class="infos twelve-mobile" ng-class="vm.question.question_type == vm.types.MULTIPLEANSWER ? 'four' : 'twelve'">
-                            <div class="eight twelve-mobile choice-value ellipsis">
+                            <div class="choice-value eight twelve-mobile ellipsis">
                                 <span ng-if="!$last">[[$index + 1]]. </span>[[choice.value]]
                             </div>
-                            <div class="four twelve-mobile ellipsis">
+                            <div class="four twelve-mobile ellipsis bold">
                                 [[choice.nbResponses]]
                                 <i18n ng-if="choice.nbResponses > 1">formulaire.responses</i18n>
                                 <i18n ng-if="choice.nbResponses <= 1">formulaire.response</i18n>
