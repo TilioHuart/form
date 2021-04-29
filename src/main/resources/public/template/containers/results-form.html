@@ -46,7 +46,9 @@
                             </div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER" class="eight zero-mobile">
-                            <div class="graph-bar" ng-style="{ width: 95 * choice.nbResponses / vm.nbResults + '%' }"></div>
+                            <div class="graph-bar"
+                                 ng-style="{width: (95 * choice.nbResponses / vm.nbResults + '%'), 'background-color': vm.getColor(choice.id)}">
+                            </div>
                         </div>
                     </div>
                 </div>

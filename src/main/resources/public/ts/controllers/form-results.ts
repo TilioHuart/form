@@ -41,12 +41,13 @@ interface ViewModel {
     prev() : Promise<void>;
     next() : Promise<void>;
     goTo(position: number) : Promise<void>;
+    getColor(choiceId: number) : string;
 }
 
 
 export const formResultsController = ng.controller('FormResultsController', ['$scope', '$rootScope',
     function ($scope, $rootScope) {
-        let paletteColors = ['#FFE4CC','#FF8500','#9C5000']; // Beige, Orange, Marron
+        let paletteColors = ['#0F2497','#2A9BC7','#77C4E1','#C0E5F2']; // Bleu foncé à bleu clair
 
         const vm: ViewModel = this;
         vm.types = Types;
@@ -162,6 +163,11 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
         vm.goTo = async (position: number) : Promise<void> => {
             $scope.redirectTo(`/form/${vm.question.form_id}/results/${position}`);
+        };
+
+        vm.getColor = (choiceId: number) : string => {
+            let colorIndex = vm.question.choices.all.filter(c => c.nbResponses > 0).findIndex(c => c.id === choiceId);
+            return vm.colors[colorIndex];
         };
 
         // Charts

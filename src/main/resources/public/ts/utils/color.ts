@@ -12,25 +12,29 @@ export class ColorUtils {
      * @param color String to test
      */
     static isRgbColor = (color: string) : boolean => {
-        let rgbValues = color.match(/\d+/g).map(Number);
-        if (rgbValues.length < 3 ||rgbValues.length > 4) {
-            return false;
-        }
-        else {
-            for (let i = 0; i < 3; i++) {
-                let value = rgbValues[i];
-                if (value < 0 || value > 255) {
-                    return false;
-                }
+        let isRgbFormat = /rgb\((\d{1,3}), ?(\d{1,3}), ?(\d{1,3})\)/.test(color);
+        if (isRgbFormat) {
+            let rgbValues = color.match(/\d+/g).map(Number);
+            if (rgbValues.length < 3 ||rgbValues.length > 4) {
+                return false;
             }
-            if (rgbValues.length === 4) {
-                let value = rgbValues[3];
-                if (value < 0 || value > 1) {
-                    return false;
+            else {
+                for (let i = 0; i < 3; i++) {
+                    let value = rgbValues[i];
+                    if (value < 0 || value > 255) {
+                        return false;
+                    }
                 }
+                if (rgbValues.length === 4) {
+                    let value = rgbValues[3];
+                    if (value < 0 || value > 1) {
+                        return false;
+                    }
+                }
+                return true;
             }
-            return true;
         }
+        return false;
     }
 
     /**
@@ -91,15 +95,12 @@ export class ColorUtils {
     static interpolateColor = (paletteColors: string[], factor: number = 0.5) : number[] => {
         factor = factor < 0 ? 0 : (factor > 1 ? 1 : factor);
         let colorValues = [];
-        for (let i = 0; i < paletteColors.length; i++) {
-            colorValues.push(ColorUtils.getRgbValues(paletteColors[i]));
-        }
 
         let positionOnGradient = (paletteColors.length - 1) * factor;
         let lowerValue = factor === 1 ? positionOnGradient - 1 : Math.floor(positionOnGradient);
         let upperValue = factor === 0 ? positionOnGradient + 1 : Math.ceil(positionOnGradient);
-        let color1Values = colorValues[lowerValue];
-        let color2Values = colorValues[upperValue];
+        let color1Values = ColorUtils.getRgbValues(paletteColors[lowerValue]);
+        let color2Values = ColorUtils.getRgbValues(paletteColors[upperValue]);
         let newFactor = positionOnGradient / upperValue;
         let result = [];
         for (let i = 0; i < color1Values.length; i++) {
