@@ -37,7 +37,9 @@
                 <div class="twelve-mobile" ng-class="vm.question.question_type == vm.types.MULTIPLEANSWER ? 'twelve' : 'four'">
                     <div ng-repeat="choice in vm.question.choices.all | limitTo:vm.nbLinesDisplay" class="choice">
                         <div class="infos twelve-mobile" ng-class="vm.question.question_type == vm.types.MULTIPLEANSWER ? 'four' : 'twelve'">
-                            <div class="eight twelve-mobile choice-value ellipsis">[[$index + 1]]. [[choice.value]]</div>
+                            <div class="eight twelve-mobile choice-value ellipsis">
+                                <span ng-if="!$last">[[$index + 1]]. </span>[[choice.value]]
+                            </div>
                             <div class="four twelve-mobile ellipsis">
                                 [[choice.nbResponses]]
                                 <i18n ng-if="choice.nbResponses > 1">formulaire.responses</i18n>

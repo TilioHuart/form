@@ -196,10 +196,11 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             }
 
             // Generate options with labels and colors
+            let baseHeight = 40 * vm.question.choices.all.length;
             let options = {
                 chart: {
                     type: 'pie',
-                    height: 40 * vm.question.choices.all.length
+                    height: baseHeight < 200 ? 200 : (baseHeight > 500 ? 500 : baseHeight)
                 },
                 colors: vm.colors,
                 labels: labels

@@ -115,15 +115,20 @@ export class ColorUtils {
      * @param nbColors Number of colors wanted between the two given colors (included)
      */
     static interpolateColors = (paletteColors: string[], nbColors: number) : string[] => {
-        let stepFactor = 1 / (nbColors - 1);
-        let interpolatedColorArray = [];
-
-        for(let i = 0; i < nbColors; i++) {
-            let rgbValues = ColorUtils.interpolateColor(paletteColors, stepFactor * i);
-            let rgbString = "rgb(" + rgbValues.join(",") + ")";
-            interpolatedColorArray.push(ColorUtils.rgbToHexa(rgbString));
+        if (nbColors <= 1) {
+            return ["rgb(" + ColorUtils.interpolateColor(paletteColors).join(",") + ")"];
         }
+        else {
+            let stepFactor = 1 / (nbColors - 1 > 0 ? nbColors - 1 : 1);
+            let interpolatedColorArray = [];
 
-        return interpolatedColorArray;
+            for (let i = 0; i < nbColors; i++) {
+                let rgbValues = ColorUtils.interpolateColor(paletteColors, stepFactor * i);
+                let rgbString = "rgb(" + rgbValues.join(",") + ")";
+                interpolatedColorArray.push(ColorUtils.rgbToHexa(rgbString));
+            }
+
+            return interpolatedColorArray;
+        }
     }
 }
