@@ -22,7 +22,7 @@ export const questionTypeMultipleanswer: Directive = ng.directive('questionTypeM
         bindToController: true,
         replace: true,
         template: `
-            <div class="seven twelve-mobile">
+            <div class="eight twelve-mobile">
                 <div ng-repeat="choice in vm.question.choices.all">
                     <label for="check-[[choice.id]]">
                         <input type="checkbox" id="check-[[choice.id]]" disabled>
