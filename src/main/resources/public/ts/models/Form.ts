@@ -66,10 +66,10 @@ export class Form implements Selectable, Shareable  {
             picture: this.picture,
             owner_id: this.owner_id,
             owner_name: this.owner_name,
-            date_creation: new Date(this.date_creation + 'Z'),
-            date_modification: new Date(this.date_modification + 'Z'),
-            date_opening: new Date(this.date_opening + 'Z'),
-            date_ending: new Date(this.date_ending + 'Z'),
+            date_creation: new Date(this.date_creation),
+            date_modification: new Date(this.date_modification),
+            date_opening: new Date(this.date_opening),
+            date_ending: new Date(this.date_ending),
             sent: this.sent,
             collab: this.collab,
             reminded: this.reminded,
@@ -86,7 +86,7 @@ export class Form implements Selectable, Shareable  {
             if (key === 'nb_responses' && !!!data[key]) { this[key] = 0; }
             if ((key === 'date_creation' || key === 'date_modification' || key === 'date_opening' || key === 'date_ending')
                 && !!data[key]) {
-                    this[key] = new Date(this[key] + 'Z');
+                    this[key] = new Date(this[key]);
             }
         }
     };

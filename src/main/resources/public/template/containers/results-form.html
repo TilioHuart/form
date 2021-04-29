@@ -68,7 +68,7 @@
                 <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':true | limitTo:vm.nbLinesDisplay"
                      class="distrib">
                     <div class="infos four twelve-mobile">
-                        <div class="eight twelve-mobile">[[distrib.date_response.toLocaleString()]]</div>
+                        <div class="eight twelve-mobile">[[displayDate(distrib.date_response)]]</div>
                         <div class="four twelve-mobile ellipsis" ng-if="!vm.form.anonymous">[[distrib.responder_name]]</div>
                     </div>
                     <div class="eight twelve-mobile results">

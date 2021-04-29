@@ -20,7 +20,6 @@ interface ViewModel {
     sort(field: FiltersOrders) : void;
     filter(filter: FiltersFilters) : void;
     displayFilterName(name: string) : string;
-    displayDate(date: Date) : string;
     checkOpenButton() : boolean;
     checkMyResponsesButton() : boolean;
     openForm(form: Form) : void;
@@ -106,10 +105,6 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
     };
 
     // Utils
-
-    vm.displayDate = (dateToFormat: Date) : string => {
-        return new Date(dateToFormat + "Z").toLocaleString();
-    };
 
     vm.getMyResponses = (form: Form) : Array<Distribution> => {
         return vm.distributions.all.filter(d => d.form_id === form.id && d.status === DistributionStatus.FINISHED);

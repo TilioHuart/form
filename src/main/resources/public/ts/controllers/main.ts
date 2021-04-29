@@ -182,6 +182,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			$scope.safeApply();
 		};
 
+		$scope.displayDate = (dateToFormat: Date) : string => {
+			return new Date(dateToFormat +'Z').toLocaleString([], {day: '2-digit', month: '2-digit', year:'numeric', hour: '2-digit', minute:'2-digit'});
+		};
+
 		$scope.getI18nWithParams = (key: string, params: string[]) : string => {
 			let finalI18n = idiom.translate(key);
 			for (let i = 0; i < params.length; i++) {
