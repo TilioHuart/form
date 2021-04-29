@@ -239,8 +239,8 @@ export const questionResponderController = ng.controller('QuestionResponderContr
             questions = questions.filter(question => question.mandatory === true);
             for (let question of questions) {
                 let responses = $scope.getDataIf200(await responseService.listMine(question.id, vm.distribution.id));
-                responses = responses.filter(response => !!!response.answer);
-                if (responses.length > 0) {
+                responses = responses.filter(response => !!response.answer);
+                if (responses.length <= 0) {
                     return false;
                 }
             }
