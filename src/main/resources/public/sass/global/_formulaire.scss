@@ -444,12 +444,19 @@ body.formulaire section.main {
               white-space: normal;
             }
           }
-
-          .graph-bar {
-            height: 25px;
-            margin-left: 25px;
-          }
         }
+      }
+    }
+
+    .graph {
+      &-bar {
+        height: 25px;
+        margin-left: 25px;
+      }
+
+      &-camembert {
+        display: flex;
+        justify-content: center;
       }
     }
 

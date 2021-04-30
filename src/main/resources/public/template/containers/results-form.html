@@ -55,8 +55,10 @@
                     </div>
                 </div>
 
-                <div ng-if="vm.question.question_type == vm.types.SINGLEANSWER" class="eight zero-mobile">
-                    <div id="singleanswer-response-chart"></div>
+                <div ng-if="vm.question.question_type == vm.types.SINGLEANSWER" class="graph-camembert eight zero-mobile">
+                    <div class="eight">
+                        <div id="singleanswer-response-chart"></div>
+                    </div>
                 </div>
             </div>
             <div ng-if="vm.question.question_type != vm.types.SINGLEANSWER &&
