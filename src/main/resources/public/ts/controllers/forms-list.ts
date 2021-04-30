@@ -88,7 +88,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         vm.forms.filters.find(f => f.name === FiltersFilters.SHARED).display = true;
         vm.forms.orders.find(o => o.name === FiltersOrders.CREATION_DATE).display = true;
         vm.forms.orders.find(o => o.name === FiltersOrders.MODIFICATION_DATE).display = true;
-        vm.forms.orders.find(o => o.name === FiltersOrders.CREATOR).display = true;
         vm.forms.orders.find(o => o.name === FiltersOrders.TITLE).display = true;
 
         // Check if the folder is ok
