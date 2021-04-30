@@ -36,7 +36,6 @@ interface ViewModel {
     displayFilterName(name: string) : string;
     displayFolder() : string;
     getTitle(title: string): string;
-    checkOpenButton() : boolean;
     openForm(form: Form) : void;
     openPropertiesForm() : void;
     duplicateForms() : Promise<void>;
@@ -158,10 +157,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     // Toaster
 
-    vm.checkOpenButton = () : boolean => {
-        return vm.forms.selected.length === 1;
-    };
-
     vm.openForm = (form: Form) : void => {
         $scope.form = form;
         $scope.redirectTo(`/form/${form.id}/edit`);
@@ -190,7 +185,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     vm.shareForm = () : void => {
-        if (!isFormEmpty(vm.forms.selected[0].id)) return;
         vm.forms.selected[0].generateShareRights();
         template.open('lightbox', 'lightbox/form-sharing');
         vm.display.lightbox.sharing = true;
@@ -316,15 +310,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     // Utils
-
-    const isFormEmpty = async (formId: number) : Promise<boolean> => {
-        let nbQuestions = $scope.getDataIf200(await questionService.countQuestions(formId)).count;
-        if (nbQuestions < 1) {
-            notify.info(idiom.translate('formulaire.warning.send.form.empty'));
-            return true;
-        }
-        return false;
-    };
 
     const initMail = () : void => {
         let link = `${$scope.config.host}/formulaire#/form/${vm.forms.selected[0].id}`;

@@ -22,12 +22,14 @@ public class DefaultFormService implements FormService {
         StringBuilder query = new StringBuilder();
         JsonArray params = new JsonArray();
 
-        query.append("SELECT f.*, d.nb_responses ")
+        query.append("SELECT f.*, d.nb_responses, q.nb_questions ")
                 .append("FROM ").append(Formulaire.FORM_TABLE).append(" f ")
                 .append("LEFT JOIN ").append(Formulaire.FORM_SHARES_TABLE).append(" fs ON f.id = fs.resource_id ")
                 .append("LEFT JOIN ").append(Formulaire.MEMBERS_TABLE).append(" m ON (fs.member_id = m.id AND m.group_id IS NOT NULL) ")
                 .append("LEFT JOIN (SELECT form_id, COUNT(form_id) AS nb_responses FROM ").append(Formulaire.DISTRIBUTION_TABLE)
-                .append(" WHERE status = ? GROUP BY form_id) d ON d.form_id = f.id ");
+                .append(" WHERE status = ? GROUP BY form_id) d ON d.form_id = f.id ")
+                .append("LEFT JOIN (SELECT form_id, COUNT(*) AS nb_questions FROM ").append(Formulaire.QUESTION_TABLE)
+                .append(" GROUP BY form_id) q ON q.form_id = f.id ");
         params.add(Formulaire.FINISHED);
 
         query.append(" WHERE (fs.member_id IN ").append(Sql.listPrepared(groupsAndUserIds.toArray()));
@@ -35,7 +37,7 @@ public class DefaultFormService implements FormService {
             params.add(groupOrUser);
         }
 
-        query.append(" AND (fs.action = ? OR fs.action = ?)) OR f.owner_id = ? GROUP BY f.id, d.nb_responses ")
+        query.append(" AND (fs.action = ? OR fs.action = ?)) OR f.owner_id = ? GROUP BY f.id, d.nb_responses, q.nb_questions ")
                 .append("ORDER BY f.date_modification DESC;");
         params.add(Formulaire.MANAGER_RESOURCE_BEHAVIOUR).add(Formulaire.CONTRIB_RESOURCE_BEHAVIOUR).add(user.getUserId());
 
