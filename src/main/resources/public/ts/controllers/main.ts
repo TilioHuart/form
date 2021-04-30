@@ -183,7 +183,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		};
 
 		$scope.displayDate = (dateToFormat: Date) : string => {
-			return new Date(dateToFormat +'Z').toLocaleString([], {day: '2-digit', month: '2-digit', year:'numeric', hour: '2-digit', minute:'2-digit'});
+			let finalFormat = dateToFormat instanceof Date ? dateToFormat : (dateToFormat +'Z');
+			return new Date(finalFormat).toLocaleString([], {day: '2-digit', month: '2-digit', year:'numeric', hour: '2-digit', minute:'2-digit'});
 		};
 
 		$scope.getI18nWithParams = (key: string, params: string[]) : string => {
