@@ -6,7 +6,7 @@ export interface ResponseService {
     list(questionId: number) : Promise<AxiosResponse>;
     listMine(questionId: number, distributionId: number) : Promise<AxiosResponse>;
     get(responseId: number) : Promise<AxiosResponse>;
-    save(response: Response, questionType: number) : Promise<AxiosResponse>;
+    save(response: Response, questionType?: number) : Promise<AxiosResponse>;
     create(response: Response) : Promise<AxiosResponse>;
     update(response: Response) : Promise<AxiosResponse>;
     delete(responseId: number) : Promise<AxiosResponse>;

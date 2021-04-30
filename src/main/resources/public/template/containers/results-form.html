@@ -58,15 +58,11 @@
                 <div ng-if="vm.question.question_type == vm.types.SINGLEANSWER" class="eight zero-mobile">
                     <div id="singleanswer-response-chart"></div>
                 </div>
-                <!--                <div ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER" class="eight zero-mobile">-->
-                <!--                    <div id="multipleanswer-response-chart"></div>-->
-                <!--                </div>-->
             </div>
             <div ng-if="vm.question.question_type != vm.types.SINGLEANSWER &&
                         vm.question.question_type != vm.types.MULTIPLEANSWER &&
                         vm.question.question_type != vm.types.FREETEXT">
-                <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':true | limitTo:vm.nbLinesDisplay"
-                     class="distrib">
+                <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':true | limitTo:vm.nbLinesDisplay" class="distrib">
                     <div class="infos four twelve-mobile">
                         <div class="eight twelve-mobile">[[displayDate(distrib.date_response)]]</div>
                         <div class="four twelve-mobile ellipsis" ng-if="!vm.form.anonymous">[[distrib.responder_name]]</div>

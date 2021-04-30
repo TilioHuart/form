@@ -79,9 +79,8 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             await vm.questions.sync(vm.form.id);
             await vm.results.sync(vm.question.id, vm.question.question_type == Types.FILE);
             await vm.distributions.syncByForm(vm.form.id);
-            let validDistribIds : any = vm.results.all.map(r => r.distribution_id);
-            vm.nbLines = vm.distributions.all.length;
-            vm.distributions.all = vm.distributions.all.filter(d => validDistribIds.includes(d.id) && d.status === DistributionStatus.FINISHED);
+
+            vm.distributions.all = vm.distributions.all.filter(d => d.status === DistributionStatus.FINISHED);
             vm.nbResults = vm.distributions.all.length;
             vm.nbLines = vm.nbResults;
             vm.nbQuestions = $scope.form.nbQuestions;
@@ -99,7 +98,10 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
                 // Deal with no choice responses
                 let noResponseChoice = new QuestionChoice();
                 noResponseChoice.value = idiom.translate('formulaire.response.empty');
-                noResponseChoice.nbResponses = vm.results.all.filter(r => !!!r.choice_id).length;
+                noResponseChoice.nbResponses = vm.question.question_type == vm.types.MULTIPLEANSWER ?
+                    vm.distributions.all.length - new Set(vm.results.all.map(r => r.distribution_id)).size :
+                    vm.results.all.filter(r => !!!r.choice_id).length;
+
                 vm.question.choices.all.push(noResponseChoice);
                 let choices = vm.question.choices.all.filter(c => c.nbResponses > 0);
                 vm.colors = ColorUtils.interpolateColors(paletteColors, choices.length);
@@ -108,9 +110,6 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
                 if (vm.question.question_type == vm.types.SINGLEANSWER) {
                     initSingleAnswerChart(choices);
                 }
-                // if (vm.question.question_type == vm.types.MULTIPLEANSWER) {
-                //     initMultipleAnswerChart();
-                // }
                 vm.nbLines = vm.question.choices.all.length;
             }
             $scope.safeApply();
@@ -216,56 +215,6 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
                 newOptions.series = series;
                 vm.singleAnswerResponseChart = new ApexCharts(document.querySelector('#singleanswer-response-chart'), newOptions);
                 vm.singleAnswerResponseChart.render();
-            }
-        }
-
-        const initMultipleAnswerChart = () : void => {
-            let choices = vm.question.choices.all.filter(c => c.nbResponses > 0);
-
-            // Fill data
-            let series = [];
-            for (let choice of choices) {
-                series.push(choice.nbResponses);
-            }
-
-            // Fill labels
-            let labels = [];
-            let i18nValue = idiom.translate('formulaire.response');
-            i18nValue = i18nValue.charAt(0).toUpperCase() + i18nValue.slice(1);
-            for (let i = 0; i < choices.length; i++) {
-                labels.push(i18nValue + " " + (i+1));
-            }
-            // labels.push(idiom.translate('formulaire.response.empty'));
-
-            // Generate options with labels and colors
-            let options = {
-                chart: {
-                    type: 'bar'
-                },
-                plotOptions: {
-                    bar: {
-                        borderRadius: 4,
-                        horizontal: true,
-                    }
-                },
-                dataLabels: {
-                    enabled: false
-                },
-                xaxis: {
-                    categories: labels,
-                }
-            }
-
-            // Generate chart with options and data
-            if (vm.multipleAnswerResponseChart) {
-                vm.multipleAnswerResponseChart.updateSeries(series, true);
-                vm.multipleAnswerResponseChart.updateOptions(options, true);
-            }
-            else {
-                var newOptions = JSON.parse(JSON.stringify(options));
-                newOptions.series = [{ data: series }];
-                vm.multipleAnswerResponseChart = new ApexCharts(document.querySelector('#multipleanswer-response-chart'), newOptions);
-                vm.multipleAnswerResponseChart.render();
             }
         }
 
