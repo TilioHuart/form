@@ -25,7 +25,7 @@ public class QuestionTypeController extends ControllerHelper {
     }
 
     @Get("/types")
-    @ApiDoc("List questions types")
+    @ApiDoc("List all questions types")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
@@ -33,7 +33,7 @@ public class QuestionTypeController extends ControllerHelper {
     }
 
     @Get("/types/:code")
-    @ApiDoc("Get one question type thanks to its code")
+    @ApiDoc("Get a specific question type by code")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {

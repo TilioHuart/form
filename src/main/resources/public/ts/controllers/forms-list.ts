@@ -169,11 +169,11 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.duplicateForms = async () : Promise<void> => {
         try {
-            let forms = [];
+            let formIds = [];
             for (let form of vm.forms.selected) {
-                forms.push(form.id);
+                formIds.push(form.id);
             }
-            await formService.duplicate(forms);
+            await formService.duplicate(formIds);
             notify.success(idiom.translate('formulaire.success.forms.duplicate'));
             init();
             $scope.safeApply();

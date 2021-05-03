@@ -9,7 +9,6 @@ import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
-
 import java.util.ArrayList;
 
 public class DefaultDistributionService implements DistributionService {
@@ -23,18 +22,18 @@ public class DefaultDistributionService implements DistributionService {
     }
 
     @Override
-    public void listByForm(String formId, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? AND active = ? " +
-                "ORDER BY date_sending DESC;";
-        JsonArray params = new JsonArray().add(formId).add(true);
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
-    }
-
-    @Override
     public void listByResponder(UserInfos user, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE responder_id = ? AND active = ? " +
                 "ORDER BY date_sending DESC;";
         JsonArray params = new JsonArray().add(user.getUserId()).add(true);
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public void listByForm(String formId, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? AND active = ? " +
+                "ORDER BY date_sending DESC;";
+        JsonArray params = new JsonArray().add(formId).add(true);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
@@ -47,18 +46,18 @@ public class DefaultDistributionService implements DistributionService {
     }
 
     @Override
+    public void count(String formId, Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT COUNT(*) FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? AND status = ?;";
+        JsonArray params = new JsonArray().add(formId).add(Formulaire.FINISHED);
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    @Override
     public void get(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE +
                 " WHERE form_id = ? AND responder_id = ? AND (status = ? OR status = ?);";
         JsonArray params = new JsonArray().add(formId).add(user.getUserId())
                 .add(Formulaire.TO_DO).add(Formulaire.IN_PROGRESS);
-        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
-    }
-
-    @Override
-    public void count(String formId, Handler<Either<String, JsonObject>> handler) {
-        String query = "SELECT COUNT(*) FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? AND status = ?;";
-        JsonArray params = new JsonArray().add(formId).add(Formulaire.FINISHED);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
@@ -88,7 +87,7 @@ public class DefaultDistributionService implements DistributionService {
     }
 
     @Override
-    public void newDist(JsonObject distribution, Handler<Either<String, JsonObject>> handler) {
+    public void add(JsonObject distribution, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT create_distrib(?, ?, ?, ?, ?) AS created;";
         JsonArray params = new JsonArray()
                 .add(distribution.getInteger("form_id", null))

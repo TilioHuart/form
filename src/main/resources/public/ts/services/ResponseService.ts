@@ -4,7 +4,7 @@ import {Response, Types} from "../models";
 
 export interface ResponseService {
     list(questionId: number) : Promise<AxiosResponse>;
-    listMine(questionId: number, distributionId: number) : Promise<AxiosResponse>;
+    listMineByDistribution(questionId: number, distributionId: number) : Promise<AxiosResponse>;
     get(responseId: number) : Promise<AxiosResponse>;
     save(response: Response, questionType?: number) : Promise<AxiosResponse>;
     create(response: Response) : Promise<AxiosResponse>;
@@ -23,7 +23,7 @@ export const responseService: ResponseService = {
         }
     },
 
-    async listMine(questionId: number, distributionId: number) : Promise<AxiosResponse> {
+    async listMineByDistribution(questionId: number, distributionId: number) : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/questions/${questionId}/responses/${distributionId}`);
         } catch (err) {

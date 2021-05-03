@@ -20,7 +20,7 @@ public class DefaultResponseService implements ResponseService {
     }
 
     @Override
-    public void listMine(String questionId, String distributionId, UserInfos user, Handler<Either<String, JsonArray>> handler) {
+    public void listMineByDistribution(String questionId, String distributionId, UserInfos user, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " WHERE question_id = ? AND responder_id = ?  AND distribution_id = ? ORDER BY choice_id;";
         JsonArray params = new JsonArray().add(questionId).add(user.getUserId()).add(distributionId);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));

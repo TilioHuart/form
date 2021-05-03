@@ -9,7 +9,7 @@ export interface FormService {
     save(form: Form) : Promise<AxiosResponse>;
     create(form: Form) : Promise<AxiosResponse>;
     createMultiple(forms: Array<Form>) : Promise<AxiosResponse>;
-    duplicate(forms: Array<number>) : Promise<AxiosResponse>;
+    duplicate(formIds: Array<number>) : Promise<AxiosResponse>;
     update(form: Form) : Promise<AxiosResponse>;
     archive(form: Form) : Promise<AxiosResponse>;
     restore(form: Form) : Promise<AxiosResponse>;
@@ -78,9 +78,9 @@ export const formService: FormService = {
         }
     },
 
-    async duplicate(forms: Array<number>) : Promise<AxiosResponse> {
+    async duplicate(formIds: Array<number>) : Promise<AxiosResponse> {
         try {
-            return http.post('/formulaire/forms/duplicate', forms);
+            return http.post('/formulaire/forms/duplicate', formIds);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.duplicate'));
             throw err;

@@ -79,7 +79,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         }
         else {
             vm.response = new Response();
-            let responses = $scope.getDataIf200(await responseService.listMine(vm.question.id, vm.distribution.id));
+            let responses = $scope.getDataIf200(await responseService.listMineByDistribution(vm.question.id, vm.distribution.id));
             if (responses.length > 0) {
                 vm.response = responses[0];
             }
@@ -246,7 +246,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
             let questions = $scope.getDataIf200(await questionService.list(vm.question.form_id));
             questions = questions.filter(question => question.mandatory === true);
             for (let question of questions) {
-                let responses = $scope.getDataIf200(await responseService.listMine(question.id, vm.distribution.id));
+                let responses = $scope.getDataIf200(await responseService.listMineByDistribution(question.id, vm.distribution.id));
                 responses = responses.filter(response => !!response.answer);
                 if (responses.length <= 0) {
                     return false;

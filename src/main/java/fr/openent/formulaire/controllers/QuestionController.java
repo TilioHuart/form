@@ -27,7 +27,7 @@ public class QuestionController extends ControllerHelper {
     }
 
     @Get("/forms/:formId/questions")
-    @ApiDoc("List questions")
+    @ApiDoc("List all the questions of a specific form")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
@@ -36,7 +36,7 @@ public class QuestionController extends ControllerHelper {
     }
 
     @Get("/forms/:formId/questions/count")
-    @ApiDoc("Count he number of questions in a form")
+    @ApiDoc("Count the number of questions in a specific form")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void countQuestions(HttpServerRequest request) {
@@ -45,7 +45,7 @@ public class QuestionController extends ControllerHelper {
     }
 
     @Get("/questions/:questionId")
-    @ApiDoc("Get form thanks to the id")
+    @ApiDoc("Get a specific question by id")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
@@ -54,7 +54,7 @@ public class QuestionController extends ControllerHelper {
     }
 
     @Get("/forms/:formId/questions/:position")
-    @ApiDoc("Get question in a form by position")
+    @ApiDoc("Get a specific question by position in a specific form")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void getByPosition(HttpServerRequest request) {
@@ -64,7 +64,7 @@ public class QuestionController extends ControllerHelper {
     }
 
     @Post("/forms/:formId/questions")
-    @ApiDoc("Create a question")
+    @ApiDoc("Create a question in a specific form")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
@@ -75,7 +75,7 @@ public class QuestionController extends ControllerHelper {
     }
 
     @Post("/forms/:formId/questions/multiple")
-    @ApiDoc("Create questions")
+    @ApiDoc("Create several questions in a specific form")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void createMultiple(HttpServerRequest request) {
@@ -86,7 +86,7 @@ public class QuestionController extends ControllerHelper {
     }
 
     @Put("/questions/:questionId")
-    @ApiDoc("Update given question")
+    @ApiDoc("Update a specific question")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
@@ -97,7 +97,7 @@ public class QuestionController extends ControllerHelper {
     }
 
     @Delete("/questions/:questionId")
-    @ApiDoc("Delete given question")
+    @ApiDoc("Delete a specific question")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {

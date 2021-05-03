@@ -1,5 +1,4 @@
 import {idiom, notify} from "entcore";
-import {responseService} from "../services/ResponseService";
 import {Mix} from "entcore-toolkit";
 import {responseFileService} from "../services";
 

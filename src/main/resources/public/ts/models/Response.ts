@@ -1,9 +1,7 @@
 import {idiom, notify} from "entcore";
-import {responseService} from "../services/ResponseService";
+import {responseService} from "../services";
 import {Mix} from "entcore-toolkit";
 import {ResponseFiles} from "./ResponseFile";
-import {Types} from "./QuestionType";
-import {QuestionChoice} from "./QuestionChoice";
 
 export class Response {
     id: number;
@@ -58,7 +56,7 @@ export class Responses {
 
     syncMine = async (questionId: number, distributionId: number) : Promise<void> => {
         try {
-            let { data } = await responseService.listMine(questionId, distributionId);
+            let { data } = await responseService.listMineByDistribution(questionId, distributionId);
             this.all = Mix.castArrayAs(Response, data);
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.response.sync'));

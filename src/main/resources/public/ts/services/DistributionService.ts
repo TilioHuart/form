@@ -10,7 +10,7 @@ export interface DistributionService {
     count(formId: number) : Promise<AxiosResponse>;
     get(formId: number) : Promise<AxiosResponse>;
     create(form: Form, distribution: Distribution) : Promise<AxiosResponse>;
-    newDist(distribution: Distribution) : Promise<AxiosResponse>;
+    add(distribution: Distribution) : Promise<AxiosResponse>;
     update(distribution: Distribution) : Promise<AxiosResponse>;
     delete(distributionId: number) : Promise<AxiosResponse>;
 }
@@ -80,7 +80,7 @@ export const distributionService: DistributionService = {
         }
     },
 
-    async newDist(distribution: Distribution) : Promise<AxiosResponse> {
+    async add(distribution: Distribution) : Promise<AxiosResponse> {
         try {
             return http.post(`/formulaire/distributions`, distribution);
         } catch (err) {

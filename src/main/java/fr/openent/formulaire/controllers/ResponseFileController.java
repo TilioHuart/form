@@ -45,17 +45,17 @@ public class ResponseFileController extends ControllerHelper {
         responseFileService.list(responseId, arrayResponseHandler(request));
     }
 
-    @Get("/responses/:responseId/files")
-    @ApiDoc("Get a specific file")
+    @Get("/responses/files/:fileId")
+    @ApiDoc("Get a specific file by id")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
-        String responseId = request.getParam("responseId");
-        responseFileService.get(responseId, defaultResponseHandler(request));
+        String fileId = request.getParam("fileId");
+        responseFileService.get(fileId, defaultResponseHandler(request));
     }
 
     @Get("/responses/files/:fileId/download")
-    @ApiDoc("Download specific file")
+    @ApiDoc("Download a specific file")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void download(HttpServerRequest request) {
@@ -72,7 +72,7 @@ public class ResponseFileController extends ControllerHelper {
     }
 
     @Get("/responses/:questionId/files/download/zip")
-    @ApiDoc("Download all response files of a specific question")
+    @ApiDoc("Download all files of a specific question")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void zipAndDownload(HttpServerRequest request) {
@@ -107,7 +107,7 @@ public class ResponseFileController extends ControllerHelper {
     }
 
     @Post("/responses/:responseId/files")
-    @ApiDoc("Upload files for a specific response")
+    @ApiDoc("Upload files of a specific response")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void upload(HttpServerRequest request) {
@@ -140,7 +140,7 @@ public class ResponseFileController extends ControllerHelper {
     }
 
     @Delete("/responses/:responseId/files")
-    @ApiDoc("Delete all files for a given response")
+    @ApiDoc("Delete all files of a specific response")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void deleteAll(HttpServerRequest request) {

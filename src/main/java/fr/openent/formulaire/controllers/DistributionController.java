@@ -17,9 +17,6 @@ import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserUtils;
-
-import javax.swing.*;
-
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
 
@@ -33,7 +30,7 @@ public class DistributionController extends ControllerHelper {
     }
 
     @Get("/distributions")
-    @ApiDoc("List all the forms sent by me")
+    @ApiDoc("List all the distributions of the forms sent by me")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listBySender(HttpServerRequest request) {
@@ -47,17 +44,8 @@ public class DistributionController extends ControllerHelper {
         });
     }
 
-    @Get("/distributions/forms/:formId/list")
-    @ApiDoc("Get the distributions for given form")
-    @ResourceFilter(CreationRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
-    public void listByForm(HttpServerRequest request) {
-        String formId = request.getParam("formId");
-        distributionService.listByForm(formId, arrayResponseHandler(request));
-    }
-
     @Get("/distributions/listMine")
-    @ApiDoc("Get all my distributions")
+    @ApiDoc("List all the distributions of the forms sent to me")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listByResponder(HttpServerRequest request) {
@@ -71,8 +59,17 @@ public class DistributionController extends ControllerHelper {
         });
     }
 
+    @Get("/distributions/forms/:formId/list")
+    @ApiDoc("List all the distributions of a specific form")
+    @ResourceFilter(CreationRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void listByForm(HttpServerRequest request) {
+        String formId = request.getParam("formId");
+        distributionService.listByForm(formId, arrayResponseHandler(request));
+    }
+
     @Get("/distributions/forms/:formId/listMine")
-    @ApiDoc("Get the distributions for given form and responder")
+    @ApiDoc("List all the distributions for a specific form sent to me")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listByFormAndResponder(HttpServerRequest request) {
@@ -88,7 +85,7 @@ public class DistributionController extends ControllerHelper {
     }
 
     @Get("/distributions/forms/:formId/count")
-    @ApiDoc("Get the number of distributions of the form")
+    @ApiDoc("Get the number of distributions for a specific form")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void count(HttpServerRequest request) {
@@ -97,7 +94,7 @@ public class DistributionController extends ControllerHelper {
     }
 
     @Get("/distributions/forms/:formId")
-    @ApiDoc("Get the in progress distribution or to do for given form and responder")
+    @ApiDoc("Get a specific distribution by form, responder and status")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
@@ -131,19 +128,19 @@ public class DistributionController extends ControllerHelper {
     }
 
     @Post("/distributions")
-    @ApiDoc("Create a new distribution based an already existing one")
+    @ApiDoc("Create a new distribution based on an already existing one")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    public void newDist(HttpServerRequest request) {
+    public void add(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
             RequestUtils.bodyToJson(request, distribution -> {
-                distributionService.newDist(distribution, defaultResponseHandler(request));
+                distributionService.add(distribution, defaultResponseHandler(request));
             });
         });
     }
 
     @Put("/distributions/:distributionId")
-    @ApiDoc("Update given distribution")
+    @ApiDoc("Update a specific distribution")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
@@ -154,7 +151,7 @@ public class DistributionController extends ControllerHelper {
     }
 
     @Delete("/distributions/:distributionId")
-    @ApiDoc("Delete given distribution")
+    @ApiDoc("Delete a specific distribution")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {

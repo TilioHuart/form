@@ -12,7 +12,6 @@ import org.entcore.common.sql.SqlConf;
 import org.entcore.common.sql.SqlConfs;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,7 +81,7 @@ public class ShareAndOwner implements ResourcesProvider {
         else if (isDeleteDistribution(binding)) {
             return "distributionId";
         }
-        else if (isListMineResponse(binding) || isCreateResponse(binding) || isZipAndDownloadResponseFile(binding)) {
+        else if (isListMineByDistributionResponse(binding) || isCreateResponse(binding) || isZipAndDownloadResponseFile(binding)) {
             return "questionId";
         }
         else if (isUpdateResponse(binding) || isDeleteResponse(binding) || isUploadResponseFile(binding) ||
@@ -141,8 +140,8 @@ public class ShareAndOwner implements ResourcesProvider {
         return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.DistributionController|delete");
     }
 
-    private boolean isListMineResponse(final Binding binding) {
-        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseController|listMine");
+    private boolean isListMineByDistributionResponse(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseController|listMineByDistribution");
     }
 
     private boolean isCreateResponse(final Binding binding) {

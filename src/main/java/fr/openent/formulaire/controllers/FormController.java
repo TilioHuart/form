@@ -25,16 +25,13 @@ import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
-import static org.entcore.common.user.UserUtils.getUserInfos;
 
 public class FormController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(FormController.class);
@@ -82,7 +79,7 @@ public class FormController extends ControllerHelper {
     // API
 
     @Get("/forms")
-    @ApiDoc("List all the forms created or shared with me")
+    @ApiDoc("List all the forms created by me or shared with me")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
@@ -137,7 +134,7 @@ public class FormController extends ControllerHelper {
     }
 
     @Get("/forms/:formId")
-    @ApiDoc("Get form thanks to the id")
+    @ApiDoc("Get a specific form by id")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
@@ -163,7 +160,7 @@ public class FormController extends ControllerHelper {
     }
 
     @Post("/forms/multiple")
-    @ApiDoc("Create forms")
+    @ApiDoc("Create several forms")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void createMultiple(HttpServerRequest request) {
@@ -180,18 +177,18 @@ public class FormController extends ControllerHelper {
     }
 
     @Post("/forms/duplicate")
-    @ApiDoc("Duplicate forms")
+    @ApiDoc("Duplicate several forms")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void duplicate(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
-                RequestUtils.bodyToJsonArray(request, forms -> {
+                RequestUtils.bodyToJsonArray(request, formIds -> {
                     List<Future> formsInfos= new ArrayList<>();
-                    for (int i = 0; i < forms.size(); i++) {
+                    for (int i = 0; i < formIds.size(); i++) {
                         Promise<JsonArray> promise = Promise.promise();
                         formsInfos.add(promise.future());
-                        formService.duplicate(forms.getInteger(i), user, FutureHelper.handlerJsonArray(promise));
+                        formService.duplicate(formIds.getInteger(i), user, FutureHelper.handlerJsonArray(promise));
                     }
                     CompositeFuture.all(formsInfos).onComplete(evt -> {
                         if (evt.failed()) {
@@ -230,7 +227,7 @@ public class FormController extends ControllerHelper {
     }
 
     @Put("/forms/:formId")
-    @ApiDoc("Update given form")
+    @ApiDoc("Update a specific form")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
@@ -241,7 +238,7 @@ public class FormController extends ControllerHelper {
     }
 
     @Delete("/forms/:formId")
-    @ApiDoc("Delete given form")
+    @ApiDoc("Delete a scpecific form")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
@@ -250,7 +247,7 @@ public class FormController extends ControllerHelper {
     }
 
     @Post("/forms/:formId/remind")
-    @ApiDoc("Send a reminder by mail to all the responders")
+    @ApiDoc("Send a reminder by mail to all the necessary responders")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void sendReminder(HttpServerRequest request) {
@@ -332,7 +329,7 @@ public class FormController extends ControllerHelper {
     }
 
     @Get("/forms/:formId/rights")
-    @ApiDoc("Get my rights for a given form")
+    @ApiDoc("Get my rights for a specific form")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void getMyFormRights(HttpServerRequest request) {
@@ -376,7 +373,7 @@ public class FormController extends ControllerHelper {
     // Export
 
     @Get("/export/:formId")
-    @ApiDoc("Export given form")
+    @ApiDoc("Export a specific form's responses")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void export(HttpServerRequest request) {
@@ -394,7 +391,7 @@ public class FormController extends ControllerHelper {
     // Image
 
     @Get("/info/image/:idImage")
-    @ApiDoc("Get info image workspace")
+    @ApiDoc("Get image info form workspace for a specific image")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void getInfoImg(final HttpServerRequest request) {

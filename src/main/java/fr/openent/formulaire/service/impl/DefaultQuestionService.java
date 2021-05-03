@@ -8,7 +8,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
-import org.entcore.common.user.UserInfos;
 
 import java.util.List;
 
@@ -80,7 +79,7 @@ public class DefaultQuestionService implements QuestionService {
 
     @Override
     public void update(String questionId, JsonObject question, Handler<Either<String, JsonObject>> handler) {
-        String query = "UPDATE " + Formulaire.QUESTION_TABLE + " SET title =  ?, position = ?, question_type = ?, " +
+        String query = "UPDATE " + Formulaire.QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, " +
                 "statement = ?, mandatory = ? WHERE id = ? RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(question.getString("title", ""))

@@ -30,7 +30,7 @@ public class ResponseController extends ControllerHelper {
     }
 
     @Get("/questions/:questionId/responses")
-    @ApiDoc("List all the responses for a question")
+    @ApiDoc("List all the responses to a specific question")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
@@ -39,15 +39,15 @@ public class ResponseController extends ControllerHelper {
     }
 
     @Get("/questions/:questionId/responses/:distributionId")
-    @ApiDoc("List all my responses for a question")
+    @ApiDoc("List all my responses to a specific question for a specific distribution")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
-    public void listMine(HttpServerRequest request) {
+    public void listMineByDistribution(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         String distributionId = request.getParam("distributionId");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
-                responseService.listMine(questionId, distributionId, user, arrayResponseHandler(request));
+                responseService.listMineByDistribution(questionId, distributionId, user, arrayResponseHandler(request));
             } else {
                 log.error("User not found in session.");
                 Renders.unauthorized(request);
@@ -56,7 +56,7 @@ public class ResponseController extends ControllerHelper {
     }
 
     @Get("/responses/:responseId")
-    @ApiDoc("Get response thanks to the id")
+    @ApiDoc("Get a specific response by id")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
@@ -83,7 +83,7 @@ public class ResponseController extends ControllerHelper {
     }
 
     @Put("/responses/:responseId")
-    @ApiDoc("Update given response")
+    @ApiDoc("Update a specific response")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
@@ -101,7 +101,7 @@ public class ResponseController extends ControllerHelper {
     }
 
     @Delete("/responses/:responseId")
-    @ApiDoc("Delete given response")
+    @ApiDoc("Delete a specific response")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {

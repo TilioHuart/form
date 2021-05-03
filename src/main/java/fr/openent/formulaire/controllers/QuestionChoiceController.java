@@ -27,7 +27,7 @@ public class QuestionChoiceController extends ControllerHelper {
     }
 
     @Get("/questions/:questionId/choices")
-    @ApiDoc("List all the choices of a given question")
+    @ApiDoc("List all the choices of a specific question")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
@@ -36,7 +36,7 @@ public class QuestionChoiceController extends ControllerHelper {
     }
 
     @Get("/choices/:choiceId")
-    @ApiDoc("Get a choice thanks to its id")
+    @ApiDoc("Get a specific by id")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
@@ -45,7 +45,7 @@ public class QuestionChoiceController extends ControllerHelper {
     }
 
     @Post("/questions/:questionId/choices")
-    @ApiDoc("Create a choice for a given question")
+    @ApiDoc("Create a choice for a specific question")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
@@ -56,7 +56,7 @@ public class QuestionChoiceController extends ControllerHelper {
     }
 
     @Post("/questions/:questionId/choices/multiple")
-    @ApiDoc("Create choices")
+    @ApiDoc("Create several choices for a specific question")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void createMultiple(HttpServerRequest request) {
@@ -67,7 +67,7 @@ public class QuestionChoiceController extends ControllerHelper {
     }
 
     @Put("/choices/:choiceId")
-    @ApiDoc("Update given choice")
+    @ApiDoc("Update a specific choice")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
@@ -78,7 +78,7 @@ public class QuestionChoiceController extends ControllerHelper {
     }
 
     @Delete("/choices/:choiceId")
-    @ApiDoc("Delete given distribution")
+    @ApiDoc("Delete a specific choice")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {

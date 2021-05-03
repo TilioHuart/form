@@ -10,9 +10,7 @@ import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
-
 import java.util.List;
-
 import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 
 public class DefaultFormService implements FormService {
@@ -78,9 +76,9 @@ public class DefaultFormService implements FormService {
     }
 
     @Override
-    public void get(String id, Handler<Either<String, JsonObject>> handler) {
+    public void get(String formId, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT * FROM " + Formulaire.FORM_TABLE + " WHERE id = ?;";
-        JsonArray params = new JsonArray().add(id);
+        JsonArray params = new JsonArray().add(formId);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
@@ -131,14 +129,14 @@ public class DefaultFormService implements FormService {
     }
 
     @Override
-    public void duplicate(int id, UserInfos user, Handler<Either<String, JsonArray>> handler) {
+    public void duplicate(int formId, UserInfos user, Handler<Either<String, JsonArray>> handler) {
         String query = "WITH dForm_id as (INSERT INTO  " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, picture, date_opening, date_ending, multiple, anonymous) " +
                 "SELECT ?, ?, concat(title, ' - Copie'), description, picture, date_opening, date_ending, multiple, anonymous FROM " + Formulaire.FORM_TABLE +
                 " WHERE id = ? RETURNING id) " +
                 "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, statement, mandatory, original_question_id) " +
                 "SELECT (SELECT id from dForm_id), title, position, question_type, statement, mandatory, id FROM " + Formulaire.QUESTION_TABLE +
                 " WHERE form_id = ? RETURNING id, original_question_id, question_type";
-        JsonArray params = new JsonArray().add(user.getUserId()).add(user.getUsername()).add(id).add(id);
+        JsonArray params = new JsonArray().add(user.getUserId()).add(user.getUsername()).add(formId).add(formId);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 

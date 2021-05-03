@@ -139,7 +139,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
                 }
             }
             if (distrib == null) {
-                await distributionService.newDist(distribs[0]);
+                await distributionService.add(distribs[0]);
             }
             $scope.redirectTo(`/form/${form.id}/question/1`);
         }
