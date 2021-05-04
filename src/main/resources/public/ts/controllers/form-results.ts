@@ -3,7 +3,7 @@ import * as ApexCharts from 'apexcharts';
 import {
     Distributions, DistributionStatus,
     Form,
-    Question, QuestionChoice, QuestionChoices,
+    Question, QuestionChoice,
     Questions,
     Responses,
     Types
@@ -41,6 +41,7 @@ interface ViewModel {
     prev() : Promise<void>;
     next() : Promise<void>;
     goTo(position: number) : Promise<void>;
+    getWidth(nbResponses: number, divisor: number) : number;
     getColor(choiceId: number) : string;
 }
 
@@ -163,6 +164,10 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         vm.goTo = async (position: number) : Promise<void> => {
             $scope.redirectTo(`/form/${vm.question.form_id}/results/${position}`);
         };
+
+        vm.getWidth = (nbResponses: number, divisor: number) : number => {
+            return nbResponses / (!!vm.nbResults ? vm.nbResults : 1) * divisor;
+        }
 
         vm.getColor = (choiceId: number) : string => {
             let colorIndex = vm.question.choices.all.filter(c => c.nbResponses > 0).findIndex(c => c.id === choiceId);

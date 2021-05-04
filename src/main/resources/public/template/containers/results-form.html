@@ -30,8 +30,11 @@
                     <i18n>formulaire.form.download.all.files</i18n>
                 </button>
             </div>
-            <!-- List of results -->
+
+            <!-- List of results FREETEXT -->
             <div ng-if="vm.question.question_type == vm.types.FREETEXT" class="freetext" bind-html="vm.question.statement"></div>
+
+            <!-- List of results SINGLEANSWER, MULTIPLEANSWER -->
             <div ng-if="vm.question.question_type == vm.types.SINGLEANSWER || vm.question.question_type == vm.types.MULTIPLEANSWER"
                  class="choices">
                 <div class="twelve-mobile" ng-class="vm.question.question_type == vm.types.MULTIPLEANSWER ? 'twelve' : 'four'">
@@ -44,23 +47,27 @@
                                 [[choice.nbResponses]]
                                 <i18n ng-if="choice.nbResponses > 1">formulaire.responses</i18n>
                                 <i18n ng-if="choice.nbResponses <= 1">formulaire.response</i18n>
-                                ([[(choice.nbResponses / vm.nbResults * 100).toFixed(2)]]%)
+                                ([[vm.getWidth(choice.nbResponses, 100).toFixed(2)]]%)
                             </div>
                         </div>
+                        <!-- Graph for MULTIPLEANSWER -->
                         <div ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER" class="eight zero-mobile">
                             <div class="graph-bar"
-                                 ng-style="{width: (95 * choice.nbResponses / vm.nbResults + '%'), 'background-color': vm.getColor(choice.id)}">
+                                 ng-style="{width: (vm.getWidth(choice.nbResponses, 95) + '%'), 'background-color': vm.getColor(choice.id)}">
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Graph for SINGLEANSWER -->
                 <div ng-if="vm.question.question_type == vm.types.SINGLEANSWER" class="graph-camembert eight zero-mobile">
                     <div class="eight">
                         <div id="singleanswer-response-chart"></div>
                     </div>
                 </div>
             </div>
+
+            <!-- List of results SHORTANSWER, LONGANSWER, DATE, TIME, FILE -->
             <div ng-if="vm.question.question_type != vm.types.SINGLEANSWER &&
                         vm.question.question_type != vm.types.MULTIPLEANSWER &&
                         vm.question.question_type != vm.types.FREETEXT">
