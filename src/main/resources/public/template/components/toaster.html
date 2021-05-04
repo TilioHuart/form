@@ -1,7 +1,7 @@
 <section class="toggle-buttons" ng-if="vm.forms.selected.length > 0">
     <div class="toggle">
         <div class="row" ng-if="currentPage === Pages.FORMS_RESPONSE" workflow="formulaire.response">
-            <button ng-click="vm.openForm(vm.forms.selected[0])" class="cell" ng-show="vm.checkToasterButton()">
+            <button ng-click="vm.openForm(vm.forms.selected[0])" class="cell" ng-show="vm.checkOpenButton()">
                 <i18n>formulaire.open</i18n>
             </button>
             <button ng-click="vm.openMyResponses(vm.forms.selected[0])" class="cell" ng-show="vm.checkMyResponsesButton()">

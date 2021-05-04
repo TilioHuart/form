@@ -122,7 +122,10 @@ body.formulaire section.main {
     align-content: center;
   }
 
-  .table { margin: 10px; }
+  .table {
+    table-layout: fixed;
+    margin: 10px;
+  }
 
   .toaster-right { float: right; }
 
