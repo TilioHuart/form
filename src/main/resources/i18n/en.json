@@ -52,6 +52,8 @@
   "formulaire.multiple.mobile": "Allow multiple responses",
   "formulaire.anonymous.label": "Anonymize the responses",
   "formulaire.anonymous.description": "The identifiers, first names, last names and school names of the responders won't be save.",
+  "formulaire.results.empty": "Sorry, there's no answer to be found for your form for the moment.",
+  "formulaire.results.reminder": "Do not hesitate to send them a reminder.",
 
   "formulaire.remind.title": "Send a reminder",
   "formulaire.remind.description.multipleTrue": "The reminder will be sent to all the users to whom the form has been sent.",

@@ -166,7 +166,8 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         };
 
         vm.getWidth = (nbResponses: number, divisor: number) : number => {
-            return nbResponses / (!!vm.nbResults ? vm.nbResults : 1) * divisor;
+            let width = nbResponses / (!!vm.nbResults ? vm.nbResults : 1) * divisor;
+            return width < 0 ? 0 : (width > divisor ? divisor : width);
         }
 
         vm.getColor = (choiceId: number) : string => {

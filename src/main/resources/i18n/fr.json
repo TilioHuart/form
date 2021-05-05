@@ -52,6 +52,8 @@
   "formulaire.multiple.mobile": "Permettre plusieurs réponses",
   "formulaire.anonymous.label": "Anonymiser les réponses",
   "formulaire.anonymous.description": "Les identifiants, noms, prénoms et établissements des répondant ne seront pas sauvegardés.",
+  "formulaire.results.empty": "Désolé, ce formulaire n'a pour l'instant reçu aucune réponse.",
+  "formulaire.results.reminder": "N'hésitez pas à leur envoyer un rappel.",
 
   "formulaire.remind.title": "Envoyer un rappel",
   "formulaire.remind.description.multipleTrue": "Le message de rappel va être transmis à tous les utilisateurs à qui le formulaire a été envoyé.",

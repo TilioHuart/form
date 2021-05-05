@@ -75,21 +75,32 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 					$scope.redirectTo('/e403');
 				}
 			},
+			emptyResults: async (params) => {
+				$scope.currentPage = Pages.EMPTY_RESULTS;
+				template.open('main', 'containers/empty-results');
+			},
 			resultsForm: async (params) => {
 				$scope.currentPage = Pages.RESULTS_FORM;
 				await $scope.getFormWithRights(params.idForm);
 				if ($scope.canCreate() && $scope.hasShareRightManager($scope.form)) {
 					$scope.form.nbQuestions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
+					let distribs = $scope.getDataIf200(await distributionService.listByForm(params.idForm));
+					let nbResponses = distribs.filter(d => d.status === DistributionStatus.FINISHED).length;
 
-					if (params.position < 1) {
-						$scope.redirectTo(`/form/${params.idForm}/results/1`);
-					}
-					else if (params.position > $scope.form.nbQuestions) {
-						$scope.redirectTo(`/form/${params.idForm}/results/${$scope.form.nbQuestions}`);
+					if (nbResponses > 0) {
+						if (params.position < 1) {
+							$scope.redirectTo(`/form/${params.idForm}/results/1`);
+						}
+						else if (params.position > $scope.form.nbQuestions) {
+							$scope.redirectTo(`/form/${params.idForm}/results/${$scope.form.nbQuestions}`);
+						}
+						else {
+							$scope.question = $scope.getDataIf200(await questionService.getByPosition(params.idForm, params.position));
+							template.open('main', 'containers/results-form');
+						}
 					}
 					else {
-						$scope.question = $scope.getDataIf200(await questionService.getByPosition(params.idForm, params.position));
-						template.open('main', 'containers/results-form');
+						$scope.redirectTo(`/form/${params.idForm}/results/empty`);
 					}
 				}
 				else {
