@@ -88,10 +88,13 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             vm.last = vm.question.position === vm.nbQuestions;
             if (vm.question.question_type == vm.types.SINGLEANSWER || vm.question.question_type == vm.types.MULTIPLEANSWER) {
                 // Count responses for each choice
+                let distribIds : any = vm.distributions.all.map(d => d.id);
                 for (let result of vm.results.all) {
-                    for (let choice of vm.question.choices.all) {
-                        if (result.choice_id === choice.id) {
-                            choice.nbResponses++;
+                    if (distribIds.includes(result.distribution_id)) { // We do not count results from distrib not FINISHED
+                        for (let choice of vm.question.choices.all) {
+                            if (result.choice_id === choice.id) {
+                                choice.nbResponses++;
+                            }
                         }
                     }
                 }
