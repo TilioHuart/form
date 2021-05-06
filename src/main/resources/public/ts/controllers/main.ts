@@ -137,8 +137,9 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form)) {
 					let distribution = $scope.getDataIf200(await distributionService.get(params.idForm));
 
-					// If form not already responded && date ok
-					if ($scope.form.date_opening < new Date() && ($scope.form.date_ending ? ($scope.form.date_ending > new Date()) : true)) {
+					// If form not archived && date ok && not already responded
+					if (!$scope.form.archived && $scope.form.date_opening < new Date() &&
+						($scope.form.date_ending ? ($scope.form.date_ending > new Date()) : true)) {
 						if ($scope.form.multiple || (!!distribution.status && distribution.status != DistributionStatus.FINISHED)) {
 							$scope.form.nbQuestions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
 

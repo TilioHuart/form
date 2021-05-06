@@ -45,9 +45,9 @@ public class DefaultFormService implements FormService {
     @Override
     public void listSentForms(UserInfos user, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT f.* FROM " + Formulaire.FORM_TABLE + " f " +
-                "LEFT OUTER JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON f.id = d.form_id " +
+                "LEFT JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON f.id = d.form_id " +
                 "WHERE d.responder_id = ? AND NOW() BETWEEN date_opening AND COALESCE(date_ending, NOW() + interval '1 year') " +
-                "AND active = ?" +
+                "AND active = ? " +
                 "GROUP BY f.id " +
                 "ORDER BY title;";
         JsonArray params = new JsonArray().add(user.getUserId()).add(true);
@@ -63,7 +63,7 @@ public class DefaultFormService implements FormService {
                 .append("LEFT JOIN ").append(Formulaire.FORM_SHARES_TABLE).append(" fs ON f.id = fs.resource_id ")
                 .append("LEFT JOIN ").append(Formulaire.MEMBERS_TABLE).append(" m ON (fs.member_id = m.id AND m.group_id IS NOT NULL) ")
                 .append("WHERE (fs.member_id IN ").append(Sql.listPrepared(groupsAndUserIds.toArray()))
-                .append(" AND fs.action = ?) OR f.owner_id = ?")
+                .append(" AND fs.action = ?) OR f.owner_id = ? ")
                 .append("GROUP BY f.id ")
                 .append("ORDER BY f.date_modification DESC;");
 
@@ -143,7 +143,7 @@ public class DefaultFormService implements FormService {
     @Override
     public void update(String formId, JsonObject form, Handler<Either<String, JsonObject>> handler) {
         String query = "WITH nbResponses AS (SELECT COUNT(*) FROM " + Formulaire.DISTRIBUTION_TABLE +
-                " WHERE form_id = ? AND status = ?)" +
+                " WHERE form_id = ? AND status = ?) " +
                 "UPDATE " + Formulaire.FORM_TABLE + " SET title = ?, description = ?, picture = ?, date_modification = ?, " +
                 "date_opening = ?, date_ending = ?, sent = ?, collab = ?, reminded = ?, archived = ?, " +
                 "multiple = CASE (SELECT count > 0 FROM nbResponses) " +

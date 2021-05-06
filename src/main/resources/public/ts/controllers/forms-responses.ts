@@ -47,6 +47,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
 
     const init = async (): Promise<void> => {
         await vm.forms.syncSent();
+        vm.forms.all = vm.forms.all.filter(form => !form.archived);
         vm.distributions = new Distributions();
 
         vm.forms.filters.find(f => f.name === FiltersFilters.TO_DO).display = true;
