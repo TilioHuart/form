@@ -48,7 +48,7 @@ public class FormResponsesExport {
 
   public void launch() {
     String formId = request.getParam("formId");
-    questionService.list(formId, getQuestionsEvt -> {
+    questionService.export(formId, getQuestionsEvt -> {
       if (getQuestionsEvt.isLeft()) {
         log.error("[Formulaire@FormExport] Failed to retrieve all questions of the form", getQuestionsEvt.left().getValue());
         Renders.renderError(request);
@@ -121,10 +121,11 @@ public class FormResponsesExport {
             });
 
             // Add responses of this responder
-            for (int j = 1; j <= nbQuestions; j++) {
+            List<JsonObject> allQuestions = questions.getList();
+            for (JsonObject question : allQuestions) {
               if (responses.size() > 0) {
                 JsonObject response = responses.get(0);
-                if (response.getInteger("position") == j) {
+                if (response.getInteger("position") == question.getInteger("position")) {
                   String answer = "";
                   boolean choice = true;
                   int question_id = response.getInteger("question_id");
@@ -144,14 +145,14 @@ public class FormResponsesExport {
                       choice = false;
                     }
                   }
-                  content.append(addResponse(answer, j == nbQuestions));
+                  content.append(addResponse(answer, allQuestions.lastIndexOf(question) == nbQuestions - 1));
                 }
                 else {
-                  content.append(addResponse("", j == nbQuestions));
+                  content.append(addResponse("", allQuestions.lastIndexOf(question) == nbQuestions - 1));
                 }
               }
               else {
-                content.append(addResponse("", j == nbQuestions));
+                content.append(addResponse("", allQuestions.lastIndexOf(question) == nbQuestions - 1));
               }
             }
           }

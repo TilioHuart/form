@@ -21,6 +21,14 @@ public class DefaultQuestionService implements QuestionService {
     }
 
     @Override
+    public void export(String formId, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT * FROM " + Formulaire.QUESTION_TABLE +
+                " WHERE form_id = ? AND question_type != 1 ORDER BY position;";
+        JsonArray params = new JsonArray().add(formId);
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
     public void countQuestions(String formId, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT COUNT (*) FROM " + Formulaire.QUESTION_TABLE + " WHERE form_id = ?;";
         JsonArray params = new JsonArray().add(formId);

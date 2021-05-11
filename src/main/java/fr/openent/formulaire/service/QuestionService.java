@@ -14,6 +14,13 @@ public interface QuestionService {
     void list(String formId, Handler<Either<String, JsonArray>> handler);
 
     /**
+     * List all the questions of a specific form without freetext questions
+     * @param formId form identifier
+     * @param handler function handler returning JsonArray data
+     */
+    void export(String formId, Handler<Either<String, JsonArray>> handler);
+
+    /**
      * Count the number of questions in a specific form
      * @param formId form identifier
      * @param handler function handler returning JsonObject data
