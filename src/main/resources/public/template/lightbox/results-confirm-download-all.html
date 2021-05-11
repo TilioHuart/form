@@ -1,10 +1,10 @@
 <lightbox show="vm.display.lightbox.download" on-close="vm.display.lightbox.download = false;">
-    <h2><i18n>formulaire.form.download.all.results.lightbox.title</i18n></h2>
+    <h2>[[getI18nWithParams('formulaire.form.download.all.results.lightbox.title', [vm.typeExport])]]</h2>
     <div>
-        <i18n>formulaire.form.download.all.results.lightbox.description</i18n>
+        [[getI18nWithParams('formulaire.form.download.all.results.lightbox.description', [vm.typeExport])]]
     </div>
     <div class="action-buttons">
         <button class="cell cancel" ng-click="vm.display.lightbox.download = false;"><i18n>formulaire.cancel</i18n></button>
-        <button class="cell" ng-click="vm.doExportForm()"><i18n>formulaire.confirm</i18n></button>
+        <button class="cell" ng-click="vm.doExport()"><i18n>formulaire.confirm</i18n></button>
     </div>
 </lightbox>

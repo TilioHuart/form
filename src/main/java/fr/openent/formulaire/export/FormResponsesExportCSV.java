@@ -21,24 +21,24 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class FormResponsesExport {
-  private static final Logger log = LoggerFactory.getLogger(FormResponsesExport.class);
+public class FormResponsesExportCSV {
+  private static final Logger log = LoggerFactory.getLogger(FormResponsesExportCSV.class);
 
-  private String UTF8_BOM = "\uFEFF";
-  private String EOL = "\n";
-  private String SEPARATOR = ";";
-  private ResponseService responseService = new DefaultResponseService();
-  private QuestionService questionService = new DefaultQuestionService();
-  private EventBus eb;
-  private HttpServerRequest request;
-  private boolean anonymous;
-  private String formName;
+  private final String UTF8_BOM = "\uFEFF";
+  private final String EOL = "\n";
+  private final String SEPARATOR = ";";
+  private final ResponseService responseService = new DefaultResponseService();
+  private final QuestionService questionService = new DefaultQuestionService();
+  private final EventBus eb;
+  private final HttpServerRequest request;
+  private final boolean anonymous;
+  private final String formName;
   // Creates  new String builder with UTF-8 BOM. Used to open on excel
-  private StringBuilder content = new StringBuilder(UTF8_BOM);
-  private SimpleDateFormat dateGetter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-  private SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+  private final StringBuilder content = new StringBuilder(UTF8_BOM);
+  private final SimpleDateFormat dateGetter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+  private final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
-  public FormResponsesExport(EventBus eb, HttpServerRequest request, JsonObject form) {
+  public FormResponsesExportCSV(EventBus eb, HttpServerRequest request, JsonObject form) {
     this.eb = eb;
     this.request = request;
     this.anonymous = form.getBoolean("anonymous");
@@ -50,7 +50,7 @@ public class FormResponsesExport {
     String formId = request.getParam("formId");
     questionService.export(formId, getQuestionsEvt -> {
       if (getQuestionsEvt.isLeft()) {
-        log.error("[Formulaire@FormExport] Failed to retrieve all questions of the form", getQuestionsEvt.left().getValue());
+        log.error("[Formulaire@FormExportCSV] Failed to retrieve all questions of the form", getQuestionsEvt.left().getValue());
         Renders.renderError(request);
       }
 
@@ -58,9 +58,9 @@ public class FormResponsesExport {
       int nbQuestions = questions.size();
       content.append(header(questions));
 
-      responseService.exportResponses(formId, getResponsesEvt -> {
+      responseService.exportCSVResponses(formId, getResponsesEvt -> {
         if (getResponsesEvt.isLeft()) {
-          log.error("[Formulaire@FormExport] Failed to retrieve all responses of the form", getResponsesEvt.left().getValue());
+          log.error("[Formulaire@FormExportCSV] Failed to retrieve all responses of the form", getResponsesEvt.left().getValue());
           Renders.renderError(request);
         }
 
@@ -86,7 +86,7 @@ public class FormResponsesExport {
         // Proceed once we've got all the users' infos in our usersInfos list
         CompositeFuture.all(usersInfos).setHandler(evt -> {
           if (evt.failed()) {
-            log.error("[Formulaire@ExportCompositeFuture] Failed to retrieve results", evt.cause());
+            log.error("[Formulaire@FormExportCSV] Failed to retrieve results", evt.cause());
             Future.failedFuture(evt.cause());
           }
 

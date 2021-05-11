@@ -25,15 +25,13 @@ import static org.entcore.common.http.response.DefaultResponseHandler.defaultRes
 
 public class ResponseFileController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(ResponseFileController.class);
-    private ResponseFileService responseFileService;
-    private Storage storage;
-    private static byte[] BUFFER;
+    private final ResponseFileService responseFileService;
+    private final Storage storage;
 
     public ResponseFileController(Storage storage) {
         super();
         this.responseFileService = new DefaultResponseFileService();
         this.storage = storage;
-        BUFFER = new byte[4096];
     }
 
     @Get("/responses/:responseId/files/all")

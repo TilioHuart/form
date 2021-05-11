@@ -56,9 +56,16 @@ public interface ResponseService {
     void delete(String responseId, Handler<Either<String, JsonObject>> handler);
 
     /**
-     * Export all the responses of a form into a CSV file
+     * Get all the responses of a specific form to export into a CSV file
      * @param formId form identifier
      * @param handler function handler returning JsonArray data
      */
-    void exportResponses(String formId, Handler<Either<String, JsonArray>> handler);
+    void exportCSVResponses(String formId, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * Get all the responses of a specific form to export into a PDF file
+     * @param formId form identifier
+     * @param handler function handler returning JsonArray data
+     */
+    void exportPDFResponses(String formId, Handler<Either<String, JsonArray>> handler);
 }

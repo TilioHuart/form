@@ -104,9 +104,10 @@
   "formulaire.form.create.title.mobile": "Titre",
   "formulaire.form.archive.title": "Supprimer les formulaires sélectionnés",
   "formulaire.form.delete.title": "Supprimer définitivement",
-  "formulaire.form.download.all.results": "Télécharger tous les résultats (CSV)",
-  "formulaire.form.download.all.results.lightbox.title": "Téléchargement des résultats",
-  "formulaire.form.download.all.results.lightbox.description": "Les réponses du formulaire vont être téléchargées au format CSV. Les documents déposés dans les questions de type \"Dépôt de fichier\" ne seront pas téléchargés lors de cet export.",
+  "formulaire.form.download.all.results.pdf": "Télécharger tous les résultats (PDF)",
+  "formulaire.form.download.all.results.csv": "Télécharger tous les résultats (CSV)",
+  "formulaire.form.download.all.results.lightbox.title": "Téléchargement des résultats ({0})",
+  "formulaire.form.download.all.results.lightbox.description": "Les réponses du formulaire vont être téléchargées au format {0}. Les documents déposés dans les questions de type \"Dépôt de fichier\" ne seront pas téléchargés lors de cet export.",
   "formulaire.form.download.all.files": "Télécharger tout (ZIP)",
   "formulaire.image.incompatible": "Seuls les formats d'image suivants sont acceptés : .jpg, .jpeg, .png, .gif",
 

@@ -1,9 +1,8 @@
 import {Behaviours, idiom, model, ng, template} from 'entcore';
-import {DistributionStatus, Form, Question, QuestionTypes} from "../models";
+import {DistributionStatus, Form, Question, QuestionTypes, Types} from "../models";
 import {configService, distributionService, formService, questionService} from "../services";
 import {AxiosResponse} from "axios";
-import {FORMULAIRE_EMIT_EVENT} from "../core/enums";
-import {Pages} from "../core/enums";
+import {Direction, Exports, FiltersFilters, FiltersOrders, FORMULAIRE_EMIT_EVENT, Pages} from "../core/enums";
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', 'FormService',
 	($scope, route, $location) => {
@@ -12,6 +11,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.config = {};
 
 		// Init variables
+		$scope.FiltersOrders = FiltersOrders;
+		$scope.FiltersFilters = FiltersFilters;
+		$scope.Direction = Direction;
+		$scope.Types = Types;
+		$scope.Exports = Exports;
 		$scope.Pages = Pages;
 		$scope.currentPage = Pages.FORMS_LIST;
 		$scope.form = new Form();

@@ -1,15 +1,18 @@
 import {idiom, ng, template} from 'entcore';
 import * as ApexCharts from 'apexcharts';
 import {
-    Distributions, DistributionStatus,
+    Distributions,
+    DistributionStatus,
     Form,
-    Question, QuestionChoice,
+    Question,
+    QuestionChoice,
     Questions,
     Responses,
     Types
 } from "../models";
 import {Mix} from "entcore-toolkit";
 import {ColorUtils} from "../utils/color";
+import {Exports} from "../core/enums";
 
 interface ViewModel {
     types: typeof Types;
@@ -27,14 +30,15 @@ interface ViewModel {
     singleAnswerResponseChart: any;
     multipleAnswerResponseChart: any;
     colors: string[];
+    typeExport: Exports;
     display: {
         lightbox: {
             download: boolean;
         }
     }
 
-    exportForm() : void;
-    doExportForm() : void;
+    export(typeExport: Exports) : void;
+    doExport() : void;
     downloadFile(responseId: number) : void;
     zipAndDownload() : void;
     getDataByDistrib(distribId: number) : any;
@@ -66,6 +70,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         vm.singleAnswerResponseChart = null;
         vm.multipleAnswerResponseChart = null;
         vm.colors = [];
+        vm.typeExport = Exports.CSV;
         vm.display = {
             lightbox: {
                 download: false
@@ -125,14 +130,15 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
         // Functions
 
-        vm.exportForm = () : void => {
+        vm.export = (typeExport: Exports) : void => {
+            vm.typeExport = typeExport;
             template.open('lightbox', 'lightbox/results-confirm-download-all');
             vm.display.lightbox.download = true;
             $scope.safeApply();
         };
 
-        vm.doExportForm = () : void => {
-            window.open(window.location.pathname + `/export/${vm.question.form_id}`);
+        vm.doExport = () : void => {
+            window.open(window.location.pathname + `/export/${vm.typeExport.toLowerCase()}/${vm.question.form_id}`);
             vm.display.lightbox.download = false;
             template.close('lightbox');
             $scope.safeApply();

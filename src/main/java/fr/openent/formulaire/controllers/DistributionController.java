@@ -22,7 +22,7 @@ import static org.entcore.common.http.response.DefaultResponseHandler.defaultRes
 
 public class DistributionController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(DistributionController.class);
-    private DistributionService distributionService;
+    private final DistributionService distributionService;
 
     public DistributionController() {
         super();

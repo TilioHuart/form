@@ -83,7 +83,7 @@ public class Formulaire extends BaseServer {
 			conf.setShareTable("form_shares");
 		}
 
-		FormController formController = new FormController(storage);
+		FormController formController = new FormController();
 		formController.setShareService(new SqlShareService(DB_SCHEMA, "form_shares", eb, securedActions, null));
 		formController.setCrudService(new SqlCrudService(DB_SCHEMA, "form", "form_shares"));
 

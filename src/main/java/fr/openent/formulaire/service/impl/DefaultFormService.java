@@ -130,7 +130,7 @@ public class DefaultFormService implements FormService {
 
     @Override
     public void duplicate(int formId, UserInfos user, Handler<Either<String, JsonArray>> handler) {
-        String query = "WITH dForm_id as (INSERT INTO  " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, picture, date_opening, date_ending, multiple, anonymous) " +
+        String query = "WITH dForm_id AS (INSERT INTO  " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, picture, date_opening, date_ending, multiple, anonymous) " +
                 "SELECT ?, ?, concat(title, ' - Copie'), description, picture, date_opening, date_ending, multiple, anonymous FROM " + Formulaire.FORM_TABLE +
                 " WHERE id = ? RETURNING id) " +
                 "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, statement, mandatory, original_question_id) " +

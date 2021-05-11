@@ -68,13 +68,27 @@ public class DefaultResponseService implements ResponseService {
     }
 
     @Override
-    public void exportResponses(String formId, Handler<Either<String, JsonArray>> handler) {
+    public void exportCSVResponses(String formId, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT d.form_id, d.responder_id, date_response, structure, question_id, position, answer " +
             "FROM " + Formulaire.DISTRIBUTION_TABLE + " d " +
             "JOIN " + Formulaire.RESPONSE_TABLE + " r ON r.distribution_id = d.id " +
             "JOIN " + Formulaire.QUESTION_TABLE + " q ON r.question_id = q.id " +
             "WHERE d.form_id = ? AND d.status = ? AND q.question_type != 1" +
             "ORDER BY d.form_id, d.responder_id, date_response, position;";
+
+        JsonArray params = new JsonArray().add(formId).add(Formulaire.FINISHED);
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public void exportPDFResponses(String formId, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT position, date_response, d.responder_id, responder_name, structure, answer, rf.filename " +
+            "FROM " + Formulaire.DISTRIBUTION_TABLE + " d " +
+            "LEFT JOIN " + Formulaire.RESPONSE_TABLE + " r ON r.distribution_id = d.id " +
+            "LEFT JOIN " + Formulaire.RESPONSE_FILE_TABLE + " rf ON rf.response_id = r.id " +
+            "LEFT JOIN " + Formulaire.QUESTION_TABLE + " q ON r.question_id = q.id " +
+            "WHERE d.form_id = ? AND d.status = ? " +
+            "ORDER BY position, date_response;";
 
         JsonArray params = new JsonArray().add(formId).add(Formulaire.FINISHED);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));

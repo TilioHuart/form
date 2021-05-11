@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+
+<head>
+    <title>Résultats</title>
+    <style type="text/css">
+        body {
+            font-family: "Roboto", sans-serif;
+            color: #5b6472;
+            font-size: 13px;
+        }
+        .page {
+            display: block;
+            margin: 5% 3%;
+        }
+        @page {
+            size: A4;
+            margin: 5% 3%;
+
+            @bottom-center{
+                content: counter(page) ' / ' counter(pages);
+                font-family: "Roboto", sans-serif;
+                font-weight: bold;
+                color: #5b6472;
+                font-size: 13px;
+            }
+        }
+
+
+        .one { width: 8.33333%; }
+        .two { width: 16.66667%; }
+        .three { width: 25%; }
+        .four { width: 33.33333%; }
+        .five { width: 41.66667%; }
+        .six { width: 50%; }
+        .seven { width: 58.33333%; }
+        .eight { width: 66.66667%; }
+        .nine { width: 75%; }
+        .ten { width: 83.33333%; }
+        .eleven { width: 91.66667%; }
+        .twelve { width: 100%; }
+        .flex { display: flex; }
+        h1 {
+            color: #4bafd5;
+            text-align: center;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 10%;
+        }
+        h4 {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .question {
+            margin-bottom: 10%;
+        }
+        .response {
+            display: flex;
+            padding: 5px 10px;
+            margin: 5px 0;
+            font-size: 14px;
+            border: thin solid #e9ebef;
+        }
+        .inline {
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body class="page">
+    <h1 class="title">{{form_title}}</h1>
+    <h2>Nombre de réponses : {{nbResponseTot}}</h2>
+
+    {{#questions}}
+    <div class="question">
+        <h4>
+            {{title}}{{#mandatory}}<span style="color:red;margin-left:10px">*</span>{{/mandatory}}
+        </h4>
+
+        {{#question_type}}
+        <div class="main">
+            {{#type_freetext}}
+                <div class="response">{{{statement}}}</div>
+            {{/type_freetext}}
+
+            {{#type_text}}
+                {{#responses}}
+                <div class="response">
+                    {{^anonymous}}
+                    <span class="eight inline">
+                        <span class="four inline">{{date_response}}</span>
+                        <span class="inline">{{responder_name}}</span>
+                    </span>
+                    {{/anonymous}}
+                    {{#anonymous}}
+                        <span class="four inline">{{responder_name}}</span>
+                    {{/anonymous}}
+                    <span>
+                        {{#filename}}{{filename}}{{/filename}}
+                        {{^filename}}{{{answer}}}{{/filename}}
+                    </span>
+                </div>
+                {{/responses}}
+            {{/type_text}}
+
+            {{#type_graph}}
+            <div class="response">
+
+            </div>
+            {{/type_graph}}
+        </div>
+        {{/question_type}}
+    </div>
+    {{/questions}}
+</body>
+</html>

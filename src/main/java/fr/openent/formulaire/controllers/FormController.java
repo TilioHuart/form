@@ -1,7 +1,8 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.Formulaire;
-import fr.openent.formulaire.export.FormResponsesExport;
+import fr.openent.formulaire.export.FormResponsesExportCSV;
+import fr.openent.formulaire.export.FormResponsesExportPDF;
 import fr.openent.formulaire.helpers.FutureHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CreationRight;
@@ -22,7 +23,6 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
-import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 import java.util.ArrayList;
@@ -35,17 +35,15 @@ import static org.entcore.common.http.response.DefaultResponseHandler.defaultRes
 
 public class FormController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(FormController.class);
-    private final Storage storage;
-    private FormService formService;
-    private DistributionService distributionService;
-    private QuestionChoiceService questionChoiceService;
-    private ResponseService responseService;
-    private FormSharesService formShareService;
-    private NeoService neoService;
+    private final FormService formService;
+    private final DistributionService distributionService;
+    private final QuestionChoiceService questionChoiceService;
+    private final ResponseService responseService;
+    private final FormSharesService formShareService;
+    private final NeoService neoService;
 
-    public FormController(final Storage storage) {
+    public FormController() {
         super();
-        this.storage = storage;
         this.formService = new DefaultFormService();
         this.distributionService = new DefaultDistributionService();
         this.questionChoiceService = new DefaultQuestionChoiceService();
@@ -369,21 +367,31 @@ public class FormController extends ControllerHelper {
         });
     }
 
+    // Exports
 
-    // Export
-
-    @Get("/export/:formId")
-    @ApiDoc("Export a specific form's responses")
+    @Get("/export/:fileType/:formId")
+    @ApiDoc("Export a specific form's responses into a file (CSV or PDF)")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
-    public void export(HttpServerRequest request) {
+    public void export(final HttpServerRequest request) {
+        String fileType = request.getParam("fileType");
         String formId = request.getParam("formId");
         formService.get(formId, getEvent -> {
             if (getEvent.isRight()) {
-                new FormResponsesExport(eb, request, getEvent.right().getValue()).launch();
+                switch (fileType) {
+                    case "csv":
+                        new FormResponsesExportCSV(eb, request, getEvent.right().getValue()).launch();
+                        break;
+                    case "pdf":
+                        new FormResponsesExportPDF(eb, request, vertx, config, getEvent.right().getValue()).launch();
+                        break;
+                    default:
+                        badRequest(request);
+                        break;
+                }
             }
             else {
-                log.error("[Formulaire@export] Error in getting form to export infos");
+                log.error("[Formulaire@export] Error in getting form to export responses of form " + formId);
             }
         });
     }

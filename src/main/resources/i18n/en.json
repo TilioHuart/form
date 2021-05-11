@@ -104,9 +104,10 @@
   "formulaire.form.create.title.mobile": "Title",
   "formulaire.form.archive.title": "Delete selected forms",
   "formulaire.form.delete.title": "Delete permanently",
-  "formulaire.form.download.all.results": "Download all the results (CSV)",
-  "formulaire.form.download.all.results.lightbox.title": "Downloading all the results",
-  "formulaire.form.download.all.results.lightbox.description": "The responses of the form will be downloaded into a CSV file. The files submitted for the 'File' questions  won't be downloaded during this operation.",
+  "formulaire.form.download.all.results.pdf": "Download all the results (PDF)",
+  "formulaire.form.download.all.results.csv": "Download all the results (CSV)",
+  "formulaire.form.download.all.results.lightbox.title": "Téléchargement des résultats ({0})",
+  "formulaire.form.download.all.results.lightbox.description": "The responses of the form will be downloaded into a {0} file. The files submitted for the 'File' questions  won't be downloaded during this operation.",
   "formulaire.form.download.all.files": "Download all (ZIP)",
   "formulaire.image.incompatible": "Only those image format are accepted : .jpg, .jpeg, .png, .gif",
 

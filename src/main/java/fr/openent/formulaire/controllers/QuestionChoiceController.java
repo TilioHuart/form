@@ -19,7 +19,7 @@ import static org.entcore.common.http.response.DefaultResponseHandler.defaultRes
 
 public class QuestionChoiceController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(QuestionChoiceController.class);
-    private QuestionChoiceService questionChoiceService;
+    private final QuestionChoiceService questionChoiceService;
 
     public QuestionChoiceController() {
         super();

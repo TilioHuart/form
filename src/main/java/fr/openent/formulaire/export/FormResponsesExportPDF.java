@@ -1,0 +1,206 @@
+package fr.openent.formulaire.export;
+
+import fr.openent.formulaire.service.DistributionService;
+import fr.openent.formulaire.service.QuestionService;
+import fr.openent.formulaire.service.ResponseService;
+import fr.openent.formulaire.service.impl.DefaultDistributionService;
+import fr.openent.formulaire.service.impl.DefaultQuestionService;
+import fr.openent.formulaire.service.impl.DefaultResponseService;
+import fr.wseduc.webutils.Either;
+import fr.wseduc.webutils.data.FileResolver;
+import fr.wseduc.webutils.http.Renders;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.TimeZone;
+
+import static fr.wseduc.webutils.http.Renders.badRequest;
+import static fr.wseduc.webutils.http.Renders.getScheme;
+
+
+public class FormResponsesExportPDF {
+    private static final Logger log = LoggerFactory.getLogger(FormResponsesExportPDF.class);
+    private String node;
+    private final EventBus eb;
+    private final HttpServerRequest request;
+    private final JsonObject config;
+    private final Vertx vertx;
+    private final Renders renders;
+    private final JsonObject form;
+    private final ResponseService responseService = new DefaultResponseService();
+    private final QuestionService questionService = new DefaultQuestionService();
+    private final DistributionService distributionService = new DefaultDistributionService();
+    private final SimpleDateFormat dateGetter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+    private final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+
+    public FormResponsesExportPDF(EventBus eb, HttpServerRequest request, Vertx vertx, JsonObject config, JsonObject form) {
+        this.eb = eb;
+        this.request = request;
+        this.config = config;
+        this.vertx = vertx;
+        this.renders = new Renders(this.vertx, config);
+        this.form = form;
+        dateFormatter.setTimeZone(TimeZone.getTimeZone("Europe/Paris")); // TODO to adapt for not France timezone
+    }
+
+    public void launch() {
+        String formId = request.getParam("formId");
+        questionService.list(formId, getQuestionsEvt -> {
+            if (getQuestionsEvt.isLeft()) {
+                log.error("[Formulaire@FormExportPDF] Failed to retrieve all questions of the form" + form.getInteger("id"), getQuestionsEvt.left().getValue());
+                Renders.renderError(request);
+            }
+
+            responseService.exportPDFResponses(formId, getResponsesEvt -> {
+                if (getResponsesEvt.isLeft()) {
+                    log.error("[Formulaire@FormExportPDF] Failed to get data for PDF export of the form " + form.getInteger("id"), getResponsesEvt.left().getValue());
+                    badRequest(request);
+                }
+
+                JsonObject results = formatData(getResponsesEvt.right().getValue(), getQuestionsEvt.right().getValue());
+
+                distributionService.count(form.getInteger("id").toString(), countRepEvent -> {
+                    if (getQuestionsEvt.isLeft()) {
+                        log.error("[Formulaire@FormExportPDF] Failed to count nb responses of the form " + form.getInteger("id"), getQuestionsEvt.left().getValue());
+                        Renders.renderError(request);
+                    }
+
+                    int nbResponseTot = countRepEvent.right().getValue().getInteger("count");
+                    results.put("nbResponseTot", nbResponseTot);
+
+                    generatePDF(request, results,"results.xhtml", pdf ->
+                        request.response()
+                            .putHeader("Content-Type", "application/pdf; charset=utf-8")
+                            .putHeader("Content-Disposition", "attachment; filename=Réponses_" + form.getString("title") + ".pdf")
+                            .end(pdf)
+                    );
+                });
+            });
+        });
+    }
+
+    private JsonObject formatData(JsonArray data, JsonArray questionsInfo) {
+        JsonObject results = new JsonObject();
+        JsonArray questions = new JsonArray();
+
+        // Fill responses with each question's data
+        int nbQuestions = questionsInfo.size();
+        for (int i = 0; i < nbQuestions; i++) {
+            JsonObject questionInfo = questionsInfo.getJsonObject(i);
+            questions.add(new JsonObject()
+                    .put("title", questionInfo.getString("title"))
+                    .put("question_type", new JsonObject())
+                    .put("statement", questionInfo.getString("statement")
+                            .replace("\"","'")
+                            .replaceAll("<img[\\w\\W]*?>","$0</img>")
+                    )
+                    .put("mandatory", questionInfo.getBoolean("mandatory"))
+                    .put("responses", new JsonArray())
+            );
+
+            // Affect boolean to each type of answer (freetext, simple text, graph)
+            // type_freetext (FREETEXT), type_text (SHORTANSWER, LONGANSWER, DATE, TIME, FILE), type_graph (SINGLEANSWER, MULTIPLEANSWER)
+            int question_type = questionInfo.getInteger("question_type");
+            questions.getJsonObject(i).getJsonObject("question_type")
+                    .put("type_freetext", question_type == 1)
+                    .put("type_text", Arrays.asList(2,3,6,7,8).contains(question_type))
+                    .put("type_graph", Arrays.asList(4,5).contains(question_type));
+        }
+
+        // Fill question's data
+        for (int i = 0; i < data.size(); i++) {
+            JsonObject response = data.getJsonObject(i);
+            int posQuestionToFill = response.getInteger("position") - 1;
+
+            // // Format answer (empty string, simple text, html)
+            if (response.getString("answer").isEmpty()) {
+                response.put("answer", "-");
+            }
+            else if (questionsInfo.getJsonObject(posQuestionToFill).getInteger("question_type") == 2) {
+                response.put("answer", "<div>" + response.getString("answer") + "</div>");
+            }
+            else if (questionsInfo.getJsonObject(posQuestionToFill).getInteger("question_type") == 3) {
+                response.put("answer", response.getString("answer")
+                        .replace("\"","'")
+                        .replaceAll("<img[\\w\\W]*?>","$0</img>")
+                );
+            }
+
+            // Format date_response
+            try {
+                Date displayDate = dateGetter.parse(response.getString("date_response"));
+                response.put("date_response", dateFormatter.format(displayDate));
+            }
+            catch (ParseException e) { e.printStackTrace(); }
+
+
+
+            questions.getJsonObject(posQuestionToFill).getJsonArray("responses").add(response);
+        }
+
+        results.put("form_title", form.getString("title"));
+        results.put("anonymous", form.getBoolean("anonymous"));
+        results.put("questions", questions);
+        return results;
+    }
+
+    private void generatePDF(HttpServerRequest request, JsonObject templateProps, String templateName, Handler<Buffer> handler) {
+        final String templatePath = "./public/template/pdf/";
+        final String baseUrl = getScheme(request) + "://" + Renders.getHost(request) + config.getString("app-address") + "/public/";
+
+        node = (String) vertx.sharedData().getLocalMap("server").get("node");
+        if (node == null) {
+            node = "";
+        }
+
+        final String path = FileResolver.absolutePath(templatePath + templateName);
+
+        vertx.fileSystem().readFile(path, result -> {
+            if (!result.succeeded()) {
+                badRequest(request);
+                return;
+            }
+
+            StringReader reader = new StringReader(result.result().toString("UTF-8"));
+            renders.processTemplate(request, templateProps, templateName, reader, writer -> {
+                String processedTemplate = ((StringWriter) writer).getBuffer().toString();
+                if (processedTemplate.isEmpty()) {
+                    badRequest(request);
+                    return;
+                }
+                JsonObject actionObject = new JsonObject();
+                byte[] bytes;
+                bytes = processedTemplate.getBytes(StandardCharsets.UTF_8);
+
+                actionObject.put("content", bytes).put("baseUrl", baseUrl);
+                eb.request(node + "entcore.pdf.generator", actionObject, (Handler<AsyncResult<Message<JsonObject>>>) reply -> {
+                    JsonObject pdfResponse = reply.result().body();
+                    if (!"ok".equals(pdfResponse.getString("status"))) {
+                        badRequest(request, pdfResponse.getString("message"));
+                        return;
+                    }
+                    byte[] pdf = pdfResponse.getBinary("content");
+                    Buffer either = Buffer.buffer(pdf);
+                    handler.handle(either);
+                });
+            });
+
+        });
+    }
+}

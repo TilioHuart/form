@@ -17,7 +17,7 @@ import static org.entcore.common.http.response.DefaultResponseHandler.defaultRes
 
 public class QuestionTypeController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(QuestionTypeController.class);
-    private QuestionTypeService questionTypeService;
+    private final QuestionTypeService questionTypeService;
 
     public QuestionTypeController() {
         super();

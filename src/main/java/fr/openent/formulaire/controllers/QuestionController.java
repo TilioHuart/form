@@ -19,7 +19,7 @@ import static org.entcore.common.http.response.DefaultResponseHandler.defaultRes
 
 public class QuestionController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(QuestionController.class);
-    private QuestionService questionService;
+    private final QuestionService questionService;
 
     public QuestionController() {
         super();
