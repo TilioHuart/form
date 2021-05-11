@@ -146,6 +146,11 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
         vm.getDataByDistrib = (distribId: number) : any => {
             let results =  vm.results.all.filter(r => r.distribution_id === distribId && r.question_id === vm.question.id);
+            for (let result of results) {
+                if (result.answer == "") {
+                    result.answer = "-";
+                }
+            }
             if (vm.question.question_type === Types.FILE) {
                 return results.map(r => r.files)[0].all;
             }
