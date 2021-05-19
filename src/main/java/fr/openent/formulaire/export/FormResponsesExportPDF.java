@@ -46,6 +46,7 @@ public class FormResponsesExportPDF {
     private final DistributionService distributionService = new DefaultDistributionService();
     private final SimpleDateFormat dateGetter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
     private final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+    private final String autoClosingTags = "img|br|hr|input|area|meta|link|param";
 
     public FormResponsesExportPDF(EventBus eb, HttpServerRequest request, Vertx vertx, JsonObject config, Storage storage, JsonObject form) {
         this.eb = eb;
@@ -114,7 +115,7 @@ public class FormResponsesExportPDF {
                     .put("question_type", new JsonObject())
                     .put("statement", questionInfo.getString("statement")
                             .replace("\"","'")
-                            .replaceAll("<img [\\w\\W]*?>","$0</img>")
+                            .replaceAll("<("+autoClosingTags+")[\\w\\W]*?>","$0</$1>")
                     )
                     .put("mandatory", questionInfo.getBoolean("mandatory"))
                     .put("responses", new JsonArray())
@@ -146,13 +147,13 @@ public class FormResponsesExportPDF {
             if (response.getString("answer").isEmpty()) {
                 response.put("answer", "-");
             }
-            else if (questionType == 2) {
+            if (questionType == 2) {
                 response.put("answer", "<div>" + response.getString("answer") + "</div>");
             }
             else if (questionType == 3) {
                 response.put("answer", response.getString("answer")
                         .replace("\"","'")
-                        .replaceAll("<img [\\w\\W]*?>","$0</img>")
+                        .replaceAll("<("+autoClosingTags+")[\\w\\W]*?>","$0</$1>")
                 );
             }
 
