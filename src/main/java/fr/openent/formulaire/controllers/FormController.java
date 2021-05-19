@@ -23,6 +23,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
+import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 import java.util.ArrayList;
@@ -35,19 +36,19 @@ import static org.entcore.common.http.response.DefaultResponseHandler.defaultRes
 
 public class FormController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(FormController.class);
+    private final Storage storage;
     private final FormService formService;
     private final DistributionService distributionService;
     private final QuestionChoiceService questionChoiceService;
-    private final ResponseService responseService;
     private final FormSharesService formShareService;
     private final NeoService neoService;
 
-    public FormController() {
+    public FormController(Storage storage) {
         super();
+        this.storage = storage;
         this.formService = new DefaultFormService();
         this.distributionService = new DefaultDistributionService();
         this.questionChoiceService = new DefaultQuestionChoiceService();
-        this.responseService = new DefaultResponseService();
         this.formShareService = new DefaultFormSharesService();
         this.neoService = new DefaultNeoService();
     }
@@ -369,30 +370,34 @@ public class FormController extends ControllerHelper {
 
     // Exports
 
-    @Get("/export/:fileType/:formId")
+    @Post("/export/:fileType/:formId")
     @ApiDoc("Export a specific form's responses into a file (CSV or PDF)")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void export(final HttpServerRequest request) {
         String fileType = request.getParam("fileType");
         String formId = request.getParam("formId");
-        formService.get(formId, getEvent -> {
-            if (getEvent.isRight()) {
-                switch (fileType) {
-                    case "csv":
-                        new FormResponsesExportCSV(eb, request, getEvent.right().getValue()).launch();
-                        break;
-                    case "pdf":
-                        new FormResponsesExportPDF(eb, request, vertx, config, getEvent.right().getValue()).launch();
-                        break;
-                    default:
-                        badRequest(request);
-                        break;
+        RequestUtils.bodyToJson(request, images -> {
+            formService.get(formId, getEvent -> {
+                if (getEvent.isRight()) {
+                    switch (fileType) {
+                        case "csv":
+                            new FormResponsesExportCSV(eb, request, getEvent.right().getValue()).launch();
+                            break;
+                        case "pdf":
+                                JsonObject form = getEvent.right().getValue();
+                                form.put("images", images);
+                                new FormResponsesExportPDF(eb, request, vertx, config, storage, form).launch();
+                            break;
+                        default:
+                            badRequest(request);
+                            break;
+                    }
                 }
-            }
-            else {
-                log.error("[Formulaire@export] Error in getting form to export responses of form " + formId);
-            }
+                else {
+                    log.error("[Formulaire@export] Error in getting form to export responses of form " + formId);
+                }
+            });
         });
     }
 

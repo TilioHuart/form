@@ -127,5 +127,10 @@
         </div>
     </div>
 
+    <!-- Temp graph for PDF export -->
+    <div class="twelve" style="opacity:0;">
+        <div ng-repeat="chart in vm.getGraphQuestions()" id="pdf-response-chart-[[$index]]"></div>
+    </div>
+
     <container template='lightbox'></container>
 </div>

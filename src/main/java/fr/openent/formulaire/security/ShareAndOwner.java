@@ -113,7 +113,7 @@ public class ShareAndOwner implements ResourcesProvider {
     }
 
     private boolean isExportForm(final Binding binding) {
-        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.FormController|export");
+        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.FormController|export");
     }
 
     private boolean isShareJson(final Binding binding) {

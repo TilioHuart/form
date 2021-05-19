@@ -66,6 +66,9 @@
         .inline {
             display: inline-block;
         }
+        .nobreakpage {
+            page-break-inside: avoid;
+        }
     </style>
 </head>
 
@@ -107,7 +110,7 @@
 
             {{#type_graph}}
             <div class="response">
-
+                <span><img src="{{graphData}}" alt="Graph"/></span>
             </div>
             {{/type_graph}}
         </div>
