@@ -48,6 +48,10 @@ public class ShareAndOwner implements ResourcesProvider {
                 case "questionId":
                     query += "(SELECT form_id FROM " + Formulaire.QUESTION_TABLE + " WHERE id = ?)";
                     break;
+                case "choiceId":
+                    query += "(SELECT form_id FROM " + Formulaire.QUESTION_TABLE + " WHERE id =" +
+                            "(SELECT question_id FROM " + Formulaire.QUESTION_CHOICE_TABLE + " WHERE id = ?))";
+                    break;
                 case "responseId":
                     query += "(SELECT form_id FROM " + Formulaire.QUESTION_TABLE + " WHERE id =" +
                             "(SELECT question_id FROM " + Formulaire.RESPONSE_TABLE + " WHERE id = ?))";
@@ -67,28 +71,36 @@ public class ShareAndOwner implements ResourcesProvider {
                 Long count = SqlResult.countResult(message);
                 handler.handle(count != null && count > 0L);
             });
-        } else {
+        }
+        else {
             handler.handle(false);
         }
     }
 
 
     private String getKeyByBinding(Binding binding) {
-        if (isUpdateForm(binding) || isDeleteForm(binding) || isExportForm(binding) || isCountDistribution(binding) ||
-                isCreateDistribution(binding) || isSendReminderForm(binding)) {
+        if (isCountDistribution(binding) || isGetDistribution(binding) || isCreateDistribution(binding) ||
+                isAddDistribution(binding) || isUpdateForm(binding) || isDeleteForm(binding) || isExportForm(binding) ||
+                isSendReminderForm(binding) || isCreateQuestion(binding)) {
             return "formId";
         }
-        else if (isDeleteDistribution(binding)) {
+        else if (isUpdateDistribution(binding) || isDeleteDistribution(binding)) {
             return "distributionId";
         }
-        else if (isListMineByDistributionResponse(binding) || isCreateResponse(binding) || isZipAndDownloadResponseFile(binding)) {
+        else if (isListMineByDistributionResponse(binding) || isCreateQuestionChoice(binding) ||
+                isCreateMultipleQuestionChoice(binding) || isGetQuestion(binding) || isUpdateQuestion(binding) ||
+                isDeleteQuestion(binding) || isListResponse(binding) || isCreateResponse(binding) ||
+                isZipAndDownloadResponseFile(binding)) {
             return "questionId";
+        }
+        else if (isUpdateQuestionChoice(binding) || isDeleteQuestionChoice(binding)) {
+            return "choiceId";
         }
         else if (isUpdateResponse(binding) || isDeleteResponse(binding) || isUploadResponseFile(binding) ||
                 isDeleteAllResponseFile(binding)) {
             return "responseId";
         }
-        else if (isDownloadResponseFile(binding)) {
+        else if (isGetResponseFile(binding) || isDownloadResponseFile(binding)) {
             return "fileId";
         }
         else {
@@ -100,6 +112,36 @@ public class ShareAndOwner implements ResourcesProvider {
         return (thatHttpMethod.equals(binding.getMethod()) && thatServiceMethod.equals(binding.getServiceMethod()));
     }
 
+    // Distribution
+    private boolean isCountDistribution(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.DistributionController|count");
+    }
+
+    private boolean isGetDistribution(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.DistributionController|get");
+    }
+
+    private boolean isCreateDistribution(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.DistributionController|create");
+    }
+
+    private boolean isAddDistribution(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.DistributionController|add");
+    }
+
+    private boolean isUpdateDistribution(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.PUT, "fr.openent.formulaire.controllers.DistributionController|update");
+    }
+
+    private boolean isDeleteDistribution(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.DistributionController|delete");
+    }
+
+    private boolean isListMineByDistributionResponse(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseController|listMineByDistribution");
+    }
+
+    // Form
     private boolean isUpdateForm(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.PUT, "fr.openent.formulaire.controllers.FormController|update");
     }
@@ -128,20 +170,43 @@ public class ShareAndOwner implements ResourcesProvider {
         return bindingIsThatMethod(binding, HttpMethod.PUT, "fr.openent.formulaire.controllers.FormController|shareResource");
     }
 
-    private boolean isCountDistribution(final Binding binding) {
-        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.DistributionController|count");
+    // QuestionChoice
+    private boolean isCreateQuestionChoice(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.QuestionChoiceController|create");
     }
 
-    private boolean isCreateDistribution(final Binding binding) {
-        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.DistributionController|create");
+    private boolean isCreateMultipleQuestionChoice(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.QuestionChoiceController|createMultiple");
     }
 
-    private boolean isDeleteDistribution(final Binding binding) {
-        return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.DistributionController|delete");
+    private boolean isUpdateQuestionChoice(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.PUT, "fr.openent.formulaire.controllers.QuestionChoiceController|update");
     }
 
-    private boolean isListMineByDistributionResponse(final Binding binding) {
-        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseController|listMineByDistribution");
+    private boolean isDeleteQuestionChoice(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.QuestionChoiceController|delete");
+    }
+
+    // Question
+    private boolean isGetQuestion(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.QuestionController|get");
+    }
+
+    private boolean isCreateQuestion(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.QuestionController|create");
+    }
+
+    private boolean isUpdateQuestion(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.PUT, "fr.openent.formulaire.controllers.QuestionController|update");
+    }
+
+    private boolean isDeleteQuestion(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.QuestionController|delete");
+    }
+
+    // Response
+    private boolean isListResponse(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseController|list");
     }
 
     private boolean isCreateResponse(final Binding binding) {
@@ -154,6 +219,11 @@ public class ShareAndOwner implements ResourcesProvider {
 
     private boolean isDeleteResponse(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.ResponseController|delete");
+    }
+
+    // ResponseFile
+    private boolean isGetResponseFile(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseFileController|get");
     }
 
     private boolean isDownloadResponseFile(final Binding binding) {
@@ -171,4 +241,5 @@ public class ShareAndOwner implements ResourcesProvider {
     private boolean isDeleteAllResponseFile(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.ResponseFileController|deleteAll");
     }
+
 }

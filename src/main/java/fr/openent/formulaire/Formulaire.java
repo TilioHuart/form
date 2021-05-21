@@ -70,12 +70,17 @@ public class Formulaire extends BaseServer {
 
 		final Storage storage = new StorageFactory(vertx, config).getStorage();
 
-		SqlConf formConf = SqlConfs.createConf(FormController.class.getName());
 		SqlConf distribConf = SqlConfs.createConf(DistributionController.class.getName());
+		SqlConf formConf = SqlConfs.createConf(FormController.class.getName());
+		SqlConf questionChoiceConf = SqlConfs.createConf(QuestionChoiceController.class.getName());
+		SqlConf questionConf = SqlConfs.createConf(QuestionController.class.getName());
 		SqlConf responseConf = SqlConfs.createConf(ResponseController.class.getName());
 		SqlConf responseFileConf = SqlConfs.createConf(ResponseFileController.class.getName());
+
 		List<SqlConf> confs = new ArrayList<>();
-		confs.add(formConf); confs.add(distribConf); confs.add(responseConf); confs.add(responseFileConf);
+		confs.add(distribConf); confs.add(formConf);
+		confs.add(questionChoiceConf); confs.add(questionConf);
+		confs.add(responseConf); confs.add(responseFileConf);
 
 		for (SqlConf conf : confs) {
 			conf.setSchema("formulaire");

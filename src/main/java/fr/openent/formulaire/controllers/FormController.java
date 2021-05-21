@@ -6,6 +6,7 @@ import fr.openent.formulaire.export.FormResponsesExportPDF;
 import fr.openent.formulaire.helpers.FutureHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CreationRight;
+import fr.openent.formulaire.security.ResponseRight;
 import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.*;
 import fr.openent.formulaire.service.impl.*;
@@ -79,7 +80,7 @@ public class FormController extends ControllerHelper {
 
     @Get("/forms")
     @ApiDoc("List all the forms created by me or shared with me")
-    @ResourceFilter(AccessRight.class)
+    @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
@@ -99,7 +100,7 @@ public class FormController extends ControllerHelper {
 
     @Get("/sentForms")
     @ApiDoc("List all the forms sent to me")
-    @ResourceFilter(AccessRight.class)
+    @ResourceFilter(ResponseRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listSentForms(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
@@ -114,7 +115,7 @@ public class FormController extends ControllerHelper {
 
     @Get("/linker")
     @ApiDoc("List all the forms for the linker")
-    @ResourceFilter(AccessRight.class)
+    @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listForLinker(final HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
@@ -404,7 +405,7 @@ public class FormController extends ControllerHelper {
     // Image
 
     @Get("/info/image/:idImage")
-    @ApiDoc("Get image info form workspace for a specific image")
+    @ApiDoc("Get image info from workspace for a specific image")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void getInfoImg(final HttpServerRequest request) {

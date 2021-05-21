@@ -1,7 +1,9 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CreationRight;
+import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.QuestionChoiceService;
 import fr.openent.formulaire.service.impl.DefaultQuestionChoiceService;
 import fr.wseduc.rs.*;
@@ -46,8 +48,8 @@ public class QuestionChoiceController extends ControllerHelper {
 
     @Post("/questions/:questionId/choices")
     @ApiDoc("Create a choice for a specific question")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         RequestUtils.bodyToJson(request, choice -> {
@@ -57,8 +59,8 @@ public class QuestionChoiceController extends ControllerHelper {
 
     @Post("/questions/:questionId/choices/multiple")
     @ApiDoc("Create several choices for a specific question")
-    @ResourceFilter(CreationRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void createMultiple(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         RequestUtils.bodyToJsonArray(request, choices -> {
@@ -68,8 +70,8 @@ public class QuestionChoiceController extends ControllerHelper {
 
     @Put("/choices/:choiceId")
     @ApiDoc("Update a specific choice")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
         String choiceId = request.getParam("choiceId");
         RequestUtils.bodyToJson(request, choice -> {
@@ -79,8 +81,8 @@ public class QuestionChoiceController extends ControllerHelper {
 
     @Delete("/choices/:choiceId")
     @ApiDoc("Delete a specific choice")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String choiceId = request.getParam("choiceId");
         questionChoiceService.delete(choiceId, defaultResponseHandler(request));

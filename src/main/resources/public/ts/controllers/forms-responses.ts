@@ -14,7 +14,6 @@ interface ViewModel {
             myResponses: boolean
         }
     };
-    filtersOrders: typeof FiltersOrders;
 
     switchAll(value: boolean) : void;
     sort(field: FiltersOrders) : void;
@@ -43,7 +42,6 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
             myResponses: false
         }
     };
-    vm.filtersOrders = FiltersOrders;
 
     const init = async (): Promise<void> => {
         await vm.forms.syncSent();
@@ -140,7 +138,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
                 }
             }
             if (distrib == null) {
-                await distributionService.add(distribs[0]);
+                await distributionService.add(form.id, distribs[0]);
             }
             $scope.redirectTo(`/form/${form.id}/question/1`);
         }

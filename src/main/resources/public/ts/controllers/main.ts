@@ -86,7 +86,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			resultsForm: async (params) => {
 				$scope.currentPage = Pages.RESULTS_FORM;
 				await $scope.getFormWithRights(params.idForm);
-				if ($scope.canCreate() && $scope.hasShareRightManager($scope.form)) {
+				if ($scope.canCreate() && $scope.hasShareRightContrib($scope.form)) {
 					$scope.form.nbQuestions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
 					let distribs = $scope.getDataIf200(await distributionService.listByForm(params.idForm));
 					let nbResponses = distribs.filter(d => d.status === DistributionStatus.FINISHED).length;

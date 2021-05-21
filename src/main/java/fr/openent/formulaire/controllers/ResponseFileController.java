@@ -45,8 +45,8 @@ public class ResponseFileController extends ControllerHelper {
 
     @Get("/responses/files/:fileId")
     @ApiDoc("Get a specific file by id")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String fileId = request.getParam("fileId");
         responseFileService.get(fileId, defaultResponseHandler(request));

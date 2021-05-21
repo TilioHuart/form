@@ -4,12 +4,10 @@ import {formService, questionChoiceService, questionService} from "../services";
 import {Direction, FORMULAIRE_QUESTION_EMIT_EVENT, Pages} from "../core/enums";
 
 interface ViewModel {
-    types: typeof Types;
     form: Form;
     questions: Questions;
     newQuestion: Question;
     dontSave: boolean;
-    direction: typeof Direction;
     display: {
         lightbox: {
             newQuestion: boolean,
@@ -45,12 +43,10 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
     function ($scope, $rootScope) {
 
         const vm: ViewModel = this;
-        vm.types = Types;
         vm.form = new Form();
         vm.questions = new Questions();
         vm.newQuestion = new Question();
         vm.dontSave = false;
-        vm.direction = Direction;
         vm.display = {
             lightbox: {
                 newQuestion: false,

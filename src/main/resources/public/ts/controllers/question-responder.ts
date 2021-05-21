@@ -11,7 +11,6 @@ import {distributionService, formService, questionService, responseFileService, 
 import {FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
 
 interface ViewModel {
-    types: typeof Types;
     question: Question;
     response: Response;
     responses: Responses;
@@ -20,12 +19,12 @@ interface ViewModel {
     nbQuestions: number;
     last: boolean;
     selectedIndex: Array<boolean>;
+    files: File[];
     display: {
         lightbox: {
             sending: boolean
         }
     };
-    files: File[];
 
     prev() : Promise<void>;
     next() : Promise<void>;
@@ -41,7 +40,6 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     function ($scope, $rootScope) {
 
     const vm: ViewModel = this;
-    vm.types = Types;
     vm.question = new Question();
     vm.response = new Response();
     vm.responses = new Responses();
@@ -50,12 +48,12 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     vm.nbQuestions = 1;
     vm.last = false;
     vm.selectedIndex = new Array<boolean>();
+    vm.files = [];
     vm.display = {
         lightbox: {
             sending: false
         }
     };
-    vm.files = [];
 
     const init = async () : Promise<void> => {
         vm.question = $scope.question;

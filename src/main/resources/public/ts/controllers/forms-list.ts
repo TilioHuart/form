@@ -1,6 +1,6 @@
 import {idiom, model, ng, notify, template} from 'entcore';
 import {Distribution, Distributions, Form, Forms} from "../models";
-import {distributionService, formService, questionService} from "../services";
+import {distributionService, formService} from "../services";
 import {FiltersFilters, FiltersOrders} from "../core/enums";
 import {Mix} from "entcore-toolkit";
 
@@ -25,7 +25,6 @@ interface ViewModel {
         },
         warning: boolean
     };
-    filtersOrders: typeof FiltersOrders;
 
     openFolder(folderName: string) : void;
     switchAll(value: boolean) : void;
@@ -79,7 +78,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         },
         warning: false
     };
-    vm.filtersOrders = FiltersOrders;
 
     const init = async () : Promise<void> => {
         await vm.forms.sync();

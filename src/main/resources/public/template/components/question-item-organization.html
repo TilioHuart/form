@@ -8,10 +8,10 @@
     <div class="main">
         <span class="title">[[question.title]]</span>
         <div class="one two-mobile container-arrow">
-            <div ng-class="$first? 'hidden' : ''" ng-click="vm.moveQuestion($index, vm.direction.UP)">
+            <div ng-class="$first? 'hidden' : ''" ng-click="vm.moveQuestion($index, Direction.UP)">
                 <i class="chevron-up lg-icon"></i>
             </div>
-            <div ng-class="$last? 'hidden' : ''" ng-click="vm.moveQuestion($index, vm.direction.DOWN)">
+            <div ng-class="$last? 'hidden' : ''" ng-click="vm.moveQuestion($index, Direction.DOWN)">
                 <i class="chevron-down lg-icon"></i>
             </div>
         </div>

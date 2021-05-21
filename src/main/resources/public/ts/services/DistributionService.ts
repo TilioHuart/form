@@ -10,7 +10,7 @@ export interface DistributionService {
     count(formId: number) : Promise<AxiosResponse>;
     get(formId: number) : Promise<AxiosResponse>;
     create(form: Form, distribution: Distribution) : Promise<AxiosResponse>;
-    add(distribution: Distribution) : Promise<AxiosResponse>;
+    add(formId: number, distribution: Distribution) : Promise<AxiosResponse>;
     update(distribution: Distribution) : Promise<AxiosResponse>;
     delete(distributionId: number) : Promise<AxiosResponse>;
 }
@@ -71,7 +71,7 @@ export const distributionService: DistributionService = {
         }
     },
 
-    async create(form: Form, distribution: Distribution) : Promise<AxiosResponse> { // TODO distrib unique ou plusieurs ?
+    async create(form: Form, distribution: Distribution) : Promise<AxiosResponse> {
         try {
             return http.post(`/formulaire/distributions/forms/${form.id}`, distribution);
         } catch (err) {
@@ -80,9 +80,9 @@ export const distributionService: DistributionService = {
         }
     },
 
-    async add(distribution: Distribution) : Promise<AxiosResponse> {
+    async add(formId: number, distribution: Distribution) : Promise<AxiosResponse> {
         try {
-            return http.post(`/formulaire/distributions`, distribution);
+            return http.post(`/formulaire/distributions/forms/${formId}`, distribution);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.create'));
             throw err;

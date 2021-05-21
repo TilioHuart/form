@@ -17,7 +17,6 @@ import {Exports} from "../core/enums";
 import http from "axios";
 
 interface ViewModel {
-    types: typeof Types;
     question: Question;
     questions: Questions;
     results: Responses;
@@ -59,7 +58,6 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         let paletteColors = ['#0F2497','#2A9BC7','#77C4E1','#C0E5F2']; // Bleu foncé à bleu clair
 
         const vm: ViewModel = this;
-        vm.types = Types;
         vm.question = new Question();
         vm.questions = new Questions();
         vm.results = new Responses();
@@ -96,13 +94,13 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             vm.nbLines = vm.nbResults;
             vm.nbQuestions = $scope.form.nbQuestions;
             vm.last = vm.question.position === vm.nbQuestions;
-            if (vm.question.question_type == vm.types.SINGLEANSWER || vm.question.question_type == vm.types.MULTIPLEANSWER) {
+            if (vm.question.question_type == Types.SINGLEANSWER || vm.question.question_type == Types.MULTIPLEANSWER) {
                 vm.question = await initQCMandQCU(vm.question);
                 let choices = vm.question.choices.all.filter(c => c.nbResponses > 0);
                 vm.colors = ColorUtils.interpolateColors(paletteColors, choices.length);
 
                 // Init charts
-                if (vm.question.question_type == vm.types.SINGLEANSWER) {
+                if (vm.question.question_type == Types.SINGLEANSWER) {
                     initSingleAnswerChart();
                 }
                 vm.nbLines = vm.question.choices.all.length;
@@ -137,7 +135,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             let noResponseChoice = new QuestionChoice();
             let nbEmptyResponse = vm.distributions.all.filter(d => !resultsDistribIds.includes(d.id)).length;
             noResponseChoice.value = idiom.translate('formulaire.response.empty');
-            noResponseChoice.nbResponses = question.question_type == vm.types.MULTIPLEANSWER ?
+            noResponseChoice.nbResponses = question.question_type == Types.MULTIPLEANSWER ?
                 nbEmptyResponse :
                 nbEmptyResponse + results.all.filter(r => !!!r.choice_id && finishedDistribIds.includes(r.distribution_id)).length;
 

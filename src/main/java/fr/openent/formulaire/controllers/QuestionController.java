@@ -1,7 +1,9 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CreationRight;
+import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.QuestionService;
 import fr.openent.formulaire.service.impl.DefaultQuestionService;
 import fr.wseduc.rs.*;
@@ -46,8 +48,8 @@ public class QuestionController extends ControllerHelper {
 
     @Get("/questions/:questionId")
     @ApiDoc("Get a specific question by id")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         questionService.get(questionId, defaultResponseHandler(request));
@@ -65,8 +67,8 @@ public class QuestionController extends ControllerHelper {
 
     @Post("/forms/:formId/questions")
     @ApiDoc("Create a question in a specific form")
-    @ResourceFilter(CreationRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
         String formId = request.getParam("formId");
         RequestUtils.bodyToJson(request, question -> {
@@ -87,8 +89,8 @@ public class QuestionController extends ControllerHelper {
 
     @Put("/questions/:questionId")
     @ApiDoc("Update a specific question")
-    @ResourceFilter(CreationRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         RequestUtils.bodyToJson(request, question -> {
@@ -98,8 +100,8 @@ public class QuestionController extends ControllerHelper {
 
     @Delete("/questions/:questionId")
     @ApiDoc("Delete a specific question")
-    @ResourceFilter(CreationRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         questionService.delete(questionId, defaultResponseHandler(request));

@@ -31,8 +31,8 @@ public class ResponseController extends ControllerHelper {
 
     @Get("/questions/:questionId/responses")
     @ApiDoc("List all the responses to a specific question")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         responseService.list(questionId, arrayResponseHandler(request));

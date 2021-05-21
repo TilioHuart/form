@@ -3,6 +3,7 @@ package fr.openent.formulaire.controllers;
 import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CreationRight;
+import fr.openent.formulaire.security.ResponseRight;
 import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.impl.DefaultDistributionService;
@@ -46,7 +47,7 @@ public class DistributionController extends ControllerHelper {
 
     @Get("/distributions/listMine")
     @ApiDoc("List all the distributions of the forms sent to me")
-    @ResourceFilter(AccessRight.class)
+    @ResourceFilter(ResponseRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listByResponder(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
@@ -95,8 +96,8 @@ public class DistributionController extends ControllerHelper {
 
     @Get("/distributions/forms/:formId")
     @ApiDoc("Get a specific distribution by form, responder and status")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String formId = request.getParam("formId");
         UserUtils.getUserInfos(eb, request, user -> {
@@ -127,10 +128,10 @@ public class DistributionController extends ControllerHelper {
         });
     }
 
-    @Post("/distributions")
+    @Post("/distributions/forms/:formId/add")
     @ApiDoc("Create a new distribution based on an already existing one")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void add(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
             RequestUtils.bodyToJson(request, distribution -> {
@@ -141,8 +142,8 @@ public class DistributionController extends ControllerHelper {
 
     @Put("/distributions/:distributionId")
     @ApiDoc("Update a specific distribution")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
         String distributionId = request.getParam("distributionId");
         RequestUtils.bodyToJson(request, distribution -> {
