@@ -82,7 +82,7 @@ export const distributionService: DistributionService = {
 
     async add(formId: number, distribution: Distribution) : Promise<AxiosResponse> {
         try {
-            return http.post(`/formulaire/distributions/forms/${formId}`, distribution);
+            return http.post(`/formulaire/distributions/forms/${formId}/add`, distribution);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.create'));
             throw err;
