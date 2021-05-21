@@ -18,7 +18,9 @@ import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.storage.Storage;
 
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
@@ -27,11 +29,14 @@ public class ResponseFileController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(ResponseFileController.class);
     private final ResponseFileService responseFileService;
     private final Storage storage;
+    private final SimpleDateFormat dateGetter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+    private final SimpleDateFormat dateFormatter = new SimpleDateFormat("ddMMyyyy_HH'h'mm_");
 
     public ResponseFileController(Storage storage) {
         super();
         this.responseFileService = new DefaultResponseFileService();
         this.storage = storage;
+        dateFormatter.setTimeZone(TimeZone.getTimeZone("Europe/Paris")); // TODO to adapt for not France timezone
     }
 
     @Get("/responses/:responseId/files/all")
@@ -78,13 +83,50 @@ public class ResponseFileController extends ControllerHelper {
         responseFileService.listByQuestion(questionId, event -> {
             if (event.isRight()) {
                 List<JsonObject> listFiles = event.right().getValue().getList();
-                JsonObject root = new JsonObject().put("type", "folder").put("name", Formulaire.ARCHIVE_ZIP_NAME);
+                JsonObject root = new JsonObject()
+                        .put("id", UUID.randomUUID().toString())
+                        .put("type", "folder")
+                        .put("name", Formulaire.ARCHIVE_ZIP_NAME)
+                        .put("folders", new JsonArray());
+                JsonObject groupFiles = new JsonObject();
 
                 // Adapt properties for exportAndSendZip functions
                 for (JsonObject file : listFiles) {
-                    file.put("name", file.getString("filename"));
+                    String displayDate = "";
+                    try {
+                        displayDate = dateFormatter.format(dateGetter.parse(file.getString("date_response")));
+                    }
+                    catch (ParseException e) { e.printStackTrace(); }
+
+                    file.put("name", displayDate + file.getString("filename"));
                     file.put("file", file.getString("id"));
                     file.put("type", "file");
+
+                    // Sort files by response_id in the groupFiles array (to add folder parents after)
+                    String responseId = file.getInteger("response_id").toString();
+                    if (!groupFiles.containsKey(responseId)) {
+                        groupFiles.put(responseId, new JsonArray());
+                    }
+                    groupFiles.getJsonArray(responseId).add(file);
+                }
+
+                // Folder management
+                for (String key : groupFiles.getMap().keySet()) {
+                    JsonArray groupFile = groupFiles.getJsonArray(key);
+                    int nbFilesInGroup = groupFile.size();
+                    if (nbFilesInGroup > 1) {
+                        JsonObject folder = new JsonObject()
+                                .put("id", UUID.randomUUID().toString())
+                                .put("type", "folder")
+                                .put("parent", root.getString("id"))
+                                .put("name", getFolderName(groupFile.getJsonObject(0)));
+                        root.getJsonArray("folders").add(folder);
+                        listFiles.add(folder);
+
+                        for (int i = 0; i < nbFilesInGroup; i++) {
+                            groupFile.getJsonObject(i).put("parent", folder.getString("id"));
+                        }
+                    }
                 }
 
                 // Export all files of the 'listFiles' in a folder defined by the 'root' object
@@ -102,6 +144,18 @@ public class ResponseFileController extends ControllerHelper {
                 renderError(request);
             }
         });
+    }
+
+    private String getFolderName(JsonObject file) {
+        String[] responderNames = file.getString("responder_name").split(" ");
+        Collections.reverse(Arrays.asList(responderNames));
+
+        String responderName = String.join("", responderNames);
+        String filename = file.getString("filename");
+        String completeName = file.getString("name");
+        boolean isAnonymous = !filename.substring(0, filename.indexOf("_")).equals(responderName);
+
+        return isAnonymous ? completeName.substring(0, 14) : completeName.substring(0, 15) + responderName;
     }
 
     @Post("/responses/:responseId/files")

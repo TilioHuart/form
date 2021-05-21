@@ -20,9 +20,11 @@ public class DefaultResponseFileService implements ResponseFileService {
 
     @Override
     public void listByQuestion(String questionId, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT rf.* FROM " + Formulaire.RESPONSE_FILE_TABLE + " rf " +
+        String query = "SELECT rf.*, d.date_response, d.responder_name FROM " + Formulaire.RESPONSE_FILE_TABLE + " rf " +
                 "INNER JOIN " + Formulaire.RESPONSE_TABLE + " r ON r.id = rf.response_id " +
-                "WHERE r.question_id = ?;";
+                "INNER JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON d.id = r.distribution_id " +
+                "WHERE r.question_id = ?" +
+                "ORDER BY rf.response_id;";
         JsonArray params = new JsonArray().add(questionId);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
