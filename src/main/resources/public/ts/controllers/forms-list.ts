@@ -14,6 +14,8 @@ interface ViewModel {
         subject: string,
         body: string
     };
+    pageSize: number;
+    limitTo: number;
     display: {
         grid: boolean,
         lightbox: {
@@ -52,6 +54,7 @@ interface ViewModel {
     doArchiveForms() : Promise<void>;
     deleteForms() : void;
     doDeleteForms() : Promise<void>;
+    infiniteScroll() : void;
 }
 
 
@@ -68,6 +71,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         subject: "",
         body: ""
     };
+    vm.pageSize = 30;
+    vm.limitTo = vm.pageSize;
     vm.display = {
         grid: true,
         lightbox: {
@@ -310,6 +315,10 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     // Utils
+
+    vm.infiniteScroll = () : void => {
+        vm.limitTo += vm.pageSize;
+    };
 
     const initMail = () : void => {
         let link = `${$scope.config.host}/formulaire#/form/${vm.forms.selected[0].id}`;

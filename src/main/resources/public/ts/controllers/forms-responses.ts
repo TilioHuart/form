@@ -8,6 +8,8 @@ interface ViewModel {
     distributions: Distributions;
     allFormsSelected: boolean;
     searchInput: string;
+    pageSize: number;
+    limitTo: number;
     display: {
         grid: boolean,
         lightbox: {
@@ -20,12 +22,13 @@ interface ViewModel {
     sort(field: FiltersOrders) : void;
     filter(filter: FiltersFilters) : void;
     displayFilterName(name: string) : string;
+    getMyResponses(form: Form) : Array<Distribution>;
+    infiniteScroll() : void;
     checkOpenButton() : boolean;
     checkMyResponsesButton() : boolean;
     openForm(form: Form) : void;
     openMyResponses() : void;
     closeMyResponses() : void;
-    getMyResponses(form: Form) : Array<Distribution>;
 }
 
 
@@ -37,6 +40,8 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
     vm.distributions = new Distributions();
     vm.searchInput = "";
     vm.allFormsSelected = false;
+    vm.pageSize = 40;
+    vm.limitTo = vm.pageSize;
     vm.display = {
         grid: true,
         lightbox: {
@@ -110,6 +115,10 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
 
     vm.getMyResponses = (form: Form) : Array<Distribution> => {
         return vm.distributions.all.filter(d => d.form_id === form.id && d.status === DistributionStatus.FINISHED);
+    };
+
+    vm.infiniteScroll = () : void => {
+        vm.limitTo += vm.pageSize;
     };
 
     // Toaster
