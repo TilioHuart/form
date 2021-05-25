@@ -23,11 +23,11 @@
             <!-- Question title -->
             <div class="title">
                 <h4 ng-if="vm.question.question_type == Types.FREETEXT">[[vm.question.title]]</h4>
-                <h4 ng-if="vm.question.question_type != Types.FREETEXT && vm.nbResults > 1">
-                    [[vm.question.title]] ([[vm.nbResults]] <i18n>formulaire.responses</i18n>)<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span>
+                <h4 ng-if="vm.question.question_type != Types.FREETEXT && vm.form.nb_responses > 1">
+                    [[vm.question.title]] ([[vm.form.nb_responses]] <i18n>formulaire.responses</i18n>)<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span>
                 </h4>
-                <h4 ng-if="vm.question.question_type != Types.FREETEXT && vm.nbResults <= 1">
-                    [[vm.question.title]] ([[vm.nbResults]] <i18n>formulaire.response</i18n>)<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span>
+                <h4 ng-if="vm.question.question_type != Types.FREETEXT && vm.form.nb_responses <= 1">
+                    [[vm.question.title]] ([[vm.form.nb_responses]] <i18n>formulaire.response</i18n>)<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span>
                 </h4>
                 <button class="cell" ng-click="vm.zipAndDownload()" ng-if="vm.question.question_type == Types.FILE">
                     <i18n>formulaire.form.download.all.files</i18n>
@@ -40,11 +40,11 @@
             <!-- List of results SINGLEANSWER, MULTIPLEANSWER -->
             <div ng-if="vm.question.question_type == Types.SINGLEANSWER || vm.question.question_type == Types.MULTIPLEANSWER"
                  class="choices">
-                <div class="twelve-mobile" ng-class="vm.question.question_type == Types.MULTIPLEANSWER ? 'twelve' : 'four'">
-                    <div ng-repeat="choice in vm.question.choices.all | limitTo:vm.nbLinesDisplay" class="choice">
-                        <div class="infos twelve-mobile" ng-class="vm.question.question_type == Types.MULTIPLEANSWER ? 'four' : 'twelve'">
+                <div class="twelve-mobile" ng-class="vm.question.question_type == Types.MULTIPLEANSWER ? 'twelve' : 'five'">
+                    <div ng-repeat="choice in vm.question.choices.all" class="choice">
+                        <div class="infos twelve-mobile" ng-class="vm.question.question_type == Types.MULTIPLEANSWER ? 'five' : 'twelve'">
                             <div class="choice-value eight twelve-mobile ellipsis">
-                                <span ng-if="($index+1) != vm.nbLines">[[$index + 1]]. </span>[[choice.value]]
+                                <span ng-if="($index+1) != vm.question.choices.all.length">[[$index + 1]]. </span>[[choice.value]]
                             </div>
                             <div class="four twelve-mobile ellipsis bold">
                                 [[choice.nbResponses]]
@@ -54,7 +54,7 @@
                             </div>
                         </div>
                         <!-- Graph for MULTIPLEANSWER -->
-                        <div ng-if="vm.question.question_type == Types.MULTIPLEANSWER" class="eight zero-mobile">
+                        <div ng-if="vm.question.question_type == Types.MULTIPLEANSWER" class="seven zero-mobile">
                             <div class="graph-bar"
                                  ng-style="{width: (vm.getWidth(choice.nbResponses, 95) + '%'), 'background-color': vm.getColor(choice.id)}">
                             </div>
@@ -63,24 +63,27 @@
                 </div>
 
                 <!-- Graph for SINGLEANSWER -->
-                <div ng-if="vm.question.question_type == Types.SINGLEANSWER" class="graph-camembert eight zero-mobile">
+                <div ng-if="vm.question.question_type == Types.SINGLEANSWER" class="graph-camembert seven zero-mobile">
                     <div class="eight">
                         <div id="singleanswer-response-chart"></div>
                     </div>
                 </div>
+
+                <!-- Loader -->
+                <div ng-if="vm.loading" class="twelve loader"><i class="loading"></i></div>
             </div>
 
             <!-- List of results SHORTANSWER, LONGANSWER, DATE, TIME, FILE -->
             <div ng-if="vm.question.question_type != Types.SINGLEANSWER &&
                         vm.question.question_type != Types.MULTIPLEANSWER &&
                         vm.question.question_type != Types.FREETEXT">
-                <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':true | limitTo:vm.nbLinesDisplay" class="distrib">
+                <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':true" class="distrib">
                     <div class="infos four twelve-mobile">
                         <div class="four twelve-mobile">[[displayDate(distrib.date_response)]]</div>
                         <div class="eight twelve-mobile ellipsis" ng-if="!vm.form.anonymous">[[distrib.responder_name]]</div>
                     </div>
                     <div class="eight twelve-mobile results">
-                        <div ng-repeat="result in vm.getDataByDistrib(distrib.id) | limitTo:vm.nbLinesDisplay"
+                        <div ng-repeat="result in vm.getDataByDistrib(distrib.id)"
                              ng-class="{'notLast' : !$last}">
                             <div ng-if="vm.question.question_type == Types.SHORTANSWER ||
                                         vm.question.question_type == Types.LONGANSWER ||
@@ -94,11 +97,13 @@
                         </div>
                     </div>
                 </div>
+                <!-- Loader -->
+                <div ng-if="vm.loading" class="twelve loader"><i class="loading"></i></div>
             </div>
 
             <!-- See more button -->
-            <div ng-if="vm.nbLines >= vm.nbLinesDisplay && vm.question.question_type != Types.FREETEXT" style="margin: 1%;">
-                <a ng-click="vm.nbLinesDisplay = vm.nbLinesDisplay + 10">
+            <div ng-if="vm.showMoreButton()" style="margin: 1%;">
+                <a ng-click="vm.loadMoreResults()">
                     <i18n>formulaire.seeMore</i18n>
                 </a>
             </div>

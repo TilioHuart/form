@@ -35,7 +35,8 @@ public class ResponseController extends ControllerHelper {
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
-        responseService.list(questionId, arrayResponseHandler(request));
+        String nbLines = request.params().get("nbLines");
+        responseService.list(questionId, nbLines, arrayResponseHandler(request));
     }
 
     @Get("/questions/:questionId/responses/:distributionId")

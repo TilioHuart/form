@@ -3,6 +3,7 @@ import http, {AxiosResponse} from 'axios';
 
 export interface ResponseFileService {
     list(responseId: number) : Promise<AxiosResponse>;
+    listByQuestion(questionId: number) : Promise<AxiosResponse>;
     get(fileId: number) : Promise<AxiosResponse>;
     download(fileId: number) : Promise<AxiosResponse>;
     zipAndDownload(questionId: number) : Promise<AxiosResponse>;
@@ -15,6 +16,15 @@ export const responseFileService: ResponseFileService = {
     async list(responseId: number) : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/responses/${responseId}/files/all`);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.responseFileService.list'));
+            throw err;
+        }
+    },
+
+    async listByQuestion(questionId: number) : Promise<AxiosResponse> {
+        try {
+            return http.get(`/formulaire/questions/${questionId}/files/all`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseFileService.list'));
             throw err;

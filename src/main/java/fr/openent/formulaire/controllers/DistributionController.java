@@ -69,6 +69,17 @@ public class DistributionController extends ControllerHelper {
         distributionService.listByForm(formId, arrayResponseHandler(request));
     }
 
+    @Get("/distributions/forms/:formId/list/:status")
+    @ApiDoc("List all the distributions of a specific form")
+    @ResourceFilter(CreationRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void listByFormAndStatus(HttpServerRequest request) {
+        String formId = request.getParam("formId");
+        String status = request.getParam("status");
+        String nbLines = request.params().get("nbLines");
+        distributionService.listByFormAndStatus(formId, status, nbLines, arrayResponseHandler(request));
+    }
+
     @Get("/distributions/forms/:formId/listMine")
     @ApiDoc("List all the distributions for a specific form sent to me")
     @ResourceFilter(AccessRight.class)

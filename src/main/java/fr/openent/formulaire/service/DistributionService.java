@@ -29,6 +29,15 @@ public interface DistributionService {
     void listByForm(String formId, Handler<Either<String, JsonArray>> handler);
 
     /**
+     * List all the distributions of a specific form with specific status
+     * @param formId form identifier
+     * @param status status
+     * @param nbLines number of lines already loaded
+     * @param handler function handler returning JsonArray data
+     */
+    void listByFormAndStatus(String formId, String status, String nbLines, Handler<Either<String, JsonArray>> handler);
+
+    /**
      * List all the distributions for a specific form sent to me
      * @param formId form identifier
      * @param user user connected

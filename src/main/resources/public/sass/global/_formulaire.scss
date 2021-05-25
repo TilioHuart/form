@@ -385,6 +385,12 @@ body.formulaire section.main {
         }
       }
 
+      .loader {
+        text-align: center;
+        font-size: 20px;
+        line-height: 40px;
+      }
+
       .freetext {
         border: thin solid $formulaire-grey-very-light;
         padding: 5px 10px;
@@ -427,6 +433,7 @@ body.formulaire section.main {
       .choices {
         display: flex;
         border: thin solid $formulaire-grey-very-light;
+        flex-wrap: wrap;
 
         .choice {
           display: flex;

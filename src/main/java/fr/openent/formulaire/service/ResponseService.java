@@ -10,9 +10,10 @@ public interface ResponseService {
     /**
      * List all the responses to a specific question
      * @param questionId question identifier
+     * @param nbLines number of lines already loaded
      * @param handler function handler returning JsonArray data
      */
-    void list(String questionId, Handler<Either<String, JsonArray>> handler);
+    void list(String questionId, String nbLines, Handler<Either<String, JsonArray>> handler);
 
     /**
      * List all my responses to a specific question for a specific distribution

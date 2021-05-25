@@ -48,6 +48,15 @@ public class ResponseFileController extends ControllerHelper {
         responseFileService.list(responseId, arrayResponseHandler(request));
     }
 
+    @Get("/questions/:questionId/files/all")
+    @ApiDoc("List all files of a specific question")
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void listByQuestion(HttpServerRequest request) {
+        String questionId = request.getParam("questionId");
+        responseFileService.listByQuestion(questionId, arrayResponseHandler(request));
+    }
+
     @Get("/responses/files/:fileId")
     @ApiDoc("Get a specific file by id")
     @ResourceFilter(ShareAndOwner.class)

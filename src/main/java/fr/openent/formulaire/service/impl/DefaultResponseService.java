@@ -13,15 +13,26 @@ import org.entcore.common.user.UserInfos;
 public class DefaultResponseService implements ResponseService {
 
     @Override
-    public void list(String questionId, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " WHERE question_id = ?;";
+    public void list(String questionId, String nbLines, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT r.* FROM " + Formulaire.RESPONSE_TABLE + " r " +
+                "INNER JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON d.id = r.distribution_id " +
+                "WHERE question_id = ? " +
+                "ORDER BY d.date_sending DESC";
         JsonArray params = new JsonArray().add(questionId);
+
+        if (!nbLines.equals("null")) {
+            query += " LIMIT ? OFFSET ?";
+            params.add(Integer.parseInt(nbLines) + Formulaire.NB_NEW_LINES).add(nbLines);
+        }
+
+        query += ";";
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
     @Override
     public void listMineByDistribution(String questionId, String distributionId, UserInfos user, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " WHERE question_id = ? AND responder_id = ?  AND distribution_id = ? ORDER BY choice_id;";
+        String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " WHERE question_id = ? AND responder_id = ? AND distribution_id = ? " +
+                "ORDER BY choice_id;";
         JsonArray params = new JsonArray().add(questionId).add(user.getUserId()).add(distributionId);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }

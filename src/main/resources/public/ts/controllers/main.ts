@@ -87,11 +87,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				$scope.currentPage = Pages.RESULTS_FORM;
 				await $scope.getFormWithRights(params.idForm);
 				if ($scope.canCreate() && $scope.hasShareRightContrib($scope.form)) {
-					$scope.form.nbQuestions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
-					let distribs = $scope.getDataIf200(await distributionService.listByForm(params.idForm));
-					let nbResponses = distribs.filter(d => d.status === DistributionStatus.FINISHED).length;
+					$scope.form.nb_responses = $scope.getDataIf200(await distributionService.count(params.idForm)).count;
 
-					if (nbResponses > 0) {
+					if ($scope.form.nb_responses > 0) {
+						$scope.form.nbQuestions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
 						if (params.position < 1) {
 							$scope.redirectTo(`/form/${params.idForm}/results/1`);
 						}

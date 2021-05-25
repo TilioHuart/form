@@ -49,6 +49,8 @@ public class Formulaire extends BaseServer {
 
 	public static final String ARCHIVE_ZIP_NAME = "Fichiers déposés";
 
+	public static final Integer NB_NEW_LINES = 10;
+
 	@Override
 	public void start() throws Exception {
 		super.start();

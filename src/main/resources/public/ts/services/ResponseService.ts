@@ -3,7 +3,7 @@ import http, {AxiosResponse} from 'axios';
 import {Response, Types} from "../models";
 
 export interface ResponseService {
-    list(questionId: number) : Promise<AxiosResponse>;
+    list(questionId: number, nbLines: number) : Promise<AxiosResponse>;
     listMineByDistribution(questionId: number, distributionId: number) : Promise<AxiosResponse>;
     get(responseId: number) : Promise<AxiosResponse>;
     save(response: Response, questionType?: number) : Promise<AxiosResponse>;
@@ -14,9 +14,9 @@ export interface ResponseService {
 
 export const responseService: ResponseService = {
 
-    async list(questionId: number) : Promise<AxiosResponse> {
+    async list(questionId: number, nbLines: number) : Promise<AxiosResponse> {
         try {
-            return http.get(`/formulaire/questions/${questionId}/responses`);
+            return http.get(`/formulaire/questions/${questionId}/responses?nbLines=${nbLines}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.list'));
             throw err;
