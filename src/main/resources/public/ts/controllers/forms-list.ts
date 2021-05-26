@@ -25,6 +25,7 @@ interface ViewModel {
         },
         warning: boolean
     };
+    loading: boolean;
 
     openFolder(folderName: string) : void;
     switchAll(value: boolean) : void;
@@ -78,6 +79,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         },
         warning: false
     };
+    vm.loading = true;
 
     const init = async () : Promise<void> => {
         await vm.forms.sync();
@@ -102,6 +104,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             default : vm.openFolder('mine'); break;
         }
 
+        vm.loading = false;
         $scope.safeApply();
     };
 

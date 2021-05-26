@@ -14,6 +14,7 @@ interface ViewModel {
             myResponses: boolean
         }
     };
+    loading: boolean;
 
     switchAll(value: boolean) : void;
     sort(field: FiltersOrders) : void;
@@ -42,6 +43,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
             myResponses: false
         }
     };
+    vm.loading = true;
 
     const init = async (): Promise<void> => {
         await vm.forms.syncSent();
@@ -77,6 +79,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
         }
 
         vm.sort(FiltersOrders.SENDING_DATE);
+        vm.loading = false;
         $scope.safeApply();
     };
 

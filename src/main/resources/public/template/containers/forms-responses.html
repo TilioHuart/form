@@ -134,6 +134,9 @@
             </tbody>
         </table>
 
+        <!-- Loader -->
+        <div ng-if="vm.loading" class="twelve loader"><i class="loading"></i></div>
+
         <div class="error" ng-if="vm.forms.all.empty()">
             <img src="/formulaire/public/img/onboarding.svg"/>
             <i18n>formulaire.forms.empty</i18n>
