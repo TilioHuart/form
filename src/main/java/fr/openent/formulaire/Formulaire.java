@@ -1,6 +1,7 @@
 package fr.openent.formulaire;
 
 import fr.openent.formulaire.controllers.*;
+import fr.openent.formulaire.service.impl.FormulaireRepositoryEvents;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -56,6 +57,9 @@ public class Formulaire extends BaseServer {
 		super.start();
 
 		final EventBus eb = getEventBus(vertx);
+
+		// Set RepositoryEvents implementation used to process events published for transition
+		setRepositoryEvents(new FormulaireRepositoryEvents());
 
 		DB_SCHEMA = config.getString("db-schema");
 		DISTRIBUTION_TABLE = DB_SCHEMA + ".distribution";
