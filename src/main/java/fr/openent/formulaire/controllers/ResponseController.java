@@ -3,7 +3,9 @@ package fr.openent.formulaire.controllers;
 import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.ShareAndOwner;
+import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.ResponseService;
+import fr.openent.formulaire.service.impl.DefaultDistributionService;
 import fr.openent.formulaire.service.impl.DefaultResponseService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
@@ -11,6 +13,7 @@ import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
@@ -23,10 +26,12 @@ import static org.entcore.common.http.response.DefaultResponseHandler.defaultRes
 public class ResponseController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(ResponseController.class);
     private final ResponseService responseService;
+    private final DistributionService distributionService;
 
     public ResponseController() {
         super();
         this.responseService = new DefaultResponseService();
+        this.distributionService = new DefaultDistributionService();
     }
 
     @Get("/questions/:questionId/responses")
@@ -36,7 +41,18 @@ public class ResponseController extends ControllerHelper {
     public void list(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         String nbLines = request.params().get("nbLines");
-        responseService.list(questionId, nbLines, arrayResponseHandler(request));
+        String formId = request.params().get("formId");
+
+        distributionService.listByFormAndStatus(formId, Formulaire.FINISHED, nbLines, getDistribsEvent -> {
+            if (getDistribsEvent.isRight()) {
+                JsonArray distribs = getDistribsEvent.right().getValue();
+                responseService.list(questionId, nbLines, distribs, arrayResponseHandler(request));
+            }
+            else {
+                log.error("[Formulaire@list] Fail to list finished ditributions for form " + formId);
+                Renders.badRequest(request);
+            }
+        });
     }
 
     @Get("/questions/:questionId/responses/:distributionId")

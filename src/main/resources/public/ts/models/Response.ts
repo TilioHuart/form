@@ -3,6 +3,7 @@ import {responseFileService, responseService} from "../services";
 import {Mix} from "entcore-toolkit";
 import {ResponseFiles} from "./ResponseFile";
 import {Distribution} from "./Distribution";
+import {Question} from "./Question";
 
 export class Response {
     id: number;
@@ -40,12 +41,12 @@ export class Responses {
         this.all = [];
     }
 
-    sync = async (questionId: number, isFileQuestion: boolean, nbLines: number = null) : Promise<void> => {
+    sync = async (question: Question, isFileQuestion: boolean, nbLines: number = null) : Promise<void> => {
         try {
-            let { data } = await responseService.list(questionId, nbLines);
+            let { data } = await responseService.list(question, nbLines);
             this.all = nbLines == null ? Mix.castArrayAs(Response, data) : this.all.concat(Mix.castArrayAs(Response, data));
             if (isFileQuestion) {
-                let dataFiles = await responseFileService.listByQuestion(questionId);
+                let dataFiles = await responseFileService.listByQuestion(question.id);
                 let files = dataFiles.data;
                 for (let i = this.all.length - 1; i >= data.length; i--) {
                     this.all[i].files.all = Mix.castArrayAs(ResponseFiles, files.filter(r => r.response_id === this.all[i].id));

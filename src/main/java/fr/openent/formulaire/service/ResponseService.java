@@ -13,7 +13,7 @@ public interface ResponseService {
      * @param nbLines number of lines already loaded
      * @param handler function handler returning JsonArray data
      */
-    void list(String questionId, String nbLines, Handler<Either<String, JsonArray>> handler);
+    void list(String questionId, String nbLines, JsonArray distribs, Handler<Either<String, JsonArray>> handler);
 
     /**
      * List all my responses to a specific question for a specific distribution

@@ -70,7 +70,8 @@ public class FormResponsesExportCSV {
         List<String> structures = new ArrayList<>();
 
         for (JsonObject response : allResponses) {
-          if (!response_dates.contains(response.getString("date_response"))) {
+          int existingIndex = response_dates.indexOf(response.getString("date_response"));
+          if (existingIndex < 0 || !responders.get(existingIndex).equals(response.getString("responder_id"))) {
             responders.add(response.getString("responder_id"));
             response_dates.add(response.getString("date_response"));
             structures.add(response.getString("structure"));

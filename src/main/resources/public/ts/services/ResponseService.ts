@@ -1,9 +1,9 @@
 import {idiom, ng, notify, moment} from 'entcore';
 import http, {AxiosResponse} from 'axios';
-import {Response, Types} from "../models";
+import {Question, Response, Types} from "../models";
 
 export interface ResponseService {
-    list(questionId: number, nbLines: number) : Promise<AxiosResponse>;
+    list(question: Question, nbLines: number) : Promise<AxiosResponse>;
     listMineByDistribution(questionId: number, distributionId: number) : Promise<AxiosResponse>;
     get(responseId: number) : Promise<AxiosResponse>;
     save(response: Response, questionType?: number) : Promise<AxiosResponse>;
@@ -14,9 +14,9 @@ export interface ResponseService {
 
 export const responseService: ResponseService = {
 
-    async list(questionId: number, nbLines: number) : Promise<AxiosResponse> {
+    async list(question: Question, nbLines: number) : Promise<AxiosResponse> {
         try {
-            return http.get(`/formulaire/questions/${questionId}/responses?nbLines=${nbLines}`);
+            return http.get(`/formulaire/questions/${question.id}/responses?nbLines=${nbLines}&formId=${question.form_id}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.list'));
             throw err;

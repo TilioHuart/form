@@ -34,7 +34,7 @@ interface ViewModel {
     pdfResponseCharts: any;
     display: {
         lightbox: {
-            download: boolean;
+            export: boolean;
         }
     }
     loading: boolean;
@@ -77,7 +77,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         vm.pdfResponseCharts = [];
         vm.display = {
             lightbox: {
-                download: false
+                export: false
             }
         };
         vm.loading = true;
@@ -93,7 +93,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
             if (vm.question.question_type != Types.FREETEXT) {
                 await vm.question.choices.sync(vm.question.id);
-                await vm.results.sync(vm.question.id, vm.question.question_type == Types.FILE, vm.isGraphQuestion ? null : 0);
+                await vm.results.sync(vm.question, vm.question.question_type == Types.FILE, vm.isGraphQuestion ? null : 0);
                 await vm.distributions.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, vm.isGraphQuestion ? null : 0);
 
                 if (vm.isGraphQuestion) {
@@ -117,7 +117,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             let results = new Responses();
             let distribIds : any = vm.distributions.all.map(d => d.id);
             if (question.id != vm.question.id) {
-                await results.sync(question.id, false);
+                await results.sync(question, false);
             }
             else {
                 results = vm.results;
@@ -151,12 +151,13 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
         vm.export = (typeExport: Exports) : void => {
             vm.typeExport = typeExport;
-            template.open('lightbox', 'lightbox/results-confirm-download-all');
-            vm.display.lightbox.download = true;
+            template.open('lightbox', 'lightbox/results-confirm-export');
+            vm.display.lightbox.export = true;
             $scope.safeApply();
         };
 
         vm.doExport = async () : Promise<void> => {
+            vm.loading = true;
             let doc;
             let blob;
 
@@ -188,7 +189,8 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
                 chart.destroy();
             }
 
-            vm.display.lightbox.download = false;
+            vm.display.lightbox.export = false;
+            vm.loading = false;
             template.close('lightbox');
             $scope.safeApply();
         };

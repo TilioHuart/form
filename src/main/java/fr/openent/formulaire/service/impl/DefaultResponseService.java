@@ -13,16 +13,15 @@ import org.entcore.common.user.UserInfos;
 public class DefaultResponseService implements ResponseService {
 
     @Override
-    public void list(String questionId, String nbLines, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT r.* FROM " + Formulaire.RESPONSE_TABLE + " r " +
-                "INNER JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON d.id = r.distribution_id " +
-                "WHERE question_id = ? " +
-                "ORDER BY d.date_sending DESC";
+    public void list(String questionId, String nbLines, JsonArray distribs, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " WHERE question_id = ? ";
         JsonArray params = new JsonArray().add(questionId);
 
         if (!nbLines.equals("null")) {
-            query += " LIMIT ? OFFSET ?";
-            params.add(Integer.parseInt(nbLines) + Formulaire.NB_NEW_LINES).add(nbLines);
+            query += " AND distribution_id IN " + Sql.listPrepared(distribs);
+            for (int i = 0; i < distribs.size(); i++) {
+                params.add(distribs.getJsonObject(i).getInteger("id"));
+            }
         }
 
         query += ";";

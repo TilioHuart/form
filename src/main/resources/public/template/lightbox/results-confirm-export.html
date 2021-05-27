@@ -1,10 +1,11 @@
-<lightbox show="vm.display.lightbox.download" on-close="vm.display.lightbox.download = false;">
+<lightbox show="vm.display.lightbox.export" on-close="vm.display.lightbox.export = false;">
     <h2>[[getI18nWithParams('formulaire.form.download.all.results.lightbox.title', [vm.typeExport])]]</h2>
     <div>
         [[getI18nWithParams('formulaire.form.download.all.results.lightbox.description', [vm.typeExport])]]
     </div>
+    <div ng-if="vm.loading" class="twelve loader"><i class="loading"></i></div>
     <div class="action-buttons">
-        <button class="cell cancel" ng-click="vm.display.lightbox.download = false;"><i18n>formulaire.cancel</i18n></button>
+        <button class="cell cancel" ng-click="vm.display.lightbox.export = false;"><i18n>formulaire.cancel</i18n></button>
         <button class="cell" ng-click="vm.doExport()"><i18n>formulaire.confirm</i18n></button>
     </div>
 </lightbox>

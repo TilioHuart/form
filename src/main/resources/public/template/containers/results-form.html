@@ -90,8 +90,7 @@
                                         vm.question.question_type == Types.DATE ||
                                         vm.question.question_type == Types.TIME"
                                  bind-html="result.answer"></div>
-                            <a ng-if="vm.question.question_type == Types.FILE"
-                               ng-click="vm.downloadFile(result.id)">
+                            <a ng-if="vm.question.question_type == Types.FILE" ng-click="vm.downloadFile(result.id)">
                                 <i class="download lg-icon spaced-right"></i> [[result.filename]]
                             </a>
                         </div>
