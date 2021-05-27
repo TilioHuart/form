@@ -48,7 +48,7 @@ export class Responses {
             if (isFileQuestion) {
                 let dataFiles = await responseFileService.listByQuestion(question.id);
                 let files = dataFiles.data;
-                for (let i = this.all.length - 1; i >= data.length; i--) {
+                for (let i = this.all.length - 1; i >= this.all.length - data.length; i--) {
                     this.all[i].files.all = Mix.castArrayAs(ResponseFiles, files.filter(r => r.response_id === this.all[i].id));
                 }
             }

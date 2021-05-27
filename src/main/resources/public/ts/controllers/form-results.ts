@@ -22,7 +22,6 @@ interface ViewModel {
     results: Responses;
     distributions: Distributions;
     form: Form;
-    nbResults: number;
     nbQuestions: number;
     last: boolean;
     navigatorValue: number;
@@ -65,7 +64,6 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         vm.results = new Responses();
         vm.distributions = new Distributions();
         vm.form = new Form();
-        vm.nbResults = 0;
         vm.nbQuestions = 1;
         vm.last = false;
         vm.navigatorValue = 1;
@@ -235,7 +233,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         };
 
         vm.getWidth = (nbResponses: number, divisor: number) : number => {
-            let width = nbResponses / (!!vm.nbResults ? vm.nbResults : 1) * divisor;
+            let width = nbResponses / (vm.results.all.length > 0 ? vm.results.all.length : 1) * divisor;
             return width < 0 ? 0 : (width > divisor ? divisor : width);
         }
 
@@ -254,6 +252,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
         vm.loadMoreResults = async () : Promise<void> => {
             if (!vm.isGraphQuestion) {
+                await vm.results.sync(vm.question, vm.question.question_type == Types.FILE, vm.isGraphQuestion ? null : vm.distributions.all.length);
                 await vm.distributions.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, vm.distributions.all.length);
                 $scope.safeApply();
             }
