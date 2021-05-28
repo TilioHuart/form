@@ -113,28 +113,29 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         const initQCMandQCU = async (question: Question) : Promise<Question> => {
             // Count responses for each choice
             let results = new Responses();
-            let distribIds : any = vm.distributions.all.map(d => d.id);
+            let distribs = new Distributions();
             if (question.id != vm.question.id) {
-                await results.sync(question, false);
+                await results.sync(question, false, null);
+                await distribs.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, null);
             }
             else {
                 results = vm.results;
+                distribs = vm.distributions;
             }
+
             for (let result of results.all) {
-                if (distribIds.includes(result.distribution_id)) { // We do not count results from distrib not FINISHED
-                    for (let choice of question.choices.all) {
-                        if (result.choice_id === choice.id) {
-                            choice.nbResponses++;
-                        }
+                for (let choice of question.choices.all) {
+                    if (result.choice_id === choice.id) {
+                        choice.nbResponses++;
                     }
                 }
             }
 
             // Deal with no choice responses
-            let finishedDistribIds : any = vm.distributions.all.map(d => d.id);
+            let finishedDistribIds : any = distribs.all.map(d => d.id);
             let resultsDistribIds : any = results.all.map(r => r.distribution_id);
             let noResponseChoice = new QuestionChoice();
-            let nbEmptyResponse = vm.distributions.all.filter(d => !resultsDistribIds.includes(d.id)).length;
+            let nbEmptyResponse = distribs.all.filter(d => !resultsDistribIds.includes(d.id)).length;
             noResponseChoice.value = idiom.translate('formulaire.response.empty');
             noResponseChoice.nbResponses = question.question_type == Types.MULTIPLEANSWER ?
                 nbEmptyResponse :
@@ -346,7 +347,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             };
         }
 
-        const generateOptions = (dataOptions, type: Types) : any => {
+        const generateOptions = (dataOptions: any, type: Types) : any => {
             let newOptions;
             if (type === Types.SINGLEANSWER) {
                 let options = {
