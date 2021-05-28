@@ -52,6 +52,8 @@ public class FormulaireRepositoryEvents implements RepositoryEvents {
 
             if (groupsIds.size() > 0) {
                 SqlStatementsBuilder statementsBuilder = new SqlStatementsBuilder();
+
+                // Delete groups from groups table (will delete their sharing rights by cascade)
                 statementsBuilder.prepared("DELETE FROM " + Formulaire.GROUPS_TABLE + " WHERE id IN " + Sql.listPrepared(groupsIds), groupsIds);
 
                 Sql.getInstance().transaction(statementsBuilder.build(), SqlResult.validRowsResultHandler(deleteEvent -> {
@@ -91,6 +93,8 @@ public class FormulaireRepositoryEvents implements RepositoryEvents {
 
             if (userIds.size() > 0) {
                 SqlStatementsBuilder statementsBuilder = new SqlStatementsBuilder();
+
+                // Delete forms no one else has manager rights (or is owner)
                 String query =
                         "SELECT id FROM " + Formulaire.FORM_TABLE + " f " +
                         "JOIN " + Formulaire.FORM_SHARES_TABLE + " fs ON fs.resource_id = f.id " +
@@ -98,22 +102,27 @@ public class FormulaireRepositoryEvents implements RepositoryEvents {
                             "SELECT id FROM " + Formulaire.FORM_TABLE +" f " +
                             "JOIN " + Formulaire.FORM_SHARES_TABLE + " fs ON fs.resource_id = f.id " +
                             "WHERE owner_id IN " + Sql.listPrepared(userIds) + " OR " +
-                            "(action = " + Formulaire.MANAGER_RESOURCE_BEHAVIOUR + " AND member_id IN " + Sql.listPrepared(userIds) + ") " +
+                            "(action = ? AND member_id IN " + Sql.listPrepared(userIds) + ") " +
                             "GROUP BY id" +
                         ") AND resource_id NOT IN ( " +
                             "SELECT resource_id FROM " + Formulaire.FORM_SHARES_TABLE + " " +
-                            "WHERE action = " + Formulaire.MANAGER_RESOURCE_BEHAVIOUR + " AND member_id NOT IN " + Sql.listPrepared(userIds) +
+                            "WHERE action = ? AND member_id NOT IN " + Sql.listPrepared(userIds) +
                         ") " +
                         "GROUP BY id;";
-                JsonArray params = new JsonArray().addAll(userIds).addAll(userIds).addAll(userIds);
-
+                JsonArray params = new JsonArray().addAll(userIds).add(Formulaire.MANAGER_RESOURCE_BEHAVIOUR)
+                        .addAll(userIds).add(Formulaire.MANAGER_RESOURCE_BEHAVIOUR).addAll(userIds);
                 statementsBuilder.prepared(query, params);
-                statementsBuilder.prepared("DELETE FROM " + Formulaire.MEMBERS_TABLE + " WHERE user_id IN " + Sql.listPrepared(userIds), userIds);
-                statementsBuilder.prepared("UPDATE " + Formulaire.DISTRIBUTION_TABLE + " " +
-                        "SET responder_name = '" + deletedUser + "' WHERE responder_id IN " + Sql.listPrepared(userIds), userIds);
 
-                statementsBuilder.prepared("UPDATE " + Formulaire.RESPONSE_FILE_TABLE + " " +
-                        "SET filename = '" + deletedUserFile + "' WHERE responder_id IN " + Sql.listPrepared(userIds), userIds);
+                // Delete users from members table (will delete their sharing rights by cascade)
+                statementsBuilder.prepared("DELETE FROM " + Formulaire.MEMBERS_TABLE + " WHERE user_id IN " + Sql.listPrepared(userIds), userIds);
+
+                // Change responder_name to a fixed common default value in all his responses
+                statementsBuilder.prepared("UPDATE " + Formulaire.DISTRIBUTION_TABLE + " SET responder_name = ? " +
+                        "WHERE responder_id IN " + Sql.listPrepared(userIds), userIds.add(deletedUser));
+
+                // Change filename to a fixed common default value in all the response files' names of the users
+                statementsBuilder.prepared("UPDATE " + Formulaire.RESPONSE_FILE_TABLE + " SET filename = ? " +
+                        "WHERE responder_id IN " + Sql.listPrepared(userIds), userIds.add(deletedUserFile));
 
                 Sql.getInstance().transaction(statementsBuilder.build(), SqlResult.validRowsResultHandler(deleteEvent -> {
                     if (deleteEvent.isRight()) {
