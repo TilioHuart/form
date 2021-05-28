@@ -161,7 +161,7 @@ public class ResponseFileController extends ControllerHelper {
         int indexOfUnderscore = filename.contains("_") ? filename.indexOf("_") : 0;
 
         // Check if responder_name and name get from filename are equals
-        char[] first = file.getString("responder_name").toCharArray();
+        char[] first = String.join("", file.getString("responder_name").split(" ")).toCharArray();
         char[] second = filename.substring(0, indexOfUnderscore).toCharArray();
         Arrays.sort(first);
         Arrays.sort(second);
