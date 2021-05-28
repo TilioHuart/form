@@ -49,7 +49,7 @@
         <div ng-include="'formulaire/public/template/components/filters.html'"></div>
         <!--Dominos display-->
         <div class="dominos" ng-if="!vm.forms.all.empty() && vm.display.grid">
-            <div ng-repeat="form in vm.forms.all | filter:vm.searchInput"
+            <div ng-repeat="form in vm.forms.all | filter:vm.searchInput | limitTo:vm.limitTo"
                  ng-if="!vm.forms.all.empty() && vm.display.grid && form.displayed"
                  ng-click="form.selected = !form.selected" ng-dblclick="vm.openForm(form)"
                  class="item response" ng-class="{'selected' : form.selected}">
@@ -105,7 +105,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="form in vm.forms.all | filter:vm.searchInput"
+                <tr ng-repeat="form in vm.forms.all | filter:vm.searchInput | limitTo:vm.limitTo"
                     ng-if="form.displayed"
                     ng-dblclick="vm.openForm(form)">
                     <td><label><input type="checkbox" ng-model="form.selected"/><span></span></label></td>
@@ -143,7 +143,7 @@
         </div>
     </section>
 
-    <infinite-scroll scrolled="vm.infiniteScroll()"></infinite-scroll>
+    <infinite-scroll scrolled="vm.infiniteScroll()" loading-mode="true"></infinite-scroll>
 
     <container template='lightbox'></container>
     <div ng-include="'formulaire/public/template/components/toaster.html'"></div>
