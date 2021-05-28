@@ -162,7 +162,8 @@ public class ResponseFileController extends ControllerHelper {
         String responderName = String.join("", responderNames);
         String filename = file.getString("filename");
         String completeName = file.getString("name");
-        boolean isAnonymous = !filename.substring(0, filename.indexOf("_")).equals(responderName);
+        int indexOfUnderscore = filename.contains("_") ? filename.indexOf("_") : 0;
+        boolean isAnonymous = !filename.substring(0, indexOfUnderscore).equals(responderName);
 
         return isAnonymous ? completeName.substring(0, 14) : completeName.substring(0, 15) + responderName;
     }

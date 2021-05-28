@@ -56,11 +56,11 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
         vm.getImage = async () : Promise<void> => {
             if (vm.form.picture) {
                 await vm.form.setInfoImage();
-                window.setTimeout(function() {
-                    if(!vm.form.infoImg.compatible) {
-                        notify.error(idiom.translate('formulaire.image.incompatible'));
-                    }
-                }, 2000)
+                // window.setTimeout(function() {
+                //     if(!vm.form.infoImg.compatible) {
+                //         notify.error(idiom.translate('formulaire.image.incompatible'));
+                //     }
+                // }, 2000)
             }
             $scope.safeApply();
         };
