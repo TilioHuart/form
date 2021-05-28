@@ -79,7 +79,7 @@ export class Distributions {
         try {
             let { data } = await distributionService.listByFormAndStatus(formId, status, nbLines);
             this.all = nbLines == null ? Mix.castArrayAs(Distribution, data) : this.all.concat(Mix.castArrayAs(Distribution, data));
-            for (let i = this.all.length - 1; i >= data.length; i--) {
+            for (let i = this.all.length - 1; i >= this.all.length - data.length; i--) {
                 let distrib = this.all[i];
                 distrib.date_response = new Date(distrib.date_response);
                 distrib.date_sending = new Date(distrib.date_sending);
