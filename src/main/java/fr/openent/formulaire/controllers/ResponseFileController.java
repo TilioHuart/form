@@ -156,16 +156,18 @@ public class ResponseFileController extends ControllerHelper {
     }
 
     private String getFolderName(JsonObject file) {
-        String[] responderNames = file.getString("responder_name").split(" ");
-        Collections.reverse(Arrays.asList(responderNames));
-
-        String responderName = String.join("", responderNames);
-        String filename = file.getString("filename");
         String completeName = file.getString("name");
+        String filename = file.getString("filename");
         int indexOfUnderscore = filename.contains("_") ? filename.indexOf("_") : 0;
-        boolean isAnonymous = !filename.substring(0, indexOfUnderscore).equals(responderName);
 
-        return isAnonymous ? completeName.substring(0, 14) : completeName.substring(0, 15) + responderName;
+        // Check if responder_name and name get from filename are equals
+        char[] first = file.getString("responder_name").toCharArray();
+        char[] second = filename.substring(0, indexOfUnderscore).toCharArray();
+        Arrays.sort(first);
+        Arrays.sort(second);
+        boolean isAnonymous = !Arrays.equals(first, second);
+
+        return isAnonymous ? completeName.substring(0, 14) : completeName.substring(0, 15) + file.getString("responder_name");
     }
 
     @Post("/responses/:responseId/files")
