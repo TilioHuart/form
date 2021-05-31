@@ -1,5 +1,5 @@
 import {$, ng} from 'entcore';
-import {INFINITE_SCROLL_EVENTER} from "../enum/infinite-scroll-eventer";
+import {INFINITE_SCROLL_EVENTER} from "../core/enums";
 
 interface IViewModel {
     loading: boolean;
