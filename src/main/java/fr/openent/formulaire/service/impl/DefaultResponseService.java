@@ -14,14 +14,19 @@ public class DefaultResponseService implements ResponseService {
 
     @Override
     public void list(String questionId, String nbLines, JsonArray distribs, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " WHERE question_id = ? ";
+        String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " r ";
         JsonArray params = new JsonArray().add(questionId);
 
         if (!nbLines.equals("null")) {
-            query += " AND distribution_id IN " + Sql.listPrepared(distribs);
+            query += "WHERE question_id = ? AND distribution_id IN " + Sql.listPrepared(distribs);
             for (int i = 0; i < distribs.size(); i++) {
                 params.add(distribs.getJsonObject(i).getInteger("id"));
             }
+        }
+        else {
+            query += "JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON d.id = r.distribution_id " +
+                    "WHERE question_id = ? AND status = ? ";
+            params.add(Formulaire.FINISHED);
         }
 
         query += ";";

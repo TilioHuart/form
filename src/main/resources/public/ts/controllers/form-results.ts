@@ -122,20 +122,18 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
                 results = vm.results;
                 distribs = vm.distributions;
             }
-            let finishedDistribIds : any = distribs.all.map(d => d.id);
 
             // Count responses for each choice
             for (let result of results.all) {
-                if (finishedDistribIds.includes(result.distribution_id)) { // We do not count results from distrib not FINISHED
-                    for (let choice of question.choices.all) {
-                        if (result.choice_id === choice.id) {
-                            choice.nbResponses++;
-                        }
+                for (let choice of question.choices.all) {
+                    if (result.choice_id === choice.id) {
+                        choice.nbResponses++;
                     }
                 }
             }
 
             // Deal with no choice responses
+            let finishedDistribIds : any = distribs.all.map(d => d.id);
             let resultsDistribIds : any = results.all.map(r => r.distribution_id);
             let noResponseChoice = new QuestionChoice();
             let nbEmptyResponse = distribs.all.filter(d => !resultsDistribIds.includes(d.id)).length;
@@ -237,7 +235,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         };
 
         vm.getWidth = (nbResponses: number, divisor: number) : number => {
-            let width = nbResponses / (vm.results.all.length > 0 ? vm.results.all.length : 1) * divisor;
+            let width = nbResponses / (vm.distributions.all.length > 0 ? vm.distributions.all.length : 1) * divisor;
             return width < 0 ? 0 : (width > divisor ? divisor : width);
         }
 
