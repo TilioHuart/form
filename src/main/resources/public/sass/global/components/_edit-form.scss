@@ -51,6 +51,17 @@
         }
       }
 
+      .question-type {
+        font-size: 12px;
+
+        textarea {
+          width: 100%;
+          height: 60px;
+          resize: none;
+          background: none;
+        }
+      }
+
       .question-bottom {
         display: flex;
         justify-content: flex-end;
@@ -62,19 +73,6 @@
     }
   }
 }
-
-
-.question-type {
-  font-size: 12px;
-
-  textarea {
-    width: 100%;
-    height: 60px;
-    resize: none;
-    background: none;
-  }
-}
-
 
 .edit-form {
   display: flex;
