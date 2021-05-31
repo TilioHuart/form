@@ -111,7 +111,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         };
 
         const initQCMandQCU = async (question: Question) : Promise<Question> => {
-            // Count responses for each choice
+            // Get distributions and results
             let results = new Responses();
             let distribs = new Distributions();
             if (question.id != vm.question.id) {
@@ -122,17 +122,20 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
                 results = vm.results;
                 distribs = vm.distributions;
             }
+            let finishedDistribIds : any = distribs.all.map(d => d.id);
 
+            // Count responses for each choice
             for (let result of results.all) {
-                for (let choice of question.choices.all) {
-                    if (result.choice_id === choice.id) {
-                        choice.nbResponses++;
+                if (finishedDistribIds.includes(result.distribution_id)) { // We do not count results from distrib not FINISHED
+                    for (let choice of question.choices.all) {
+                        if (result.choice_id === choice.id) {
+                            choice.nbResponses++;
+                        }
                     }
                 }
             }
 
             // Deal with no choice responses
-            let finishedDistribIds : any = distribs.all.map(d => d.id);
             let resultsDistribIds : any = results.all.map(r => r.distribution_id);
             let noResponseChoice = new QuestionChoice();
             let nbEmptyResponse = distribs.all.filter(d => !resultsDistribIds.includes(d.id)).length;
