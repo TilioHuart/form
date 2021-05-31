@@ -8,6 +8,7 @@ export interface ResponseService {
     get(responseId: number) : Promise<AxiosResponse>;
     save(response: Response, questionType?: number) : Promise<AxiosResponse>;
     create(response: Response) : Promise<AxiosResponse>;
+    fillResponses(formId: number, distributionId: number) : Promise<AxiosResponse>;
     update(response: Response) : Promise<AxiosResponse>;
     delete(responseId: number) : Promise<AxiosResponse>;
 }
@@ -61,6 +62,15 @@ export const responseService: ResponseService = {
     async create(response: Response) : Promise<AxiosResponse> {
         try {
             return http.post(`/formulaire/questions/${response.question_id}/responses`, response);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.responseService.create'));
+            throw err;
+        }
+    },
+
+    async fillResponses(formId: number, distributionId: number) : Promise<AxiosResponse> {
+        try {
+            return http.post(`/formulaire/forms/${formId}/responses/fill/${distributionId}`, {});
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.create'));
             throw err;

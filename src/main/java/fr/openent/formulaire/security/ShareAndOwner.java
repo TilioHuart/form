@@ -81,7 +81,7 @@ public class ShareAndOwner implements ResourcesProvider {
     private String getKeyByBinding(Binding binding) {
         if (isCountDistribution(binding) || isGetDistribution(binding) || isCreateDistribution(binding) ||
                 isAddDistribution(binding) || isUpdateForm(binding) || isDeleteForm(binding) || isExportForm(binding) ||
-                isSendReminderForm(binding) || isCreateQuestion(binding)) {
+                isSendReminderForm(binding) || isCreateQuestion(binding) || isFillResponsesResponse(binding)) {
             return "formId";
         }
         else if (isUpdateDistribution(binding) || isDeleteDistribution(binding)) {
@@ -211,6 +211,10 @@ public class ShareAndOwner implements ResourcesProvider {
 
     private boolean isCreateResponse(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.ResponseController|create");
+    }
+
+    private boolean isFillResponsesResponse(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.ResponseController|fillResponses");
     }
 
     private boolean isUpdateResponse(final Binding binding) {

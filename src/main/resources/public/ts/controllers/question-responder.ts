@@ -149,6 +149,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     vm.doSend = async () : Promise<void> => {
         vm.distribution.status = DistributionStatus.FINISHED;
         vm.distribution.structure = !!vm.distribution.structure ? vm.distribution.structure : model.me.structureNames[0];
+        await responseService.fillResponses(vm.form.id,  vm.distribution.id);
         await distributionService.update(vm.distribution);
         template.close('lightbox');
         vm.display.lightbox.sending = false;

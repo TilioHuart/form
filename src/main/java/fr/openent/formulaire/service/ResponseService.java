@@ -32,6 +32,14 @@ public interface ResponseService {
     void get(String responseId, Handler<Either<String, JsonObject>> handler);
 
     /**
+     * Get question ids of a specific form where specific distribution has missing responses
+     * @param formId form identifier
+     * @param distributionId distribution identifier
+     * @param handler function handler returning JsonArray data
+     */
+    void getMissingResponses(String formId, String distributionId, Handler<Either<String, JsonArray>> handler);
+
+    /**
      * Create a response
      * @param response JsonObject data
      * @param user user connected
@@ -39,6 +47,15 @@ public interface ResponseService {
      * @param handler function handler returning JsonObject data
      */
     void create(JsonObject response, UserInfos user, String questionId, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Create empty responses to fill missing ones for a specific distribution
+     * @param questionIds JsonArray ids of missing questions
+     * @param distributionId distribution identifier
+     * @param user user connected
+     * @param handler function handler returning JsonObject data
+     */
+    void fillResponses(JsonArray questionIds, String distributionId, UserInfos user, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Update a specific response

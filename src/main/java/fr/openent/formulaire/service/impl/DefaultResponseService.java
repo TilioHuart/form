@@ -49,6 +49,16 @@ public class DefaultResponseService implements ResponseService {
     }
 
     @Override
+    public void getMissingResponses(String formId, String distributionId, Handler<Either<String, JsonArray>> handler) {
+        String query = "WITH question_ids AS (" +
+                "SELECT question_id FROM " + Formulaire.RESPONSE_TABLE + " WHERE distribution_id = ?) " +
+                "SELECT id FROM " + Formulaire.QUESTION_TABLE + " " +
+                "WHERE form_id = ? AND id NOT IN (SELECT * FROM question_ids)";
+        JsonArray params = new JsonArray().add(distributionId).add(formId);
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
     public void create(JsonObject response, UserInfos user, String questionId, Handler<Either<String, JsonObject>> handler) {
         String query = "INSERT INTO " + Formulaire.RESPONSE_TABLE + " (question_id, choice_id, answer, responder_id, distribution_id) " +
                 "VALUES (?, ?, ?, ?, ?) RETURNING *;";
@@ -59,6 +69,20 @@ public class DefaultResponseService implements ResponseService {
                 .add(user.getUserId())
                 .add(response.getInteger("distribution_id", null));
 
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    @Override
+    public void fillResponses(JsonArray questionIds, String distributionId, UserInfos user, Handler<Either<String, JsonObject>> handler) {
+        String query = "INSERT INTO " + Formulaire.RESPONSE_TABLE + " (question_id, answer, responder_id, distribution_id) VALUES ";
+        JsonArray params = new JsonArray();
+
+        for (int i = 0; i < questionIds.size(); i++) {
+            query += "(?, ?, ?, ?), ";
+            params.add(questionIds.getJsonObject(i).getInteger("id")).add("").add(user.getUserId()).add(distributionId);
+        }
+
+        query = query.substring(0, query.length() - 2) + ";";
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 

@@ -205,6 +205,10 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
         vm.getDataByDistrib = (distribId: number) : any => {
             let results =  vm.results.all.filter(r => r.distribution_id === distribId);
+            if (results.length <= 0) {
+                return [{ answer: "-"}];
+            }
+
             for (let result of results) {
                 if (result.answer == "") {
                     result.answer = "-";

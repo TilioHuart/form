@@ -99,6 +99,40 @@ public class ResponseController extends ControllerHelper {
         });
     }
 
+    @Post("/forms/:formId/responses/fill/:distributionId")
+    @ApiDoc("Create empty responses for missing responses")
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void fillResponses(HttpServerRequest request) {
+        String formId = request.getParam("formId");
+        String distributionId = request.getParam("distributionId");
+        RequestUtils.bodyToJson(request, response -> {
+            responseService.getMissingResponses(formId, distributionId, getMissingResponsesEevent -> {
+                if (getMissingResponsesEevent.isRight()) {
+                    JsonArray questionIds = getMissingResponsesEevent.right().getValue();
+                    UserUtils.getUserInfos(eb, request, user -> {
+                        if (user != null) {
+                            if (questionIds != null && !questionIds.isEmpty()) {
+                                responseService.fillResponses(questionIds, distributionId, user, defaultResponseHandler(request));
+                            }
+                            else {
+                                Renders.ok(request);
+                            }
+                        } else {
+                            log.error("User not found in session.");
+                            Renders.unauthorized(request);
+                        }
+                    });
+
+                }
+                else {
+                    log.error("[Formulaire@getMissingResponses] Fail to missing responses for form " + formId);
+                    Renders.badRequest(request);
+                }
+            });
+        });
+    }
+
     @Put("/responses/:responseId")
     @ApiDoc("Update a specific response")
     @ResourceFilter(ShareAndOwner.class)
