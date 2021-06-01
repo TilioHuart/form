@@ -49,7 +49,7 @@ public class ResponseFileController extends ControllerHelper {
     }
 
     @Get("/questions/:questionId/files/all")
-    @ApiDoc("List all files of a specific question")
+    @ApiDoc("List all files of all responses to a specific question")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listByQuestion(HttpServerRequest request) {

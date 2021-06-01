@@ -70,7 +70,7 @@ public class DistributionController extends ControllerHelper {
     }
 
     @Get("/distributions/forms/:formId/list/:status")
-    @ApiDoc("List all the distributions of a specific form")
+    @ApiDoc("List all the distributions of a specific form with a specific status")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listByFormAndStatus(HttpServerRequest request) {
