@@ -3,7 +3,9 @@
     <div>
         [[getI18nWithParams('formulaire.form.download.all.results.lightbox.description', [vm.typeExport])]]
     </div>
-    <div ng-if="vm.loading" class="twelve loader"><i class="loading"></i></div>
+    <div ng-if="vm.loading" class="twelve loader">
+        <loader min-height="'10px'"/>
+    </div>
     <div class="action-buttons">
         <button class="cell cancel" ng-click="vm.display.lightbox.export = false;"><i18n>formulaire.cancel</i18n></button>
         <button class="cell" ng-click="vm.doExport()"><i18n>formulaire.confirm</i18n></button>
