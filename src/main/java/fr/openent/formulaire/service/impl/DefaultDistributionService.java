@@ -39,10 +39,10 @@ public class DefaultDistributionService implements DistributionService {
 
     @Override
     public void listByFormAndStatus(String formId, String status, String nbLines, Handler<Either<String, JsonArray>> handler) {
-        String query = "WITH distribs AS (SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? AND active = ? AND status = ? " +
+        String query = "WITH distribs AS (SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? AND status = ? " +
                 "ORDER BY date_response DESC) " +
                 "SELECT * FROM distribs";
-        JsonArray params = new JsonArray().add(formId).add(true).add(status);
+        JsonArray params = new JsonArray().add(formId).add(status);
 
         if (!nbLines.equals("null")) {
             query += " LIMIT ? OFFSET ?";

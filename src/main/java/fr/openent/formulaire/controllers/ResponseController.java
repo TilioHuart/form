@@ -46,7 +46,13 @@ public class ResponseController extends ControllerHelper {
         distributionService.listByFormAndStatus(formId, Formulaire.FINISHED, nbLines, getDistribsEvent -> {
             if (getDistribsEvent.isRight()) {
                 JsonArray distribs = getDistribsEvent.right().getValue();
-                responseService.list(questionId, nbLines, distribs, arrayResponseHandler(request));
+                if (distribs != null && !distribs.isEmpty()) {
+                    responseService.list(questionId, nbLines, distribs, arrayResponseHandler(request));
+                }
+                else {
+                    log.error("[Formulaire@list] No more responses to load for form " + formId);
+                    Renders.ok(request);
+                }
             }
             else {
                 log.error("[Formulaire@list] Fail to list finished ditributions for form " + formId);

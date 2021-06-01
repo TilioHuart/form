@@ -90,12 +90,12 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 					$scope.form.nb_responses = $scope.getDataIf200(await distributionService.count(params.idForm)).count;
 
 					if ($scope.form.nb_responses > 0) {
-						$scope.form.nbQuestions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
+						$scope.form.nb_questions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
 						if (params.position < 1) {
 							$scope.redirectTo(`/form/${params.idForm}/results/1`);
 						}
-						else if (params.position > $scope.form.nbQuestions) {
-							$scope.redirectTo(`/form/${params.idForm}/results/${$scope.form.nbQuestions}`);
+						else if (params.position > $scope.form.nb_questions) {
+							$scope.redirectTo(`/form/${params.idForm}/results/${$scope.form.nb_questions}`);
 						}
 						else {
 							$scope.question = $scope.getDataIf200(await questionService.getByPosition(params.idForm, params.position));
@@ -144,13 +144,13 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 					if (!$scope.form.archived && $scope.form.date_opening < new Date() &&
 						($scope.form.date_ending ? ($scope.form.date_ending > new Date()) : true)) {
 						if ($scope.form.multiple || (!!distribution.status && distribution.status != DistributionStatus.FINISHED)) {
-							$scope.form.nbQuestions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
+							$scope.form.nb_questions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
 
 							if (params.position < 1) {
 								$scope.redirectTo(`/form/${params.idForm}/question/1`);
 							}
-							else if (params.position > $scope.form.nbQuestions) {
-								$scope.redirectTo(`/form/${params.idForm}/question/${$scope.form.nbQuestions}`);
+							else if (params.position > $scope.form.nb_questions) {
+								$scope.redirectTo(`/form/${params.idForm}/question/${$scope.form.nb_questions}`);
 							}
 							else {
 								$scope.question = $scope.getDataIf200(await questionService.getByPosition(params.idForm, params.position));
