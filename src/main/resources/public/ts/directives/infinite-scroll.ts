@@ -1,5 +1,5 @@
 import {$, ng} from 'entcore';
-import {INFINITE_SCROLL_EVENTER} from "../core/enums";
+import {FORMULAIRE_EMIT_EVENT, INFINITE_SCROLL_EVENTER} from "../core/enums";
 
 interface IViewModel {
     loading: boolean;
@@ -46,6 +46,7 @@ export const InfiniteScroll = ng.directive('infiniteScroll', () => {
                     }
                     // Storing the latest scroll that has been the longest one in order to not redo the scrolled() each time
                     currentscrollHeight = scrollHeight;
+                    $scope.$emit(FORMULAIRE_EMIT_EVENT.REFRESH);
                 }
             });
 
