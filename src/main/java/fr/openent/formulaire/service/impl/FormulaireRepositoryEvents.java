@@ -11,14 +11,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-import fr.wseduc.webutils.Either;
-
-import java.text.Format;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 public class FormulaireRepositoryEvents implements RepositoryEvents {
     private static final Logger log = LoggerFactory.getLogger(FormulaireRepositoryEvents.class);
     private static final String deletedUser = "Utilisateur supprimé";
@@ -94,7 +86,7 @@ public class FormulaireRepositoryEvents implements RepositoryEvents {
             if (userIds.size() > 0) {
                 SqlStatementsBuilder statementsBuilder = new SqlStatementsBuilder();
 
-                // Delete forms no one else has manager rights (or is owner)
+                // Delete forms on which no one else has manager rights (or is owner)
                 String query =
                         "SELECT id FROM " + Formulaire.FORM_TABLE + " f " +
                         "JOIN " + Formulaire.FORM_SHARES_TABLE + " fs ON fs.resource_id = f.id " +
@@ -116,13 +108,20 @@ public class FormulaireRepositoryEvents implements RepositoryEvents {
                 // Delete users from members table (will delete their sharing rights by cascade)
                 statementsBuilder.prepared("DELETE FROM " + Formulaire.MEMBERS_TABLE + " WHERE user_id IN " + Sql.listPrepared(userIds), userIds);
 
+                // Set active distributions to false
+                statementsBuilder.prepared("UPDATE " + Formulaire.DISTRIBUTION_TABLE + " SET active = ?" +
+                        " WHERE responder_id IN " + Sql.listPrepared(userIds), new JsonArray().add(false).addAll(userIds));
+
                 // Change responder_name to a fixed common default value in all his responses
                 statementsBuilder.prepared("UPDATE " + Formulaire.DISTRIBUTION_TABLE + " SET responder_name = ? " +
-                        "WHERE responder_id IN " + Sql.listPrepared(userIds), userIds.add(deletedUser));
+                        "WHERE responder_id IN " + Sql.listPrepared(userIds), new JsonArray().add(deletedUser).addAll(userIds));
 
                 // Change filename to a fixed common default value in all the response files' names of the users
                 statementsBuilder.prepared("UPDATE " + Formulaire.RESPONSE_FILE_TABLE + " SET filename = ? " +
-                        "WHERE responder_id IN " + Sql.listPrepared(userIds), userIds.add(deletedUserFile));
+                        "WHERE response_id IN (" +
+                            "SELECT id FROM " + Formulaire.RESPONSE_TABLE + " " +
+                            "WHERE responder_id IN " + Sql.listPrepared(userIds) +
+                        ")", new JsonArray().add(deletedUserFile).addAll(userIds));
 
                 Sql.getInstance().transaction(statementsBuilder.build(), SqlResult.validRowsResultHandler(deleteEvent -> {
                     if (deleteEvent.isRight()) {
