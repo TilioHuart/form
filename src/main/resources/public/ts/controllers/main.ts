@@ -276,14 +276,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			return form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.comment.right);
 		};
 
-		$scope.hasWorkflowZimbra = function () {
-			return model.me.hasWorkflow('fr.openent.zimbra.controllers.ZimbraController|view');
-		};
-
-		$scope.hasWorkflowMessagerie = function () {
-			return model.me.hasWorkflow('org.entcore.conversation.controllers.ConversationController|view');
-		};
-
 
 		init();
 }]);
