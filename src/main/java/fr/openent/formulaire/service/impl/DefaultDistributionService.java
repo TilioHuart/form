@@ -104,7 +104,7 @@ public class DefaultDistributionService implements DistributionService {
 
     @Override
     public void add(JsonObject distribution, Handler<Either<String, JsonObject>> handler) {
-        String query = "SELECT create_distrib(?, ?, ?, ?, ?) AS created;";
+        String query = "SELECT add_distrib(?, ?, ?, ?, ?) AS created;";
         JsonArray params = new JsonArray()
                 .add(distribution.getInteger("form_id", null))
                 .add(distribution.getString("sender_id", ""))
