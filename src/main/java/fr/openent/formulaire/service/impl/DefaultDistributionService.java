@@ -200,13 +200,15 @@ public class DefaultDistributionService implements DistributionService {
         }
 
         ArrayList<JsonObject> respondersArray = new ArrayList<>();
+        ArrayList<String> respondersArrayIds = new ArrayList<>();
         for (int i = 0; i < responders.size(); i++) {
             JsonArray infos = responders.getJsonObject(i).getJsonArray("users");
             if (infos != null && !infos.isEmpty()) {
                 for (int j = 0; j < infos.size(); j++) {
                     JsonObject info = infos.getJsonObject(j);
-                    if (!idsToFilter.contains(info.getString("id"))) {
+                    if (!idsToFilter.contains(info.getString("id")) && !respondersArrayIds.contains(info.getString("id"))) {
                         respondersArray.add(info);
+                        respondersArrayIds.add(info.getString("id"));
                     }
                 }
             }
