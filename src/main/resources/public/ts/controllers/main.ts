@@ -1,6 +1,6 @@
 import {Behaviours, idiom, model, ng, template} from 'entcore';
-import {DistributionStatus, Form, Question, QuestionTypes, Types} from "../models";
-import {configService, distributionService, formService, questionService} from "../services";
+import {Distribution, DistributionStatus, Form, Question, QuestionTypes, Types} from "../models";
+import {distributionService, formService, questionService} from "../services";
 import {AxiosResponse} from "axios";
 import {Direction, Exports, FiltersFilters, FiltersOrders, FORMULAIRE_EMIT_EVENT, Pages} from "../core/enums";
 
@@ -8,7 +8,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 	($scope, route, $location) => {
 		$scope.lang = idiom;
 		$scope.template = template;
-		$scope.config = {};
 
 		// Init variables
 		$scope.FiltersOrders = FiltersOrders;
@@ -19,12 +18,12 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.Pages = Pages;
 		$scope.currentPage = Pages.FORMS_LIST;
 		$scope.form = new Form();
+		$scope.distribution = new Distribution();
 		$scope.question = new Question();
 		$scope.questionTypes = new QuestionTypes();
 		$scope.isMobile = window.screen.width <= 500;
 
 		const init = async () : Promise<void> => {
-			await $scope.getConfig();
 			await $scope.questionTypes.sync();
 		}
 
@@ -185,17 +184,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 
 
 		// Utils
-
-		$scope.getConfig = async (): Promise<void> => {
-			try {
-				$scope.config = $scope.getDataIf200(await configService.get());
-			}
-			catch (err) {
-				console.log("Error in retrieving config : " + err);
-				throw err;
-			}
-			$scope.safeApply();
-		};
 
 		$scope.displayDate = (dateToFormat: Date) : string => {
 			return new Date(dateToFormat).toLocaleString([], {day: '2-digit', month: '2-digit', year:'numeric', hour: '2-digit', minute:'2-digit'});
