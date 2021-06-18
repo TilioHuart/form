@@ -137,12 +137,25 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				$scope.currentPage = Pages.RESPOND_QUESTION;
 				await $scope.getFormWithRights(params.idForm);
 				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form)) {
-					let distribution = $scope.getDataIf200(await distributionService.get(params.idForm));
+					if ($scope.form.multiple) {
+						let distribs : any = $scope.getDataIf200(await distributionService.listByFormAndResponder(params.idForm));
+						let distrib: Distribution = null;
+						for (let d of distribs) {
+							if (d.status != DistributionStatus.FINISHED) {
+								distrib = d;
+								break;
+							}
+						}
+						if (!!!distrib) {
+							await distributionService.add($scope.form.id, distribs[0]);
+						}
+					}
+					$scope.distribution = $scope.getDataIf200(await distributionService.get(params.idForm));
 
 					// If form not archived && date ok && not already responded
 					if (!$scope.form.archived && $scope.form.date_opening < new Date() &&
 						($scope.form.date_ending ? ($scope.form.date_ending > new Date()) : true)) {
-						if ($scope.form.multiple || (!!distribution.status && distribution.status != DistributionStatus.FINISHED)) {
+						if ($scope.form.multiple || (!!$scope.distribution.status && $scope.distribution.status != DistributionStatus.FINISHED)) {
 							$scope.form.nb_questions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
 
 							if (params.position < 1) {

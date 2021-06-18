@@ -2,7 +2,6 @@ import {idiom, notify} from "entcore";
 import {responseFileService, responseService} from "../services";
 import {Mix} from "entcore-toolkit";
 import {ResponseFiles} from "./ResponseFile";
-import {Distribution} from "./Distribution";
 import {Question} from "./Question";
 
 export class Response {

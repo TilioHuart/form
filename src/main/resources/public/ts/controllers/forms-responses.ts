@@ -141,7 +141,8 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
             if (distrib.status != DistributionStatus.FINISHED) {
                 $scope.redirectTo(`/form/${form.id}/question/1`);
             }
-        } else {
+        }
+        else {
             let distribs = vm.distributions.all.filter(distrib => distrib.form_id === form.id);
             let distrib: Distribution = null;
             for (let d of distribs) {

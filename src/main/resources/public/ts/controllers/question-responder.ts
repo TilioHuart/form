@@ -57,12 +57,15 @@ export const questionResponderController = ng.controller('QuestionResponderContr
 
     const init = async () : Promise<void> => {
         vm.form = $scope.form;
+        vm.distribution = $scope.distribution;
         vm.question = $scope.question;
         vm.question.choices = new QuestionChoices();
         vm.nbQuestions = $scope.form.nb_questions;
         vm.distribution = $scope.getDataIf200(await distributionService.get(vm.question.form_id));
         vm.last = vm.question.position === vm.nbQuestions;
-        await vm.question.choices.sync(vm.question.id);
+        if (vm.question.question_type === Types.MULTIPLEANSWER || vm.question.question_type === Types.SINGLEANSWER) {
+            await vm.question.choices.sync(vm.question.id);
+        }
         if (vm.question.question_type === Types.MULTIPLEANSWER) {
             await vm.responses.syncMine(vm.question.id, vm.distribution.id);
             vm.selectedIndex = new Array<boolean>(vm.nbQuestions);
