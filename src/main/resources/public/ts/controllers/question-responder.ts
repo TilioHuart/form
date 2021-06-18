@@ -56,6 +56,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     };
 
     const init = async () : Promise<void> => {
+        vm.form = $scope.form;
         vm.question = $scope.question;
         vm.question.choices = new QuestionChoices();
         vm.nbQuestions = $scope.form.nb_questions;
@@ -136,7 +137,6 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     vm.send = async () : Promise<void> => {
         await saveResponses();
         if (await checkMandatoryQuestions()) {
-            vm.form.setFromJson($scope.getDataIf200(await formService.get(vm.question.form_id)));
             vm.distribution.structure = model.me.structureNames[0];
             template.open('lightbox', 'lightbox/responses-confirm-sending');
             vm.display.lightbox.sending = true;
