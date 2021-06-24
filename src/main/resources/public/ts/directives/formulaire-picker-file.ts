@@ -1,5 +1,5 @@
 import { ng, template, Document, $ } from 'entcore';
-import {FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_QUESTION_EMIT_EVENT} from "../core/enums";
+import {FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
 
 export const formulairePickerFile = ng.directive('formulairePickerFile', () => {
     return {

@@ -12,7 +12,7 @@
                 <editor ng-model="vm.mail.body"></editor>
             </div>
             <div style="margin-bottom:5%">
-                <i18n>formulaire.remind.link</i18n><a href="#/form/[[vm.forms.selected[0].id]]">[[config.host]]/formulaire#/form/[[vm.forms.selected[0].id]]</a>
+                <i18n>formulaire.remind.link</i18n><a href="[[vm.mail.link]]">[[vm.mail.link]]</a>
             </div>
             <div class="action-buttons">
                 <button class="cell cancel" ng-click="vm.cancelRemind()"><i18n>formulaire.cancel</i18n></button>
