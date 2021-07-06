@@ -66,13 +66,13 @@ public class DefaultQuestionService implements QuestionService {
 
     @Override
     public void createMultiple(JsonArray questions, String formId, Handler<Either<String, JsonArray>> handler) {
-        String query = "";
+        String query = "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, " +
+                "statement, mandatory) VALUES ";
         JsonArray params = new JsonArray();
 
         List<JsonObject> allQuestions = questions.getList();
         for (JsonObject question : allQuestions) {
-            query += "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, statement, mandatory) " +
-                    "VALUES (?, ?, ?, ?, ?, ?); ";
+            query += "(?, ?, ?, ?, ?, ?), ";
             params.add(formId)
                     .add(question.getString("title", ""))
                     .add(question.getInteger("position", 0))
@@ -81,7 +81,7 @@ public class DefaultQuestionService implements QuestionService {
                     .add(question.getBoolean("mandatory", false));
         }
 
-        query += "RETURNING *;";
+        query = query.substring(0, query.length() - 2) + " RETURNING *;";
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
