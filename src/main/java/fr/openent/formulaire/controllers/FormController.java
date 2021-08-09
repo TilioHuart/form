@@ -192,7 +192,7 @@ public class FormController extends ControllerHelper {
                     }
                     CompositeFuture.all(formsInfos).onComplete(evt -> {
                         if (evt.failed()) {
-                            log.error("[Formulaire@duplicate] Failed to retrieve info ", evt.cause());
+                            log.error("[Formulaire@duplicate] Failed to retrieve info : " + evt.cause());
                             badRequest(request);
                         }
                         List<Future> questionsInfosFutures = new ArrayList<>();
@@ -212,7 +212,7 @@ public class FormController extends ControllerHelper {
                         }
                         CompositeFuture.all(questionsInfosFutures).onComplete(evt1 -> {
                             if (evt1.failed()) {
-                                log.error("[Formulaire@duplicate] Failed to retrieve info from questions", evt1.cause());
+                                log.error("[Formulaire@duplicate] Failed to retrieve info from questions : " + evt1.cause());
                                 badRequest(request);
                             }
                             created(request);
@@ -289,8 +289,8 @@ public class FormController extends ControllerHelper {
                                     // Send mail via Conversation app
                                     eb.request("org.entcore.conversation", action, handlerToAsyncHandler(messageEvent -> {
                                         if (!"ok".equals(messageEvent.body().getString("status"))) {
-                                            log.error("[Formulaire@sendReminder] Failed to send reminder", messageEvent.body().getString("error"));
-                                            renderError(request);
+                                            log.error("[Formulaire@sendReminder] Failed to send reminder : " + messageEvent.body().getString("error"));
+                                            renderError(request, messageEvent.body());
                                         }
                                         else {
                                             // Update 'reminded' prop of the form

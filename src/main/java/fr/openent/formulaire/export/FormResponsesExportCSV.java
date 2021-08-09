@@ -51,7 +51,7 @@ public class FormResponsesExportCSV {
     String formId = request.getParam("formId");
     questionService.export(formId, getQuestionsEvt -> {
       if (getQuestionsEvt.isLeft()) {
-        log.error("[Formulaire@FormExportCSV] Failed to retrieve all questions of the form", getQuestionsEvt.left().getValue());
+        log.error("[Formulaire@FormExportCSV] Failed to retrieve all questions of the form : " + getQuestionsEvt.left().getValue());
         Renders.renderError(request);
       }
 
@@ -61,7 +61,7 @@ public class FormResponsesExportCSV {
 
       responseService.exportCSVResponses(formId, getResponsesEvt -> {
         if (getResponsesEvt.isLeft()) {
-          log.error("[Formulaire@FormExportCSV] Failed to retrieve all responses of the form", getResponsesEvt.left().getValue());
+          log.error("[Formulaire@FormExportCSV] Failed to retrieve all responses of the form : " + getResponsesEvt.left().getValue());
           Renders.renderError(request);
         }
 
@@ -88,7 +88,7 @@ public class FormResponsesExportCSV {
         // Proceed once we've got all the users' infos in our usersInfos list
         CompositeFuture.all(usersInfos).setHandler(evt -> {
           if (evt.failed()) {
-            log.error("[Formulaire@FormExportCSV] Failed to retrieve results", evt.cause());
+            log.error("[Formulaire@FormExportCSV] Failed to retrieve results : " + evt.cause());
             Future.failedFuture(evt.cause());
           }
 

@@ -63,26 +63,26 @@ public class FormResponsesExportPDF {
         String formId = request.getParam("formId");
         questionService.list(formId, getQuestionsEvt -> {
             if (getQuestionsEvt.isLeft()) {
-                log.error("[Formulaire@FormExportPDF] Failed to retrieve all questions of the form" + form.getInteger("id"), getQuestionsEvt.left().getValue());
+                log.error("[Formulaire@FormExportPDF] Failed to retrieve all questions of the form" + form.getInteger("id") + " : " + getQuestionsEvt.left().getValue());
                 Renders.renderError(request);
             }
 
             responseService.exportPDFResponses(formId, getResponsesEvt -> {
                 if (getResponsesEvt.isLeft()) {
-                    log.error("[Formulaire@FormExportPDF] Failed to get data for PDF export of the form " + form.getInteger("id"), getResponsesEvt.left().getValue());
+                    log.error("[Formulaire@FormExportPDF] Failed to get data for PDF export of the form " + form.getInteger("id") + " : " + getResponsesEvt.left().getValue());
                     badRequest(request);
                 }
 
                 formatData(getResponsesEvt.right().getValue(), getQuestionsEvt.right().getValue(), formatDataEvent -> {
                     if (formatDataEvent.isLeft()) {
-                        log.error("[Formulaire@FormExportPDF] Failed to format data of the form " + form.getInteger("id"), formatDataEvent.left().getValue());
+                        log.error("[Formulaire@FormExportPDF] Failed to format data of the form " + form.getInteger("id") + " : " + formatDataEvent.left().getValue());
                         Renders.renderError(request);
                     }
                     JsonObject results = formatDataEvent.right().getValue();
 
                     distributionService.count(form.getInteger("id").toString(), countRepEvent -> {
                         if (countRepEvent.isLeft()) {
-                            log.error("[Formulaire@FormExportPDF] Failed to count nb responses of the form " + form.getInteger("id"), countRepEvent.left().getValue());
+                            log.error("[Formulaire@FormExportPDF] Failed to count nb responses of the form " + form.getInteger("id") + " : " + countRepEvent.left().getValue());
                             Renders.renderError(request);
                         }
 
@@ -171,7 +171,7 @@ public class FormResponsesExportPDF {
         // Get graph images, affect them to their respective questions and send the result
         CompositeFuture.all(questionsGraphs).onComplete(evt -> {
             if (evt.failed()) {
-                log.error("[Formulaire@FormExportPDF] Failed to retrieve graphs' data", evt.cause());
+                log.error("[Formulaire@FormExportPDF] Failed to retrieve graphs' data : " + evt.cause());
                 Future.failedFuture(evt.cause());
             }
 
