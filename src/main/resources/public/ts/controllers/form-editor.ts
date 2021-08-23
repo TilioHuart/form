@@ -163,9 +163,13 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         };
 
         vm.deleteQuestion = () : void => {
-            vm.dontSave = true;
-            template.open('lightbox', 'lightbox/question-confirm-delete');
-            vm.display.lightbox.delete = true;
+            if (vm.form.sent && vm.questions.all.length === 1) {
+                notify.error(idiom.translate('formulaire.question.delete.warning'));
+            } else {
+                vm.dontSave = true;
+                template.open('lightbox', 'lightbox/question-confirm-delete');
+                vm.display.lightbox.delete = true;
+            }
         };
 
         vm.doDeleteQuestion = async () : Promise<void> => {
