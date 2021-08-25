@@ -1,0 +1,1 @@
+ALTER FUNCTION add_distrib(bigint, VARCHAR(36), VARCHAR, VARCHAR(36), VARCHAR) RENAME TO function_add_distrib;
