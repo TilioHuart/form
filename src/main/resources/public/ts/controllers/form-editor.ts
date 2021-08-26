@@ -1,5 +1,5 @@
 import {idiom, ng, notify, template, angular} from 'entcore';
-import {Form, Question, QuestionChoice, Questions, Types} from "../models";
+import {Form, Question, QuestionChoice, Questions, Response, Responses, Types} from "../models";
 import {formService, questionChoiceService, questionService} from "../services";
 import {Direction, FORMULAIRE_QUESTION_EMIT_EVENT, Pages} from "../core/enums";
 
@@ -8,6 +8,11 @@ interface ViewModel {
     questions: Questions;
     newQuestion: Question;
     dontSave: boolean;
+    question: Question; // Question for preview
+    response: Response; // Response for preview
+    responses: Responses; // Responses list for preview
+    nbQuestions: number;
+    last: boolean;
     display: {
         lightbox: {
             newQuestion: boolean,
@@ -17,6 +22,7 @@ interface ViewModel {
         }
     };
 
+    // Editor functions
     saveAll() : Promise<void>;
     return() : void;
     createNewQuestion() : void;
@@ -36,6 +42,14 @@ interface ViewModel {
     displayTypeIcon(code: number) : string;
     reOrder() : void;
     moveQuestion(index: number, direction: string) : void;
+
+    // Preview functions
+    preview() : void;
+    backToEditor() : void;
+    finish() : void;
+    prev() : void;
+    next() : void;
+    displayDefaultOption() : string;
 }
 
 
@@ -47,6 +61,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.questions = new Questions();
         vm.newQuestion = new Question();
         vm.dontSave = false;
+        vm.question = new Question();
+        vm.nbQuestions = 0;
+        vm.last = false;
         vm.display = {
             lightbox: {
                 newQuestion: false,
@@ -61,6 +78,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             await vm.questions.sync(vm.form.id);
             vm.newQuestion.form_id = vm.form.id;
             vm.dontSave = false;
+            vm.nbQuestions = vm.questions.all.length;
+            vm.last = vm.question.position === vm.nbQuestions;
             $scope.safeApply();
         };
 
@@ -289,6 +308,57 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
             rePositionQuestions();
             $scope.safeApply();
+        };
+
+        // Preview functions
+
+        vm.preview = async () : Promise<void> => {
+            await vm.saveAll();
+            vm.responses = new Responses();
+            for (let question of vm.questions.all) {
+                let response = new Response();
+                if (vm.question.question_type === Types.MULTIPLEANSWER) {
+                    response.selectedIndex = new Array<boolean>(vm.question.choices.all.length);
+                }
+                vm.responses.all.push(response);
+            }
+            vm.question = vm.questions.all[0];
+            vm.response = vm.responses.all[0];
+            $scope.currentPage = Pages.PREVIEW;
+            $scope.safeApply();
+        }
+
+        vm.backToEditor = () : void => {
+            $scope.currentPage = Pages.EDIT_FORM;
+            $scope.safeApply();
+        };
+
+        vm.finish = () : void => {
+            $scope.redirectTo('/list');
+        };
+
+        vm.prev = () : void => {
+            let prevPosition: number = vm.question.position - 1;
+            vm.last = prevPosition === vm.nbQuestions;
+            if (prevPosition > 0) {
+                vm.question = vm.questions.all[prevPosition - 1];
+                vm.response = vm.responses.all[prevPosition - 1];
+                $scope.safeApply();
+            }
+        };
+
+        vm.next = () : void => {
+            let nextPosition: number = vm.question.position + 1;
+            vm.last = nextPosition === vm.nbQuestions;
+            if (nextPosition <= vm.nbQuestions) {
+                vm.question = vm.questions.all[nextPosition - 1];
+                vm.response = vm.responses.all[nextPosition - 1];
+                $scope.safeApply();
+            }
+        };
+
+        vm.displayDefaultOption = () : string => {
+            return idiom.translate('formulaire.options.select');
         };
 
         // Utils

@@ -9,5 +9,6 @@ export enum Pages {
     RESPOND_QUESTION = 'RESPOND_QUESTION',
     E403 = 'E403',
     E404 = 'E404',
-    E409 = 'E409'
+    E409 = 'E409',
+    PREVIEW = 'PREVIEW'
 }

@@ -1,66 +1,72 @@
 <div ng-controller="FormEditorController as vm">
-    <div class="row">
-        <section class="cell">
-            <div>
-                <h1>
-                    <a ng-click="vm.return()"><i18n>formulaire.title</i18n></a><i18n>formulaire.title.separator</i18n>[[form.title]]
-                </h1>
-            </div>
-        </section>
-
-        <section class="cell" style="float:right;">
-            <div class="main-button">
-                <div class="date" ng-if="!isMobile">
-                    <i class="clock sm-icon spaced-right"></i><i18n>formulaire.form.edit.modified</i18n>[[displayDate(vm.form.date_modification)]]
+    <div ng-if="currentPage == Pages.EDIT_FORM">
+        <div class="row">
+            <section class="cell">
+                <div>
+                    <h1>
+                        <a ng-click="vm.return()"><i18n>formulaire.title</i18n></a><i18n>formulaire.title.separator</i18n>[[form.title]]
+                    </h1>
                 </div>
-                <button class="cell cancel" ng-click="vm.return()"><i18n>formulaire.return</i18n></button>
-                <button class="cell cancel dontSave" ng-click="vm.organizeQuestions()"><i18n>formulaire.organize</i18n></button>
-                <button class="cell dontSave" ng-click="" ng-show="false"><i18n>formulaire.preview</i18n></button>
-                <button class="cell" ng-click="vm.saveAll(true)"><i18n>formulaire.save</i18n></button>
-            </div>
-        </section>
+            </section>
 
-        <div class="cell date-saved-form" ng-if="isMobile">
-            <i class="clock sm-icon spaced-right"></i><i18n>formulaire.form.edit.modified</i18n>[[displayDate(vm.form.date_modification)]]
-        </div>
-    </div>
+            <section class="cell" style="float:right;">
+                <div class="main-button">
+                    <div class="date" ng-if="!isMobile">
+                        <i class="clock sm-icon spaced-right"></i><i18n>formulaire.form.edit.modified</i18n>[[displayDate(vm.form.date_modification)]]
+                    </div>
+                    <button class="cell cancel" ng-click="vm.return()"><i18n>formulaire.return</i18n></button>
+                    <button class="cell cancel dontSave" ng-click="vm.organizeQuestions()"><i18n>formulaire.organize</i18n></button>
+                    <button class="cell cancel dontSave" ng-click="vm.preview()" ng-show="vm.questions.all.length >= 1"><i18n>formulaire.preview</i18n></button>
+                    <button class="cell" ng-click="vm.saveAll(true)"><i18n>formulaire.save</i18n></button>
+                </div>
+            </section>
 
-    <div class="edit-form" ng-if="vm.questions.all.length > 0">
-        <!-- List of questions-->
-        <div class="questions" sortable-list ng-if="!isMobile && vm.questions.selected.length == 0">
-            <div ng-repeat="question in vm.questions.all | orderBy:'position'" class="nine twelve-mobile"
-                 sortable-element data-ng-change="vm.reOrder()" data-ng-model="question.index">
-                <!--  Each questions component -->
-                <question-item question="question" reorder="true"></question-item>
+            <div class="cell date-saved-form" ng-if="isMobile">
+                <i class="clock sm-icon spaced-right"></i><i18n>formulaire.form.edit.modified</i18n>[[displayDate(vm.form.date_modification)]]
             </div>
         </div>
-        <div class="questions" ng-if="isMobile || (!isMobile  && vm.questions.selected.length > 0)">
-            <div ng-repeat="question in vm.questions.all | orderBy:'position'" class="nine twelve-mobile">
-                <!--  Each questions component -->
-                <question-item question="question" reorder="false"></question-item>
+
+        <div class="edit-form" ng-if="vm.questions.all.length > 0">
+            <!-- List of questions-->
+            <div class="questions" sortable-list ng-if="!isMobile && vm.questions.selected.length == 0">
+                <div ng-repeat="question in vm.questions.all | orderBy:'position'" class="nine twelve-mobile"
+                     sortable-element data-ng-change="vm.reOrder()" data-ng-model="question.index">
+                    <!--  Each questions component -->
+                    <question-item question="question" reorder="true"></question-item>
+                </div>
+            </div>
+            <div class="questions" ng-if="isMobile || (!isMobile  && vm.questions.selected.length > 0)">
+                <div ng-repeat="question in vm.questions.all | orderBy:'position'" class="nine twelve-mobile">
+                    <!--  Each questions component -->
+                    <question-item question="question" reorder="false"></question-item>
+                </div>
+            </div>
+            <!-- End page buttons -->
+            <div class="buttons">
+                <div class="flexend nine zero-mobile">
+                    <button class="cell blueButton" ng-click="vm.createNewQuestion()"><i18n>formulaire.add.element</i18n></button>
+                </div>
+                <div ng-click="vm.createNewQuestion()" class="fab zero-desktop">
+                    +
+                </div>
             </div>
         </div>
-        <!-- End page buttons -->
-        <div class="buttons">
-            <div class="flexend nine zero-mobile">
+
+        <!-- Error page, wrong form -->
+        <div class="error" ng-if="vm.questions.all.length <= 0">
+            <img src="/formulaire/public/img/empty-form.svg" class="img_mini"/>
+            <h1><i18n>formulaire.form.edit.empty.main</i18n></h1>
+            <br>
+            <div><i18n>formulaire.form.edit.empty.caption</i18n></div>
+            <br>
+            <div class="buttons">
                 <button class="cell blueButton" ng-click="vm.createNewQuestion()"><i18n>formulaire.add.element</i18n></button>
             </div>
-            <div ng-click="vm.createNewQuestion()" class="fab zero-desktop">
-                +
-            </div>
         </div>
     </div>
 
-    <!-- Error page, wrong form -->
-    <div class="error" ng-if="vm.questions.all.length <= 0">
-        <img src="/formulaire/public/img/empty-form.svg" class="img_mini"/>
-        <h1><i18n>formulaire.form.edit.empty.main</i18n></h1>
-        <br>
-        <div><i18n>formulaire.form.edit.empty.caption</i18n></div>
-        <br>
-        <div class="buttons">
-            <button class="cell blueButton" ng-click="vm.createNewQuestion()"><i18n>formulaire.add.element</i18n></button>
-        </div>
+    <div ng-if="currentPage == Pages.PREVIEW">
+        <div ng-include="'formulaire/public/template/containers/preview-form.html'"></div>
     </div>
 
     <container template='lightbox'></container>

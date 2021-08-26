@@ -11,6 +11,7 @@ export class Response {
     answer: string|Date;
     distribution_id: number;
     files: ResponseFiles;
+    selectedIndex: boolean[]; // For multiple answer in preview
 
     constructor(question_id?: number, choice_id?: number, answer?: string|Date, distribution_id?: number) {
         this.id = null;

@@ -1,0 +1,68 @@
+<div class="row">
+    <section class="cell six">
+        <div>
+            <h1>
+                <a href="#/list/mine"><i18n>formulaire.title</i18n></a><i18n>formulaire.title.separator</i18n>[[form.title]]
+            </h1>
+        </div>
+    </section>
+
+    <section class="cell six">
+        <div class="main-button">
+            <button class="cell cancel" ng-click="vm.backToEditor()"><i18n>formulaire.backToEditor</i18n></button>
+        </div>
+    </section>
+</div>
+
+<div ng-include="'formulaire/public/template/components/progress-bar.html'" ng-if="vm.nbQuestions > 1"></div>
+
+<div class="respond-question">
+    <div class="nine twelve-mobile">
+        <div class="question">
+            <div class="question-title">
+                <h4>[[vm.question.title]]<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span></h4>
+            </div>
+            <div class="question-main">
+                <div ng-if="vm.question.question_type == Types.FREETEXT">
+                    <div ng-if="!!vm.question.statement" bind-html="vm.question.statement"></div>
+                </div>
+                <div ng-if="vm.question.question_type == Types.SHORTANSWER">
+                    <textarea ng-model="vm.response.answer" i18n-placeholder="formulaire.question.type.SHORTANSWER">
+                    </textarea>
+                </div>
+                <div ng-if="vm.question.question_type == Types.LONGANSWER">
+                    <editor ng-model="vm.response.answer"></editor>
+                </div>
+                <div ng-if="vm.question.question_type == Types.SINGLEANSWER">
+                    <select ng-model="vm.response.choice_id">
+                        <option ng-value="">[[vm.displayDefaultOption()]]</option>
+                        <option ng-repeat="choice in vm.question.choices.all" ng-value="choice.id">[[choice.value]]</option>
+                    </select>
+                </div>
+                <div ng-if="vm.question.question_type == Types.MULTIPLEANSWER">
+                    <div ng-repeat="choice in question.choices.all">
+                        <label for="check-[[choice.id]]">
+                            <input type="checkbox" id="check-[[choice.id]]" ng-model="vm.response.selectedIndex[$index]">
+                            <span>[[choice.value]]</span>
+                        </label>
+                    </div>
+                </div>
+                <div ng-if="vm.question.question_type == Types.DATE">
+                    <date-picker ng-model="vm.response.answer"></date-picker>
+                </div>
+                <div ng-if="vm.question.question_type == Types.TIME">
+                    <input type="time" ng-model="vm.response.answer"/>
+                </div>
+                <div ng-if="vm.question.question_type == Types.FILE">
+                    <formulaire-picker-file files="vm.files" multiple="true"></formulaire-picker-file>
+                </div>
+            </div>
+        </div>
+        <div class="buttons">
+            <button class="cell" ng-if="vm.question.position <= 1" ng-disabled="true"><i18n>formulaire.prev</i18n></button>
+            <button class="cell cancel dontSave" ng-click="vm.prev()" ng-if="vm.question.position > 1"><i18n>formulaire.prev</i18n></button>
+            <button class="cell" ng-click="vm.next()" ng-if="!vm.last"><i18n>formulaire.next</i18n></button>
+            <button class="cell" ng-click="vm.finish()" ng-if="vm.last"><i18n>formulaire.finish</i18n></button>
+        </div>
+    </div>
+</div>

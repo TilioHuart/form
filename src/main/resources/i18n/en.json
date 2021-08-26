@@ -16,6 +16,8 @@
   "formulaire.save": "Save",
   "formulaire.saveAndQuit": "Save and quit",
   "formulaire.end": "Finish and send",
+  "formulaire.backToEditor": "Go back to editor",
+  "formulaire.finish": "Finish",
   "formulaire.cancel": "Cancel",
   "formulaire.return": "Return",
   "formulaire.close": "Close",
