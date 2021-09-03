@@ -68,8 +68,8 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         }
         if (vm.question.question_type === Types.MULTIPLEANSWER) {
             await vm.responses.syncMine(vm.question.id, vm.distribution.id);
-            vm.selectedIndex = new Array<boolean>(vm.nbQuestions);
-            for (let i = 0; i < vm.question.choices.all.length; i++) {
+            vm.selectedIndex = new Array<boolean>(vm.question.choices.all.length);
+            for (let i = 0; i < vm.selectedIndex.length; i++) {
                 let check = false;
                 let j = 0;
                 while (!check && j < vm.responses.all.length) {
