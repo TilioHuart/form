@@ -41,7 +41,7 @@
                         </select>
                     </div>
                     <div ng-if="vm.question.question_type == Types.MULTIPLEANSWER">
-                        <div ng-repeat="choice in question.choices.all">
+                        <div ng-repeat="choice in vm.question.choices.all">
                             <label for="check-[[choice.id]]">
                                 <input type="checkbox" id="check-[[choice.id]]" ng-model="vm.selectedIndex[$index]">
                                 <span>[[choice.value]]</span>
