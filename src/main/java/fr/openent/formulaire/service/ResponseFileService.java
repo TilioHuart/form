@@ -21,6 +21,13 @@ public interface ResponseFileService {
     void listByQuestion(String questionId, Handler<Either<String, JsonArray>> handler);
 
     /**
+     * List all files of a specific form
+     * @param formId  form identifier
+     * @param handler function handler returning JsonArray data
+     */
+    void listByForm(String formId, Handler<Either<String, JsonArray>> handler);
+
+    /**
      * Get a specific file by id
      * @param fileId file identifier
      * @param handler function handler returning JsonObject data

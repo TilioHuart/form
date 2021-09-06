@@ -9,6 +9,8 @@ import fr.openent.formulaire.service.impl.DefaultResponseFileService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.Either;
+import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -149,7 +151,8 @@ public class ResponseFileController extends ControllerHelper {
                         log.info("Zip folder downloaded !");
                     }
                 });
-            } else {
+            }
+            else {
                 renderError(request);
             }
         });
@@ -178,7 +181,7 @@ public class ResponseFileController extends ControllerHelper {
         storage.writeUploadFile(request, entries -> {
             if (!"ok".equals(entries.getString("status"))) {
                 log.error("[Formulaire@upload] Fail to create file in storage");
-                renderError(request);
+                renderError(request, new JsonObject().put("message", entries.getString("message")));
                 return;
             }
             try {
@@ -187,18 +190,27 @@ public class ResponseFileController extends ControllerHelper {
                 String name = entries.getJsonObject("metadata").getString("filename");
                 String type = entries.getJsonObject("metadata").getString("content-type");
 
-                responseFileService.create(responseId, fileId, name, type, event -> {
-                    if (event.isRight()) {
+                responseFileService.create(responseId, fileId, name, type, createEvent -> {
+                    if (createEvent.isRight()) {
                         JsonObject response = new JsonObject().put("id", fileId).put("filename", name);
                         request.response().setStatusCode(201).putHeader("Content-Type", type).end(response.toString());
-                    } else {
+                    }
+                    else {
                         log.error("[Formulaire@upload] Fail to create in database file " + fileId);
-                        deleteFiles(new JsonArray().add(fileId));
-                        renderError(request);
+                        deleteFiles(storage, new JsonArray().add(fileId), deleteFilesEvt -> {
+                            if (deleteFilesEvt.isRight()) {
+                                ok(request);
+                            }
+                            else {
+                                log.error("[Formulaire@upload] Fail to delete files in storage");
+                                renderError(request, new JsonObject().put("message", deleteFilesEvt.left().getValue()));
+                            }
+                        });
+                        renderError(request, new JsonObject().put("message", createEvent.left().getValue()));
                     }
                 });
             } catch (NumberFormatException e) {
-                renderError(request);
+                renderError(request, new JsonObject().put("message", e.getMessage()));
             }
         });
     }
@@ -215,19 +227,31 @@ public class ResponseFileController extends ControllerHelper {
                 JsonArray deletedFiles = deleteEvent.right().getValue();
                 request.response().setStatusCode(204).end();
                 if (!deletedFiles.isEmpty()) {
-                    deleteFiles(deletedFiles);
+                    deleteFiles(storage, deletedFiles, deleteFilesEvt -> {
+                        if (deleteFilesEvt.isRight()) {
+                            ok(request);
+                        }
+                        else {
+                            renderError(request, new JsonObject().put("message", deleteFilesEvt.left().getValue()));
+                        }
+                    });
                 }
-            } else {
+            }
+            else {
                 log.error("[Formulaire@deleteAll] An error occurred while deleting files for reponse " + responseId);
-                renderError(request);
+                renderError(request, new JsonObject().put("message", deleteEvent.left().getValue()));
             }
         });
     }
 
-    private void deleteFiles(JsonArray fileIds) {
-        storage.removeFiles(fileIds, e -> {
-            if (!"ok".equals(e.getString("status"))) {
+    public static void deleteFiles(Storage storage, JsonArray fileIds, Handler<Either<String, JsonObject>> handler) {
+        storage.removeFiles(fileIds, deleteFilesEvt -> {
+            if (!"ok".equals(deleteFilesEvt.getString("status"))) {
                 log.error("[Formulaire@deleteFile] An error occurred while removing files " + fileIds);
+                handler.handle(new Either.Left<>(deleteFilesEvt.getString("message")));
+            }
+            else {
+                handler.handle(new Either.Right<>(new JsonObject()));
             }
         });
     }

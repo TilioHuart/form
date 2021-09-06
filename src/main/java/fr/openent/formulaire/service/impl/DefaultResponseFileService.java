@@ -30,6 +30,16 @@ public class DefaultResponseFileService implements ResponseFileService {
     }
 
     @Override
+    public void listByForm(String formId, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT rf.id FROM " + Formulaire.RESPONSE_FILE_TABLE + " rf " +
+                "INNER JOIN " + Formulaire.RESPONSE_TABLE + " r ON r.id = rf.response_id " +
+                "INNER JOIN " + Formulaire.QUESTION_TABLE + " q ON q.id = r.question_id " +
+                "WHERE q.form_id = ?;";
+        JsonArray params = new JsonArray().add(formId);
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
     public void get(String fileId, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT * FROM " + Formulaire.RESPONSE_FILE_TABLE + " WHERE id = ?;";
         JsonArray params = new JsonArray().add(fileId);

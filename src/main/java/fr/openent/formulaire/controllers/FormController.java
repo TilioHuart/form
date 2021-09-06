@@ -41,6 +41,7 @@ public class FormController extends ControllerHelper {
     private final FormService formService;
     private final DistributionService distributionService;
     private final QuestionChoiceService questionChoiceService;
+    private final ResponseFileService responseFileService;
     private final FormSharesService formShareService;
     private final NeoService neoService;
 
@@ -50,6 +51,7 @@ public class FormController extends ControllerHelper {
         this.formService = new DefaultFormService();
         this.distributionService = new DefaultDistributionService();
         this.questionChoiceService = new DefaultQuestionChoiceService();
+        this.responseFileService = new DefaultResponseFileService();
         this.formShareService = new DefaultFormSharesService();
         this.neoService = new DefaultNeoService();
     }
@@ -238,12 +240,42 @@ public class FormController extends ControllerHelper {
     }
 
     @Delete("/forms/:formId")
-    @ApiDoc("Delete a scpecific form")
+    @ApiDoc("Delete a specific form")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String formId = request.getParam("formId");
-        formService.delete(formId, defaultResponseHandler(request));
+
+        responseFileService.listByForm(formId, responseFileIds -> {
+            if (responseFileIds.isRight()) {
+                JsonArray ids = responseFileIds.right().getValue();
+                JsonArray fileIds = new JsonArray();
+
+                if (ids != null && ids.size() > 0) {
+                    for (Object fileId : ids) {
+                        if (fileId instanceof JsonObject) {
+                            fileIds.add(((JsonObject) fileId).getString("id"));
+                        }
+                    }
+
+                    ResponseFileController.deleteFiles(storage, fileIds, deleteFilesEvt -> {
+                        if (deleteFilesEvt.isRight()) {
+                            formService.delete(formId, defaultResponseHandler(request));
+                        } else {
+                            log.error("[Formulaire@delete] Fail to delete files in storage");
+                            renderError(request, new JsonObject().put("message", deleteFilesEvt.left().getValue()));
+                        }
+                    });
+                }
+                else {
+                    formService.delete(formId, defaultResponseHandler(request));
+                }
+            }
+            else {
+                log.error("[Formulaire@delete] Failed to retrieve files' ids for form : " + formId);
+                badRequest(request, responseFileIds.left().getValue());
+            }
+        });
     }
 
     @Post("/forms/:formId/remind")
