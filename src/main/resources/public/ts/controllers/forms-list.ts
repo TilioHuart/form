@@ -195,6 +195,21 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         vm.forms.selected[0].generateShareRights();
         template.open('lightbox', 'lightbox/form-sharing');
         vm.display.lightbox.sharing = true;
+        window.setTimeout(async function () {
+            let contribs = document.querySelectorAll('[data-label="Contribuer"]');
+            let gestions = document.querySelectorAll('[data-label="Gérer"]');
+            for (let i = 1; i < contribs.length; i++) {
+                let input = contribs[i].children[0].children[0] as HTMLInputElement;
+                let gestionValue = gestions[i].children[0].children[0] as HTMLInputElement;
+                input.addEventListener('change', (e) => {
+                    let inputValue = e.target as HTMLInputElement;
+                    if (!inputValue.checked && gestionValue.checked) {
+                        inputValue.checked = true;
+                        $scope.safeApply();
+                    }
+                });
+            }
+        }, 500);
     };
 
     vm.closeShareFormLightbox = () : void => {
