@@ -260,8 +260,17 @@ public class FormController extends ControllerHelper {
 
                     ResponseFileController.deleteFiles(storage, fileIds, deleteFilesEvt -> {
                         if (deleteFilesEvt.isRight()) {
-                            formService.delete(formId, defaultResponseHandler(request));
-                        } else {
+                            responseFileService.deleteAll(fileIds, deleteResponseFilesEvt -> {
+                                if (deleteResponseFilesEvt.isRight()) {
+                                    formService.delete(formId, defaultResponseHandler(request));
+                                }
+                                else {
+                                    log.error("[Formulaire@delete] Fail to delete response files in bdd");
+                                    renderError(request, new JsonObject().put("message", deleteResponseFilesEvt.left().getValue()));
+                                }
+                            });
+                        }
+                        else {
                             log.error("[Formulaire@delete] Fail to delete files in storage");
                             renderError(request, new JsonObject().put("message", deleteFilesEvt.left().getValue()));
                         }

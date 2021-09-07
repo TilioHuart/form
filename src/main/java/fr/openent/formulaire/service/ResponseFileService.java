@@ -49,5 +49,12 @@ public interface ResponseFileService {
      * @param responseId response identifier
      * @param handler function handler returning JsonArray data
      */
-    void deleteAll(String responseId, Handler<Either<String, JsonArray>> handler);
+    void deleteAllByResponse(String responseId, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * Delete all response_files by their ids
+     * @param responseIds   responseFiles identifier
+     * @param handler       function handler returning JsonArray data
+     */
+    void deleteAll(JsonArray responseIds, Handler<Either<String, JsonArray>> handler);
 }

@@ -222,7 +222,7 @@ public class ResponseFileController extends ControllerHelper {
     public void deleteAll(HttpServerRequest request) {
         String responseId = request.getParam("responseId");
 
-        responseFileService.deleteAll(responseId, deleteEvent -> {
+        responseFileService.deleteAllByResponse(responseId, deleteEvent -> {
             if (deleteEvent.isRight()) {
                 JsonArray deletedFiles = deleteEvent.right().getValue();
                 request.response().setStatusCode(204).end();
