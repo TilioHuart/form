@@ -319,7 +319,8 @@ public class FormController extends ControllerHelper {
                                     JsonObject message = new JsonObject()
                                             .put("subject", mail.getString("subject"))
                                             .put("body", mail.getString("body"))
-                                            .put("to", respondersIds);
+                                            .put("to", new JsonArray())
+                                            .put("cci", respondersIds);
 
                                     JsonObject action = new JsonObject()
                                             .put("action", "send")
