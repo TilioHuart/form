@@ -13,10 +13,12 @@ import fr.openent.formulaire.service.impl.*;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.http.response.DefaultResponseHandler;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.*;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -27,10 +29,9 @@ import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
+
 import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
@@ -303,63 +304,90 @@ public class FormController extends ControllerHelper {
                             distributionService.listByForm(formId, getDistributions -> {
                                 if (getDistributions.isRight()) {
                                     JsonArray distributions = getDistributions.right().getValue();
-                                    JsonArray respondersIds = new JsonArray();
+                                    JsonArray localRespondersIds = new JsonArray();
+                                    JsonArray listMails = new JsonArray();
+
+                                    // Generate list of mails to send
                                     for (int i = 0; i < distributions.size(); i++) {
                                         String id = distributions.getJsonObject(i).getString("responder_id");
-                                        if (!respondersIds.contains(id)) {
+                                        if (!localRespondersIds.contains(id)) {
                                             if (form.getBoolean("multiple")) {
-                                                respondersIds.add(id);
+                                                localRespondersIds.add(id);
                                             }
                                             else if (distributions.getJsonObject(i).getString("date_response") == null) {
-                                                respondersIds.add(id);
+                                                localRespondersIds.add(id);
                                             }
+                                        }
+
+                                        // Generate new mail object if limit or end loop are reached
+                                        if (i == distributions.size() - 1 || localRespondersIds.size() == config.getInteger("zimbra-max-recipients", 50)) {
+                                            JsonObject message = new JsonObject()
+                                                    .put("subject", mail.getString("subject"))
+                                                    .put("body", mail.getString("body"))
+                                                    .put("to", new JsonArray())
+                                                    .put("cci", localRespondersIds);
+
+                                            JsonObject action = new JsonObject()
+                                                    .put("action", "send")
+                                                    .put("userId", user.getUserId())
+                                                    .put("username", user.getUsername())
+                                                    .put("message", message);
+
+                                            listMails.add(action);
+                                            localRespondersIds = new JsonArray();
                                         }
                                     }
 
-                                    JsonObject message = new JsonObject()
-                                            .put("subject", mail.getString("subject"))
-                                            .put("body", mail.getString("body"))
-                                            .put("to", new JsonArray())
-                                            .put("cci", respondersIds);
 
-                                    JsonObject action = new JsonObject()
-                                            .put("action", "send")
-                                            .put("userId", user.getUserId())
-                                            .put("username", user.getUsername())
-                                            .put("message", message);
+                                    // Prepare futures to get message responses
+                                    List<Future> mails = new ArrayList<>();
+                                    mails.addAll(Collections.nCopies(listMails.size(), Promise.promise().future()));
 
-                                    // Send mail via Conversation app
-                                    eb.request("org.entcore.conversation", action, handlerToAsyncHandler(messageEvent -> {
-                                        if (!"ok".equals(messageEvent.body().getString("status"))) {
-                                            log.error("[Formulaire@sendReminder] Failed to send reminder : " + messageEvent.body().getString("error"));
-                                            renderError(request, messageEvent.body());
+                                    // Code to send mails
+                                    for (int i = 0; i < listMails.size(); i++) {
+                                        Future future = mails.get(i);
+
+                                        // Send mail via Conversation app if it exists or else with Zimbra
+                                        eb.request("org.entcore.conversation", listMails.getJsonObject(i), (Handler<AsyncResult<Message<JsonObject>>>) messageEvent -> {
+                                            if (!"ok".equals(messageEvent.result().body().getString("status"))) {
+                                                log.error("[Formulaire@sendReminder] Failed to send reminder : " + messageEvent.cause());
+                                                future.handle(Future.failedFuture(messageEvent.cause()));
+                                            }
+                                            future.handle(Future.succeededFuture(messageEvent.result().body()));
+                                        });
+                                    }
+
+
+                                    // Try to send effectively mails with code below and get results
+                                    CompositeFuture.all(mails).onComplete(evt -> {
+                                        if (evt.failed()) {
+                                            log.error("[Zimbra@sendMessage] Failed to send reminder : " + evt.cause());
+                                            Future.failedFuture(evt.cause());
                                         }
-                                        else {
-                                            // Update 'reminded' prop of the form
-                                            form.put("reminded", true);
-                                            formService.update(formId, form, updateEvent -> {
-                                                if (updateEvent.isRight()) {
-                                                    Renders.renderJson(request, updateEvent.right().getValue(), 200);
-                                                }
-                                                else {
-                                                    log.error("[Formulaire@sendReminder] Fail to update form " + formId + " : " + updateEvent.left().getValue());
-                                                    renderError(request);
-                                                }
-                                            });
-                                        }
-                                    }));
 
+                                        // Update 'reminded' prop of the form
+                                        form.put("reminded", true);
+                                        formService.update(formId, form, updateEvent -> {
+                                            if (updateEvent.isRight()) {
+                                                renderJson(request, updateEvent.right().getValue());
+                                            }
+                                            else {
+                                                log.error("[Formulaire@sendReminder] Fail to update form " + formId + " : " + updateEvent.left().getValue());
+                                                renderError(request, new JsonObject().put("message", updateEvent.left().getValue()));
+                                            }
+                                        });
+                                    });
                                 }
                                 else {
                                     String error = getDistributions.left().getValue();
                                     log.error("[Formulaire@sendReminder] Fail to retrieve distributions of form " + formId + " : " + error);
-                                    renderError(request);
+                                    renderError(request, new JsonObject().put("message", error));
                                 }
                             });
                         }
                         else {
                             log.error("[Formulaire@sendReminder] Fail to get form " + formId + " : " + getFormEvent.left().getValue());
-                            renderError(request);
+                            renderError(request, new JsonObject().put("message", getFormEvent.left().getValue()));
                         }
                     });
                 } else {

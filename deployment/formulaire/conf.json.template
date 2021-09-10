@@ -15,6 +15,7 @@
     "mode" : "${mode}",
     "entcore.port" : 8009,
     "sql" : true,
-    "db-schema" : "formulaire"
+    "db-schema" : "formulaire",
+    "zimbra-max-recipients": ${zimbraMaxRecipients}
   }
 }
