@@ -76,17 +76,20 @@ body.formulaire section.main {
     }
   }
 
-  .cancel {
-    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+  button {
+    &.cancel {
+      box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    &.blueButton {
+      background-color: $formulaire-blue;
+    }
   }
 
   .date-saved-form {
     background: $formulaire-blue-transparent;
   }
 
-  .blueButton {
-    background-color: $formulaire-blue;
-  }
 
   .fab {
     width: 45px;
