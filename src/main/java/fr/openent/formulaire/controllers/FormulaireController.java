@@ -19,16 +19,15 @@ import java.util.Map;
 public class FormulaireController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(FormulaireController.class);
     private EventStore eventStore;
-    private enum FormulaireEvent { ACCESS, CREATE }
 
-    public FormulaireController() {
+    public FormulaireController(EventStore eventStore) {
         super();
+        this.eventStore = eventStore;
     }
 
     @Override
     public void init(Vertx vertx, JsonObject config, RouteMatcher rm, Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
         super.init(vertx, config, rm, securedActions);
-        eventStore = EventStoreFactory.getFactory().getEventStore(Formulaire.class.getSimpleName());
     }
 
     @Get("")
@@ -36,7 +35,6 @@ public class FormulaireController extends ControllerHelper {
     @SecuredAction(Formulaire.ACCESS_RIGHT)
     public void render(HttpServerRequest request) {
         renderView(request);
-        eventStore.createAndStoreEvent(FormulaireEvent.ACCESS.name(), request);
-        eventStore.createAndStoreEvent(FormulaireEvent.CREATE.name(), request);
+        eventStore.createAndStoreEvent(Formulaire.FormulaireEvent.ACCESS.name(), request);
     }
 }

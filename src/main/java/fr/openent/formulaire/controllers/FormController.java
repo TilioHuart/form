@@ -25,6 +25,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
+import org.entcore.common.events.EventStore;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
@@ -32,12 +33,12 @@ import org.entcore.common.user.UserUtils;
 
 import java.util.*;
 
-import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
 
 public class FormController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(FormController.class);
+    private final EventStore eventStore;
     private final Storage storage;
     private final FormService formService;
     private final DistributionService distributionService;
@@ -46,8 +47,9 @@ public class FormController extends ControllerHelper {
     private final FormSharesService formShareService;
     private final NeoService neoService;
 
-    public FormController(Storage storage) {
+    public FormController(EventStore eventStore, Storage storage) {
         super();
+        this.eventStore = eventStore;
         this.storage = storage;
         this.formService = new DefaultFormService();
         this.distributionService = new DefaultDistributionService();
@@ -153,7 +155,15 @@ public class FormController extends ControllerHelper {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
                 RequestUtils.bodyToJson(request, form -> {
-                    formService.create(form, user, defaultResponseHandler(request));
+                    formService.create(form, user, event -> {
+                        if (event.isRight()) {
+                            eventStore.createAndStoreEvent(Formulaire.FormulaireEvent.CREATE.name(), request);
+                            Renders.renderJson(request, event.right().getValue(), 200);
+                        } else {
+                            JsonObject error = (new JsonObject()).put("error", event.left().getValue());
+                            Renders.renderJson(request, error, 400);
+                        }
+                    });
                 });
             } else {
                 log.error("User not found in session.");
@@ -170,7 +180,15 @@ public class FormController extends ControllerHelper {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
                 RequestUtils.bodyToJsonArray(request, forms -> {
-                    formService.createMultiple(forms, user, arrayResponseHandler(request));
+                    formService.createMultiple(forms, user, event -> {
+                        if (event.isRight()) {
+                            eventStore.createAndStoreEvent(Formulaire.FormulaireEvent.CREATE.name(), request);
+                            Renders.renderJson(request, event.right().getValue());
+                        } else {
+                            JsonObject error = (new JsonObject()).put("error", event.left().getValue());
+                            Renders.renderJson(request, error, 400);
+                        }
+                    });
                 });
             } else {
                 log.error("User not found in session.");
@@ -218,6 +236,7 @@ public class FormController extends ControllerHelper {
                                 log.error("[Formulaire@duplicate] Failed to retrieve info from questions : " + evt1.cause());
                                 badRequest(request);
                             }
+                            eventStore.createAndStoreEvent(Formulaire.FormulaireEvent.CREATE.name(), request);
                             created(request);
                         });
                     });

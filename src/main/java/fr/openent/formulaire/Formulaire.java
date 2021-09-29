@@ -5,6 +5,8 @@ import fr.openent.formulaire.service.impl.FormulaireRepositoryEvents;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.entcore.common.events.EventStore;
+import org.entcore.common.events.EventStoreFactory;
 import org.entcore.common.http.BaseServer;
 import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.share.impl.SqlShareService;
@@ -18,6 +20,7 @@ import java.util.List;
 
 public class Formulaire extends BaseServer {
 	private static final Logger log = LoggerFactory.getLogger(Formulaire.class);
+	public enum FormulaireEvent { ACCESS, CREATE }
 
 	public static String DB_SCHEMA;
 	public static String DISTRIBUTION_TABLE;
@@ -60,6 +63,7 @@ public class Formulaire extends BaseServer {
 		super.start();
 
 		final EventBus eb = getEventBus(vertx);
+		EventStore eventStore = EventStoreFactory.getFactory().getEventStore(Formulaire.class.getSimpleName());
 
 		// Set RepositoryEvents implementation used to process events published for transition
 		setRepositoryEvents(new FormulaireRepositoryEvents());
@@ -97,7 +101,7 @@ public class Formulaire extends BaseServer {
 			conf.setShareTable("form_shares");
 		}
 
-		FormController formController = new FormController(storage);
+		FormController formController = new FormController(eventStore, storage);
 		formController.setShareService(new SqlShareService(DB_SCHEMA, "form_shares", eb, securedActions, null));
 		formController.setCrudService(new SqlCrudService(DB_SCHEMA, "form", "form_shares"));
 
@@ -106,7 +110,7 @@ public class Formulaire extends BaseServer {
 
 		addController(new DistributionController());
 		addController(formController);
-		addController(new FormulaireController());
+		addController(new FormulaireController(eventStore));
 		addController(new QuestionChoiceController());
 		addController(new QuestionController());
 		addController(new QuestionTypeController());
