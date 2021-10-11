@@ -48,7 +48,9 @@ export const responseService: ResponseService = {
         }
         else {
             if (questionType === Types.TIME) {
-                response.answer = moment(response.answer).format("HH:mm");
+                if (typeof response.answer != "string") {
+                    response.answer = moment(response.answer).format("HH:mm");
+                }
             }
             else if (questionType === Types.DATE) {
                 if (typeof response.answer != "string") {
