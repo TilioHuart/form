@@ -1,14 +1,11 @@
 package fr.openent.formulaire.service.impl;
 
 import fr.openent.formulaire.Formulaire;
-import fr.openent.formulaire.controllers.FormController;
 import fr.openent.formulaire.service.DistributionService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
@@ -145,20 +142,14 @@ public class DefaultDistributionService implements DistributionService {
 
     @Override
     public void getDeactivated(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler) {
-        JsonArray respondersIdsArray = new JsonArray();
-        for (int i = 0; i < responders.size(); i++) {
-            JsonArray users = responders.getJsonObject(i).getJsonArray("users");
-            for (int j = 0; j < users.size(); j++) {
-                respondersIdsArray.add(users.getJsonObject(j).getString("id"));
-            }
-        }
+        JsonArray respondersIds = getIds(responders);
 
         JsonArray params = new JsonArray().add(formId);
         String query = "SELECT responder_id FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? ";
 
-        if (respondersIdsArray.size() > 0) {
-            query += "AND responder_id NOT IN " + Sql.listPrepared(respondersIdsArray) + ";";
-            params.addAll(respondersIdsArray);
+        if (respondersIds.size() > 0) {
+            query += "AND responder_id NOT IN " + Sql.listPrepared(respondersIds) + ";";
+            params.addAll(respondersIds);
         }
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
@@ -166,20 +157,14 @@ public class DefaultDistributionService implements DistributionService {
 
     @Override
     public void getDuplicates(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler) {
-        JsonArray respondersIdsArray = new JsonArray();
-        for (int i = 0; i < responders.size(); i++) {
-            JsonArray users = responders.getJsonObject(i).getJsonArray("users");
-            for (int j = 0; j < users.size(); j++) {
-                respondersIdsArray.add(users.getJsonObject(j).getString("id"));
-            }
-        }
+        JsonArray respondersIds = getIds(responders);
 
         JsonArray params = new JsonArray().add(formId);
         String query = "SELECT responder_id FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? ";
 
-        if (respondersIdsArray.size() > 0) {
-            query += "AND responder_id IN " + Sql.listPrepared(respondersIdsArray) + ";";
-            params.addAll(respondersIdsArray);
+        if (respondersIds.size() > 0) {
+            query += "AND responder_id IN " + Sql.listPrepared(respondersIds) + ";";
+            params.addAll(respondersIds);
         }
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
@@ -195,21 +180,17 @@ public class DefaultDistributionService implements DistributionService {
         }
 
         ArrayList<JsonObject> respondersArray = new ArrayList<>();
-        JsonArray respondersArrayIds = new JsonArray();
-        for (int i = 0; i < responders.size(); i++) {
-            JsonArray infos = responders.getJsonObject(i).getJsonArray("users");
-            if (infos != null && !infos.isEmpty()) {
-                for (int j = 0; j < infos.size(); j++) {
-                    JsonObject info = infos.getJsonObject(j);
-                    if (!idsToFilter.contains(info.getString("id")) && !respondersArrayIds.contains(info.getString("id"))) {
-                        respondersArray.add(info);
-                        respondersArrayIds.add(info.getString("id"));
-                    }
+        ArrayList<String> respondersArrayIds = new ArrayList<>();
+        for (int j = 0; j < responders.size(); j++) {
+            if (responders.getJsonObject(j) != null && !responders.getJsonObject(j).isEmpty()) {
+                JsonObject responder = responders.getJsonObject(j);
+                if (!idsToFilter.contains(responder.getString("id")) && !respondersArrayIds.contains(responder.getString("id"))) {
+                    respondersArray.add(responder);
+                    respondersArrayIds.add(responder.getString("id"));
                 }
             }
         }
 
-        Logger log = LoggerFactory.getLogger(FormController.class);
         if (!respondersArray.isEmpty()) {
             JsonArray params = new JsonArray();
             String query = "INSERT INTO " + Formulaire.DISTRIBUTION_TABLE + " (form_id, sender_id, sender_name, responder_id, " +
@@ -253,5 +234,13 @@ public class DefaultDistributionService implements DistributionService {
         }
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    private JsonArray getIds(JsonArray responders) {
+        JsonArray respondersIds = new JsonArray();
+        for (int j = 0; j < responders.size(); j++) {
+            respondersIds.add(responders.getJsonObject(j).getString("id"));
+        }
+        return respondersIds;
     }
 }

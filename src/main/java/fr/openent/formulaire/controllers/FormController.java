@@ -568,7 +568,12 @@ public class FormController extends ControllerHelper {
                             // Sync with distribution table
                             neoService.getUsersInfosFromIds(usersIds, groupsIds, eventUsers -> {
                                 if (eventUsers.isRight()) {
-                                    JsonArray responders = eventUsers.right().getValue();
+                                    JsonArray infos = eventUsers.right().getValue();
+                                    JsonArray responders = new JsonArray();
+                                    for (int i = 0; i < infos.size(); i++) {
+                                        JsonArray users = infos.getJsonObject(i).getJsonArray("users");
+                                        responders.addAll(users);
+                                    }
                                     syncDistributions(formId, user, responders, syncEvent -> {
                                         if (syncEvent.isRight()) {
                                             // Update 'collab' property as needed
@@ -783,7 +788,8 @@ public class FormController extends ControllerHelper {
                         handler.handle(new Either.Right<>(updateEvent.right().getValue()));
                     }
                 });
-            } else {
+            }
+            else {
                 handler.handle(new Either.Left<>(getEvent.left().getValue()));
                 log.error("[Formulaire@updateFormCollabProp] Fail to get form : " + getEvent.left().getValue());
             }
