@@ -266,11 +266,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		};
 
 		$scope.hasShareRightManager = (form : Form) => {
-			return form.owner_id === model.me.userId || form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.manager.right);
+			return form.owner_id === model.me.userId || (form.myRights && form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.manager.right));
 		};
 
 		$scope.hasShareRightContrib = (form : Form) => {
-			return form.owner_id === model.me.userId || form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.contrib.right);
+			return form.owner_id === model.me.userId || (form.myRights && form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.contrib.right));
 		};
 
 		$scope.hasShareRightResponse = (form : Form) => {

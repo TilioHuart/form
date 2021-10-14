@@ -199,14 +199,21 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             let contribs = document.querySelectorAll('[data-label="Contribuer"]');
             let gestions = document.querySelectorAll('[data-label="Gérer"]');
             for (let i = 1; i < contribs.length; i++) {
-                let input = contribs[i].children[0].children[0] as HTMLInputElement;
+                let contribValue = contribs[i].children[0].children[0] as HTMLInputElement;
                 let gestionValue = gestions[i].children[0].children[0] as HTMLInputElement;
-                input.addEventListener('change', (e) => {
-                    let inputValue = e.target as HTMLInputElement;
-                    if (!inputValue.checked && gestionValue.checked) {
-                        inputValue.checked = true;
-                        $scope.safeApply();
+                contribValue.addEventListener('change', (e) => {
+                    let newValue = e.target as HTMLInputElement;
+                    if (!newValue.checked && gestionValue.checked) {
+                        gestionValue.checked = false;
                     }
+                    $scope.safeApply();
+                });
+                gestionValue.addEventListener('change', (e) => {
+                    let newValue = e.target as HTMLInputElement;
+                    if (newValue.checked && !contribValue.checked) {
+                        contribValue.checked = true;
+                    }
+                    $scope.safeApply();
                 });
             }
         }, 500);
