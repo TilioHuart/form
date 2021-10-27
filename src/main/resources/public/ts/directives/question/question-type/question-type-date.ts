@@ -1,11 +1,11 @@
 import {Directive, ng} from "entcore";
-import {Question} from "../../models";
+import {Question} from "../../../models";
 
 interface IViewModel {
     question: Question
 }
 
-export const questionTypeShortanswer: Directive = ng.directive('questionTypeShortanswer', () => {
+export const questionTypeDate: Directive = ng.directive('questionTypeDate', () => {
 
     return {
         restrict: 'E',
@@ -17,7 +17,7 @@ export const questionTypeShortanswer: Directive = ng.directive('questionTypeShor
         bindToController: true,
         replace: true,
         template: `
-            <textarea disabled i18n-placeholder="formulaire.question.type.SHORTANSWER"></textarea>
+            <i18n style="color:grey">formulaire.question.date.empty</i18n>
         `,
 
         controller: async ($scope) => {

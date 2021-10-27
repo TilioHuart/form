@@ -1,11 +1,11 @@
 import {Directive, ng} from "entcore";
-import {Question} from "../../models";
+import {Question} from "../../../models";
 
 interface IViewModel {
     question: Question
 }
 
-export const questionTypeTime: Directive = ng.directive('questionTypeTime', () => {
+export const questionTypeFile: Directive = ng.directive('questionTypeFile', () => {
 
     return {
         restrict: 'E',
@@ -17,7 +17,7 @@ export const questionTypeTime: Directive = ng.directive('questionTypeTime', () =
         bindToController: true,
         replace: true,
         template: `
-            <i18n style="color:grey">formulaire.question.time.empty</i18n>
+            <i18n style="color:grey">formulaire.question.file.empty</i18n>
         `,
 
         controller: async ($scope) => {

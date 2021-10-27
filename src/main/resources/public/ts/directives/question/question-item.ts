@@ -1,6 +1,6 @@
 import {Directive, idiom, ng} from "entcore";
-import {Question, Types} from "../models";
-import {FORMULAIRE_QUESTION_EMIT_EVENT} from "../core/enums/formulaire-event";
+import {Question, Types} from "../../models";
+import {FORMULAIRE_QUESTION_EMIT_EVENT} from "../../core/enums/formulaire-event";
 
 interface IViewModel {
     question: Question,

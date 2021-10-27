@@ -1,7 +1,7 @@
 import {Directive, ng} from "entcore";
-import {Question, QuestionChoice} from "../../models";
-import {questionChoiceService} from "../../services";
-import {FORMULAIRE_EMIT_EVENT} from "../../core/enums/formulaire-event";
+import {Question, QuestionChoice} from "../../../models";
+import {questionChoiceService} from "../../../services";
+import {FORMULAIRE_EMIT_EVENT} from "../../../core/enums/formulaire-event";
 
 interface IViewModel {
     question: Question,
@@ -10,7 +10,7 @@ interface IViewModel {
     deleteChoice(index: number): Promise<void>
 }
 
-export const questionTypeSingleanswer: Directive = ng.directive('questionTypeSingleanswer', () => {
+export const questionTypeMultipleanswer: Directive = ng.directive('questionTypeMultipleanswer', () => {
 
     return {
         restrict: 'E',
@@ -24,9 +24,12 @@ export const questionTypeSingleanswer: Directive = ng.directive('questionTypeSin
         template: `
             <div class="eight twelve-mobile">
                 <div ng-repeat="choice in vm.question.choices.all">
-                    <span>[[$index + 1]].</span>
-                    <input type="text" class="ten nine-mobile" ng-model="choice.value" placeholder="Choix [[$index + 1]]" ng-if="!vm.question.selected" disabled>
-                    <input type="text" class="ten nine-mobile" ng-model="choice.value" placeholder="Choix [[$index + 1]]" ng-if="vm.question.selected">
+                    <label for="check-[[choice.id]]">
+                        <input type="checkbox" id="check-[[choice.id]]" disabled>
+                        <span style="cursor: default"></span>
+                        <input type="text" class="ten eight-mobile" ng-model="choice.value" placeholder="Choix [[$index + 1]]" ng-if="!vm.question.selected" disabled>
+                        <input type="text" class="ten eight-mobile" ng-model="choice.value" placeholder="Choix [[$index + 1]]" ng-if="vm.question.selected">
+                    </label>
                     <i class="cancel lg-icon" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected"></i>
                 </div>
                 <div style="display: flex; justify-content: center;" ng-if="vm.question.selected">

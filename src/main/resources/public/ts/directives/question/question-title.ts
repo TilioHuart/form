@@ -1,5 +1,5 @@
 import {Directive, idiom, ng} from "entcore";
-import {Question, Types} from "../models";
+import {Question, Types} from "../../models";
 
 interface IViewModel {
     question: Question,
