@@ -60,6 +60,14 @@ public class ResponseController extends ControllerHelper {
             }
         });
     }
+    @Get("/questions/:questionId/responses/count")
+    @ApiDoc("Count respsonses by questionId")
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value ="", type = ActionType.RESOURCE)
+    public void countByQuestion(HttpServerRequest request){ //count
+        String questionId=request.getParam("questionId");
+        responseService.countByQuestion(questionId, defaultResponseHandler(request));
+    }
 
     @Get("/questions/:questionId/responses/:distributionId")
     @ApiDoc("List all my responses to a specific question for a specific distribution")
@@ -86,6 +94,8 @@ public class ResponseController extends ControllerHelper {
         String responseId = request.getParam("responseId");
         responseService.get(responseId, defaultResponseHandler(request));
     }
+
+
 
     @Post("/questions/:questionId/responses")
     @ApiDoc("Create a response")

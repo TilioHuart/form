@@ -1,6 +1,6 @@
 import {idiom, ng, notify, template, angular} from 'entcore';
 import {Form, Question, QuestionChoice, Questions, Response, Responses, Types} from "../models";
-import {formService, questionChoiceService, questionService} from "../services";
+import {formService, questionChoiceService, questionService, responseService} from "../services";
 import {Direction, FORMULAIRE_QUESTION_EMIT_EVENT, Pages} from "../core/enums";
 
 interface ViewModel {
@@ -31,7 +31,7 @@ interface ViewModel {
     doOrganizeQuestions() : Promise<void>;
     cancelOrganizeQuestions() : Promise<void>;
     duplicateQuestion() : Promise<void>;
-    deleteQuestion() : void;
+    deleteQuestion() : Promise<void>;
     doDeleteQuestion() : Promise<void>;
     undoQuestionChanges();
     doUndoQuestionChanges() : Promise<void>;
@@ -181,10 +181,15 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
         };
 
-        vm.deleteQuestion = () : void => {
-            if (vm.form.sent && vm.questions.all.length === 1) {
-                notify.error(idiom.translate('formulaire.question.delete.warning'));
-            } else {
+        vm.deleteQuestion = async () : Promise<void> => {
+            let responseCount = $scope.getDataIf200(await responseService.countByQuestion(vm.questions.selected[0].id));
+            if (vm.form.sent && responseCount.count>0){
+                notify.error(idiom.translate('formulaire.question.delete.response.fill.warning'));
+            }
+            else if (vm.form.sent && vm.questions.all.length === 1) {
+                notify.error(idiom.translate('formulaire.question.delete.empty.warning'));
+            }
+            else {
                 vm.dontSave = true;
                 template.open('lightbox', 'lightbox/question-confirm-delete');
                 vm.display.lightbox.delete = true;

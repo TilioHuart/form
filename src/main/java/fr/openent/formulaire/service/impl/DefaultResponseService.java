@@ -32,6 +32,14 @@ public class DefaultResponseService implements ResponseService {
         query += ";";
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
+    @Override
+    public void countByQuestion(String questionId, Handler<Either<String, JsonObject>> handler){ //count
+        String query="SELECT COUNT(*) FROM " + Formulaire.RESPONSE_TABLE + " r " +
+                "JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON d.id = r.distribution_id " +
+                "WHERE question_id = ? AND d.status <> ?" ;
+        JsonArray params=new JsonArray().add(questionId).add(Formulaire.TO_DO);
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
 
     @Override
     public void listMineByDistribution(String questionId, String distributionId, UserInfos user, Handler<Either<String, JsonArray>> handler) {
@@ -47,6 +55,8 @@ public class DefaultResponseService implements ResponseService {
         JsonArray params = new JsonArray().add(responseId);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
+
+
 
     @Override
     public void getMissingResponses(String formId, String distributionId, Handler<Either<String, JsonArray>> handler) {

@@ -4,6 +4,7 @@ import {Question, Response, Types} from "../models";
 
 export interface ResponseService {
     list(question: Question, nbLines: number) : Promise<AxiosResponse>;
+    countByQuestion(questionId : number) : Promise<AxiosResponse>;
     listMineByDistribution(questionId: number, distributionId: number) : Promise<AxiosResponse>;
     get(responseId: number) : Promise<AxiosResponse>;
     save(response: Response, questionType?: number) : Promise<AxiosResponse>;
@@ -11,6 +12,7 @@ export interface ResponseService {
     fillResponses(formId: number, distributionId: number) : Promise<AxiosResponse>;
     update(response: Response) : Promise<AxiosResponse>;
     delete(responseId: number) : Promise<AxiosResponse>;
+
 }
 
 export const responseService: ResponseService = {
@@ -23,6 +25,15 @@ export const responseService: ResponseService = {
             throw err;
         }
     },
+    async countByQuestion (questionId:number):Promise<AxiosResponse>{ //count
+        try{
+            return http.get(`/formulaire/questions/${questionId}/responses/count`);
+        }catch(err){
+            notify.error(idiom.translate('formulaire.error.responseService.list'));
+            throw err;
+        }
+    },
+
 
     async listMineByDistribution(questionId: number, distributionId: number) : Promise<AxiosResponse> {
         try {
