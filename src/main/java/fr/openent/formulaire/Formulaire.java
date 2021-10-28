@@ -2,7 +2,12 @@ package fr.openent.formulaire;
 
 import fr.openent.formulaire.controllers.*;
 import fr.openent.formulaire.service.impl.FormulaireRepositoryEvents;
+import fr.wseduc.webutils.Either;
+import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.events.EventStore;
@@ -18,12 +23,15 @@ import org.entcore.common.storage.StorageFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static fr.wseduc.webutils.http.Renders.renderJson;
+
 public class Formulaire extends BaseServer {
 	private static final Logger log = LoggerFactory.getLogger(Formulaire.class);
 	public enum FormulaireEvent { ACCESS, CREATE }
 
 	public static String DB_SCHEMA;
 	public static String DISTRIBUTION_TABLE;
+	public static String FOLDER_TABLE;
 	public static String FORM_TABLE;
 	public static String FORM_SHARES_TABLE;
 	public static String GROUPS_TABLE;
@@ -31,6 +39,7 @@ public class Formulaire extends BaseServer {
 	public static String QUESTION_CHOICE_TABLE;
 	public static String QUESTION_TABLE;
 	public static String QUESTION_TYPE_TABLE;
+	public static String REL_FORM_FOLDER_TABLE;
 	public static String RESPONSE_TABLE;
 	public static String RESPONSE_FILE_TABLE;
 	public static String USERS_TABLE;
@@ -70,6 +79,7 @@ public class Formulaire extends BaseServer {
 
 		DB_SCHEMA = config.getString("db-schema");
 		DISTRIBUTION_TABLE = DB_SCHEMA + ".distribution";
+		FOLDER_TABLE = DB_SCHEMA + ".folder";
 		FORM_TABLE = DB_SCHEMA + ".form";
 		FORM_SHARES_TABLE = DB_SCHEMA + ".form_shares";
 		GROUPS_TABLE = DB_SCHEMA + ".groups";
@@ -77,12 +87,14 @@ public class Formulaire extends BaseServer {
 		QUESTION_CHOICE_TABLE = DB_SCHEMA + ".question_choice";
 		QUESTION_TABLE = DB_SCHEMA + ".question";
 		QUESTION_TYPE_TABLE = DB_SCHEMA + ".question_type";
+		REL_FORM_FOLDER_TABLE = DB_SCHEMA + ".rel_form_folder";
 		RESPONSE_TABLE = DB_SCHEMA + ".response";
 		RESPONSE_FILE_TABLE = DB_SCHEMA + ".response_file";
 		USERS_TABLE = DB_SCHEMA + ".users";
 
 		final Storage storage = new StorageFactory(vertx, config).getStorage();
 
+		// Create and parameter confs for all controllers using sharing system
 		SqlConf distribConf = SqlConfs.createConf(DistributionController.class.getName());
 		SqlConf formConf = SqlConfs.createConf(FormController.class.getName());
 		SqlConf questionChoiceConf = SqlConfs.createConf(QuestionChoiceController.class.getName());
@@ -101,13 +113,13 @@ public class Formulaire extends BaseServer {
 			conf.setShareTable("form_shares");
 		}
 
+		// Set sharing services to formController
 		FormController formController = new FormController(eventStore, storage);
 		formController.setShareService(new SqlShareService(DB_SCHEMA, "form_shares", eb, securedActions, null));
 		formController.setCrudService(new SqlCrudService(DB_SCHEMA, "form", "form_shares"));
 
 
-
-
+		// Init controllers
 		addController(new DistributionController());
 		addController(formController);
 		addController(new FormulaireController(eventStore));
@@ -117,5 +129,6 @@ public class Formulaire extends BaseServer {
 		addController(new ResponseController());
 		addController(new ResponseFileController(storage));
 		addController(new UtilsController(storage));
+		addController(new FolderController());
 	}
 }

@@ -39,8 +39,12 @@ i {
     font-size: 24px;
   }
 
+  &.xl-icon::before {
+    font-size: 40px;
+  }
+
   &.hg-icon::before {
-    font-size: 36px;
+    font-size: 48px;
   }
 
   &.selected::before {
@@ -161,5 +165,11 @@ i {
   &.undo::before {
     font-family: 'material-icons';
     content: "\F54C";
+  }
+
+  &.ifolder::before {
+    font-family: 'material-icons';
+    content: "\F24B";
+    color: $formulaire-blue;
   }
 }

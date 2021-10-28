@@ -1,4 +1,5 @@
 <div class="row" ng-controller="FormsListController as vm">
+    <!-- Title and main buttons -->
     <div class="row">
         <section class="cell five">
             <div>
@@ -19,6 +20,7 @@
         </div>
     </div>
 
+    <!-- Tabs desktop -->
     <div class="row twelve cell tabs zero-mobile" style="min-height: 60px;">
         <div class="cell">
             <header class="horizontal-spacing selected" ng-class="{ selected : currentPage === Pages.FORMS_LIST }"
@@ -32,6 +34,7 @@
         </div>
     </div>
 
+    <!-- Tabs mobile -->
     <nav class="vertical mobile-navigation tabs zero-desktop heightNavBar" side-nav >
         <header class="horizontal-spacing row ellipsis" ng-class="{ selected : currentPage === Pages.FORMS_LIST }"
                 ng-if="canCreate()" ng-click="redirectTo('/list/mine')">
@@ -43,30 +46,21 @@
         </header>
     </nav>
 
+    <!--Navigation desktop-->
+    <section class="cell three zero-mobile">
+        <h4><input type="text" ng-model="vm.searchInput" placeholder="Rechercher"></h4>
+        <folder-tree tree-props="vm.folderTree"></folder-tree>
+        <button class="left-one ten top-spacing-three cancel" ng-click="vm.openCreateFolder()">
+            <i18n>formulaire.folder.create</i18n>
+        </button>
+    </section>
+
+    <!-- Navigation mobile -->
     <div class="row zero-desktop">
-        <i ng-click="vm.openNavMyForms()" class="dropbtn"></i>
-        <span>[[vm.displayFolder()]]</span>
+        <i ng-click="vm.openNavMyForms()" class="dropbtn"></i>[[vm.folder.name]]
     </div>
 
     <h4 class="zero-desktop"><input type="text" ng-model="vm.searchInput" placeholder="Rechercher"></h4>
-
-    <!--Navigation menu-->
-    <section class="cell three zero-mobile">
-        <h4><input type="text" ng-model="vm.searchInput" placeholder="Rechercher"></h4>
-        <nav class="vertical row">
-            <ul>
-                <li><a ng-click="vm.openFolder('mine')" ng-class="{selected : vm.folder === 'mine'}">
-                    <i18n>formulaire.forms.mine</i18n>
-                </a></li>
-                <li><a ng-click="vm.openFolder('shared')" ng-class="{selected : vm.folder === 'shared'}">
-                    <i18n>formulaire.forms.shared</i18n>
-                </a></li>
-                <li><a ng-click="vm.openFolder('archived')" ng-class="{selected : vm.folder === 'archived'}">
-                    <i18n>formulaire.forms.archived</i18n>
-                </a></li>
-            </ul>
-        </nav>
-    </section>
 
     <div id="mySidenavForms" class="sideNavMyForms zero-desktop ellipsis">
         <div class="vertical-spacing row">
@@ -75,13 +69,16 @@
         </div>
         <nav class="vertical row">
             <ul>
-                <li><a ng-click="vm.openFolder('mine')" ng-class="{selected : vm.folder === 'mine'}">
+                <li><a ng-click="vm.openFolder(vm.folders.myFormsFolder)"
+                       ng-class="{selected : vm.folder.id === vm.folders.myFormsFolder.id}">
                     <i18n>formulaire.forms.mine</i18n>
                 </a></li>
-                <li><a ng-click="vm.openFolder('shared')" ng-class="{selected : vm.folder === 'shared'}">
+                <li><a ng-click="vm.openFolder(vm.folders.sharedFormsFolder)"
+                       ng-class="{selected : vm.folder.id === vm.folders.sharedFormsFolder.id}">
                     <i18n>formulaire.forms.shared</i18n>
                 </a></li>
-                <li><a ng-click="vm.openFolder('archived')" ng-class="{selected : vm.folder === 'archived'}">
+                <li><a ng-click="vm.openFolder(vm.folders.archivedFormsFolder)"
+                       ng-class="{selected : vm.folder.id === vm.folders.archivedFormsFolder.id}">
                     <i18n>formulaire.forms.archived</i18n>
                 </a></li>
             </ul>
@@ -91,23 +88,28 @@
     <!--List of forms-->
     <section class="cell nine twelve-mobile">
 
+        <!-- Folder title -->
         <div class="folder-info zero-mobile">
-            <div><h4><i class="folder spaced-right"></i>[[vm.displayFolder()]]</h4></div>
+            <div><h4><i class="ifolder lg-icon spaced-right"></i>[[vm.folder.name]]</h4></div>
             <div>
-                <i class="view-cards hg-icon" ng-click="vm.display.grid = true" ng-class="{'selected': vm.display.grid}"></i>
-                <i class="view-tab hg-icon" ng-click="vm.display.grid = false" ng-class="{'selected': !vm.display.grid}"></i>
+                <i class="view-cards xl-icon" ng-click="vm.display.grid = true" ng-class="{'selected': vm.display.grid}"></i>
+                <i class="view-tab xl-icon" ng-click="vm.display.grid = false" ng-class="{'selected': !vm.display.grid}"></i>
             </div>
         </div>
 
+        <!-- Filters -->
         <div ng-include="'formulaire/public/template/components/filters.html'"></div>
 
-        <!--Dominos display-->
+        <!-- Folders -->
+        <div class="row folders" ng-include="'/formulaire/public/template/containers/folders.html'"></div>
+
+        <!-- Dominos display -->
         <div class="dominos" ng-if="!vm.forms.all.empty() && vm.display.grid">
             <div ng-repeat="form in vm.forms.all | filter:vm.searchInput | limitTo:vm.limitTo"
                  ng-if="!vm.forms.all.empty() && vm.display.grid && form.displayed"
-                 ng-click="form.selected = !form.selected" ng-dblclick="vm.openForm(form)"
+                 ng-click="vm.selectItem(form)" ng-dblclick="vm.openForm(form)"
                  class="item" ng-class="{'selected' : form.selected}">
-                <div class="domino">
+                <div class="form domino" lvl-draggable on-drop="vm.dropped(dragEl, dropEl)">
                     <div class="four picture" ng-class="{'empty': !form.picture}">
                         <img ng-src="[[(form.picture) || '/formulaire/public/img/empty-image.png']]"/>
                     </div>
@@ -132,7 +134,7 @@
             </div>
         </div>
 
-        <!--Table display-->
+        <!-- Table display -->
         <table class="twelve table" ng-if="!vm.forms.all.empty() && !vm.display.grid && !isMobile">
             <thead>
                 <tr>
@@ -150,8 +152,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="form in vm.forms.all | filter:vm.searchInput | limitTo:vm.limitTo"
-                    ng-if="form.displayed"
+                <tr ng-repeat="form in vm.forms.all | filter:vm.searchInput | limitTo:vm.limitTo" ng-if="form.displayed"
                     ng-dblclick="vm.openForm(form)">
                     <td><label><input type="checkbox" ng-model="form.selected"/><span></span></label></td>
                     <td ng-click="form.selected=!form.selected">[[form.title]]</td>
@@ -172,6 +173,7 @@
             <loader min-height="'10px'"/>
         </div>
 
+        <!-- Error display -->
         <div class="error" ng-if="vm.forms.all.empty()">
             <img src="/formulaire/public/img/onboarding.svg"/>
             <i18n>formulaire.forms.empty</i18n>
@@ -182,4 +184,5 @@
 
     <container template='lightbox'></container>
     <div ng-include="'formulaire/public/template/components/toaster.html'"></div>
+    <div ng-include="'formulaire/public/template/components/toaster-folder.html'"></div>
 </div>

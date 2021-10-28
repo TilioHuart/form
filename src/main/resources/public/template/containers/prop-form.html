@@ -60,7 +60,7 @@
                             <div ng-if="currentPage === Pages.PROP_FORM && !isMobile" style="margin-bottom: 10px;">
                                 <i18n>formulaire.form.edit.modified</i18n>[[displayDate(vm.form.date_modification)]]
                             </div>
-                            <div>
+                            <div class="action-buttons">
                                 <button class="cell cancel" ng-click="redirectTo('/list/mine')"><i18n>formulaire.cancel</i18n></button>
                                 <button class="cell" ng-click="vm.save()" ng-disabled="!!!vm.form.title || !vm.checkIntervalDates()"><i18n>formulaire.save</i18n></button>
                             </div>

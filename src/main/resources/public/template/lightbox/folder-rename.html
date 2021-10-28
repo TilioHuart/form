@@ -1,0 +1,12 @@
+<lightbox show="vm.display.lightbox.folder.rename" on-close="vm.display.lightbox.folder.rename = false">
+    <h2><i18n>formulaire.folder.rename</i18n></h2>
+    <label style="display: flex;">
+        <i18n class="two">formulaire.folder.name</i18n>
+        <input type="text" class="ten" required autofocus i18n-placeholder="formulaire.folder.name.rename"
+               ng-model="vm.editedFolder.name">
+    </label>
+    <div class="action-buttons">
+        <button class="cell cancel" ng-click="vm.display.lightbox.folder.rename = false"><i18n>formulaire.cancel</i18n></button>
+        <button class="cell" ng-click="vm.doRenameFolder()" ng-disabled="!vm.editedFolder.name"><i18n>formulaire.rename</i18n></button>
+    </div>
+</lightbox>

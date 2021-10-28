@@ -1,7 +1,7 @@
 <lightbox show="vm.display.lightbox.reminder" on-close="vm.cancelRemind()">
     <h2><i18n>formulaire.remind.title</i18n></h2>
     <div ng-if="vm.distributions.all.length >= 1">
-        <div ng-if="vm.checkIfFormOpen()">
+        <div ng-if="vm.isFormOpened()">
             <div ng-if="vm.forms.selected[0].multiple"><i18n>formulaire.remind.description.multipleTrue</i18n></div>
             <div ng-if="!vm.forms.selected[0].multiple"><i18n>formulaire.remind.description.multipleFalse</i18n></div>
             <div style="margin-top:5%">
@@ -19,7 +19,7 @@
                 <button class="cell" ng-click="vm.doRemind()"><i18n>formulaire.confirm</i18n></button>
             </div>
         </div>
-        <div ng-if="!vm.checkIfFormOpen()">
+        <div ng-if="!vm.isFormOpened()">
             <div><i18n>formulaire.remind.notOpen</i18n></div>
             <div class="action-buttons">
                 <button class="cell cancel" ng-click="vm.cancelRemind()"><i18n>formulaire.close</i18n></button>

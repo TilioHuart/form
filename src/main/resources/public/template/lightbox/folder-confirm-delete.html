@@ -6,21 +6,21 @@
     <table class="table" style="margin: 20px 10px;">
         <thead>
             <tr>
-                <th class="four"><i18n>formulaire.table.title</i18n></th>
-                <th class="three"><i18n>formulaire.table.author</i18n></th>
-                <th class="three"><i18n>formulaire.table.modified</i18n></th>
+                <th class="six"><i18n>formulaire.folder.name</i18n></th>
+                <th class="two"><i18n>formulaire.folder.nbFolderChildren</i18n></th>
+                <th class="two"><i18n>formulaire.folder.nbFormChildren</i18n></th>
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="form in vm.forms.selected">
-                <td>[[form.title]]</td>
-                <td>[[form.owner_name]]</td>
-                <td><i18n>formulaire.modified</i18n>[[displayDate(form.date_modification)]]</td>
+            <tr ng-repeat="folder in vm.folders.selected">
+                <td>[[folder.name]]</td>
+                <td>[[folder.nb_folder_children]]</td>
+                <td>[[folder.nb_form_children]]</td>
             </tr>
         </tbody>
     </table>
     <div class="action-buttons">
         <button class="cell cancel" ng-click="vm.display.lightbox.delete = false"><i18n>formulaire.cancel</i18n></button>
-        <button class="cell" ng-click="vm.doDeleteForms()"><i18n>formulaire.delete</i18n></button>
+        <button class="cell" ng-click="vm.doDeleteFolders()"><i18n>formulaire.delete</i18n></button>
     </div>
 </lightbox>

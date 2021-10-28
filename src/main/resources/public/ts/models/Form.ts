@@ -27,6 +27,7 @@ export class Form implements Selectable, Shareable  {
     multiple: boolean;
     anonymous: boolean;
     displayed: boolean;
+    folder_id: number;
     selected: boolean;
     infoImg: {
         name: string;
@@ -116,6 +117,7 @@ export class Form implements Selectable, Shareable  {
 
 export class Forms extends Selection<Form> {
     all: Form[];
+    visibles: Form[];
 
     order = {
         field: FiltersOrders.CREATION_DATE,

@@ -1,0 +1,31 @@
+<lightbox class="move" show="vm.display.lightbox.move" on-close="vm.closeMoveItems()">
+    <h2><i18n>formulaire.move.title</i18n></h2>
+
+    <div class="infos">
+        <div class="infos-items">
+            <i18n class="two four-mobile">formulaire.move</i18n>
+            <div class="ten eight-mobile" ng-if="vm.folders.selected.length > 0">
+                <b ng-repeat-start="folder in vm.folders.selected track by $index">[[folder.name]]</b>
+                <span ng-repeat-end ng-if="!$last">,&nbsp;</span>
+            </div>
+            <div class="ten eight-mobile" ng-if="vm.forms.selected.length > 0">
+                <b ng-repeat-start="form in vm.forms.selected track by $index">[[form.title]]</b>
+                <span ng-repeat-end ng-if="!$last">,&nbsp;</span>
+            </div>
+        </div>
+        <div class="infos-target">
+            <i18n class="two four-mobile">formulaire.to</i18n>
+            <div class="ten eight-mobile"><b>[[vm.selectedFolder.name]]</b></div>
+        </div>
+    </div>
+
+    <div class="tree">
+        <em class="tree-description"><i18n>formulaire.move.folder.tree</i18n></em>
+        <folder-tree tree-props="vm.folderTree"></folder-tree>
+    </div>
+
+    <div class="action-buttons">
+        <button class="cell cancel" ng-click="vm.closeMoveItems()"><i18n>formulaire.cancel</i18n></button>
+        <button class="cell" ng-click="vm.doMoveItems()"><i18n>formulaire.move</i18n></button>
+    </div>
+</lightbox>

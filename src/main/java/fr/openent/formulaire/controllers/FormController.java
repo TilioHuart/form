@@ -4,6 +4,7 @@ import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.export.FormResponsesExportCSV;
 import fr.openent.formulaire.export.FormResponsesExportPDF;
 import fr.openent.formulaire.helpers.FutureHelper;
+import fr.openent.formulaire.helpers.RenderHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.security.ResponseRight;
@@ -45,6 +46,8 @@ public class FormController extends ControllerHelper {
     private final QuestionChoiceService questionChoiceService;
     private final ResponseFileService responseFileService;
     private final FormSharesService formShareService;
+    private final FolderService folderService;
+    private final RelFormFolderService relFormFolderService;
     private final NeoService neoService;
 
     public FormController(EventStore eventStore, Storage storage) {
@@ -56,6 +59,8 @@ public class FormController extends ControllerHelper {
         this.questionChoiceService = new DefaultQuestionChoiceService();
         this.responseFileService = new DefaultResponseFileService();
         this.formShareService = new DefaultFormSharesService();
+        this.folderService = new DefaultFolderService();
+        this.relFormFolderService = new DefaultRelFormFolderService();
         this.neoService = new DefaultNeoService();
     }
 
@@ -155,14 +160,27 @@ public class FormController extends ControllerHelper {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
                 RequestUtils.bodyToJson(request, form -> {
-                    formService.create(form, user, event -> {
-                        if (event.isRight()) {
-                            eventStore.createAndStoreEvent(Formulaire.FormulaireEvent.CREATE.name(), request);
-                            Renders.renderJson(request, event.right().getValue(), 200);
-                        } else {
-                            JsonObject error = (new JsonObject()).put("error", event.left().getValue());
-                            Renders.renderJson(request, error, 400);
+                    formService.create(form, user, createEvent -> {
+                        if (createEvent.isLeft()) {
+                            log.error("[Formulaire@create] Failed to create form : " + form);
+                            RenderHelper.badRequest(request, createEvent);
+                            return;
                         }
+
+                        eventStore.createAndStoreEvent(Formulaire.FormulaireEvent.CREATE.name(), request);
+                        String formId = createEvent.right().getValue().getInteger("id").toString();
+//                            String folderId = form.getInteger("folder_id").toString(); // TODO later + ci-dessous
+                        String folderId = "1";
+                        relFormFolderService.create(user, new JsonArray().add(formId), folderId, createRelEvent -> {
+                            if (createRelEvent.isLeft()) {
+                                log.error("[Formulaire@create] Failed to create relation form-folder for form : " + form);
+                                RenderHelper.badRequest(request, createRelEvent);
+                                return;
+                            }
+
+                            renderJson(request, createEvent.right().getValue());
+                        });
+                        // TODO sync folder count children (should decrement because of the deletion)
                     });
                 });
             } else {
@@ -180,14 +198,27 @@ public class FormController extends ControllerHelper {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
                 RequestUtils.bodyToJsonArray(request, forms -> {
-                    formService.createMultiple(forms, user, event -> {
-                        if (event.isRight()) {
-                            eventStore.createAndStoreEvent(Formulaire.FormulaireEvent.CREATE.name(), request);
-                            Renders.renderJson(request, event.right().getValue());
-                        } else {
-                            JsonObject error = (new JsonObject()).put("error", event.left().getValue());
-                            Renders.renderJson(request, error, 400);
+                    formService.createMultiple(forms, user, createEvent -> {
+                        if (createEvent.isLeft()) {
+                            log.error("[Formulaire@createMultiple] Failed to create forms : " + forms);
+                            RenderHelper.badRequest(request, createEvent);
+                            return;
                         }
+
+                        eventStore.createAndStoreEvent(Formulaire.FormulaireEvent.CREATE.name(), request);
+                        JsonArray formIds = getFormIds(forms);
+//                            String folderId = form.getInteger("folder_id").toString(); // TODO later + ci-dessous
+                        String folderId = "1";
+                        relFormFolderService.create(user, formIds, folderId, createRelEvent -> {
+                            if (createRelEvent.isLeft()) {
+                                log.error("[Formulaire@create] Failed to create relation form-folder for forms : " + formIds);
+                                RenderHelper.badRequest(request, createRelEvent);
+                                return;
+                            }
+
+                            renderJson(request, createEvent.right().getValue());
+                        });
+                        // TODO sync folder count children (should decrement because of the deletion)
                     });
                 });
             } else {
@@ -197,15 +228,17 @@ public class FormController extends ControllerHelper {
         });
     }
 
-    @Post("/forms/duplicate")
+    @Post("/forms/duplicate/:folderId")
     @ApiDoc("Duplicate several forms")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void duplicate(HttpServerRequest request) {
+        String folderId = request.getParam("folderId");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
                 RequestUtils.bodyToJsonArray(request, formIds -> {
-                    List<Future> formsInfos= new ArrayList<>();
+                    List<Future> formsInfos = new ArrayList<>();
+                    // Duplicates form and all questions inside
                     for (int i = 0; i < formIds.size(); i++) {
                         Promise<JsonArray> promise = Promise.promise();
                         formsInfos.add(promise.future());
@@ -216,6 +249,7 @@ public class FormController extends ControllerHelper {
                             log.error("[Formulaire@duplicate] Failed to retrieve info : " + evt.cause());
                             badRequest(request);
                         }
+                        // Duplicates all potential question choices
                         List<Future> questionsInfosFutures = new ArrayList<>();
                         for (Object questions : evt.result().list()) {
                             JsonArray questionsInfos = ((JsonArray) questions);
@@ -236,8 +270,27 @@ public class FormController extends ControllerHelper {
                                 log.error("[Formulaire@duplicate] Failed to retrieve info from questions : " + evt1.cause());
                                 badRequest(request);
                             }
+                            // Sync folders with this new forms
                             eventStore.createAndStoreEvent(Formulaire.FormulaireEvent.CREATE.name(), request);
-                            created(request);
+                            JsonArray questions = (JsonArray)evt.result().list().get(0);
+                            JsonArray newFormIds = new JsonArray();
+                            for (int i = 0; i < evt.result().list().size(); i++) {
+                                newFormIds.add(questions.getJsonObject(0).getInteger("form_id"));
+                            }
+                            relFormFolderService.create(user, newFormIds, folderId, createRelEvent -> {
+                                if (createRelEvent.isLeft()) {
+                                    log.error("[Formulaire@moveForm] Error in moving forms " + formIds);
+                                    RenderHelper.badRequest(request, createRelEvent);
+                                    return;
+                                }
+
+                                if (!folderId.equals("0")) { // We do not sync root folder counts (useless)
+                                    folderService.syncNbChildren(user, folderId, defaultResponseHandler(request));
+                                }
+                                else {
+                                    renderJson(request, createRelEvent.right().getValue());
+                                }
+                            });
                         });
                     });
                 });
@@ -265,7 +318,6 @@ public class FormController extends ControllerHelper {
     @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String formId = request.getParam("formId");
-
         responseFileService.listByForm(formId, responseFileIds -> {
             if (responseFileIds.isRight()) {
                 JsonArray ids = responseFileIds.right().getValue();
@@ -283,6 +335,7 @@ public class FormController extends ControllerHelper {
                             responseFileService.deleteAll(fileIds, deleteResponseFilesEvt -> {
                                 if (deleteResponseFilesEvt.isRight()) {
                                     formService.delete(formId, defaultResponseHandler(request));
+                                    // TODO sync folder count children (should decrement because of the deletion)
                                 }
                                 else {
                                     log.error("[Formulaire@delete] Fail to delete response files in bdd");
@@ -303,6 +356,55 @@ public class FormController extends ControllerHelper {
             else {
                 log.error("[Formulaire@delete] Failed to retrieve files' ids for form : " + formId);
                 badRequest(request, responseFileIds.left().getValue());
+            }
+        });
+    }
+
+    @Put("/forms/move/:folderId")
+    @ApiDoc("Update a specific form")
+    @ResourceFilter(CreationRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void move(HttpServerRequest request) {
+        String targetFolderId = request.getParam("folderId");
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user != null) {
+                RequestUtils.bodyToJsonArray(request, forms -> {
+                    String oldFolderId = forms.getJsonObject(0).getInteger("folder_id").toString();
+                    JsonArray formIds = getFormIds(forms);
+                    relFormFolderService.update(user, formIds, targetFolderId, updateEvent -> {
+                        if (updateEvent.isLeft()) {
+                            log.error("[Formulaire@moveForm] Error in moving forms " + forms);
+                            RenderHelper.badRequest(request, updateEvent);
+                            return;
+                        }
+
+                        if (!targetFolderId.equals("0")) { // We do not sync root folder counts (useless)
+                            folderService.syncNbChildren(user, targetFolderId, syncEvent -> {
+                                if (syncEvent.isLeft()) {
+                                    log.error("[Formulaire@moveForm] Error in sync children counts for folder " + targetFolderId);
+                                    RenderHelper.badRequest(request, syncEvent);
+                                    return;
+                                }
+                                if (!oldFolderId.equals("0")) { // We do not sync root folder counts (useless)
+                                    folderService.syncNbChildren(user, oldFolderId, defaultResponseHandler(request));
+                                }
+                                else {
+                                    renderJson(request, syncEvent.right().getValue());
+                                }
+                            });
+                        }
+                        else if (!oldFolderId.equals("0")) { // We do not sync root folder counts (useless)
+                            folderService.syncNbChildren(user, oldFolderId, defaultResponseHandler(request));
+                        }
+                        else {
+                            renderJson(request, updateEvent.right().getValue());
+                        }
+                    });
+                });
+            }
+            else {
+                log.error("User not found in session.");
+                unauthorized(request);
             }
         });
     }

@@ -117,11 +117,20 @@ body.formulaire section.main {
   }
 
   lightbox {
-    h2 { margin-bottom: 20px !important; }
+    h2 {
+      font-size: 24px;
+      margin-bottom: 20px !important;
+    }
+  }
 
-    .action-buttons {
-      margin-top: 10px;
-      float: right;
+  .action-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-top: 2%;
+    float: right;
+
+    button {
+      margin: 5px;
     }
   }
 
@@ -171,10 +180,6 @@ body.formulaire section.main {
     border-radius: 2px;
     border-left: none;
     box-shadow: 0 6px 18px rgba(0,0,0,0.26);
-  }
-
-  nav.vertical ul li a {
-    padding-left: 20px;
   }
 
   .heightNavBar{
@@ -252,6 +257,24 @@ body.formulaire section.main {
 
     i.arrow:before {
       font-size: 14px;
+    }
+  }
+
+  .move {
+    .infos {
+      margin-bottom: 5%;
+      font-size: 18px;
+
+      &-items, &-target {
+        display: flex;
+        margin: 1% 0;
+      }
+    }
+
+    .tree {
+      &-description {
+        font-size: 14px;
+      }
     }
   }
 

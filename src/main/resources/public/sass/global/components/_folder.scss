@@ -1,0 +1,45 @@
+.folders {
+  margin: 2% 0;
+
+  .folder-article {
+    width: calc(90%/3);
+    height: auto;
+    padding: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.26);
+    background: $formulaire-white;
+
+    @media screen and (min-width: 800px) {
+      margin-right: 1.296%;
+    }
+    @media screen and (max-width: 800px) {
+      margin-right: 1%;
+    }
+
+    &.selected { background: $formulaire-blue-transparent }
+
+    &:hover {
+      box-shadow: 0 6px 18px rgba(0,0,0,0.26);
+      transition : all 0.3s cubic-bezier(.25, .8, .25, 1)
+    }
+  }
+
+  .folder {
+    display: flex;
+    align-items: flex-end;
+
+    &-image {
+      padding: 0 5%;
+    }
+
+    &-infos {
+      display: flex;
+      flex-direction: column;
+
+      .counters {
+        font-size: 12px;
+        font-style: italic;
+        color: $formulaire-grey;
+      }
+    }
+  }
+}

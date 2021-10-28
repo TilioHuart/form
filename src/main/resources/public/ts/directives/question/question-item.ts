@@ -27,8 +27,8 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
                 <div class="domino" ng-class="{'questionError': !!!vm.question.title || vm.question.choices.length === 0 }">
                     <div class="question-top">
                         <div class="dots" ng-if="vm.reorder">
-                            <i class="drag hg-icon"></i>
-                            <i class="drag hg-icon"></i>
+                            <i class="drag xl-icon"></i>
+                            <i class="drag xl-icon"></i>
                         </div>
                     </div>
                     <div class="focusable" id="[[vm.question.position]]">

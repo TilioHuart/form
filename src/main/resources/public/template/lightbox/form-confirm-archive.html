@@ -5,18 +5,18 @@
     </div>
     <table class="table" style="margin: 20px 10px;">
         <thead>
-        <tr>
-            <th class="four"><i18n>formulaire.table.title</i18n></th>
-            <th class="three"><i18n>formulaire.table.author</i18n></th>
-            <th class="three"><i18n>formulaire.table.modified</i18n></th>
-        </tr>
+            <tr>
+                <th class="four"><i18n>formulaire.table.title</i18n></th>
+                <th class="three"><i18n>formulaire.table.author</i18n></th>
+                <th class="three"><i18n>formulaire.table.modified</i18n></th>
+            </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="form in vm.forms.selected">
-            <td>[[form.title]]</td>
-            <td>[[form.owner_name]]</td>
-            <td><i18n>formulaire.modified</i18n>[[displayDate(form.date_modification)]]</td>
-        </tr>
+            <tr ng-repeat="form in vm.forms.selected">
+                <td>[[form.title]]</td>
+                <td>[[form.owner_name]]</td>
+                <td><i18n>formulaire.modified</i18n>[[displayDate(form.date_modification)]]</td>
+            </tr>
         </tbody>
     </table>
     <div class="action-buttons">

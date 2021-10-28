@@ -1,0 +1,24 @@
+<section class="toggle-buttons" ng-if="vm.folders.selected.length > 0">
+    <div class="toggle">
+        <div class="row" workflow="formulaire.creation">
+            <button ng-click="vm.openFolder(vm.folders.selected[0])" class="cell" ng-show="vm.folders.selected.length === 1">
+                <i18n>formulaire.open</i18n>
+            </button>
+            <button ng-click="vm.renameFolder()" class="cell" ng-show="vm.folders.selected.length === 1">
+                <i18n>formulaire.rename</i18n>
+            </button>
+            <button ng-click="vm.moveItems()" class="cell">
+                <i18n>formulaire.move</i18n>
+            </button>
+            <button ng-click="vm.deleteFolders()" class="cell">
+                <i18n>formulaire.archive</i18n>
+            </button>
+            <button ng-click="vm.switchAllFolders(true)" class="cell toaster-right zero-mobile">
+                <i18n>formulaire.selectAll</i18n>
+            </button>
+            <button ng-click="vm.switchAllFolders(false)" class="cell toaster-right zero-mobile">
+                <i18n>formulaire.deselect</i18n>
+            </button>
+        </div>
+    </div>
+</section>

@@ -9,11 +9,12 @@ export interface FormService {
     save(form: Form) : Promise<AxiosResponse>;
     create(form: Form) : Promise<AxiosResponse>;
     createMultiple(forms: Array<Form>) : Promise<AxiosResponse>;
-    duplicate(formIds: Array<number>) : Promise<AxiosResponse>;
+    duplicate(formIds: Array<number>, folderId: number) : Promise<AxiosResponse>;
     update(form: Form) : Promise<AxiosResponse>;
     archive(form: Form) : Promise<AxiosResponse>;
     restore(form: Form) : Promise<AxiosResponse>;
     delete(formId: number) : Promise<AxiosResponse>;
+    move(forms : Form[], parentId: number) : Promise<AxiosResponse>;
     sendReminder(formId: number, mail: {}) : Promise<AxiosResponse>;
     unshare(formId: number) : Promise<AxiosResponse>;
     getMyFormRights(formId: number) : Promise<AxiosResponse>;
@@ -71,16 +72,16 @@ export const formService: FormService = {
 
     async createMultiple(forms: Array<Form>) : Promise<AxiosResponse> {
         try {
-            return http.post('/formulaire/forms/m', forms);
+            return http.post('/formulaire/forms/multiple', forms);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.createMultiple'));
             throw err;
         }
     },
 
-    async duplicate(formIds: Array<number>) : Promise<AxiosResponse> {
+    async duplicate(formIds: Array<number>, folderId: number) : Promise<AxiosResponse> {
         try {
-            return http.post('/formulaire/forms/duplicate', formIds);
+            return http.post(`/formulaire/forms/duplicate/${folderId}`, formIds);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.duplicate'));
             throw err;
@@ -122,6 +123,15 @@ export const formService: FormService = {
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.delete'));
             throw err;
+        }
+    },
+
+    async move(forms, parentId) : Promise<AxiosResponse> {
+        try {
+            return http.put(`/formulaire/forms/move/${parentId}`, forms);
+        } catch (e) {
+            notify.error(idiom.translate('formulaire.error.formService.move'));
+            throw e;
         }
     },
 

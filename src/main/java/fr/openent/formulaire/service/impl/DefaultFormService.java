@@ -20,14 +20,15 @@ public class DefaultFormService implements FormService {
         StringBuilder query = new StringBuilder();
         JsonArray params = new JsonArray();
 
-        query.append("SELECT f.*, d.nb_responses, q.nb_questions ")
+        query.append("SELECT f.*, d.nb_responses, q.nb_questions, rff.folder_id ")
                 .append("FROM ").append(Formulaire.FORM_TABLE).append(" f ")
                 .append("LEFT JOIN ").append(Formulaire.FORM_SHARES_TABLE).append(" fs ON f.id = fs.resource_id ")
                 .append("LEFT JOIN ").append(Formulaire.MEMBERS_TABLE).append(" m ON (fs.member_id = m.id AND m.group_id IS NOT NULL) ")
                 .append("LEFT JOIN (SELECT form_id, COUNT(form_id) AS nb_responses FROM ").append(Formulaire.DISTRIBUTION_TABLE)
                 .append(" WHERE status = ? GROUP BY form_id) d ON d.form_id = f.id ")
                 .append("LEFT JOIN (SELECT form_id, COUNT(*) AS nb_questions FROM ").append(Formulaire.QUESTION_TABLE)
-                .append(" GROUP BY form_id) q ON q.form_id = f.id ");
+                .append(" GROUP BY form_id) q ON q.form_id = f.id ")
+                .append("LEFT JOIN ").append(Formulaire.REL_FORM_FOLDER_TABLE).append(" rff ON rff.form_id = f.id AND rff.user_id = f.owner_id");
         params.add(Formulaire.FINISHED);
 
         query.append(" WHERE (fs.member_id IN ").append(Sql.listPrepared(groupsAndUserIds.toArray()));
@@ -35,7 +36,8 @@ public class DefaultFormService implements FormService {
             params.add(groupOrUser);
         }
 
-        query.append(" AND (fs.action = ? OR fs.action = ?)) OR f.owner_id = ? GROUP BY f.id, d.nb_responses, q.nb_questions ")
+        query.append(" AND (fs.action = ? OR fs.action = ?)) OR f.owner_id = ? ")
+                .append("GROUP BY f.id, d.nb_responses, q.nb_questions, rff.folder_id ")
                 .append("ORDER BY f.date_modification DESC;");
         params.add(Formulaire.MANAGER_RESOURCE_BEHAVIOUR).add(Formulaire.CONTRIB_RESOURCE_BEHAVIOUR).add(user.getUserId());
 
@@ -130,12 +132,21 @@ public class DefaultFormService implements FormService {
 
     @Override
     public void duplicate(int formId, UserInfos user, Handler<Either<String, JsonArray>> handler) {
-        String query = "WITH dForm_id AS (INSERT INTO  " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, picture, date_opening, date_ending, multiple, anonymous) " +
-                "SELECT ?, ?, concat(title, ' - Copie'), description, picture, date_opening, date_ending, multiple, anonymous FROM " + Formulaire.FORM_TABLE +
-                " WHERE id = ? RETURNING id) " +
-                "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, statement, mandatory, original_question_id) " +
-                "SELECT (SELECT id from dForm_id), title, position, question_type, statement, mandatory, id FROM " + Formulaire.QUESTION_TABLE +
-                " WHERE form_id = ? RETURNING id, original_question_id, question_type";
+        String query =
+                "WITH new_form_id AS (" +
+                    "INSERT INTO  " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, picture, date_opening, date_ending, multiple, anonymous) " +
+                    "SELECT ?, ?, concat(title, ' - Copie'), description, picture, date_opening, date_ending, multiple, anonymous " +
+                    "FROM " + Formulaire.FORM_TABLE + " WHERE id = ? RETURNING id" +
+                "), " +
+                "rows AS (" +
+                    "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, statement, mandatory, original_question_id) " +
+                    "SELECT (SELECT id from new_form_id), title, position, question_type, statement, mandatory, id " +
+                    "FROM " + Formulaire.QUESTION_TABLE + " WHERE form_id = ? " +
+                    "RETURNING form_id, id, original_question_id, question_type)" +
+                "SELECT * FROM rows " +
+                "UNION ALL " +
+                "SELECT (SELECT id FROM new_form_id), null, null, null " +
+                "WHERE NOT EXISTS (SELECT * FROM rows);";
         JsonArray params = new JsonArray().add(user.getUserId()).add(user.getUsername()).add(formId).add(formId);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }

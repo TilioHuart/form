@@ -1,0 +1,11 @@
+<lightbox show="vm.display.lightbox.folder.create" on-close="vm.closeCreateFolder()">
+    <h2><i18n>formulaire.folder.create</i18n></h2>
+    <label style="display: flex;">
+        <i18n class="two">formulaire.folder.name</i18n>
+        <input type="text" class="six ten-mobile" required autofocus ng-model="vm.editedFolder.name">
+    </label>
+    <div class="action-buttons">
+        <button class="cell cancel" ng-click="vm.closeCreateFolder()"><i18n>formulaire.cancel</i18n></button>
+        <button class="cell" ng-click="vm.createFolder()" ng-disabled="!vm.editedFolder.name"><i18n>formulaire.create</i18n></button>
+    </div>
+</lightbox>

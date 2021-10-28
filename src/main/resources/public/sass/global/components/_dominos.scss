@@ -6,6 +6,7 @@
   .item {
     width: calc(90%/3);
     background: $formulaire-white;
+    margin: 15px 12px 0 0;
 
     @media screen and (max-width: $formulaire-screen-laptop) { width: calc(90%/2); }
     @media screen and (max-width: $formulaire-screen-tablet) { width: calc(90%); }

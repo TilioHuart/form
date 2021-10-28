@@ -7,10 +7,10 @@
             <button ng-click="vm.openMyResponses(vm.forms.selected[0])" class="cell" ng-show="vm.checkMyResponsesButton()">
                 <i18n>formulaire.myResponses</i18n>
             </button>
-            <button ng-click="vm.switchAll(true)" class="cell toaster-right" ng-if="!isMobile">
+            <button ng-click="vm.switchAllForms(true)" class="cell toaster-right" ng-if="!isMobile">
                 <i18n>formulaire.selectAll</i18n>
             </button>
-            <button ng-click="vm.switchAll(false)" class="cell toaster-right" ng-if="!isMobile">
+            <button ng-click="vm.switchAllForms(false)" class="cell toaster-right" ng-if="!isMobile">
                 <i18n>formulaire.deselect</i18n>
             </button>
         </div>
@@ -23,6 +23,9 @@
             </button>
             <button ng-click="vm.duplicateForms()" class="cell">
                 <i18n>formulaire.duplicate</i18n>
+            </button>
+            <button ng-click="vm.moveItems()" class="cell">
+                <i18n>formulaire.move</i18n>
             </button>
             <button ng-click="vm.shareForm()" class="cell"
                     ng-show="vm.forms.selected.length === 1 && !!vm.forms.selected[0].nb_questions && hasShareRightManager(vm.forms.selected[0]) ">
@@ -39,10 +42,10 @@
             <button ng-click="vm.archiveForms()" class="cell" ng-show="hasShareRightManager(vm.forms.selected[0])">
                 <i18n>formulaire.archive</i18n>
             </button>
-            <button ng-click="vm.switchAll(true)" class="cell toaster-right" ng-if="!isMobile">
+            <button ng-click="vm.switchAllForms(true)" class="cell toaster-right zero-mobile">
                 <i18n>formulaire.selectAll</i18n>
             </button>
-            <button ng-click="vm.switchAll(false)" class="cell toaster-right" ng-if="!isMobile">
+            <button ng-click="vm.switchAllForms(false)" class="cell toaster-right zero-mobile">
                 <i18n>formulaire.deselect</i18n>
             </button>
         </div>
@@ -53,10 +56,10 @@
             <button ng-click="vm.deleteForms()" class="cell" ng-show="hasShareRightManager(vm.forms.selected[0])">
                 <i18n>formulaire.delete</i18n>
             </button>
-            <button ng-click="vm.switchAll(true)" class="cell toaster-right" ng-if="!isMobile">
+            <button ng-click="vm.switchAllForms(true)" class="cell toaster-right zero-mobile">
                 <i18n>formulaire.selectAll</i18n>
             </button>
-            <button ng-click="vm.switchAll(false)" class="cell toaster-right" ng-if="!isMobile">
+            <button ng-click="vm.switchAllForms(false)" class="cell toaster-right zero-mobile">
                 <i18n>formulaire.deselect</i18n>
             </button>
         </div>

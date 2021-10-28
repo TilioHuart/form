@@ -277,6 +277,5 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			return form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.comment.right);
 		};
 
-
 		init();
 }]);

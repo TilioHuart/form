@@ -10,7 +10,7 @@ import io.vertx.core.logging.LoggerFactory;
 
 public class FutureHelper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FutureHelper.class);
+    private static final Logger log = LoggerFactory.getLogger(FutureHelper.class);
 
     private FutureHelper() {
     }
@@ -20,7 +20,7 @@ public class FutureHelper {
             if (event.isRight()) {
                 future.complete(event.right().getValue());
             } else {
-                LOGGER.error(event.left().getValue());
+                log.error(event.left().getValue());
                 future.fail(event.left().getValue());
             }
         };
@@ -31,7 +31,7 @@ public class FutureHelper {
             if (event.isRight()) {
                 future.complete(event.right().getValue());
             } else {
-                LOGGER.error(event.left().getValue());
+                log.error(event.left().getValue());
                 future.fail(event.left().getValue());
             }
         };
