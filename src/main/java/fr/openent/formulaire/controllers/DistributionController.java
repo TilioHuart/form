@@ -1,33 +1,45 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.Formulaire;
+import fr.openent.formulaire.helpers.RenderHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.security.ResponseRight;
 import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.DistributionService;
+import fr.openent.formulaire.service.FormService;
+import fr.openent.formulaire.service.NotifyService;
 import fr.openent.formulaire.service.impl.DefaultDistributionService;
+import fr.openent.formulaire.service.impl.DefaultFormService;
+import fr.openent.formulaire.service.impl.DefaultNotifyService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
+import org.entcore.common.notification.TimelineHelper;
 import org.entcore.common.user.UserUtils;
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
 
 public class DistributionController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(DistributionController.class);
+    private final NotifyService notifyService;
     private final DistributionService distributionService;
+    private final FormService formService;
 
-    public DistributionController() {
+    public DistributionController(TimelineHelper timelineHelper) {
         super();
+        this.notifyService = new DefaultNotifyService(timelineHelper, eb);
         this.distributionService = new DefaultDistributionService();
+        this.formService = new DefaultFormService();
     }
 
     @Get("/distributions")
@@ -36,12 +48,11 @@ public class DistributionController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listBySender(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                distributionService.listBySender(user, arrayResponseHandler(request));
-            } else {
+            if (user == null) {
                 log.error("User not found in session.");
                 Renders.unauthorized(request);
             }
+            distributionService.listBySender(user, arrayResponseHandler(request));
         });
     }
 
@@ -51,12 +62,11 @@ public class DistributionController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listByResponder(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                distributionService.listByResponder(user, arrayResponseHandler(request));
-            } else {
+            if (user == null) {
                 log.error("User not found in session.");
                 Renders.unauthorized(request);
             }
+            distributionService.listByResponder(user, arrayResponseHandler(request));
         });
     }
 
@@ -87,12 +97,11 @@ public class DistributionController extends ControllerHelper {
     public void listByFormAndResponder(HttpServerRequest request) {
         String formId = request.getParam("formId");
         UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                distributionService.listByFormAndResponder(formId, user, arrayResponseHandler(request));
-            } else {
+            if (user == null) {
                 log.error("User not found in session.");
                 Renders.unauthorized(request);
             }
+            distributionService.listByFormAndResponder(formId, user, arrayResponseHandler(request));
         });
     }
 
@@ -112,12 +121,11 @@ public class DistributionController extends ControllerHelper {
     public void get(HttpServerRequest request) {
         String formId = request.getParam("formId");
         UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                distributionService.get(formId, user, defaultResponseHandler(request));
-            } else {
+            if (user == null) {
                 log.error("User not found in session.");
                 Renders.unauthorized(request);
             }
+            distributionService.get(formId, user, defaultResponseHandler(request));
         });
     }
 
@@ -128,14 +136,13 @@ public class DistributionController extends ControllerHelper {
     public void create(HttpServerRequest request) {
         String formId = request.getParam("formId");
         UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                RequestUtils.bodyToJsonArray(request, responders -> {
-                    distributionService.create(formId, user, responders, defaultResponseHandler(request));
-                });
-            } else {
+            if (user == null) {
                 log.error("User not found in session.");
                 Renders.unauthorized(request);
             }
+            RequestUtils.bodyToJsonArray(request, responders -> {
+                distributionService.create(formId, user, responders, defaultResponseHandler(request));
+            });
         });
     }
 
@@ -145,6 +152,10 @@ public class DistributionController extends ControllerHelper {
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void add(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
+            if (user == null) {
+                log.error("User not found in session.");
+                Renders.unauthorized(request);
+            }
             RequestUtils.bodyToJson(request, distribution -> {
                 distributionService.add(distribution, defaultResponseHandler(request));
             });
@@ -158,7 +169,41 @@ public class DistributionController extends ControllerHelper {
     public void update(HttpServerRequest request) {
         String distributionId = request.getParam("distributionId");
         RequestUtils.bodyToJson(request, distribution -> {
-            distributionService.update(distributionId, distribution, defaultResponseHandler(request));
+            distributionService.update(distributionId, distribution, updateEvent -> {
+                if (updateEvent.isLeft()) {
+                    log.error("[Formulaire@updateDistribution] Error in updating distribution " + distributionId);
+                    RenderHelper.badRequest(request, updateEvent);
+                }
+                if (distribution.getString("status").equals(Formulaire.FINISHED)) {
+                    String formId = distribution.getInteger("form_id").toString();
+                    formService.get(formId, getEvent -> {
+                        if (getEvent.isLeft()) {
+                            log.error("[Formulaire@updateDistribution] Error in getting form with id " + formId);
+                            RenderHelper.badRequest(request, getEvent);
+                        }
+
+                        JsonObject form = getEvent.right().getValue();
+                        if (form.getBoolean("response_notified")) {
+                            formService.listManagers(form.getInteger("id").toString(), listManagersEvent -> {
+                                if (listManagersEvent.isLeft()) {
+                                    log.error("[Formulaire@updateDistribution] Error in listing managers for form with id " + formId);
+                                    RenderHelper.badRequest(request, listManagersEvent);
+                                }
+
+                                JsonArray managers = listManagersEvent.right().getValue();
+                                JsonArray managerIds = new JsonArray();
+                                for (int i = 0; i < managers.size(); i++) {
+                                    managerIds.add(managers.getJsonObject(i).getString("id"));
+                                }
+
+                                notifyService.notifyResponse(request, form, managerIds);
+                                renderJson(request, new JsonObject(), 200);
+                            });
+                        }
+                    });
+                }
+                renderJson(request, new JsonObject(), 200);
+            });
         });
     }
 

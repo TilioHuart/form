@@ -1,0 +1,21 @@
+<span>{{#i18n}}timeline.formulaire.new.notification{{/i18n}}</span>
+{{#userUri}}<a href="{{#host}}{{userUri}}{{/host}}">{{username}}</a>{{/userUri}}
+{{^userUri}}
+ {{#username}}{{username}}{{/username}}
+ {{^username}}<span>{{#i18n}}timeline.unknown.sender{{/i18n}}</span>{{/username}}
+{{/userUri}}
+ :<br/>
+
+{{#username}}{{username}}{{/username}}
+{{^username}}<span>{{#i18n}}timeline.unknown.sender{{/i18n}}</span>{{/username}}
+<span>{{#i18n}}timeline.formulaire.responded{{/i18n}}</span>
+{{#formUri}}
+ {{#formName}}
+  <a href="{{#host}}{{formUri}}{{/host}}">{{formName}}</a>
+ {{/formName}}
+{{/formUri}}
+
+{{#formResultsUri}}
+ <span>{{#i18n}}timeline.formulaire.see{{/i18n}}</span>
+ <a href="{{#host}}{{formResultsUri}}{{/host}}">{{#i18n}}timeline.formulaire.results{{/i18n}}</a>.
+{{/formResultsUri}}

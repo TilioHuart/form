@@ -58,6 +58,8 @@
   "formulaire.multiple.mobile": "Permettre plusieurs réponses",
   "formulaire.anonymous.label": "Anonymiser les réponses",
   "formulaire.anonymous.description": "Les identifiants, noms, prénoms et établissements des répondant ne seront pas sauvegardés.",
+  "formulaire.notified.label": "Recevoir une notification de réponse",
+  "formulaire.notified.description": "Vous recevrez une notification à chaque fois qu'un utilisateur aura répondu au formulaire.",
   "formulaire.results.empty": "Désolé, ce formulaire n'a pour l'instant reçu aucune réponse.",
   "formulaire.results.reminder": "N'hésitez pas à leur envoyer un rappel.",
   "formulaire.move.title": "Déplacer la sélection",

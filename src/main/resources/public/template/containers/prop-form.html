@@ -39,8 +39,8 @@
                             </div>
                             <div class="multiple">
                                 <div class="text">
-                                    <label for="multiple">
-                                        <input type="checkbox" id="multiple" ng-model="vm.form.multiple" ng-disabled="vm.form.nb_responses > 0"/>
+                                    <label for="isMultiple">
+                                        <input type="checkbox" id="isMultiple" ng-model="vm.form.multiple" ng-disabled="vm.form.nb_responses > 0"/>
                                         <span ng-if="!isMobile"><i18n>formulaire.multiple</i18n></span>
                                         <span ng-if="isMobile"><i18n>formulaire.multiple.mobile</i18n></span>
                                     </label>
@@ -53,6 +53,15 @@
                                         <span><i18n>formulaire.anonymous.label</i18n></span>
                                     </label>
                                     <i18n class="subdescription" ng-if="vm.form.anonymous">formulaire.anonymous.description</i18n>
+                                </div>
+                            </div>
+                            <div class="notified">
+                                <div class="text">
+                                    <label for="isNotified">
+                                        <input type="checkbox" id="isNotified" ng-model="vm.form.response_notified"/>
+                                        <span><i18n>formulaire.notified.label</i18n></span>
+                                    </label>
+                                    <i18n class="subdescription" ng-if="vm.form.response_notified">formulaire.notified.description</i18n>
                                 </div>
                             </div>
                         </div>

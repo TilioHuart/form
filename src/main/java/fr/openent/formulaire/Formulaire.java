@@ -13,6 +13,7 @@ import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.events.EventStore;
 import org.entcore.common.events.EventStoreFactory;
 import org.entcore.common.http.BaseServer;
+import org.entcore.common.notification.TimelineHelper;
 import org.entcore.common.service.impl.SqlCrudService;
 import org.entcore.common.share.impl.SqlShareService;
 import org.entcore.common.sql.SqlConf;
@@ -72,6 +73,7 @@ public class Formulaire extends BaseServer {
 		super.start();
 
 		final EventBus eb = getEventBus(vertx);
+		final TimelineHelper timelineHelper = new TimelineHelper(vertx, eb, config);
 		EventStore eventStore = EventStoreFactory.getFactory().getEventStore(Formulaire.class.getSimpleName());
 
 		// Set RepositoryEvents implementation used to process events published for transition
@@ -120,7 +122,7 @@ public class Formulaire extends BaseServer {
 
 
 		// Init controllers
-		addController(new DistributionController());
+		addController(new DistributionController(timelineHelper));
 		addController(formController);
 		addController(new FormulaireController(eventStore));
 		addController(new QuestionChoiceController());

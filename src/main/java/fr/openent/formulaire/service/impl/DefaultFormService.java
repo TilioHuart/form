@@ -78,6 +78,26 @@ public class DefaultFormService implements FormService {
     }
 
     @Override
+    public void listContributors(String formId, Handler<Either<String, JsonArray>> handler) {
+        listUsersByRights(formId, Formulaire.CONTRIB_RESOURCE_BEHAVIOUR, handler);
+    }
+
+    @Override
+    public void listManagers(String formId, Handler<Either<String, JsonArray>> handler) {
+        listUsersByRights(formId, Formulaire.MANAGER_RESOURCE_BEHAVIOUR, handler);
+    }
+
+    private void listUsersByRights(String formId, String right, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT DISTINCT fs.member_id AS id FROM " + Formulaire.FORM_TABLE + " f " +
+                "JOIN " + Formulaire.FORM_SHARES_TABLE + " fs ON fs.resource_id = f.id " +
+                "WHERE f.id = ? AND fs.action = ? " +
+                "UNION " +
+                "SELECT owner_id FROM "  + Formulaire.FORM_TABLE + " WHERE id = ?;";
+        JsonArray params = new JsonArray().add(formId).add(right).add(formId);
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
     public void get(String formId, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT * FROM " + Formulaire.FORM_TABLE + " WHERE id = ?;";
         JsonArray params = new JsonArray().add(formId);
@@ -87,8 +107,8 @@ public class DefaultFormService implements FormService {
     @Override
     public void create(JsonObject form, UserInfos user, Handler<Either<String, JsonObject>> handler) {
         String query = "INSERT INTO " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, " +
-                "picture, date_creation, date_modification, date_opening, date_ending, multiple, anonymous) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+                "picture, date_creation, date_modification, date_opening, date_ending, multiple, anonymous, response_notified) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(user.getUserId())
                 .add(user.getUsername())
@@ -99,7 +119,8 @@ public class DefaultFormService implements FormService {
                 .add(form.getString("date_opening", "NOW()"))
                 .add(form.getString("date_ending", null))
                 .add(form.getBoolean("multiple", false))
-                .add(form.getBoolean("anonymous", false));
+                .add(form.getBoolean("anonymous", false))
+                .add(form.getBoolean("response_notified", false));
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
@@ -112,8 +133,8 @@ public class DefaultFormService implements FormService {
         List<JsonObject> allForms = forms.getList();
         for (JsonObject form : allForms) {
             query += "INSERT INTO " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, " +
-                    "picture, date_creation, date_modification, date_opening, date_ending, multiple, anonymous) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?); ";
+                    "picture, date_creation, date_modification, date_opening, date_ending, multiple, anonymous, response_notified) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?); ";
             params.add(user.getUserId())
                     .add(user.getUsername())
                     .add(form.getString("title", ""))
@@ -123,7 +144,8 @@ public class DefaultFormService implements FormService {
                     .add(form.getString("date_opening", "NOW()"))
                     .add(form.getString("date_ending", null))
                     .add(form.getBoolean("multiple", false))
-                    .add(form.getBoolean("anonymous", false));
+                    .add(form.getBoolean("anonymous", false))
+                    .add(form.getBoolean("response_notified", false));
         }
 
         query += "RETURNING *;";
@@ -134,8 +156,8 @@ public class DefaultFormService implements FormService {
     public void duplicate(int formId, UserInfos user, Handler<Either<String, JsonArray>> handler) {
         String query =
                 "WITH new_form_id AS (" +
-                    "INSERT INTO  " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, picture, date_opening, date_ending, multiple, anonymous) " +
-                    "SELECT ?, ?, concat(title, ' - Copie'), description, picture, date_opening, date_ending, multiple, anonymous " +
+                    "INSERT INTO  " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, picture, date_opening, date_ending, multiple, anonymous, response_notified) " +
+                    "SELECT ?, ?, concat(title, ' - Copie'), description, picture, date_opening, date_ending, multiple, anonymous, response_notified " +
                     "FROM " + Formulaire.FORM_TABLE + " WHERE id = ? RETURNING id" +
                 "), " +
                 "rows AS (" +
@@ -160,7 +182,8 @@ public class DefaultFormService implements FormService {
                 "multiple = CASE (SELECT count > 0 FROM nbResponses) " +
                 "WHEN false THEN ? WHEN true THEN (SELECT multiple FROM " + Formulaire.FORM_TABLE +" WHERE id = ?) END, " +
                 "anonymous = CASE (SELECT count > 0 FROM nbResponses) " +
-                "WHEN false THEN ? WHEN true THEN (SELECT anonymous FROM " + Formulaire.FORM_TABLE +" WHERE id = ?) END " +
+                "WHEN false THEN ? WHEN true THEN (SELECT anonymous FROM " + Formulaire.FORM_TABLE +" WHERE id = ?) END, " +
+                "response_notified = ?" +
                 "WHERE id = ? RETURNING *;";
 
         JsonArray params = new JsonArray()
@@ -178,6 +201,7 @@ public class DefaultFormService implements FormService {
                 .add(form.getBoolean("archived", false))
                 .add(form.getBoolean("multiple", false)).add(formId)
                 .add(form.getBoolean("anonymous", false)).add(formId)
+                .add(form.getBoolean("response_notified", false))
                 .add(formId);
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));

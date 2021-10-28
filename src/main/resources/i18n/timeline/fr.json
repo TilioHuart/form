@@ -1,0 +1,13 @@
+{
+    "formulaire": "Formulaire",
+
+    "formulaire.response_notification": "Notification de réponse à un formulaire",
+
+    "push.notif.formulaire.response": "Nouvelle notification Formulaire",
+
+    "timeline.formulaire.new.notification": "Nouvelle notification Formulaire de ",
+    "timeline.formulaire.unknown.sender": "Utilisateur INCONNU",
+    "timeline.formulaire.responded": " a répondu au formulaire ",
+    "timeline.formulaire.see": ". Voir les ",
+    "timeline.formulaire.results": "résultats"
+}
