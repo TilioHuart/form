@@ -1,7 +1,7 @@
 <lightbox class="new-question dontSave" show="vm.display.lightbox.newQuestion" on-close="vm.closeLightbox('newQuestion')">
     <h2><i18n>formulaire.question.selectType</i18n></h2>
     <div class="dominos">
-        <div ng-repeat="type in questionTypes.all" ng-click="vm.doCreateNewQuestion(type.code)" class="item">
+        <div ng-repeat="type in questionTypes.all" ng-click="vm.doCreateNewQuestion(type.code)" class="item" title="[[vm.displayTypeDescritption(type.name)]]">
             <div class="domino">
                 <div class="data-text">
                     <h5>[[vm.displayTypeName(type.name)]]</h5>
