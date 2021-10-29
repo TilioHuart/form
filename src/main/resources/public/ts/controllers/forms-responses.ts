@@ -27,6 +27,7 @@ interface ViewModel {
     checkOpenButton() : boolean;
     checkMyResponsesButton() : boolean;
     openForm(form: Form) : void;
+    selectForm(form : Form):void;
     openMyResponses() : void;
     closeMyResponses() : void;
 }
@@ -126,12 +127,11 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
     vm.checkOpenButton = () : boolean => {
         let formId = vm.forms.selected[0].id;
         let status = vm.distributions.all.filter(distrib => distrib.form_id === formId)[0].status;
-        return (vm.forms.selected.length === 1 &&
-            (vm.forms.selected[0].multiple || status != DistributionStatus.FINISHED));
+        return (vm.forms.selected[0].multiple || status != DistributionStatus.FINISHED);
     };
 
     vm.checkMyResponsesButton = () : boolean => {
-        return (vm.forms.selected.length === 1 && vm.forms.selected[0].multiple);
+        return vm.forms.selected[0].multiple;
     };
 
     vm.openForm = async (form: Form) : Promise<void> => {
@@ -157,6 +157,18 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
         }
         $scope.safeApply();
     };
+
+    vm.selectForm= async(form : Form):Promise <void> =>{
+        if (!form.selected) {
+            vm.forms.deselectAll();
+            if (form.multiple || status != DistributionStatus.FINISHED) {
+                form.selected = true;
+            }
+        }
+        else {
+            vm.forms.deselectAll();
+        }
+    }
 
     vm.openMyResponses = () : void => {
         template.open('lightbox', 'lightbox/my-responses');

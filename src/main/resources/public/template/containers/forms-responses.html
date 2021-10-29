@@ -51,7 +51,7 @@
         <div class="dominos" ng-if="!vm.forms.all.empty() && vm.display.grid">
             <div ng-repeat="form in vm.forms.all | filter:vm.searchInput | limitTo:vm.limitTo"
                  ng-if="!vm.forms.all.empty() && vm.display.grid && form.displayed"
-                 ng-click="form.selected = !form.selected" ng-dblclick="vm.openForm(form)"
+                 ng-click="vm.selectForm(form)" ng-dblclick="vm.openForm(form)"
                  class="item response" ng-class="{'selected' : form.selected}">
                 <div class="domino">
                     <div class="four picture" ng-class="{'empty': !form.picture}">
