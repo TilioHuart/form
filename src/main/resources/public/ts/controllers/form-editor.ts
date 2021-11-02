@@ -154,7 +154,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
 
         // Question functions
-
         vm.duplicateQuestion = async () : Promise<void> => {
             try {
                 vm.dontSave = true;

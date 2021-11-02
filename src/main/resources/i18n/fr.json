@@ -27,6 +27,8 @@
   "formulaire.return": "Retour",
   "formulaire.close": "Fermer",
   "formulaire.edit": "Modifier",
+  "formulaire.checkremind.answered": "répondu",
+  "formulaire.checkremind.notanswered":"non répondu",
   "formulaire.mandatory": "Obligatoire",
   "formulaire.sent": "Envoyé",
   "formulaire.shared": "Partagé",
@@ -43,6 +45,7 @@
   "formulaire.results": "Résultats",
   "formulaire.export": "Exporter",
   "formulaire.remind": "Rappel",
+  "formulaire.checkremind": "Suivi",
   "formulaire.archive": "Supprimer",
   "formulaire.restore": "Restaurer",
   "formulaire.delete": "Supprimer",
@@ -117,10 +120,15 @@
   "formulaire.folder.create": "Créer un dossier",
   "formulaire.folder.rename": "Renommer un dossier",
 
+  "formulaire.checkremind.name": "utilisateurs auxquels a été envoyé : ",
+
   "formulaire.table.title": "Titre du formulaire",
   "formulaire.table.author": "Auteur",
   "formulaire.table.modified": "Dernière modification",
   "formulaire.table.sent": "Date d'envoi",
+  "formulaire.table.checkremind.name": "Nom",
+  "formulaire.table.checkremind.surname": "Prenom",
+  "formulaire.table.checkremind.nbResponses": "Nombre de réponses",
 
   "formulaire.filter": "Filtre",
   "formulaire.filter.creation_date": "Date de création",
@@ -137,6 +145,7 @@
   "formulaire.form.create.button": "Créer un formulaire",
   "formulaire.form.create.title": "Titre de mon formulaire",
   "formulaire.form.create.title.mobile": "Titre",
+  "formulaire.form.checkremind.title": "Suivi des réponses",
   "formulaire.form.download.all.results.pdf": "Télécharger tous les résultats (PDF)",
   "formulaire.form.download.all.results.csv": "Télécharger tous les résultats (CSV)",
   "formulaire.form.download.all.results.lightbox.title": "Téléchargement des résultats ({0})",
@@ -214,6 +223,8 @@
   "formulaire.error.formService.remind": "Une erreur est survenue lors de l'envoi du rappel",
   "formulaire.error.formService.unshare": "Une erreur est survenue lors de la suppression du partage du formulaire",
   "formulaire.error.formService.image": "Une erreur est survenue lors de la récupération de l'image",
+  "formulaire.error.formService.checkremind": "Une erreur est survenue lors de la récupération des réponses",
+
 
   "formulaire.error.question.reorganization": "Direction de réorganisation inconnue.",
   "formulaire.error.question.sync": "Une erreur est survenue lors de la synchronisation des questions",

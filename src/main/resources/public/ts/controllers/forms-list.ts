@@ -1,5 +1,5 @@
 import {idiom, model, ng, notify, template, workspace} from 'entcore';
-import {Distribution, Distributions, Form, Forms} from "../models";
+import {Distribution, Distributions, DistributionStatus, Form, Forms} from "../models";
 import {distributionService, formService} from "../services";
 import {FiltersFilters, FiltersOrders, FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_EMIT_EVENT} from "../core/enums";
 import {Mix} from "entcore-toolkit";
@@ -18,11 +18,16 @@ interface ViewModel {
     allFoldersSelected: boolean;
     targetFolderId: number;
     searchInput: string;
+    responders: any[];
     mail: {
         link: string,
         subject: string,
         body: string
     };
+    remindfilter:{
+        answered : boolean,
+        notanswered : boolean,
+    }
     pageSize: number;
     limitTo: number;
     display: {
@@ -34,6 +39,7 @@ interface ViewModel {
             archive: boolean,
             delete: boolean,
             reminder: boolean,
+            checkremind:boolean,
             folder: {
                 create: boolean,
                 rename: boolean
@@ -59,8 +65,11 @@ interface ViewModel {
     isFormOpened(): boolean;
     remind() : Promise<void>;
     doRemind() : Promise<void>;
+    checkRemind() : Promise<void>;
+    filterResponses() : any;
     cancelRemind() : void;
     restoreForms() : Promise<void>;
+
     archiveForms() : void;
     doArchiveForms() : Promise<void>;
     deleteForms() : void;
@@ -109,10 +118,16 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.allFormsSelected = false;
     vm.allFoldersSelected = false;
     vm.targetFolderId = 0;
+    vm.responders = [];
     vm.mail = {
         link: "",
         subject: "",
         body: ""
+    };
+    vm.remindfilter = {
+      answered:false,
+      notanswered:true
+
     };
     vm.pageSize = 30;
     vm.limitTo = vm.pageSize;
@@ -125,6 +140,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             archive: false,
             delete: false,
             reminder: false,
+            checkremind:false,
             folder: {
                 create: false,
                 rename: false
@@ -237,6 +253,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         return dateOpeningOk && dateEndingOk;
     };
 
+
+
     vm.remind = async () : Promise<void> => {
         initMail();
         vm.distributions.all = Mix.castArrayAs(Distribution, $scope.getDataIf200(await distributionService.listByForm(vm.forms.selected[0].id)));
@@ -263,6 +281,45 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             window.setTimeout(async function () { await init(); }, 100);
         }
     };
+
+    vm.checkRemind = async () : Promise<void> => {
+        let distributions = Mix.castArrayAs(Distribution, $scope.getDataIf200(await distributionService.listByForm(vm.forms.selected[0].id)));
+
+        let uniqueDistribs : any = [];
+        for (let d of distributions){
+            if(!uniqueDistribs.map(d => d.responder_id).includes(d.responder_id)) {
+                uniqueDistribs.push(d);
+            }
+        }
+        vm.responders = [];
+        for (let uniqueDistribution of uniqueDistribs){
+            let str = uniqueDistribution.responder_name;
+            let seperate = str.split(' ');
+            let responderInfo = {
+                name : seperate[0],
+                surname: seperate[1],
+                nbResponses: distributions.filter(d => d.responder_id === uniqueDistribution.responder_id && d.status==DistributionStatus.FINISHED).length,
+            };
+            vm.responders.push(responderInfo);
+        }
+        template.open('lightbox','lightbox/form-check-remind');
+        vm.display.lightbox.checkremind=true;
+    };
+
+    vm.filterResponses = () : any => {
+        if(vm.remindfilter.notanswered == false && vm.remindfilter.answered == true){
+            return vm.responders.filter(a =>a.nbResponses >0);
+        }
+        else if(vm.remindfilter.answered == false && vm.remindfilter.notanswered == true) {
+            return vm.responders.filter(a => a.nbResponses <=0);
+        }
+        else if (vm.remindfilter.answered == false && vm.remindfilter.notanswered == false){
+            return vm.responders;
+        }
+        else if(vm.remindfilter.answered == true && vm.remindfilter.notanswered == true){
+            return vm.responders;
+        }
+    }
 
     vm.cancelRemind = () : void => {
         initMail();

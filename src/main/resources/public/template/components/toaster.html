@@ -29,9 +29,9 @@
                     ng-show="vm.forms.selected.length === 1 && !!vm.forms.selected[0].nb_questions">
                 <i18n>formulaire.results</i18n>
             </button>
-            <button ng-click="vm.remind()" class="cell"
+            <button ng-click="vm.checkRemind()" class="cell"
                     ng-show="vm.forms.selected.length === 1 && !!vm.forms.selected[0].nb_questions">
-                <i18n>formulaire.remind</i18n>
+                <i18n>formulaire.checkremind</i18n>
             </button>
             <button ng-click="vm.archiveForms()" class="cell" ng-show="hasShareRightManager(vm.forms.selected[0])">
                 <i18n>formulaire.archive</i18n>

@@ -1,0 +1,39 @@
+<lightbox show="vm.display.lightbox.checkremind" on-close="vm.display.lightbox.checkremind = false">
+    <h2><i18n>formulaire.form.checkremind.title</i18n></h2>
+    <div>
+        <i18n>formulaire.checkremind.name</i18n>
+    </div>
+    <div>
+        <label class="chip checkbox" ng-class="{ selected: vm.remindfilter.answered }">
+            <i18n>formulaire.checkremind.answered</i18n>
+            <input type="checkbox" ng-click="vm.remindfilter.answered=!vm.remindfilter.answered">
+        </label>
+        <label class="chip checkbox" ng-class="{ selected: vm.remindfilter.notanswered }">
+            <i18n>formulaire.checkremind.notanswered</i18n>
+            <input type="checkbox" ng-click="vm.remindfilter.notanswered=!vm.remindfilter.notanswered">
+        </label>
+    </div>
+
+    <table class="table" style="margin: 20px 10px;">
+        <thead>
+        <tr>
+            <th ng-class ="!vm.forms.selected[0].multiple? 'six' : 'four'"><i18n>formulaire.table.checkremind.name</i18n></th>
+            <th ng-class ="!vm.forms.selected[0].multiple? 'six' : 'four'"><i18n>formulaire.table.checkremind.surname</i18n></th>
+            <th class="four" ng-if="vm.forms.selected[0].multiple"><i18n>formulaire.table.checkremind.nbResponses</i18n></th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr ng-repeat="responderInfo in vm.filterResponses()">
+            <td>[[responderInfo.name]]</td>
+            <td>[[responderInfo.surname]]</td>
+            <td ng-if="vm.forms.selected[0].multiple">[[responderInfo.nbResponses]]</td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="action-buttons">
+        <button class="cell cancel" ng-click="vm.display.lightbox.checkremind = false"><i18n>formulaire.cancel</i18n></button>
+        <button class="cell" ng-click="vm.remind()"><i18n>formulaire.remind.title</i18n></button>
+    </div>
+    <infinite-scroll scrolled="vm.infiniteScroll()" loading-mode="true"></infinite-scroll>
+</lightbox>

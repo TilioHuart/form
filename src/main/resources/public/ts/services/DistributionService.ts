@@ -20,7 +20,6 @@ export interface DistributionService {
 }
 
 export const distributionService: DistributionService = {
-
     async list() : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/distributions`);

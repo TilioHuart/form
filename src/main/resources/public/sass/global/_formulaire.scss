@@ -232,6 +232,10 @@ body.formulaire section.main {
     text-overflow: ellipsis;
   }
 
+  label.chip.checkbox.selected {
+    background-color: $accent;
+  }
+
   .filter-forms {
     width: 97%;
     .drop-down-block, .drop-down-block .drop-down-label {
@@ -249,10 +253,6 @@ body.formulaire section.main {
         margin-left: 2%;
         padding: 0 10px;
       }
-    }
-
-    label.chip.checkbox.selected {
-      background-color: $accent;
     }
 
     i.arrow {
