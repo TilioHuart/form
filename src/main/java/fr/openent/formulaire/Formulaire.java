@@ -116,7 +116,7 @@ public class Formulaire extends BaseServer {
 		}
 
 		// Set sharing services to formController
-		FormController formController = new FormController(eventStore, storage);
+		FormController formController = new FormController(eventStore, storage, timelineHelper);
 		formController.setShareService(new SqlShareService(DB_SCHEMA, "form_shares", eb, securedActions, null));
 		formController.setCrudService(new SqlCrudService(DB_SCHEMA, "form", "form_shares"));
 

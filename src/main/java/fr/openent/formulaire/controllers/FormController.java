@@ -28,6 +28,7 @@ import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.events.EventStore;
 import org.entcore.common.http.filter.ResourceFilter;
+import org.entcore.common.notification.TimelineHelper;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
@@ -49,8 +50,9 @@ public class FormController extends ControllerHelper {
     private final FolderService folderService;
     private final RelFormFolderService relFormFolderService;
     private final NeoService neoService;
+    private final NotifyService notifyService;
 
-    public FormController(EventStore eventStore, Storage storage) {
+    public FormController(EventStore eventStore, Storage storage, TimelineHelper timelineHelper) {
         super();
         this.eventStore = eventStore;
         this.storage = storage;
@@ -62,6 +64,7 @@ public class FormController extends ControllerHelper {
         this.folderService = new DefaultFolderService();
         this.relFormFolderService = new DefaultRelFormFolderService();
         this.neoService = new DefaultNeoService();
+        this.notifyService = new DefaultNotifyService(timelineHelper, eb);
     }
 
     // Init rights
@@ -732,7 +735,7 @@ public class FormController extends ControllerHelper {
         return filteredMap;
     }
 
-    private void syncDistributions(String formId, UserInfos user, JsonArray responders, Handler<Either<String, JsonObject>> handler) {
+    private void syncDistributions(HttpServerRequest request, String formId, UserInfos user, JsonArray responders, Handler<Either<String, JsonObject>> handler) {
         deactivateDeletedDistributions(formId, responders, removeEvt -> {
             if (removeEvt.isLeft()) {
                 log.error(removeEvt.left().getValue());
@@ -740,7 +743,7 @@ public class FormController extends ControllerHelper {
                 return;
             };
 
-            addNewDistributions(formId, user, responders, addEvt -> {
+            addNewDistributions(request, formId, user, responders, addEvt -> {
                 if (addEvt.isLeft()) {
                     log.error(addEvt.left().getValue());
                     handler.handle(new Either.Left<>(addEvt.left().getValue()));
@@ -784,7 +787,7 @@ public class FormController extends ControllerHelper {
         });
     }
 
-    private void addNewDistributions(String formId, UserInfos user, JsonArray responders, Handler<Either<String, JsonObject>> handler) {
+    private void addNewDistributions(HttpServerRequest request, String formId, UserInfos user, JsonArray responders, Handler<Either<String, JsonObject>> handler) {
         if (!responders.isEmpty()) {
             distributionService.getDuplicates(formId, responders, filteringEvent -> {
                 if (filteringEvent.isRight()) {
@@ -794,7 +797,17 @@ public class FormController extends ControllerHelper {
                             if (!duplicates.isEmpty()) {
                                 distributionService.setActiveValue(true, formId, duplicates, updateEvent -> {
                                     if (updateEvent.isRight()) {
-                                        handler.handle(new Either.Right<>(updateEvent.right().getValue()));
+                                        JsonArray respondersIds = getResponderIds(responders);
+                                        formService.get(formId, getFormEvent -> {
+                                            if (getFormEvent.isLeft()) {
+                                                handler.handle(new Either.Right<>(getFormEvent.right().getValue()));
+                                                log.error("[Formulaire@addNewDistributions] Fail to get infos for form with id " + formId);
+                                                return;
+                                            }
+                                            JsonObject form = getFormEvent.right().getValue();
+                                            notifyService.notifyNewForm(request, form, respondersIds);
+                                            handler.handle(new Either.Right<>(getFormEvent.right().getValue()));
+                                        });
                                     } else {
                                         log.error("[Formulaire@addNewDistributions] Fail to update distributions");
                                         handler.handle(new Either.Left<>(updateEvent.left().getValue()));

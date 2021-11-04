@@ -1,13 +1,17 @@
 {
   "formulaire": "Formulaire",
 
-  "formulaire.response_notification": "Response notification to a form",
+  "formulaire.response_notification": "Notification of a response to a form",
+  "formulaire.new_form_notification": "Notification of a new form to answer",
 
   "push.notif.formulaire.response": "New Formulaire notification",
+  "push.notif.formulaire.newForm": "New Formulaire notification",
 
   "timeline.formulaire.new.notification": "New Formulaire notification from ",
   "timeline.formulaire.unknown.sender": "User UNKNOW",
   "timeline.formulaire.responded": " has responded to the form ",
+  "timeline.formulaire.sent": " has sent you a new form. ",
   "timeline.formulaire.see": ". See the ",
-  "timeline.formulaire.results": "results"
+  "timeline.formulaire.results": "results",
+  "timeline.formulaire.access": "Go to the form "
 }

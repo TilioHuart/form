@@ -2,12 +2,16 @@
     "formulaire": "Formulaire",
 
     "formulaire.response_notification": "Notification de réponse à un formulaire",
+    "formulaire.new_form_notification": "Notification de nouveau formulaire à répondre",
 
     "push.notif.formulaire.response": "Nouvelle notification Formulaire",
+    "push.notif.formulaire.newForm": "Nouvelle notification Formulaire",
 
     "timeline.formulaire.new.notification": "Nouvelle notification Formulaire de ",
     "timeline.formulaire.unknown.sender": "Utilisateur INCONNU",
     "timeline.formulaire.responded": " a répondu au formulaire ",
+    "timeline.formulaire.sent": " vous a envoyé un formulaire. ",
     "timeline.formulaire.see": ". Voir les ",
-    "timeline.formulaire.results": "résultats"
+    "timeline.formulaire.results": "résultats",
+    "timeline.formulaire.access": "Accéder au formulaire "
 }

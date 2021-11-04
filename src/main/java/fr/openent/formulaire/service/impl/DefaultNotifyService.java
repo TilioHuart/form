@@ -25,6 +25,25 @@ public class DefaultNotifyService implements NotifyService {
     }
 
     @Override
+    public void notifyNewForm(HttpServerRequest request, JsonObject form, JsonArray responders) {
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user == null) {
+                log.error("User not found in session.");
+                Renders.unauthorized(request);
+            }
+
+            JsonObject params = new JsonObject()
+                    .put("userUri", "/userbook/annuaire#" + user.getUserId())
+                    .put("username", user.getUsername())
+                    .put("formUri", "/formulaire#/form/" + form.getInteger("id") + "/question/1")
+                    .put("formName", form.getString("title"))
+                    .put("pushNotif", new JsonObject().put("title", "push.notif.formulaire.newForm").put("body", ""));
+
+            timelineHelper.notifyTimeline(request, "formulaire.new_form_notification", user, responders.getList(), params);
+        });
+    }
+
+    @Override
     public void notifyResponse(HttpServerRequest request, JsonObject form, JsonArray managers) {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
