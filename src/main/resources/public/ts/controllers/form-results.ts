@@ -13,7 +13,7 @@ import {
 } from "../models";
 import {Mix} from "entcore-toolkit";
 import {ColorUtils} from "../utils/color";
-import {Exports} from "../core/enums";
+import {Exports, FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
 import http from "axios";
 
 interface ViewModel {
@@ -412,7 +412,5 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
         init();
 
-        $rootScope.$on( "$routeChangeSuccess", function(event, next, current) {
-            window.location.reload();
-        });
+        $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER, () => { init() });
     }]);

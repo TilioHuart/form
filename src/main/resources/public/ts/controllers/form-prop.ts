@@ -1,6 +1,7 @@
 import {idiom, ng, notify} from 'entcore';
 import {distributionService, formService} from "../services";
 import {Form} from "../models";
+import {FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
 
 interface ViewModel {
     form: Form;
@@ -66,4 +67,6 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
         };
 
         init();
+
+        $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER, () => { init() });
     }]);

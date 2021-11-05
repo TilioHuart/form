@@ -263,7 +263,5 @@ export const questionResponderController = ng.controller('QuestionResponderContr
 
     init();
 
-    $rootScope.$on( "$routeChangeSuccess", function(event, next, current) {
-        window.location.reload();
-    });
+    $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER, () => { init() });
 }]);

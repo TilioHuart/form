@@ -1,7 +1,7 @@
 import {idiom, ng, notify, template, angular} from 'entcore';
 import {Form, Question, QuestionChoice, Questions, Response, Responses, Types} from "../models";
 import {formService, questionChoiceService, questionService, responseService} from "../services";
-import {Direction, FORMULAIRE_QUESTION_EMIT_EVENT, Pages} from "../core/enums";
+import {Direction, FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_QUESTION_EMIT_EVENT, Pages} from "../core/enums";
 
 interface ViewModel {
     form: Form;
@@ -454,11 +454,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         document.onclick = e => { onClickQuestion(e); };
 
-        $rootScope.$on( "$routeChangeSuccess", function(event, next, current) {
-            window.location.reload();
-        });
-
         $scope.$on(FORMULAIRE_QUESTION_EMIT_EVENT.DUPLICATE, () => { vm.duplicateQuestion() });
         $scope.$on(FORMULAIRE_QUESTION_EMIT_EVENT.DELETE, () => { vm.deleteQuestion() });
         $scope.$on(FORMULAIRE_QUESTION_EMIT_EVENT.UNDO, () => { vm.undoQuestionChanges() });
+        $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER, () => { init() });
     }]);

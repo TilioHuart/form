@@ -2,7 +2,15 @@ import {Behaviours, idiom, model, ng, template} from 'entcore';
 import {Distribution, DistributionStatus, Form, Question, QuestionTypes, Types} from "../models";
 import {distributionService, formService, questionService} from "../services";
 import {AxiosResponse} from "axios";
-import {Direction, Exports, FiltersFilters, FiltersOrders, FORMULAIRE_EMIT_EVENT, Pages} from "../core/enums";
+import {
+	Direction,
+	Exports,
+	FiltersFilters,
+	FiltersOrders,
+	FORMULAIRE_BROADCAST_EVENT,
+	FORMULAIRE_EMIT_EVENT,
+	Pages
+} from "../core/enums";
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', 'FormService',
 	($scope, route, $location) => {
@@ -72,6 +80,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				$scope.currentPage = Pages.PROP_FORM;
 				await $scope.getFormWithRights(params.idForm);
 				if ($scope.canCreate() && $scope.hasShareRightContrib($scope.form)) {
+					$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER);
 					template.open('main', 'containers/prop-form');
 				}
 				else {
@@ -98,6 +107,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 						}
 						else {
 							$scope.question = $scope.getDataIf200(await questionService.getByPosition(params.idForm, params.position));
+							$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER);
 							template.open('main', 'containers/results-form');
 						}
 					}
@@ -114,6 +124,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				await $scope.getFormWithRights(params.idForm);
 				if ($scope.canCreate() && $scope.hasShareRightContrib($scope.form)) {
 					if (!!$scope.form.id) {
+						$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER);
 						template.open('main', 'containers/edit-form');
 					}
 					else {
@@ -166,6 +177,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 							}
 							else {
 								$scope.question = $scope.getDataIf200(await questionService.getByPosition(params.idForm, params.position));
+								$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER);
 								template.open('main', 'containers/respond-question');
 							}
 						}
