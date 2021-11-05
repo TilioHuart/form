@@ -1,4 +1,4 @@
-import {idiom, ng, notify} from 'entcore';
+import {ng} from 'entcore';
 import {distributionService, formService} from "../services";
 import {Form} from "../models";
 import {FORMULAIRE_BROADCAST_EVENT} from "../core/enums";

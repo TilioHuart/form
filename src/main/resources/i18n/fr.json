@@ -16,6 +16,7 @@
   "formulaire.create": "Créer",
   "formulaire.save": "Enregistrer",
   "formulaire.saveAndQuit": "Enregistrer et quitter",
+  "formulaire.recap": "Récapitulatif",
   "formulaire.end": "Terminer et envoyer",
   "formulaire.backToEditor": "Revenir à l'édition",
   "formulaire.finish": "Terminer",
@@ -165,6 +166,7 @@
 
   "formulaire.response": "réponse",
   "formulaire.response.empty": "Sans réponse",
+  "formulaire.response.missing": "Non répondu",
   "formulaire.response.file.send": "Fichier déposé",
   "formulaire.response.file.tooMany": "Le nombre de fichiers est trop important. Veuillez les compresser en un unique fichier .zip d'abord.",
   "formulaire.responses": "réponses",

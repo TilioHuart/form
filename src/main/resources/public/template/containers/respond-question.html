@@ -1,4 +1,4 @@
-<div ng-controller="QuestionResponderController as vm">
+<div ng-controller="ResponseQuestionController as vm">
     <div class="row">
         <section class="cell six">
             <div>
@@ -10,6 +10,7 @@
 
         <section class="cell six">
             <div class="main-button">
+                <button class="cell cancel" ng-click="vm.goToRecap()"><i18n>formulaire.recap</i18n></button>
                 <button class="cell cancel" ng-click="vm.saveAndQuit()"><i18n>formulaire.saveAndQuit</i18n></button>
             </div>
         </section>
@@ -62,11 +63,8 @@
             <div class="buttons">
                 <button class="cell" ng-if="vm.question.position <= 1" ng-disabled="true"><i18n>formulaire.prev</i18n></button>
                 <button class="cell cancel" ng-click="vm.prev()" ng-if="vm.question.position > 1"><i18n>formulaire.prev</i18n></button>
-                <button class="cell" ng-click="vm.next()" ng-if="!vm.last"><i18n>formulaire.next</i18n></button>
-                <button class="cell" ng-click="vm.send()" ng-if="vm.last"><i18n>formulaire.end</i18n></button>
+                <button class="cell" ng-click="vm.next()"><i18n>formulaire.next</i18n></button>
             </div>
         </div>
     </div>
-
-    <container template='lightbox'></container>
 </div>

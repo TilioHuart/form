@@ -86,6 +86,22 @@ public class ResponseController extends ControllerHelper {
         });
     }
 
+    @Get("/responses/distrib/:distributionId")
+    @ApiDoc("List all responses for a specific distribution")
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void listByDistribution(HttpServerRequest request) {
+        String distributionId = request.getParam("distributionId");
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user != null) {
+                responseService.listByDistribution(distributionId, arrayResponseHandler(request));
+            } else {
+                log.error("User not found in session.");
+                Renders.unauthorized(request);
+            }
+        });
+    }
+
     @Get("/responses/:responseId")
     @ApiDoc("Get a specific response by id")
     @ResourceFilter(AccessRight.class)
@@ -94,8 +110,6 @@ public class ResponseController extends ControllerHelper {
         String responseId = request.getParam("responseId");
         responseService.get(responseId, defaultResponseHandler(request));
     }
-
-
 
     @Post("/questions/:questionId/responses")
     @ApiDoc("Create a response")

@@ -3,7 +3,7 @@
     <div ng-repeat="dist in vm.getMyResponses(vm.forms.selected[0])">
         [[$index + 1]]. <i18n>formulaire.responded.date</i18n>[[displayDate(dist.date_response)]]
     </div>
-    <div class="action-buttons">
+    <div style="floar: right; margin-top: 2%;">
         <button class="cell cancel" ng-click="vm.closeMyResponses()"><i18n>formulaire.close</i18n></button>
     </div>
 </lightbox>

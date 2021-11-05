@@ -6,6 +6,7 @@ export interface ResponseService {
     list(question: Question, nbLines: number) : Promise<AxiosResponse>;
     countByQuestion(questionId : number) : Promise<AxiosResponse>;
     listMineByDistribution(questionId: number, distributionId: number) : Promise<AxiosResponse>;
+    listByDistribution(distributionId: number) : Promise<AxiosResponse>;
     get(responseId: number) : Promise<AxiosResponse>;
     save(response: Response, questionType?: number) : Promise<AxiosResponse>;
     create(response: Response) : Promise<AxiosResponse>;
@@ -34,10 +35,18 @@ export const responseService: ResponseService = {
         }
     },
 
-
     async listMineByDistribution(questionId: number, distributionId: number) : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/questions/${questionId}/responses/${distributionId}`);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.responseService.list'));
+            throw err;
+        }
+    },
+
+    async listByDistribution(distributionId: number) : Promise<AxiosResponse> {
+        try {
+            return http.get(`/formulaire/responses/distrib/${distributionId}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.list'));
             throw err;

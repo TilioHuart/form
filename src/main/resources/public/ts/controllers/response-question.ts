@@ -1,4 +1,4 @@
-import {idiom, model, ng, notify, template} from "entcore";
+import {idiom, model, ng, notify} from "entcore";
 import {
     Distribution,
     DistributionStatus, Form,
@@ -7,7 +7,7 @@ import {
     Responses,
     Types
 } from "../models";
-import {distributionService, formService, questionService, responseFileService, responseService} from "../services";
+import {distributionService, responseFileService, responseService} from "../services";
 import {FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
 
 interface ViewModel {
@@ -17,27 +17,18 @@ interface ViewModel {
     distribution: Distribution;
     form: Form;
     nbQuestions: number;
-    last: boolean;
     selectedIndex: Array<boolean>;
     files: File[];
-    display: {
-        lightbox: {
-            sending: boolean
-        }
-    };
 
     prev() : Promise<void>;
     next() : Promise<void>;
+    goToRecap() : Promise<void>;
     saveAndQuit() : Promise<void>;
-    send() : Promise<void>;
-    doSend() : Promise<void>;
-    checkMultiEtab() : boolean;
-    getStructures() : string[];
     displayDefaultOption() : string;
 }
 
-export const questionResponderController = ng.controller('QuestionResponderController', ['$scope', '$rootScope',
-    function ($scope, $rootScope) {
+export const respondQuestionController = ng.controller('RespondQuestionController', ['$scope',
+    function ($scope) {
 
     const vm: ViewModel = this;
     vm.question = new Question();
@@ -46,14 +37,8 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     vm.distribution = new Distribution();
     vm.form = new Form();
     vm.nbQuestions = 1;
-    vm.last = false;
     vm.selectedIndex = new Array<boolean>();
     vm.files = [];
-    vm.display = {
-        lightbox: {
-            sending: false
-        }
-    };
 
     const init = async () : Promise<void> => {
         vm.form = $scope.form;
@@ -61,8 +46,6 @@ export const questionResponderController = ng.controller('QuestionResponderContr
         vm.question = $scope.question;
         vm.question.choices = new QuestionChoices();
         vm.nbQuestions = $scope.form.nb_questions;
-        vm.distribution = $scope.getDataIf200(await distributionService.get(vm.question.form_id));
-        vm.last = vm.question.position === vm.nbQuestions;
         if (vm.question.question_type === Types.MULTIPLEANSWER || vm.question.question_type === Types.SINGLEANSWER) {
             await vm.question.choices.sync(vm.question.id);
         }
@@ -111,7 +94,7 @@ export const questionResponderController = ng.controller('QuestionResponderContr
             let prevPosition: number = vm.question.position - 1;
 
             if (prevPosition > 0) {
-                $scope.redirectTo(`/form/${vm.question.form_id}/question/${prevPosition}`);
+                $scope.redirectTo(`/form/${vm.form.id}/question/${prevPosition}`);
             }
         }
     };
@@ -121,8 +104,17 @@ export const questionResponderController = ng.controller('QuestionResponderContr
             let nextPosition: number = vm.question.position + 1;
 
             if (nextPosition <= vm.nbQuestions) {
-                $scope.redirectTo(`/form/${vm.question.form_id}/question/${nextPosition}`);
+                $scope.redirectTo(`/form/${vm.form.id}/question/${nextPosition}`);
             }
+            else {
+                $scope.redirectTo(`/form/${vm.form.id}/${vm.distribution.id}/questions/recap`);
+            }
+        }
+    };
+
+    vm.goToRecap = async () : Promise<void> => {
+        if (await saveResponses()) {
+            $scope.redirectTo(`/form/${vm.form.id}/${vm.distribution.id}/questions/recap`);
         }
     };
 
@@ -135,37 +127,6 @@ export const questionResponderController = ng.controller('QuestionResponderContr
             notify.success(idiom.translate('formulaire.success.responses.save'));
             window.setTimeout(function () { $scope.redirectTo(`/list/responses`); }, 1000);
         }
-    };
-
-    vm.send = async () : Promise<void> => {
-        await saveResponses();
-        if (await checkMandatoryQuestions()) {
-            vm.distribution.structure = model.me.structureNames[0];
-            template.open('lightbox', 'lightbox/responses-confirm-sending');
-            vm.display.lightbox.sending = true;
-        }
-        else {
-            notify.error(idiom.translate('formulaire.warning.send.missing.responses.missing'));
-        }
-    };
-
-    vm.doSend = async () : Promise<void> => {
-        vm.distribution.status = DistributionStatus.FINISHED;
-        vm.distribution.structure = !!vm.distribution.structure ? vm.distribution.structure : model.me.structureNames[0];
-        await responseService.fillResponses(vm.form.id,  vm.distribution.id);
-        await distributionService.update(vm.distribution);
-        template.close('lightbox');
-        vm.display.lightbox.sending = false;
-        notify.success(idiom.translate('formulaire.success.responses.save'));
-        window.setTimeout(function () { $scope.redirectTo(`/list/responses`); }, 1000);
-    };
-
-    vm.checkMultiEtab = () : boolean => {
-        return model.me.structureNames.length > 1 && !vm.form.anonymous;
-    };
-
-    vm.getStructures = () : string[] => {
-        return model.me.structureNames;
     };
 
     vm.displayDefaultOption = () : string => {
@@ -240,24 +201,6 @@ export const questionResponderController = ng.controller('QuestionResponderContr
     const formatTime = () : void => {
         if (!!vm.response.answer) {
             vm.response.answer = new Date("January 01 1970 " + vm.response.answer);
-        }
-    };
-
-    const checkMandatoryQuestions = async () : Promise<boolean> => {
-        try {
-            let questions = $scope.getDataIf200(await questionService.list(vm.question.form_id));
-            questions = questions.filter(question => question.mandatory === true);
-            for (let question of questions) {
-                let responses = $scope.getDataIf200(await responseService.listMineByDistribution(question.id, vm.distribution.id));
-                responses = responses.filter(response => !!response.answer);
-                if (responses.length <= 0) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        catch (e) {
-            throw e;
         }
     };
 

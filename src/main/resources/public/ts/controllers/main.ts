@@ -148,6 +148,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				$scope.currentPage = Pages.RESPOND_QUESTION;
 				await $scope.getFormWithRights(params.idForm);
 				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form)) {
+					let newDistrib = false;
 					if ($scope.form.multiple) {
 						let distribs : any = $scope.getDataIf200(await distributionService.listByFormAndResponder(params.idForm));
 						let distrib: Distribution = null;
@@ -159,6 +160,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 						}
 						if (!!!distrib) {
 							await distributionService.add($scope.form.id, distribs[0]);
+							newDistrib = true;
 						}
 					}
 					$scope.distribution = $scope.getDataIf200(await distributionService.get(params.idForm));
@@ -169,17 +171,45 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 						if ($scope.form.multiple || (!!$scope.distribution.status && $scope.distribution.status != DistributionStatus.FINISHED)) {
 							$scope.form.nb_questions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
 
-							if (params.position < 1) {
+							if (newDistrib || params.position < 1) {
 								$scope.redirectTo(`/form/${params.idForm}/question/1`);
 							}
 							else if (params.position > $scope.form.nb_questions) {
-								$scope.redirectTo(`/form/${params.idForm}/question/${$scope.form.nb_questions}`);
+								$scope.redirectTo(`/form/${params.idForm}/questions/recap`);
 							}
 							else {
 								$scope.question = $scope.getDataIf200(await questionService.getByPosition(params.idForm, params.position));
 								$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER);
 								template.open('main', 'containers/respond-question');
 							}
+						}
+						else {
+							$scope.redirectTo('/e409');
+						}
+					}
+					else {
+						$scope.redirectTo('/e403');
+					}
+				}
+				else {
+					$scope.redirectTo('/e403');
+				}
+			},
+			recapQuestions: async (params) => {
+				$scope.currentPage = Pages.RECAP_QUESTIONS;
+				await $scope.getFormWithRights(params.idForm);
+				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form)) {
+					$scope.distribution = $scope.getDataIf200(await distributionService.get(params.idForm));
+					if (!$scope.distribution) {
+						$scope.redirectTo(`/form/${params.idForm}/question/1`);
+					}
+					else if (!$scope.form.archived && $scope.form.date_opening < new Date() &&
+						($scope.form.date_ending ? ($scope.form.date_ending > new Date()) : true)) {
+						// If form not already responded
+						if ($scope.form.multiple || ($scope.distribution.status && $scope.distribution.status != DistributionStatus.FINISHED)) {
+							$scope.form.nb_questions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
+							$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER);
+							template.open('main', 'containers/recap-questions');
 						}
 						else {
 							$scope.redirectTo('/e409');

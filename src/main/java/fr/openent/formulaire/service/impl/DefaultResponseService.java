@@ -32,11 +32,12 @@ public class DefaultResponseService implements ResponseService {
         query += ";";
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
+
     @Override
     public void countByQuestion(String questionId, Handler<Either<String, JsonObject>> handler){ //count
         String query="SELECT COUNT(*) FROM " + Formulaire.RESPONSE_TABLE + " r " +
                 "JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON d.id = r.distribution_id " +
-                "WHERE question_id = ? AND d.status <> ?" ;
+                "WHERE question_id = ? AND d.status != ?" ;
         JsonArray params=new JsonArray().add(questionId).add(Formulaire.TO_DO);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
@@ -50,13 +51,18 @@ public class DefaultResponseService implements ResponseService {
     }
 
     @Override
+    public void listByDistribution(String distributionId, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " WHERE distribution_id = ? ORDER BY question_id, choice_id;";
+        JsonArray params = new JsonArray().add(distributionId);
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
     public void get(String responseId, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " WHERE id = ?;";
         JsonArray params = new JsonArray().add(responseId);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
-
-
 
     @Override
     public void getMissingResponses(String formId, String distributionId, Handler<Either<String, JsonArray>> handler) {

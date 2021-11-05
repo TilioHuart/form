@@ -4,4 +4,5 @@ export * from './form-results';
 export * from './forms-list';
 export * from './forms-responses';
 export * from './main';
-export * from './question-responder';
+export * from './recap-questions';
+export * from './response-question';

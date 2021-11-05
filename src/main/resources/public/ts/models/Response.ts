@@ -67,4 +67,14 @@ export class Responses {
             throw e;
         }
     }
+
+    syncByDistribution = async (distributionId: number) : Promise<void> => {
+        try {
+            let { data } = await responseService.listByDistribution(distributionId);
+            this.all = Mix.castArrayAs(Response, data);
+        } catch (e) {
+            notify.error(idiom.translate('formulaire.error.response.sync'));
+            throw e;
+        }
+    }
 }

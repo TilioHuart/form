@@ -1,0 +1,72 @@
+<div ng-controller="RecapQuestionsController as vm">
+    <div class="row">
+        <section class="cell six">
+            <div>
+                <h1>
+                    <a href="#/list/responses"><i18n>formulaire.title</i18n></a><i18n>formulaire.title.separator</i18n>
+                    [[form.title]]<i18n>formulaire.title.separator</i18n><i18n>formulaire.recap</i18n>
+                </h1>
+            </div>
+        </section>
+
+        <section class="cell six">
+            <div class="main-button">
+                <button class="cell cancel" ng-click="redirectTo('/list/responses')"><i18n>formulaire.saveAndQuit</i18n></button>
+            </div>
+        </section>
+    </div>
+
+    <div class="respond-question">
+        <div class="nine twelve-mobile questions">
+            <div ng-repeat="question in vm.questions.all | orderBy:'position'">
+                <div class="question">
+                    <div class="question-title">
+                        <h4>[[question.title]]<span ng-if="question.mandatory" style="color:red;margin-left:10px">*</span></h4>
+                    </div>
+                    <div class="question-main">
+                        <div ng-if="question.question_type == Types.FREETEXT">
+                            <div ng-if="question.statement" bind-html="question.statement"></div>
+                            <div ng-if="!question.statement"><i18n>formulaire.response.missing</i18n></div>
+                        </div>
+                        <div ng-if="question.question_type == Types.SHORTANSWER">
+                            <div bind-html="vm.getStringResponse(question)"></div>
+                        </div>
+                        <div ng-if="question.question_type == Types.LONGANSWER">
+                            <div bind-html="vm.getStringResponse(question)"></div>
+                        </div>
+                        <div ng-if="question.question_type == Types.SINGLEANSWER">
+                            <div bind-html="vm.getStringResponse(question)"></div>
+                        </div>
+                        <div ng-if="question.question_type == Types.MULTIPLEANSWER">
+                            <div ng-repeat="choice in question.choices.all">
+                                <label>
+                                    <input type="checkbox" disabled checked ng-if="vm.isSelectedChoice(question, choice)">
+                                    <input type="checkbox" disabled ng-if="!vm.isSelectedChoice(question, choice)">
+                                    <span style="cursor: default"></span>
+                                    <span class="ten eight-mobile">[[choice.value]]</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div ng-if="question.question_type == Types.DATE">
+                            <div bind-html="vm.getStringResponse(question)"></div>
+                        </div>
+                        <div ng-if="question.question_type == Types.TIME">
+                            <div bind-html="vm.getStringResponse(question)"></div>
+                        </div>
+                        <div ng-if="question.question_type == Types.FILE">
+                            <div ng-repeat="filename in vm.getResponseFileNames(question)">
+                                <span bind-html="[[filename]]"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="buttons">
+                <button class="cell" ng-click="vm.prev()"><i18n>formulaire.prev</i18n></button>
+                <button class="cell" ng-click="vm.send()"><i18n>formulaire.end</i18n></button>
+            </div>
+        </div>
+    </div>
+
+    <container template='lightbox'></container>
+</div>

@@ -20,7 +20,7 @@ public interface ResponseService {
      * @param questionId question identifier
      * @param handler function handler returning JsonObject data
      */
-    void countByQuestion(String questionId, Handler<Either<String, JsonObject>> handler); //count
+    void countByQuestion(String questionId, Handler<Either<String, JsonObject>> handler);
 
     /**
      * List all my responses to a specific question for a specific distribution
@@ -30,6 +30,13 @@ public interface ResponseService {
      * @param handler function handler returning JsonArray data
      */
     void listMineByDistribution(String questionId, String distributionId, UserInfos user, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * List all responses for a specific distribution
+     * @param distributionId distribution identifier
+     * @param handler function handler returning JsonArray data
+     */
+    void listByDistribution(String distributionId, Handler<Either<String, JsonArray>> handler);
 
     /**
      * Get a specific response by id

@@ -84,7 +84,7 @@ public class ShareAndOwner implements ResourcesProvider {
                 isSendReminderForm(binding) || isCreateQuestion(binding) || isFillResponsesResponse(binding)) {
             return "formId";
         }
-        else if (isUpdateDistribution(binding) || isDeleteDistribution(binding)) {
+        else if (isUpdateDistribution(binding) || isDeleteDistribution(binding) || isListByDistributionResponse(binding)) {
             return "distributionId";
         }
         else if (isListMineByDistributionResponse(binding) || isCreateQuestionChoice(binding) ||
@@ -135,10 +135,6 @@ public class ShareAndOwner implements ResourcesProvider {
 
     private boolean isDeleteDistribution(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.DistributionController|delete");
-    }
-
-    private boolean isListMineByDistributionResponse(final Binding binding) {
-        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseController|listMineByDistribution");
     }
 
     // Form
@@ -207,6 +203,14 @@ public class ShareAndOwner implements ResourcesProvider {
     // Response
     private boolean isListResponse(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseController|list");
+    }
+
+    private boolean isListMineByDistributionResponse(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseController|listMineByDistribution");
+    }
+
+    private boolean isListByDistributionResponse(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseController|listByDistribution");
     }
 
     private boolean isCreateResponse(final Binding binding) {
