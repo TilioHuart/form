@@ -91,7 +91,7 @@
   "formulaire.forms.shared": "Formulaires partagés avec moi",
   "formulaire.forms.sent": "Formulaires envoyés",
   "formulaire.forms.archived": "Corbeille",
-  "formulaire.forms.empty": "Désolé, vous n'avez aucun formulaire ...",
+  "formulaire.forms.empty": "Ce dossier est vide. Vous pouver créer un nouveau formulaire dès maintenant.",
 
   "formulaire.folder.name": "Nom du dossier",
   "formulaire.folder.nbFolderChildren" : "Nombre de sous-dossiers",
@@ -174,6 +174,8 @@
   "formulaire.responses.send.selectStructure": "Veuillez sélectionnez votre établissement : ",
   "formulaire.responses.send.text": "Une fois votre formulaire envoyé vous ne pourrez plus modifier vos réponses.",
   "formulaire.responses.send.continue": "Voulez-vous continuez ?",
+  "formulaire.responses.empty": "Vous n'avez aucun formulaire en attente de réponse.",
+  "formulaire.responses.empty.notif": "Vous recevrez une notification dès qu'un formulaire vous aura été envoyé.",
 
 
   "formulaire.error": "Erreur",

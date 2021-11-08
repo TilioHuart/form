@@ -48,7 +48,7 @@
     <section class="cell twelve">
         <div ng-include="'formulaire/public/template/components/filters.html'"></div>
         <!--Dominos display-->
-        <div class="dominos" ng-if="!vm.forms.all.empty() && vm.display.grid">
+        <div class="dominos" ng-if="vm.forms.all.length > 0 && vm.display.grid">
             <div ng-repeat="form in vm.forms.all | filter:vm.searchInput | limitTo:vm.limitTo"
                  ng-if="!vm.forms.all.empty() && vm.display.grid && form.displayed"
                  ng-click="vm.selectForm(form)" ng-dblclick="vm.openForm(form)"
@@ -89,7 +89,7 @@
         </div>
 
         <!--Table display-->
-        <table class="twelve table" ng-if="!vm.forms.all.empty() && !vm.display.grid">
+        <table class="twelve table" ng-if="vm.forms.all.length > 0 && !vm.display.grid">
             <thead>
                 <tr>
                     <th class="one">
@@ -139,9 +139,11 @@
             <loader min-height="'10px'"/>
         </div>
 
-        <div class="error" ng-if="vm.forms.all.empty()">
-            <img src="/formulaire/public/img/onboarding.svg"/>
-            <i18n>formulaire.forms.empty</i18n>
+        <!-- Error display -->
+        <div class="error" ng-if="vm.forms.all.length <= 0">
+            <h1><i18n>formulaire.responses.empty</i18n></h1>
+            <img src="/formulaire/public/img/empty_responses.svg" class="img_mini"/>
+            <i18n>formulaire.responses.empty.notif</i18n>
         </div>
     </section>
 

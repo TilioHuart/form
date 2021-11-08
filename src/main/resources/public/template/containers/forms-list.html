@@ -104,7 +104,7 @@
         <div class="row folders" ng-include="'/formulaire/public/template/containers/folders.html'"></div>
 
         <!-- Dominos display -->
-        <div class="dominos" ng-if="!vm.forms.all.empty() && vm.display.grid">
+        <div class="dominos" ng-if="vm.forms.all.length > 0 && vm.display.grid">
             <div ng-repeat="form in vm.forms.all | filter:vm.searchInput | limitTo:vm.limitTo"
                  ng-if="!vm.forms.all.empty() && vm.display.grid && form.displayed"
                  ng-click="vm.selectItem(form)" ng-dblclick="vm.openForm(form)"
@@ -135,7 +135,7 @@
         </div>
 
         <!-- Table display -->
-        <table class="twelve table" ng-if="!vm.forms.all.empty() && !vm.display.grid && !isMobile">
+        <table class="twelve table" ng-if="vm.forms.all.length > 0 && !vm.display.grid && !isMobile">
             <thead>
                 <tr>
                     <th class="one">
@@ -174,8 +174,8 @@
         </div>
 
         <!-- Error display -->
-        <div class="error" ng-if="vm.forms.all.empty()">
-            <img src="/formulaire/public/img/onboarding.svg"/>
+        <div class="error" ng-if="vm.forms.all.length <= 0 && vm.folder.children.length <= 0">
+            <img src="/formulaire/public/img/empty_folder.svg" class="img_mini"/>
             <i18n>formulaire.forms.empty</i18n>
         </div>
     </section>

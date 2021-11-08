@@ -396,6 +396,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         vm.selectedFolder = folderElem;
 
         vm.folder = folder;
+        vm.folder.children = vm.folders.getChildren(vm.folder.id);
         await vm.forms.sync();
 
         switch (vm.folder.id) {
