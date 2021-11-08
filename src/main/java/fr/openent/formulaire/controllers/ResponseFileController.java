@@ -247,7 +247,7 @@ public class ResponseFileController extends ControllerHelper {
     public static void deleteFiles(Storage storage, JsonArray fileIds, Handler<Either<String, JsonObject>> handler) {
         storage.removeFiles(fileIds, deleteFilesEvt -> {
             if (!"ok".equals(deleteFilesEvt.getString("status"))) {
-                log.error("[Formulaire@deleteFile] An error occurred while removing files " + fileIds);
+                log.error("[Formulaire@deleteFiles] An error occurred while removing files " + fileIds);
                 handler.handle(new Either.Left<>(deleteFilesEvt.getString("message")));
             }
             else {
