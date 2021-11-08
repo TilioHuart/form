@@ -9,7 +9,8 @@ export interface DistributionService {
     listByFormAndStatus(formId: number, status: string, nbLines: number) : Promise<AxiosResponse>;
     listByFormAndResponder(formId: number) : Promise<AxiosResponse>;
     count(formId: number) : Promise<AxiosResponse>;
-    get(formId: number) : Promise<AxiosResponse>;
+    get(distributionId: number) : Promise<AxiosResponse>;
+    getByFormResponderAndStatus(formId: number) : Promise<AxiosResponse>;
     create(form: Form, distribution: Distribution) : Promise<AxiosResponse>;
     add(formId: number, distribution: Distribution) : Promise<AxiosResponse>;
     update(distribution: Distribution) : Promise<AxiosResponse>;
@@ -72,7 +73,16 @@ export const distributionService: DistributionService = {
         }
     },
 
-    async get(formId: number) : Promise<AxiosResponse> {
+    async get(distributionId: number) : Promise<AxiosResponse> {
+        try {
+            return http.get(`/formulaire/distributions/${distributionId}`);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.distributionService.get'));
+            throw err;
+        }
+    },
+
+    async getByFormResponderAndStatus(formId: number) : Promise<AxiosResponse> {
         try {
             return http.get(`/formulaire/distributions/forms/${formId}`);
         } catch (err) {

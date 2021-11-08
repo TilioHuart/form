@@ -169,6 +169,7 @@
   "formulaire.response.missing": "Non répondu",
   "formulaire.response.file.send": "Fichier déposé",
   "formulaire.response.file.tooMany": "Le nombre de fichiers est trop important. Veuillez les compresser en un unique fichier .zip d'abord.",
+  "formulaire.response.open": "Ouvrir ma réponse",
   "formulaire.responses": "réponses",
   "formulaire.responses.send.title": "Valider l'envoi",
   "formulaire.responses.send.selectStructure": "Veuillez sélectionnez votre établissement : ",

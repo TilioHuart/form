@@ -22,7 +22,8 @@ interface ViewModel {
     sort(field: FiltersOrders) : void;
     filter(filter: FiltersFilters) : void;
     displayFilterName(name: string) : string;
-    getMyResponses(form: Form) : Array<Distribution>;
+    getMyDistribs(form: Form) : Array<Distribution>;
+    openDistribution(distrib: Distribution) : void;
     infiniteScroll() : void;
     checkOpenButton() : boolean;
     checkMyResponsesButton() : boolean;
@@ -114,9 +115,13 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
 
     // Utils
 
-    vm.getMyResponses = (form: Form) : Array<Distribution> => {
+    vm.getMyDistribs = (form: Form) : Array<Distribution> => {
         return vm.distributions.all.filter(d => d.form_id === form.id && d.status === DistributionStatus.FINISHED);
     };
+
+    vm.openDistribution = (distrib) : void => {
+        $scope.redirectTo(`/form/${distrib.form_id}/${distrib.id}/questions/recap`);
+    }
 
     vm.infiniteScroll = () : void => {
         vm.limitTo += vm.pageSize;

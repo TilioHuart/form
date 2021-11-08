@@ -39,6 +39,10 @@ body.formulaire section.toggle-buttons {
 body.formulaire section.main {
   @import "components/index";
 
+  .margin-vertical-1 {
+    margin: 1% 0;
+  }
+
   .error {
     display: flex;
     flex-direction: column;

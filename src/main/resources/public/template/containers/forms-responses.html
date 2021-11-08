@@ -66,18 +66,18 @@
                             </div>
                             <div class="data-status">
                                 <div ng-if="!form.multiple">
-                                    <span ng-if="!!vm.getMyResponses(form)[0].date_response" class="responded">
-                                        <i18n>formulaire.responded.date</i18n>[[displayDate(vm.getMyResponses(form)[0].date_response)]]
+                                    <span ng-if="!!vm.getMyDistribs(form)[0].date_response" class="responded">
+                                        <i18n>formulaire.responded.date</i18n>[[displayDate(vm.getMyDistribs(form)[0].date_response)]]
                                     </span>
-                                    <span ng-if="!!!vm.getMyResponses(form)[0].date_response" class="notResponded">
+                                    <span ng-if="!!!vm.getMyDistribs(form)[0].date_response" class="notResponded">
                                         <i18n>formulaire.responded.waiting</i18n>
                                     </span>
                                 </div>
                                 <div ng-if="form.multiple">
-                                    <span ng-if="vm.getMyResponses(form).length > 0" class="responded">
-                                        <i18n>formulaire.responses.count</i18n> : [[vm.getMyResponses(form).length]]
+                                    <span ng-if="vm.getMyDistribs(form).length > 0" class="responded">
+                                        <i18n>formulaire.responses.count</i18n> : [[vm.getMyDistribs(form).length]]
                                     </span>
-                                    <span ng-if="vm.getMyResponses(form).length <= 0" class="notResponded">
+                                    <span ng-if="vm.getMyDistribs(form).length <= 0" class="notResponded">
                                         <i18n>formulaire.responses.count</i18n> : 0
                                     </span>
                                 </div>
@@ -114,18 +114,18 @@
                     <td ng-click="form.selected=!form.selected"><i18n>formulaire.sentAt</i18n>[[displayDate(form.date_sending)]]</td>
                     <td ng-click="form.selected=!form.selected">
                         <div ng-if="!form.multiple">
-                                <span ng-if="!!vm.getMyResponses(form)[0].date_response" class="responded">
-                                    <i18n>formulaire.responded.date</i18n>[[displayDate(vm.getMyResponses(form)[0].date_response)]]
+                                <span ng-if="!!vm.getMyDistribs(form)[0].date_response" class="responded">
+                                    <i18n>formulaire.responded.date</i18n>[[displayDate(vm.getMyDistribs(form)[0].date_response)]]
                                 </span>
-                            <span ng-if="!!!vm.getMyResponses(form)[0].date_response" class="notResponded">
+                            <span ng-if="!!!vm.getMyDistribs(form)[0].date_response" class="notResponded">
                                     <i18n>formulaire.responded.waiting</i18n>
                                 </span>
                         </div>
                         <div ng-if="form.multiple">
-                                <span ng-if="vm.getMyResponses(form).length > 0" class="responded">
-                                    <i18n>formulaire.responses.count</i18n> : [[vm.getMyResponses(form).length]]
+                                <span ng-if="vm.getMyDistribs(form).length > 0" class="responded">
+                                    <i18n>formulaire.responses.count</i18n> : [[vm.getMyDistribs(form).length]]
                                 </span>
-                            <span ng-if="vm.getMyResponses(form).length <= 0" class="notResponded">
+                            <span ng-if="vm.getMyDistribs(form).length <= 0" class="notResponded">
                                     <i18n>formulaire.responses.count</i18n> : 0
                                 </span>
                         </div>

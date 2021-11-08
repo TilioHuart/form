@@ -114,18 +114,33 @@ public class DistributionController extends ControllerHelper {
         distributionService.count(formId, defaultResponseHandler(request));
     }
 
+    @Get("/distributions/:distributionId")
+    @ApiDoc("Get a specific distribution by id")
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void get(HttpServerRequest request) {
+        String distributionId = request.getParam("distributionId");
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user == null) {
+                log.error("User not found in session.");
+                Renders.unauthorized(request);
+            }
+            distributionService.get(distributionId, defaultResponseHandler(request));
+        });
+    }
+
     @Get("/distributions/forms/:formId")
     @ApiDoc("Get a specific distribution by form, responder and status")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
-    public void get(HttpServerRequest request) {
+    public void getByFormResponderAndStatus(HttpServerRequest request) {
         String formId = request.getParam("formId");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 log.error("User not found in session.");
                 Renders.unauthorized(request);
             }
-            distributionService.get(formId, user, defaultResponseHandler(request));
+            distributionService.getByFormResponderAndStatus(formId, user, defaultResponseHandler(request));
         });
     }
 

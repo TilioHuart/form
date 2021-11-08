@@ -53,12 +53,19 @@ public interface DistributionService {
     void count(String formId, Handler<Either<String, JsonObject>> handler);
 
     /**
+     * Get a specific distribution by id
+     * @param distributionId distribution identifier
+     * @param handler function handler returning JsonObject data
+     */
+    void get(String distributionId, Handler<Either<String, JsonObject>> handler);
+
+    /**
      * Get a specific distribution by form, responder and status
      * @param formId form identifier
      * @param user user connected
      * @param handler function handler returning JsonObject data
      */
-    void get(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler);
+    void getByFormResponderAndStatus(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Distribute a form to a list of responders

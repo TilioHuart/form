@@ -14,7 +14,7 @@ import {
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', 'FormService',
 	($scope, route, $location) => {
-		$scope.lang = idiom;
+		$scope.idiom = idiom;
 		$scope.template = template;
 
 		// Init variables
@@ -78,7 +78,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			},
 			propForm: async (params) => {
 				$scope.currentPage = Pages.PROP_FORM;
-				await $scope.getFormWithRights(params.idForm);
+				await $scope.getFormWithRights(params.formId);
 				if ($scope.canCreate() && $scope.hasShareRightContrib($scope.form)) {
 					$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER);
 					template.open('main', 'containers/prop-form');
@@ -93,26 +93,26 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			},
 			resultsForm: async (params) => {
 				$scope.currentPage = Pages.RESULTS_FORM;
-				await $scope.getFormWithRights(params.idForm);
+				await $scope.getFormWithRights(params.formId);
 				if ($scope.canCreate() && $scope.hasShareRightContrib($scope.form)) {
-					$scope.form.nb_responses = $scope.getDataIf200(await distributionService.count(params.idForm)).count;
+					$scope.form.nb_responses = $scope.getDataIf200(await distributionService.count(params.formId)).count;
 
 					if ($scope.form.nb_responses > 0) {
-						$scope.form.nb_questions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
+						$scope.form.nb_questions = $scope.getDataIf200(await questionService.countQuestions(params.formId)).count;
 						if (params.position < 1) {
-							$scope.redirectTo(`/form/${params.idForm}/results/1`);
+							$scope.redirectTo(`/form/${params.formId}/results/1`);
 						}
 						else if (params.position > $scope.form.nb_questions) {
-							$scope.redirectTo(`/form/${params.idForm}/results/${$scope.form.nb_questions}`);
+							$scope.redirectTo(`/form/${params.formId}/results/${$scope.form.nb_questions}`);
 						}
 						else {
-							$scope.question = $scope.getDataIf200(await questionService.getByPosition(params.idForm, params.position));
+							$scope.question = $scope.getDataIf200(await questionService.getByPosition(params.formId, params.position));
 							$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER);
 							template.open('main', 'containers/results-form');
 						}
 					}
 					else {
-						$scope.redirectTo(`/form/${params.idForm}/results/empty`);
+						$scope.redirectTo(`/form/${params.formId}/results/empty`);
 					}
 				}
 				else {
@@ -121,7 +121,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			},
 			editForm: async (params) => {
 				$scope.currentPage = Pages.EDIT_FORM;
-				await $scope.getFormWithRights(params.idForm);
+				await $scope.getFormWithRights(params.formId);
 				if ($scope.canCreate() && $scope.hasShareRightContrib($scope.form)) {
 					if (!!$scope.form.id) {
 						$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER);
@@ -136,9 +136,9 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				}
 			},
 			respondForm: async (params) => {
-				await $scope.getFormWithRights(params.idForm);
+				await $scope.getFormWithRights(params.formId);
 				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form)) {
-					$scope.redirectTo(`/form/${params.idForm}/question/1`);
+					$scope.redirectTo(`/form/${params.formId}/question/1`);
 				}
 				else {
 					$scope.redirectTo('/e403');
@@ -146,11 +146,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			},
 			respondQuestion: async (params) => {
 				$scope.currentPage = Pages.RESPOND_QUESTION;
-				await $scope.getFormWithRights(params.idForm);
+				await $scope.getFormWithRights(params.formId);
 				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form)) {
 					let newDistrib = false;
 					if ($scope.form.multiple) {
-						let distribs : any = $scope.getDataIf200(await distributionService.listByFormAndResponder(params.idForm));
+						let distribs : any = $scope.getDataIf200(await distributionService.listByFormAndResponder(params.formId));
 						let distrib: Distribution = null;
 						for (let d of distribs) {
 							if (d.status != DistributionStatus.FINISHED) {
@@ -163,22 +163,22 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 							newDistrib = true;
 						}
 					}
-					$scope.distribution = $scope.getDataIf200(await distributionService.get(params.idForm));
+					$scope.distribution = $scope.getDataIf200(await distributionService.getByFormResponderAndStatus(params.formId));
 
 					// If form not archived && date ok && not already responded
 					if (!$scope.form.archived && $scope.form.date_opening < new Date() &&
 						($scope.form.date_ending ? ($scope.form.date_ending > new Date()) : true)) {
 						if ($scope.form.multiple || (!!$scope.distribution.status && $scope.distribution.status != DistributionStatus.FINISHED)) {
-							$scope.form.nb_questions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
+							$scope.form.nb_questions = $scope.getDataIf200(await questionService.countQuestions(params.formId)).count;
 
 							if (newDistrib || params.position < 1) {
-								$scope.redirectTo(`/form/${params.idForm}/question/1`);
+								$scope.redirectTo(`/form/${params.formId}/question/1`);
 							}
 							else if (params.position > $scope.form.nb_questions) {
-								$scope.redirectTo(`/form/${params.idForm}/questions/recap`);
+								$scope.redirectTo(`/form/${params.formId}/questions/recap`);
 							}
 							else {
-								$scope.question = $scope.getDataIf200(await questionService.getByPosition(params.idForm, params.position));
+								$scope.question = $scope.getDataIf200(await questionService.getByPosition(params.formId, params.position));
 								$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER);
 								template.open('main', 'containers/respond-question');
 							}
@@ -197,23 +197,16 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			},
 			recapQuestions: async (params) => {
 				$scope.currentPage = Pages.RECAP_QUESTIONS;
-				await $scope.getFormWithRights(params.idForm);
+				await $scope.getFormWithRights(params.formId);
 				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form)) {
-					$scope.distribution = $scope.getDataIf200(await distributionService.get(params.idForm));
+					$scope.distribution = $scope.getDataIf200(await distributionService.get(params.distributionId));
 					if (!$scope.distribution) {
-						$scope.redirectTo(`/form/${params.idForm}/question/1`);
+						$scope.redirectTo(`/form/${params.formId}/question/1`);
 					}
 					else if (!$scope.form.archived && $scope.form.date_opening < new Date() &&
 						($scope.form.date_ending ? ($scope.form.date_ending > new Date()) : true)) {
-						// If form not already responded
-						if ($scope.form.multiple || ($scope.distribution.status && $scope.distribution.status != DistributionStatus.FINISHED)) {
-							$scope.form.nb_questions = $scope.getDataIf200(await questionService.countQuestions(params.idForm)).count;
-							$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER);
-							template.open('main', 'containers/recap-questions');
-						}
-						else {
-							$scope.redirectTo('/e409');
-						}
+						$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER);
+						template.open('main', 'containers/recap-questions');
 					}
 					else {
 						$scope.redirectTo('/e403');

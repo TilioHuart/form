@@ -21,6 +21,10 @@ i {
     opacity: 0;
   }
 
+  &.selected::before {
+    color: $formulaire-grey-dark !important;
+  }
+
   // Icons sizes
 
   &.xs-icon::before {
@@ -45,10 +49,6 @@ i {
 
   &.hg-icon::before {
     font-size: 48px;
-  }
-
-  &.selected::before {
-    color: $formulaire-grey-dark !important;
   }
 
   // Icons color
@@ -171,5 +171,17 @@ i {
     font-family: 'material-icons';
     content: "\F24B";
     color: $formulaire-blue;
+  }
+
+  &.ipencil::before {
+    font-family: 'material-icons';
+    content: "\F3EB";
+    color: $formulaire-blue;
+  }
+
+  &.ipencil:hover::before {
+    font-family: 'material-icons';
+    content: "\F3EB";
+    color: $formulaire-orange;
   }
 }
