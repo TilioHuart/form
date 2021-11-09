@@ -59,10 +59,13 @@
                             </div>
                         </div>
                     </div>
+                    <div class="question-edit" ng-if="vm.form.editable">
+                        <a href="#/form/[[vm.form.id]]/[[vm.distribution.id]]/question/[[question.position]]"><i18n>formulaire.edit</i18n></a>
+                    </div>
                 </div>
-            </div>
-            <div class="buttons">
-                <button class="cell" ng-click="vm.prev()"><i18n>formulaire.prev</i18n></button>
+                    </div>
+            <div class="buttons" ng-class="{alone: !vm.form.editable || vm.distribution.status == DistributionStatus.FINISHED}">
+                <button class="cell" ng-click="vm.prev()" ng-if="vm.form.editable || vm.distribution.status != DistributionStatus.FINISHED"><i18n>formulaire.prev</i18n></button>
                 <button class="cell" ng-click="vm.send()"><i18n>formulaire.end</i18n></button>
             </div>
         </div>

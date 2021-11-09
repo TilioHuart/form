@@ -41,16 +41,29 @@
                                 <div class="text">
                                     <label for="isMultiple">
                                         <input type="checkbox" id="isMultiple" ng-model="vm.form.multiple" ng-disabled="vm.form.nb_responses > 0"/>
-                                        <span ng-if="!isMobile"><i18n>formulaire.multiple</i18n></span>
-                                        <span ng-if="isMobile"><i18n>formulaire.multiple.mobile</i18n></span>
+                                        <span ng-if="!isMobile" ng-style="{'cursor' : vm.form.nb_responses > 0 ? 'default' : 'pointer'}">
+                                            <i18n>formulaire.multiple.label</i18n>
+                                        </span>
+                                        <span ng-if="isMobile" ng-style="{'cursor' : vm.form.nb_responses > 0 ? 'default' : 'pointer'}">
+                                            <i18n>formulaire.multiple.label.mobile</i18n>
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="editable">
+                                <div class="text">
+                                    <label for="isEditable">
+                                        <input type="checkbox" id="isEditable" ng-model="vm.form.editable"/>
+                                        <span><i18n>formulaire.editable.label</i18n></span>
                                     </label>
                                 </div>
                             </div>
                             <div class="anonymous">
                                 <div class="text">
                                     <label for="isAnonymous">
-                                        <input type="checkbox" id="isAnonymous" ng-model="vm.form.anonymous" ng-disabled="vm.form.nb_responses > 0"/>
-                                        <span><i18n>formulaire.anonymous.label</i18n></span>
+                                        <input type="checkbox" id="isAnonymous" ng-model="vm.form.anonymous" ng-disabled="vm.form.nb_responses > 0"
+                                               ng-style="{'cursor' : vm.form.nb_responses > 0 ? 'default' : 'pointer'}"/>
+                                        <span ng-style="{'cursor' : vm.form.nb_responses > 0 ? 'default' : 'pointer'}"><i18n>formulaire.anonymous.label</i18n></span>
                                     </label>
                                     <i18n class="subdescription" ng-if="vm.form.anonymous">formulaire.anonymous.description</i18n>
                                 </div>

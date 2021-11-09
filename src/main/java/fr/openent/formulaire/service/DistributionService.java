@@ -53,6 +53,14 @@ public interface DistributionService {
     void count(String formId, Handler<Either<String, JsonObject>> handler);
 
     /**
+     * Get the number of distributions for a specific form
+     * @param formId form identifier
+     * @param user user connected
+     * @param handler function handler returning JsonObject data
+     */
+    void countMyNotFinished(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler);
+
+    /**
      * Get a specific distribution by id
      * @param distributionId distribution identifier
      * @param handler function handler returning JsonObject data
@@ -68,20 +76,20 @@ public interface DistributionService {
     void getByFormResponderAndStatus(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler);
 
     /**
-     * Distribute a form to a list of responders
+     * Create a new distribution based on an already existing one
      * @param formId form identifier
      * @param user user connected
-     * @param responders responders to whom we give respond right
-     * @param handler function handler returning JsonObject data
-     */
-    void create(String formId, UserInfos user, JsonArray responders, Handler<Either<String, JsonObject>> handler);
-
-    /**
-     * Create a new distribution based on an already existing one
      * @param distribution JsonObject data
      * @param handler function handler returning JsonObject data
      */
-    void add(JsonObject distribution, Handler<Either<String, JsonObject>> handler);
+    void create(String formId, UserInfos user, JsonObject distribution, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Duplicate a distribution by id
+     * @param distributionId distribution identifier
+     * @param handler function handler returning JsonObject data
+     */
+    void duplicateWithResponses(String distributionId, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Update a specific distribution

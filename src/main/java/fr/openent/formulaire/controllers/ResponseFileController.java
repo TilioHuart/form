@@ -158,21 +158,6 @@ public class ResponseFileController extends ControllerHelper {
         });
     }
 
-    private String getFolderName(JsonObject file) {
-        String completeName = file.getString("name");
-        String filename = file.getString("filename");
-        int indexOfUnderscore = filename.contains("_") ? filename.indexOf("_") : 0;
-
-        // Check if responder_name and name get from filename are equals
-        char[] first = String.join("", file.getString("responder_name").split(" ")).toCharArray();
-        char[] second = filename.substring(0, indexOfUnderscore).toCharArray();
-        Arrays.sort(first);
-        Arrays.sort(second);
-        boolean isAnonymous = !Arrays.equals(first, second);
-
-        return isAnonymous ? completeName.substring(0, 14) : completeName.substring(0, 15) + file.getString("responder_name");
-    }
-
     @Post("/responses/:responseId/files")
     @ApiDoc("Upload files of a specific response")
     @ResourceFilter(ShareAndOwner.class)
@@ -254,5 +239,20 @@ public class ResponseFileController extends ControllerHelper {
                 handler.handle(new Either.Right<>(new JsonObject()));
             }
         });
+    }
+
+    private String getFolderName(JsonObject file) {
+        String completeName = file.getString("name");
+        String filename = file.getString("filename");
+        int indexOfUnderscore = filename.contains("_") ? filename.indexOf("_") : 0;
+
+        // Check if responder_name and name get from filename are equals
+        char[] first = String.join("", file.getString("responder_name").split(" ")).toCharArray();
+        char[] second = filename.substring(0, indexOfUnderscore).toCharArray();
+        Arrays.sort(first);
+        Arrays.sort(second);
+        boolean isAnonymous = !Arrays.equals(first, second);
+
+        return isAnonymous ? completeName.substring(0, 14) : completeName.substring(0, 15) + file.getString("responder_name");
     }
 }

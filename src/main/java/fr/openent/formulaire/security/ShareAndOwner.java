@@ -80,12 +80,12 @@ public class ShareAndOwner implements ResourcesProvider {
 
     private String getKeyByBinding(Binding binding) {
         if (isCountDistribution(binding) || isGetByFormResponderAndStatusDistribution(binding) || isCreateDistribution(binding) ||
-                isAddDistribution(binding) || isUpdateForm(binding) || isDeleteForm(binding) || isExportForm(binding) ||
-                isSendReminderForm(binding) || isCreateQuestion(binding) || isFillResponsesResponse(binding)) {
+                isUpdateForm(binding) || isDeleteForm(binding) || isExportForm(binding) || isSendReminderForm(binding) ||
+                isCreateQuestion(binding) || isFillResponsesResponse(binding)) {
             return "formId";
         }
-        else if (isGetDistribution(binding) || isUpdateDistribution(binding) || isDeleteDistribution(binding) ||
-                isListByDistributionResponse(binding)) {
+        else if (isGetDistribution(binding) || isUpdateDistribution(binding) || isDuplicateWithResponsesDistribution(binding) ||
+                isReplaceDistribution(binding) || isDeleteDistribution(binding) || isListByDistributionResponse(binding)) {
             return "distributionId";
         }
         else if (isListMineByDistributionResponse(binding) || isCreateQuestionChoice(binding) ||
@@ -130,12 +130,16 @@ public class ShareAndOwner implements ResourcesProvider {
         return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.DistributionController|create");
     }
 
-    private boolean isAddDistribution(final Binding binding) {
-        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.DistributionController|add");
+    private boolean isDuplicateWithResponsesDistribution(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.DistributionController|duplicateWithResponses");
     }
 
     private boolean isUpdateDistribution(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.PUT, "fr.openent.formulaire.controllers.DistributionController|update");
+    }
+
+    private boolean isReplaceDistribution(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.DistributionController|replace");
     }
 
     private boolean isDeleteDistribution(final Binding binding) {

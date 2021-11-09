@@ -11,9 +11,11 @@ export interface DistributionService {
     count(formId: number) : Promise<AxiosResponse>;
     get(distributionId: number) : Promise<AxiosResponse>;
     getByFormResponderAndStatus(formId: number) : Promise<AxiosResponse>;
-    create(form: Form, distribution: Distribution) : Promise<AxiosResponse>;
-    add(formId: number, distribution: Distribution) : Promise<AxiosResponse>;
+    create(formId: number, distribution: Distribution) : Promise<AxiosResponse>;
+    add(formId: number, responders: any[]) : Promise<AxiosResponse>;
+    duplicateWithResponses(distributionId: number) : Promise<AxiosResponse>;
     update(distribution: Distribution) : Promise<AxiosResponse>;
+    replace(distribution: Distribution) : Promise<AxiosResponse>;
     delete(distributionId: number) : Promise<AxiosResponse>;
 }
 
@@ -91,18 +93,27 @@ export const distributionService: DistributionService = {
         }
     },
 
-    async create(form: Form, distribution: Distribution) : Promise<AxiosResponse> {
+    async create(formId: number, distribution: Distribution) : Promise<AxiosResponse> {
         try {
-            return http.post(`/formulaire/distributions/forms/${form.id}`, distribution);
+            return http.post(`/formulaire/distributions/forms/${formId}`, distribution);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.create'));
             throw err;
         }
     },
 
-    async add(formId: number, distribution: Distribution) : Promise<AxiosResponse> {
+    async add(formId: number, responders: any[]) : Promise<AxiosResponse> {
         try {
-            return http.post(`/formulaire/distributions/forms/${formId}/add`, distribution);
+            return http.post(`/formulaire/distributions/forms/${formId}/add`, responders);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.distributionService.create'));
+            throw err;
+        }
+    },
+
+    async duplicateWithResponses(distributionId: number) : Promise<AxiosResponse> {
+        try {
+            return http.post(`/formulaire/distributions/${distributionId}/duplicate`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.create'));
             throw err;
@@ -112,6 +123,15 @@ export const distributionService: DistributionService = {
     async update(distribution: Distribution) : Promise<AxiosResponse> {
         try {
             return http.put(`/formulaire/distributions/${distribution.id}`, distribution);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.distributionService.update'));
+            throw err;
+        }
+    },
+
+    async replace(distribution: Distribution) : Promise<AxiosResponse> {
+        try {
+            return http.delete(`/formulaire/distributions/${distribution.id}/replace/${distribution.original_id}`);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.update'));
             throw err;

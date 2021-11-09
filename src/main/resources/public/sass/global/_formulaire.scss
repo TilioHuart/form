@@ -134,6 +134,10 @@ body.formulaire section.main {
     margin-top: 2%;
     float: right;
 
+    &.alone {
+      grid-template-columns: 1fr !important;
+    }
+
     button {
       margin: 5px;
     }
@@ -145,11 +149,6 @@ body.formulaire section.main {
     width: 20px;
     margin-top: 0;
   }
-
-
-
-
-
 
 
   // Forms-list
@@ -329,7 +328,7 @@ body.formulaire section.main {
               }
             }
 
-            .multiple, .anonymous, .notified {
+            .multiple, .editable, .anonymous, .notified {
               font-size: 12px;
               display: flex;
               align-items: baseline;
@@ -380,7 +379,7 @@ body.formulaire section.main {
       box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
       margin-bottom: 2%;
 
-      .question-main {
+      &-main {
         display: flex;
         flex-direction: column;
         font-size: 12px;
@@ -399,12 +398,21 @@ body.formulaire section.main {
           }
         }
       }
+
+      &-edit {
+        text-align: end;
+        margin-top: 1%;
+      }
     }
 
     .buttons {
       display: flex;
       justify-content: space-between;
-      margin: 30px 0;
+      margin: 3% 0;
+
+      &.alone {
+        justify-content: end !important;
+      }
     }
   }
 

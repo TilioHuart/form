@@ -26,7 +26,7 @@ routes.define(function($routeProvider){
 		.when('/form/:formId/properties', { action: 'propForm' })
 		.when('/form/:formId/results/empty', { action: 'emptyResults' })
 		.when('/form/:formId/results/:position', { action: 'resultsForm' })
-		.when('/form/:formId/question/:position', { action: 'respondQuestion' })
+		.when('/form/:formId/:distributionId/question/:position', { action: 'respondQuestion' })
 		.when('/form/:formId/:distributionId/questions/recap', { action: 'recapQuestions' })
 		.when('/e403', { action: 'e403' })
 		.when('/e404', { action: 'e404' })

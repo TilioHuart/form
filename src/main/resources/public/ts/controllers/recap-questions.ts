@@ -6,7 +6,7 @@ import {
     Responses,
     Types
 } from "../models";
-import {distributionService, questionService, responseService} from "../services";
+import {distributionService, questionService, responseFileService, responseService} from "../services";
 import {FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
 
 interface ViewModel {
@@ -64,7 +64,7 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
     // Global functions
 
     vm.prev = async () : Promise<void> => {
-        $scope.redirectTo(`/form/${vm.form.id}/question/${vm.form.nb_questions}`);
+        $scope.redirectTo(`/form/${vm.form.id}/${vm.distribution.id}/question/${vm.form.nb_questions}`);
     };
 
     // Display helper functions
@@ -109,8 +109,18 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
     vm.doSend = async () : Promise<void> => {
         vm.distribution.status = DistributionStatus.FINISHED;
         vm.distribution.structure = !!vm.distribution.structure ? vm.distribution.structure : model.me.structureNames[0];
-        await responseService.fillResponses(vm.form.id,  vm.distribution.id);
-        await distributionService.update(vm.distribution);
+        await responseService.fillResponses(vm.form.id, vm.distribution.id);
+        if (vm.distribution.original_id) {
+            let questionFileIds: any = vm.questions.all.filter(q => q.question_type === Types.FILE).map(q => q.id);
+            let responseFiles = vm.responses.all.filter(r => questionFileIds.includes(r.question_id));
+            for (let responseFile of responseFiles) {
+                await responseFileService.deleteAll(responseFile.original_id);
+            }
+            await distributionService.replace(vm.distribution);
+        }
+        else {
+            await distributionService.update(vm.distribution);
+        }
         template.close('lightbox');
         vm.display.lightbox.sending = false;
         notify.success(idiom.translate('formulaire.success.responses.save'));
@@ -136,5 +146,5 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
         return true;
     };
 
-    $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER, () => { vm.$onInit() });
+    $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_RECAP_QUESTIONS, () => { vm.$onInit() });
 }]);

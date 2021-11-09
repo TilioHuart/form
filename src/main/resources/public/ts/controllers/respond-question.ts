@@ -72,14 +72,13 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             if (!!!vm.response.distribution_id) { vm.response.distribution_id = vm.distribution.id; }
         }
         if (vm.question.question_type === Types.TIME) { formatTime() }
-        if (vm.question.question_type === Types.FILE && !!vm.response.id) {
+        if (vm.question.question_type === Types.FILE && vm.response.id) {
             vm.files = [];
             let responseFiles = new ResponseFiles();
             await responseFiles.sync(vm.response.id);
-            for (let i = 0; i < responseFiles.all.length; i++) {
-                let responseFile = responseFiles.all[i];
-                if (!!responseFile.id) {
-                    let file = new File([responseFile.id], responseFile.filename);
+            for (let repFile of responseFiles.all) {
+                if (repFile.id) {
+                    let file = new File([repFile.id], repFile.filename);
                     vm.files.push(file);
                 }
             }
@@ -94,7 +93,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             let prevPosition: number = vm.question.position - 1;
 
             if (prevPosition > 0) {
-                $scope.redirectTo(`/form/${vm.form.id}/question/${prevPosition}`);
+                $scope.redirectTo(`/form/${vm.form.id}/${vm.distribution.id}/question/${prevPosition}`);
             }
         }
     };
@@ -104,7 +103,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             let nextPosition: number = vm.question.position + 1;
 
             if (nextPosition <= vm.nbQuestions) {
-                $scope.redirectTo(`/form/${vm.form.id}/question/${nextPosition}`);
+                $scope.redirectTo(`/form/${vm.form.id}/${vm.distribution.id}/question/${nextPosition}`);
             }
             else {
                 $scope.redirectTo(`/form/${vm.form.id}/${vm.distribution.id}/questions/recap`);
@@ -206,5 +205,5 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
     init();
 
-    $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER, () => { init() });
+    $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_RESPOND_QUESTION, () => { init() });
 }]);

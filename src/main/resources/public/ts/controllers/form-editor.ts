@@ -54,8 +54,8 @@ interface ViewModel {
 }
 
 
-export const formEditorController = ng.controller('FormEditorController', ['$scope', '$rootScope',
-    function ($scope, $rootScope) {
+export const formEditorController = ng.controller('FormEditorController', ['$scope',
+    function ($scope) {
 
         const vm: ViewModel = this;
         vm.form = new Form();
@@ -457,5 +457,5 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         $scope.$on(FORMULAIRE_QUESTION_EMIT_EVENT.DUPLICATE, () => { vm.duplicateQuestion() });
         $scope.$on(FORMULAIRE_QUESTION_EMIT_EVENT.DELETE, () => { vm.deleteQuestion() });
         $scope.$on(FORMULAIRE_QUESTION_EMIT_EVENT.UNDO, () => { vm.undoQuestionChanges() });
-        $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER, () => { init() });
+        $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_FORM_EDITOR, () => { init() });
     }]);

@@ -88,6 +88,13 @@ public interface ResponseService {
     void delete(String responseId, Handler<Either<String, JsonObject>> handler);
 
     /**
+     * Delete responses by distribution id
+     * @param String distribution identifier
+     * @param handler function handler returning JsonArray data
+     */
+    void deleteMultipleByDistribution(String String, Handler<Either<String, JsonArray>> handler);
+
+    /**
      * Get all the responses of a specific form to export into a CSV file
      * @param formId form identifier
      * @param handler function handler returning JsonArray data

@@ -5,11 +5,11 @@ import {distributionService} from "../services";
 export enum DistributionStatus {
     TO_DO = 'TO_DO',
     IN_PROGRESS = 'IN_PROGRESS',
-    FINISHED = 'FINISHED'
+    FINISHED = 'FINISHED',
+    ON_CHANGE = 'ON_CHANGE'
 }
 
 export class Distribution  {
-
     id: number;
     form_id: number;
     sender_id: number;
@@ -21,6 +21,7 @@ export class Distribution  {
     date_response: Date;
     active: boolean;
     structure: string;
+    original_id: number;
 
     constructor() {
         this.id = null;
@@ -34,6 +35,7 @@ export class Distribution  {
         this.date_response = null;
         this.active = true;
         this.structure = null;
+        this.original_id = null;
     }
 
     toJson() : Object {
@@ -48,7 +50,8 @@ export class Distribution  {
             date_sending: this.date_sending,
             date_response: this.date_response,
             active: this.active,
-            structure: this.structure
+            structure: this.structure,
+            original_id: this.original_id
         }
     }
 }

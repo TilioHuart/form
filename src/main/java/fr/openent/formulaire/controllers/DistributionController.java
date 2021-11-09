@@ -9,9 +9,11 @@ import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.FormService;
 import fr.openent.formulaire.service.NotifyService;
+import fr.openent.formulaire.service.ResponseService;
 import fr.openent.formulaire.service.impl.DefaultDistributionService;
 import fr.openent.formulaire.service.impl.DefaultFormService;
 import fr.openent.formulaire.service.impl.DefaultNotifyService;
+import fr.openent.formulaire.service.impl.DefaultResponseService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
@@ -34,12 +36,14 @@ public class DistributionController extends ControllerHelper {
     private final NotifyService notifyService;
     private final DistributionService distributionService;
     private final FormService formService;
+    private final ResponseService responseService;
 
     public DistributionController(TimelineHelper timelineHelper) {
         super();
         this.notifyService = new DefaultNotifyService(timelineHelper, eb);
         this.distributionService = new DefaultDistributionService();
         this.formService = new DefaultFormService();
+        this.responseService = new DefaultResponseService();
     }
 
     @Get("/distributions")
@@ -145,9 +149,9 @@ public class DistributionController extends ControllerHelper {
     }
 
     @Post("/distributions/forms/:formId")
-    @ApiDoc("Distribute a form to a list of responders")
+    @ApiDoc("Create a new distribution based on an already existing one")
     @ResourceFilter(ShareAndOwner.class)
-    @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
         String formId = request.getParam("formId");
         UserUtils.getUserInfos(eb, request, user -> {
@@ -155,26 +159,31 @@ public class DistributionController extends ControllerHelper {
                 log.error("User not found in session.");
                 Renders.unauthorized(request);
             }
-            RequestUtils.bodyToJsonArray(request, responders -> {
-                distributionService.create(formId, user, responders, defaultResponseHandler(request));
+            RequestUtils.bodyToJson(request, distribution -> {
+                distributionService.countMyNotFinished(formId, user, countEvent -> {
+                    if (countEvent.isLeft()) {
+                        log.error("[Formulaire@createDistribution] Error in counting not finished distributions for formId " + formId);
+                        RenderHelper.badRequest(request, countEvent);
+                    }
+                    if (countEvent.right().getValue().getInteger("count") == 0) {
+                        distributionService.create(formId, user, distribution, defaultResponseHandler(request));
+                    }
+                    else {
+                        log.error("[Formulaire@createDistribution] A not finished distribution already exists for formId " + formId);
+                        Renders.conflict(request);
+                    }
+                });
             });
         });
     }
 
-    @Post("/distributions/forms/:formId/add")
-    @ApiDoc("Create a new distribution based on an already existing one")
+    @Post("/distributions/:distributionId/duplicate")
+    @ApiDoc("Duplicate a distribution by id")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
-    public void add(HttpServerRequest request) {
-        UserUtils.getUserInfos(eb, request, user -> {
-            if (user == null) {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
-            }
-            RequestUtils.bodyToJson(request, distribution -> {
-                distributionService.add(distribution, defaultResponseHandler(request));
-            });
-        });
+    public void duplicateWithResponses(HttpServerRequest request) {
+        String distributionId = request.getParam("distributionId");
+        distributionService.duplicateWithResponses(distributionId, defaultResponseHandler(request));
     }
 
     @Put("/distributions/:distributionId")
@@ -218,6 +227,51 @@ public class DistributionController extends ControllerHelper {
                     });
                 }
                 renderJson(request, new JsonObject(), 200);
+            });
+        });
+    }
+
+    @Delete("/distributions/:distributionId/replace/:originalDistributionId")
+    @ApiDoc("Delete a specific distribution and update the new one")
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void replace(HttpServerRequest request) {
+        String distributionId = request.getParam("distributionId");
+        String originalDistributionId = request.getParam("originalDistributionId");
+
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user == null) {
+                log.error("User not found in session.");
+                Renders.unauthorized(request);
+            }
+            distributionService.get(originalDistributionId, getEvent -> {
+                if (getEvent.isLeft()) {
+                    log.error("[Formulaire@replaceDistribution] Error in getting distribution with id " + originalDistributionId);
+                    RenderHelper.badRequest(request, getEvent);
+                }
+
+                JsonObject distribution = getEvent.right().getValue();
+                if (distribution.getString("responder_id").equals(user.getUserId())) {
+                    distributionService.delete(originalDistributionId, deleteDistribEvent -> {
+                        if (deleteDistribEvent.isLeft()) {
+                            log.error("[Formulaire@replaceDistribution] Error in deleting distribution with id " + originalDistributionId);
+                            RenderHelper.badRequest(request, deleteDistribEvent);
+                        }
+
+                        responseService.deleteMultipleByDistribution(originalDistributionId, deleteRepEvent -> {
+                            if (deleteRepEvent.isLeft()) {
+                                log.error("[Formulaire@replaceDistribution] Error in deleting responses for distribution with id " + originalDistributionId);
+                                RenderHelper.badRequest(request, deleteRepEvent);
+                            }
+
+                            distributionService.update(distributionId, distribution, defaultResponseHandler(request));
+                        });
+                    });
+                }
+                else {
+                    log.error("[Formulaire@replaceDistribution] Deleting a distribution not owned is forbidden.");
+                    Renders.unauthorized(request);
+                }
             });
         });
     }

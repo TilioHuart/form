@@ -123,6 +123,13 @@ public class DefaultResponseService implements ResponseService {
     }
 
     @Override
+    public void deleteMultipleByDistribution(String distributionId, Handler<Either<String, JsonArray>> handler) {
+        String query = "DELETE FROM " + Formulaire.RESPONSE_TABLE + " WHERE distribution_id = ?;";
+        JsonArray params = new JsonArray().add(distributionId);
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
     public void exportCSVResponses(String formId, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT d.form_id, d.responder_id, date_response, structure, question_id, position, answer " +
             "FROM " + Formulaire.DISTRIBUTION_TABLE + " d " +

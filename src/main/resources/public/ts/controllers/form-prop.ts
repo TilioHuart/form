@@ -68,5 +68,5 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
 
         init();
 
-        $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER, () => { init() });
+        $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_FORM_PROP, () => { init() });
     }]);

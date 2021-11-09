@@ -27,6 +27,7 @@ export class Form implements Selectable, Shareable  {
     multiple: boolean;
     anonymous: boolean;
     response_notified: boolean;
+    editable: boolean;
     displayed: boolean;
     folder_id: number;
     selected: boolean;
@@ -58,6 +59,7 @@ export class Form implements Selectable, Shareable  {
         this.multiple = false;
         this.anonymous = false;
         this.response_notified = false;
+        this.editable = false;
         this.displayed = true;
         this.selected = null;
     }
@@ -81,6 +83,7 @@ export class Form implements Selectable, Shareable  {
             multiple: this.multiple,
             anonymous: this.anonymous,
             response_notified: this.response_notified,
+            editable: this.editable,
             selected: this.selected
         }
     }

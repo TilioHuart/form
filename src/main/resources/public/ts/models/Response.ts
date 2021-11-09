@@ -10,6 +10,7 @@ export class Response {
     choice_id: number;
     answer: string|Date;
     distribution_id: number;
+    original_id: number;
     files: ResponseFiles;
     selectedIndex: boolean[]; // For multiple answer in preview
 
@@ -19,6 +20,7 @@ export class Response {
         this.choice_id = choice_id ? choice_id : null;
         this.answer =  answer ? answer : null;
         this.distribution_id = distribution_id ? distribution_id : null;
+        this.original_id = null;
         this.files = new ResponseFiles();
     }
 
@@ -29,6 +31,7 @@ export class Response {
             choice_id: this.choice_id,
             answer: this.answer,
             distribution_id: this.distribution_id,
+            original_id: this.original_id,
             files: this.files
         }
     }

@@ -54,8 +54,8 @@ interface ViewModel {
 }
 
 
-export const formResultsController = ng.controller('FormResultsController', ['$scope', '$rootScope',
-    function ($scope, $rootScope) {
+export const formResultsController = ng.controller('FormResultsController', ['$scope',
+    function ($scope) {
         let paletteColors = ['#0F2497','#2A9BC7','#77C4E1','#C0E5F2']; // Bleu foncé à bleu clair
 
         const vm: ViewModel = this;
@@ -412,5 +412,5 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
         init();
 
-        $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_CONTROLLER, () => { init() });
+        $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_FORM_PROP, () => { init() });
     }]);

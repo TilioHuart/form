@@ -1,7 +1,8 @@
 import {idiom, ng, template} from 'entcore';
-import {Distribution, Distributions, DistributionStatus, Form, Forms} from "../models";
+import {Distribution, Distributions, DistributionStatus, Form, Forms, Response} from "../models";
 import {distributionService} from "../services";
 import {FiltersFilters, FiltersOrders} from "../core/enums";
+import {Mix} from "entcore-toolkit";
 
 interface ViewModel {
     forms: Forms;
@@ -18,15 +19,12 @@ interface ViewModel {
     };
     loading: boolean;
 
-    switchAll(value: boolean) : void;
     sort(field: FiltersOrders) : void;
     filter(filter: FiltersFilters) : void;
     displayFilterName(name: string) : string;
     getMyDistribs(form: Form) : Array<Distribution>;
     openDistribution(distrib: Distribution) : void;
     infiniteScroll() : void;
-    checkOpenButton() : boolean;
-    checkMyResponsesButton() : boolean;
     openForm(form: Form) : void;
     selectForm(form : Form):void;
     openMyResponses() : void;
@@ -64,12 +62,10 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
         vm.forms.orders.find(o => o.name === FiltersOrders.TITLE).display = true;
 
         try {
-            let allMyDistribs = $scope.getDataIf200(await distributionService.listByResponder());
+            let allMyDistribs = Mix.castArrayAs(Distribution, $scope.getDataIf200(await distributionService.listByResponder()));
             for (let form of vm.forms.all) {
                 let distribs = allMyDistribs.filter(d => d.form_id === form.id);
-                for (let d of distribs) {
-                    vm.distributions.all.push(d);
-                }
+                vm.distributions.all = vm.distributions.all.concat(distribs);
                 form.date_sending = distribs[distribs.length - 1].date_sending;
                 form.status = distribs[distribs.length - 1].status;
                 if (form.multiple) {
@@ -92,11 +88,6 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
 
     // Functions
 
-    vm.switchAll = (value: boolean) : void => {
-        value ? vm.forms.selectAll() : vm.forms.deselectAll();
-        vm.allFormsSelected = value;
-    };
-
     vm.sort = (field: FiltersOrders) : void => {
         vm.forms.orderByField(field);
         vm.forms.orderForms();
@@ -116,7 +107,10 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
     // Utils
 
     vm.getMyDistribs = (form: Form) : Array<Distribution> => {
-        return vm.distributions.all.filter(d => d.form_id === form.id && d.status === DistributionStatus.FINISHED);
+        if (form) {
+            return vm.distributions.all.filter(d => d.form_id === form.id && d.status === DistributionStatus.FINISHED);
+        }
+        return [new Distribution()];
     };
 
     vm.openDistribution = (distrib) : void => {
@@ -129,36 +123,22 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
 
     // Toaster
 
-    vm.checkOpenButton = () : boolean => {
-        let formId = vm.forms.selected[0].id;
-        let status = vm.distributions.all.filter(distrib => distrib.form_id === formId)[0].status;
-        return (vm.forms.selected[0].multiple || status != DistributionStatus.FINISHED);
-    };
-
-    vm.checkMyResponsesButton = () : boolean => {
-        return vm.forms.selected[0].multiple;
-    };
-
     vm.openForm = async (form: Form) : Promise<void> => {
         vm.forms.deselectAll();
         if (!form.multiple) {
-            let distrib: Distribution = vm.distributions.all.filter(d => d.form_id === form.id)[0];
-            if (distrib.status != DistributionStatus.FINISHED) {
-                $scope.redirectTo(`/form/${form.id}/question/1`);
+            let distrib = vm.distributions.all.filter(d => d.form_id === form.id)[0];
+            if (distrib.status == DistributionStatus.TO_DO) {
+                $scope.redirectTo(`/form/${form.id}/${distrib.id}/question/1`);
+            }
+            else {
+                $scope.redirectTo(`/form/${form.id}/${distrib.id}/questions/recap`);
             }
         }
         else {
-            let distribs = vm.distributions.all.filter(distrib => distrib.form_id === form.id);
-            let distrib: Distribution = null;
-            for (let d of distribs) {
-                if (d.status != DistributionStatus.FINISHED) {
-                    distrib = d;
-                }
-            }
-            if (distrib == null) {
-                await distributionService.add(form.id, distribs[0]);
-            }
-            $scope.redirectTo(`/form/${form.id}/question/1`);
+            let distribs = vm.distributions.all.filter(d => d.form_id === form.id);
+            let distrib = distribs.filter(d => d.status != DistributionStatus.FINISHED)[0];
+            distrib = distrib ? distrib : $scope.getDataIf200(await distributionService.create(form.id, distribs[0]));
+            $scope.redirectTo(`/form/${form.id}/${distrib.id}/question/1`);
         }
         $scope.safeApply();
     };

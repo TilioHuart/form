@@ -55,7 +55,7 @@ public class DefaultDistributionService implements DistributionService {
 
     public void listByFormAndResponder(String formId, UserInfos user, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE +
-                " WHERE form_id = ? AND responder_id = ? AND active = ?" +
+                " WHERE form_id = ? AND responder_id = ? AND active = ? " +
                 "ORDER BY date_sending DESC;";
         JsonArray params = new JsonArray().add(formId).add(user.getUserId()).add(true);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
@@ -69,6 +69,13 @@ public class DefaultDistributionService implements DistributionService {
     }
 
     @Override
+    public void countMyNotFinished(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT COUNT(*) FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? AND responder_id = ? AND status != ?;";
+        JsonArray params = new JsonArray().add(formId).add(user.getUserId()).add(Formulaire.FINISHED);
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    @Override
     public void get(String distributionId, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE id = ?;";
         JsonArray params = new JsonArray().add(distributionId);
@@ -78,46 +85,51 @@ public class DefaultDistributionService implements DistributionService {
     @Override
     public void getByFormResponderAndStatus(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE +
-                " WHERE form_id = ? AND responder_id = ? AND (status = ? OR status = ?);";
+                " WHERE form_id = ? AND responder_id = ? AND status = ?;";
         JsonArray params = new JsonArray().add(formId).add(user.getUserId())
-                .add(Formulaire.TO_DO).add(Formulaire.IN_PROGRESS);
+                .add(Formulaire.TO_DO);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override
-    public void create(String formId, UserInfos user, JsonArray responders, Handler<Either<String, JsonObject>> handler) {
-        ArrayList<JsonObject> respondersArray = new ArrayList<>();
-        if (responders != null) {
-            for (int i=0; i < responders.size(); i++){
-                respondersArray.add(responders.getJsonObject(i));
-            }
-        }
-        for (JsonObject responder : respondersArray) {
-            String query = "INSERT INTO " + Formulaire.DISTRIBUTION_TABLE + " (form_id, sender_id, sender_name, " +
-                    "responder_id, responder_name, status, date_sending, active) " +
-                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
-            JsonArray params = new JsonArray()
-                    .add(formId)
-                    .add(user.getUserId())
-                    .add(user.getUsername())
-                    .add(responder.getString("id", ""))
-                    .add(responder.getString("name", ""))
-                    .add(Formulaire.TO_DO)
-                    .add("NOW()")
-                    .add(true);
-            Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
-        }
+    public void create(String formId, UserInfos user, JsonObject distribution, Handler<Either<String, JsonObject>> handler) {
+        String query = "INSERT INTO " + Formulaire.DISTRIBUTION_TABLE + " (form_id, sender_id, sender_name, " +
+                "responder_id, responder_name, status, date_sending, active) " +
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+        JsonArray params = new JsonArray()
+                .add(formId)
+                .add(user.getUserId())
+                .add(user.getUsername())
+                .add(distribution.getString("responder_id", ""))
+                .add(distribution.getString("responder_name", ""))
+                .add(Formulaire.TO_DO)
+                .add("NOW()")
+                .add(true);
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override
-    public void add(JsonObject distribution, Handler<Either<String, JsonObject>> handler) {
-        String query = "SELECT function_add_distrib(?, ?, ?, ?, ?) AS created;";
-        JsonArray params = new JsonArray()
-                .add(distribution.getInteger("form_id", null))
-                .add(distribution.getString("sender_id", ""))
-                .add(distribution.getString("sender_name", ""))
-                .add(distribution.getString("responder_id", ""))
-                .add(distribution.getString("responder_name", ""));
+    public void duplicateWithResponses(String distributionId, Handler<Either<String, JsonObject>> handler) {
+        String query =
+                "WITH newDistrib AS (" +
+                    "INSERT INTO " + Formulaire.DISTRIBUTION_TABLE + " (form_id, sender_id, sender_name, " +
+                    "responder_id, responder_name, status, date_sending, date_response, active, original_id) " +
+                    "SELECT form_id, sender_id, sender_name, responder_id, responder_name, ?, " +
+                    "date_sending, date_response, active, id FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE id = ? RETURNING *" +
+                "), " +
+                "newResponses AS (" +
+                    "INSERT INTO " + Formulaire.RESPONSE_TABLE + " (question_id, answer, responder_id, choice_id, distribution_id, original_id) " +
+                    "SELECT question_id, answer, responder_id, choice_id, (SELECT id FROM newDistrib), id " +
+                    "FROM " + Formulaire.RESPONSE_TABLE + " WHERE distribution_id = ? RETURNING *" +
+                ")," +
+                "newResponseFiles AS (" +
+                    "INSERT INTO " + Formulaire.RESPONSE_FILE_TABLE + " (id, response_id, filename, type) " +
+                    "SELECT id, (SELECT id FROM newResponses WHERE original_id = response_id), filename, type " +
+                    "FROM " + Formulaire.RESPONSE_FILE_TABLE + " WHERE response_id IN (SELECT original_id FROM newResponses)" +
+                ")" +
+                "SELECT * FROM newDistrib;";
+
+        JsonArray params = new JsonArray().add(Formulaire.ON_CHANGE).add(distributionId).add(distributionId);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
@@ -126,7 +138,11 @@ public class DefaultDistributionService implements DistributionService {
         String query = "UPDATE " + Formulaire.DISTRIBUTION_TABLE + " SET status = ?, structure = ?";
         JsonArray params = new JsonArray().add(distribution.getString("status")).add(distribution.getString("structure"));
 
-        if (distribution.getString("status").equals(Formulaire.FINISHED)) {
+        if (distribution.getString("date_response") != null) {
+            query += ", date_response = ?";
+            params.add(distribution.getString("date_response"));
+        }
+        else if (distribution.getString("status").equals(Formulaire.FINISHED)) {
             query += ", date_response = ?";
             params.add("NOW()");
         }
