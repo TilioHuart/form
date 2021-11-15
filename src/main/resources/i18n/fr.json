@@ -202,7 +202,7 @@
   "formulaire.error.formService.unshare": "Une erreur est survenue lors de la suppression du partage du formulaire",
   "formulaire.error.formService.image": "Une erreur est survenue lors de la récupération de l'image",
 
-  "formulaire.error.question.reorganization": "Wrong reorganization direction, should be : UP or DOWN",
+  "formulaire.error.question.reorganization": "Direction de réorganisation inconnue.",
   "formulaire.error.question.sync": "Une erreur est survenue lors de la synchronisation des questions",
   "formulaire.error.questionService.list": "Une erreur est survenue lors de la récupération des questions",
   "formulaire.error.questionService.count": "Une erreur est survenue lors du décompte des questions",
