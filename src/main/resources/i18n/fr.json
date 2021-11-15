@@ -1,6 +1,7 @@
 {
   "formulaire.title": "Formulaires",
-  "formulaire.title.separator": " / ",
+  "formulaire.separator": " / ",
+  "formulaire.dots": " ... ",
   "formulaire.mine": "Mon formulaire",
   "formulaire.created": "Créé le ",
   "formulaire.modified": "Modifié le ",

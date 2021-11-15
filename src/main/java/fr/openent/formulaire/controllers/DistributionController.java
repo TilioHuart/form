@@ -193,40 +193,47 @@ public class DistributionController extends ControllerHelper {
     public void update(HttpServerRequest request) {
         String distributionId = request.getParam("distributionId");
         RequestUtils.bodyToJson(request, distribution -> {
-            distributionService.update(distributionId, distribution, updateEvent -> {
-                if (updateEvent.isLeft()) {
-                    log.error("[Formulaire@updateDistribution] Error in updating distribution " + distributionId);
-                    RenderHelper.badRequest(request, updateEvent);
+            UserUtils.getUserInfos(eb, request, user -> {
+                if (user == null) {
+                    log.error("User not found in session.");
+                    Renders.unauthorized(request);
+                    return;
                 }
-                if (distribution.getString("status").equals(Formulaire.FINISHED)) {
-                    String formId = distribution.getInteger("form_id").toString();
-                    formService.get(formId, getEvent -> {
-                        if (getEvent.isLeft()) {
-                            log.error("[Formulaire@updateDistribution] Error in getting form with id " + formId);
-                            RenderHelper.badRequest(request, getEvent);
-                        }
+                distributionService.update(distributionId, distribution, updateEvent -> {
+                    if (updateEvent.isLeft()) {
+                        log.error("[Formulaire@updateDistribution] Error in updating distribution " + distributionId);
+                        RenderHelper.badRequest(request, updateEvent);
+                    }
+                    if (distribution.getString("status").equals(Formulaire.FINISHED)) {
+                        String formId = distribution.getInteger("form_id").toString();
+                        formService.get(formId, user, getEvent -> {
+                            if (getEvent.isLeft()) {
+                                log.error("[Formulaire@updateDistribution] Error in getting form with id " + formId);
+                                RenderHelper.badRequest(request, getEvent);
+                            }
 
-                        JsonObject form = getEvent.right().getValue();
-                        if (form.getBoolean("response_notified")) {
-                            formService.listManagers(form.getInteger("id").toString(), listManagersEvent -> {
-                                if (listManagersEvent.isLeft()) {
-                                    log.error("[Formulaire@updateDistribution] Error in listing managers for form with id " + formId);
-                                    RenderHelper.badRequest(request, listManagersEvent);
-                                }
+                            JsonObject form = getEvent.right().getValue();
+                            if (form.getBoolean("response_notified")) {
+                                formService.listManagers(form.getInteger("id").toString(), listManagersEvent -> {
+                                    if (listManagersEvent.isLeft()) {
+                                        log.error("[Formulaire@updateDistribution] Error in listing managers for form with id " + formId);
+                                        RenderHelper.badRequest(request, listManagersEvent);
+                                    }
 
-                                JsonArray managers = listManagersEvent.right().getValue();
-                                JsonArray managerIds = new JsonArray();
-                                for (int i = 0; i < managers.size(); i++) {
-                                    managerIds.add(managers.getJsonObject(i).getString("id"));
-                                }
+                                    JsonArray managers = listManagersEvent.right().getValue();
+                                    JsonArray managerIds = new JsonArray();
+                                    for (int i = 0; i < managers.size(); i++) {
+                                        managerIds.add(managers.getJsonObject(i).getString("id"));
+                                    }
 
-                                notifyService.notifyResponse(request, form, managerIds);
-                                renderJson(request, new JsonObject(), 200);
-                            });
-                        }
-                    });
-                }
-                renderJson(request, new JsonObject(), 200);
+                                    notifyService.notifyResponse(request, form, managerIds);
+                                    renderJson(request, new JsonObject(), 200);
+                                });
+                            }
+                        });
+                    }
+                    renderJson(request, new JsonObject(), 200);
+                });
             });
         });
     }

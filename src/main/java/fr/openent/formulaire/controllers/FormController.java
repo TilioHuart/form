@@ -152,7 +152,14 @@ public class FormController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String formId = request.getParam("formId");
-        formService.get(formId, defaultResponseHandler(request));
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user == null) {
+                log.error("User not found in session.");
+                Renders.unauthorized(request);
+                return;
+            }
+            formService.get(formId, user, defaultResponseHandler(request));
+        });
     }
 
     @Post("/forms")
@@ -421,7 +428,7 @@ public class FormController extends ControllerHelper {
         RequestUtils.bodyToJson(request, mail -> {
             UserUtils.getUserInfos(eb, request, user -> {
                 if (user != null) {
-                    formService.get(formId, getFormEvent -> {
+                    formService.get(formId, user, getFormEvent -> {
                         if (getFormEvent.isRight()) {
                             JsonObject form = getFormEvent.right().getValue();
 
@@ -573,25 +580,31 @@ public class FormController extends ControllerHelper {
         String fileType = request.getParam("fileType");
         String formId = request.getParam("formId");
         RequestUtils.bodyToJson(request, images -> {
-            formService.get(formId, getEvent -> {
-                if (getEvent.isRight()) {
-                    switch (fileType) {
-                        case "csv":
-                            new FormResponsesExportCSV(eb, request, getEvent.right().getValue()).launch();
-                            break;
-                        case "pdf":
+            UserUtils.getUserInfos(eb, request, user -> {
+                if (user == null) {
+                    log.error("User not found in session.");
+                    Renders.unauthorized(request);
+                    return;
+                }
+                formService.get(formId, user, getEvent -> {
+                    if (getEvent.isRight()) {
+                        switch (fileType) {
+                            case "csv":
+                                new FormResponsesExportCSV(eb, request, getEvent.right().getValue()).launch();
+                                break;
+                            case "pdf":
                                 JsonObject form = getEvent.right().getValue();
                                 form.put("images", images);
                                 new FormResponsesExportPDF(eb, request, vertx, config, storage, form).launch();
-                            break;
-                        default:
-                            badRequest(request);
-                            break;
+                                break;
+                            default:
+                                badRequest(request);
+                                break;
+                        }
+                    } else {
+                        log.error("[Formulaire@export] Error in getting form to export responses of form " + formId);
                     }
-                }
-                else {
-                    log.error("[Formulaire@export] Error in getting form to export responses of form " + formId);
-                }
+                });
             });
         });
     }
@@ -627,7 +640,7 @@ public class FormController extends ControllerHelper {
             if (user != null) {
                 request.pause();
                 final String formId = request.params().get("id");
-                formService.get(formId, getFormHandler -> {
+                formService.get(formId, user, getFormHandler -> {
                     request.resume();
                     final String formName = getFormHandler.right().getValue().getString("title");
                     JsonObject params = new fr.wseduc.webutils.collections.JsonObject();
@@ -679,7 +692,7 @@ public class FormController extends ControllerHelper {
                                         JsonArray users = infos.getJsonObject(i).getJsonArray("users");
                                         responders.addAll(users);
                                     }
-                                    syncDistributions(formId, user, responders, syncEvent -> {
+                                    syncDistributions(request, formId, user, responders, syncEvent -> {
                                         if (syncEvent.isRight()) {
                                             // Update 'collab' property as needed
                                             List<Map<String, Object>> idsObjects = new ArrayList<>();
@@ -798,7 +811,7 @@ public class FormController extends ControllerHelper {
                                 distributionService.setActiveValue(true, formId, duplicates, updateEvent -> {
                                     if (updateEvent.isRight()) {
                                         JsonArray respondersIds = getResponderIds(responders);
-                                        formService.get(formId, getFormEvent -> {
+                                        formService.get(formId, user, getFormEvent -> {
                                             if (getFormEvent.isLeft()) {
                                                 handler.handle(new Either.Right<>(getFormEvent.right().getValue()));
                                                 log.error("[Formulaire@addNewDistributions] Fail to get infos for form with id " + formId);
@@ -837,7 +850,7 @@ public class FormController extends ControllerHelper {
         distributionService.listByForm(formId, getDistributionsEvent -> {
             if (getDistributionsEvent.isRight()) {
                 boolean value = !getDistributionsEvent.right().getValue().isEmpty();
-                formService.get(formId, getEvent -> {
+                formService.get(formId, user, getEvent -> {
                     if (getEvent.isRight()) {
                         JsonObject form = getEvent.right().getValue();
                         form.put("sent", value);
@@ -862,7 +875,7 @@ public class FormController extends ControllerHelper {
     }
 
     private void updateFormCollabProp(String formId, UserInfos user, List<Map<String, Object>> idsObjects, Handler<Either<String, JsonObject>> handler) {
-        formService.get(formId, getEvent -> {
+        formService.get(formId, user, getEvent -> {
             if (getEvent.isRight()) {
                 JsonObject form = getEvent.right().getValue();
 

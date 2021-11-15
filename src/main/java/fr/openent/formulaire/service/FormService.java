@@ -49,9 +49,10 @@ public interface FormService {
     /**
      * Get a specific form by id
      * @param formId form identifier
+     * @param user user connected
      * @param handler function handler returning JsonObject data
      */
-    void get(String formId, Handler<Either<String, JsonObject>> handler);
+    void get(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Create a form

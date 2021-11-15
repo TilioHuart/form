@@ -1,6 +1,6 @@
 import {idiom, ng, notify} from 'entcore';
 import http, {AxiosResponse} from 'axios';
-import {Folder, Folders} from '../models/Folder';
+import {Folder} from '../models/Folder';
 
 export interface FolderService {
     list() : Promise<AxiosResponse>;

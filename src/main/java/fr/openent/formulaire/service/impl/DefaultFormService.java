@@ -98,9 +98,11 @@ public class DefaultFormService implements FormService {
     }
 
     @Override
-    public void get(String formId, Handler<Either<String, JsonObject>> handler) {
-        String query = "SELECT * FROM " + Formulaire.FORM_TABLE + " WHERE id = ?;";
-        JsonArray params = new JsonArray().add(formId);
+    public void get(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT f.*, rff.folder_id FROM " + Formulaire.FORM_TABLE + " f " +
+                "JOIN " + Formulaire.REL_FORM_FOLDER_TABLE + " rff ON f.id = rff.form_id " +
+                "WHERE id = ? AND user_id = ?;";
+        JsonArray params = new JsonArray().add(formId).add(user.getUserId());
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
