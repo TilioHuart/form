@@ -15,7 +15,10 @@
                         <i class="clock sm-icon spaced-right"></i><i18n>formulaire.form.edit.modified</i18n>[[displayDate(vm.form.date_modification)]]
                     </div>
                     <button class="cell cancel" ng-click="vm.return()"><i18n>formulaire.return</i18n></button>
-                    <button class="cell cancel dontSave" ng-click="vm.organizeQuestions()"><i18n>formulaire.organize</i18n></button>
+                    <button class="cell dontSave" ng-class="{cancel: vm.form.nb_responses <= 0}"
+                            ng-click="vm.organizeQuestions()" ng-disabled="vm.form.nb_responses > 0">
+                        <i18n>formulaire.organize</i18n>
+                    </button>
                     <button class="cell cancel dontSave" ng-click="vm.preview()" ng-show="vm.questions.all.length >= 1"><i18n>formulaire.preview</i18n></button>
                     <button class="cell" ng-click="vm.saveAll(true)"><i18n>formulaire.save</i18n></button>
                 </div>
@@ -28,23 +31,26 @@
 
         <div class="edit-form" ng-if="vm.questions.all.length > 0">
             <!-- List of questions-->
-            <div class="questions" sortable-list ng-if="!isMobile && vm.questions.selected.length == 0">
+            <div class="questions" sortable-list ng-if="!isMobile && vm.questions.selected.length == 0 && vm.form.nb_responses <= 0">
                 <div ng-repeat="question in vm.questions.all | orderBy:'position'" class="nine twelve-mobile"
                      sortable-element data-ng-change="vm.reOrder()" data-ng-model="question.index">
                     <!--  Each questions component -->
-                    <question-item question="question" reorder="true"></question-item>
+                    <question-item question="question" reorder="true" has-form-responses="vm.form.nb_responses > 0"></question-item>
                 </div>
             </div>
-            <div class="questions" ng-if="isMobile || (!isMobile  && vm.questions.selected.length > 0)">
+            <div class="questions" ng-if="isMobile || (!isMobile && vm.questions.selected.length > 0) || vm.form.nb_responses > 0">
                 <div ng-repeat="question in vm.questions.all | orderBy:'position'" class="nine twelve-mobile">
                     <!--  Each questions component -->
-                    <question-item question="question" reorder="false"></question-item>
+                    <question-item question="question" reorder="false" has-form-responses="vm.form.nb_responses > 0"></question-item>
                 </div>
             </div>
             <!-- End page buttons -->
             <div class="buttons">
                 <div class="flexend nine zero-mobile">
-                    <button class="cell blueButton" ng-click="vm.createNewQuestion()"><i18n>formulaire.add.element</i18n></button>
+                    <button class="cell" ng-class="{blueButton: vm.form.nb_responses <= 0}"
+                            ng-click="vm.createNewQuestion()" ng-disabled="vm.form.nb_responses > 0">
+                        <i18n>formulaire.add.element</i18n>
+                    </button>
                 </div>
                 <div ng-click="vm.createNewQuestion()" class="fab zero-desktop">
                     +

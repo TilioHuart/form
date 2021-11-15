@@ -1,6 +1,6 @@
 import {idiom, ng, notify, template, angular} from 'entcore';
 import {Form, Question, QuestionChoice, Questions, Response, Responses, Types} from "../models";
-import {formService, questionChoiceService, questionService, responseService} from "../services";
+import {distributionService, formService, questionChoiceService, questionService, responseService} from "../services";
 import {Direction, FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_QUESTION_EMIT_EVENT, Pages} from "../core/enums";
 
 interface ViewModel {
@@ -76,6 +76,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         const init = async () : Promise<void> => {
             vm.form = $scope.form;
+            vm.form.nb_responses = vm.form.id ? $scope.getDataIf200(await distributionService.count(vm.form.id)).count : 0;
             await vm.questions.sync(vm.form.id);
             vm.newQuestion.form_id = vm.form.id;
             vm.dontSave = false;

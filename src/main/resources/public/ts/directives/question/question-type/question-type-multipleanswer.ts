@@ -1,10 +1,11 @@
 import {Directive, ng} from "entcore";
 import {Question, QuestionChoice} from "../../../models";
 import {questionChoiceService} from "../../../services";
-import {FORMULAIRE_EMIT_EVENT} from "../../../core/enums/formulaire-event";
+import {FORMULAIRE_EMIT_EVENT} from "../../../core/enums";
 
 interface IViewModel {
     question: Question,
+    hasFormResponses: boolean,
 
     createNewChoice(): void,
     deleteChoice(index: number): Promise<void>
@@ -16,7 +17,8 @@ export const questionTypeMultipleanswer: Directive = ng.directive('questionTypeM
         restrict: 'E',
         transclude: true,
         scope: {
-            question: '='
+            question: '=',
+            hasFormResponses: '='
         },
         controllerAs: 'vm',
         bindToController: true,
@@ -30,9 +32,9 @@ export const questionTypeMultipleanswer: Directive = ng.directive('questionTypeM
                         <input type="text" class="ten eight-mobile" ng-model="choice.value" placeholder="Choix [[$index + 1]]" ng-if="!vm.question.selected" disabled>
                         <input type="text" class="ten eight-mobile" ng-model="choice.value" placeholder="Choix [[$index + 1]]" ng-if="vm.question.selected">
                     </label>
-                    <i class="cancel lg-icon" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected"></i>
+                    <i class="cancel lg-icon" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
                 </div>
-                <div style="display: flex; justify-content: center;" ng-if="vm.question.selected">
+                <div style="display: flex; justify-content: center;" ng-if="vm.question.selected && !vm.hasFormResponses">
                     <i class="plus-circle lg-icon" ng-click="vm.createNewChoice()"></i>
                 </div>
             </div>

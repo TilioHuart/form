@@ -57,7 +57,7 @@ i {
     color: $formulaire-grey-dark !important;
   }
 
-  &.grey::before {
+  &.classic-grey::before {
     color: $formulaire-grey !important;
   }
 
@@ -67,6 +67,13 @@ i {
 
   &.very-light-grey::before {
     color: $formulaire-grey-very-light !important;
+  }
+
+  &.disabled {
+    cursor: default;
+    &::before {
+      color: $formulaire-grey-light !important;
+    }
   }
 
   // Icons content

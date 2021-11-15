@@ -3,6 +3,7 @@ import {Question, Types} from "../../models";
 
 interface IViewModel {
     question: Question,
+    hasFormResponses: boolean,
     types: typeof Types
 }
 
@@ -12,7 +13,8 @@ export const questionType: Directive = ng.directive('questionType', () => {
         restrict: 'E',
         transclude: true,
         scope: {
-            question: '='
+            question: '=',
+            hasFormResponses: '='
         },
         controllerAs: 'vm',
         bindToController: true,
@@ -22,8 +24,8 @@ export const questionType: Directive = ng.directive('questionType', () => {
                 <question-type-freetext question="vm.question" ng-if="vm.question.question_type == vm.types.FREETEXT"></question-type-freetext>
                 <question-type-shortanswer question="vm.question" ng-if="vm.question.question_type == vm.types.SHORTANSWER"></question-type-shortanswer>
                 <question-type-longanswer question="vm.question" ng-if="vm.question.question_type == vm.types.LONGANSWER"></question-type-longanswer>
-                <question-type-singleanswer question="vm.question" ng-if="vm.question.question_type == vm.types.SINGLEANSWER"></question-type-singleanswer>
-                <question-type-multipleanswer question="vm.question" ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER"></question-type-multipleanswer>
+                <question-type-singleanswer question="vm.question" has-form-responses="vm.hasFormResponses" ng-if="vm.question.question_type == vm.types.SINGLEANSWER"></question-type-singleanswer>
+                <question-type-multipleanswer question="vm.question" has-form-responses="vm.hasFormResponses" ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER"></question-type-multipleanswer>
                 <question-type-date question="vm.question" ng-if="vm.question.question_type == vm.types.DATE"></question-type-date>
                 <question-type-time question="vm.question" ng-if="vm.question.question_type == vm.types.TIME"></question-type-time>
                 <question-type-file question="vm.question" ng-if="vm.question.question_type == vm.types.FILE"></question-type-file>
