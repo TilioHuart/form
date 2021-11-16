@@ -11,7 +11,10 @@
 
         <section class="cell six">
             <div class="main-button">
-                <button class="cell cancel" ng-click="redirectTo('/list/responses')"><i18n>formulaire.saveAndQuit</i18n></button>
+                <button class="cell cancel" ng-click="redirectTo('/list/responses')">
+                    <i18n ng-if="vm.form.editable || vm.distribution.status != DistributionStatus.FINISHED">formulaire.saveAndQuit</i18n>
+                    <i18n ng-if="!vm.form.editable || vm.distribution.status == DistributionStatus.FINISHED">formulaire.quit</i18n>
+                </button>
             </div>
         </section>
     </div>
@@ -59,13 +62,14 @@
                             </div>
                         </div>
                     </div>
-                    <div class="question-edit" ng-if="vm.form.editable">
+                    <div class="question-edit" ng-if="vm.form.editable || vm.distribution.status != DistributionStatus.FINISHED">
                         <a href="#/form/[[vm.form.id]]/[[vm.distribution.id]]/question/[[question.position]]"><i18n>formulaire.edit</i18n></a>
                     </div>
                 </div>
                     </div>
-            <div class="buttons" ng-class="{alone: !vm.form.editable || vm.distribution.status == DistributionStatus.FINISHED}">
-                <button class="cell" ng-click="vm.prev()" ng-if="vm.form.editable || vm.distribution.status != DistributionStatus.FINISHED"><i18n>formulaire.prev</i18n></button>
+            <div class="buttons" ng-class="{alone: !vm.form.editable || vm.distribution.status == DistributionStatus.FINISHED}"
+                 ng-if="vm.form.editable || vm.distribution.status != DistributionStatus.FINISHED">
+                <button class="cell" ng-click="vm.prev()"><i18n>formulaire.prev</i18n></button>
                 <button class="cell" ng-click="vm.send()"><i18n>formulaire.end</i18n></button>
             </div>
         </div>

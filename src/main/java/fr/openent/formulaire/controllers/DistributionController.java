@@ -115,7 +115,7 @@ public class DistributionController extends ControllerHelper {
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void count(HttpServerRequest request) {
         String formId = request.getParam("formId");
-        distributionService.count(formId, defaultResponseHandler(request));
+        distributionService.countFinished(formId, defaultResponseHandler(request));
     }
 
     @Get("/distributions/:distributionId")
@@ -160,7 +160,7 @@ public class DistributionController extends ControllerHelper {
                 Renders.unauthorized(request);
             }
             RequestUtils.bodyToJson(request, distribution -> {
-                distributionService.countMyNotFinished(formId, user, countEvent -> {
+                distributionService.countMyToDo(formId, user, countEvent -> {
                     if (countEvent.isLeft()) {
                         log.error("[Formulaire@createDistribution] Error in counting not finished distributions for formId " + formId);
                         RenderHelper.badRequest(request, countEvent);

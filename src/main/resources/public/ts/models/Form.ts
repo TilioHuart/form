@@ -29,6 +29,8 @@ export class Form implements Selectable, Shareable  {
     response_notified: boolean;
     editable: boolean;
     displayed: boolean;
+    rgpd: boolean;
+    rgpd_goal: string;
     folder_id: number;
     selected: boolean;
     infoImg: {
@@ -60,6 +62,8 @@ export class Form implements Selectable, Shareable  {
         this.anonymous = false;
         this.response_notified = false;
         this.editable = false;
+        this.rgpd = false;
+        this.rgpd_goal = null;
         this.displayed = true;
         this.selected = null;
     }
@@ -84,6 +88,8 @@ export class Form implements Selectable, Shareable  {
             anonymous: this.anonymous,
             response_notified: this.response_notified,
             editable: this.editable,
+            rgpd: this.rgpd,
+            rgpd_goal: this.rgpd_goal,
             selected: this.selected
         }
     }
@@ -91,10 +97,11 @@ export class Form implements Selectable, Shareable  {
     setFromJson = (data: any) : void => {
         for (let key in data) {
             this[key] = data[key];
-            if (key === 'nb_responses' && !!!data[key]) { this[key] = 0; }
-            if ((key === 'date_creation' || key === 'date_modification' || key === 'date_opening' || key === 'date_ending')
-                && !!data[key]) {
-                    this[key] = new Date(this[key]);
+            if (key === 'nb_responses' && !data[key]) {
+                this[key] = 0;
+            }
+            if ((key === 'date_creation' || key === 'date_modification' || key === 'date_opening' || key === 'date_ending') && data[key]) {
+                this[key] = new Date(this[key]);
             }
         }
     };

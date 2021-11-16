@@ -1,10 +1,12 @@
-import {ng} from 'entcore';
+import {idiom, ng} from 'entcore';
 import {distributionService, formService} from "../services";
-import {Form} from "../models";
+import {Delegate, Form} from "../models";
 import {FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
+import {Delegates} from "../models/Delegate";
 
 interface ViewModel {
     form: Form;
+    delegates: Delegates;
     display: {
         date_ending: boolean
     }
@@ -12,20 +14,24 @@ interface ViewModel {
     save() : Promise<void>;
     checkIntervalDates() : boolean;
     getImage() : void;
+    getRgpdDescriptionIntro() : string;
+    getRgpdDescriptionDelegates(delegate: Delegate) : string;
 }
 
 
-export const formPropController = ng.controller('FormPropController', ['$scope', 'FormService',
+export const formPropController = ng.controller('FormPropController', ['$scope',
     function ($scope) {
 
         const vm: ViewModel = this;
         vm.form = new Form();
+        vm.delegates = new Delegates();
         vm.display = {
             date_ending: false
         };
 
         const init = async () : Promise<void> => {
             vm.form = $scope.form;
+            await vm.delegates.sync();
             vm.display.date_ending = !!vm.form.date_ending;
             vm.form.nb_responses = !!vm.form.id ? $scope.getDataIf200(await distributionService.count(vm.form.id)).count : 0;
             $scope.safeApply();
@@ -34,10 +40,14 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
         // Functions
 
         vm.save = async () : Promise<void> => {
-            let form = new Form();
-            form.setFromJson($scope.getDataIf200(await formService.save(vm.form)));
-            $scope.redirectTo(`/form/${form.id}/edit`);
-            $scope.safeApply();
+            if (vm.form.title && vm.checkIntervalDates()) {
+                let form = new Form();
+                let data = $scope.getDataIf200(await formService.save(vm.form));
+                console.log(data.id);
+                form.setFromJson(data);
+                $scope.redirectTo(`/form/${form.id}/edit`);
+                $scope.safeApply();
+            }
         };
 
         vm.checkIntervalDates = () : boolean => {
@@ -64,6 +74,23 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
                 // }, 2000)
             }
             $scope.safeApply();
+        };
+
+        vm.getRgpdDescriptionIntro = () : string => {
+            let defaultGoal = "[" + idiom.translate('formulaire.prop.rgpd.goal') + "]";
+            let params = [vm.form.rgpd_goal ? vm.form.rgpd_goal : defaultGoal, getEndValidityDate()];
+            return $scope.getI18nWithParams('formulaire.prop.rgpd.description.intro', params);
+        };
+
+        vm.getRgpdDescriptionDelegates = (delegate) : string => {
+            let params = [delegate.entity, delegate.mail, delegate.address, delegate.zipcode];
+            return $scope.getI18nWithParams('formulaire.prop.rgpd.description.delegates', params);
+        };
+
+        const getEndValidityDate = () : string => {
+            let today = new Date();
+            today.setFullYear(today.getFullYear() + 1);
+            return today.toLocaleDateString();
         };
 
         init();

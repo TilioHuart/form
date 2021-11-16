@@ -67,7 +67,7 @@ public class FormController extends ControllerHelper {
         this.notifyService = new DefaultNotifyService(timelineHelper, eb);
     }
 
-    // Init rights
+    // Init classic rights
 
     @SecuredAction(Formulaire.CREATION_RIGHT)
     public void initCreationRight(final HttpServerRequest request) {
@@ -76,6 +76,8 @@ public class FormController extends ControllerHelper {
     @SecuredAction(Formulaire.RESPONSE_RIGHT)
     public void initResponseRight(final HttpServerRequest request) {
     }
+
+    // Init sharing rights
 
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void initContribResourceRight(final HttpServerRequest request) {

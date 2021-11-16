@@ -139,10 +139,34 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			respondForm: async (params) => {
 				await $scope.getFormWithRights(params.formId);
 				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form)) {
-					$scope.redirectTo(`/form/${params.formId}/${params.distributionId}/question/1`);
+					$scope.redirectTo(`/form/${params.formId}/${params.distributionId}/question/${$scope.form.rgpd ? 'recap' : 1}`);
 				}
 				else {
 					$scope.redirectTo('/e403');
+				}
+			},
+			rgpdQuestion: async (params) => {
+				$scope.currentPage = Pages.RGPD_QUESTIONS;
+				await $scope.getFormWithRights(params.formId);
+				if ($scope.canSeeRgpd() && $scope.form.rgpd) {
+					if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form) && !$scope.form.archived) {
+						if ($scope.form.date_opening < new Date() && ($scope.form.date_ending ? ($scope.form.date_ending > new Date()) : true)) {
+							let correctedUrl = window.location.origin + window.location.pathname + `#/form/${$scope.form.id}/rgpd`;
+							window.location.assign(correctedUrl);
+							$scope.safeApply();
+							$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_RGPD_QUESTION);
+							template.open('main', 'containers/rgpd-question');
+						}
+						else {
+							$scope.redirectTo('/e403');
+						}
+					}
+					else {
+						$scope.redirectTo('/e403');
+					}
+				}
+				else {
+					$scope.redirectTo('/list/responses');
 				}
 			},
 			respondQuestion: async (params) => {
@@ -312,6 +336,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 
 		$scope.canRespond = () => {
 			return $scope.hasRight(Behaviours.applicationsBehaviours.formulaire.rights.workflow.response);
+		};
+
+		$scope.canSeeRgpd = () => {
+			return $scope.hasRight(Behaviours.applicationsBehaviours.formulaire.rights.workflow.rgpd);
 		};
 
 		$scope.hasShareRightManager = (form : Form) => {

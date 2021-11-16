@@ -78,6 +78,21 @@ export class Distributions {
         }
     }
 
+    syncByFormAndResponder = async (formId: number) : Promise<void> => {
+        try {
+            let { data } = await distributionService.listByFormAndResponder(formId);
+            this.all = Mix.castArrayAs(Distribution, data);
+            for (let i = this.all.length - 1; i >= this.all.length - data.length; i--) {
+                let distrib = this.all[i];
+                distrib.date_response = new Date(distrib.date_response);
+                distrib.date_sending = new Date(distrib.date_sending);
+            }
+        } catch (e) {
+            notify.error(idiom.translate('formulaire.error.distribution.sync'));
+            throw e;
+        }
+    }
+
     syncByFormAndStatus = async (formId: number, status: string, nbLines: number = null) : Promise<void> => {
         try {
             let { data } = await distributionService.listByFormAndStatus(formId, status, nbLines);

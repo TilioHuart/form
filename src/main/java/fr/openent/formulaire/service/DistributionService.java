@@ -50,7 +50,7 @@ public interface DistributionService {
      * @param formId form identifier
      * @param handler function handler returning JsonObject data
      */
-    void count(String formId, Handler<Either<String, JsonObject>> handler);
+    void countFinished(String formId, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Get the number of distributions for a specific form
@@ -58,7 +58,7 @@ public interface DistributionService {
      * @param user user connected
      * @param handler function handler returning JsonObject data
      */
-    void countMyNotFinished(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler);
+    void countMyToDo(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Get a specific distribution by id

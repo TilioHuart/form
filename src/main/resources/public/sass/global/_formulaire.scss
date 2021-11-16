@@ -328,7 +328,7 @@ body.formulaire section.main {
               }
             }
 
-            .multiple, .editable, .anonymous, .notified {
+            .multiple, .editable, .anonymous, .notified, .rgpd {
               font-size: 12px;
               display: flex;
               align-items: baseline;
@@ -345,6 +345,22 @@ body.formulaire section.main {
                   color: $formulaire-grey;
                   margin: -5px 0 0 25px;
                 }
+              }
+            }
+
+            .rgpd {
+              &-inputs{
+                margin: 2% 2% 2% 25px;
+
+                .goal input {
+                  margin: 0;
+                  font-size: 12px;
+                }
+              }
+
+              &-description {
+                border: solid 1px $formulaire-grey;
+                padding: 2%;
               }
             }
           }
@@ -378,6 +394,10 @@ body.formulaire section.main {
       background: $formulaire-white;
       box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
       margin-bottom: 2%;
+
+      &rgpd {
+        margin-top: 2%;
+      }
 
       &-main {
         display: flex;

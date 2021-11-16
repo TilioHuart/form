@@ -31,6 +31,7 @@ public class Formulaire extends BaseServer {
 	public enum FormulaireEvent { ACCESS, CREATE }
 
 	public static String DB_SCHEMA;
+	public static String DELEGATE_TABLE;
 	public static String DISTRIBUTION_TABLE;
 	public static String FOLDER_TABLE;
 	public static String FORM_TABLE;
@@ -48,6 +49,7 @@ public class Formulaire extends BaseServer {
 	public static final String ACCESS_RIGHT = "formulaire.access";
 	public static final String CREATION_RIGHT = "formulaire.creation";
 	public static final String RESPONSE_RIGHT = "formulaire.response";
+	public static final String RGPD_RIGHT = "formulaire.rgpd.data.collection";
 
 	public static final String CONTRIB_RESOURCE_RIGHT = "formulaire.contrib";
 	public static final String MANAGER_RESOURCE_RIGHT = "formulaire.manager";
@@ -81,6 +83,7 @@ public class Formulaire extends BaseServer {
 		setRepositoryEvents(new FormulaireRepositoryEvents());
 
 		DB_SCHEMA = config.getString("db-schema");
+		DELEGATE_TABLE = DB_SCHEMA + ".delegate";
 		DISTRIBUTION_TABLE = DB_SCHEMA + ".distribution";
 		FOLDER_TABLE = DB_SCHEMA + ".folder";
 		FORM_TABLE = DB_SCHEMA + ".form";
@@ -123,6 +126,7 @@ public class Formulaire extends BaseServer {
 
 
 		// Init controllers
+		addController(new DelegateController());
 		addController(new DistributionController(timelineHelper));
 		addController(formController);
 		addController(new FormulaireController(eventStore));

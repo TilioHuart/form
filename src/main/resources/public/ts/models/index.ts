@@ -1,3 +1,4 @@
+export * from './Delegate';
 export * from './Distribution';
 export * from './Form';
 export * from './Question';

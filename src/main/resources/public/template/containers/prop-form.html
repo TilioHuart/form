@@ -23,7 +23,7 @@
                         <div class="data-text">
                             <div class="title" ng-if="!isMobile"><i18n>formulaire.form.create.title</i18n></div>
                             <div class="title" ng-if="isMobile"><i18n>formulaire.form.create.title.mobile</i18n></div>
-                            <input type="text" ng-model="vm.form.title" i18n-placeholder="formulaire.form.create.title" style="width: 60%;">
+                            <input type="text" ng-model="vm.form.title" i18n-placeholder="formulaire.form.create.title" style="width: 60%;" ng-keydown="$event.keyCode === 13 && vm.save()">
                             <div class="interval">
                                 <span class="opening">
                                     <i18n>formulaire.date.opening</i18n>
@@ -42,10 +42,10 @@
                                     <label for="isMultiple">
                                         <input type="checkbox" id="isMultiple" ng-model="vm.form.multiple" ng-disabled="vm.form.nb_responses > 0"/>
                                         <span ng-if="!isMobile" ng-style="{'cursor' : vm.form.nb_responses > 0 ? 'default' : 'pointer'}">
-                                            <i18n>formulaire.multiple.label</i18n>
+                                            <i18n>formulaire.prop.multiple.label</i18n>
                                         </span>
                                         <span ng-if="isMobile" ng-style="{'cursor' : vm.form.nb_responses > 0 ? 'default' : 'pointer'}">
-                                            <i18n>formulaire.multiple.label.mobile</i18n>
+                                            <i18n>formulaire.prop.multiple.label.mobile</i18n>
                                         </span>
                                     </label>
                                 </div>
@@ -54,7 +54,7 @@
                                 <div class="text">
                                     <label for="isEditable">
                                         <input type="checkbox" id="isEditable" ng-model="vm.form.editable"/>
-                                        <span><i18n>formulaire.editable.label</i18n></span>
+                                        <span><i18n>formulaire.prop.editable.label</i18n></span>
                                     </label>
                                 </div>
                             </div>
@@ -63,18 +63,43 @@
                                     <label for="isAnonymous">
                                         <input type="checkbox" id="isAnonymous" ng-model="vm.form.anonymous" ng-disabled="vm.form.nb_responses > 0"
                                                ng-style="{'cursor' : vm.form.nb_responses > 0 ? 'default' : 'pointer'}"/>
-                                        <span ng-style="{'cursor' : vm.form.nb_responses > 0 ? 'default' : 'pointer'}"><i18n>formulaire.anonymous.label</i18n></span>
+                                        <span ng-style="{'cursor' : vm.form.nb_responses > 0 ? 'default' : 'pointer'}"><i18n>formulaire.prop.anonymous.label</i18n></span>
                                     </label>
-                                    <i18n class="subdescription" ng-if="vm.form.anonymous">formulaire.anonymous.description</i18n>
+                                    <i18n class="subdescription" ng-if="vm.form.anonymous">formulaire.prop.anonymous.description</i18n>
                                 </div>
                             </div>
                             <div class="notified">
                                 <div class="text">
                                     <label for="isNotified">
                                         <input type="checkbox" id="isNotified" ng-model="vm.form.response_notified"/>
-                                        <span><i18n>formulaire.notified.label</i18n></span>
+                                        <span><i18n>formulaire.prop.notified.label</i18n></span>
                                     </label>
-                                    <i18n class="subdescription" ng-if="vm.form.response_notified">formulaire.notified.description</i18n>
+                                    <i18n class="subdescription" ng-if="vm.form.response_notified">formulaire.prop.notified.description</i18n>
+                                </div>
+                            </div>
+                            <div class="rgpd" workflow="formulaire.rgpd">
+                                <div class="text">
+                                    <label for="isRgpd">
+                                        <input type="checkbox" id="isRgpd" ng-model="vm.form.rgpd" ng-disabled="vm.form.nb_responses > 0"
+                                               ng-style="{'cursor' : vm.form.nb_responses > 0 ? 'default' : 'pointer'}"/>
+                                        <span ng-style="{'cursor' : vm.form.nb_responses > 0 ? 'default' : 'pointer'}"><i18n>formulaire.prop.rgpd.label</i18n></span>
+                                    </label>
+                                    <div ng-if="vm.form.rgpd">
+                                        <div class="rgpd-inputs">
+                                            <div class="goal">
+                                                <i18n>formulaire.prop.rgpd.goal</i18n>
+                                                <input type="text" class="ten nine-mobile" ng-model="vm.form.rgpd_goal"
+                                                       maxlength="150" i18n-placeholder="formulaire.prop.rgpd.goal.input">
+                                            </div>
+                                            <div class="validity">
+                                                <i18n>formulaire.prop.rgpd.validity</i18n>
+                                            </div>
+                                        </div>
+                                        <div class="rgpd-description">
+                                            <div class="bottom-spacing-three" bind-html="vm.getRgpdDescriptionIntro()"></div>
+                                            <div ng-repeat="delegate in vm.delegates.all" bind-html="vm.getRgpdDescriptionDelegates(delegate)"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -84,7 +109,7 @@
                             </div>
                             <div class="action-buttons">
                                 <button class="cell cancel" ng-click="redirectTo('/list/mine')"><i18n>formulaire.cancel</i18n></button>
-                                <button class="cell" ng-click="vm.save()" ng-disabled="!!!vm.form.title || !vm.checkIntervalDates()"><i18n>formulaire.save</i18n></button>
+                                <button class="cell" ng-click="vm.save()" ng-disabled="!vm.form.title || !vm.checkIntervalDates()"><i18n>formulaire.save</i18n></button>
                             </div>
                         </div>
                     </div>

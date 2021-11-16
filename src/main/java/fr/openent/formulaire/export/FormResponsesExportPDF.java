@@ -80,7 +80,7 @@ public class FormResponsesExportPDF {
                     }
                     JsonObject results = formatDataEvent.right().getValue();
 
-                    distributionService.count(form.getInteger("id").toString(), countRepEvent -> {
+                    distributionService.countFinished(form.getInteger("id").toString(), countRepEvent -> {
                         if (countRepEvent.isLeft()) {
                             log.error("[Formulaire@FormExportPDF] Failed to count nb responses of the form " + form.getInteger("id") + " : " + countRepEvent.left().getValue());
                             Renders.renderError(request);

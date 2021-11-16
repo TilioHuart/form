@@ -1,0 +1,34 @@
+<div ng-controller="RgpdQuestionController as vm">
+    <div class="row">
+        <section class="cell six">
+            <div>
+                <h1>
+                    <a href="#/list/responses"><i18n>formulaire.title</i18n></a><i18n>formulaire.separator</i18n>[[form.title]]
+                </h1>
+            </div>
+        </section>
+
+        <section class="cell six">
+            <div class="main-button">
+                <button class="cell cancel" ng-click="vm.quit()"><i18n>formulaire.quit</i18n></button>
+            </div>
+        </section>
+    </div>
+
+    <div ng-include="'formulaire/public/template/components/progress-bar.html'" ng-if="vm.nbQuestions > 1"></div>
+
+    <div class="respond-question">
+        <div class="nine twelve-mobile">
+            <div class="question rgpd">
+                <h4><i18n>formulaire.question.rgpd.title</i18n></h4>
+                <div class="question-main">
+                    <div class="bottom-spacing-three" bind-html="vm.getRgpdDescriptionIntro()"></div>
+                    <div ng-repeat="delegate in vm.delegates.all" bind-html="vm.getRgpdDescriptionDelegates(delegate)"></div>
+                </div>
+            </div>
+            <div class="buttons alone">
+                <button class="cell" ng-click="vm.startForm()"><i18n>formulaire.respond.form</i18n></button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -11,7 +11,6 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.events.EventStore;
-import org.entcore.common.events.EventStoreFactory;
 import org.vertx.java.core.http.RouteMatcher;
 
 import java.util.Map;
