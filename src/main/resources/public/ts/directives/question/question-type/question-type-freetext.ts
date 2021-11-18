@@ -15,7 +15,6 @@ export const questionTypeFreetext: Directive = ng.directive('questionTypeFreetex
         },
         controllerAs: 'vm',
         bindToController: true,
-        replace: true,
         template: `
             <div>
                 <div ng-if="!vm.question.selected">

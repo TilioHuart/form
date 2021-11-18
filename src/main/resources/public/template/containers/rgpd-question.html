@@ -22,8 +22,7 @@
             <div class="question rgpd">
                 <h4><i18n>formulaire.question.rgpd.title</i18n></h4>
                 <div class="question-main">
-                    <div class="bottom-spacing-three" bind-html="vm.getRgpdDescriptionIntro()"></div>
-                    <div ng-repeat="delegate in vm.delegates.all" bind-html="vm.getRgpdDescriptionDelegates(delegate)"></div>
+                    <rgpd form="vm.form"></rgpd>
                 </div>
             </div>
             <div class="buttons alone">

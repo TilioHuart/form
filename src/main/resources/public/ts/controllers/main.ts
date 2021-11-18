@@ -11,6 +11,7 @@ import {
 	FORMULAIRE_EMIT_EVENT,
 	Pages
 } from "../core/enums";
+import {i18nUtils} from "../utils";
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', 'FormService',
 	($scope, route, $location) => {
@@ -25,6 +26,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.Exports = Exports;
 		$scope.Pages = Pages;
 		$scope.DistributionStatus = DistributionStatus;
+		$scope.i18nUtils = i18nUtils;
 		$scope.currentPage = Pages.FORMS_LIST;
 		$scope.form = new Form();
 		$scope.distribution = new Distribution();
@@ -273,14 +275,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 
 		$scope.displayDate = (dateToFormat: Date) : string => {
 			return new Date(dateToFormat).toLocaleString([], {day: '2-digit', month: '2-digit', year:'numeric', hour: '2-digit', minute:'2-digit'});
-		};
-
-		$scope.getI18nWithParams = (key: string, params: string[]) : string => {
-			let finalI18n = idiom.translate(key);
-			for (let i = 0; i < params.length; i++) {
-				finalI18n = finalI18n.replace(`{${i}}`, params[i]);
-			}
-			return finalI18n;
 		};
 
 		$scope.getTypeNameByCode = (code: number) : string => {

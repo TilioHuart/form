@@ -6,6 +6,7 @@ import {Mix} from "entcore-toolkit";
 import {folderService} from "../services/FolderService";
 import {Folder, Folders} from "../models/Folder";
 import {Tree, Element} from "entcore/types/src/ts/workspace/model";
+import {i18nUtils} from "../utils";
 
 interface ViewModel {
     forms: Forms;
@@ -532,7 +533,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         }
         else {
             let params = [folder.nb_folder_children.toString(), folder.nb_form_children.toString()];
-            return $scope.getI18nWithParams("formulaire.folder.nbItems", params);
+            return i18nUtils.getWithParams("formulaire.folder.nbItems", params);
         }
     };
 
@@ -605,7 +606,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     const initMail = () : void => {
         vm.mail.link = `${window.location.origin}${window.location.pathname}#/form/${vm.forms.selected[0].id}`;
         vm.mail.subject = idiom.translate('formulaire.remind.default.subject');
-        vm.mail.body = $scope.getI18nWithParams('formulaire.remind.default.body', [vm.mail.link, vm.mail.link]);
+        vm.mail.body = i18nUtils.getWithParams('formulaire.remind.default.body', [vm.mail.link, vm.mail.link]);
     };
 
     init();

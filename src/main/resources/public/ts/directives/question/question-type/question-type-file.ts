@@ -15,7 +15,6 @@ export const questionTypeFile: Directive = ng.directive('questionTypeFile', () =
         },
         controllerAs: 'vm',
         bindToController: true,
-        replace: true,
         template: `
             <i18n style="color:grey">formulaire.question.file.empty</i18n>
         `,

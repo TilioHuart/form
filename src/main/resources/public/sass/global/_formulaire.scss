@@ -328,7 +328,7 @@ body.formulaire section.main {
               }
             }
 
-            .multiple, .editable, .anonymous, .notified, .rgpd {
+            .multiple, .editable, .anonymous, .notified, .collectData {
               font-size: 12px;
               display: flex;
               align-items: baseline;
@@ -348,7 +348,7 @@ body.formulaire section.main {
               }
             }
 
-            .rgpd {
+            .collectData {
               &-inputs{
                 margin: 2% 2% 2% 25px;
 

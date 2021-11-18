@@ -15,7 +15,6 @@ export const questionTypeShortanswer: Directive = ng.directive('questionTypeShor
         },
         controllerAs: 'vm',
         bindToController: true,
-        replace: true,
         template: `
             <textarea disabled i18n-placeholder="formulaire.question.type.SHORTANSWER"></textarea>
         `,

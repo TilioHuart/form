@@ -22,7 +22,6 @@ export const questionTypeMultipleanswer: Directive = ng.directive('questionTypeM
         },
         controllerAs: 'vm',
         bindToController: true,
-        replace: true,
         template: `
             <div class="eight twelve-mobile">
                 <div ng-repeat="choice in vm.question.choices.all">

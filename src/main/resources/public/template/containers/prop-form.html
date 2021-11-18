@@ -77,15 +77,15 @@
                                     <i18n class="subdescription" ng-if="vm.form.response_notified">formulaire.prop.notified.description</i18n>
                                 </div>
                             </div>
-                            <div class="rgpd" workflow="formulaire.rgpd">
+                            <div class="collectData" workflow="formulaire.rgpd">
                                 <div class="text">
-                                    <label for="isRgpd">
-                                        <input type="checkbox" id="isRgpd" ng-model="vm.form.rgpd" ng-disabled="vm.form.nb_responses > 0"
+                                    <label for="isCollectData">
+                                        <input type="checkbox" id="isCollectData" ng-model="vm.form.rgpd" ng-disabled="vm.form.nb_responses > 0"
                                                ng-style="{'cursor' : vm.form.nb_responses > 0 ? 'default' : 'pointer'}"/>
                                         <span ng-style="{'cursor' : vm.form.nb_responses > 0 ? 'default' : 'pointer'}"><i18n>formulaire.prop.rgpd.label</i18n></span>
                                     </label>
                                     <div ng-if="vm.form.rgpd">
-                                        <div class="rgpd-inputs">
+                                        <div class="collectData-inputs">
                                             <div class="goal">
                                                 <i18n>formulaire.prop.rgpd.goal</i18n>
                                                 <input type="text" class="ten nine-mobile" ng-model="vm.form.rgpd_goal"
@@ -95,9 +95,8 @@
                                                 <i18n>formulaire.prop.rgpd.validity</i18n>
                                             </div>
                                         </div>
-                                        <div class="rgpd-description">
-                                            <div class="bottom-spacing-three" bind-html="vm.getRgpdDescriptionIntro()"></div>
-                                            <div ng-repeat="delegate in vm.delegates.all" bind-html="vm.getRgpdDescriptionDelegates(delegate)"></div>
+                                        <div class="collectData-description">
+                                            <rgpd form="vm.form"></rgpd>
                                         </div>
                                     </div>
                                 </div>

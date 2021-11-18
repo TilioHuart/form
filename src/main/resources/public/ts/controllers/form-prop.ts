@@ -14,8 +14,6 @@ interface ViewModel {
     save() : Promise<void>;
     checkIntervalDates() : boolean;
     getImage() : void;
-    getRgpdDescriptionIntro() : string;
-    getRgpdDescriptionDelegates(delegate: Delegate) : string;
 }
 
 
@@ -74,23 +72,6 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
                 // }, 2000)
             }
             $scope.safeApply();
-        };
-
-        vm.getRgpdDescriptionIntro = () : string => {
-            let defaultGoal = "[" + idiom.translate('formulaire.prop.rgpd.goal') + "]";
-            let params = [vm.form.rgpd_goal ? vm.form.rgpd_goal : defaultGoal, getEndValidityDate()];
-            return $scope.getI18nWithParams('formulaire.prop.rgpd.description.intro', params);
-        };
-
-        vm.getRgpdDescriptionDelegates = (delegate) : string => {
-            let params = [delegate.entity, delegate.mail, delegate.address, delegate.zipcode];
-            return $scope.getI18nWithParams('formulaire.prop.rgpd.description.delegates', params);
-        };
-
-        const getEndValidityDate = () : string => {
-            let today = new Date();
-            today.setFullYear(today.getFullYear() + 1);
-            return today.toLocaleDateString();
         };
 
         init();

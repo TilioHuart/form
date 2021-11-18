@@ -15,7 +15,6 @@ export const questionTypeTime: Directive = ng.directive('questionTypeTime', () =
         },
         controllerAs: 'vm',
         bindToController: true,
-        replace: true,
         template: `
             <i18n style="color:grey">formulaire.question.time.empty</i18n>
         `,

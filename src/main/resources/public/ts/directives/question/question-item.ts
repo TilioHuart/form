@@ -23,7 +23,6 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
         },
         controllerAs: 'vm',
         bindToController: true,
-        replace: true,
         template: `
             <div class="question-item">                
                 <div class="domino" ng-class="{'questionError': !!!vm.question.title || vm.question.choices.length === 0 }">

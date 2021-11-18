@@ -15,7 +15,6 @@ export const questionTypeLonganswer: Directive = ng.directive('questionTypeLonga
         },
         controllerAs: 'vm',
         bindToController: true,
-        replace: true,
         template: `
             <textarea disabled i18n-placeholder="formulaire.question.type.LONGANSWER"></textarea>
         `,

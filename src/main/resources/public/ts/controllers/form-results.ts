@@ -12,7 +12,7 @@ import {
     Types
 } from "../models";
 import {Mix} from "entcore-toolkit";
-import {ColorUtils} from "../utils/color";
+import {ColorUtils} from "../utils";
 import {Exports, FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
 import http from "axios";
 

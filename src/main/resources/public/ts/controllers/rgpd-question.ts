@@ -11,9 +11,6 @@ interface ViewModel {
     $onInit() : Promise<void>;
     quit() : void;
     startForm() : Promise<void>;
-    displayDefaultOption() : string;
-    getRgpdDescriptionIntro() : string;
-    getRgpdDescriptionDelegates(delegate: Delegate) : string;
 }
 
 export const rgpdQuestionController = ng.controller('RgpdQuestionController', ['$scope',
@@ -51,23 +48,6 @@ export const rgpdQuestionController = ng.controller('RgpdQuestionController', ['
             $scope.redirectTo(`/form/${vm.form.id}/${distrib.id}/question/1`);
         }
         $scope.safeApply();
-    };
-
-    vm.getRgpdDescriptionIntro = () : string => {
-        let defaultGoal = "[" + idiom.translate('formulaire.prop.rgpd.goal') + "]";
-        let params = [vm.form.rgpd_goal ? vm.form.rgpd_goal : defaultGoal, getEndValidityDate()];
-        return $scope.getI18nWithParams('formulaire.prop.rgpd.description.intro', params);
-    };
-
-    vm.getRgpdDescriptionDelegates = (delegate) : string => {
-        let params = [delegate.entity, delegate.mail, delegate.address, delegate.zipcode];
-        return $scope.getI18nWithParams('formulaire.prop.rgpd.description.delegates', params);
-    };
-
-    const getEndValidityDate = () : string => {
-        let today = new Date();
-        today.setFullYear(today.getFullYear() + 1);
-        return today.toLocaleDateString();
     };
 
     $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_RGPD_QUESTION, () => { vm.$onInit() });
