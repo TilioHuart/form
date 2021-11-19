@@ -3,7 +3,7 @@
     <div class="margin-vertical-1"
          ng-repeat="distrib in vm.forms.selected[0].distributions.all | filter:{status:DistributionStatus.FINISHED} | orderBy:'date_response':reverse">
         <span>[[$index + 1]]. <i18n>formulaire.responded.date</i18n>[[displayDate(distrib.date_response)]]</span>
-        <i class="ieye spaced-left" ng-click="vm.openDistribution(distrib)" title="[[idiom.translate('formulaire.response.open')]]"></i>
+        <i class="i-eye spaced-left" ng-click="vm.openDistribution(distrib)" title="[[idiom.translate('formulaire.response.open')]]"></i>
     </div>
     <div class="action-buttons alone">
         <button class="cell cancel" ng-click="vm.closeMyResponses()"><i18n>formulaire.close</i18n></button>

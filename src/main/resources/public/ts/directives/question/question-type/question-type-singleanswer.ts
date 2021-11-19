@@ -28,10 +28,10 @@ export const questionTypeSingleanswer: Directive = ng.directive('questionTypeSin
                     <span>[[$index + 1]].</span>
                     <input type="text" class="ten nine-mobile" ng-model="choice.value" placeholder="Choix [[$index + 1]]" ng-if="!vm.question.selected" disabled>
                     <input type="text" class="ten nine-mobile" ng-model="choice.value" placeholder="Choix [[$index + 1]]" ng-if="vm.question.selected">
-                    <i class="cancel lg-icon" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
+                    <i class="i-cancel lg-icon" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
                 </div>
                 <div style="display: flex; justify-content: center;" ng-if="vm.question.selected && !vm.hasFormResponses">
-                    <i class="plus-circle lg-icon" ng-click="vm.createNewChoice()"></i>
+                    <i class="i-plus-circle lg-icon" ng-click="vm.createNewChoice()"></i>
                 </div>
             </div>
         `,

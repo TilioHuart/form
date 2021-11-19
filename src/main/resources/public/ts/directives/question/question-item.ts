@@ -28,8 +28,8 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
                 <div class="domino" ng-class="{'questionError': !vm.question.title || vm.question.choices.length === 0 }">
                     <div class="question-top" ng-class="{disabled: vm.hasFormResponses}">
                         <div class="dots" ng-if="vm.reorder && !vm.hasFormResponses">
-                            <i class="drag xl-icon"></i>
-                            <i class="drag xl-icon"></i>
+                            <i class="i-drag xl-icon"></i>
+                            <i class="i-drag xl-icon"></i>
                         </div>
                     </div>
                     <div class="focusable" id="[[vm.question.position]]">
@@ -42,10 +42,10 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
                             <div class="mandatory" ng-if="vm.question.question_type != vm.types.FREETEXT">
                                 <switch ng-model="vm.question.mandatory"></switch><i18n>formulaire.mandatory</i18n>
                             </div>
-                            <i class="duplicate lg-icon spaced-right" ng-click="duplicateQuestion()" title="[[vm.getTitle('duplicate')]]"></i>
-                            <i class="delete lg-icon spaced-right" ng-class="{disabled: vm.hasFormResponses}"
+                            <i class="i-duplicate lg-icon spaced-right" ng-click="duplicateQuestion()" title="[[vm.getTitle('duplicate')]]"></i>
+                            <i class="i-delete lg-icon spaced-right" ng-class="{disabled: vm.hasFormResponses}"
                             ng-click="deleteQuestion()" title="[[vm.getTitle('delete')]]"></i>
-                            <i class="undo lg-icon spaced-right" ng-click="undoQuestionChanges()" title="[[vm.getTitle('cancel')]]"></i>
+                            <i class="i-undo lg-icon spaced-right" ng-click="undoQuestionChanges()" title="[[vm.getTitle('cancel')]]"></i>
                         </div>
                     </div>
                 </div>

@@ -14,7 +14,7 @@
             <section class="cell" style="float:right;">
                 <div class="main-button">
                     <div class="date" ng-if="!isMobile">
-                        <i class="clock sm-icon spaced-right"></i><i18n>formulaire.form.edit.modified</i18n>[[displayDate(vm.form.date_modification)]]
+                        <i class="i-clock sm-icon spaced-right"></i><i18n>formulaire.form.edit.modified</i18n>[[displayDate(vm.form.date_modification)]]
                     </div>
                     <button class="cell cancel" ng-click="vm.return()"><i18n>formulaire.return</i18n></button>
                     <button class="cell dontSave" ng-class="{cancel: vm.form.nb_responses <= 0}"
@@ -27,7 +27,7 @@
             </section>
 
             <div class="cell date-saved-form" ng-if="isMobile">
-                <i class="clock sm-icon spaced-right"></i><i18n>formulaire.form.edit.modified</i18n>[[displayDate(vm.form.date_modification)]]
+                <i class="i-clock sm-icon spaced-right"></i><i18n>formulaire.form.edit.modified</i18n>[[displayDate(vm.form.date_modification)]]
             </div>
         </div>
 

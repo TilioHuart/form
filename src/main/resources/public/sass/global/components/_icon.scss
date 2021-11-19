@@ -86,111 +86,111 @@ i {
     content: '\e912';
   }
 
-  &.bell::before {
+  &.i-bell::before {
     font-family: 'material-icons';
     content: "\F09C";
   }
 
-  &.cancel::before {
+  &.i-cancel::before {
     font-family: 'material-icons';
     content: "\F156";
   }
 
-  &.chevron-down::before {
+  &.i-chevron-down::before {
     font-family: 'material-icons';
     content: "\F140";
   }
 
-  &.chevron-left::before {
+  &.i-chevron-left::before {
     font-family: 'material-icons';
     content: "\F141";
   }
 
-  &.chevron-right::before {
+  &.i-chevron-right::before {
     font-family: 'material-icons';
     content: "\F142";
   }
 
-  &.chevron-up::before {
+  &.i-chevron-up::before {
     font-family: 'material-icons';
     content: "\F143";
   }
 
-  &.clock::before {
+  &.i-clock::before {
     font-family: 'material-icons';
     content: "\F150";
     color: $formulaire-grey-dark;
   }
 
-  &.delete::before {
+  &.i-delete::before {
     font-family: 'material-icons';
     content: "\F1C0";
   }
 
-  &.download::before {
+  &.i-download::before {
     font-family: 'material-icons';
     content: "\F1DA";
     color: $formulaire-grey-dark;
   }
 
-  &.drag::before {
+  &.i-drag::before {
     font-family: 'material-icons';
     content: "\F1D8";
     color: $formulaire-grey;
   }
 
-  &.duplicate::before {
+  &.i-duplicate::before {
     font-family: 'material-icons';
     content: "\F18F";
   }
 
-  &.plus-circle::before {
+  &.i-plus-circle::before {
     font-family: 'material-icons';
     content: "\F417";
   }
 
-  &.send::before {
+  &.i-send::before {
     font-family: 'material-icons';
     content: "\F0108";
     color: $formulaire-grey-dark;
   }
 
-  &.share::before {
+  &.i-share::before {
     font-family: 'material-icons';
     content: "\F497";
     color: $formulaire-grey-dark;
   }
 
-  &.view-cards::before {
+  &.i-view-cards::before {
     font-family: 'material-icons';
     content: "\FE4D";
     color: $formulaire-grey-light;
   }
 
-  &.view-tab::before {
+  &.i-view-tab::before {
     font-family: 'material-icons';
     content: "\F572";
     color: $formulaire-grey-light;
   }
 
-  &.undo::before {
+  &.i-undo::before {
     font-family: 'material-icons';
     content: "\F54C";
   }
 
-  &.ifolder::before {
+  &.i-folder::before {
     font-family: 'material-icons';
     content: "\F24B";
     color: $formulaire-blue;
   }
 
-  &.ieye::before {
+  &.i-eye::before {
     font-family: 'material-icons';
     content: "\F208";
     color: $formulaire-blue;
   }
 
-  &.ieye:hover::before {
+  &.i-eye:hover::before {
     font-family: 'material-icons';
     content: "\F208";
     color: $formulaire-orange;

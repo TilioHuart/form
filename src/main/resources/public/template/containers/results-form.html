@@ -93,7 +93,7 @@
                                         vm.question.question_type == Types.TIME"
                                  bind-html="result.answer"></div>
                             <a ng-if="vm.question.question_type == Types.FILE" ng-click="vm.downloadFile(result.id)">
-                                <i class="download lg-icon spaced-right"></i> [[result.filename]]
+                                <i class="i-download lg-icon spaced-right"></i> [[result.filename]]
                             </a>
                         </div>
                     </div>
@@ -117,7 +117,7 @@
         <div class="buttons">
             <button class="cell" ng-click="vm.prev()" ng-disabled="vm.question.position == 1">
                 <i18n class="zero-mobile">formulaire.prev</i18n>
-                <i class="chevron-left zero-desktop"></i>
+                <i class="i-chevron-left zero-desktop"></i>
             </button>
             <div class="goto six">
                 <i18n class="one" style="margin-right:10px">formulaire.goTo</i18n>
@@ -130,7 +130,7 @@
             </div>
             <button class="cell" ng-click="vm.next()" ng-disabled="vm.last">
                 <i18n class="zero-mobile">formulaire.next</i18n>
-                <i class="chevron-right zero-desktop"></i>
+                <i class="i-chevron-right zero-desktop"></i>
             </button>
         </div>
     </div>

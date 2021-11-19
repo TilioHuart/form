@@ -91,10 +91,10 @@
 
         <!-- Folder title -->
         <div class="folder-info zero-mobile">
-            <div><h4><i class="ifolder lg-icon spaced-right"></i>[[vm.folder.name]]</h4></div>
+            <div><h4><i class="i-folder lg-icon spaced-right"></i>[[vm.folder.name]]</h4></div>
             <div>
-                <i class="view-cards xl-icon" ng-click="vm.display.grid = true" ng-class="{'selected': vm.display.grid}"></i>
-                <i class="view-tab xl-icon" ng-click="vm.display.grid = false" ng-class="{'selected': !vm.display.grid}"></i>
+                <i class="i-view-cards xl-icon" ng-click="vm.display.grid = true" ng-class="{'selected': vm.display.grid}"></i>
+                <i class="i-view-tab xl-icon" ng-click="vm.display.grid = false" ng-class="{'selected': !vm.display.grid}"></i>
             </div>
         </div>
 
@@ -124,9 +124,9 @@
                             <div class="data-bottom">
                                 <div class="count"><i18n>formulaire.responses.count</i18n> : [[form.nb_responses]]</div>
                                 <div class="icons">
-                                    <i class="send md-icon" ng-if="form.sent && !form.archived" title="[[vm.getTitle('sent')]]"></i>
-                                    <i class="share md-icon" ng-if="form.collab" title="[[vm.getTitle('shared')]]"></i>
-                                    <i class="bell md-icon" ng-if="form.reminded" title="[[vm.getTitle('reminded')]]"></i>
+                                    <i class="i-send md-icon" ng-if="form.sent && !form.archived" title="[[vm.getTitle('sent')]]"></i>
+                                    <i class="i-share md-icon" ng-if="form.collab" title="[[vm.getTitle('shared')]]"></i>
+                                    <i class="i-bell md-icon" ng-if="form.reminded" title="[[vm.getTitle('reminded')]]"></i>
                                 </div>
                             </div>
                         </div>
@@ -161,9 +161,9 @@
                     <td ng-click="form.selected=!form.selected">[[form.nb_responses]]</td>
                     <td ng-click="form.selected=!form.selected"><i18n>formulaire.modified</i18n>[[displayDate(form.date_modification)]]</td>
                     <td ng-click="form.selected=!form.selected">
-                        <i class="send md-icon" ng-if="form.sent && !form.archived" title="[[vm.getTitle('sent')]]"></i>
-                        <i class="share md-icon" ng-if="form.collab" title="[[vm.getTitle('shared')]]"></i>
-                        <i class="bell md-icon" ng-if="form.reminded" title="[[vm.getTitle('reminded')]]"></i>
+                        <i class="i-send md-icon" ng-if="form.sent && !form.archived" title="[[vm.getTitle('sent')]]"></i>
+                        <i class="i-share md-icon" ng-if="form.collab" title="[[vm.getTitle('shared')]]"></i>
+                        <i class="i-bell md-icon" ng-if="form.reminded" title="[[vm.getTitle('reminded')]]"></i>
                     </td>
                 </tr>
             </tbody>
