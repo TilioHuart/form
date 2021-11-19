@@ -264,7 +264,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.isFormOpened = () : boolean => {
         let dateOpeningOk = vm.forms.selected[0].date_opening < new Date();
-        let dateEndingOk = (!!!vm.forms.selected[0].date_ending || vm.forms.selected[0].date_ending > new Date());
+        let dateEndingOk = (!vm.forms.selected[0].date_ending || vm.forms.selected[0].date_ending > new Date());
         return dateOpeningOk && dateEndingOk;
     };
 
@@ -364,7 +364,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     vm.archiveForms = () : void => {
-        vm.display.warning = !!vm.forms.selected.find(form => form.sent === true);
+        vm.display.warning = vm.forms.selected.some(form => form.sent === true);
         template.open('lightbox', 'lightbox/form-confirm-archive');
         vm.display.lightbox.archive = true;
     };

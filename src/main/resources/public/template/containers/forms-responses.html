@@ -66,10 +66,10 @@
                             </div>
                             <div class="data-status">
                                 <div ng-if="!form.multiple">
-                                    <span ng-if="!!form.getDateResponse()" class="responded">
+                                    <span ng-if="form.getDateResponse()" class="responded">
                                         <i18n>formulaire.responded.date</i18n>[[displayDate(form.getDateResponse())]]
                                     </span>
-                                    <span ng-if="!!!form.getDateResponse()" class="notResponded">
+                                    <span ng-if="!form.getDateResponse()" class="notResponded">
                                         <i18n>formulaire.responded.waiting</i18n>
                                     </span>
                                 </div>
@@ -114,10 +114,10 @@
                 <td ng-click="form.selected=!form.selected"><i18n>formulaire.sentAt</i18n>[[displayDate(form.getDateSending())]]</td>
                 <td ng-click="form.selected=!form.selected">
                     <div ng-if="!form.multiple">
-                                <span ng-if="!!form.getDateResponse()" class="responded">
+                                <span ng-if="form.getDateResponse()" class="responded">
                                     <i18n>formulaire.responded.date</i18n>[[displayDate(form.getDateResponse())]]
                                 </span>
-                        <span ng-if="!!!form.getDateResponse()" class="notResponded">
+                        <span ng-if="!form.getDateResponse()" class="notResponded">
                                     <i18n>formulaire.responded.waiting</i18n>
                                 </span>
                     </div>

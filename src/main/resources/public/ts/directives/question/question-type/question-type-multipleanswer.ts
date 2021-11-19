@@ -51,7 +51,7 @@ export const questionTypeMultipleanswer: Directive = ng.directive('questionTypeM
             };
 
             vm.deleteChoice = async (index: number) : Promise<void> => {
-                if (!!vm.question.choices.all[index].id) {
+                if (vm.question.choices.all[index].id) {
                     await questionChoiceService.delete(vm.question.choices.all[index].id);
                 }
                 vm.question.choices.all.splice(index,1);

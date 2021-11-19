@@ -25,7 +25,7 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
         bindToController: true,
         template: `
             <div class="question-item">                
-                <div class="domino" ng-class="{'questionError': !!!vm.question.title || vm.question.choices.length === 0 }">
+                <div class="domino" ng-class="{'questionError': !vm.question.title || vm.question.choices.length === 0 }">
                     <div class="question-top" ng-class="{disabled: vm.hasFormResponses}">
                         <div class="dots" ng-if="vm.reorder && !vm.hasFormResponses">
                             <i class="drag xl-icon"></i>

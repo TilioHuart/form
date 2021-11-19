@@ -128,7 +128,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				$scope.currentPage = Pages.EDIT_FORM;
 				await $scope.getFormWithRights(params.formId);
 				if ($scope.canCreate() && $scope.hasShareRightContrib($scope.form)) {
-					if (!!$scope.form.id) {
+					if ($scope.form.id) {
 						$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_FORM_EDITOR);
 						template.open('main', 'containers/edit-form');
 					}

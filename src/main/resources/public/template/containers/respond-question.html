@@ -26,7 +26,7 @@
                 </div>
                 <div class="question-main">
                     <div ng-if="vm.question.question_type == Types.FREETEXT">
-                        <div ng-if="!!vm.question.statement" bind-html="vm.question.statement"></div>
+                        <div ng-if="vm.question.statement" bind-html="vm.question.statement"></div>
                     </div>
                     <div ng-if="vm.question.question_type == Types.SHORTANSWER">
                         <textarea ng-model="vm.response.answer" i18n-placeholder="formulaire.question.type.SHORTANSWER">

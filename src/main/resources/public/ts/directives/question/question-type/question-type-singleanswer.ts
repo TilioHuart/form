@@ -48,7 +48,7 @@ export const questionTypeSingleanswer: Directive = ng.directive('questionTypeSin
             };
 
             vm.deleteChoice = async (index: number) : Promise<void> => {
-                if (!!vm.question.choices.all[index].id) {
+                if (vm.question.choices.all[index].id) {
                     await questionChoiceService.delete(vm.question.choices.all[index].id);
                 }
                 vm.question.choices.all.splice(index,1);

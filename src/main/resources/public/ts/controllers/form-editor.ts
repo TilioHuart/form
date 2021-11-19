@@ -185,7 +185,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 let newQuestion = $scope.getDataIf200(await questionService.create(duplicata));
                 if (question.question_type === Types.SINGLEANSWER || question.question_type === Types.MULTIPLEANSWER) {
                     for (let choice of question.choices.all) {
-                        if (!!choice.value) {
+                        if (choice.value) {
                             await questionChoiceService.create(new QuestionChoice(newQuestion.id, choice.value));
                         }
                     }
@@ -223,7 +223,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.doDeleteQuestion = async () : Promise<void> => {
             try {
                 let question = vm.questions.selected[0];
-                if (!!question.id) {
+                if (question.id) {
                     await questionService.delete(question.id);
                 }
                 template.close('lightbox');
@@ -243,7 +243,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.undoQuestionChanges = async () => {
             if (vm.questions.selected.length > 0) {
                 let question = vm.questions.selected[0];
-                if (!!question.title || !!question.statement || question.mandatory || question.choices.all.length > 0) {
+                if (question.title || question.statement || question.mandatory || question.choices.all.length > 0) {
                     vm.dontSave = true;
                     template.open('lightbox', 'lightbox/question-confirm-undo');
                     vm.display.lightbox.undo = true;
@@ -317,7 +317,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 if (question.position != parseFloat(question.index) + 1) {
                     question.position = parseFloat(question.index) + 1;
                 }
-                if (!!!question.position) { finished = false }
+                if (!question.position) { finished = false }
             });
             if (finished) {
                 rePositionQuestions();
@@ -440,7 +440,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 rePositionQuestions();
                 for (let question of vm.questions.all) {
                     if (!question.title && !question.statement && !question.mandatory && question.choices.all.length <= 0) {
-                        if (!!question.id) {
+                        if (question.id) {
                             question = $scope.getDataIf200(await questionService.get(question.id));
                         }
                     }
@@ -449,7 +449,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         question.id = newId;
                         let registeredChoices = [];
                         for (let choice of question.choices.all) {
-                            if (!!choice.value && !registeredChoices.find(c => c === choice.value) ) {
+                            if (choice.value && !registeredChoices.find(c => c === choice.value) ) {
                                 choice.question_id = newId;
                                 choice.id = $scope.getDataIf200(await questionChoiceService.save(choice)).id;
                                 registeredChoices.push(choice.value);

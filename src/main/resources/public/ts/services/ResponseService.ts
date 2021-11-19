@@ -63,7 +63,7 @@ export const responseService: ResponseService = {
     },
 
     async save(response: Response, questionType?: number) : Promise<AxiosResponse> {
-        if (!!!response.answer) {
+        if (!response.answer) {
             response.answer = "";
         }
         else {

@@ -69,8 +69,8 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             if (responses.length > 0) {
                 vm.response = responses[0];
             }
-            if (!!!vm.response.question_id) { vm.response.question_id = vm.question.id; }
-            if (!!!vm.response.distribution_id) { vm.response.distribution_id = vm.distribution.id; }
+            if (!vm.response.question_id) { vm.response.question_id = vm.question.id; }
+            if (!vm.response.distribution_id) { vm.response.distribution_id = vm.distribution.id; }
         }
         if (vm.question.question_type === Types.TIME) { formatTime() }
         if (vm.question.question_type === Types.FILE) {
@@ -157,7 +157,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             return true;
         }
         if (vm.question.question_type == Types.SINGLEANSWER) {
-            if (!!!vm.response.choice_id) {
+            if (!vm.response.choice_id) {
                 vm.response.answer = "";
             }
             else {
@@ -184,7 +184,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             await responseFileService.deleteAll(vm.response.id);
             for (let i = 0; i < vm.files.length; i++) {
                 let filename = vm.files[i].name;
-                if (!!vm.files[i].type && !$scope.form.anonymous) {
+                if (vm.files[i].type && !$scope.form.anonymous) {
                     filename = model.me.firstName + model.me.lastName + "_" + filename;
                 }
                 let file = new FormData();
@@ -198,7 +198,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
     };
 
     const formatTime = () : void => {
-        if (!!vm.response.answer) {
+        if (vm.response.answer) {
             vm.response.answer = new Date("January 01 1970 " + vm.response.answer);
         }
     };

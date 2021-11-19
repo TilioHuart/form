@@ -18,8 +18,8 @@ export const questionTypeFreetext: Directive = ng.directive('questionTypeFreetex
         template: `
             <div>
                 <div ng-if="!vm.question.selected">
-                    <div ng-if="!!vm.question.statement" bind-html="vm.question.statement"></div>
-                    <textarea disabled ng-if="!!!vm.question.statement" i18n-placeholder="formulaire.question.type.FREETEXT"></textarea>
+                    <div ng-if="vm.question.statement" bind-html="vm.question.statement"></div>
+                    <textarea disabled ng-if="!vm.question.statement" i18n-placeholder="formulaire.question.type.FREETEXT"></textarea>
                 </div>
                 <div ng-if="vm.question.selected">
                     <editor ng-model="vm.question.statement"></editor>

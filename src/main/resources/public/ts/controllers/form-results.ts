@@ -140,7 +140,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             let nbEmptyResponse = distribs.all.filter(d => !resultsDistribIds.includes(d.id)).length;
             noResponseChoice.value = idiom.translate('formulaire.response.empty');
             noResponseChoice.nbResponses =
-                nbEmptyResponse + results.all.filter(r => !!!r.choice_id && finishedDistribIds.includes(r.distribution_id)).length;
+                nbEmptyResponse + results.all.filter(r => !r.choice_id && finishedDistribIds.includes(r.distribution_id)).length;
 
             question.choices.all.push(noResponseChoice);
 
@@ -278,7 +278,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             for (let choice of choices) {
                 series.push(choice.nbResponses); // Fill data
                 let i = vm.question.choices.all.indexOf(choice) + 1;
-                !!!choice.id ? labels.push(idiom.translate('formulaire.response.empty')) : labels.push(i18nValue + " " + i); // Fill labels
+                !choice.id ? labels.push(idiom.translate('formulaire.response.empty')) : labels.push(i18nValue + " " + i); // Fill labels
             }
 
             // Generate options with labels and colors
@@ -337,7 +337,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             for (let choice of choices) {
                 series.push(choice.nbResponses); // Fill data
                 // Fill labels
-                !!!choice.id ?
+                !choice.id ?
                     labels.push(idiom.translate('formulaire.response.empty')) :
                     labels.push(choice.value.substring(0, 40) + (choice.value.length > 40 ? "..." : ""));
             }
