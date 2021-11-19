@@ -157,7 +157,7 @@
   "formulaire.question.type.DATE": "Date",
   "formulaire.question.type.TIME": "Heure",
   "formulaire.question.type.FILE": "Dépôt de fichier",
-  "formulaire.question.type.description.FREETEXT": "Saisi d'un texte à afficher au répondant (ex : introduction d'une partie, ...)",
+  "formulaire.question.type.description.FREETEXT": "Saisie d'un texte à afficher au répondant (ex : introduction d'une partie, ...)",
   "formulaire.question.type.description.SHORTANSWER":" Question permettant une réponse texte courte sans mise en page",
   "formulaire.question.type.description.LONGANSWER": "Question permettant une réponse plus longue avec une mise en page",
   "formulaire.question.type.description.SINGLEANSWER":"Menu déroulant permettant au répondant de choisir une réponse parmi une liste",
