@@ -20,6 +20,7 @@ interface ViewModel {
     selectedIndex: Array<boolean>;
     files: File[];
 
+    $onInit() : Promise<void>;
     prev() : Promise<void>;
     next() : Promise<void>;
     goToRecap() : Promise<void>;
@@ -40,7 +41,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
     vm.selectedIndex = new Array<boolean>();
     vm.files = [];
 
-    const init = async () : Promise<void> => {
+    vm.$onInit = async () : Promise<void> => {
         vm.form = $scope.form;
         vm.distribution = $scope.distribution;
         vm.question = $scope.question;
@@ -202,7 +203,5 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         }
     };
 
-    init();
-
-    $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_RESPOND_QUESTION, () => { init() });
+    $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_RESPOND_QUESTION, () => { vm.$onInit() });
 }]);

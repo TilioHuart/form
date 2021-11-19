@@ -38,6 +38,7 @@ interface ViewModel {
     }
     loading: boolean;
 
+    $onInit() : Promise<void>;
     export(typeExport: Exports) : void;
     doExport() : void;
     downloadFile(responseId: number) : void;
@@ -80,7 +81,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         };
         vm.loading = true;
 
-        const init = async () : Promise<void> => {
+        vm.$onInit = async () : Promise<void> => {
             vm.form = $scope.form;
             vm.question = Mix.castAs(Question, $scope.question);
             vm.navigatorValue = vm.question.position;
@@ -139,7 +140,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             let nbEmptyResponse = distribs.all.filter(d => !resultsDistribIds.includes(d.id)).length;
             noResponseChoice.value = idiom.translate('formulaire.response.empty');
             noResponseChoice.nbResponses =
-                nbEmptyResponse + results.all.filter(r => !r.choice_id && finishedDistribIds.includes(r.distribution_id)).length;
+                nbEmptyResponse + results.all.filter(r => !!!r.choice_id && finishedDistribIds.includes(r.distribution_id)).length;
 
             question.choices.all.push(noResponseChoice);
 
@@ -407,7 +408,5 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             return response.data._id;
         };
 
-        init();
-
-        $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_FORM_RESULTS, () => { init() });
+        $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_FORM_RESULTS, () => { vm.$onInit() });
     }]);

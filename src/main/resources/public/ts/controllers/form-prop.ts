@@ -14,6 +14,7 @@ interface ViewModel {
         date_ending: boolean
     }
 
+    $onInit() : Promise<void>;
     save() : Promise<void>;
     checkIntervalDates() : boolean;
     getImage() : void;
@@ -31,7 +32,7 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
             date_ending: false
         };
 
-        const init = async () : Promise<void> => {
+        vm.$onInit = async () : Promise<void> => {
             vm.form = $scope.form;
             vm.folder = $scope.folder;
             await vm.delegates.sync();
@@ -78,7 +79,5 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
             $scope.safeApply();
         };
 
-        init();
-
-        $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_FORM_PROP, () => { init() });
+        $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_FORM_PROP, () => { vm.$onInit() });
     }]);
