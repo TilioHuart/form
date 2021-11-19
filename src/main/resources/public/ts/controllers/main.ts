@@ -178,7 +178,15 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				await $scope.getFormWithRights(params.formId);
 				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form) && !$scope.form.archived) {
 					if ($scope.form.date_opening < new Date() && ($scope.form.date_ending ? ($scope.form.date_ending > new Date()) : true)) {
-						$scope.distribution = $scope.getDataIf200(await distributionService.get(params.distributionId));
+						if (params.distributionId == "new") {
+							let distribs = $scope.getDataIf200(await distributionService.listByFormAndResponder($scope.form.id));
+							let distrib = distribs.filter(d => d.status == DistributionStatus.TO_DO)[0];
+							$scope.distribution = distrib ? distrib : $scope.getDataIf200(await distributionService.create($scope.form.id, distribs[0]));
+						}
+						else {
+							$scope.distribution = $scope.getDataIf200(await distributionService.get(params.distributionId));
+						}
+
 						if ($scope.distribution) {
 							let conditionsOk = false;
 							if ($scope.distribution.status && $scope.distribution.status != DistributionStatus.FINISHED) {

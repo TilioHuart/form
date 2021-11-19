@@ -119,10 +119,10 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
     vm.saveAndQuit = async () : Promise<void> => {
         if (await saveResponses()) {
-            if (vm.distribution.status == DistributionStatus.TO_DO) {
-                vm.distribution.status = DistributionStatus.IN_PROGRESS;
-                await distributionService.update(vm.distribution);
-            }
+            // if (vm.distribution.status == DistributionStatus.TO_DO) {
+            //     vm.distribution.status = DistributionStatus.IN_PROGRESS;
+            //     await distributionService.update(vm.distribution);
+            // }
             notify.success(idiom.translate('formulaire.success.responses.save'));
             window.setTimeout(function () { $scope.redirectTo(`/list/responses`); }, 1000);
         }
