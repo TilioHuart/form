@@ -106,8 +106,8 @@
   "formulaire.forms.sent": "Formulaires envoyés",
   "formulaire.forms.archived": "Corbeille",
   "formulaire.forms.empty.mine": "Ce dossier est vide. Vous pouver créer un nouveau formulaire dès maintenant.",
-  "formulaire.forms.empty.shared": "Ce dossier est vide. Vous retrouverez ici les formulaires qui vous seront partagés.",
-  "formulaire.forms.empty.archived": "Ce dossier est vide. Vous retrouverez ici vos formulaires supprimés.",
+  "formulaire.forms.empty.shared": "Aucun formulaire ne vous a encore été partagés.",
+  "formulaire.forms.empty.archived": "Votre corbeille est vide.",
 
   "formulaire.folder.name": "Nom du dossier",
   "formulaire.folder.nbFolderChildren" : "Nombre de sous-dossiers",
