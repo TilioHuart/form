@@ -1,6 +1,6 @@
 import {idiom, moment, ng, notify} from 'entcore';
 import http, {AxiosResponse} from 'axios';
-import {Form} from '../models/Form';
+import {Form} from '../models';
 
 export interface FormService {
     list() : Promise<AxiosResponse>;
@@ -8,8 +8,8 @@ export interface FormService {
     get(formId: number) : Promise<AxiosResponse>;
     save(form: Form) : Promise<AxiosResponse>;
     create(form: Form) : Promise<AxiosResponse>;
-    createMultiple(forms: Array<Form>) : Promise<AxiosResponse>;
-    duplicate(formIds: Array<number>, folderId: number) : Promise<AxiosResponse>;
+    createMultiple(forms: Form[]) : Promise<AxiosResponse>;
+    duplicate(formIds: number[], folderId: number) : Promise<AxiosResponse>;
     update(form: Form) : Promise<AxiosResponse>;
     archive(form: Form, destinationFolderId: number) : Promise<AxiosResponse>;
     restore(form: Form, destinationFolderId: number) : Promise<AxiosResponse>;
@@ -70,7 +70,7 @@ export const formService: FormService = {
         }
     },
 
-    async createMultiple(forms: Array<Form>) : Promise<AxiosResponse> {
+    async createMultiple(forms: Form[]) : Promise<AxiosResponse> {
         try {
             return http.post('/formulaire/forms/multiple', forms);
         } catch (err) {
@@ -79,7 +79,7 @@ export const formService: FormService = {
         }
     },
 
-    async duplicate(formIds: Array<number>, folderId: number) : Promise<AxiosResponse> {
+    async duplicate(formIds: number[], folderId: number) : Promise<AxiosResponse> {
         try {
             return http.post(`/formulaire/forms/duplicate/${folderId}`, formIds);
         } catch (err) {

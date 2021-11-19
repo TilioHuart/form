@@ -9,7 +9,7 @@ export interface QuestionService {
     getByPosition(idForm: number, position: number) : Promise<AxiosResponse>;
     save(question: Question) : Promise<AxiosResponse>;
     create(question: Question) : Promise<AxiosResponse>;
-    createMultiple(questions: Array<Question>, formId: number) : Promise<AxiosResponse>;
+    createMultiple(questions: Question[], formId: number) : Promise<AxiosResponse>;
     update(question: Question) : Promise<AxiosResponse>;
     delete(questionId: number) : Promise<AxiosResponse>;
 }
@@ -65,7 +65,7 @@ export const questionService: QuestionService = {
         }
     },
 
-    async createMultiple(questions: Array<Question>, formId : number) : Promise<AxiosResponse> {
+    async createMultiple(questions: Question[], formId : number) : Promise<AxiosResponse> {
         try {
             return http.post(`/formulaire/forms/${formId}/questions/m`, questions);
         } catch (err) {

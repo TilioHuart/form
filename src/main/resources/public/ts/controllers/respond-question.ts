@@ -17,7 +17,7 @@ interface ViewModel {
     distribution: Distribution;
     form: Form;
     nbQuestions: number;
-    selectedIndex: Array<boolean>;
+    selectedIndex: boolean[];
     files: File[];
 
     $onInit() : Promise<void>;
@@ -38,7 +38,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
     vm.distribution = new Distribution();
     vm.form = new Form();
     vm.nbQuestions = 1;
-    vm.selectedIndex = new Array<boolean>();
+    vm.selectedIndex = [];
     vm.files = [];
 
     vm.$onInit = async () : Promise<void> => {
