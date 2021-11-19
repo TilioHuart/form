@@ -22,8 +22,10 @@ interface ViewModel {
         }
     };
 
+    $onInit() : Promise<void>;
+
     // Editor functions
-    saveAll() : Promise<void>;
+    saveAll(displaySuccess?: boolean) : Promise<void>;
     return() : void;
     createNewQuestion() : void;
     doCreateNewQuestion(code: number) : void;
@@ -47,7 +49,6 @@ interface ViewModel {
     // Preview functions
     preview() : void;
     backToEditor() : void;
-    finish() : void;
     prev() : void;
     next() : void;
     displayDefaultOption() : string;
@@ -74,33 +75,32 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
         };
 
-        const init = async () : Promise<void> => {
+        vm.$onInit = async () : Promise<void> => {
             vm.form = $scope.form;
             vm.form.nb_responses = vm.form.id ? $scope.getDataIf200(await distributionService.count(vm.form.id)).count : 0;
             await vm.questions.sync(vm.form.id);
             vm.newQuestion.form_id = vm.form.id;
             vm.dontSave = false;
             vm.nbQuestions = vm.questions.all.length;
-            vm.last = vm.question.position === vm.nbQuestions;
             $scope.safeApply();
         };
 
 
         // Global functions
 
-        vm.saveAll = async () : Promise<void> => {
+        vm.saveAll = async (displaySuccess= true) : Promise<void> => {
             vm.dontSave = true;
-            let wrongQuestions = vm.questions.filter(question => !!!question.title); // TODO check more than just titles later
+            let wrongQuestions = vm.questions.filter(question => !question.title); // TODO check more than just titles later
             if (wrongQuestions.length > 0) {
                 notify.error(idiom.translate('formulaire.question.save.missing.field'));
             }
-            await saveQuestions(wrongQuestions.length <= 0);
+            await saveQuestions(displaySuccess && wrongQuestions.length <= 0);
             vm.dontSave = false;
         };
 
         vm.return = () : void => {
             vm.dontSave = true;
-            let wrongQuestions = vm.questions.filter(question => !!!question.title); // TODO check more than just titles later
+            let wrongQuestions = vm.questions.filter(question => !question.title); // TODO check more than just titles later
             if (wrongQuestions.length > 0) {
                 notify.error(idiom.translate('formulaire.question.save.missing.field'));
                 vm.dontSave = false;
@@ -323,7 +323,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         // Preview functions
 
         vm.preview = async () : Promise<void> => {
-            await vm.saveAll();
+            await vm.saveAll(false);
             vm.responses = new Responses();
             for (let question of vm.questions.all) {
                 let response = new Response();
@@ -334,6 +334,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
             vm.question = vm.questions.all[0];
             vm.response = vm.responses.all[0];
+            vm.last = vm.question.position === vm.nbQuestions;
             $scope.currentPage = Pages.PREVIEW;
             $scope.safeApply();
         }
@@ -341,10 +342,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.backToEditor = () : void => {
             $scope.currentPage = Pages.EDIT_FORM;
             $scope.safeApply();
-        };
-
-        vm.finish = () : void => {
-            $scope.redirectTo('/list');
         };
 
         vm.prev = () : void => {
@@ -385,7 +382,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             try {
                 rePositionQuestions();
                 for (let question of vm.questions.all) {
-                    if (!!!question.title && !!!question.statement && !question.mandatory && question.choices.all.length <= 0) {
+                    if (!question.title && !question.statement && !question.mandatory && question.choices.all.length <= 0) {
                         if (!!question.id) {
                             question = $scope.getDataIf200(await questionService.get(question.id));
                         }
@@ -416,7 +413,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         const onClickQuestion = async (event) : Promise<void> => {
             if (!vm.dontSave && $scope.currentPage === Pages.EDIT_FORM) {
                 let questionPos: number = isInFocusable(event.target);
-                if (!!questionPos && questionPos > 0) {
+                if (questionPos && questionPos > 0) {
                     let question = vm.questions.all.filter(question => question.position == questionPos)[0];
                     if (!question.selected) {
                         if (vm.questions.selected.length > 0) {
@@ -434,29 +431,27 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         };
 
         const isInShowErrorZone = (el) : boolean => {
-            if (!!!el) { return true; }
+            if (!el) { return true; }
             else if (el.classList && el.classList.contains("dontShowError")) { return false; }
             return isInShowErrorZone(el.parentNode);
         };
 
         const isInFocusable = (el) : number => {
-            if (!!!el) { return -1; }
+            if (!el) { return -1; }
             else if (el.classList && el.classList.contains("focusable")) { return el.id; }
             return isInFocusable(el.parentNode);
         };
 
         const isInDontSave = (el) : boolean => {
-            if (!!!el) { return false; }
+            if (!el) { return false; }
             else if (el.classList && el.classList.contains("dontSave")) { return true; }
             return isInDontSave(el.parentNode);
         };
-
-        init();
 
         document.onclick = e => { onClickQuestion(e); };
 
         $scope.$on(FORMULAIRE_QUESTION_EMIT_EVENT.DUPLICATE, () => { vm.duplicateQuestion() });
         $scope.$on(FORMULAIRE_QUESTION_EMIT_EVENT.DELETE, () => { vm.deleteQuestion() });
         $scope.$on(FORMULAIRE_QUESTION_EMIT_EVENT.UNDO, () => { vm.undoQuestionChanges() });
-        $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_FORM_EDITOR, () => { init() });
+        $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_FORM_EDITOR, () => { vm.$onInit() });
     }]);

@@ -1,4 +1,4 @@
-import {Behaviours, idiom, model, ng, template} from 'entcore';
+import {Behaviours, idiom, init, model, ng, template} from 'entcore';
 import {Distribution, DistributionStatus, Form, Question, QuestionTypes, Types} from "../models";
 import {distributionService, formService, questionService} from "../services";
 import {AxiosResponse} from "axios";
@@ -14,7 +14,7 @@ import {
 import {i18nUtils} from "../utils";
 import {Folder} from "../models/Folder";
 
-export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', 'FormService',
+export const mainController = ng.controller('MainController', ['$scope', 'route', '$location',
 	($scope, route, $location) => {
 		$scope.idiom = idiom;
 		$scope.template = template;
@@ -36,7 +36,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.folder = $scope.folder ? $scope.folder : new Folder();
 		$scope.isMobile = window.screen.width <= 500;
 
-		const $onInit = async () : Promise<void> => {
+		const init = async () : Promise<void> => {
 			await $scope.questionTypes.sync();
 		}
 
@@ -350,4 +350,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.hasShareRightResponse = (form : Form) => {
 			return form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.comment.right);
 		};
+
+		init();
 }]);

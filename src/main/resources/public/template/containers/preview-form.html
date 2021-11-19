@@ -59,10 +59,10 @@
             </div>
         </div>
         <div class="buttons">
-            <button class="cell" ng-if="vm.question.position <= 1" ng-disabled="true"><i18n>formulaire.prev</i18n></button>
+            <button class="cell dontSave" ng-if="vm.question.position <= 1" ng-disabled="true"><i18n>formulaire.prev</i18n></button>
             <button class="cell cancel dontSave" ng-click="vm.prev()" ng-if="vm.question.position > 1"><i18n>formulaire.prev</i18n></button>
-            <button class="cell" ng-click="vm.next()" ng-if="!vm.last"><i18n>formulaire.next</i18n></button>
-            <button class="cell" ng-click="vm.finish()" ng-if="vm.last"><i18n>formulaire.finish</i18n></button>
+            <button class="cell dontSave" ng-click="vm.next()" ng-if="!vm.last"><i18n>formulaire.next</i18n></button>
+            <button class="cell dontSave" ng-click="vm.backToEditor()" ng-if="vm.last"><i18n>formulaire.finish</i18n></button>
         </div>
     </div>
 </div>
