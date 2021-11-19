@@ -282,6 +282,12 @@ body.formulaire section.main {
     }
   }
 
+  .folders-tree {
+    .disabled-color {
+      cursor: default;
+    }
+  }
+
   // Prop-form
 
   .prop-form {

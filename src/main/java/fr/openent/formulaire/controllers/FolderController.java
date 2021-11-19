@@ -1,5 +1,6 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.helpers.RenderHelper;
 import fr.openent.formulaire.helpers.FutureHelper;
 import fr.openent.formulaire.security.CreationRight;
@@ -150,7 +151,7 @@ public class FolderController extends ControllerHelper {
 
                             // Change all children forms relation folder (replace with "3")
                             JsonArray formIds = getIds(forms);
-                            String parentId = folders.getJsonObject(0).getInteger("parent_id").toString();
+                            Integer parentId = folders.getJsonObject(0).getInteger("parent_id");
 
                             if (formIds.size() > 0) {
                                 relFormFolderService.update(user, formIds, "3", updateRelEvent -> {
@@ -181,36 +182,36 @@ public class FolderController extends ControllerHelper {
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void move(HttpServerRequest request) {
-        String targetFolderId = request.getParam("folderId");
+        Integer targetFolderId = Integer.parseInt(request.getParam("folderId"));
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
                 RequestUtils.bodyToJsonArray(request, folders -> {
-                    String oldFolderId = folders.getJsonObject(0).getInteger("parent_id").toString();
+                    Integer oldFolderId = folders.getJsonObject(0).getInteger("parent_id");
                     JsonArray folderIds = getIds(folders);
-                    folderService.move(folderIds, targetFolderId, moveEvent -> {
+                    folderService.move(folderIds, targetFolderId.toString(), moveEvent -> {
                         if (moveEvent.isLeft()) {
                             log.error("[Formulaire@moveFolder] Error in moving folders " + folderIds);
                             RenderHelper.badRequest(request, moveEvent);
                             return;
                         }
 
-                        if (!targetFolderId.equals("0")) { // We do not sync root folder counts (useless)
-                            folderService.syncNbChildren(user, targetFolderId, syncEvent -> {
+                        if (targetFolderId != Formulaire.ID_ROOT_FOLDER) { // We do not sync root folder counts (useless)
+                            folderService.syncNbChildren(user, targetFolderId.toString(), syncEvent -> {
                                 if (syncEvent.isLeft()) {
                                     log.error("[Formulaire@moveFolder] Error in sync children counts for folder " + targetFolderId);
                                     RenderHelper.badRequest(request, syncEvent);
                                     return;
                                 }
-                                if (!oldFolderId.equals("0")) { // We do not sync root folder counts (useless)
-                                    folderService.syncNbChildren(user, oldFolderId, defaultResponseHandler(request));
+                                if (oldFolderId != Formulaire.ID_ROOT_FOLDER) { // We do not sync root folder counts (useless)
+                                    folderService.syncNbChildren(user, oldFolderId.toString(), defaultResponseHandler(request));
                                 }
                                 else {
                                     renderJson(request, syncEvent.right().getValue());
                                 }
                             });
                         }
-                        else if (!oldFolderId.equals("0")) { // We do not sync root folder counts (useless)
-                            folderService.syncNbChildren(user, oldFolderId, defaultResponseHandler(request));
+                        else if (oldFolderId != Formulaire.ID_ROOT_FOLDER) { // We do not sync root folder counts (useless)
+                            folderService.syncNbChildren(user, oldFolderId.toString(), defaultResponseHandler(request));
                         }
                         else {
                             renderJson(request, new JsonObject(), 200);
@@ -233,7 +234,7 @@ public class FolderController extends ControllerHelper {
         return ids;
     }
 
-    private void deleteFolders(HttpServerRequest request, UserInfos user, String parentId, JsonArray folderIds) {
+    private void deleteFolders(HttpServerRequest request, UserInfos user, Integer parentId, JsonArray folderIds) {
         // Delete folders (and their children by cascade effect)
         folderService.delete(folderIds, deleteEvent -> {
             if (deleteEvent.isLeft()) {
@@ -243,8 +244,8 @@ public class FolderController extends ControllerHelper {
             }
 
             // Sync parent folder children counts
-            if (!parentId.equals("0")) { // We do not sync root folder counts (useless)
-                folderService.syncNbChildren(user, parentId, defaultResponseHandler(request));
+            if (parentId != Formulaire.ID_ROOT_FOLDER) { // We do not sync root folder counts (useless)
+                folderService.syncNbChildren(user, parentId.toString(), defaultResponseHandler(request));
             }
         });
     }

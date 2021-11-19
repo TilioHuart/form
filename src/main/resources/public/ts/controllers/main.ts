@@ -12,6 +12,7 @@ import {
 	Pages
 } from "../core/enums";
 import {i18nUtils} from "../utils";
+import {Folder} from "../models/Folder";
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location', 'FormService',
 	($scope, route, $location) => {
@@ -32,9 +33,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.distribution = new Distribution();
 		$scope.question = new Question();
 		$scope.questionTypes = new QuestionTypes();
+		$scope.folder = $scope.folder ? $scope.folder : new Folder();
 		$scope.isMobile = window.screen.width <= 500;
 
-		const init = async () : Promise<void> => {
+		const $onInit = async () : Promise<void> => {
 			await $scope.questionTypes.sync();
 		}
 
@@ -312,6 +314,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		};
 
 		$scope.$on(FORMULAIRE_EMIT_EVENT.REFRESH, () => { $scope.safeApply() });
+		$scope.$on(FORMULAIRE_EMIT_EVENT.UPDATE_FOLDER, (event, data) => { $scope.folder = data });
 
 
 		// Rights
@@ -347,6 +350,4 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.hasShareRightResponse = (form : Form) => {
 			return form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.comment.right);
 		};
-
-		init();
 }]);

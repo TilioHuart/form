@@ -66,7 +66,8 @@ public class Formulaire extends BaseServer {
 
 	public static final String ARCHIVE_ZIP_NAME = "Fichiers déposés";
 
-	public static final Integer NB_NEW_LINES = 10;
+	public static final int ID_ROOT_FOLDER = 1;
+	public static final int NB_NEW_LINES = 10;
 	public static final String DELETED_USER = "Utilisateur supprimé";
 	public static final String DELETED_USER_FILE = "utilisateurSupprimé_Fichier";
 	public static final String UNKNOW_STRUCTURE = "Structure inconnue";

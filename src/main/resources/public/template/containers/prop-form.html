@@ -4,6 +4,8 @@
             <div>
                 <h1>
                     <a href="#/"><i18n>formulaire.title</i18n></a>
+                    <span ng-if="vm.folder.parent_id && vm.folder.parent_id != 1"><i18n>formulaire.separator</i18n><i18n>formulaire.dots</i18n></span>
+                    <span ng-if="vm.folder.id && vm.folder.id != 1"><i18n>formulaire.separator</i18n>[[vm.folder.name]]</span>
                 </h1>
             </div>
         </section>

@@ -1,5 +1,5 @@
-import {idiom, ng} from "entcore";
-import {Delegate, Delegates, Distributions, DistributionStatus, Form} from "../models";
+import {ng} from "entcore";
+import {Delegates, Distributions, DistributionStatus, Form} from "../models";
 import {FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
 import {distributionService} from "../services";
 

@@ -1,11 +1,13 @@
-import {idiom, ng} from 'entcore';
+import {ng} from 'entcore';
 import {distributionService, formService} from "../services";
-import {Delegate, Form} from "../models";
+import {Form} from "../models";
 import {FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
-import {Delegates} from "../models/Delegate";
+import {Delegates} from "../models";
+import {Folder} from "../models/Folder";
 
 interface ViewModel {
     form: Form;
+    folder: Folder;
     delegates: Delegates;
     display: {
         date_ending: boolean
@@ -22,6 +24,7 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
 
         const vm: ViewModel = this;
         vm.form = new Form();
+        vm.folder = new Folder();
         vm.delegates = new Delegates();
         vm.display = {
             date_ending: false
@@ -29,9 +32,11 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
 
         const init = async () : Promise<void> => {
             vm.form = $scope.form;
+            vm.folder = $scope.folder;
             await vm.delegates.sync();
             vm.display.date_ending = !!vm.form.date_ending;
-            vm.form.nb_responses = !!vm.form.id ? $scope.getDataIf200(await distributionService.count(vm.form.id)).count : 0;
+            vm.form.nb_responses = vm.form.id ? $scope.getDataIf200(await distributionService.count(vm.form.id)).count : 0;
+            vm.form.folder_id = vm.folder.id;
             $scope.safeApply();
         };
 
@@ -39,18 +44,19 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
 
         vm.save = async () : Promise<void> => {
             if (vm.form.title && vm.checkIntervalDates()) {
-                let form = new Form();
-                let data = $scope.getDataIf200(await formService.save(vm.form));
-                console.log(data.id);
-                form.setFromJson(data);
-                $scope.redirectTo(`/form/${form.id}/edit`);
+                // let form = new Form();
+                // let data = $scope.getDataIf200(await formService.save(vm.form));
+                // form.setFromJson(data);
+
+                vm.form = $scope.getDataIf200(await formService.save(vm.form));
+                $scope.redirectTo(`/form/${vm.form.id}/edit`);
                 $scope.safeApply();
             }
         };
 
         vm.checkIntervalDates = () : boolean => {
             if (vm.display.date_ending) {
-                if (!!!vm.form.date_ending) {
+                if (!vm.form.date_ending) {
                     vm.form.date_ending = new Date(vm.form.date_opening);
                     vm.form.date_ending.setFullYear(vm.form.date_ending.getFullYear() + 1);
                 }

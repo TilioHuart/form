@@ -111,7 +111,15 @@ export class Folders extends Selection<Folder> {
         return [];
     };
 
-    getTreeElement = (folderId: number, elem = this.trees[0]) : Element => {
+    getTreeElement = (folderId: number) : Element => {
+        let elem = null;
+        for (let tree of this.trees) {
+            elem = !elem ? this.getElementByTree(folderId, tree) : elem;
+        }
+        return elem;
+    };
+
+    getElementByTree = (folderId: number, elem = this.trees[0]) : Element => {
         if (elem.id === folderId) {
             return elem;
         }
@@ -119,7 +127,7 @@ export class Folders extends Selection<Folder> {
             let result = null;
             let i = 0;
             while (!result && i < elem.children.length) {
-                result = this.getTreeElement(folderId, elem.children[i]);
+                result = this.getElementByTree(folderId, elem.children[i]);
                 i++;
             }
             return result;

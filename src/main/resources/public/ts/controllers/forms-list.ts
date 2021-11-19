@@ -1,7 +1,7 @@
 import {idiom, model, ng, notify, template, workspace} from 'entcore';
 import {Distribution, Distributions, Form, Forms} from "../models";
 import {distributionService, formService} from "../services";
-import {FiltersFilters, FiltersOrders} from "../core/enums";
+import {FiltersFilters, FiltersOrders, FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_EMIT_EVENT} from "../core/enums";
 import {Mix} from "entcore-toolkit";
 import {folderService} from "../services/FolderService";
 import {Folder, Folders} from "../models/Folder";
@@ -46,23 +46,7 @@ interface ViewModel {
     openedFolder: Element;
     selectedFolder: Element;
 
-    initFolders() : Promise<void>;
-    openFolder(folder: Folder) : void;
-    openCreateFolder() : void;
-    closeCreateFolder() : void;
-    renameFolder() : void;
-    doRenameFolder() : Promise<void>;
-    closeRenameFolder() : void;
-    moveItems() : void;
-    doMoveItems() : Promise<void>;
-    closeMoveItems() : void;
-    deleteFolders() : void;
-    doDeleteFolders() : Promise<void>;
-    displayFolder(folder: Folder) : string;
-    displayNbItems(folder: Folder) : string;
-    dropped(dragEl, dropEl) : Promise<void>;
-    switchAllFolders(value: boolean) : void;
-
+    createForm() : void;
     openForm(form: Form) : void;
     openPropertiesForm() : void;
     duplicateForms() : Promise<void>;
@@ -81,6 +65,23 @@ interface ViewModel {
     doDeleteForms() : Promise<void>;
     createFolder() : Promise<void>;
     selectItem(form: Form) : void;
+
+    initFolders() : Promise<void>;
+    openFolder(folder: Folder) : void;
+    openCreateFolder() : void;
+    closeCreateFolder() : void;
+    renameFolder() : void;
+    doRenameFolder() : Promise<void>;
+    closeRenameFolder() : void;
+    moveItems() : void;
+    doMoveItems() : Promise<void>;
+    closeMoveItems() : void;
+    deleteFolders() : void;
+    doDeleteFolders() : Promise<void>;
+    displayFolder(folder: Folder) : string;
+    displayNbItems(folder: Folder) : string;
+    dropped(dragEl, dropEl) : Promise<void>;
+    switchAllFolders(value: boolean) : void;
 
     switchAllForms(value: boolean) : void;
     sort(field: FiltersOrders) : void;
@@ -144,6 +145,12 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
         vm.loading = false;
         $scope.safeApply();
+    };
+
+    vm.createForm = () : void => {
+        let isFolderOkForCreation = vm.folder.id != vm.folders.sharedFormsFolder.id && vm.folder.id != vm.folders.archivedFormsFolder.id;
+        $scope.folder = isFolderOkForCreation ? vm.folder : vm.folders.myFormsFolder;
+        $scope.redirectTo(`/form/create`);
     };
 
     // Toaster
@@ -347,7 +354,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
                 return vm.folders.trees;
             },
             isDisabled(folder) {
-                if (vm.folders.selected.length > 0) {
+                if (vm.display.lightbox.move) {
                     let selectedIds : any = vm.folders.selected.map(f => f.id);
                     return selectedIds.includes(folder.id);
                 }
@@ -368,18 +375,20 @@ export const formsListController = ng.controller('FormsListController', ['$scope
                 return vm.selectedFolder === folder;
             },
             openFolder(folder) {
-                if (vm.folders.selected.length > 0) {
-                    let selectedIds : any = vm.folders.selected.map(f => f.id);
-                    if (!selectedIds.includes(folder.id)) {
-                        vm.targetFolderId = folder.id;
-                        vm.openedFolder = vm.selectedFolder = folder;
+                if (!vm.folderTree.isDisabled(folder)) {
+                    if (vm.folders.selected.length > 0) {
+                        let selectedIds : any = vm.folders.selected.map(f => f.id);
+                        if (!selectedIds.includes(folder.id)) {
+                            vm.targetFolderId = folder.id;
+                            vm.openedFolder = vm.selectedFolder = folder;
+                        }
                     }
-                }
-                vm.targetFolderId = folder.id;
-                vm.openedFolder = vm.selectedFolder = folder;
+                    vm.targetFolderId = folder.id;
+                    vm.openedFolder = vm.selectedFolder = folder;
 
-                if (!vm.display.lightbox.move) {
-                    vm.openFolder(folder.data);
+                    if (!vm.display.lightbox.move) {
+                        vm.openFolder(folder.data);
+                    }
                 }
             }
         }
@@ -397,6 +406,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         vm.selectedFolder = folderElem;
 
         vm.folder = folder;
+        $scope.folder = folder;
         vm.folder.children = vm.folders.getChildren(vm.folder.id);
         await vm.forms.sync();
 
@@ -415,6 +425,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
                 break;
         }
         vm.switchAllFolders(false);
+        $scope.$emit(FORMULAIRE_EMIT_EVENT.UPDATE_FOLDER, vm.folder);
         $scope.safeApply();
     };
 

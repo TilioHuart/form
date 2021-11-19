@@ -11,7 +11,7 @@
 
         <section class="cell seven zero-mobile">
             <div class="main-button">
-                <button class="cell" ng-click="redirectTo('/form/create')"><i18n>formulaire.form.create.button</i18n></button>
+                <button class="cell" ng-click="vm.createForm()"><i18n>formulaire.form.create.button</i18n></button>
             </div>
         </section>
 
@@ -176,7 +176,9 @@
         <!-- Error display -->
         <div class="error" ng-if="vm.forms.all.length <= 0 && vm.folder.children.length <= 0">
             <img src="/formulaire/public/img/empty_folder.svg" class="img_mini"/>
-            <i18n>formulaire.forms.empty</i18n>
+            <i18n ng-if="vm.folder.id == vm.folders.myFormsFolder.id">formulaire.forms.empty.mine</i18n>
+            <i18n ng-if="vm.folder.id == vm.folders.sharedFormsFolder.id">formulaire.forms.empty.shared</i18n>
+            <i18n ng-if="vm.folder.id == vm.folders.archivedFormsFolder.id">formulaire.forms.empty.archived</i18n>
         </div>
     </section>
 
