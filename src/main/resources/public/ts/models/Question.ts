@@ -51,7 +51,7 @@ export class Questions extends Selection<Question> {
 
     sync = async (formId: number) : Promise<void> => {
         try {
-            let { data } = await questionService.list(formId);
+            let data = await questionService.list(formId);
             this.all = Mix.castArrayAs(Question, data);
             for (let i = 0; i < this.all.length; i++) {
                 if (this.all[i].question_type === Types.SINGLEANSWER || this.all[i].question_type === Types.MULTIPLEANSWER) {

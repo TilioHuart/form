@@ -7,7 +7,7 @@ import {
     Responses,
     Types
 } from "../models";
-import {distributionService, responseFileService, responseService} from "../services";
+import {responseFileService, responseService} from "../services";
 import {FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
 
 interface ViewModel {
@@ -65,7 +65,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         }
         else {
             vm.response = new Response();
-            let responses = $scope.getDataIf200(await responseService.listMineByDistribution(vm.question.id, vm.distribution.id));
+            let responses = await responseService.listMineByDistribution(vm.question.id, vm.distribution.id);
             if (responses.length > 0) {
                 vm.response = responses[0];
             }
@@ -168,7 +168,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                 }
             }
         }
-        vm.response = $scope.getDataIf200(await responseService.save(vm.response, vm.question.question_type));
+        vm.response = await responseService.save(vm.response, vm.question.question_type);
         if (vm.question.question_type === Types.FILE) {
             return (await saveFiles());
         }
@@ -192,7 +192,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                 await responseFileService.create(vm.response.id, file);
             }
             vm.response.answer = idiom.translate('formulaire.response.file.send');
-            vm.response = $scope.getDataIf200(await responseService.update(vm.response));
+            vm.response = await responseService.update(vm.response);
             return true;
         }
     };

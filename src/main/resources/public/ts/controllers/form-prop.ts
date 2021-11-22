@@ -37,7 +37,7 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
             vm.folder = $scope.folder;
             await vm.delegates.sync();
             vm.display.date_ending = !!vm.form.date_ending;
-            vm.form.nb_responses = vm.form.id ? $scope.getDataIf200(await distributionService.count(vm.form.id)).count : 0;
+            vm.form.nb_responses = vm.form.id ? (await distributionService.count(vm.form.id)).count : 0;
             vm.form.folder_id = vm.folder.id;
             vm.rgpdLifetimeChoices = [3, 6, 9, 12];
             $scope.safeApply();
@@ -46,8 +46,7 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
         // Functions
 
         vm.save = async () : Promise<void> => {
-            if (vm.form.title && vm.checkIntervalDates()) {
-                vm.form = $scope.getDataIf200(await formService.save(vm.form));
+            if (vm.form.title && vm.checkIntervalDates()) {vm.form = await formService.save(vm.form);
                 $scope.redirectTo(`/form/${vm.form.id}/edit`);
                 $scope.safeApply();
             }

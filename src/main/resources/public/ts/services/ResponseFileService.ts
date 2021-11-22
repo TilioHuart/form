@@ -1,75 +1,76 @@
 import {idiom, ng, notify} from 'entcore';
-import http, {AxiosResponse} from 'axios';
+import http from 'axios';
+import {DataUtils} from "../utils/data";
 
 export interface ResponseFileService {
-    list(responseId: number) : Promise<AxiosResponse>;
-    listByQuestion(questionId: number) : Promise<AxiosResponse>;
-    get(fileId: number) : Promise<AxiosResponse>;
-    download(fileId: number) : Promise<AxiosResponse>;
-    zipAndDownload(questionId: number) : Promise<AxiosResponse>;
-    create(responseId: number, file) : Promise<AxiosResponse>;
-    deleteAll(responseId : number) : Promise<AxiosResponse>;
+    list(responseId: number) : Promise<any>;
+    listByQuestion(questionId: number) : Promise<any>;
+    get(fileId: number) : Promise<any>;
+    download(fileId: number) : Promise<any>;
+    zipAndDownload(questionId: number) : Promise<any>;
+    create(responseId: number, file) : Promise<any>;
+    deleteAll(responseId : number) : Promise<any>;
 }
 
 export const responseFileService: ResponseFileService = {
 
-    async list(responseId: number) : Promise<AxiosResponse> {
+    async list(responseId: number) : Promise<any> {
         try {
-            return http.get(`/formulaire/responses/${responseId}/files/all`);
+            return DataUtils.getData(await http.get(`/formulaire/responses/${responseId}/files/all`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseFileService.list'));
             throw err;
         }
     },
 
-    async listByQuestion(questionId: number) : Promise<AxiosResponse> {
+    async listByQuestion(questionId: number) : Promise<any> {
         try {
-            return http.get(`/formulaire/questions/${questionId}/files/all`);
+            return DataUtils.getData(await http.get(`/formulaire/questions/${questionId}/files/all`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseFileService.list'));
             throw err;
         }
     },
 
-    async get(fileId: number) : Promise<AxiosResponse> {
+    async get(fileId: number) : Promise<any> {
         try {
-            return http.get(`/formulaire/responses/files/${fileId}`);
+            return DataUtils.getData(await http.get(`/formulaire/responses/files/${fileId}`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseFileService.get'));
             throw err;
         }
     },
 
-    async download(fileId: number) : Promise<AxiosResponse> {
+    async download(fileId: number) : Promise<any> {
         try {
-            return http.get(`/formulaire/responses/files/${fileId}/download`);
+            return DataUtils.getData(await http.get(`/formulaire/responses/files/${fileId}/download`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseFileService.download'));
             throw err;
         }
     },
 
-    async zipAndDownload(questionId: number) : Promise<AxiosResponse> {
+    async zipAndDownload(questionId: number) : Promise<any> {
         try {
-            return http.get(`/formulaire/responses/${questionId}/files/download/zip`);
+            return DataUtils.getData(await http.get(`/formulaire/responses/${questionId}/files/download/zip`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseFileService.download'));
             throw err;
         }
     },
 
-    async create(responseId: number, file) : Promise<AxiosResponse> {
+    async create(responseId: number, file) : Promise<any> {
         try {
-            return http.post(`/formulaire/responses/${responseId}/files`, file, {'headers': {'Content-Type': 'multipart/form-data'}});
+            return DataUtils.getData(await http.post(`/formulaire/responses/${responseId}/files`, file, {'headers': {'Content-Type': 'multipart/form-data'}}));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseFileService.create'));
             throw err;
         }
     },
 
-    async deleteAll(responseId: number) : Promise<AxiosResponse> {
+    async deleteAll(responseId: number) : Promise<any> {
         try {
-            return http.delete(`/formulaire/responses/${responseId}/files`);
+            return DataUtils.getData(await http.delete(`/formulaire/responses/${responseId}/files`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseFileService.delete'));
             throw err;

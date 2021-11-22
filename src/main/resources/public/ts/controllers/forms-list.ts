@@ -1,12 +1,12 @@
 import {idiom, model, ng, notify, template, workspace} from 'entcore';
 import {Distribution, Distributions, DistributionStatus, Form, Forms} from "../models";
 import {distributionService, formService} from "../services";
-import {FiltersFilters, FiltersOrders, FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_EMIT_EVENT} from "../core/enums";
+import {FiltersFilters, FiltersOrders, FORMULAIRE_EMIT_EVENT} from "../core/enums";
 import {Mix} from "entcore-toolkit";
 import {folderService} from "../services/FolderService";
 import {Folder, Folders} from "../models/Folder";
 import {Tree, Element} from "entcore/types/src/ts/workspace/model";
-import {i18nUtils} from "../utils";
+import {I18nUtils} from "../utils";
 
 interface ViewModel {
     forms: Forms;
@@ -299,7 +299,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.remind = async () : Promise<void> => {
         initMail();
-        vm.distributions.all = Mix.castArrayAs(Distribution, $scope.getDataIf200(await distributionService.listByForm(vm.forms.selected[0].id)));
+        vm.distributions.all = Mix.castArrayAs(Distribution, await distributionService.listByForm(vm.forms.selected[0].id));
         await template.open('lightbox', 'lightbox/reminder');
         vm.display.lightbox.reminder = true;
         // Set CSS to show text on editor
@@ -314,14 +314,12 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     vm.doRemind = async () : Promise<void> => {
-        let { status } = await formService.sendReminder(vm.forms.selected[0].id, vm.mail);
-        if (status === 200) {
-            notify.success(idiom.translate('formulaire.success.reminder.send'));
-            initMail();
-            template.close('lightbox');
-            vm.display.lightbox.reminder = false;
-            window.setTimeout(async function () { await vm.$onInit(); }, 100);
-        }
+        await formService.sendReminder(vm.forms.selected[0].id, vm.mail);
+        notify.success(idiom.translate('formulaire.success.reminder.send'));
+        initMail();
+        template.close('lightbox');
+        vm.display.lightbox.reminder = false;
+        window.setTimeout(async function () { await vm.$onInit(); }, 100);
     };
 
     vm.filterResponses = () : any => {
@@ -395,9 +393,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.doDeleteForms = async () : Promise<void> => {
         try {
             for (let form of vm.forms.selected) {
-                if ($scope.isStatusXXX(await formService.unshare(form.id), 200)) {
-                    await formService.delete(form.id);
-                }
+                await formService.delete(form.id);
             }
             template.close('lightbox');
             vm.display.lightbox.delete = false;
@@ -622,7 +618,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         }
         else {
             let params = [folder.nb_folder_children.toString(), folder.nb_form_children.toString()];
-            return i18nUtils.getWithParams("formulaire.folder.nbItems", params);
+            return I18nUtils.getWithParams("formulaire.folder.nbItems", params);
         }
     };
 
@@ -698,7 +694,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     const initMail = () : void => {
         vm.mail.link = `${window.location.origin}${window.location.pathname}#/form/${vm.forms.selected[0].id}`;
         vm.mail.subject = idiom.translate('formulaire.remind.default.subject');
-        vm.mail.body = i18nUtils.getWithParams('formulaire.remind.default.body', [vm.mail.link, vm.mail.link]);
+        vm.mail.body = I18nUtils.getWithParams('formulaire.remind.default.body', [vm.mail.link, vm.mail.link]);
     };
 
 

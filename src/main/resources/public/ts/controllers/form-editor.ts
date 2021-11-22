@@ -92,7 +92,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         vm.$onInit = async () : Promise<void> => {
             vm.form = $scope.form;
-            vm.form.nb_responses = vm.form.id ? $scope.getDataIf200(await distributionService.count(vm.form.id)).count : 0;
+            vm.form.nb_responses = vm.form.id ? (await distributionService.count(vm.form.id)).count : 0;
             await vm.questions.sync(vm.form.id);
             vm.newQuestion.form_id = vm.form.id;
             vm.dontSave = false;
@@ -120,7 +120,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 notify.error(idiom.translate('formulaire.question.save.missing.field'));
                 vm.dontSave = false;
             } else {
-                let folder = $scope.getDataIf200(await folderService.get(vm.form.folder_id));
+                let folder = await folderService.get(vm.form.folder_id);
                 $scope.$emit(FORMULAIRE_EMIT_EVENT.UPDATE_FOLDER, folder);
                 $scope.redirectTo('/list/mine');
             }
@@ -182,7 +182,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 }
                 let duplicata = question;
                 duplicata.position++;
-                let newQuestion = $scope.getDataIf200(await questionService.create(duplicata));
+                let newQuestion = await questionService.create(duplicata);
                 if (question.question_type === Types.SINGLEANSWER || question.question_type === Types.MULTIPLEANSWER) {
                     for (let choice of question.choices.all) {
                         if (choice.value) {
@@ -202,7 +202,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         vm.deleteQuestion = async () : Promise<void> => {
             if(vm.questions.selected[0].id != null){
-                let responseCount = $scope.getDataIf200(await responseService.countByQuestion(vm.questions.selected[0].id));
+                let responseCount = await responseService.countByQuestion(vm.questions.selected[0].id);
                 if (vm.form.sent && responseCount.count>0){
                     notify.error(idiom.translate('formulaire.question.delete.response.fill.warning'));
                 }
@@ -441,24 +441,24 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 for (let question of vm.questions.all) {
                     if (!question.title && !question.statement && !question.mandatory && question.choices.all.length <= 0) {
                         if (question.id) {
-                            question = $scope.getDataIf200(await questionService.get(question.id));
+                            question = await questionService.get(question.id);
                         }
                     }
                     else {
-                        let newId = $scope.getDataIf200(await questionService.save(question)).id;
+                        let newId = (await questionService.save(question)).id;
                         question.id = newId;
                         let registeredChoices = [];
                         for (let choice of question.choices.all) {
                             if (choice.value && !registeredChoices.find(c => c === choice.value) ) {
                                 choice.question_id = newId;
-                                choice.id = $scope.getDataIf200(await questionChoiceService.save(choice)).id;
+                                choice.id = (await questionChoiceService.save(choice)).id;
                                 registeredChoices.push(choice.value);
                             }
                         }
                     }
                 }
                 if (displaySuccess) { notify.success(idiom.translate('formulaire.success.form.save')); }
-                vm.form.setFromJson($scope.getDataIf200(await formService.get(vm.form.id)));
+                vm.form.setFromJson(await formService.get(vm.form.id));
                 vm.questions.deselectAll();
                 $scope.safeApply();
             }

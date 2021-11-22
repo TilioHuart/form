@@ -65,7 +65,7 @@ export class Distributions {
 
     sync = async () : Promise<void> => {
         try {
-            let { data } = await distributionService.list();
+            let data = await distributionService.list();
             this.all = Mix.castArrayAs(Distribution, data);
             for (let i = 0; i < this.all.length; i++) {
                 let distrib = this.all[i];
@@ -80,7 +80,7 @@ export class Distributions {
 
     syncByFormAndResponder = async (formId: number) : Promise<void> => {
         try {
-            let { data } = await distributionService.listByFormAndResponder(formId);
+            let data = await distributionService.listByFormAndResponder(formId);
             this.all = Mix.castArrayAs(Distribution, data);
             for (let i = this.all.length - 1; i >= this.all.length - data.length; i--) {
                 let distrib = this.all[i];
@@ -95,7 +95,7 @@ export class Distributions {
 
     syncByFormAndStatus = async (formId: number, status: string, nbLines: number = null) : Promise<void> => {
         try {
-            let { data } = await distributionService.listByFormAndStatus(formId, status, nbLines);
+            let data = await distributionService.listByFormAndStatus(formId, status, nbLines);
             this.all = nbLines && nbLines > 0 ? this.all.concat(Mix.castArrayAs(Distribution, data)) : Mix.castArrayAs(Distribution, data);
             for (let i = this.all.length - 1; i >= this.all.length - data.length; i--) {
                 let distrib = this.all[i];

@@ -34,7 +34,7 @@ export class ResponseFiles {
 
     sync = async (responseId: number) : Promise<void> => {
         try {
-            let { data } = await responseFileService.list(responseId);
+            let data = await responseFileService.list(responseId);
             this.all = Mix.castArrayAs(ResponseFile, data);
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.responseFile.sync'));

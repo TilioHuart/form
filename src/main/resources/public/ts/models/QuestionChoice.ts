@@ -45,7 +45,7 @@ export class QuestionChoices {
 
     sync = async (questionId: number) : Promise<void> => {
         try {
-            let { data } = await questionChoiceService.list(questionId);
+            let data = await questionChoiceService.list(questionId);
             this.all = Mix.castArrayAs(QuestionChoice, data);
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.questionChoice.sync'));

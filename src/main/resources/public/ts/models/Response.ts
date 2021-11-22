@@ -46,11 +46,10 @@ export class Responses {
 
     sync = async (question: Question, isFileQuestion: boolean, nbLines: number = null) : Promise<void> => {
         try {
-            let { data } = await responseService.list(question, nbLines);
+            let data = await responseService.list(question, nbLines);
             this.all = nbLines && nbLines > 0 ? this.all.concat(Mix.castArrayAs(Response, data)) : Mix.castArrayAs(Response, data);
             if (isFileQuestion) {
-                let dataFiles = await responseFileService.listByQuestion(question.id);
-                let files = dataFiles.data;
+                let files = await responseFileService.listByQuestion(question.id);
                 for (let i = this.all.length - 1; i >= this.all.length - data.length; i--) {
                     this.all[i].files.all = Mix.castArrayAs(ResponseFiles, files.filter(r => r.response_id === this.all[i].id));
                 }
@@ -63,7 +62,7 @@ export class Responses {
 
     syncMine = async (questionId: number, distributionId: number) : Promise<void> => {
         try {
-            let { data } = await responseService.listMineByDistribution(questionId, distributionId);
+            let data = await responseService.listMineByDistribution(questionId, distributionId);
             this.all = Mix.castArrayAs(Response, data);
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.response.sync'));
@@ -73,7 +72,7 @@ export class Responses {
 
     syncByDistribution = async (distributionId: number) : Promise<void> => {
         try {
-            let { data } = await responseService.listByDistribution(distributionId);
+            let data = await responseService.listByDistribution(distributionId);
             this.all = Mix.castArrayAs(Response, data);
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.response.sync'));

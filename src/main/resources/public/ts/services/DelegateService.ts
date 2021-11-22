@@ -1,15 +1,15 @@
 import {idiom, ng, notify} from 'entcore';
-import http, {AxiosResponse} from 'axios';
+import http from 'axios';
+import {DataUtils} from "../utils/data";
 
 export interface DelegateService {
-    list() : Promise<AxiosResponse>;
+    list() : Promise<any>;
 }
 
 export const delegateService: DelegateService = {
-
-    async list() : Promise<AxiosResponse> {
+    async list() : Promise<any> {
         try {
-            return http.get(`/formulaire/delegates`);
+            return DataUtils.getData(await http.get(`/formulaire/delegates`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.delegateService.list'));
             throw err;

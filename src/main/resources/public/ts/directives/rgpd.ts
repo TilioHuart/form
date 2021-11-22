@@ -1,12 +1,11 @@
 import {Directive, idiom, ng} from "entcore";
 import {Delegate, Delegates, Form} from "../models";
-import {i18nUtils} from "../utils";
-import {isArray} from "angular";
+import {I18nUtils} from "../utils";
 
 interface IViewModel {
     form: Form;
     delegates: Delegates;
-    i18nUtils: i18nUtils;
+    i18nUtils: I18nUtils;
 
     $onInit() : Promise<void>;
     getRgpdDescriptionIntro() : string;
@@ -44,7 +43,7 @@ export const rgpd: Directive = ng.directive('rgpd', () => {
             vm.getRgpdDescriptionIntro = () : string => {
                 let defaultGoal = "[" + idiom.translate('formulaire.prop.rgpd.goal') + "]";
                 let params = [vm.form.rgpd_goal ? vm.form.rgpd_goal : defaultGoal, getEndValidityDate()];
-                return i18nUtils.getWithParams('formulaire.prop.rgpd.description.intro', params);
+                return I18nUtils.getWithParams('formulaire.prop.rgpd.description.intro', params);
             };
 
             vm.getRgpdDescriptionDelegates = (delegate) : string => {
@@ -54,7 +53,7 @@ export const rgpd: Directive = ng.directive('rgpd', () => {
                         params[i] = "";
                     }
                 }
-                return i18nUtils.getWithParams('formulaire.prop.rgpd.description.delegates', params);
+                return I18nUtils.getWithParams('formulaire.prop.rgpd.description.delegates', params);
             };
 
             const getEndValidityDate = () : string => {

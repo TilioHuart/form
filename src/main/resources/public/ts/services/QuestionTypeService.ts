@@ -1,25 +1,26 @@
 import {idiom, ng, notify} from 'entcore';
-import http, {AxiosResponse} from 'axios';
+import http from 'axios';
+import {DataUtils} from "../utils/data";
 
 export interface QuestionTypeService {
-    list() : Promise<AxiosResponse>;
-    get(code: number) : Promise<AxiosResponse>;
+    list() : Promise<any>;
+    get(code: number) : Promise<any>;
 }
 
 export const questionTypeService: QuestionTypeService = {
 
-    async list() : Promise<AxiosResponse> {
+    async list() : Promise<any> {
         try {
-            return http.get(`/formulaire/types`);
+            return DataUtils.getData(await http.get(`/formulaire/types`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionTypeService.list'));
             throw err;
         }
     },
 
-    async get(code: number) : Promise<AxiosResponse> {
+    async get(code: number) : Promise<any> {
         try {
-            return http.get(`/formulaire/types/${code}`);
+            return DataUtils.getData(await http.get(`/formulaire/types/${code}`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionTypeService.get'));
             throw err;

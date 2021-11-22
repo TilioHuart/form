@@ -1,135 +1,136 @@
 import {idiom, ng, notify} from 'entcore';
-import http, {AxiosResponse} from 'axios';
-import {Distribution, Form} from '../models';
+import http from 'axios';
+import {Distribution} from '../models';
+import {DataUtils} from "../utils/data";
 
 export interface DistributionService {
-    list() : Promise<AxiosResponse>;
-    listByResponder() : Promise<AxiosResponse>;
-    listByForm(formId: number) : Promise<AxiosResponse>;
-    listByFormAndStatus(formId: number, status: string, nbLines: number) : Promise<AxiosResponse>;
-    listByFormAndResponder(formId: number) : Promise<AxiosResponse>;
-    count(formId: number) : Promise<AxiosResponse>;
-    get(distributionId: number) : Promise<AxiosResponse>;
-    getByFormResponderAndStatus(formId: number) : Promise<AxiosResponse>;
-    add(formId: number, distribution: Distribution) : Promise<AxiosResponse>;
-    duplicateWithResponses(distributionId: number) : Promise<AxiosResponse>;
-    update(distribution: Distribution) : Promise<AxiosResponse>;
-    replace(distribution: Distribution) : Promise<AxiosResponse>;
-    delete(distributionId: number) : Promise<AxiosResponse>;
+    list() : Promise<any>;
+    listByResponder() : Promise<any>;
+    listByForm(formId: number) : Promise<any>;
+    listByFormAndStatus(formId: number, status: string, nbLines: number) : Promise<any>;
+    listByFormAndResponder(formId: number) : Promise<any>;
+    count(formId: number) : Promise<any>;
+    get(distributionId: number) : Promise<any>;
+    getByFormResponderAndStatus(formId: number) : Promise<any>;
+    add(formId: number, distribution: Distribution) : Promise<any>;
+    duplicateWithResponses(distributionId: number) : Promise<any>;
+    update(distribution: Distribution) : Promise<any>;
+    replace(distribution: Distribution) : Promise<any>;
+    delete(distributionId: number) : Promise<any>;
 }
 
 export const distributionService: DistributionService = {
-    async list() : Promise<AxiosResponse> {
+    async list() : Promise<any> {
         try {
-            return http.get(`/formulaire/distributions`);
+            return DataUtils.getData(await http.get(`/formulaire/distributions`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.list'));
             throw err;
         }
     },
 
-    async listByResponder() : Promise<AxiosResponse> {
+    async listByResponder() : Promise<any> {
         try {
-            return http.get(`/formulaire/distributions/listMine`);
+            return DataUtils.getData(await http.get(`/formulaire/distributions/listMine`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.list'));
             throw err;
         }
     },
 
-    async listByForm(formId: number) : Promise<AxiosResponse> {
+    async listByForm(formId: number) : Promise<any> {
         try {
-            return http.get(`/formulaire/distributions/forms/${formId}/list`);
+            return DataUtils.getData(await http.get(`/formulaire/distributions/forms/${formId}/list`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.list'));
             throw err;
         }
     },
 
-    async listByFormAndStatus(formId: number, status: string, nbLines: number) : Promise<AxiosResponse> {
+    async listByFormAndStatus(formId: number, status: string, nbLines: number) : Promise<any> {
         try {
-            return http.get(`/formulaire/distributions/forms/${formId}/list/${status}?nbLines=${nbLines}`);
+            return DataUtils.getData(await http.get(`/formulaire/distributions/forms/${formId}/list/${status}?nbLines=${nbLines}`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.list'));
             throw err;
         }
     },
 
-    async listByFormAndResponder(formId: number) : Promise<AxiosResponse> {
+    async listByFormAndResponder(formId: number) : Promise<any> {
         try {
-            return http.get(`/formulaire/distributions/forms/${formId}/listMine`);
+            return DataUtils.getData(await http.get(`/formulaire/distributions/forms/${formId}/listMine`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.list'));
             throw err;
         }
     },
 
-    async count(formId: number) : Promise<AxiosResponse> {
+    async count(formId: number) : Promise<any> {
         try {
-            return http.get(`/formulaire/distributions/forms/${formId}/count`);
+            return DataUtils.getData(await http.get(`/formulaire/distributions/forms/${formId}/count`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.count'));
             throw err;
         }
     },
 
-    async get(distributionId: number) : Promise<AxiosResponse> {
+    async get(distributionId: number) : Promise<any> {
         try {
-            return http.get(`/formulaire/distributions/${distributionId}`);
+            return DataUtils.getData(await http.get(`/formulaire/distributions/${distributionId}`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.get'));
             throw err;
         }
     },
 
-    async getByFormResponderAndStatus(formId: number) : Promise<AxiosResponse> {
+    async getByFormResponderAndStatus(formId: number) : Promise<any> {
         try {
-            return http.get(`/formulaire/distributions/forms/${formId}`);
+            return DataUtils.getData(await http.get(`/formulaire/distributions/forms/${formId}`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.get'));
             throw err;
         }
     },
 
-    async add(formId: number, distribution: Distribution) : Promise<AxiosResponse> {
+    async add(formId: number, distribution: Distribution) : Promise<any> {
         try {
-            return http.post(`/formulaire/distributions/forms/${formId}/add`, distribution);
+            return DataUtils.getData(await http.post(`/formulaire/distributions/forms/${formId}/add`, distribution));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.create'));
             throw err;
         }
     },
 
-    async duplicateWithResponses(distributionId: number) : Promise<AxiosResponse> {
+    async duplicateWithResponses(distributionId: number) : Promise<any> {
         try {
-            return http.post(`/formulaire/distributions/${distributionId}/duplicate`);
+            return DataUtils.getData(await http.post(`/formulaire/distributions/${distributionId}/duplicate`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.create'));
             throw err;
         }
     },
 
-    async update(distribution: Distribution) : Promise<AxiosResponse> {
+    async update(distribution: Distribution) : Promise<any> {
         try {
-            return http.put(`/formulaire/distributions/${distribution.id}`, distribution);
+            return DataUtils.getData(await http.put(`/formulaire/distributions/${distribution.id}`, distribution));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.update'));
             throw err;
         }
     },
 
-    async replace(distribution: Distribution) : Promise<AxiosResponse> {
+    async replace(distribution: Distribution) : Promise<any> {
         try {
-            return http.delete(`/formulaire/distributions/${distribution.id}/replace/${distribution.original_id}`);
+            return DataUtils.getData(await http.delete(`/formulaire/distributions/${distribution.id}/replace/${distribution.original_id}`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.update'));
             throw err;
         }
     },
 
-    async delete(distributionId: number) : Promise<AxiosResponse> {
+    async delete(distributionId: number) : Promise<any> {
         try {
-            return http.delete(`/formulaire/distributions/${distributionId}`);
+            return DataUtils.getData(await http.delete(`/formulaire/distributions/${distributionId}`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.delete'));
             throw err;

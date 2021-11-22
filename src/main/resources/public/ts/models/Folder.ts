@@ -51,7 +51,7 @@ export class Folders extends Selection<Folder> {
 
     async sync (setDefaultFolders: boolean = true) {
         try {
-            let { data } = await folderService.list();
+            let data = await folderService.list();
             this.all = Mix.castArrayAs(Folder, data);
             this.setTree();
             if (setDefaultFolders) this.setDefaultFolders();

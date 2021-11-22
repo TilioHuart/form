@@ -1,57 +1,57 @@
 import {idiom, moment, ng, notify} from 'entcore';
-import http, {AxiosResponse} from 'axios';
+import http from 'axios';
 import {Form} from '../models';
+import {DataUtils} from "../utils/data";
 
 export interface FormService {
-    list() : Promise<AxiosResponse>;
-    listSentForms() : Promise<AxiosResponse>;
-    get(formId: number) : Promise<AxiosResponse>;
-    save(form: Form) : Promise<AxiosResponse>;
-    create(form: Form) : Promise<AxiosResponse>;
-    createMultiple(forms: Form[]) : Promise<AxiosResponse>;
-    duplicate(formIds: number[], folderId: number) : Promise<AxiosResponse>;
-    update(form: Form) : Promise<AxiosResponse>;
-    archive(form: Form, destinationFolderId: number) : Promise<AxiosResponse>;
-    restore(form: Form, destinationFolderId: number) : Promise<AxiosResponse>;
-    delete(formId: number) : Promise<AxiosResponse>;
-    move(forms : Form[], parentId: number) : Promise<AxiosResponse>;
-    sendReminder(formId: number, mail: {}) : Promise<AxiosResponse>;
-    unshare(formId: number) : Promise<AxiosResponse>;
-    getMyFormRights(formId: number) : Promise<AxiosResponse>;
-    getAllMyFormRights() : Promise<AxiosResponse>;
-    getInfoImage(form: Form) : Promise<AxiosResponse>;
+    list() : Promise<any>;
+    listSentForms() : Promise<any>;
+    get(formId: number) : Promise<any>;
+    save(form: Form) : Promise<any>;
+    create(form: Form) : Promise<any>;
+    createMultiple(forms: Form[]) : Promise<any>;
+    duplicate(formIds: number[], folderId: number) : Promise<any>;
+    update(form: Form) : Promise<any>;
+    archive(form: Form, destinationFolderId: number) : Promise<any>;
+    restore(form: Form, destinationFolderId: number) : Promise<any>;
+    delete(formId: number) : Promise<any>;
+    move(forms : Form[], parentId: number) : Promise<any>;
+    sendReminder(formId: number, mail: {}) : Promise<any>;
+    unshare(formId: number) : Promise<any>;
+    getMyFormRights(formId: number) : Promise<any>;
+    getAllMyFormRights() : Promise<any>;
+    getInfoImage(form: Form) : Promise<any>;
 }
 
 export const formService: FormService = {
-
-    async list() : Promise<AxiosResponse> {
+    async list() : Promise<any> {
         try {
-            return http.get('/formulaire/forms');
+            return DataUtils.getData(await http.get('/formulaire/forms'));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.list'));
             throw err;
         }
     },
 
-    async listSentForms() : Promise<AxiosResponse> {
+    async listSentForms() : Promise<any> {
         try {
-            return http.get('/formulaire/sentForms');
+            return DataUtils.getData(await http.get('/formulaire/sentForms'));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.list'));
             throw err;
         }
     },
 
-    async get(formId: number) : Promise<AxiosResponse> {
+    async get(formId: number) : Promise<any> {
         try {
-            return http.get(`/formulaire/forms/${formId}`);
+            return DataUtils.getData(await http.get(`/formulaire/forms/${formId}`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.get'));
             throw err;
         }
     },
 
-    async save(form: Form) : Promise<AxiosResponse> {
+    async save(form: Form) : Promise<any> {
         if (form.date_opening != null) {
             form.date_opening = moment(form.date_opening.setHours(0,0,0,0)).format();
         }
@@ -61,34 +61,34 @@ export const formService: FormService = {
         return form.id ? await this.update(form) : await this.create(form);
     },
 
-    async create(form: Form) : Promise<AxiosResponse> {
+    async create(form: Form) : Promise<any> {
         try {
-            return http.post('/formulaire/forms', form);
+            return DataUtils.getData(await http.post('/formulaire/forms', form));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.create'));
             throw err;
         }
     },
 
-    async createMultiple(forms: Form[]) : Promise<AxiosResponse> {
+    async createMultiple(forms: Form[]) : Promise<any> {
         try {
-            return http.post('/formulaire/forms/multiple', forms);
+            return DataUtils.getData(await http.post('/formulaire/forms/multiple', forms));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.createMultiple'));
             throw err;
         }
     },
 
-    async duplicate(formIds: number[], folderId: number) : Promise<AxiosResponse> {
+    async duplicate(formIds: number[], folderId: number) : Promise<any> {
         try {
-            return http.post(`/formulaire/forms/duplicate/${folderId}`, formIds);
+            return DataUtils.getData(await http.post(`/formulaire/forms/duplicate/${folderId}`, formIds));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.duplicate'));
             throw err;
         }
     },
 
-    async update(form: Form) : Promise<AxiosResponse> {
+    async update(form: Form) : Promise<any> {
         try {
             return http.put(`/formulaire/forms/${form.id}`, form);
         } catch (err) {
@@ -97,7 +97,7 @@ export const formService: FormService = {
         }
     },
 
-    async archive(form: Form, destinationFolderId: number) : Promise<AxiosResponse> {
+    async archive(form: Form, destinationFolderId: number) : Promise<any> {
         try {
             form.archived = true;
             await this.move([form], destinationFolderId);
@@ -108,7 +108,7 @@ export const formService: FormService = {
         }
     },
 
-    async restore(form: Form, destinationFolderId: number) : Promise<AxiosResponse> {
+    async restore(form: Form, destinationFolderId: number) : Promise<any> {
         try {
             form.archived = false;
             await this.move([form], destinationFolderId);
@@ -119,65 +119,65 @@ export const formService: FormService = {
         }
     },
 
-    async delete(formId: number) : Promise<AxiosResponse> {
+    async delete(formId: number) : Promise<any> {
         try {
-            return await http.delete(`/formulaire/forms/${formId}`);
+            await this.unshare(formId);
+            return DataUtils.getData(await http.delete(`/formulaire/forms/${formId}`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.delete'));
             throw err;
         }
     },
 
-    async move(forms, parentId) : Promise<AxiosResponse> {
+    async move(forms, parentId) : Promise<any> {
         try {
-            return http.put(`/formulaire/forms/move/${parentId}`, forms);
+            return DataUtils.getData(await http.put(`/formulaire/forms/move/${parentId}`, forms));
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.formService.move'));
             throw e;
         }
     },
 
-    async sendReminder(formId: number, mail: {}) : Promise<AxiosResponse> {
+    async sendReminder(formId: number, mail: {}) : Promise<any> {
         try {
-            return await http.post(`/formulaire/forms/${formId}/remind`, mail);
+            return DataUtils.getData(await http.post(`/formulaire/forms/${formId}/remind`, mail));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.remind'));
             throw err;
         }
     },
 
-
-    async unshare(formId: number) : Promise<AxiosResponse> {
+    async unshare(formId: number) : Promise<any> {
         try {
             let emptyBody = {"users":{},"groups":{},"bookmarks":{}};
-            return await http.put(`/formulaire/share/resource/${formId}`, emptyBody);
+            return DataUtils.getData(await http.put(`/formulaire/share/resource/${formId}`, emptyBody));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.unshare'));
             throw err;
         }
     },
 
-    async getMyFormRights(formId: number) : Promise<AxiosResponse> {
+    async getMyFormRights(formId: number) : Promise<any> {
         try {
-            return http.get(`/formulaire/forms/${formId}/rights`);
+            return DataUtils.getData(await http.get(`/formulaire/forms/${formId}/rights`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.get'));
             throw err;
         }
     },
 
-    async getAllMyFormRights() : Promise<AxiosResponse> {
+    async getAllMyFormRights() : Promise<any> {
         try {
-            return http.get(`/formulaire/forms/rights/all`);
+            return DataUtils.getData(await http.get(`/formulaire/forms/rights/all`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.get'));
             throw err;
         }
     },
 
-    async getInfoImage(form: Form) : Promise<AxiosResponse> {
+    async getInfoImage(form: Form) : Promise<any> {
         try {
-            return await http.get(`/formulaire/info/image/${form.picture ? form.picture.split("/").slice(-1)[0] : null}`);
+            return DataUtils.getData(await http.get(`/formulaire/info/image/${form.picture ? form.picture.split("/").slice(-1)[0] : null}`));
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.formService.image'));
             throw e;

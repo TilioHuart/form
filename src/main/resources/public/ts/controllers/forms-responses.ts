@@ -70,7 +70,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
             vm.forms.orders.find(o => o.name === FiltersOrders.TITLE).display = true;
 
             try {
-                vm.distributions.all = Mix.castArrayAs(Distribution, $scope.getDataIf200(await distributionService.listByResponder()));
+                vm.distributions.all = Mix.castArrayAs(Distribution, await distributionService.listByResponder());
                 for (let form of vm.forms.all) {
                     form.distributions = new Distributions();
                     form.distributions.all = vm.distributions.all.filter(d => d.form_id === form.id);
@@ -115,33 +115,33 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
 
         // Toaster
 
-        vm.openForm = async (form: Form) : Promise<void> => {
-            vm.forms.deselectAll();
-            if (!form.multiple) {
-                let distrib = vm.distributions.all.filter(d => d.form_id === form.id)[0];
-                if (distrib.status == DistributionStatus.TO_DO) {
-                    if (form.rgpd) {
-                        $scope.redirectTo(`/form/${form.id}/rgpd`);
-                    }
-                    else {
-                        $scope.redirectTo(`/form/${form.id}/${distrib.id}/question/1`);
-                    }
+    vm.openForm = async (form: Form) : Promise<void> => {
+        vm.forms.deselectAll();
+        if (!form.multiple) {
+            let distrib = vm.distributions.all.filter(d => d.form_id === form.id)[0];
+            if (distrib.status == DistributionStatus.TO_DO) {
+                if (form.rgpd) {
+                    $scope.redirectTo(`/form/${form.id}/rgpd`);
                 }
                 else {
-                    $scope.redirectTo(`/form/${form.id}/${distrib.id}/questions/recap`);
+                    $scope.redirectTo(`/form/${form.id}/${distrib.id}/question/1`);
                 }
             }
-            else if (form.rgpd) {
-                $scope.redirectTo(`/form/${form.id}/rgpd`);
-            }
             else {
-                let distribs = vm.distributions.all.filter(d => d.form_id === form.id);
-                let distrib = distribs.filter(d => d.status == DistributionStatus.TO_DO)[0];
-                distrib = distrib ? distrib : $scope.getDataIf200(await distributionService.add(form.id, distribs[0]));
-                $scope.redirectTo(`/form/${form.id}/${distrib.id}/question/1`);
+                $scope.redirectTo(`/form/${form.id}/${distrib.id}/questions/recap`);
             }
-            $scope.safeApply();
-        };
+        }
+        else if (form.rgpd) {
+            $scope.redirectTo(`/form/${form.id}/rgpd`);
+        }
+        else {
+            let distribs = vm.distributions.all.filter(d => d.form_id === form.id);
+            let distrib = distribs.filter(d => d.status == DistributionStatus.TO_DO)[0];
+            distrib = distrib ? distrib : await distributionService.add(form.id, distribs[0]);
+            $scope.redirectTo(`/form/${form.id}/${distrib.id}/question/1`);
+        }
+        $scope.safeApply();
+    };
 
         vm.selectForm = async(form : Form):Promise <void> =>{
             if (!form.selected) {

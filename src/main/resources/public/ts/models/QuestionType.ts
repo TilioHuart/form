@@ -42,7 +42,7 @@ export class QuestionTypes {
 
     sync = async () : Promise<void> => {
         try {
-            let { data } = await questionTypeService.list();
+            let data = await questionTypeService.list();
             this.all = Mix.castArrayAs(QuestionType, data);
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.questionType.sync'));

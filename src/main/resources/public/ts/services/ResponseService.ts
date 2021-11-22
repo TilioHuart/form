@@ -1,68 +1,67 @@
 import {idiom, ng, notify, moment} from 'entcore';
-import http, {AxiosResponse} from 'axios';
+import http from 'axios';
 import {Question, Response, Types} from "../models";
+import {DataUtils} from "../utils/data";
 
 export interface ResponseService {
-    list(question: Question, nbLines: number) : Promise<AxiosResponse>;
-    countByQuestion(questionId : number) : Promise<AxiosResponse>;
-    listMineByDistribution(questionId: number, distributionId: number) : Promise<AxiosResponse>;
-    listByDistribution(distributionId: number) : Promise<AxiosResponse>;
-    get(responseId: number) : Promise<AxiosResponse>;
-    save(response: Response, questionType?: number) : Promise<AxiosResponse>;
-    create(response: Response) : Promise<AxiosResponse>;
-    fillResponses(formId: number, distributionId: number) : Promise<AxiosResponse>;
-    update(response: Response) : Promise<AxiosResponse>;
-    delete(responseId: number) : Promise<AxiosResponse>;
-
+    list(question: Question, nbLines: number) : Promise<any>;
+    countByQuestion(questionId : number) : Promise<any>;
+    listMineByDistribution(questionId: number, distributionId: number) : Promise<any>;
+    listByDistribution(distributionId: number) : Promise<any>;
+    get(responseId: number) : Promise<any>;
+    save(response: Response, questionType?: number) : Promise<any>;
+    create(response: Response) : Promise<any>;
+    fillResponses(formId: number, distributionId: number) : Promise<any>;
+    update(response: Response) : Promise<any>;
+    delete(responseId: number) : Promise<any>;
 }
 
 export const responseService: ResponseService = {
-
-    async list(question: Question, nbLines: number) : Promise<AxiosResponse> {
+    async list(question: Question, nbLines: number) : Promise<any> {
         try {
-            return http.get(`/formulaire/questions/${question.id}/responses?nbLines=${nbLines}&formId=${question.form_id}`);
+            return DataUtils.getData(await http.get(`/formulaire/questions/${question.id}/responses?nbLines=${nbLines}&formId=${question.form_id}`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.list'));
             throw err;
         }
     },
-    async countByQuestion (questionId:number):Promise<AxiosResponse>{ //count
+    async countByQuestion (questionId:number):Promise<any>{ //count
         try{
-            return http.get(`/formulaire/questions/${questionId}/responses/count`);
+            return DataUtils.getData(await http.get(`/formulaire/questions/${questionId}/responses/count`));
         }catch(err){
             notify.error(idiom.translate('formulaire.error.responseService.list'));
             throw err;
         }
     },
 
-    async listMineByDistribution(questionId: number, distributionId: number) : Promise<AxiosResponse> {
+    async listMineByDistribution(questionId: number, distributionId: number) : Promise<any> {
         try {
-            return http.get(`/formulaire/questions/${questionId}/responses/${distributionId}`);
+            return DataUtils.getData(await http.get(`/formulaire/questions/${questionId}/responses/${distributionId}`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.list'));
             throw err;
         }
     },
 
-    async listByDistribution(distributionId: number) : Promise<AxiosResponse> {
+    async listByDistribution(distributionId: number) : Promise<any> {
         try {
-            return http.get(`/formulaire/responses/distrib/${distributionId}`);
+            return DataUtils.getData(await http.get(`/formulaire/responses/distrib/${distributionId}`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.list'));
             throw err;
         }
     },
 
-    async get(responseId: number) : Promise<AxiosResponse> {
+    async get(responseId: number) : Promise<any> {
         try {
-            return http.get(`/formulaire/responses/${responseId}`);
+            return DataUtils.getData(await http.get(`/formulaire/responses/${responseId}`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.get'));
             throw err;
         }
     },
 
-    async save(response: Response, questionType?: number) : Promise<AxiosResponse> {
+    async save(response: Response, questionType?: number) : Promise<any> {
         if (!response.answer) {
             response.answer = "";
         }
@@ -81,36 +80,36 @@ export const responseService: ResponseService = {
         return response.id ? await this.update(response) : await this.create(response);
     },
 
-    async create(response: Response) : Promise<AxiosResponse> {
+    async create(response: Response) : Promise<any> {
         try {
-            return http.post(`/formulaire/questions/${response.question_id}/responses`, response);
+            return DataUtils.getData(await http.post(`/formulaire/questions/${response.question_id}/responses`, response));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.create'));
             throw err;
         }
     },
 
-    async fillResponses(formId: number, distributionId: number) : Promise<AxiosResponse> {
+    async fillResponses(formId: number, distributionId: number) : Promise<any> {
         try {
-            return http.post(`/formulaire/forms/${formId}/responses/fill/${distributionId}`, {});
+            return DataUtils.getData(await http.post(`/formulaire/forms/${formId}/responses/fill/${distributionId}`, {}));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.create'));
             throw err;
         }
     },
 
-    async update(response: Response) : Promise<AxiosResponse> {
+    async update(response: Response) : Promise<any> {
         try {
-            return http.put(`/formulaire/responses/${response.id}`, response);
+            return DataUtils.getData(await http.put(`/formulaire/responses/${response.id}`, response));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.update'));
             throw err;
         }
     },
 
-    async delete(responseId: number) : Promise<AxiosResponse> {
+    async delete(responseId: number) : Promise<any> {
         try {
-            return http.delete(`/formulaire/responses/${responseId}`);
+            return DataUtils.getData(await http.delete(`/formulaire/responses/${responseId}`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.delete'));
             throw err;

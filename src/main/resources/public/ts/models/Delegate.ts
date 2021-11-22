@@ -40,7 +40,7 @@ export class Delegates {
 
     sync = async () : Promise<void> => {
         try {
-            let { data } = await delegateService.list();
+            let data = await delegateService.list();
             this.all = Mix.castArrayAs(Delegate, data);
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.delegateService.sync'));

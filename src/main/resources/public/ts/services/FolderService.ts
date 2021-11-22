@@ -1,71 +1,72 @@
 import {idiom, ng, notify} from 'entcore';
-import http, {AxiosResponse} from 'axios';
+import http from 'axios';
 import {Folder} from '../models/Folder';
+import {DataUtils} from "../utils/data";
 
 export interface FolderService {
-    list() : Promise<AxiosResponse>;
-    get(folderId: number) : Promise<AxiosResponse>;
-    save(folder: Folder) : Promise<AxiosResponse>;
-    create(folder: Folder) : Promise<AxiosResponse>;
-    update(folder: Folder) : Promise<AxiosResponse>;
-    delete(folders: Folder[]) : Promise<AxiosResponse>;
-    move(folders: Folder[], parentId: number) : Promise<AxiosResponse>;
+    list() : Promise<any>;
+    get(folderId: number) : Promise<any>;
+    save(folder: Folder) : Promise<any>;
+    create(folder: Folder) : Promise<any>;
+    update(folder: Folder) : Promise<any>;
+    delete(folders: Folder[]) : Promise<any>;
+    move(folders: Folder[], parentId: number) : Promise<any>;
 }
 
 export const folderService: FolderService = {
 
-    async list() : Promise<AxiosResponse> {
+    async list() : Promise<any> {
         try {
-            return http.get('/formulaire/folders');
+            return DataUtils.getData(await http.get('/formulaire/folders'));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.folderService.list'));
             throw err;
         }
     },
 
-    async get(folderId) : Promise<AxiosResponse> {
+    async get(folderId) : Promise<any> {
         try {
-            return http.get(`/formulaire/folders/${folderId}`);
+            return DataUtils.getData(await http.get(`/formulaire/folders/${folderId}`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.folderService.get'));
             throw err;
         }
     },
 
-    async save(folder) : Promise<AxiosResponse> {
+    async save(folder) : Promise<any> {
         return folder.id ? await this.update(folder) : await this.create(folder);
     },
 
-    async create(folder) : Promise<AxiosResponse> {
+    async create(folder) : Promise<any> {
         try {
-            return http.post('/formulaire/folders', folder);
+            return DataUtils.getData(await http.post('/formulaire/folders', folder));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.folderService.create'));
             throw err;
         }
     },
 
-    async update(folder) : Promise<AxiosResponse> {
+    async update(folder) : Promise<any> {
         try {
-            return http.put(`/formulaire/folders/${folder.id}`, folder);
+            return DataUtils.getData(await http.put(`/formulaire/folders/${folder.id}`, folder));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.folderService.update'));
             throw err;
         }
     },
 
-    async delete(folders) : Promise<AxiosResponse> {
+    async delete(folders) : Promise<any> {
         try {
-            return http.delete('/formulaire/folders', { data: folders } );
+            return DataUtils.getData(await http.delete('/formulaire/folders', { data: folders } ));
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.folderService.delete'));
             throw e;
         }
     },
 
-    async move(folders, parentId) : Promise<AxiosResponse> {
+    async move(folders, parentId) : Promise<any> {
         try {
-            return http.put(`/formulaire/folders/move/${parentId}`, folders);
+            return DataUtils.getData(await http.put(`/formulaire/folders/move/${parentId}`, folders));
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.folderService.move'));
             throw e;

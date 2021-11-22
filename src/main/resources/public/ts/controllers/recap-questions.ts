@@ -48,7 +48,7 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
 
     vm.$onInit = async () : Promise<void> => {
         vm.form = $scope.form;
-        vm.form.nb_questions = $scope.getDataIf200(await questionService.countQuestions(vm.form.id)).count;
+        vm.form.nb_questions = (await questionService.countQuestions(vm.form.id)).count;
         vm.distribution = $scope.distribution;
         await vm.questions.sync(vm.form.id);
         await vm.responses.syncByDistribution(vm.distribution.id);
