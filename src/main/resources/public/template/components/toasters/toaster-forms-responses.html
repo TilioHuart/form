@@ -1,0 +1,13 @@
+<section class="toggle-buttons" workflow="formulaire.response"
+         ng-if="currentPage === Pages.FORMS_RESPONSE && vm.forms.selected.length > 0" >
+    <div class="toggle">
+        <div class="row">
+            <button ng-click="vm.openForm(vm.forms.selected[0])" class="cell">
+                <i18n>formulaire.open</i18n>
+            </button>
+            <button ng-click="vm.openMyResponses(vm.forms.selected[0])" class="cell" ng-show="vm.forms.selected[0].multiple && vm.getMyDistribs(vm.forms.selected[0]).length > 0">
+                <i18n>formulaire.myResponses</i18n>
+            </button>
+        </div>
+    </div>
+</section>

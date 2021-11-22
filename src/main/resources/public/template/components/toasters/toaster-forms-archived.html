@@ -1,0 +1,19 @@
+<section class="toggle-buttons" workflow="formulaire.creation"
+         ng-if="currentPage === Pages.FORMS_LIST && vm.forms.selected.length > 0 && vm.forms.selected[0].archived" >
+    <div class="toggle">
+        <div class="row">
+            <button ng-click="vm.restoreForms()" class="cell" ng-show="hasShareRightManager(vm.forms.selected[0])">
+                <i18n>formulaire.restore</i18n>
+            </button>
+            <button ng-click="vm.deleteForms()" class="cell" ng-show="hasShareRightManager(vm.forms.selected[0])">
+                <i18n>formulaire.delete</i18n>
+            </button>
+            <button ng-click="vm.switchAllForms(true)" class="cell toaster-right zero-mobile">
+                <i18n>formulaire.selectAll</i18n>
+            </button>
+            <button ng-click="vm.switchAllForms(false)" class="cell toaster-right zero-mobile">
+                <i18n>formulaire.deselect</i18n>
+            </button>
+        </div>
+    </div>
+</section>

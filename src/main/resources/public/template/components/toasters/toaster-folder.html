@@ -1,6 +1,6 @@
-<section class="toggle-buttons" ng-if="vm.folders.selected.length > 0">
+<section class="toggle-buttons" ng-if="vm.folders.selected.length > 0" workflow="formulaire.creation">
     <div class="toggle">
-        <div class="row" workflow="formulaire.creation">
+        <div class="row">
             <button ng-click="vm.openFolder(vm.folders.selected[0])" class="cell" ng-show="vm.folders.selected.length === 1">
                 <i18n>formulaire.open</i18n>
             </button>
