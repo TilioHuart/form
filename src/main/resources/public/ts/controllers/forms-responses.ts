@@ -151,7 +151,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
         $scope.safeApply();
     };
 
-    vm.selectForm= async(form : Form):Promise <void> =>{
+    vm.selectForm = async(form : Form):Promise <void> =>{
         if (!form.selected) {
             vm.forms.deselectAll();
             if (form.multiple || status != DistributionStatus.FINISHED) {

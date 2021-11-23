@@ -55,9 +55,10 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
         let fileQuestions = vm.questions.all.filter(q => q.question_type === Types.FILE);
         for (let fileQuestion of fileQuestions) {
             let response = vm.responses.all.filter(r => r.question_id === fileQuestion.id)[0];
-            await response.files.sync(response.id);
+            if(response){
+                await response.files.sync(response.id);
+            }
         }
-
         $scope.safeApply();
     };
 

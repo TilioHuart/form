@@ -8,9 +8,11 @@
             </select>
         </div>
         <br/>
-        <i18n>formulaire.responses.send.text</i18n>
+        <i18n ng-if="!vm.form.editable">formulaire.responses.send.text</i18n>
         <br/>
-        <i18n>formulaire.responses.send.continue</i18n>
+        <i18n ng-if="!vm.form.editable">formulaire.responses.send.continue</i18n>
+
+        <i18n ng-if="vm.form.editable">formulaire.responses.editable.send.text</i18n>
     </div>
     <div class="action-buttons">
         <button class="cell cancel" ng-click="vm.display.lightbox.sending = false;"><i18n>formulaire.cancel</i18n></button>
