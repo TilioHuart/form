@@ -47,6 +47,8 @@ interface ViewModel {
     selectedFolder: Element;
 
     createForm() : void;
+
+    // Toaster functions
     openForm(form: Form) : void;
     openPropertiesForm() : void;
     duplicateForms() : Promise<void>;
@@ -66,6 +68,7 @@ interface ViewModel {
     createFolder() : Promise<void>;
     selectItem(form: Form) : void;
 
+    // Folders functions
     initFolders() : Promise<void>;
     openFolder(folder: Folder) : void;
     openCreateFolder() : void;
@@ -83,6 +86,7 @@ interface ViewModel {
     dropped(dragEl, dropEl) : Promise<void>;
     switchAllFolders(value: boolean) : void;
 
+    // Utils functions
     switchAllForms(value: boolean) : void;
     sort(field: FiltersOrders) : void;
     filter(filter: FiltersFilters) : void;
@@ -148,8 +152,10 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     vm.createForm = () : void => {
-        let isFolderOkForCreation = vm.folder.id != vm.folders.sharedFormsFolder.id && vm.folder.id != vm.folders.archivedFormsFolder.id;
-        $scope.folder = isFolderOkForCreation ? vm.folder : vm.folders.myFormsFolder;
+        let isFolderOkForCreation = vm.folder.id && vm.folder.id != vm.folders.sharedFormsFolder.id && vm.folder.id != vm.folders.archivedFormsFolder.id;
+        let folder = isFolderOkForCreation ? vm.folder : vm.folders.myFormsFolder;
+        $scope.$emit(FORMULAIRE_EMIT_EVENT.UPDATE_FOLDER, folder);
+        $scope.safeApply();
         $scope.redirectTo(`/form/create`);
     };
 

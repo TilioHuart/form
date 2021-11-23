@@ -247,6 +247,9 @@ public class FolderController extends ControllerHelper {
             if (parentId != Formulaire.ID_ROOT_FOLDER) { // We do not sync root folder counts (useless)
                 folderService.syncNbChildren(user, parentId.toString(), defaultResponseHandler(request));
             }
+            else {
+                RenderHelper.ok(request);
+            }
         });
     }
 }

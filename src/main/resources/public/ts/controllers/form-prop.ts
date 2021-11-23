@@ -44,10 +44,6 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
 
         vm.save = async () : Promise<void> => {
             if (vm.form.title && vm.checkIntervalDates()) {
-                // let form = new Form();
-                // let data = $scope.getDataIf200(await formService.save(vm.form));
-                // form.setFromJson(data);
-
                 vm.form = $scope.getDataIf200(await formService.save(vm.form));
                 $scope.redirectTo(`/form/${vm.form.id}/edit`);
                 $scope.safeApply();
