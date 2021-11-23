@@ -126,7 +126,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     vm.newQuestion.choices.all.push(new QuestionChoice());
                 }
             }
-            await vm.questions.all.push(vm.newQuestion);
+            vm.questions.all.push(vm.newQuestion);
+            vm.nbQuestions = vm.questions.all.length;
             vm.display.lightbox.newQuestion = false;
             template.close('lightbox');
             vm.dontSave = false;
@@ -208,6 +209,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 vm.display.lightbox.delete = false;
                 notify.success(idiom.translate('formulaire.success.question.delete'));
                 await vm.questions.sync(vm.form.id);
+                vm.nbQuestions = vm.questions.all.length;
                 rePositionQuestions();
                 vm.dontSave = false;
                 $scope.safeApply();
