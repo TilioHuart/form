@@ -2,7 +2,8 @@ ALTER TABLE formulaire.form
     ADD COLUMN response_notified boolean NOT NULL DEFAULT FALSE,
     ADD COLUMN editable boolean NOT NULL DEFAULT FALSE,
     ADD COLUMN rgpd boolean NOT NULL DEFAULT FALSE,
-    ADD COLUMN rgpd_goal VARCHAR;
+    ADD COLUMN rgpd_goal VARCHAR,
+    ADD COLUMN rgpd_lifetime bigint NOT NULL DEFAULT 12;
 
 ALTER TABLE formulaire.distribution
     ADD COLUMN original_id bigint;

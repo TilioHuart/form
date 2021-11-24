@@ -1,4 +1,4 @@
-import {Behaviours, idiom, init, model, ng, template} from 'entcore';
+import {Behaviours, idiom, model, ng, template} from 'entcore';
 import {Distribution, DistributionStatus, Form, Question, QuestionTypes, Types} from "../models";
 import {distributionService, formService, questionService} from "../services";
 import {AxiosResponse} from "axios";

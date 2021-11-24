@@ -36,7 +36,7 @@
     "apexcharts": "^3.26.0"
   },
   "devDependencies": {
-    "@mdi/font": "^4.4.95",
+    "@mdi/font": "^4.5.95",
     "@types/jquery": "^2.0.34",
     "@types/jest": "^22.2.0",
     "@types/core-js": "0.9.42",

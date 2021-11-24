@@ -43,11 +43,8 @@
                                 <div class="text">
                                     <label for="isMultiple">
                                         <input type="checkbox" id="isMultiple" ng-model="vm.form.multiple" ng-disabled="vm.form.nb_responses > 0"/>
-                                        <span ng-if="!isMobile" ng-style="{'cursor' : vm.form.nb_responses > 0 ? 'default' : 'pointer'}">
+                                        <span ng-style="{'cursor' : vm.form.nb_responses > 0 ? 'default' : 'pointer'}">
                                             <i18n>formulaire.prop.multiple.label</i18n>
-                                        </span>
-                                        <span ng-if="isMobile" ng-style="{'cursor' : vm.form.nb_responses > 0 ? 'default' : 'pointer'}">
-                                            <i18n>formulaire.prop.multiple.label.mobile</i18n>
                                         </span>
                                     </label>
                                 </div>
@@ -66,8 +63,8 @@
                                         <input type="checkbox" id="isAnonymous" ng-model="vm.form.anonymous" ng-disabled="vm.form.nb_responses > 0"
                                                ng-style="{'cursor' : vm.form.nb_responses > 0 ? 'default' : 'pointer'}"/>
                                         <span ng-style="{'cursor' : vm.form.nb_responses > 0 ? 'default' : 'pointer'}"><i18n>formulaire.prop.anonymous.label</i18n></span>
+                                        <i class="i-info sm-icon" title="[[idiom.translate('formulaire.prop.anonymous.description')]]"></i>
                                     </label>
-                                    <i18n class="subdescription" ng-if="vm.form.anonymous">formulaire.prop.anonymous.description</i18n>
                                 </div>
                             </div>
                             <div class="notified">
@@ -75,8 +72,8 @@
                                     <label for="isNotified">
                                         <input type="checkbox" id="isNotified" ng-model="vm.form.response_notified"/>
                                         <span><i18n>formulaire.prop.notified.label</i18n></span>
+                                        <i class="i-info sm-icon" title="[[idiom.translate('formulaire.prop.notified.description')]]"></i>
                                     </label>
-                                    <i18n class="subdescription" ng-if="vm.form.response_notified">formulaire.prop.notified.description</i18n>
                                 </div>
                             </div>
                             <div class="collectData" workflow="formulaire.rgpd">
@@ -90,11 +87,18 @@
                                         <div class="collectData-inputs">
                                             <div class="goal">
                                                 <i18n>formulaire.prop.rgpd.goal</i18n>
-                                                <input type="text" class="ten nine-mobile" ng-model="vm.form.rgpd_goal"
+                                                <input type="text" class="nine eight-mobile" ng-model="vm.form.rgpd_goal"
                                                        maxlength="150" i18n-placeholder="formulaire.prop.rgpd.goal.input">
+                                                <i class="i-info sm-icon" title="[[idiom.translate('formulaire.prop.rgpd.goal.description')]]"></i>
                                             </div>
-                                            <div class="validity">
-                                                <i18n>formulaire.prop.rgpd.validity</i18n>
+                                            <div class="lifetime">
+                                                <i18n>formulaire.prop.rgpd.lifetime</i18n>
+                                                <select class="horizontal-margin" ng-model="vm.form.rgpd_lifetime">
+                                                    <option ng-repeat="choice in vm.rgpdLifetimeChoices" ng-value="choice"
+                                                            ng-attr-selected="[[choice === vm.form.rgpd_lifetime ? 'selected' : undefined]]">
+                                                        [[choice]] [[idiom.translate('formulaire.months')]]
+                                                    </option>
+                                                </select>
                                             </div>
                                         </div>
                                         <div class="collectData-description">

@@ -112,9 +112,10 @@ public class DefaultFormService implements FormService {
 
     @Override
     public void create(JsonObject form, UserInfos user, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, " +
-                "picture, date_creation, date_modification, date_opening, date_ending, multiple, anonymous, response_notified, editable, rgpd, rgpd_goal) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+        String query = "INSERT INTO " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, picture, " +
+                "date_creation, date_modification, date_opening, date_ending, multiple, anonymous, response_notified, " +
+                "editable, rgpd, rgpd_goal, rgpd_lifetime) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(user.getUserId())
                 .add(user.getUsername())
@@ -129,7 +130,8 @@ public class DefaultFormService implements FormService {
                 .add(form.getBoolean("response_notified", false))
                 .add(form.getBoolean("editable", false))
                 .add(form.getBoolean("rgpd", false))
-                .add(form.getString("rgpd_goal", ""));
+                .add(form.getString("rgpd_goal", ""))
+                .add(form.getInteger("rgpd_lifetime", 12));
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
@@ -141,9 +143,10 @@ public class DefaultFormService implements FormService {
 
         List<JsonObject> allForms = forms.getList();
         for (JsonObject form : allForms) {
-            query += "INSERT INTO " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, " +
-                    "picture, date_creation, date_modification, date_opening, date_ending, multiple, anonymous, response_notified, editable, rgpd, rgpd_goal) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?); ";
+            query += "INSERT INTO " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, picture, " +
+                    "date_creation, date_modification, date_opening, date_ending, multiple, anonymous, response_notified, " +
+                    "editable, rgpd, rgpd_goal, rgpd_lifetime) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?); ";
             params.add(user.getUserId())
                     .add(user.getUsername())
                     .add(form.getString("title", ""))
@@ -157,7 +160,8 @@ public class DefaultFormService implements FormService {
                     .add(form.getBoolean("response_notified", false))
                     .add(form.getBoolean("editable", false))
                     .add(form.getBoolean("rgpd", false))
-                    .add(form.getString("rgpd_goal", ""));
+                    .add(form.getString("rgpd_goal", ""))
+                    .add(form.getInteger("rgpd_lifetime", 12));
         }
 
         query += "RETURNING *;";
@@ -169,8 +173,9 @@ public class DefaultFormService implements FormService {
         String query =
                 "WITH new_form_id AS (" +
                     "INSERT INTO  " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, picture, " +
-                    "date_opening, date_ending, multiple, anonymous, response_notified, editable, rgpd, rgpd_goal) " +
-                    "SELECT ?, ?, concat(title, ' - Copie'), description, picture, date_opening, date_ending, multiple, anonymous, response_notified, editable, rgpd, rgpd_goal " +
+                    "date_opening, date_ending, multiple, anonymous, response_notified, editable, rgpd, rgpd_goal, rgpd_lifetime) " +
+                    "SELECT ?, ?, concat(title, ' - Copie'), description, picture, date_opening, date_ending, multiple, " +
+                    "anonymous, response_notified, editable, rgpd, rgpd_goal, rgpd_lifetime " +
                     "FROM " + Formulaire.FORM_TABLE + " WHERE id = ? RETURNING id" +
                 "), " +
                 "rows AS (" +
@@ -196,7 +201,7 @@ public class DefaultFormService implements FormService {
                 "WHEN false THEN ? WHEN true THEN (SELECT multiple FROM " + Formulaire.FORM_TABLE +" WHERE id = ?) END, " +
                 "anonymous = CASE (SELECT count > 0 FROM nbResponses) " +
                 "WHEN false THEN ? WHEN true THEN (SELECT anonymous FROM " + Formulaire.FORM_TABLE +" WHERE id = ?) END, " +
-                "response_notified = ?, editable = ?, rgpd = ?, rgpd_goal = ?" +
+                "response_notified = ?, editable = ?, rgpd = ?, rgpd_goal = ?, rgpd_lifetime = ?" +
                 "WHERE id = ? RETURNING *;";
 
         JsonArray params = new JsonArray()
@@ -218,6 +223,7 @@ public class DefaultFormService implements FormService {
                 .add(form.getBoolean("editable", false))
                 .add(form.getBoolean("rgpd", false))
                 .add(form.getString("rgpd_goal", ""))
+                .add(form.getInteger("rgpd_lifetime", 12))
                 .add(formId);
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));

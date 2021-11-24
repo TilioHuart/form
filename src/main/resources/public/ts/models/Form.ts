@@ -31,6 +31,7 @@ export class Form implements Selectable, Shareable  {
     displayed: boolean;
     rgpd: boolean;
     rgpd_goal: string;
+    rgpd_lifetime: number;
     folder_id: number;
     selected: boolean;
     infoImg: {
@@ -64,6 +65,7 @@ export class Form implements Selectable, Shareable  {
         this.editable = false;
         this.rgpd = false;
         this.rgpd_goal = null;
+        this.rgpd_lifetime = 12;
         this.displayed = true;
         this.selected = null;
     }
@@ -90,6 +92,7 @@ export class Form implements Selectable, Shareable  {
             editable: this.editable,
             rgpd: this.rgpd,
             rgpd_goal: this.rgpd_goal,
+            rgpd_lifetime: this.rgpd_lifetime,
             selected: this.selected
         }
     }

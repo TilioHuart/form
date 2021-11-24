@@ -191,4 +191,10 @@ i {
     content: "\F3EB";
     color: $formulaire-orange;
   }
+
+  &.i-info::before {
+    font-family: 'material-icons';
+    content: "\F2FD";
+    color: $formulaire-blue;
+  }
 }

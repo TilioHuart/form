@@ -334,6 +334,10 @@ body.formulaire section.main {
               }
             }
 
+            .multiple, .editable, .anonymous, .notified {
+              height: 24px;
+            }
+
             .multiple, .editable, .anonymous, .notified, .collectData {
               font-size: 12px;
               display: flex;
@@ -344,13 +348,6 @@ body.formulaire section.main {
                 display: flex;
                 flex-direction: column;
                 margin-left: 5px;
-
-                .subdescription {
-                  font-style: italic;
-                  font-weight: normal;
-                  color: $formulaire-grey;
-                  margin: -5px 0 0 25px;
-                }
               }
             }
 
