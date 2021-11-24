@@ -45,16 +45,16 @@ public interface ResponseFileService {
     void create(String responseId, String fileId, String filename, String type, Handler<Either<String, JsonObject>> handler);
 
     /**
-     * Delete all response_files of a specific response
-     * @param responseId response identifier
+     * Delete all response_files of specific responses
+     * @param responseIds response identifiers
      * @param handler function handler returning JsonArray data
      */
-    void deleteAllByResponse(String responseId, Handler<Either<String, JsonArray>> handler);
+    void deleteAllByResponse(JsonArray responseIds, Handler<Either<String, JsonArray>> handler);
 
     /**
      * Delete all response_files by their ids
-     * @param responseIds   responseFiles identifier
-     * @param handler       function handler returning JsonArray data
+     * @param fileIds responseFiles identifier
+     * @param handler function handler returning JsonArray data
      */
-    void deleteAll(JsonArray responseIds, Handler<Either<String, JsonArray>> handler);
+    void deleteAll(JsonArray fileIds, Handler<Either<String, JsonArray>> handler);
 }

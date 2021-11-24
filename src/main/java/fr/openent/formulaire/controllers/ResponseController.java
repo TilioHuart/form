@@ -137,9 +137,9 @@ public class ResponseController extends ControllerHelper {
         String formId = request.getParam("formId");
         String distributionId = request.getParam("distributionId");
         RequestUtils.bodyToJson(request, response -> {
-            responseService.getMissingResponses(formId, distributionId, getMissingResponsesEevent -> {
-                if (getMissingResponsesEevent.isRight()) {
-                    JsonArray questionIds = getMissingResponsesEevent.right().getValue();
+            responseService.getMissingResponses(formId, distributionId, getMissingResponsesEvent -> {
+                if (getMissingResponsesEvent.isRight()) {
+                    JsonArray questionIds = getMissingResponsesEvent.right().getValue();
                     UserUtils.getUserInfos(eb, request, user -> {
                         if (user != null) {
                             if (questionIds != null && !questionIds.isEmpty()) {

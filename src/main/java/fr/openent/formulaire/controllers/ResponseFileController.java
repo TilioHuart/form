@@ -2,6 +2,7 @@ package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.helpers.FolderExporterZip;
+import fr.openent.formulaire.helpers.RenderHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.ResponseFileService;
@@ -207,7 +208,13 @@ public class ResponseFileController extends ControllerHelper {
     public void deleteAll(HttpServerRequest request) {
         String responseId = request.getParam("responseId");
 
-        responseFileService.deleteAllByResponse(responseId, deleteEvent -> {
+        JsonArray responseIds = new JsonArray().add(responseId);
+
+        if (responseIds.size() <= 0) {
+            noContent(request);
+            return;
+        }
+        responseFileService.deleteAllByResponse(responseIds, deleteEvent -> {
             if (deleteEvent.isRight()) {
                 JsonArray deletedFiles = deleteEvent.right().getValue();
                 request.response().setStatusCode(204).end();
@@ -223,7 +230,7 @@ public class ResponseFileController extends ControllerHelper {
                 }
             }
             else {
-                log.error("[Formulaire@deleteAll] An error occurred while deleting files for reponse " + responseId);
+                log.error("[Formulaire@deleteAll] An error occurred while deleting files for response " + responseId);
                 renderError(request, new JsonObject().put("message", deleteEvent.left().getValue()));
             }
         });

@@ -53,6 +53,7 @@ compileTestJava {
     targetCompatibility = project.targetCompatibility
 }
 dependencies {
+    compile "fr.wseduc:vertx-cron-timer:$vertxCronTimer"
     compileOnly "io.vertx:vertx-core:$vertxVersion"
     compile "org.entcore:common:$entCoreVersion"
     testCompile "org.entcore:tests:$entCoreVersion"

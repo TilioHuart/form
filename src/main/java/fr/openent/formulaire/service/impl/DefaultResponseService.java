@@ -155,4 +155,20 @@ public class DefaultResponseService implements ResponseService {
         JsonArray params = new JsonArray().add(formId).add(Formulaire.FINISHED);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
+
+    @Override
+    public void deleteOldResponse(Handler<Either<String, JsonArray>> handler) {
+        String query =
+                "DELETE FROM " + Formulaire.RESPONSE_TABLE + " " +
+                "WHERE id IN (" +
+                    "SELECT r.id FROM " + Formulaire.FORM_TABLE + " f " +
+                    "JOIN " + Formulaire.QUESTION_TABLE + " q ON q.form_id = f.id " +
+                    "JOIN " + Formulaire.RESPONSE_TABLE + " r ON r.question_id = q.id " +
+                    "WHERE f.rgpd = ? " +
+                    "AND (SELECT EXTRACT(month FROM AGE(NOW(), f.date_opening::timestamp)) > f.rgpd_lifetime)" +
+                ") " +
+                "RETURNING id;";
+        JsonArray params = new JsonArray().add(true);
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
 }

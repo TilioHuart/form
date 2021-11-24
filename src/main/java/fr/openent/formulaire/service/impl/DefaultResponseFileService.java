@@ -54,17 +54,18 @@ public class DefaultResponseFileService implements ResponseFileService {
     }
 
     @Override
-    public void deleteAllByResponse(String responseId, Handler<Either<String, JsonArray>> handler) {
-        String query = "DELETE FROM " + Formulaire.RESPONSE_FILE_TABLE + " WHERE response_id = ? RETURNING id;";
-        JsonArray params = new JsonArray().add(responseId);
+    public void deleteAllByResponse(JsonArray responseIds, Handler<Either<String, JsonArray>> handler) {
+        String query = "DELETE FROM " + Formulaire.RESPONSE_FILE_TABLE +
+                " WHERE response_id IN " + Sql.listPrepared(responseIds) + " RETURNING id;";
+        JsonArray params = new JsonArray().addAll(responseIds);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
     @Override
-    public void deleteAll(JsonArray responseIds, Handler<Either<String, JsonArray>> handler) {
+    public void deleteAll(JsonArray fileIds, Handler<Either<String, JsonArray>> handler) {
         String query = "DELETE FROM " + Formulaire.RESPONSE_FILE_TABLE +
-                " WHERE id IN " + Sql.listPrepared(responseIds) + "RETURNING id;";
-        JsonArray params = new JsonArray().addAll(responseIds);
+                " WHERE id IN " + Sql.listPrepared(fileIds) + " RETURNING id;";
+        JsonArray params = new JsonArray().addAll(fileIds);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 }

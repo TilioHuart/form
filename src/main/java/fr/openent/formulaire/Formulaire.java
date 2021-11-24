@@ -1,13 +1,9 @@
 package fr.openent.formulaire;
 
 import fr.openent.formulaire.controllers.*;
+import fr.openent.formulaire.cron.RgpdCron;
 import fr.openent.formulaire.service.impl.FormulaireRepositoryEvents;
-import fr.wseduc.webutils.Either;
-import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.events.EventStore;
@@ -23,8 +19,7 @@ import org.entcore.common.storage.StorageFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static fr.wseduc.webutils.http.Renders.renderJson;
+import fr.wseduc.cron.CronTrigger;
 
 public class Formulaire extends BaseServer {
 	private static final Logger log = LoggerFactory.getLogger(Formulaire.class);
@@ -138,5 +133,9 @@ public class Formulaire extends BaseServer {
 		addController(new ResponseFileController(storage));
 		addController(new UtilsController(storage));
 		addController(new FolderController());
+
+		// CRON
+		RgpdCron rgpdCron = new RgpdCron(storage);
+		new CronTrigger(vertx, config.getString("rgpd-cron", "0 0 0 */1 * ? *")).schedule(rgpdCron);
 	}
 }
