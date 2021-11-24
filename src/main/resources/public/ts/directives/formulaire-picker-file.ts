@@ -1,4 +1,4 @@
-import { ng, template, Document, $ } from 'entcore';
+import {ng, template, Document, $, init} from 'entcore';
 import {FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
 
 export const formulairePickerFile = ng.directive('formulairePickerFile', () => {
@@ -63,6 +63,14 @@ export const formulairePickerFile = ng.directive('formulairePickerFile', () => {
                 scope.$apply();
             }
 
+            scope.initFiles = function(files){
+                scope.files = scope.filesArray = files;
+                if(scope.filesArray && scope.filesArray.length > 0){
+                    template.open('list', 'entcore/file-picker-list/list');
+                }
+                scope.$apply();
+            }
+
             $('body').on('drop', '.icons-view', dropFiles);
             element.on('drop', dropFiles);
 
@@ -86,7 +94,7 @@ export const formulairePickerFile = ng.directive('formulairePickerFile', () => {
                 return Math.ceil(koSize) + ' Ko';
             }
 
-            scope.$on(FORMULAIRE_BROADCAST_EVENT.DISPLAY_FILES, (event, ctrlFiles) => { scope.listFiles(ctrlFiles) });
+            scope.$on(FORMULAIRE_BROADCAST_EVENT.DISPLAY_FILES, (event, ctrlFiles) => { scope.initFiles(ctrlFiles) });
         }
     }
 })

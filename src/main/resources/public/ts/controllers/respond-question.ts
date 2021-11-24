@@ -72,19 +72,20 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             if (!!!vm.response.distribution_id) { vm.response.distribution_id = vm.distribution.id; }
         }
         if (vm.question.question_type === Types.TIME) { formatTime() }
-        if (vm.question.question_type === Types.FILE && vm.response.id) {
+        if (vm.question.question_type === Types.FILE) {
             vm.files = [];
-            let responseFiles = new ResponseFiles();
-            await responseFiles.sync(vm.response.id);
-            for (let repFile of responseFiles.all) {
-                if (repFile.id) {
-                    let file = new File([repFile.id], repFile.filename);
-                    vm.files.push(file);
+            if (vm.response.id) {
+                let responseFiles = new ResponseFiles();
+                await responseFiles.sync(vm.response.id);
+                for (let repFile of responseFiles.all) {
+                    if (repFile.id) {
+                        let file = new File([repFile.id], repFile.filename);
+                        vm.files.push(file);
+                    }
                 }
             }
             $scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.DISPLAY_FILES, vm.files);
         }
-
         $scope.safeApply();
     };
 
@@ -101,13 +102,14 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
     vm.next = async () : Promise<void> => {
         if (await saveResponses()) {
             let nextPosition: number = vm.question.position + 1;
-
             if (nextPosition <= vm.nbQuestions) {
                 $scope.redirectTo(`/form/${vm.form.id}/${vm.distribution.id}/question/${nextPosition}`);
             }
+
             else {
                 $scope.redirectTo(`/form/${vm.form.id}/${vm.distribution.id}/questions/recap`);
             }
+
         }
     };
 
@@ -131,7 +133,6 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
     vm.displayDefaultOption = () : string => {
         return idiom.translate('formulaire.options.select');
     };
-
 
     const saveResponses = async () : Promise<boolean> => {
         if (vm.question.question_type === Types.MULTIPLEANSWER) {
@@ -180,7 +181,6 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         }
         else {
             await responseFileService.deleteAll(vm.response.id);
-
             for (let i = 0; i < vm.files.length; i++) {
                 let filename = vm.files[i].name;
                 if (!!vm.files[i].type && !$scope.form.anonymous) {
@@ -190,7 +190,6 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                 file.append("file", vm.files[i], filename);
                 await responseFileService.create(vm.response.id, file);
             }
-
             vm.response.answer = idiom.translate('formulaire.response.file.send');
             vm.response = $scope.getDataIf200(await responseService.update(vm.response));
             return true;
