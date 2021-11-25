@@ -29,7 +29,9 @@ interface ViewModel {
         notanswered : boolean,
     }
     pageSize: number;
+    tableSize:number;
     limitTo: number;
+    limitTable:number;
     display: {
         grid: boolean,
         lightbox: {
@@ -66,6 +68,7 @@ interface ViewModel {
     remind() : Promise<void>;
     doRemind() : Promise<void>;
     checkRemind() : Promise<void>;
+    closeCheckRemind() : Promise<void>;
     filterResponses() : any;
     cancelRemind() : void;
     restoreForms() : Promise<void>;
@@ -103,6 +106,7 @@ interface ViewModel {
     displayFilterName(name: string) : string;
     getTitle(title: string): string;
     infiniteScroll() : void;
+    seeMore():void;
 }
 
 
@@ -129,7 +133,9 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     };
     vm.pageSize = 30;
+    vm.tableSize = 10;
     vm.limitTo = vm.pageSize;
+    vm.limitTable = vm.tableSize;
     vm.display = {
         grid: true,
         lightbox: {
@@ -252,8 +258,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         return dateOpeningOk && dateEndingOk;
     };
 
-
-
     vm.remind = async () : Promise<void> => {
         initMail();
         vm.distributions.all = Mix.castArrayAs(Distribution, $scope.getDataIf200(await distributionService.listByForm(vm.forms.selected[0].id)));
@@ -283,7 +287,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.checkRemind = async () : Promise<void> => {
         let distributions = Mix.castArrayAs(Distribution, $scope.getDataIf200(await distributionService.listByForm(vm.forms.selected[0].id)));
-
         let uniqueDistribs : any = [];
         for (let d of distributions){
             if(!uniqueDistribs.map(d => d.responder_id).includes(d.responder_id)) {
@@ -303,6 +306,12 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         }
         template.open('lightbox','lightbox/form-check-remind');
         vm.display.lightbox.checkremind=true;
+    };
+
+    vm.closeCheckRemind = async () : Promise<void> => {
+        vm.display.lightbox.checkremind = false;
+        template.close('lightbox');
+        vm.limitTable= vm.tableSize;
     };
 
     vm.filterResponses = () : any => {
@@ -401,7 +410,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             vm.forms.deselectAll();
         }
     };
-
 
     // Folders
 
@@ -637,7 +645,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         vm.allFoldersSelected = value;
     };
 
-
     // Utils
 
     vm.switchAllForms = (value) : void => {
@@ -676,6 +683,11 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.infiniteScroll = () : void => {
         vm.limitTo += vm.pageSize;
     };
+
+    vm.seeMore = () :void =>{
+        vm.limitTable += vm.tableSize;
+    };
+
 
     const initMail = () : void => {
         vm.mail.link = `${window.location.origin}${window.location.pathname}#/form/${vm.forms.selected[0].id}`;

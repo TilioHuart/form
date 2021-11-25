@@ -27,8 +27,8 @@
   "formulaire.return": "Retour",
   "formulaire.close": "Fermer",
   "formulaire.edit": "Modifier",
-  "formulaire.checkremind.answered": "répondu",
-  "formulaire.checkremind.notanswered":"non répondu",
+  "formulaire.checkremind.answered": "Répondu",
+  "formulaire.checkremind.notanswered":"Non répondu",
   "formulaire.mandatory": "Obligatoire",
   "formulaire.sent": "Envoyé",
   "formulaire.shared": "Partagé",
@@ -122,7 +122,7 @@
   "formulaire.folder.create": "Créer un dossier",
   "formulaire.folder.rename": "Renommer un dossier",
 
-  "formulaire.checkremind.name": "utilisateurs auxquels a été envoyé : ",
+  "formulaire.checkremind.name": "Utilisateurs auxquels a été envoyé : ",
 
   "formulaire.table.title": "Titre du formulaire",
   "formulaire.table.author": "Auteur",

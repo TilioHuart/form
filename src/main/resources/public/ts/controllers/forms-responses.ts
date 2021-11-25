@@ -11,6 +11,10 @@ interface ViewModel {
     searchInput: string;
     pageSize: number;
     limitTo: number;
+    sortRemindlist:{
+        filter:string,
+        order:boolean
+    }
     display: {
         grid: boolean,
         lightbox: {
@@ -42,6 +46,10 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
     vm.allFormsSelected = false;
     vm.pageSize = 40;
     vm.limitTo = vm.pageSize;
+    vm.sortRemindlist={
+        filter:"name",
+        order: true
+    }
     vm.display = {
         grid: true,
         lightbox: {
