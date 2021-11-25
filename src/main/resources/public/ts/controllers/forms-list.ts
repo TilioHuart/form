@@ -69,7 +69,6 @@ interface ViewModel {
     filterResponses() : any;
     cancelRemind() : void;
     restoreForms() : Promise<void>;
-
     archiveForms() : void;
     doArchiveForms() : Promise<void>;
     deleteForms() : void;

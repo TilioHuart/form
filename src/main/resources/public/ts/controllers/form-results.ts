@@ -139,7 +139,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             let nbEmptyResponse = distribs.all.filter(d => !resultsDistribIds.includes(d.id)).length;
             noResponseChoice.value = idiom.translate('formulaire.response.empty');
             noResponseChoice.nbResponses =
-                nbEmptyResponse + results.all.filter(r => !!!r.choice_id && finishedDistribIds.includes(r.distribution_id)).length;
+                nbEmptyResponse + results.all.filter(r => !r.choice_id && finishedDistribIds.includes(r.distribution_id)).length;
 
             question.choices.all.push(noResponseChoice);
 
@@ -235,6 +235,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
         vm.goTo = async (position: number) : Promise<void> => {
             $scope.redirectTo(`/form/${vm.question.form_id}/results/${position}`);
+            $scope.safeApply();
         };
 
         vm.getWidth = (nbResponses: number, divisor: number) : number => {
@@ -412,5 +413,5 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
         init();
 
-        $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_FORM_PROP, () => { init() });
+        $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_FORM_RESULTS, () => { init() });
     }]);

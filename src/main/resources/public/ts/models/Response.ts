@@ -47,7 +47,7 @@ export class Responses {
     sync = async (question: Question, isFileQuestion: boolean, nbLines: number = null) : Promise<void> => {
         try {
             let { data } = await responseService.list(question, nbLines);
-            this.all = nbLines == null ? Mix.castArrayAs(Response, data) : this.all.concat(Mix.castArrayAs(Response, data));
+            this.all = nbLines && nbLines > 0 ? this.all.concat(Mix.castArrayAs(Response, data)) : Mix.castArrayAs(Response, data);
             if (isFileQuestion) {
                 let dataFiles = await responseFileService.listByQuestion(question.id);
                 let files = dataFiles.data;
