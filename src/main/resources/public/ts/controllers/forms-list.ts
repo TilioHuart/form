@@ -504,7 +504,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     vm.createFolder = async () : Promise<void> => {
-        vm.editedFolder.parent_id = vm.folder.id;
+        let isFolderOkForCreation = vm.folder.id && vm.folder.id != vm.folders.sharedFormsFolder.id && vm.folder.id != vm.folders.archivedFormsFolder.id;
+        vm.editedFolder.parent_id = isFolderOkForCreation ? vm.folder.id : vm.folders.myFormsFolder.id;
         await folderService.create(vm.editedFolder);
         await vm.folders.sync();
         vm.openFolder(vm.folder);
