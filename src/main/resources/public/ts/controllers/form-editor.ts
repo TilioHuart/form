@@ -3,14 +3,13 @@ import {Form, Question, QuestionChoice, Questions, Response, Responses, Types} f
 import {distributionService, formService, questionChoiceService, questionService, responseService} from "../services";
 import {Direction, FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_QUESTION_EMIT_EVENT, Pages} from "../core/enums";
 
+enum PreviewPage { RGPD = 'rgpd', QUESTION = 'question', RECAP = 'recap'}
+
 interface ViewModel {
     form: Form;
     questions: Questions;
     newQuestion: Question;
     dontSave: boolean;
-    question: Question; // Question for preview
-    response: Response; // Response for preview
-    responses: Responses; // Responses list for preview
     nbQuestions: number;
     last: boolean;
     display: {
@@ -21,6 +20,11 @@ interface ViewModel {
             undo: boolean
         }
     };
+    question: Question; // Question for preview
+    response: Response; // Response for preview
+    responses: Responses; // Responses list for preview
+    PreviewPage: typeof PreviewPage;
+    previewPage: string;
 
     $onInit() : Promise<void>;
 
@@ -63,7 +67,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.questions = new Questions();
         vm.newQuestion = new Question();
         vm.dontSave = false;
-        vm.question = new Question();
         vm.nbQuestions = 0;
         vm.last = false;
         vm.display = {
@@ -74,6 +77,11 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 undo: false
             }
         };
+        vm.question = new Question();
+        vm.response = new Response();
+        vm.responses = new Responses();
+        vm.PreviewPage = PreviewPage;
+        vm.previewPage = PreviewPage.QUESTION;
 
         vm.$onInit = async () : Promise<void> => {
             vm.form = $scope.form;
@@ -263,6 +271,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 return "ERROR_TEXT";
             }
         };
+
         vm.displayTypeDescritption =(description : string|number) :string =>{
             return idiom.translate("formulaire.question.type.description." + description);
         }
@@ -333,9 +342,15 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 }
                 vm.responses.all.push(response);
             }
-            vm.question = vm.questions.all[0];
-            vm.response = vm.responses.all[0];
-            vm.last = vm.question.position === vm.nbQuestions;
+            if (vm.form.rgpd) {
+                vm.previewPage = PreviewPage.RGPD;
+            }
+            else {
+                vm.question = vm.questions.all[0];
+                vm.response = vm.responses.all[0];
+                vm.last = vm.question.position === vm.nbQuestions;
+                vm.previewPage = PreviewPage.QUESTION;
+            }
             $scope.currentPage = Pages.PREVIEW;
             $scope.safeApply();
         }
@@ -346,23 +361,50 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         };
 
         vm.prev = () : void => {
-            let prevPosition: number = vm.question.position - 1;
-            vm.last = prevPosition === vm.nbQuestions;
-            if (prevPosition > 0) {
-                vm.question = vm.questions.all[prevPosition - 1];
-                vm.response = vm.responses.all[prevPosition - 1];
-                $scope.safeApply();
+            if (vm.previewPage === PreviewPage.RECAP) {
+                vm.question = vm.questions.all[vm.nbQuestions - 1];
+                vm.response = vm.responses.all[vm.nbQuestions - 1];
+                vm.last = vm.question.position === vm.nbQuestions;
+                vm.previewPage = PreviewPage.QUESTION;
             }
+            else {
+                let prevPosition: number = vm.question.position - 1;
+                vm.last = prevPosition === vm.nbQuestions;
+                if (prevPosition > 0) {
+                    vm.question = vm.questions.all[prevPosition - 1];
+                    vm.response = vm.responses.all[prevPosition - 1];
+                }
+                else if (vm.form.rgpd) {
+                    vm.question = null;
+                    vm.response = null;
+                    vm.previewPage = PreviewPage.RGPD;
+                }
+            }
+            $scope.safeApply();
         };
 
         vm.next = () : void => {
-            let nextPosition: number = vm.question.position + 1;
-            vm.last = nextPosition === vm.nbQuestions;
-            if (nextPosition <= vm.nbQuestions) {
-                vm.question = vm.questions.all[nextPosition - 1];
-                vm.response = vm.responses.all[nextPosition - 1];
-                $scope.safeApply();
+            if (vm.previewPage === PreviewPage.RGPD) {
+                vm.question = vm.questions.all[0];
+                vm.response = vm.responses.all[0];
+                vm.last = vm.question.position === vm.nbQuestions;
+                vm.previewPage = PreviewPage.QUESTION;
             }
+            else {
+                let nextPosition: number = vm.question.position + 1;
+                vm.last = nextPosition === vm.nbQuestions;
+                if (nextPosition <= vm.nbQuestions) {
+                    vm.question = vm.questions.all[nextPosition - 1];
+                    vm.response = vm.responses.all[nextPosition - 1];
+                }
+                else {
+                    // TODO init what needed for recap page
+                    vm.question = null;
+                    vm.response = null;
+                    vm.previewPage = PreviewPage.RECAP;
+                }
+            }
+            $scope.safeApply();
         };
 
         vm.displayDefaultOption = () : string => {

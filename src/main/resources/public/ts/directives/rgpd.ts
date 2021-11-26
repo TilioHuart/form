@@ -53,7 +53,7 @@ export const rgpd: Directive = ng.directive('rgpd', () => {
 
             const getEndValidityDate = () : string => {
                 let today = new Date();
-                today.setFullYear(today.getFullYear() + 1);
+                today.setMonth(today.getMonth() + vm.form.rgpd_lifetime);
                 return today.toLocaleDateString();
             };
         }

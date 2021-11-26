@@ -17,7 +17,20 @@
 <div ng-include="'formulaire/public/template/components/progress-bar.html'" ng-if="vm.nbQuestions > 1"></div>
 
 <div class="respond-question">
-    <div class="nine twelve-mobile">
+    <!-- RPGD page -->
+    <div class="nine twelve-mobile" ng-if="vm.form.rgpd && vm.previewPage == vm.PreviewPage.RGPD">
+        <div class="question rgpd">
+            <h4><i18n>formulaire.question.rgpd.title</i18n></h4>
+            <div class="question-main">
+                <rgpd form="vm.form"></rgpd>
+            </div>
+        </div>
+        <div class="buttons alone">
+            <button class="cell" ng-click="vm.next()"><i18n>formulaire.respond.form</i18n></button>
+        </div>
+    </div>
+    <!-- Question page -->
+    <div class="nine twelve-mobile" ng-if="vm.previewPage == vm.PreviewPage.QUESTION">
         <div class="question">
             <div class="question-title">
                 <h4>[[vm.question.title]]<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span></h4>
@@ -65,4 +78,5 @@
             <button class="cell dontSave" ng-click="vm.backToEditor()" ng-if="vm.last"><i18n>formulaire.finish</i18n></button>
         </div>
     </div>
+    <!-- TODO Recap page -->
 </div>

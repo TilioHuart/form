@@ -93,7 +93,7 @@
                                             </div>
                                             <div class="lifetime">
                                                 <i18n>formulaire.prop.rgpd.lifetime</i18n>
-                                                <select class="horizontal-margin" ng-model="vm.form.rgpd_lifetime">
+                                                <select class="margin-vertical-1" ng-model="vm.form.rgpd_lifetime">
                                                     <option ng-repeat="choice in vm.rgpdLifetimeChoices" ng-value="choice"
                                                             ng-attr-selected="[[choice === vm.form.rgpd_lifetime ? 'selected' : undefined]]">
                                                         [[choice]] [[idiom.translate('formulaire.months')]]
