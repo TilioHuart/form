@@ -47,7 +47,7 @@ export const rgpd: Directive = ng.directive('rgpd', () => {
             };
 
             vm.getRgpdDescriptionDelegates = (delegate) : string => {
-                let params = [delegate.entity, delegate.mail, delegate.address, delegate.zipcode];
+                let params = [delegate.entity, delegate.mail, delegate.address, delegate.zipcode, delegate.city];
                 return i18nUtils.getWithParams('formulaire.prop.rgpd.description.delegates', params);
             };
 

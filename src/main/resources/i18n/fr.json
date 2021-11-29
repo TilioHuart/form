@@ -82,8 +82,8 @@
   "formulaire.prop.rgpd.goal.input": "Saisir la finalité (150 caractères maximum)",
   "formulaire.prop.rgpd.lifetime": "Durée de conservation : ",
   "formulaire.prop.rgpd.goal.description": "Par exemple :\n- organisation d'une sortie scolaire avec nuitées\n- gestion de la photographie scolaire\n- planification des interventions des parents dans le cadre du projet \"découverte des métiers\"",
-  "formulaire.prop.rgpd.description.intro": "Vos informations à caractère personnel sont receuillies pour : <b>{0}</b>. Elles seront conservées dans nos fichiers jusqu'au <b>{1}</b>. Elles seront détruites à cette date. En application du Réglement Général de Protection des données (RGPD), vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation au traitement de vos données. Pour exercer ce droit ou pour toute question concernant le traitement de vos données personnelles, vous pouvez contacter :",
-  "formulaire.prop.rgpd.description.delegates": "<div><b>Le délégué à la protection des données {0}</b> ({1})</div><div class='left-spacing'>{2}</br>{3}</div>",
+  "formulaire.prop.rgpd.description.intro": "Vos informations à caractère personnel sont recueillies pour : <b>{0}</b>. Elles seront conservées dans nos fichiers jusqu'au <b>{1}</b>. Elles seront détruites à cette date. En application du Règlement Général de Protection des données (RGPD), vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation au traitement de vos données. Pour exercer ce droit ou pour toute question concernant le traitement de vos données personnelles, vous pouvez contacter :",
+  "formulaire.prop.rgpd.description.delegates": "<div><b>Le délégué à la protection des données {0}</b> ({1})</div><div class='left-spacing'>{2}</br>{3} {4}</div>",
 
   "formulaire.remind.title": "Envoyer un rappel",
   "formulaire.remind.description.multipleTrue": "Le message de rappel va être transmis à tous les utilisateurs à qui le formulaire a été envoyé.",

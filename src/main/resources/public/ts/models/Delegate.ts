@@ -8,6 +8,7 @@ export class Delegate {
     mail: string;
     address: string;
     zipcode: string;
+    city: string;
 
     constructor () {
         this.id = null;
@@ -15,6 +16,7 @@ export class Delegate {
         this.mail = null;
         this.address = null;
         this.zipcode = null;
+        this.city = null;
     }
 
     toJson() : Object {
@@ -23,7 +25,8 @@ export class Delegate {
             entity: this.entity,
             mail: this.mail,
             address: this.address,
-            zipcode: this.zipcode
+            zipcode: this.zipcode,
+            city: this.city
         }
     }
 }
