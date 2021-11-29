@@ -10,7 +10,8 @@ export enum Types {
     MULTIPLEANSWER = 5,
     DATE = 6,
     TIME = 7,
-    FILE = 8
+    FILE = 8,
+    SINGLEANSWERRADIO = 9,
 }
 
 export class QuestionType {

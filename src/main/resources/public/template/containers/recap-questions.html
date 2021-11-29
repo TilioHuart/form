@@ -60,6 +60,16 @@
                                 <span bind-html="[[filename]]"></span>
                             </div>
                         </div>
+                        <div ng-if="question.question_type == Types.SINGLEANSWERRADIO">
+                            <div ng-repeat="choice in question.choices.all">
+                                <label>
+                                    <input type="radio" disabled checked ng-if="vm.isSelectedChoice(question, choice)">
+                                    <input type="radio" disabled ng-if="!vm.isSelectedChoice(question, choice)">
+                                    <span style="cursor: default"></span>
+                                    <span class="ten eight-mobile">[[choice.value]]</span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                     <div class="question-edit" ng-if="(vm.form.editable || vm.distribution.status != DistributionStatus.FINISHED) && question.question_type != Types.FREETEXT">
                         <a href="#/form/[[vm.form.id]]/[[vm.distribution.id]]/question/[[question.position]]"><i18n>formulaire.edit</i18n></a>

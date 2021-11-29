@@ -138,7 +138,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             vm.newQuestion.form_id = vm.form.id;
             vm.newQuestion.question_type = code;
             vm.newQuestion.position = vm.questions.all.length + 1;
-            if (vm.newQuestion.question_type === Types.MULTIPLEANSWER || vm.newQuestion.question_type === Types.SINGLEANSWER) {
+            if (vm.newQuestion.question_type === Types.MULTIPLEANSWER
+                || vm.newQuestion.question_type === Types.SINGLEANSWER
+                || vm.newQuestion.question_type === Types.SINGLEANSWERRADIO) {
                 for (let i = 0; i < 3; i++) {
                     vm.newQuestion.choices.all.push(new QuestionChoice());
                 }
@@ -183,7 +185,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 let duplicata = question;
                 duplicata.position++;
                 let newQuestion = await questionService.create(duplicata);
-                if (question.question_type === Types.SINGLEANSWER || question.question_type === Types.MULTIPLEANSWER) {
+                if (question.question_type === Types.SINGLEANSWER
+                    || question.question_type === Types.MULTIPLEANSWER
+                    || question.question_type === Types.SINGLEANSWERRADIO) {
                     for (let choice of question.choices.all) {
                         if (choice.value) {
                             await questionChoiceService.create(new QuestionChoice(newQuestion.id, choice.value));
@@ -308,6 +312,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     return "/formulaire/public/img/question_type/time.svg";
                 case 8 :
                     return "/formulaire/public/img/question_type/file.svg";
+                case 9:
+                    return "/formulaire/public/img/question_type/singleanswer_radio.svg";
             }
         };
 
@@ -351,7 +357,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             vm.responses = new Responses();
             for (let question of vm.questions.all) {
                 let response = new Response();
-                if (vm.question.question_type === Types.MULTIPLEANSWER) {
+                if (vm.question.question_type === Types.MULTIPLEANSWER
+                    || vm.question.question_type === Types.SINGLEANSWERRADIO) {
                     response.selectedIndex = new Array<boolean>(vm.question.choices.all.length);
                 }
                 vm.responses.all.push(response);

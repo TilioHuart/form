@@ -47,7 +47,9 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         vm.question = $scope.question;
         vm.question.choices = new QuestionChoices();
         vm.nbQuestions = $scope.form.nb_questions;
-        if (vm.question.question_type === Types.MULTIPLEANSWER || vm.question.question_type === Types.SINGLEANSWER) {
+        if (vm.question.question_type === Types.MULTIPLEANSWER
+            || vm.question.question_type === Types.SINGLEANSWER
+            || vm.question.question_type === Types.SINGLEANSWERRADIO) {
             await vm.question.choices.sync(vm.question.id);
         }
         if (vm.question.question_type === Types.MULTIPLEANSWER) {
@@ -136,7 +138,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
     };
 
     const saveResponses = async () : Promise<boolean> => {
-        if (vm.question.question_type === Types.MULTIPLEANSWER) {
+        if (vm.question.question_type === Types.MULTIPLEANSWER ) {
             for (let i = 0; i < vm.question.choices.all.length; i++) {
                 let checked = vm.selectedIndex[i];
                 let j = 0;
@@ -156,7 +158,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             }
             return true;
         }
-        if (vm.question.question_type == Types.SINGLEANSWER) {
+        if (vm.question.question_type === Types.SINGLEANSWER || vm.question.question_type === Types.SINGLEANSWERRADIO) {
             if (!vm.response.choice_id) {
                 vm.response.answer = "";
             }
@@ -167,6 +169,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                     }
                 }
             }
+
         }
         vm.response = await responseService.save(vm.response, vm.question.question_type);
         if (vm.question.question_type === Types.FILE) {

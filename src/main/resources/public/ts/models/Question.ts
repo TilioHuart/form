@@ -54,7 +54,9 @@ export class Questions extends Selection<Question> {
             let data = await questionService.list(formId);
             this.all = Mix.castArrayAs(Question, data);
             for (let i = 0; i < this.all.length; i++) {
-                if (this.all[i].question_type === Types.SINGLEANSWER || this.all[i].question_type === Types.MULTIPLEANSWER) {
+                if (this.all[i].question_type === Types.SINGLEANSWER
+                    || this.all[i].question_type === Types.MULTIPLEANSWER
+                    || this.all[i].question_type === Types.SINGLEANSWERRADIO) {
                     let questionChoices = this.all[i].choices;
                     await questionChoices.sync(this.all[i].id);
                     let nbChoices = questionChoices.all.length;

@@ -69,6 +69,13 @@
                 <div ng-if="vm.question.question_type == Types.FILE">
                     <formulaire-picker-file files="vm.files" multiple="true"></formulaire-picker-file>
                 </div>
+                <div ng-if ="vm.question.question_type == Types.SINGLEANSWERRADIO">
+                    <div ng-repeat ="choice in vm.question.choices.all">
+                        <label>
+                            <input type="radio" ng-model="vm.response.choice_id" ng-value="[[choice.id]]">[[choice.value]]
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="buttons">
