@@ -1,11 +1,14 @@
 package fr.openent.formulaire.service.impl;
 
 import fr.openent.formulaire.Formulaire;
+import fr.openent.formulaire.controllers.FormController;
 import fr.openent.formulaire.service.DistributionService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
@@ -142,7 +145,7 @@ public class DefaultDistributionService implements DistributionService {
 
     @Override
     public void getDeactivated(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler) {
-        ArrayList<String> respondersIdsArray = new ArrayList<>();
+        JsonArray respondersIdsArray = new JsonArray();
         for (int i = 0; i < responders.size(); i++) {
             JsonArray users = responders.getJsonObject(i).getJsonArray("users");
             for (int j = 0; j < users.size(); j++) {
@@ -154,12 +157,8 @@ public class DefaultDistributionService implements DistributionService {
         String query = "SELECT responder_id FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? ";
 
         if (respondersIdsArray.size() > 0) {
-            query += "AND responder_id NOT IN (";
-            for (String id : respondersIdsArray) {
-                query += "?, ";
-                params.add(id);
-            }
-            query = query.substring(0, query.length() - 2) + ");";
+            query += "AND responder_id NOT IN " + Sql.listPrepared(respondersIdsArray) + ";";
+            params.addAll(respondersIdsArray);
         }
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
@@ -167,7 +166,7 @@ public class DefaultDistributionService implements DistributionService {
 
     @Override
     public void getDuplicates(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler) {
-        ArrayList<String> respondersIdsArray = new ArrayList<>();
+        JsonArray respondersIdsArray = new JsonArray();
         for (int i = 0; i < responders.size(); i++) {
             JsonArray users = responders.getJsonObject(i).getJsonArray("users");
             for (int j = 0; j < users.size(); j++) {
@@ -179,12 +178,8 @@ public class DefaultDistributionService implements DistributionService {
         String query = "SELECT responder_id FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? ";
 
         if (respondersIdsArray.size() > 0) {
-            query += "AND responder_id IN (";
-            for (String id : respondersIdsArray) {
-                query += "?, ";
-                params.add(id);
-            }
-            query = query.substring(0, query.length() - 2) + ");";
+            query += "AND responder_id IN " + Sql.listPrepared(respondersIdsArray) + ";";
+            params.addAll(respondersIdsArray);
         }
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
@@ -192,7 +187,7 @@ public class DefaultDistributionService implements DistributionService {
 
     @Override
     public void createMultiple(String formId, UserInfos user, JsonArray responders, JsonArray duplicates, Handler<Either<String, JsonObject>> handler) {
-        ArrayList<String> idsToFilter = new ArrayList<>();
+        JsonArray idsToFilter = new JsonArray();
         if (duplicates != null && !duplicates.isEmpty()) {
             for (int i = 0; i < duplicates.size(); i++) {
                 idsToFilter.add(duplicates.getJsonObject(i).getString("responder_id"));
@@ -200,7 +195,7 @@ public class DefaultDistributionService implements DistributionService {
         }
 
         ArrayList<JsonObject> respondersArray = new ArrayList<>();
-        ArrayList<String> respondersArrayIds = new ArrayList<>();
+        JsonArray respondersArrayIds = new JsonArray();
         for (int i = 0; i < responders.size(); i++) {
             JsonArray infos = responders.getJsonObject(i).getJsonArray("users");
             if (infos != null && !infos.isEmpty()) {
@@ -214,6 +209,7 @@ public class DefaultDistributionService implements DistributionService {
             }
         }
 
+        Logger log = LoggerFactory.getLogger(FormController.class);
         if (!respondersArray.isEmpty()) {
             JsonArray params = new JsonArray();
             String query = "INSERT INTO " + Formulaire.DISTRIBUTION_TABLE + " (form_id, sender_id, sender_name, responder_id, " +
@@ -241,9 +237,9 @@ public class DefaultDistributionService implements DistributionService {
 
     @Override
     public void setActiveValue(boolean active, String formId, JsonArray distributions, Handler<Either<String, JsonObject>> handler) {
-        ArrayList<String> idsToUpdate = new ArrayList<>();
+        JsonArray idsToUpdate = new JsonArray();
         if (distributions != null && !distributions.isEmpty()) {
-            for (int i=0; i < distributions.size(); i++) {
+            for (int i = 0; i < distributions.size(); i++) {
                 idsToUpdate.add(distributions.getJsonObject(i).getString("responder_id"));
             }
         }
@@ -252,13 +248,10 @@ public class DefaultDistributionService implements DistributionService {
         String query = "UPDATE " + Formulaire.DISTRIBUTION_TABLE + " SET active = ? WHERE form_id = ? ";
 
         if (idsToUpdate.size() > 0) {
-            query += "AND responder_id IN (";
-            for (String id : idsToUpdate) {
-                query += "?, ";
-                params.add(id);
-            }
-            query = query.substring(0, query.length() - 2) + ");";
+            query += "AND responder_id IN " + Sql.listPrepared(idsToUpdate) + ";";
+            params.addAll(idsToUpdate);
         }
+
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 }

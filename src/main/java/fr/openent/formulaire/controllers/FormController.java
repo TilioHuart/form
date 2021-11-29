@@ -549,51 +549,43 @@ public class FormController extends ControllerHelper {
                             // Sync with distribution table
                             neoService.getUsersInfosFromIds(usersIds, groupsIds, eventUsers -> {
                                 if (eventUsers.isRight()) {
-                                    JsonArray infos = eventUsers.right().getValue();
-                                    syncDistributions(formId, user, infos);
-                                } else {
-                                    log.error("[Formulaire@getUserIds] Fail to get users' ids from groups' ids");
+                                    JsonArray responders = eventUsers.right().getValue();
+                                    syncDistributions(formId, user, responders, syncEvent -> {
+                                        if (syncEvent.isRight()) {
+                                            // Update 'collab' property as needed
+                                            List<Map<String, Object>> idsObjects = new ArrayList<>();
+                                            idsObjects.add(idUsers);
+                                            idsObjects.add(idGroups);
+                                            idsObjects.add(idBookmarks);
+                                            updateFormCollabProp(formId, user, idsObjects, updateEvent -> {
+                                                if (updateEvent.isRight()) {
+                                                    fixBugAutoUnsharing(request, formId, user, shareFormObject);
+                                                }
+                                                else {
+                                                    log.error("[Formulaire@shareResource] Fail to update collab prop for form " + formId);
+                                                    renderError(request, new JsonObject().put("error", updateEvent.left().getValue()));
+                                                }
+                                            });
+                                        }
+                                        else {
+                                            log.error("[Formulaire@shareResource] Fail to sync distributions for form " + formId);
+                                            renderError(request, new JsonObject().put("error", syncEvent.left().getValue()));
+                                        }
+                                    });
                                 }
-                            });
-                        } else {
-                            log.error("[Formulaire@getUserIds] Fail to get ids from bookmarks' ids");
-                        }
-                    });
-
-                    // Update 'collab' property as needed
-                    List<Map<String, Object>> idsObjects = new ArrayList<>();
-                    idsObjects.add(idUsers);
-                    idsObjects.add(idGroups);
-                    idsObjects.add(idBookmarks);
-                    updateFormCollabProp(formId, user, idsObjects);
-
-                    // Fix bug auto-unsharing
-                    formShareService.getSharedWithMe(formId, user, event -> {
-                        if (event.isRight() && event.right().getValue() != null) {
-                            JsonArray rights = event.right().getValue();
-                            String id = user.getUserId();
-                            shareFormObject.getJsonObject("users").put(id, new JsonArray());
-
-                            for (int i = 0; i < rights.size(); i++) {
-                                JsonObject right = rights.getJsonObject(i);
-                                shareFormObject.getJsonObject("users").getJsonArray(id).add(right.getString("action"));
-                            }
-
-                            // Classic sharing stuff (putting or removing ids from form_shares table accordingly)
-                            this.getShareService().share(user.getUserId(), formId, shareFormObject, (r) -> {
-                                if (r.isRight()) {
-                                    this.doShareSucceed(request, formId, user, shareFormObject, (JsonObject)r.right().getValue(), false);
-                                } else {
-                                    JsonObject error = (new JsonObject()).put("error", (String)r.left().getValue());
-                                    Renders.renderJson(request, error, 400);
+                                else {
+                                    log.error("[Formulaire@shareResource] Fail to get users' ids from groups' ids");
+                                    renderError(request, new JsonObject().put("error", eventUsers.left().getValue()));
                                 }
                             });
                         }
                         else {
-                            log.error("[Formulaire@getSharedWithMe] Fail to get user's shared rights");
+                            log.error("[Formulaire@shareResource] Fail to get ids from bookmarks' ids");
+                            renderError(request, new JsonObject().put("error", eventBookmarks.left().getValue()));
                         }
                     });
-                } else {
+                }
+                else {
                     log.error("User not found in session.");
                     unauthorized(request);
                 }
@@ -614,72 +606,95 @@ public class FormController extends ControllerHelper {
         return filteredMap;
     }
 
-    private void syncDistributions(String formId, UserInfos user, JsonArray responders) {
-        removeDeletedDistributions(formId, responders, removeEvt -> {
-            if (removeEvt.failed()) log.error(removeEvt.cause());
+    private void syncDistributions(String formId, UserInfos user, JsonArray responders, Handler<Either<String, JsonObject>> handler) {
+        deactivateDeletedDistributions(formId, responders, removeEvt -> {
+            if (removeEvt.isLeft()) {
+                log.error(removeEvt.left().getValue());
+                handler.handle(new Either.Left<>(removeEvt.left().getValue()));
+                return;
+            };
 
             addNewDistributions(formId, user, responders, addEvt -> {
-                if (addEvt.failed()) log.error(addEvt.cause());
+                if (addEvt.isLeft()) {
+                    log.error(addEvt.left().getValue());
+                    handler.handle(new Either.Left<>(addEvt.left().getValue()));
+                    return;
+                }
 
-                updateFormSentProp(formId, updateSentPropEvent -> {
-                    if (updateSentPropEvent.failed()) log.error(updateSentPropEvent.cause());
+                updateFormSentProp(formId, user, updateSentPropEvent -> {
+                    if (updateSentPropEvent.isLeft()) {
+                        log.error(updateSentPropEvent.left().getValue());
+                        handler.handle(new Either.Left<>(updateSentPropEvent.left().getValue()));
+                        return;
+                    }
+
+                    handler.handle(new Either.Right<>(updateSentPropEvent.right().getValue()));
                 });
             });
         });
     }
 
-    private void removeDeletedDistributions(String formId, JsonArray responders, Handler<AsyncResult<String>> handler) {
+    private void deactivateDeletedDistributions(String formId, JsonArray responders, Handler<Either<String, JsonObject>> handler) {
         distributionService.getDeactivated(formId, responders, filteringEvent -> {
             if (filteringEvent.isRight()) {
                 JsonArray deactivated = filteringEvent.right().getValue();
                 if (!deactivated.isEmpty()) {
                     distributionService.setActiveValue(false, formId, deactivated, deactivateEvent -> {
                         if (deactivateEvent.isRight()) {
-                            handler.handle(Future.succeededFuture());
+                            handler.handle(new Either.Right<>(deactivateEvent.right().getValue()));
                         } else {
-                            handler.handle(Future.failedFuture(deactivateEvent.left().getValue()));
                             log.error("[Formulaire@removeDeletedDistributions] Fail to deactivate distributions");
+                            handler.handle(new Either.Left<>(deactivateEvent.left().getValue()));
                         }
                     });
                 }
-                handler.handle(Future.succeededFuture());
+                else {
+                    handler.handle(new Either.Right<>(new JsonObject()));
+                }
             } else {
-                handler.handle(Future.failedFuture(filteringEvent.left().getValue()));
                 log.error("[Formulaire@removeDeletedDistributions] Fail to filter distributions to remove");
+                handler.handle(new Either.Left<>(filteringEvent.left().getValue()));
             }
         });
     }
 
-    private void addNewDistributions(String formId, UserInfos user, JsonArray responders, Handler<AsyncResult<String>> handler) {
+    private void addNewDistributions(String formId, UserInfos user, JsonArray responders, Handler<Either<String, JsonObject>> handler) {
         if (!responders.isEmpty()) {
             distributionService.getDuplicates(formId, responders, filteringEvent -> {
                 if (filteringEvent.isRight()) {
                     JsonArray duplicates = filteringEvent.right().getValue();
                     distributionService.createMultiple(formId, user, responders, duplicates, addEvent -> {
                         if (addEvent.isRight()) {
-                            distributionService.setActiveValue(true, formId, duplicates, updateEvent -> {
-                                if (updateEvent.isRight()) {
-                                    handler.handle(Future.succeededFuture());
-                                } else {
-                                    handler.handle(Future.failedFuture(updateEvent.left().getValue()));
-                                    log.error("[Formulaire@addNewDistributions] Fail to update distributions");
-                                }
-                            });
+                            if (!duplicates.isEmpty()) {
+                                distributionService.setActiveValue(true, formId, duplicates, updateEvent -> {
+                                    if (updateEvent.isRight()) {
+                                        handler.handle(new Either.Right<>(updateEvent.right().getValue()));
+                                    } else {
+                                        log.error("[Formulaire@addNewDistributions] Fail to update distributions");
+                                        handler.handle(new Either.Left<>(updateEvent.left().getValue()));
+                                    }
+                                });
+                            }
+                            else {
+                                handler.handle(new Either.Right<>(new JsonObject()));
+                            }
                         } else {
-                            handler.handle(Future.failedFuture(addEvent.left().getValue()));
                             log.error("[Formulaire@addNewDistributions] Fail to add distributions");
+                            handler.handle(new Either.Left<>(addEvent.left().getValue()));
                         }
                     });
                 } else {
-                    handler.handle(Future.failedFuture(filteringEvent.left().getValue()));
                     log.error("[Formulaire@addNewDistributions] Fail to filter existing distributions");
+                    handler.handle(new Either.Left<>(filteringEvent.left().getValue()));
                 }
             });
         }
-        handler.handle(Future.succeededFuture());
+        else {
+            handler.handle(new Either.Right<>(new JsonObject()));
+        }
     }
 
-    private void updateFormSentProp(String formId, Handler<AsyncResult<String>> handler) {
+    private void updateFormSentProp(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler) {
         distributionService.listByForm(formId, getDistributionsEvent -> {
             if (getDistributionsEvent.isRight()) {
                 boolean value = !getDistributionsEvent.right().getValue().isEmpty();
@@ -689,25 +704,25 @@ public class FormController extends ControllerHelper {
                         form.put("sent", value);
                         formService.update(formId, form, updateEvent -> {
                             if (updateEvent.isRight()) {
-                                handler.handle(Future.succeededFuture());
+                                handler.handle(new Either.Right<>(updateEvent.right().getValue()));
                             } else {
-                                handler.handle(Future.failedFuture(updateEvent.left().getValue()));
                                 log.error("[Formulaire@updateFormSentProp] Fail to update form");
+                                handler.handle(new Either.Left<>(updateEvent.left().getValue()));
                             }
                         });
                     } else {
-                        handler.handle(Future.failedFuture(getEvent.left().getValue()));
                         log.error("[Formulaire@updateFormSentProp] Fail to get form");
+                        handler.handle(new Either.Left<>(getEvent.left().getValue()));
                     }
                 });
             } else {
-                handler.handle(Future.failedFuture(getDistributionsEvent.left().getValue()));
                 log.error("[Formulaire@updateFormSentProp] Fail to get distributions of the form");
+                handler.handle(new Either.Left<>(getDistributionsEvent.left().getValue()));
             }
         });
     }
 
-    private void updateFormCollabProp(String formId, UserInfos user, List<Map<String, Object>> idsObjects) {
+    private void updateFormCollabProp(String formId, UserInfos user, List<Map<String, Object>> idsObjects, Handler<Either<String, JsonObject>> handler) {
         formService.get(formId, getEvent -> {
             if (getEvent.isRight()) {
                 JsonObject form = getEvent.right().getValue();
@@ -742,12 +757,61 @@ public class FormController extends ControllerHelper {
                 form.put("collab", isShared);
                 formService.update(formId, form, updateEvent -> {
                     if (updateEvent.isLeft()) {
+                        handler.handle(new Either.Left<>(updateEvent.left().getValue()));
                         log.error("[Formulaire@updateFormCollabProp] Fail to update form : " + updateEvent.left().getValue());
+                    }
+                    else {
+                        handler.handle(new Either.Right<>(updateEvent.right().getValue()));
                     }
                 });
             } else {
+                handler.handle(new Either.Left<>(getEvent.left().getValue()));
                 log.error("[Formulaire@updateFormCollabProp] Fail to get form : " + getEvent.left().getValue());
             }
         });
+    }
+
+    private void fixBugAutoUnsharing(HttpServerRequest request, String formId, UserInfos user, JsonObject shareFormObject) {
+        formShareService.getSharedWithMe(formId, user, event -> {
+            if (event.isRight() && event.right().getValue() != null) {
+                JsonArray rights = event.right().getValue();
+                String id = user.getUserId();
+                shareFormObject.getJsonObject("users").put(id, new JsonArray());
+
+                for (int i = 0; i < rights.size(); i++) {
+                    JsonObject right = rights.getJsonObject(i);
+                    shareFormObject.getJsonObject("users").getJsonArray(id).add(right.getString("action"));
+                }
+
+                // Classic sharing stuff (putting or removing ids from form_shares table accordingly)
+                this.getShareService().share(user.getUserId(), formId, shareFormObject, (r) -> {
+                    if (r.isRight()) {
+                        this.doShareSucceed(request, formId, user, shareFormObject, r.right().getValue(), false);
+                    } else {
+                        JsonObject error = (new JsonObject()).put("error", r.left().getValue());
+                        Renders.renderJson(request, error, 400);
+                    }
+                });
+            }
+            else {
+                log.error("[Formulaire@getSharedWithMe] Fail to get user's shared rights");
+            }
+        });
+    }
+
+    private JsonArray getFormIds(JsonArray forms) {
+        JsonArray formIds = new JsonArray();
+        for (int i = 0; i < forms.size(); i++) {
+            formIds.add(forms.getJsonObject(i).getInteger("id").toString());
+        }
+        return formIds;
+    }
+
+    private JsonArray getResponderIds(JsonArray responders) {
+        JsonArray responderIds = new JsonArray();
+        for (int i = 0; i < responders.size(); i++) {
+            responderIds.add(responders.getJsonObject(i).getString("id"));
+        }
+        return responderIds;
     }
 }
