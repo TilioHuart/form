@@ -79,7 +79,7 @@ public class ShareAndOwner implements ResourcesProvider {
 
 
     private String getKeyByBinding(Binding binding) {
-        if (isCountDistribution(binding) || isGetByFormResponderAndStatusDistribution(binding) || isCreateDistribution(binding) ||
+        if (isCountDistribution(binding) || isGetByFormResponderAndStatusDistribution(binding) || isAddDistribution(binding) ||
                 isUpdateForm(binding) || isDeleteForm(binding) || isExportForm(binding) || isSendReminderForm(binding) ||
                 isCreateQuestion(binding) || isFillResponsesResponse(binding)) {
             return "formId";
@@ -126,8 +126,8 @@ public class ShareAndOwner implements ResourcesProvider {
         return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.DistributionController|getByFormResponderAndStatus");
     }
 
-    private boolean isCreateDistribution(final Binding binding) {
-        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.DistributionController|create");
+    private boolean isAddDistribution(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.DistributionController|add");
     }
 
     private boolean isDuplicateWithResponsesDistribution(final Binding binding) {

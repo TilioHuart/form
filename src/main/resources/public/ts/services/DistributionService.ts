@@ -11,8 +11,7 @@ export interface DistributionService {
     count(formId: number) : Promise<AxiosResponse>;
     get(distributionId: number) : Promise<AxiosResponse>;
     getByFormResponderAndStatus(formId: number) : Promise<AxiosResponse>;
-    create(formId: number, distribution: Distribution) : Promise<AxiosResponse>;
-    add(formId: number, responders: any[]) : Promise<AxiosResponse>;
+    add(formId: number, distribution: Distribution) : Promise<AxiosResponse>;
     duplicateWithResponses(distributionId: number) : Promise<AxiosResponse>;
     update(distribution: Distribution) : Promise<AxiosResponse>;
     replace(distribution: Distribution) : Promise<AxiosResponse>;
@@ -92,18 +91,9 @@ export const distributionService: DistributionService = {
         }
     },
 
-    async create(formId: number, distribution: Distribution) : Promise<AxiosResponse> {
+    async add(formId: number, distribution: Distribution) : Promise<AxiosResponse> {
         try {
-            return http.post(`/formulaire/distributions/forms/${formId}`, distribution);
-        } catch (err) {
-            notify.error(idiom.translate('formulaire.error.distributionService.create'));
-            throw err;
-        }
-    },
-
-    async add(formId: number, responders: any[]) : Promise<AxiosResponse> {
-        try {
-            return http.post(`/formulaire/distributions/forms/${formId}/add`, responders);
+            return http.post(`/formulaire/distributions/forms/${formId}/add`, distribution);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.create'));
             throw err;

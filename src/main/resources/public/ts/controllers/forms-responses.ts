@@ -145,7 +145,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
         else {
             let distribs = vm.distributions.all.filter(d => d.form_id === form.id);
             let distrib = distribs.filter(d => d.status == DistributionStatus.TO_DO)[0];
-            distrib = distrib ? distrib : $scope.getDataIf200(await distributionService.create(form.id, distribs[0]));
+            distrib = distrib ? distrib : $scope.getDataIf200(await distributionService.add(form.id, distribs[0]));
             $scope.redirectTo(`/form/${form.id}/${distrib.id}/question/1`);
         }
         $scope.safeApply();

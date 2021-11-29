@@ -148,11 +148,11 @@ public class DistributionController extends ControllerHelper {
         });
     }
 
-    @Post("/distributions/forms/:formId")
+    @Post("/distributions/forms/:formId/add")
     @ApiDoc("Create a new distribution based on an already existing one")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
-    public void create(HttpServerRequest request) {
+    public void add(HttpServerRequest request) {
         String formId = request.getParam("formId");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
@@ -166,7 +166,7 @@ public class DistributionController extends ControllerHelper {
                         RenderHelper.badRequest(request, countEvent);
                     }
                     if (countEvent.right().getValue().getInteger("count") == 0) {
-                        distributionService.create(formId, user, distribution, defaultResponseHandler(request));
+                        distributionService.add(distribution, defaultResponseHandler(request));
                     }
                     else {
                         log.error("[Formulaire@createDistribution] A not finished distribution already exists for formId " + formId);

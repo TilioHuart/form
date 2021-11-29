@@ -92,14 +92,14 @@ public class DefaultDistributionService implements DistributionService {
     }
 
     @Override
-    public void create(String formId, UserInfos user, JsonObject distribution, Handler<Either<String, JsonObject>> handler) {
+    public void add(JsonObject distribution, Handler<Either<String, JsonObject>> handler) {
         String query = "INSERT INTO " + Formulaire.DISTRIBUTION_TABLE + " (form_id, sender_id, sender_name, " +
                 "responder_id, responder_name, status, date_sending, active) " +
                 " VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
-                .add(formId)
-                .add(user.getUserId())
-                .add(user.getUsername())
+                .add(distribution.getInteger("form_id", null))
+                .add(distribution.getString("sender_id", ""))
+                .add(distribution.getString("sender_name", ""))
                 .add(distribution.getString("responder_id", ""))
                 .add(distribution.getString("responder_name", ""))
                 .add(Formulaire.TO_DO)

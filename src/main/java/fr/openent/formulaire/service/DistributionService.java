@@ -77,12 +77,10 @@ public interface DistributionService {
 
     /**
      * Create a new distribution based on an already existing one
-     * @param formId form identifier
-     * @param user user connected
      * @param distribution JsonObject data
      * @param handler function handler returning JsonObject data
      */
-    void create(String formId, UserInfos user, JsonObject distribution, Handler<Either<String, JsonObject>> handler);
+    void add(JsonObject distribution, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Duplicate a distribution by id

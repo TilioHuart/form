@@ -181,7 +181,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 						if (params.distributionId == "new") {
 							let distribs = $scope.getDataIf200(await distributionService.listByFormAndResponder($scope.form.id));
 							let distrib = distribs.filter(d => d.status == DistributionStatus.TO_DO)[0];
-							$scope.distribution = distrib ? distrib : $scope.getDataIf200(await distributionService.create($scope.form.id, distribs[0]));
+							$scope.distribution = distrib ? distrib : $scope.getDataIf200(await distributionService.add($scope.form.id, distribs[0]));
 						}
 						else {
 							$scope.distribution = $scope.getDataIf200(await distributionService.get(params.distributionId));

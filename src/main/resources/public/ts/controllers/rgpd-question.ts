@@ -44,7 +44,7 @@ export const rgpdQuestionController = ng.controller('RgpdQuestionController', ['
         }
         else {
             let distrib = vm.distributions.all.filter(d => d.status == DistributionStatus.TO_DO)[0];
-            distrib = distrib ? distrib : $scope.getDataIf200(await distributionService.create(vm.form.id, vm.distributions.all[0]));
+            distrib = distrib ? distrib : $scope.getDataIf200(await distributionService.add(vm.form.id, vm.distributions.all[0]));
             $scope.redirectTo(`/form/${vm.form.id}/${distrib.id}/question/1`);
         }
         $scope.safeApply();
