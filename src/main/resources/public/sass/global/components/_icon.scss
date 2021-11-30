@@ -180,15 +180,15 @@ i {
     color: $formulaire-blue;
   }
 
-  &.ipencil::before {
+  &.ieye::before {
     font-family: 'material-icons';
-    content: "\F3EB";
+    content: "\F208";
     color: $formulaire-blue;
   }
 
-  &.ipencil:hover::before {
+  &.ieye:hover::before {
     font-family: 'material-icons';
-    content: "\F3EB";
+    content: "\F208";
     color: $formulaire-orange;
   }
 
