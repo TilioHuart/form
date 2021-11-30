@@ -196,7 +196,7 @@ public class FormController extends ControllerHelper {
                                         RenderHelper.badRequest(request, syncEvent);
                                         return;
                                     }
-                                    renderJson(request, syncEvent.right().getValue());
+                                    renderJson(request, createEvent.right().getValue());
                                 });
                             }
                             else {
@@ -244,7 +244,7 @@ public class FormController extends ControllerHelper {
                                         RenderHelper.badRequest(request, syncEvent);
                                         return;
                                     }
-                                    renderJson(request, syncEvent.right().getValue());
+                                    renderJson(request, createEvent.right().getValue());
                                 });
                             }
                             else {

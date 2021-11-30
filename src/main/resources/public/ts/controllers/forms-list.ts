@@ -342,7 +342,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             for (let form of vm.forms.selected) {
                 await formService.restore(form);
             }
-            await formService.move(vm.forms.selected, 0);
+            await formService.move(vm.forms.selected, vm.folders.myFormsFolder.id);
             template.close('lightbox');
             notify.success(idiom.translate('formulaire.success.forms.restore'));
             init();
