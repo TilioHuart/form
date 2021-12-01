@@ -28,6 +28,10 @@ interface ViewModel {
         answered : boolean,
         notanswered : boolean,
     }
+    sortRemindlist: {
+        filter: string,
+        order: boolean
+    }
     pageSize: number;
     tableSize:number;
     limitTo: number;
@@ -65,10 +69,10 @@ interface ViewModel {
     seeResultsForm() : void;
     exportForm() : void;
     isFormOpened(): boolean;
-    remind() : Promise<void>;
-    doRemind() : Promise<void>;
     checkRemind() : Promise<void>;
     closeCheckRemind() : Promise<void>;
+    remind() : Promise<void>;
+    doRemind() : Promise<void>;
     filterResponses() : any;
     cancelRemind() : void;
     restoreForms() : Promise<void>;
@@ -132,6 +136,10 @@ export const formsListController = ng.controller('FormsListController', ['$scope
       notanswered:true
 
     };
+    vm.sortRemindlist = {
+        filter: 'name',
+        order: true
+    }
     vm.pageSize = 30;
     vm.tableSize = 10;
     vm.limitTo = vm.pageSize;
@@ -258,6 +266,35 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         return dateOpeningOk && dateEndingOk;
     };
 
+        vm.checkRemind = async () : Promise<void> => {
+            let distributions = Mix.castArrayAs(Distribution, $scope.getDataIf200(await distributionService.listByForm(vm.forms.selected[0].id)));
+            let uniqueDistribs : any = [];
+            for (let d of distributions){
+                if(!uniqueDistribs.map(d => d.responder_id).includes(d.responder_id)) {
+                    uniqueDistribs.push(d);
+                }
+            }
+            vm.responders = [];
+            for (let uniqueDistribution of uniqueDistribs){
+                let str = uniqueDistribution.responder_name;
+                let seperate = str.split(' ');
+                let responderInfo = {
+                    name : seperate[0],
+                    surname: seperate[1],
+                    nbResponses: distributions.filter(d => d.responder_id === uniqueDistribution.responder_id && d.status==DistributionStatus.FINISHED).length,
+                };
+                vm.responders.push(responderInfo);
+            }
+            template.open('lightbox','lightbox/form-check-remind');
+            vm.display.lightbox.checkremind=true;
+        };
+
+        vm.closeCheckRemind = async () : Promise<void> => {
+            vm.display.lightbox.checkremind = false;
+            template.close('lightbox');
+            vm.limitTable= vm.tableSize;
+        };
+
     vm.remind = async () : Promise<void> => {
         initMail();
         vm.distributions.all = Mix.castArrayAs(Distribution, $scope.getDataIf200(await distributionService.listByForm(vm.forms.selected[0].id)));
@@ -285,46 +322,17 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         }
     };
 
-    vm.checkRemind = async () : Promise<void> => {
-        let distributions = Mix.castArrayAs(Distribution, $scope.getDataIf200(await distributionService.listByForm(vm.forms.selected[0].id)));
-        let uniqueDistribs : any = [];
-        for (let d of distributions){
-            if(!uniqueDistribs.map(d => d.responder_id).includes(d.responder_id)) {
-                uniqueDistribs.push(d);
-            }
-        }
-        vm.responders = [];
-        for (let uniqueDistribution of uniqueDistribs){
-            let str = uniqueDistribution.responder_name;
-            let seperate = str.split(' ');
-            let responderInfo = {
-                name : seperate[0],
-                surname: seperate[1],
-                nbResponses: distributions.filter(d => d.responder_id === uniqueDistribution.responder_id && d.status==DistributionStatus.FINISHED).length,
-            };
-            vm.responders.push(responderInfo);
-        }
-        template.open('lightbox','lightbox/form-check-remind');
-        vm.display.lightbox.checkremind=true;
-    };
-
-    vm.closeCheckRemind = async () : Promise<void> => {
-        vm.display.lightbox.checkremind = false;
-        template.close('lightbox');
-        vm.limitTable= vm.tableSize;
-    };
-
     vm.filterResponses = () : any => {
-        if(vm.remindfilter.notanswered == false && vm.remindfilter.answered == true){
-            return vm.responders.filter(a =>a.nbResponses >0);
+        if (vm.remindfilter.answered && !vm.remindfilter.notanswered) {
+            return vm.responders.filter(a => a.nbResponses > 0);
         }
-        else if(vm.remindfilter.answered == false && vm.remindfilter.notanswered == true) {
-            return vm.responders.filter(a => a.nbResponses <=0);
+        else if(!vm.remindfilter.answered && vm.remindfilter.notanswered) {
+            return vm.responders.filter(a => a.nbResponses <= 0);
         }
-        else if (vm.remindfilter.answered == false && vm.remindfilter.notanswered == false){
+        else if (!vm.remindfilter.answered && !vm.remindfilter.notanswered) {
             return vm.responders;
         }
-        else if(vm.remindfilter.answered == true && vm.remindfilter.notanswered == true){
+        else if(vm.remindfilter.answered && vm.remindfilter.notanswered) {
             return vm.responders;
         }
     }
