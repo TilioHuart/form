@@ -50,7 +50,7 @@
     <section class="cell three zero-mobile">
         <h4><input type="text" ng-model="vm.searchInput" placeholder="Rechercher"></h4>
         <folder-tree tree-props="vm.folderTree"></folder-tree>
-        <button class="left-one ten top-spacing-three cancel" ng-click="vm.openCreateFolder()">
+        <button class="left-one ten top-spacing-three cancel" ng-click="vm.openCreateFolder()" ng_if="vm.folder.id == vm.folders.myFormsFolder.id">
             <i18n>formulaire.folder.create</i18n>
         </button>
     </section>
