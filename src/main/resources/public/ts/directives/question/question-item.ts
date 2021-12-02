@@ -43,7 +43,7 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
                                 <switch ng-model="vm.question.mandatory"></switch><i18n>formulaire.mandatory</i18n>
                             </div>
                             <i class="i-duplicate lg-icon spaced-right" ng-click="duplicateQuestion()" title="[[vm.getTitle('duplicate')]]"></i>
-                            <i class="i-delete lg-icon spaced-right" ng-class="{disabled: vm.hasFormResponses}"
+                            <i class="i-delete lg-icon spaced-right" ng-class="{disabled: vm.hasFormResponses}" 
                             ng-click="deleteQuestion()" title="[[vm.getTitle('delete')]]"></i>
                             <i class="i-undo lg-icon spaced-right" ng-click="undoQuestionChanges()" title="[[vm.getTitle('cancel')]]"></i>
                         </div>

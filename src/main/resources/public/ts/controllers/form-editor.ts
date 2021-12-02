@@ -205,7 +205,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         };
 
         vm.deleteQuestion = async () : Promise<void> => {
-            if(vm.questions.selected[0].id != null){
+            if (vm.questions.selected[0].id != null){
                 let responseCount = await responseService.countByQuestion(vm.questions.selected[0].id);
                 if (vm.form.sent && responseCount.count>0){
                     notify.error(idiom.translate('formulaire.question.delete.response.fill.warning'));
