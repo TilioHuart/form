@@ -192,17 +192,22 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         };
 
         vm.deleteQuestion = async () : Promise<void> => {
-            let responseCount = $scope.getDataIf200(await responseService.countByQuestion(vm.questions.selected[0].id));
-            if (vm.form.sent && responseCount.count>0){
-                notify.error(idiom.translate('formulaire.question.delete.response.fill.warning'));
+            if(vm.questions.selected[0].id != null){
+                let responseCount = $scope.getDataIf200(await responseService.countByQuestion(vm.questions.selected[0].id));
+                if (vm.form.sent && responseCount.count>0){
+                    notify.error(idiom.translate('formulaire.question.delete.response.fill.warning'));
+                }
+                else if (vm.form.sent && vm.questions.all.length === 1) {
+                    notify.error(idiom.translate('formulaire.question.delete.empty.warning'));
+                }
+                else {
+                    vm.dontSave = true;
+                    template.open('lightbox', 'lightbox/question-confirm-delete');
+                    vm.display.lightbox.delete = true;
+                }
             }
-            else if (vm.form.sent && vm.questions.all.length === 1) {
-                notify.error(idiom.translate('formulaire.question.delete.empty.warning'));
-            }
-            else {
-                vm.dontSave = true;
-                template.open('lightbox', 'lightbox/question-confirm-delete');
-                vm.display.lightbox.delete = true;
+            else{
+                vm.questions.all = vm.questions.all.filter(q => q.id);
             }
         };
 
