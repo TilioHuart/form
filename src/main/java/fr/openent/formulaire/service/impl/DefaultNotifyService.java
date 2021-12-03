@@ -54,6 +54,7 @@ public class DefaultNotifyService implements NotifyService {
             }
 
             JsonObject params = new JsonObject()
+                    .put("anonymous", form.getBoolean("anonymous"))
                     .put("userUri", "/userbook/annuaire#" + user.getUserId())
                     .put("username", user.getUsername())
                     .put("formUri", "/formulaire#/form/" + form.getInteger("id") + "/edit")

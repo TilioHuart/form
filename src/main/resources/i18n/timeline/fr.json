@@ -7,8 +7,10 @@
     "push.notif.formulaire.response": "Nouvelle notification Formulaire",
     "push.notif.formulaire.newForm": "Nouvelle notification Formulaire",
 
-    "timeline.formulaire.new.notification": "Nouvelle notification Formulaire de ",
+    "timeline.formulaire.new.notification": "Nouvelle notification Formulaire ",
+    "timeline.formulaire.from": "de ",
     "timeline.formulaire.unknown.sender": "Utilisateur INCONNU",
+    "timeline.formulaire.lambda.sender": "Un utilisateur ",
     "timeline.formulaire.responded": " a répondu au formulaire ",
     "timeline.formulaire.sent": " vous a envoyé un formulaire. ",
     "timeline.formulaire.see": ". Voir les ",
