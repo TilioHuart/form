@@ -831,10 +831,10 @@ public class FormController extends ControllerHelper {
                     JsonArray duplicates = filteringEvent.right().getValue();
                     distributionService.createMultiple(formId, user, responders, duplicates, addEvent -> {
                         if (addEvent.isRight()) {
+                            JsonArray respondersIds = getResponderIds(responders);
                             if (!duplicates.isEmpty()) {
                                 distributionService.setActiveValue(true, formId, duplicates, updateEvent -> {
                                     if (updateEvent.isRight()) {
-                                        JsonArray respondersIds = getResponderIds(responders);
                                         formService.get(formId, user, getFormEvent -> {
                                             if (getFormEvent.isLeft()) {
                                                 handler.handle(new Either.Right<>(getFormEvent.right().getValue()));
@@ -852,7 +852,16 @@ public class FormController extends ControllerHelper {
                                 });
                             }
                             else {
-                                handler.handle(new Either.Right<>(new JsonObject()));
+                                formService.get(formId, user, getFormEvent -> {
+                                    if (getFormEvent.isLeft()) {
+                                        handler.handle(new Either.Right<>(getFormEvent.right().getValue()));
+                                        log.error("[Formulaire@addNewDistributions] Fail to get infos for form with id " + formId);
+                                        return;
+                                    }
+                                    JsonObject form = getFormEvent.right().getValue();
+                                    notifyService.notifyNewForm(request, form, respondersIds);
+                                    handler.handle(new Either.Right<>(getFormEvent.right().getValue()));
+                                });
                             }
                         } else {
                             log.error("[Formulaire@addNewDistributions] Fail to add distributions");
