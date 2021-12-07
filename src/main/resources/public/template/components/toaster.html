@@ -18,7 +18,7 @@
             <button ng-click="vm.duplicateForms()" class="cell">
                 <i18n>formulaire.duplicate</i18n>
             </button>
-            <button ng-click="vm.moveItems()" class="cell">
+            <button ng-click="vm.moveItems()" class="cell" ng-show="vm.folder.id != vm.folders.sharedFormsFolder.id">
                 <i18n>formulaire.move</i18n>
             </button>
             <button ng-click="vm.shareForm()" class="cell"
