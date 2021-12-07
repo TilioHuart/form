@@ -248,7 +248,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.closeShareFormLightbox = () : void => {
         template.close('lightbox');
         vm.display.lightbox.sharing = false;
-        window.setTimeout(async function () { await init(); }, 100);
+        window.setTimeout(async function () { await vm.openFolder(vm.folder); }, 100);
     };
 
     vm.seeResultsForm = () : void => {
@@ -266,34 +266,34 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         return dateOpeningOk && dateEndingOk;
     };
 
-        vm.checkRemind = async () : Promise<void> => {
-            let distributions = Mix.castArrayAs(Distribution, $scope.getDataIf200(await distributionService.listByForm(vm.forms.selected[0].id)));
-            let uniqueDistribs : any = [];
-            for (let d of distributions){
-                if(!uniqueDistribs.map(d => d.responder_id).includes(d.responder_id)) {
-                    uniqueDistribs.push(d);
-                }
+    vm.checkRemind = async () : Promise<void> => {
+        let distributions = Mix.castArrayAs(Distribution, $scope.getDataIf200(await distributionService.listByForm(vm.forms.selected[0].id)));
+        let uniqueDistribs : any = [];
+        for (let d of distributions){
+            if(!uniqueDistribs.map(d => d.responder_id).includes(d.responder_id)) {
+                uniqueDistribs.push(d);
             }
-            vm.responders = [];
-            for (let uniqueDistribution of uniqueDistribs){
-                let str = uniqueDistribution.responder_name;
-                let seperate = str.split(' ');
-                let responderInfo = {
-                    name : seperate[0],
-                    surname: seperate[1],
-                    nbResponses: distributions.filter(d => d.responder_id === uniqueDistribution.responder_id && d.status==DistributionStatus.FINISHED).length,
-                };
-                vm.responders.push(responderInfo);
-            }
-            template.open('lightbox','lightbox/form-check-remind');
-            vm.display.lightbox.checkremind=true;
-        };
+        }
+        vm.responders = [];
+        for (let uniqueDistribution of uniqueDistribs){
+            let str = uniqueDistribution.responder_name;
+            let seperate = str.split(' ');
+            let responderInfo = {
+                name : seperate[0],
+                surname: seperate[1],
+                nbResponses: distributions.filter(d => d.responder_id === uniqueDistribution.responder_id && d.status==DistributionStatus.FINISHED).length,
+            };
+            vm.responders.push(responderInfo);
+        }
+        template.open('lightbox','lightbox/form-check-remind');
+        vm.display.lightbox.checkremind=true;
+    };
 
-        vm.closeCheckRemind = async () : Promise<void> => {
-            vm.display.lightbox.checkremind = false;
-            template.close('lightbox');
-            vm.limitTable= vm.tableSize;
-        };
+    vm.closeCheckRemind = async () : Promise<void> => {
+        vm.display.lightbox.checkremind = false;
+        template.close('lightbox');
+        vm.limitTable= vm.tableSize;
+    };
 
     vm.remind = async () : Promise<void> => {
         initMail();
