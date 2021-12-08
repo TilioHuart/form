@@ -13,7 +13,7 @@
             <div class="main-button">
                 <button class="cell cancel" ng-click="redirectTo('/list/responses')">
                     <i18n ng-if="vm.form.editable || vm.distribution.status != DistributionStatus.FINISHED">formulaire.saveAndQuit</i18n>
-                    <i18n ng-if="!vm.form.editable || vm.distribution.status == DistributionStatus.FINISHED">formulaire.quit</i18n>
+                    <i18n ng-if="!vm.form.editable && vm.distribution.status == DistributionStatus.FINISHED">formulaire.quit</i18n>
                 </button>
             </div>
         </section>
