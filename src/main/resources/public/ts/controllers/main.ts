@@ -143,7 +143,12 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			respondForm: async (params) => {
 				await $scope.getFormWithRights(params.formId);
 				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form)) {
-					$scope.redirectTo(`/form/${params.formId}/new/question/${$scope.form.rgpd ? 'recap' : 1}`);
+					if ($scope.form.rgpd) {
+						$scope.redirectTo(`/form/${params.formId}/rgpd`);
+					}
+					else {
+						$scope.redirectTo(`/form/${params.formId}/new/question/1`);
+					}
 				}
 				else {
 					$scope.redirectTo('/e403');
