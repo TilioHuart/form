@@ -15,6 +15,10 @@ i {
     }
   }
 
+  &.centered {
+    vertical-align: sub;
+  }
+
   // Status
 
   &.hide {

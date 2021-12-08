@@ -74,7 +74,7 @@
   "formulaire.prop.multiple.label.mobile": "Permettre plusieurs réponses",
   "formulaire.prop.editable.label": "Permettre à l'utilisateur de modifier les réponses envoyées",
   "formulaire.prop.anonymous.label": "Anonymiser les réponses",
-  "formulaire.prop.anonymous.description": "Les identifiants, noms, prénoms et établissements des répondant ne seront pas sauvegardés.",
+  "formulaire.prop.anonymous.description": "Les identifiants, noms, prénoms et établissements des répondants ne seront pas sauvegardés.",
   "formulaire.prop.notified.label": "Recevoir une notification de réponse",
   "formulaire.prop.notified.description": "Vous recevrez une notification à chaque fois qu'un utilisateur aura répondu au formulaire.",
   "formulaire.prop.rgpd.label": "Collecte de données à caractère personnel",
