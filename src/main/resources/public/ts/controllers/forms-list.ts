@@ -85,7 +85,7 @@ interface ViewModel {
 
     // Folders functions
     initFolders() : Promise<void>;
-    openFolder(folder: Folder) : void;
+    openFolder(folder: Folder, resync?: boolean) : void;
     openCreateFolder() : void;
     closeCreateFolder() : void;
     renameFolder() : void;
@@ -248,7 +248,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.closeShareFormLightbox = () : void => {
         template.close('lightbox');
         vm.display.lightbox.sharing = false;
-        window.setTimeout(async function () { await vm.openFolder(vm.folder); }, 100);
+        window.setTimeout(async function () { await vm.openFolder(vm.folder, false); }, 100);
     };
 
     vm.seeResultsForm = () : void => {
@@ -348,12 +348,12 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.restoreForms = async () : Promise<void> => {
         try {
             for (let form of vm.forms.selected) {
-                await formService.restore(form);
+                await formService.restore(form, vm.folders.myFormsFolder.id);
             }
             await formService.move(vm.forms.selected, vm.folders.myFormsFolder.id);
             template.close('lightbox');
             notify.success(idiom.translate('formulaire.success.forms.restore'));
-            init();
+            vm.openFolder(vm.folder, false);
             $scope.safeApply();
         }
         catch (e) {
@@ -370,13 +370,13 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.doArchiveForms = async () : Promise<void> => {
         try {
             for (let form of vm.forms.selected) {
-                await formService.archive(form);
+                await formService.archive(form, vm.folders.archivedFormsFolder.id);
             }
             template.close('lightbox');
             vm.display.lightbox.archive = false;
             vm.display.warning = false;
             notify.success(idiom.translate('formulaire.success.forms.archive'));
-            init();
+            vm.openFolder(vm.folder);
             $scope.safeApply();
         }
         catch (e) {
@@ -401,7 +401,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             vm.display.lightbox.delete = false;
             vm.display.warning = false;
             notify.success(idiom.translate('formulaire.success.forms.delete'));
-            init(); // TODO need that ?
+            vm.openFolder(vm.folder, false);
             $scope.safeApply();
         }
         catch (e) {
@@ -478,7 +478,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         $scope.safeApply();
     };
 
-    vm.openFolder = async (folder: Folder) : Promise<void> => {
+    vm.openFolder = async (folder: Folder, resync: boolean = true) : Promise<void> => {
+        if (resync) await vm.folders.sync();
         let folderElem = vm.folders.getTreeElement(folder.id);
         vm.openedFolder = folderElem;
         vm.selectedFolder = folderElem;
@@ -523,7 +524,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         let isFolderOkForCreation = vm.folder.id && vm.folder.id != vm.folders.sharedFormsFolder.id && vm.folder.id != vm.folders.archivedFormsFolder.id;
         vm.editedFolder.parent_id = isFolderOkForCreation ? vm.folder.id : vm.folders.myFormsFolder.id;
         await folderService.create(vm.editedFolder);
-        await vm.folders.sync();
         vm.openFolder(vm.folder);
         vm.closeCreateFolder();
     };
@@ -539,8 +539,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             await folderService.update(vm.editedFolder);
             vm.closeRenameFolder();
             notify.success(idiom.translate('formulaire.success.folders.update'));
-            await vm.folders.sync();
-            vm.openFolder(vm.folder);
+            vm.openFolder(vm.folder); // TODO maybe just a simple vm.folders.sync() ?
             $scope.safeApply();
         }
         catch (e) {
@@ -575,7 +574,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             vm.display.lightbox.move = false;
             template.close('lightbox');
             notify.success(idiom.translate('formulaire.success.move'));
-            await vm.folders.sync();
             vm.openFolder(vm.folder);
             $scope.safeApply();
         }
@@ -604,7 +602,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             vm.display.lightbox.delete = false;
             vm.display.warning = false;
             notify.success(idiom.translate('formulaire.success.folders.delete'));
-            await vm.folders.sync();
             vm.openFolder(vm.folder);
             $scope.safeApply();
         }
@@ -644,7 +641,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             let draggedItems = vm.forms.all.filter(f => f.id === idOriginalItem);
             await formService.move(draggedItems, idTargetItem ? idTargetItem : 1);
         }
-        await vm.folders.sync();
         await vm.openFolder(vm.folder);
     };
 

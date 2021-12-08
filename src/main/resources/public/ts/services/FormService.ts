@@ -11,8 +11,8 @@ export interface FormService {
     createMultiple(forms: Array<Form>) : Promise<AxiosResponse>;
     duplicate(formIds: Array<number>, folderId: number) : Promise<AxiosResponse>;
     update(form: Form) : Promise<AxiosResponse>;
-    archive(form: Form) : Promise<AxiosResponse>;
-    restore(form: Form) : Promise<AxiosResponse>;
+    archive(form: Form, destinationFolderId: number) : Promise<AxiosResponse>;
+    restore(form: Form, destinationFolderId: number) : Promise<AxiosResponse>;
     delete(formId: number) : Promise<AxiosResponse>;
     move(forms : Form[], parentId: number) : Promise<AxiosResponse>;
     sendReminder(formId: number, mail: {}) : Promise<AxiosResponse>;
@@ -97,9 +97,10 @@ export const formService: FormService = {
         }
     },
 
-    async archive(form: Form) : Promise<AxiosResponse> {
+    async archive(form: Form, destinationFolderId: number) : Promise<AxiosResponse> {
         try {
             form.archived = true;
+            await this.move([form], destinationFolderId);
             return await this.update(form);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.archive'));
@@ -107,9 +108,10 @@ export const formService: FormService = {
         }
     },
 
-    async restore(form: Form) : Promise<AxiosResponse> {
+    async restore(form: Form, destinationFolderId: number) : Promise<AxiosResponse> {
         try {
             form.archived = false;
+            await this.move([form], destinationFolderId);
             return await this.update(form);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.restore'));
