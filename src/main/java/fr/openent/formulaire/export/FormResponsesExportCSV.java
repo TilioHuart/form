@@ -175,7 +175,8 @@ public class FormResponsesExportCSV {
   }
 
   private String addResponse(String answer, Boolean endLine) {
-    String value = "\"" + answer.replace("\"", "\"\"") + "\"";
+    String cleanAnswer = answer.replace("\"", "\"\"").replace("&nbsp;", "").replaceAll("<[^>]*>", "");
+    String value = "\"" + cleanAnswer + "\"";
     value += endLine ? EOL : SEPARATOR;
     return value;
   }
