@@ -109,8 +109,9 @@ public interface ResponseService {
     void exportPDFResponses(String formId, Handler<Either<String, JsonArray>> handler);
 
     /**
-     * Delete responses too old according to lifetime RGPD chose
+     * Delete responses too old according to lifetime RGPD chosen
+     * @param distributionIds id of deleted distributions
      * @param handler function handler returning JsonObject data
      */
-    void deleteOldResponse(Handler<Either<String, JsonArray>> handler);
+    void deleteOldResponse(JsonArray distributionIds, Handler<Either<String, JsonArray>> handler);
 }

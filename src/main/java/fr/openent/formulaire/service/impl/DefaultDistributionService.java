@@ -1,6 +1,7 @@
 package fr.openent.formulaire.service.impl;
 
 import fr.openent.formulaire.Formulaire;
+import fr.openent.formulaire.helpers.UtilsHelper;
 import fr.openent.formulaire.service.DistributionService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
@@ -165,7 +166,7 @@ public class DefaultDistributionService implements DistributionService {
 
     @Override
     public void getDeactivated(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler) {
-        JsonArray respondersIds = getIds(responders);
+        JsonArray respondersIds = UtilsHelper.getUserIds(responders);
 
         JsonArray params = new JsonArray().add(formId);
         String query = "SELECT responder_id FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? ";
@@ -180,7 +181,7 @@ public class DefaultDistributionService implements DistributionService {
 
     @Override
     public void getDuplicates(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler) {
-        JsonArray respondersIds = getIds(responders);
+        JsonArray respondersIds = UtilsHelper.getUserIds(responders);
 
         JsonArray params = new JsonArray().add(formId);
         String query = "SELECT responder_id FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? ";
@@ -259,11 +260,21 @@ public class DefaultDistributionService implements DistributionService {
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
-    private JsonArray getIds(JsonArray responders) {
-        JsonArray respondersIds = new JsonArray();
-        for (int j = 0; j < responders.size(); j++) {
-            respondersIds.add(responders.getJsonObject(j).getString("id"));
-        }
-        return respondersIds;
+    @Override
+    public void deleteOldDistributions(Handler<Either<String, JsonArray>> handler) {
+        String query =
+                "DELETE FROM " + Formulaire.DISTRIBUTION_TABLE + " " +
+                "WHERE id IN (" +
+                    "SELECT d.id FROM " + Formulaire.DISTRIBUTION_TABLE + " d " +
+                    "JOIN " + Formulaire.FORM_TABLE + " f ON f.id = d.form_id " +
+                    "WHERE f.rgpd = ? AND d.date_response IS NOT NULL " +
+                    "AND (SELECT " +
+                        "EXTRACT(year FROM AGE(NOW(), d.date_response::timestamp)) * 12 + " +
+                        "EXTRACT(month FROM AGE(NOW(), d.date_response::timestamp))" +
+                    ") > f.rgpd_lifetime" +
+                ")" +
+                "RETURNING *;";
+        JsonArray params = new JsonArray().add(true);
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 }

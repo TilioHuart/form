@@ -5,6 +5,7 @@ import fr.openent.formulaire.export.FormResponsesExportCSV;
 import fr.openent.formulaire.export.FormResponsesExportPDF;
 import fr.openent.formulaire.helpers.FutureHelper;
 import fr.openent.formulaire.helpers.RenderHelper;
+import fr.openent.formulaire.helpers.UtilsHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.security.ResponseRight;
@@ -228,7 +229,7 @@ public class FormController extends ControllerHelper {
                         }
 
                         eventStore.createAndStoreEvent(Formulaire.FormulaireEvent.CREATE.name(), request);
-                        JsonArray formIds = getFormIds(forms);
+                        JsonArray formIds = UtilsHelper.getIds(forms);
                         Integer folderId = forms.getJsonObject(0).getInteger("folder_id");
                         relFormFolderService.create(user, formIds, folderId.toString(), createRelEvent -> {
                             if (createRelEvent.isLeft()) {
@@ -404,7 +405,7 @@ public class FormController extends ControllerHelper {
             if (user != null) {
                 RequestUtils.bodyToJsonArray(request, forms -> {
                     Integer oldFolderId = forms.getJsonObject(0).getInteger("folder_id");
-                    JsonArray formIds = getFormIds(forms);
+                    JsonArray formIds = UtilsHelper.getIds(forms);
                     relFormFolderService.update(user, formIds, targetFolderId.toString(), updateEvent -> {
                         if (updateEvent.isLeft()) {
                             log.error("[Formulaire@moveForm] Error in moving forms " + forms);
@@ -831,7 +832,7 @@ public class FormController extends ControllerHelper {
                     JsonArray duplicates = filteringEvent.right().getValue();
                     distributionService.createMultiple(formId, user, responders, duplicates, addEvent -> {
                         if (addEvent.isRight()) {
-                            JsonArray respondersIds = getResponderIds(responders);
+                            JsonArray respondersIds = UtilsHelper.getUserIds(responders);
                             if (!duplicates.isEmpty()) {
                                 distributionService.setActiveValue(true, formId, duplicates, updateEvent -> {
                                     if (updateEvent.isRight()) {
@@ -983,21 +984,5 @@ public class FormController extends ControllerHelper {
                 log.error("[Formulaire@getSharedWithMe] Fail to get user's shared rights");
             }
         });
-    }
-
-    private JsonArray getFormIds(JsonArray forms) {
-        JsonArray formIds = new JsonArray();
-        for (int i = 0; i < forms.size(); i++) {
-            formIds.add(forms.getJsonObject(i).getInteger("id").toString());
-        }
-        return formIds;
-    }
-
-    private JsonArray getResponderIds(JsonArray responders) {
-        JsonArray responderIds = new JsonArray();
-        for (int i = 0; i < responders.size(); i++) {
-            responderIds.add(responders.getJsonObject(i).getString("id"));
-        }
-        return responderIds;
     }
 }

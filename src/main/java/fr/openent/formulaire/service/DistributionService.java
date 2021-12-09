@@ -138,4 +138,10 @@ public interface DistributionService {
      * @param handler function handler returning JsonObject data
      */
     void setActiveValue(boolean active, String formId, JsonArray duplicates, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Delete distributions too old according to lifetime RGPD chosen
+     * @param handler function handler returning JsonArray data
+     */
+    void deleteOldDistributions(Handler<Either<String, JsonArray>> handler);
 }
