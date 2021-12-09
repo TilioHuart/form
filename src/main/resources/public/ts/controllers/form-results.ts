@@ -292,16 +292,12 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             }
 
             // Generate chart with options and data
-            if (vm.singleAnswerResponseChart) {
-                vm.singleAnswerResponseChart.updateSeries(series, true);
-                vm.singleAnswerResponseChart.updateOptions(options, true);
-            }
-            else {
-                var newOptions = JSON.parse(JSON.stringify(options));
-                newOptions.series = series;
-                vm.singleAnswerResponseChart = new ApexCharts(document.querySelector('#singleanswer-response-chart'), newOptions);
-                vm.singleAnswerResponseChart.render();
-            }
+            if (vm.singleAnswerResponseChart) { vm.singleAnswerResponseChart.destroy(); }
+
+            let newOptions = JSON.parse(JSON.stringify(options));
+            newOptions.series = series;
+            vm.singleAnswerResponseChart = new ApexCharts(document.querySelector('#singleanswer-response-chart'), newOptions);
+            vm.singleAnswerResponseChart.render();
         }
 
         // PDF
