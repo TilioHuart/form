@@ -7,12 +7,15 @@
                 <option ng-repeat="struct in vm.getStructures()" ng-value="struct">[[struct]]</option>
             </select>
         </div>
-        <br/>
-        <i18n ng-if="!vm.form.editable">formulaire.responses.send.text</i18n>
-        <br/>
-        <i18n ng-if="!vm.form.editable">formulaire.responses.send.continue</i18n>
-
-        <i18n ng-if="vm.form.editable">formulaire.responses.editable.send.text</i18n>
+        <div ng-if="!vm.form.editable">
+            <i18n>formulaire.responses.send.text</i18n>
+<!--            <br/>-->
+<!--            <i18n>formulaire.responses.send.continue</i18n>-->
+        </div>
+        <div ng-if="vm.form.editable">
+            <i18n ng-if="vm.distribution.status != DistributionStatus.ON_CHANGE">formulaire.responses.send.text.editable.first</i18n>
+            <i18n ng-if="vm.distribution.status == DistributionStatus.ON_CHANGE">formulaire.responses.send.text.editable.modif</i18n>
+        </div>
     </div>
     <div class="action-buttons">
         <button class="cell cancel" ng-click="vm.display.lightbox.sending = false;"><i18n>formulaire.cancel</i18n></button>
