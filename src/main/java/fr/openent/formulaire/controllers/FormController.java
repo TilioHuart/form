@@ -286,17 +286,20 @@ public class FormController extends ControllerHelper {
                         }
                         // Duplicates all potential question choices
                         List<Future> questionsInfosFutures = new ArrayList<>();
+
                         for (Object questions : evt.result().list()) {
                             JsonArray questionsInfos = ((JsonArray) questions);
-                            for (int i = 0; i < questionsInfos.size(); i++) {
-                                JsonObject questionInfo = questionsInfos.getJsonObject(i);
-                                int questionId = questionInfo.getInteger("id");
-                                int originalQuestionId = questionInfo.getInteger("original_question_id");
-                                int question_type = questionInfo.getInteger("question_type");
-                                if (question_type == 4 || question_type == 5) {
-                                    Promise<JsonObject> promise = Promise.promise();
-                                    questionsInfosFutures.add(promise.future());
-                                    questionChoiceService.duplicate(questionId, originalQuestionId, FutureHelper.handlerJsonObject(promise));
+                            if(questionsInfos.getJsonObject(0).getInteger("id") != null){
+                                for (int i = 0; i < questionsInfos.size(); i++) {
+                                    JsonObject questionInfo = questionsInfos.getJsonObject(i);
+                                    int questionId = questionInfo.getInteger("id");
+                                    int originalQuestionId = questionInfo.getInteger("original_question_id");
+                                    int question_type = questionInfo.getInteger("question_type");
+                                    if (question_type == 4 || question_type == 5) {
+                                        Promise<JsonObject> promise = Promise.promise();
+                                        questionsInfosFutures.add(promise.future());
+                                        questionChoiceService.duplicate(questionId, originalQuestionId, FutureHelper.handlerJsonObject(promise));
+                                    }
                                 }
                             }
                         }
