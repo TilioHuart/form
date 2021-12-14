@@ -29,7 +29,6 @@
                     <div class="question-main">
                         <div ng-if="question.question_type == Types.FREETEXT">
                             <div ng-if="question.statement" bind-html="question.statement"></div>
-                            <div ng-if="!question.statement"><i18n>formulaire.response.missing</i18n></div>
                         </div>
                         <div ng-if="question.question_type == Types.SHORTANSWER">
                             <div bind-html="vm.getStringResponse(question)"></div>
@@ -62,11 +61,11 @@
                             </div>
                         </div>
                     </div>
-                    <div class="question-edit" ng-if="vm.form.editable || vm.distribution.status != DistributionStatus.FINISHED">
+                    <div class="question-edit" ng-if="(vm.form.editable || vm.distribution.status != DistributionStatus.FINISHED) && question.question_type != Types.FREETEXT">
                         <a href="#/form/[[vm.form.id]]/[[vm.distribution.id]]/question/[[question.position]]"><i18n>formulaire.edit</i18n></a>
                     </div>
                 </div>
-                    </div>
+            </div>
             <div class="buttons" ng-class="{alone: !vm.form.editable || vm.distribution.status == DistributionStatus.FINISHED}"
                  ng-if="vm.form.editable || vm.distribution.status != DistributionStatus.FINISHED">
                 <button class="cell" ng-click="vm.prev()"><i18n>formulaire.prev</i18n></button>
