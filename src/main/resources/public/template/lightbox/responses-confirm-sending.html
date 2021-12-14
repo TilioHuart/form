@@ -9,11 +9,18 @@
         </div>
         <div ng-if="!vm.form.editable">
             <i18n>formulaire.responses.send.text</i18n>
-<!--            <br/>-->
-<!--            <i18n>formulaire.responses.send.continue</i18n>-->
+            <div>
+                <i18n>formulaire.responses.send.continue</i18n>
+            </div>
         </div>
+
         <div ng-if="vm.form.editable">
-            <i18n ng-if="vm.distribution.status != DistributionStatus.ON_CHANGE">formulaire.responses.send.text.editable.first</i18n>
+            <div ng-if="vm.distribution.status != DistributionStatus.ON_CHANGE">
+                <i18n>formulaire.responses.send.text.editable.first</i18n>
+                <div>
+                    <i18n>formulaire.responses.send.continue</i18n>
+                </div>
+            </div>
             <i18n ng-if="vm.distribution.status == DistributionStatus.ON_CHANGE">formulaire.responses.send.text.editable.modif</i18n>
         </div>
     </div>

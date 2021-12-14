@@ -108,22 +108,23 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
     };
 
     vm.doSend = async () : Promise<void> => {
-        vm.distribution.status = DistributionStatus.FINISHED;
-        vm.distribution.structure = !!vm.distribution.structure ? vm.distribution.structure : model.me.structureNames[0];
+        let distrib=vm.distribution;
+        distrib.structure = !!distrib.structure ? distrib.structure : model.me.structureNames[0];
         await responseService.fillResponses(vm.form.id, vm.distribution.id);
-        if (vm.distribution.original_id) {
+        if (distrib.original_id) {
             let questionFileIds: any = vm.questions.all.filter(q => q.question_type === Types.FILE).map(q => q.id);
             let responseFiles = vm.responses.all.filter(r => questionFileIds.includes(r.question_id));
             for (let responseFile of responseFiles) {
                 await responseFileService.deleteAll(responseFile.original_id);
             }
-            await distributionService.replace(vm.distribution);
+            await distributionService.replace(distrib);
         }
         else {
-            await distributionService.update(vm.distribution);
+            await distributionService.update(distrib);
         }
         template.close('lightbox');
         vm.display.lightbox.sending = false;
+        vm.distribution.status = DistributionStatus.FINISHED;
         notify.success(idiom.translate('formulaire.success.responses.save'));
         window.setTimeout(function () { $scope.redirectTo(`/list/responses`); }, 1000);
     };
