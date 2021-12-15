@@ -1,4 +1,4 @@
-import {Behaviours} from 'entcore';
+import {Behaviours, model} from 'entcore';
 import http from "axios";
 
 const rights = {

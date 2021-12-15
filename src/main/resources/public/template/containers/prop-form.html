@@ -76,7 +76,7 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="collectData" workflow="formulaire.rgpd">
+                            <div class="collectData" ng-if="canSeeRgpd()">
                                 <div class="text">
                                     <label for="isCollectData">
                                         <input type="checkbox" id="isCollectData" ng-model="vm.form.rgpd" ng-disabled="vm.form.nb_responses > 0"
