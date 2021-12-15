@@ -4,7 +4,7 @@
             <button ng-click="vm.openForm(vm.forms.selected[0])" class="cell">
                 <i18n>formulaire.open</i18n>
             </button>
-            <button ng-click="vm.openMyResponses(vm.forms.selected[0])" class="cell" ng-show="vm.forms.selected[0].multiple && vm.getMyDistribs(vm.forms.selected[0]).length > 0">
+            <button ng-click="vm.openMyResponses(vm.forms.selected[0])" class="cell" ng-show="vm.forms.selected[0].multiple && vm.forms.selected[0].getNbFinishedDistribs() > 0">
                 <i18n>formulaire.myResponses</i18n>
             </button>
         </div>

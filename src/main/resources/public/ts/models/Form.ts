@@ -1,7 +1,7 @@
 import {Selectable, Selection} from "entcore-toolkit";
 import {idiom, notify, Rights, Shareable} from "entcore";
 import {formService} from "../services";
-import {DistributionStatus} from "./Distribution";
+import {Distribution, Distributions, DistributionStatus} from "./Distribution";
 import {FiltersFilters, FiltersOrders} from "../core/enums";
 
 export class Form implements Selectable, Shareable  {
@@ -41,8 +41,7 @@ export class Form implements Selectable, Shareable  {
     };
     nb_questions: number;
     nb_responses: number;
-    date_sending: string;
-    status: string;
+    distributions: Distributions;
 
     constructor() {
         this.id = null;
@@ -113,6 +112,39 @@ export class Form implements Selectable, Shareable  {
         this._id = this.id;
         this.owner = {userId: this.owner_id, displayName: this.owner_name};
         this.myRights = new Rights<Form>(this);
+    };
+
+    getNbFinishedDistribs = () : number => {
+        if (this.distributions) {
+            return this.distributions.all.filter(d => d.status === DistributionStatus.FINISHED).length;
+        }
+        return 0;
+    };
+
+    getDateResponse = () : Date => {
+        return this.getMyLastDistrib().date_response;
+    };
+
+    getDateSending = () : Date => {
+        return this.getMyFirstDistrib().date_sending;
+    };
+
+    getStatus = () : string => {
+        return this.getMyLastDistrib().status;
+    };
+
+    getMyFirstDistrib = () : Distribution => {
+        if (this.distributions) {
+            return this.distributions.all[0];
+        }
+        return new Distribution();
+    };
+
+    getMyLastDistrib = () : Distribution => {
+        if (this.distributions) {
+            return this.distributions.all[this.distributions.all.length - 1];
+        }
+        return new Distribution();
     };
 
     setInfoImage = async () : Promise<void> => {
@@ -201,6 +233,8 @@ export class Forms extends Selection<Form> {
         }
     };
 
+    // Sorting / Filtering
+
     orderForms = () : void => {
         this.all = this.all.sort(
             (a, b) => {
@@ -213,8 +247,8 @@ export class Forms extends Selection<Form> {
                     if (a.date_modification < b.date_modification) return this.order.desc ? -1 : 1;
                 }
                 else if (this.order.field == FiltersOrders.SENDING_DATE) {
-                    if (a.date_sending > b.date_sending) return this.order.desc ? 1 : -1;
-                    if (a.date_sending < b.date_sending) return this.order.desc ? -1 : 1;
+                    if (a.getDateSending() > b.getDateSending()) return this.order.desc ? 1 : -1;
+                    if (a.getDateSending() < b.getDateSending()) return this.order.desc ? -1 : 1;
                 }
                 else if (this.order.field == FiltersOrders.CREATOR) {
                     if (a.owner_name.toLowerCase() < b.owner_name.toLowerCase()) return this.order.desc ? 1 : -1;
@@ -278,13 +312,13 @@ export class Forms extends Selection<Form> {
                     form.displayed = true;
                 }
                 else {
-                    if (form.status === DistributionStatus.TO_DO && !objectFilters[FiltersFilters.TO_DO].value) {
+                    if (form.getStatus() === DistributionStatus.TO_DO && !objectFilters[FiltersFilters.TO_DO].value) {
                         form.displayed = false;
                     }
-                    if (form.status === DistributionStatus.IN_PROGRESS && !objectFilters[FiltersFilters.IN_PROGRESS].value) {
+                    if (form.getStatus() === DistributionStatus.IN_PROGRESS && !objectFilters[FiltersFilters.IN_PROGRESS].value) {
                         form.displayed = false;
                     }
-                    if (form.status === DistributionStatus.FINISHED && !objectFilters[FiltersFilters.FINISHED].value) {
+                    if (form.getStatus() === DistributionStatus.FINISHED && !objectFilters[FiltersFilters.FINISHED].value) {
                         form.displayed = false;
                     }
                 }
