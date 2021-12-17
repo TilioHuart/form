@@ -108,8 +108,9 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
     };
 
     vm.doSend = async () : Promise<void> => {
-        let distrib=vm.distribution;
-        distrib.structure = !!distrib.structure ? distrib.structure : model.me.structureNames[0];
+        let distrib = vm.distribution;
+        distrib.status = DistributionStatus.FINISHED;
+        distrib.structure = distrib.structure ? distrib.structure : model.me.structureNames[0];
         await responseService.fillResponses(vm.form.id, vm.distribution.id);
         if (distrib.original_id) {
             let questionFileIds: any = vm.questions.all.filter(q => q.question_type === Types.FILE).map(q => q.id);
@@ -124,7 +125,6 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
         }
         template.close('lightbox');
         vm.display.lightbox.sending = false;
-        vm.distribution.status = DistributionStatus.FINISHED;
         notify.success(idiom.translate('formulaire.success.responses.save'));
         window.setTimeout(function () { $scope.redirectTo(`/list/responses`); }, 1000);
     };
