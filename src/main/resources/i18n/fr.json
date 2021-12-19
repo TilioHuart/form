@@ -237,7 +237,7 @@
   "formulaire.error.questionService.create": "Une erreur est survenue lors de la création de la nouvelle question",
   "formulaire.error.questionService.createMultiple": "Une erreur est survenue lors de la création des questions",
   "formulaire.error.questionService.get": "Une erreur est survenue lors de la récupération de la question",
-  "formulaire.error.questionService.update": "Une erreur est survenue lors de la sauvearde de la question",
+  "formulaire.error.questionService.update": "Une erreur est survenue lors de la sauvegarde de la question",
   "formulaire.error.questionService.delete": "Une erreur est survenue lors de la suppression de la question",
 
   "formulaire.error.questionType.sync": "Une erreur est survenue lors de la synchronisation des types de question",
@@ -264,7 +264,7 @@
   "formulaire.error.responseService.list": "Une erreur est survenue lors de la récupération des réponses",
   "formulaire.error.responseService.get": "Une erreur est survenue lors de la récupération de la réponse",
   "formulaire.error.responseService.create": "Une erreur est survenue lors de la création de la nouvelle réponse",
-  "formulaire.error.responseService.update": "Une erreur est survenue lors de la sauvearde de la réponse",
+  "formulaire.error.responseService.update": "Une erreur est survenue lors de la sauvegarde de la réponse",
   "formulaire.error.responseService.delete": "Une erreur est survenue lors de la suppression de la réponse",
 
   "formulaire.error.responseFile.sync": "Une erreur est survenue lors de la synchronisation des fichiers",
