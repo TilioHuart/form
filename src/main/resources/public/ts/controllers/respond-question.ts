@@ -22,9 +22,12 @@ interface ViewModel {
 
     $onInit() : Promise<void>;
     prev() : Promise<void>;
+    prevGuard() : void;
     next() : Promise<void>;
+    nextGuard() : void;
     goToRecap() : Promise<void>;
     saveAndQuit() : Promise<void>;
+    saveAndQuitGuard() : void;
     displayDefaultOption() : string;
 }
 
@@ -102,18 +105,25 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         }
     };
 
+    vm.prevGuard = () => {
+        vm.prev();
+    };
+
     vm.next = async () : Promise<void> => {
         if (await saveResponses()) {
             let nextPosition: number = vm.question.position + 1;
             if (nextPosition <= vm.nbQuestions) {
                 $scope.redirectTo(`/form/${vm.form.id}/${vm.distribution.id}/question/${nextPosition}`);
             }
-
             else {
                 $scope.redirectTo(`/form/${vm.form.id}/${vm.distribution.id}/questions/recap`);
             }
 
         }
+    };
+
+    vm.nextGuard = () => {
+        vm.next();
     };
 
     vm.goToRecap = async () : Promise<void> => {
@@ -131,6 +141,10 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             notify.success(idiom.translate('formulaire.success.responses.save'));
             window.setTimeout(function () { $scope.redirectTo(`/list/responses`); }, 1000);
         }
+    };
+
+    vm.saveAndQuitGuard = () => {
+        vm.saveAndQuit();
     };
 
     vm.displayDefaultOption = () : string => {

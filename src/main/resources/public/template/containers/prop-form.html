@@ -3,7 +3,7 @@
         <section class="cell eight">
             <div>
                 <h1>
-                    <a href="#/"><i18n>formulaire.title</i18n></a>
+                    <a navigation-trigger="redirectTo('/list/mine')" href="#/"><i18n>formulaire.title</i18n></a>
                     <span ng-if="vm.folder.parent_id && vm.folder.parent_id != 1"><i18n>formulaire.separator</i18n><i18n>formulaire.dots</i18n></span>
                     <span ng-if="vm.folder.id && vm.folder.id != 1"><i18n>formulaire.separator</i18n>[[vm.folder.name]]</span>
                 </h1>
@@ -11,7 +11,7 @@
         </section>
     </div>
 
-    <div class="prop-form dominos">
+    <div class="prop-form dominos" root-guard>
         <div class="item">
             <div class="domino">
                 <div class="three cell picture" ng-class="{'empty': !vm.form.picture}">
@@ -25,7 +25,7 @@
                         <div class="data-text">
                             <div class="title" ng-if="!isMobile"><i18n>formulaire.form.create.title</i18n></div>
                             <div class="title" ng-if="isMobile"><i18n>formulaire.form.create.title.mobile</i18n></div>
-                            <input type="text" ng-model="vm.form.title" i18n-placeholder="formulaire.form.create.title" style="width: 60%;" ng-keydown="$event.keyCode === 13 && vm.save()">
+                            <input type="text" ng-model="vm.form.title" i18n-placeholder="formulaire.form.create.title" style="width: 60%;" ng-keydown="$event.keyCode === 13 && vm.save()" input-guard/>
                             <div class="interval">
                                 <span class="opening">
                                     <i18n>formulaire.date.opening</i18n>
@@ -111,8 +111,9 @@
                                 <i18n>formulaire.form.edit.modified</i18n>[[displayDate(vm.form.date_modification)]]
                             </div>
                             <div class="action-buttons">
-                                <button class="cell cancel" ng-click="redirectTo('/list/mine')"><i18n>formulaire.cancel</i18n></button>
-                                <button class="cell" ng-click="vm.save()" ng-disabled="!vm.form.title || !vm.checkIntervalDates()"><i18n>formulaire.save</i18n></button>
+                                <button class="cell cancel" navigation-trigger="redirectTo('/list/mine')"><i18n>formulaire.cancel</i18n></button>
+                                <button class="cell" reset-guard="vm.save()" ng-disabled="!vm.form.title || !vm.checkIntervalDates()"><i18n>formulaire.save</i18n></button>
+
                             </div>
                         </div>
                     </div>

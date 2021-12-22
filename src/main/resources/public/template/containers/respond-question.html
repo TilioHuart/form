@@ -11,7 +11,7 @@
         <section class="cell six">
             <div class="main-button">
                 <button class="cell cancel" ng-click="vm.goToRecap()"><i18n>formulaire.recap</i18n></button>
-                <button class="cell cancel" ng-click="vm.saveAndQuit()"><i18n>formulaire.saveAndQuit</i18n></button>
+                <button class="cell cancel" reset-guard="vm.saveAndQuitGuard()"><i18n>formulaire.saveAndQuit</i18n></button>
             </div>
         </section>
     </div>
@@ -20,7 +20,7 @@
 
     <div class="respond-question">
         <div class="nine twelve-mobile">
-            <div class="question">
+            <div class="question" guard-root>
                 <div class="question-title">
                     <h4>[[vm.question.title]]<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span></h4>
                 </div>
@@ -29,14 +29,14 @@
                         <div ng-if="vm.question.statement" bind-html="vm.question.statement"></div>
                     </div>
                     <div ng-if="vm.question.question_type == Types.SHORTANSWER">
-                        <textarea ng-model="vm.response.answer" i18n-placeholder="formulaire.question.type.SHORTANSWER">
+                        <textarea ng-model="vm.response.answer" i18n-placeholder="formulaire.question.type.SHORTANSWER" input-guard>
                         </textarea>
                     </div>
                     <div ng-if="vm.question.question_type == Types.LONGANSWER">
-                        <editor ng-model="vm.response.answer"></editor>
+                        <editor ng-model="vm.response.answer" input-guard></editor>
                     </div>
                     <div ng-if="vm.question.question_type == Types.SINGLEANSWER">
-                        <select ng-model="vm.response.choice_id">
+                        <select ng-model="vm.response.choice_id" input-guard>
                             <option ng-value="">[[vm.displayDefaultOption()]]</option>
                             <option ng-repeat="choice in vm.question.choices.all" ng-value="choice.id">[[choice.value]]</option>
                         </select>
@@ -44,24 +44,24 @@
                     <div ng-if="vm.question.question_type == Types.MULTIPLEANSWER">
                         <div ng-repeat="choice in vm.question.choices.all">
                             <label for="check-[[choice.id]]">
-                                <input type="checkbox" id="check-[[choice.id]]" ng-model="vm.selectedIndex[$index]">
+                                <input type="checkbox" id="check-[[choice.id]]" ng-model="vm.selectedIndex[$index]" input-guard>
                                 <span>[[choice.value]]</span>
                             </label>
                         </div>
                     </div>
                     <div ng-if="vm.question.question_type == Types.DATE">
-                        <date-picker ng-model="vm.response.answer"></date-picker>
+                        <date-picker ng-model="vm.response.answer" input-guard></date-picker>
                     </div>
                     <div ng-if="vm.question.question_type == Types.TIME">
-                        <input type="time" ng-model="vm.response.answer"/>
+                        <input type="time" ng-model="vm.response.answer" input-guard/>
                     </div>
                     <div ng-if="vm.question.question_type == Types.FILE">
-                        <formulaire-picker-file files="vm.files" multiple="true"></formulaire-picker-file>
+                        <formulaire-picker-file files="vm.files" multiple="true" input-guard></formulaire-picker-file>
                     </div>
                     <div ng-if="vm.question.question_type == Types.SINGLEANSWERRADIO">
                         <div ng-repeat="choice in vm.question.choices.all">
                             <label>
-                                <input type="radio" ng-model="vm.response.choice_id" ng-value="[[choice.id]]">[[choice.value]]
+                                <input type="radio" ng-model="vm.response.choice_id" ng-value="[[choice.id]]" input-guard>[[choice.value]]
                             </label>
 
                         </div>
@@ -70,8 +70,8 @@
             </div>
             <div class="buttons">
                 <button class="cell" ng-if="vm.question.position <= 1" ng-disabled="true"><i18n>formulaire.prev</i18n></button>
-                <button class="cell cancel" ng-click="vm.prev()" ng-if="vm.question.position > 1"><i18n>formulaire.prev</i18n></button>
-                <button class="cell" ng-click="vm.next()"><i18n>formulaire.next</i18n></button>
+                <button class="cell cancel" reset-guard="vm.prevGuard()" ng-if="vm.question.position > 1"><i18n>formulaire.prev</i18n></button>
+                <button class="cell" reset-guard="vm.nextGuard()"><i18n>formulaire.next</i18n></button>
             </div>
         </div>
     </div>
