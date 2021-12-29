@@ -1,7 +1,14 @@
 import {idiom, ng, notify, template, angular} from 'entcore';
 import {Form, Question, QuestionChoice, Questions, Response, Responses, Types} from "../models";
 import {distributionService, formService, questionChoiceService, questionService, responseService} from "../services";
-import {Direction, FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_QUESTION_EMIT_EVENT, Pages} from "../core/enums";
+import {
+    Direction,
+    FORMULAIRE_BROADCAST_EVENT,
+    FORMULAIRE_EMIT_EVENT,
+    FORMULAIRE_QUESTION_EMIT_EVENT,
+    Pages
+} from "../core/enums";
+import {folderService} from "../services/FolderService";
 
 enum PreviewPage { RGPD = 'rgpd', QUESTION = 'question', RECAP = 'recap'}
 
@@ -30,7 +37,7 @@ interface ViewModel {
 
     // Editor functions
     saveAll(displaySuccess?: boolean) : Promise<void>;
-    return() : void;
+    return() : Promise<void>;
     createNewQuestion() : void;
     doCreateNewQuestion(code: number) : void;
     organizeQuestions() : void;
@@ -106,13 +113,15 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             vm.dontSave = false;
         };
 
-        vm.return = () : void => {
+        vm.return = async() : Promise<void> => {
             vm.dontSave = true;
             let wrongQuestions = vm.questions.filter(question => !question.title); // TODO check more than just titles later
             if (wrongQuestions.length > 0) {
                 notify.error(idiom.translate('formulaire.question.save.missing.field'));
                 vm.dontSave = false;
             } else {
+                let folder = $scope.getDataIf200(await folderService.get(vm.form.folder_id));
+                $scope.$emit(FORMULAIRE_EMIT_EVENT.UPDATE_FOLDER, folder);
                 $scope.redirectTo('/list/mine');
             }
         };
@@ -277,7 +286,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
         };
 
-        vm.displayTypeDescritption =(description : string|number) :string =>{
+        vm.displayTypeDescritption = (description : string|number) :string =>{
             return idiom.translate("formulaire.question.type.description." + description);
         }
 

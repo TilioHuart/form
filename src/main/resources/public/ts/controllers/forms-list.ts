@@ -475,8 +475,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
         vm.openedFolder = vm.folders.trees[0];
         vm.selectedFolder = vm.folders.trees[0];
-        vm.folder = vm.folders.myFormsFolder;
-
+        vm.folder = $scope.folder.id ? $scope.folder : vm.folders.myFormsFolder;
         $scope.safeApply();
     };
 
