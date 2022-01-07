@@ -101,7 +101,7 @@ interface ViewModel {
     dropped(dragEl, dropEl) : Promise<void>;
     switchAllFolders(value: boolean) : void;
 
-    // Utils functions
+    $onInit() : Promise<void>;
     switchAllForms(value: boolean) : void;
     sort(field: FiltersOrders) : void;
     filter(filter: FiltersFilters) : void;
@@ -111,6 +111,7 @@ interface ViewModel {
     getTitle(title: string): string;
     infiniteScroll() : void;
     seeMore():void;
+    $onDestroy() : Promise<void>;
 }
 
 
@@ -166,7 +167,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.openedFolder = null;
     vm.selectedFolder = null;
 
-    const init = async () : Promise<void> => {
+    vm.$onInit = async () : Promise<void> => {
         await vm.initFolders();
         vm.openFolder(vm.folder);
 
@@ -176,6 +177,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         vm.forms.orders.find(o => o.name === FiltersOrders.MODIFICATION_DATE).display = true;
         vm.forms.orders.find(o => o.name === FiltersOrders.TITLE).display = true;
 
+        (window as any).LAZY_MODE = false;
         vm.loading = false;
         $scope.safeApply();
     };
@@ -318,7 +320,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             initMail();
             template.close('lightbox');
             vm.display.lightbox.reminder = false;
-            window.setTimeout(async function () { await init(); }, 100);
+            window.setTimeout(async function () { await vm.$onInit(); }, 100);
         }
     };
 
@@ -555,6 +557,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     vm.moveItems = () : void => {
+        vm.targetFolderId = vm.folders.trees[0].id;
         vm.openedFolder = vm.folders.trees[0];
         vm.selectedFolder = vm.folders.trees[0];
         delete vm.folders.trees[1].name;
@@ -699,5 +702,9 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         vm.mail.body = i18nUtils.getWithParams('formulaire.remind.default.body', [vm.mail.link, vm.mail.link]);
     };
 
-    init();
+
+    vm.$onDestroy = async () : Promise<void> => {
+        (window as any).LAZY_MODE = true;
+        $scope.safeApply();
+    }
 }]);
