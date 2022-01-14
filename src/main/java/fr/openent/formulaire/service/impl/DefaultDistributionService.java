@@ -9,10 +9,12 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
+import org.entcore.common.sql.SqlStatementsBuilder;
 import org.entcore.common.user.UserInfos;
 import java.util.ArrayList;
 
 public class DefaultDistributionService implements DistributionService {
+    private final Sql sql = Sql.getInstance();
 
     @Override
     public void listBySender(UserInfos user, Handler<Either<String, JsonArray>> handler) {
@@ -216,13 +218,14 @@ public class DefaultDistributionService implements DistributionService {
         }
 
         if (!respondersArray.isEmpty()) {
-            JsonArray params = new JsonArray();
+            SqlStatementsBuilder s = new SqlStatementsBuilder();
             String query = "INSERT INTO " + Formulaire.DISTRIBUTION_TABLE + " (form_id, sender_id, sender_name, responder_id, " +
-                    "responder_name, status, date_sending, active) VALUES ";
+                    "responder_name, status, date_sending, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
 
+            s.raw("BEGIN;");
             for (JsonObject responder : respondersArray) {
-                query += "(?, ?, ?, ?, ?, ?, ?, ?), ";
-                params.add(formId)
+                JsonArray params = new JsonArray()
+                        .add(formId)
                         .add(user.getUserId())
                         .add(user.getUsername())
                         .add(responder.getString("id", ""))
@@ -230,10 +233,11 @@ public class DefaultDistributionService implements DistributionService {
                         .add(Formulaire.TO_DO)
                         .add("NOW()")
                         .add(true);
+                s.prepared(query, params);
             }
+            s.raw("COMMIT;");
 
-            query = query.substring(0, query.length() - 2) + ";";
-            Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+            sql.transaction(s.build(), SqlResult.validUniqueResultHandler(handler));
         }
         else {
             handler.handle(new Either.Right<>(new JsonObject()));
