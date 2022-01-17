@@ -130,13 +130,24 @@ public class DefaultResponseService implements ResponseService {
     }
 
     @Override
+    public void getExportCSVResponders(String formId, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT id, date_response, responder_id, responder_name, structure " +
+                "FROM " + Formulaire.DISTRIBUTION_TABLE + " " +
+                "WHERE form_id = ? AND status = ? " +
+                "ORDER BY date_response DESC, responder_id, id;";
+
+        JsonArray params = new JsonArray().add(formId).add(Formulaire.FINISHED);
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
     public void exportCSVResponses(String formId, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT d.form_id, d.responder_id, date_response, structure, question_id, position, answer " +
-            "FROM " + Formulaire.DISTRIBUTION_TABLE + " d " +
-            "JOIN " + Formulaire.RESPONSE_TABLE + " r ON r.distribution_id = d.id " +
-            "JOIN " + Formulaire.QUESTION_TABLE + " q ON r.question_id = q.id " +
-            "WHERE d.form_id = ? AND d.status = ? AND q.question_type != 1" +
-            "ORDER BY d.form_id, d.responder_id, date_response, position;";
+        String query = "SELECT d.id, d.responder_id, date_response, structure, question_id, position, answer " +
+                "FROM " + Formulaire.DISTRIBUTION_TABLE + " d " +
+                "JOIN " + Formulaire.RESPONSE_TABLE + " r ON r.distribution_id = d.id " +
+                "JOIN " + Formulaire.QUESTION_TABLE + " q ON r.question_id = q.id " +
+                "WHERE d.form_id = ? AND d.status = ? AND q.question_type != 1" +
+                "ORDER BY d.date_response DESC, d.responder_id, d.id, position;";
 
         JsonArray params = new JsonArray().add(formId).add(Formulaire.FINISHED);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));

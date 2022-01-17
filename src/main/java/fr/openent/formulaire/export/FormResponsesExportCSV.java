@@ -1,22 +1,16 @@
 package fr.openent.formulaire.export;
 
-import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.service.QuestionService;
 import fr.openent.formulaire.service.ResponseService;
 import fr.openent.formulaire.service.impl.DefaultQuestionService;
 import fr.openent.formulaire.service.impl.DefaultResponseService;
 import fr.wseduc.webutils.http.Renders;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.CompositeFuture;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.entcore.common.user.UserUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -30,7 +24,6 @@ public class FormResponsesExportCSV {
   private final String SEPARATOR = ";";
   private final ResponseService responseService = new DefaultResponseService();
   private final QuestionService questionService = new DefaultQuestionService();
-  private final EventBus eb;
   private final HttpServerRequest request;
   private final boolean anonymous;
   private final String formName;
@@ -39,8 +32,7 @@ public class FormResponsesExportCSV {
   private final SimpleDateFormat dateGetter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
   private final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
-  public FormResponsesExportCSV(EventBus eb, HttpServerRequest request, JsonObject form) {
-    this.eb = eb;
+  public FormResponsesExportCSV(HttpServerRequest request, JsonObject form) {
     this.request = request;
     this.anonymous = form.getBoolean("anonymous");
     this.formName = form.getString("title");
@@ -51,76 +43,71 @@ public class FormResponsesExportCSV {
     String formId = request.getParam("formId");
     questionService.export(formId, getQuestionsEvt -> {
       if (getQuestionsEvt.isLeft()) {
-        log.error("[Formulaire@FormExportCSV] Failed to retrieve all questions of the form : " + getQuestionsEvt.left().getValue());
+        String message = "[Formulaire@FormExportCSV] Failed to retrieve all questions of the form " + formId;
+        log.error(message + " : " + getQuestionsEvt.left().getValue());
         Renders.renderError(request);
+        return;
       }
 
       JsonArray questions = getQuestionsEvt.right().getValue();
       int nbQuestions = questions.size();
       content.append(header(questions));
 
-      responseService.exportCSVResponses(formId, getResponsesEvt -> {
-        if (getResponsesEvt.isLeft()) {
-          log.error("[Formulaire@FormExportCSV] Failed to retrieve all responses of the form : " + getResponsesEvt.left().getValue());
+      responseService.getExportCSVResponders(formId, getRespondersEvt -> {
+        if (getRespondersEvt.isLeft()) {
+          String message = "[Formulaire@FormExportCSV] Failed to retrieve responders infos of the form " + formId;
+          log.error(message + " : " + getRespondersEvt.left().getValue());
           Renders.renderError(request);
+          return;
         }
 
-        List<JsonObject> allResponses = getResponsesEvt.right().getValue().getList();
-        List<String> responders = new ArrayList<>();
-        List<String> response_dates = new ArrayList<>();
-        List<String> structures = new ArrayList<>();
+        JsonArray responders = getRespondersEvt.right().getValue();
 
-        for (JsonObject response : allResponses) {
-          int existingIndex = response_dates.indexOf(response.getString("date_response"));
-          if (existingIndex < 0 || !responders.get(existingIndex).equals(response.getString("responder_id"))) {
-            responders.add(response.getString("responder_id"));
-            response_dates.add(response.getString("date_response"));
-            structures.add(response.getString("structure"));
-          }
-        }
-
-        // Create futures for getting users infos
-        List<Future> usersInfos = new ArrayList<>();
-        for (int i = 0; i < responders.size(); i++) {
-          usersInfos.add(Future.future());
-        }
-
-        // Proceed once we've got all the users' infos in our usersInfos list
-        CompositeFuture.all(usersInfos).setHandler(evt -> {
-          if (evt.failed()) {
-            log.error("[Formulaire@FormExportCSV] Failed to retrieve results : " + evt.cause());
-            Future.failedFuture(evt.cause());
+        responseService.exportCSVResponses(formId, getResponsesEvt -> {
+          if (getResponsesEvt.isLeft()) {
+            String message = "[Formulaire@FormExportCSV] Failed to retrieve all responses of the form " + formId;
+            log.error(message + " : " + getResponsesEvt.left().getValue());
+            Renders.renderError(request);
+            return;
           }
 
-          for (int i = 0; i < responders.size(); i++) {
-            String responderId = responders.get(i);
-            String responseDate = response_dates.get(i);
+          List<JsonObject> allResponses = getResponsesEvt.right().getValue().getList();
+          if (allResponses.isEmpty()) {
+            log.info("[Formulaire@FormExportCSV] No responses found for the form : " + formId);
+            Renders.notFound(request);
+            return;
+          }
 
+          for (int r = 0; r < responders.size(); r++) {
             // Add responder infos
-            content.append(usersInfos.get(i).result());
+            content.append(getUserInfos(responders.getJsonObject(r)));
 
             // Get responses of this responder
             ArrayList<JsonObject> responses = new ArrayList<>();
-            for (JsonObject response : allResponses) {
-              if (response.getString("responder_id").equals(responderId) &&
-                      response.getString("date_response").equals(responseDate)) {
+            boolean allFound = false;
+            int previousDistribId = allResponses.get(0).getInteger("id");
+            int firstIndexToDelete = -1;
+            int lastIndexToDelete = -1;
+            int i = 0;
+
+            while (!allFound && i < allResponses.size()) {
+              JsonObject response = allResponses.get(i);
+              if (!responses.isEmpty() && !response.getInteger("id").equals(previousDistribId)) {
+                allFound = true;
+                lastIndexToDelete = i;
+              }
+              else if (response.getInteger("id").equals(previousDistribId)) {
+                if (responses.isEmpty()) { firstIndexToDelete = i; }
                 responses.add(response);
               }
+              previousDistribId = response.getInteger("id");
+              i++;
             }
 
-            // Sort responses by question's position
-            Collections.sort(responses, (jsonObjectA, jsonObjectB) -> {
-              int compare = 0;
-              try {
-                int keyA = jsonObjectA.getInteger("position");
-                int keyB = jsonObjectB.getInteger("position");
-                compare = Integer.compare(keyA, keyB);
-              }
-              catch(Exception e) {
-                e.printStackTrace();
-              }
-              return compare;
-            });
+            // Remove found responses to simplify next responders' loops
+            if (firstIndexToDelete >= 0 && lastIndexToDelete >= 0) {
+              allResponses.subList(firstIndexToDelete, lastIndexToDelete).clear();
+            }
 
             // Add responses of this responder
             List<JsonObject> allQuestions = questions.getList();
@@ -142,7 +129,8 @@ public class FormResponsesExportCSV {
                       else {
                         answer = answer.substring(0, answer.length() - 1);
                       }
-                    } else {
+                    }
+                    else {
                       answer = answer.substring(0, answer.length() - 1);
                       choice = false;
                     }
@@ -161,67 +149,21 @@ public class FormResponsesExportCSV {
 
           send();
         });
-
-        // Get basic infos for all the responders (trigger CompositeFuture above)
-        for (int i = 0; i < responders.size(); i++) {
-          String responderId = responders.get(i);
-          String date_response = response_dates.get(i);
-          String structure = structures.get(i);
-          getUserInfos(responderId, structure, date_response, usersInfos.get(i));
-        }
-
       });
     });
-  }
-
-  private String addResponse(String answer, Boolean endLine) {
-    String cleanAnswer = answer.replace("\"", "\"\"").replace("&nbsp;", "").replaceAll("<[^>]*>", "");
-    String value = "\"" + cleanAnswer + "\"";
-    value += endLine ? EOL : SEPARATOR;
-    return value;
-  }
-
-  private void getUserInfos(String userId, String structure, String sqlDate, Handler<AsyncResult<String>> handler) {
-    UserUtils.getUserInfos(eb, userId, user -> {
-      StringBuilder builder = new StringBuilder();
-      Date date = null;
-      try { date = dateGetter.parse(sqlDate); } catch (ParseException e) { e.printStackTrace(); }
-
-      if (!anonymous) {
-        builder.append(userId).append(SEPARATOR);
-        if (user != null) {
-          builder.append("\"" + user.getLastName() + "\"").append(SEPARATOR);
-          builder.append("\"" + user.getFirstName() + "\"").append(SEPARATOR);
-          builder.append("\"" + (structure != null ? structure : user.getStructureNames().get(0)) + "\"").append(SEPARATOR);
-        }
-        else {
-          builder.append("\"" + Formulaire.DELETED_USER + "\"").append(SEPARATOR);
-          builder.append("\"" + Formulaire.DELETED_USER + "\"").append(SEPARATOR);
-          builder.append("\"" + (structure != null ? structure : Formulaire.UNKNOW_STRUCTURE) + "\"").append(SEPARATOR);
-        }
-      }
-      builder.append(dateFormatter.format(date)).append(SEPARATOR);
-
-      handler.handle(Future.succeededFuture(builder.toString()));
-    });
-
   }
 
   private String header(JsonArray questions) {
     ArrayList<String> headers = new ArrayList<>();
     if (!anonymous) {
       headers.add("ID");
-      headers.add("Nom");
-      headers.add("Prénom");
+      headers.add("Utilisateur");
       headers.add("Établissement");
     }
     headers.add("Date de réponse");
 
-    for (Object o : questions) {
-      if (o instanceof JsonObject) {
-        JsonObject question = (JsonObject)o;
-        headers.add(question.getString("title"));
-      }
+    for (int i = 0; i < questions.size(); i++) {
+      headers.add(questions.getJsonObject(i).getString("title"));
     }
 
     StringBuilder builder = new StringBuilder();
@@ -231,6 +173,33 @@ public class FormResponsesExportCSV {
 
     builder.append(EOL);
     return builder.toString();
+  }
+
+  private String getUserInfos(JsonObject responder) {
+    String userId = responder.getString("responder_id");
+    String displayName = responder.getString("responder_name");
+    String sqlDate = responder.getString("date_response");
+    String structure = responder.getString("structure");
+
+    StringBuilder builder = new StringBuilder();
+    Date date = null;
+    try { date = dateGetter.parse(sqlDate); } catch (ParseException e) { e.printStackTrace(); }
+
+    if (!anonymous) {
+      builder.append(userId).append(SEPARATOR);
+      builder.append("\"" + displayName + "\"").append(SEPARATOR);
+      builder.append("\"" + (structure != null ? structure : "-") + "\"").append(SEPARATOR);
+    }
+    builder.append(dateFormatter.format(date)).append(SEPARATOR);
+
+    return builder.toString();
+  }
+
+  private String addResponse(String answer, Boolean endLine) {
+    String cleanAnswer = answer.replace("\"", "\"\"").replace("&nbsp;", "").replaceAll("<[^>]*>", "");
+    String value = "\"" + cleanAnswer + "\"";
+    value += endLine ? EOL : SEPARATOR;
+    return value;
   }
 
   private void send() {

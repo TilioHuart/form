@@ -95,6 +95,13 @@ public interface ResponseService {
     void deleteMultipleByDistribution(String String, Handler<Either<String, JsonArray>> handler);
 
     /**
+     * Get all the responders of a specific form to export into a CSV file
+     * @param formId form identifier
+     * @param handler function handler returning JsonArray data
+     */
+    void getExportCSVResponders(String formId, Handler<Either<String, JsonArray>> handler);
+
+    /**
      * Get all the responses of a specific form to export into a CSV file
      * @param formId form identifier
      * @param handler function handler returning JsonArray data

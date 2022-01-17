@@ -618,7 +618,7 @@ public class FormController extends ControllerHelper {
                     if (getEvent.isRight()) {
                         switch (fileType) {
                             case "csv":
-                                new FormResponsesExportCSV(eb, request, getEvent.right().getValue()).launch();
+                                new FormResponsesExportCSV(request, getEvent.right().getValue()).launch();
                                 break;
                             case "pdf":
                                 JsonObject form = getEvent.right().getValue();
@@ -629,7 +629,8 @@ public class FormController extends ControllerHelper {
                                 badRequest(request);
                                 break;
                         }
-                    } else {
+                    }
+                    else {
                         log.error("[Formulaire@export] Error in getting form to export responses of form " + formId);
                     }
                 });
@@ -867,12 +868,14 @@ public class FormController extends ControllerHelper {
                                     handler.handle(new Either.Right<>(getFormEvent.right().getValue()));
                                 });
                             }
-                        } else {
+                        }
+                        else {
                             log.error("[Formulaire@addNewDistributions] Fail to add distributions");
                             handler.handle(new Either.Left<>(addEvent.left().getValue()));
                         }
                     });
-                } else {
+                }
+                else {
                     log.error("[Formulaire@addNewDistributions] Fail to filter existing distributions");
                     handler.handle(new Either.Left<>(filteringEvent.left().getValue()));
                 }
