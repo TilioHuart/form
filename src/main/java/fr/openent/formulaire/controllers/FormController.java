@@ -778,112 +778,105 @@ public class FormController extends ControllerHelper {
     }
 
     private void syncDistributions(HttpServerRequest request, String formId, UserInfos user, JsonArray responders, Handler<Either<String, JsonObject>> handler) {
-        deactivateDeletedDistributions(formId, responders, removeEvt -> {
-            if (removeEvt.isLeft()) {
-                log.error(removeEvt.left().getValue());
-                handler.handle(new Either.Left<>(removeEvt.left().getValue()));
-                return;
-            };
+        List<String> respondersFromSharing = UtilsHelper.getUserIds(responders).getList();
 
-            addNewDistributions(request, formId, user, responders, addEvt -> {
-                if (addEvt.isLeft()) {
-                    log.error(addEvt.left().getValue());
-                    handler.handle(new Either.Left<>(addEvt.left().getValue()));
+        distributionService.getResponders(formId, getRespondersEvt -> {
+            if (getRespondersEvt.isLeft()) {
+                log.error("[Formulaire@removeDeletedDistributions] Fail to get responders to form " + formId);
+                handler.handle(new Either.Left<>(getRespondersEvt.left().getValue()));
+                return;
+            }
+
+            List<String> respondersFromBDD = UtilsHelper.getUserIds(getRespondersEvt.right().getValue()).getList();
+
+            // List the responders already in BDD
+            List<String> existingResponders = new ArrayList<>(respondersFromSharing);
+            existingResponders.retainAll(respondersFromBDD);
+
+            // List the responder_ids to deactivate
+            List<String> deactivatedResponders = new ArrayList<>(respondersFromBDD);
+            deactivatedResponders.removeAll(respondersFromSharing);
+
+            // List the new responders to add in BDD
+            List<JsonObject> newResponders = new ArrayList<>();
+            for (int i = 0; i < responders.size(); i++) {
+                JsonObject responder = responders.getJsonObject(i);
+                if (!respondersFromBDD.contains(responder.getString("id"))) {
+                    newResponders.add(responder);
+                }
+            }
+
+
+            distributionService.setActiveValue(false, formId, deactivatedResponders, deactivateEvent -> {
+                if (deactivateEvent.isLeft()) {
+                    log.error("[Formulaire@removeDeletedDistributions] Fail to deactivate distributions");
+                    handler.handle(new Either.Left<>(deactivateEvent.left().getValue()));
                     return;
                 }
 
-                updateFormSentProp(formId, user, updateSentPropEvent -> {
-                    if (updateSentPropEvent.isLeft()) {
-                        log.error(updateSentPropEvent.left().getValue());
-                        handler.handle(new Either.Left<>(updateSentPropEvent.left().getValue()));
+                addNewDistributions(request, formId, user, newResponders, existingResponders, addEvt -> {
+                    if (addEvt.isLeft()) {
+                        log.error(addEvt.left().getValue());
+                        handler.handle(new Either.Left<>(addEvt.left().getValue()));
                         return;
                     }
 
-                    handler.handle(new Either.Right<>(updateSentPropEvent.right().getValue()));
+                    updateFormSentProp(formId, user, updateSentPropEvent -> {
+                        if (updateSentPropEvent.isLeft()) {
+                            log.error(updateSentPropEvent.left().getValue());
+                            handler.handle(new Either.Left<>(updateSentPropEvent.left().getValue()));
+                            return;
+                        }
+
+                        handler.handle(new Either.Right<>(updateSentPropEvent.right().getValue()));
+                    });
                 });
             });
         });
     }
 
-    private void deactivateDeletedDistributions(String formId, JsonArray responders, Handler<Either<String, JsonObject>> handler) {
-        distributionService.getDeactivated(formId, responders, filteringEvent -> {
-            if (filteringEvent.isRight()) {
-                JsonArray deactivated = filteringEvent.right().getValue();
-                if (!deactivated.isEmpty()) {
-                    distributionService.setActiveValue(false, formId, deactivated, deactivateEvent -> {
-                        if (deactivateEvent.isRight()) {
-                            handler.handle(new Either.Right<>(deactivateEvent.right().getValue()));
+    private void addNewDistributions(HttpServerRequest request, String formId, UserInfos user, List<JsonObject> newResponders,
+                                     List<String> existingResponders, Handler<Either<String, JsonObject>> handler) {
+        distributionService.createMultiple(formId, user, newResponders, addEvent -> {
+            if (addEvent.isRight()) {
+                JsonArray respondersIds = UtilsHelper.getUserIds(new JsonArray(newResponders));
+                if (!existingResponders.isEmpty()) {
+                    distributionService.setActiveValue(true, formId, existingResponders, updateEvent -> {
+                        if (updateEvent.isRight()) {
+                            formService.get(formId, user, getFormEvent -> {
+                                if (getFormEvent.isLeft()) {
+                                    handler.handle(new Either.Right<>(getFormEvent.right().getValue()));
+                                    log.error("[Formulaire@addNewDistributions] Fail to get infos for form with id " + formId);
+                                    return;
+                                }
+                                JsonObject form = getFormEvent.right().getValue();
+                                notifyService.notifyNewForm(request, form, respondersIds);
+                                handler.handle(new Either.Right<>(getFormEvent.right().getValue()));
+                            });
                         } else {
-                            log.error("[Formulaire@removeDeletedDistributions] Fail to deactivate distributions");
-                            handler.handle(new Either.Left<>(deactivateEvent.left().getValue()));
+                            log.error("[Formulaire@addNewDistributions] Fail to update distributions");
+                            handler.handle(new Either.Left<>(updateEvent.left().getValue()));
                         }
                     });
                 }
                 else {
-                    handler.handle(new Either.Right<>(new JsonObject()));
+                    formService.get(formId, user, getFormEvent -> {
+                        if (getFormEvent.isLeft()) {
+                            handler.handle(new Either.Right<>(getFormEvent.right().getValue()));
+                            log.error("[Formulaire@addNewDistributions] Fail to get infos for form with id " + formId);
+                            return;
+                        }
+                        JsonObject form = getFormEvent.right().getValue();
+                        notifyService.notifyNewForm(request, form, respondersIds);
+                        handler.handle(new Either.Right<>(getFormEvent.right().getValue()));
+                    });
                 }
-            } else {
-                log.error("[Formulaire@removeDeletedDistributions] Fail to filter distributions to remove");
-                handler.handle(new Either.Left<>(filteringEvent.left().getValue()));
+            }
+            else {
+                log.error("[Formulaire@addNewDistributions] Fail to add distributions");
+                handler.handle(new Either.Left<>(addEvent.left().getValue()));
             }
         });
-    }
-
-    private void addNewDistributions(HttpServerRequest request, String formId, UserInfos user, JsonArray responders, Handler<Either<String, JsonObject>> handler) {
-        if (!responders.isEmpty()) {
-            distributionService.getDuplicates(formId, responders, filteringEvent -> {
-                if (filteringEvent.isRight()) {
-                    JsonArray duplicates = filteringEvent.right().getValue();
-                    distributionService.createMultiple(formId, user, responders, duplicates, addEvent -> {
-                        if (addEvent.isRight()) {
-                            JsonArray respondersIds = UtilsHelper.getUserIds(responders);
-                            if (!duplicates.isEmpty()) {
-                                distributionService.setActiveValue(true, formId, duplicates, updateEvent -> {
-                                    if (updateEvent.isRight()) {
-                                        formService.get(formId, user, getFormEvent -> {
-                                            if (getFormEvent.isLeft()) {
-                                                handler.handle(new Either.Right<>(getFormEvent.right().getValue()));
-                                                log.error("[Formulaire@addNewDistributions] Fail to get infos for form with id " + formId);
-                                                return;
-                                            }
-                                            JsonObject form = getFormEvent.right().getValue();
-                                            notifyService.notifyNewForm(request, form, respondersIds);
-                                            handler.handle(new Either.Right<>(getFormEvent.right().getValue()));
-                                        });
-                                    } else {
-                                        log.error("[Formulaire@addNewDistributions] Fail to update distributions");
-                                        handler.handle(new Either.Left<>(updateEvent.left().getValue()));
-                                    }
-                                });
-                            }
-                            else {
-                                formService.get(formId, user, getFormEvent -> {
-                                    if (getFormEvent.isLeft()) {
-                                        handler.handle(new Either.Right<>(getFormEvent.right().getValue()));
-                                        log.error("[Formulaire@addNewDistributions] Fail to get infos for form with id " + formId);
-                                        return;
-                                    }
-                                    JsonObject form = getFormEvent.right().getValue();
-                                    notifyService.notifyNewForm(request, form, respondersIds);
-                                    handler.handle(new Either.Right<>(getFormEvent.right().getValue()));
-                                });
-                            }
-                        }
-                        else {
-                            log.error("[Formulaire@addNewDistributions] Fail to add distributions");
-                            handler.handle(new Either.Left<>(addEvent.left().getValue()));
-                        }
-                    });
-                }
-                else {
-                    log.error("[Formulaire@addNewDistributions] Fail to filter existing distributions");
-                    handler.handle(new Either.Left<>(filteringEvent.left().getValue()));
-                }
-            });
-        }
-        else {
-            handler.handle(new Either.Right<>(new JsonObject()));
-        }
     }
 
     private void updateFormSentProp(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler) {

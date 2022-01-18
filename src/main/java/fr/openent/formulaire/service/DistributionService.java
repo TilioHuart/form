@@ -6,6 +6,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.user.UserInfos;
 
+import java.util.List;
+
 public interface DistributionService {
     /**
      * List all the distributions of the forms sent by me
@@ -105,39 +107,29 @@ public interface DistributionService {
     void delete(String distributionId, Handler<Either<String, JsonObject>> handler);
 
     /**
-     * List of the responders who had respond right and won't have anymore
+     *
      * @param formId form identifier
-     * @param responders responders to whom we give respond right
      * @param handler function handler returning JsonArray data
      */
-    void getDeactivated(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler);
-
-    /**
-     * List of the responders who already had respond right
-     * @param formId form identifier
-     * @param responders responders to whom we give respond right
-     * @param handler function handler returning JsonArray data
-     */
-    void getDuplicates(String formId, JsonArray responders, Handler<Either<String, JsonArray>> handler);
+    void getResponders(String formId, Handler<Either<String, JsonArray>> handler);
 
     /**
      * Distribute a form to a list of responders who do not already have respond right
      * @param formId form identifier
      * @param user user connected
-     * @param responders responders to whom we give respond right
-     * @param duplicates responders who already had respond right
+     * @param newResponders responders to whom we give respond right
      * @param handler function handler returning JsonObject data
      */
-    void createMultiple(String formId, UserInfos user, JsonArray responders, JsonArray duplicates, Handler<Either<String, JsonObject>> handler);
+    void createMultiple(String formId, UserInfos user, List<JsonObject> newResponders, Handler<Either<String, JsonObject>> handler);
 
     /**
-     * Update active status of all distributions for a specific form
+     * Update active status of the wanted distributions for a specific form
      * @param active status value to give to all the distributions
      * @param formId form identifier
-     * @param duplicates distributions
+     * @param responder_ids ids of the responders of the distributions to update
      * @param handler function handler returning JsonObject data
      */
-    void setActiveValue(boolean active, String formId, JsonArray duplicates, Handler<Either<String, JsonObject>> handler);
+    void setActiveValue(boolean active, String formId, List<String> responder_ids, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Delete distributions too old according to lifetime RGPD chosen
