@@ -17,6 +17,7 @@
     "sql" : true,
     "db-schema" : "formulaire",
     "zimbra-max-recipients": ${zimbraMaxRecipients},
-    "rgpd-cron": "${rgpdCron}"
+    "rgpd-cron": "${rgpdCron}",
+    "max-responses-export-PDF": ${maxResponsesExportPDF}
   }
 }

@@ -151,7 +151,9 @@
   "formulaire.form.download.all.results.pdf": "Télécharger tous les résultats (PDF)",
   "formulaire.form.download.all.results.csv": "Télécharger tous les résultats (CSV)",
   "formulaire.form.download.all.results.lightbox.title": "Téléchargement des résultats ({0})",
-  "formulaire.form.download.all.results.lightbox.description": "Les réponses du formulaire vont être téléchargées au format {0}. Les documents déposés dans les questions de type \"Dépôt de fichier\" ne seront pas téléchargés lors de cet export.",
+  "formulaire.form.download.all.results.lightbox.description.p1": "Les réponses du formulaire vont être téléchargées au format {0}.",
+  "formulaire.form.download.all.results.lightbox.description.p2": "Les documents déposés dans les questions de type \"Dépôt de fichier\" ne seront pas téléchargés lors de cet export.",
+  "formulaire.form.download.all.results.lightbox.description.p3": "Si votre formulaire a reçu plus de 100 réponses, seuls les graphiques des questions de type \"Choix multiples\" et \"Réponse unique\" seront téléchargés.",
   "formulaire.form.download.all.files": "Télécharger tout (ZIP)",
   "formulaire.image.incompatible": "Seuls les formats d'image suivants sont acceptés : .jpg, .jpeg, .png, .gif",
 

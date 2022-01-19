@@ -61,6 +61,7 @@ public class Formulaire extends BaseServer {
 
 	public static final String ARCHIVE_ZIP_NAME = "Fichiers déposés";
 
+	public static int MAX_RESPONSES_EXPORT_PDF;
 	public static final int ID_ROOT_FOLDER = 1;
 	public static final int NB_NEW_LINES = 10;
 	public static final String DELETED_USER = "Utilisateur supprimé";
@@ -93,6 +94,8 @@ public class Formulaire extends BaseServer {
 		RESPONSE_TABLE = DB_SCHEMA + ".response";
 		RESPONSE_FILE_TABLE = DB_SCHEMA + ".response_file";
 		USERS_TABLE = DB_SCHEMA + ".users";
+
+		MAX_RESPONSES_EXPORT_PDF = config.getInteger("max-responses-export-PDF", 100);
 
 		final Storage storage = new StorageFactory(vertx, config).getStorage();
 

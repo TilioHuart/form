@@ -1,5 +1,6 @@
 package fr.openent.formulaire.export;
 
+import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.QuestionService;
 import fr.openent.formulaire.service.ResponseService;
@@ -67,26 +68,28 @@ public class FormResponsesExportPDF {
                 Renders.renderError(request);
             }
 
-            responseService.exportPDFResponses(formId, getResponsesEvt -> {
-                if (getResponsesEvt.isLeft()) {
-                    log.error("[Formulaire@FormExportPDF] Failed to get data for PDF export of the form " + form.getInteger("id") + " : " + getResponsesEvt.left().getValue());
-                    badRequest(request);
+            distributionService.countFinished(form.getInteger("id").toString(), countRepEvent -> {
+                if (countRepEvent.isLeft()) {
+                    log.error("[Formulaire@FormExportPDF] Failed to count nb responses of the form " + form.getInteger("id") + " : " + countRepEvent.left().getValue());
+                    Renders.renderError(request);
                 }
 
-                formatData(getResponsesEvt.right().getValue(), getQuestionsEvt.right().getValue(), formatDataEvent -> {
-                    if (formatDataEvent.isLeft()) {
-                        log.error("[Formulaire@FormExportPDF] Failed to format data of the form " + form.getInteger("id") + " : " + formatDataEvent.left().getValue());
-                        Renders.renderError(request);
-                    }
-                    JsonObject results = formatDataEvent.right().getValue();
+                int nbResponseTot = countRepEvent.right().getValue().getInteger("count");
+                boolean hasTooManyResponses = nbResponseTot > Formulaire.MAX_RESPONSES_EXPORT_PDF;
 
-                    distributionService.countFinished(form.getInteger("id").toString(), countRepEvent -> {
-                        if (countRepEvent.isLeft()) {
-                            log.error("[Formulaire@FormExportPDF] Failed to count nb responses of the form " + form.getInteger("id") + " : " + countRepEvent.left().getValue());
+                responseService.exportPDFResponses(formId, getResponsesEvt -> {
+                    if (getResponsesEvt.isLeft()) {
+                        log.error("[Formulaire@FormExportPDF] Failed to get data for PDF export of the form " + form.getInteger("id") + " : " + getResponsesEvt.left().getValue());
+                        badRequest(request);
+                    }
+
+                    formatData(getResponsesEvt.right().getValue(), getQuestionsEvt.right().getValue(), hasTooManyResponses, formatDataEvent -> {
+                        if (formatDataEvent.isLeft()) {
+                            log.error("[Formulaire@FormExportPDF] Failed to format data of the form " + form.getInteger("id") + " : " + formatDataEvent.left().getValue());
                             Renders.renderError(request);
                         }
 
-                        int nbResponseTot = countRepEvent.right().getValue().getInteger("count");
+                        JsonObject results = formatDataEvent.right().getValue();
                         results.put("nbResponseTot", nbResponseTot);
 
                         generatePDF(request, results,"results.xhtml", pdf ->
@@ -98,10 +101,12 @@ public class FormResponsesExportPDF {
                     });
                 });
             });
+
+
         });
     }
 
-    private void formatData(JsonArray data, JsonArray questionsInfo, Handler<Either<String, JsonObject>> handler) {
+    private void formatData(JsonArray data, JsonArray questionsInfo, boolean hasTooManyResponses, Handler<Either<String, JsonObject>> handler) {
         JsonObject results = new JsonObject();
         JsonArray questions = new JsonArray();
         List<Future> questionsGraphs = new ArrayList<>();
@@ -110,61 +115,69 @@ public class FormResponsesExportPDF {
         int nbQuestions = questionsInfo.size();
         for (int i = 0; i < nbQuestions; i++) {
             JsonObject questionInfo = questionsInfo.getJsonObject(i);
-            questions.add(new JsonObject()
-                    .put("title", questionInfo.getString("title"))
-                    .put("question_type", new JsonObject())
-                    .put("statement", questionInfo.getString("statement")
-                            .replace("\"","'")
-                            .replaceAll("<("+autoClosingTags+")[\\w\\W]*?>","$0</$1>")
-                    )
-                    .put("mandatory", questionInfo.getBoolean("mandatory"))
-                    .put("responses", new JsonArray())
-            );
 
-            // Affect boolean to each type of answer (freetext, simple text, graph)
-            // type_freetext (FREETEXT), type_text (SHORTANSWER, LONGANSWER, DATE, TIME, FILE), type_graph (SINGLEANSWER, MULTIPLEANSWER)
+
             int question_type = questionInfo.getInteger("question_type");
-            questions.getJsonObject(i).getJsonObject("question_type")
-                    .put("type_freetext", question_type == 1)
-                    .put("type_text", Arrays.asList(2,3,6,7,8).contains(question_type))
-                    .put("type_graph", Arrays.asList(4,5).contains(question_type));
+            boolean isGraph = Arrays.asList(4,5).contains(question_type);
+
+            if (!hasTooManyResponses || isGraph) {
+                questions.add(new JsonObject()
+                        .put("title", questionInfo.getString("title"))
+                        .put("question_type", new JsonObject())
+                        .put("statement", questionInfo.getString("statement")
+                                .replace("\"","'")
+                                .replaceAll("<("+autoClosingTags+")[\\w\\W]*?>","$0</$1>")
+                        )
+                        .put("mandatory", questionInfo.getBoolean("mandatory"))
+                        .put("responses", new JsonArray())
+                );
+
+                // Affect boolean to each type of answer (freetext, simple text, graph)
+                // type_freetext (FREETEXT), type_text (SHORTANSWER, LONGANSWER, DATE, TIME, FILE), type_graph (SINGLEANSWER, MULTIPLEANSWER)
+                questions.getJsonObject(questions.size() - 1).getJsonObject("question_type")
+                        .put("type_freetext", question_type == 1)
+                        .put("type_text", Arrays.asList(2,3,6,7,8).contains(question_type))
+                        .put("type_graph", isGraph);
 
 
-            // Prepare futures to get graph images
-            if (Arrays.asList(4,5).contains(question_type)) {
-                questionsGraphs.add(Future.future());
-                getGraphData(questionInfo, questionsGraphs.get(questionsGraphs.size() - 1));
+                // Prepare futures to get graph images
+                if (Arrays.asList(4,5).contains(question_type)) {
+                    questionsGraphs.add(Future.future());
+                    getGraphData(questionInfo, questionsGraphs.get(questionsGraphs.size() - 1));
+                }
             }
         }
 
-        // Fill each question with responses' data
-        for (int i = 0; i < data.size(); i++) {
-            JsonObject response = data.getJsonObject(i);
-            int posQuestionToFill = response.getInteger("position") - 1;
+        if (!hasTooManyResponses) {
+            // Fill each question with responses' data
+            for (int i = 0; i < data.size(); i++) {
+                JsonObject response = data.getJsonObject(i);
+                int posQuestionToFill = response.getInteger("position") - 1;
 
-            // // Format answer (empty string, simple text, html)
-            int questionType = questionsInfo.getJsonObject(posQuestionToFill).getInteger("question_type");
-            if (response.getString("answer").isEmpty()) {
-                response.put("answer", "-");
-            }
-            if (questionType == 2) {
-                response.put("answer", "<div>" + response.getString("answer") + "</div>");
-            }
-            else if (questionType == 3) {
-                response.put("answer", response.getString("answer")
-                        .replace("\"","'")
-                        .replaceAll("<("+autoClosingTags+")[\\w\\W]*?>","$0</$1>")
-                );
-            }
+                // // Format answer (empty string, simple text, html)
+                int questionType = questionsInfo.getJsonObject(posQuestionToFill).getInteger("question_type");
+                if (response.getString("answer").isEmpty()) {
+                    response.put("answer", "-");
+                }
+                if (questionType == 2) {
+                    response.put("answer", "<div>" + response.getString("answer") + "</div>");
+                }
+                else if (questionType == 3) {
+                    response.put("answer", response.getString("answer")
+                            .replace("\"","'")
+                            .replaceAll("<("+autoClosingTags+")[\\w\\W]*?>","$0</$1>")
+                    );
+                }
 
-            // Format date_response
-            try {
-                Date displayDate = dateGetter.parse(response.getString("date_response"));
-                response.put("date_response", dateFormatter.format(displayDate));
-            }
-            catch (ParseException e) { e.printStackTrace(); }
+                // Format date_response
+                try {
+                    Date displayDate = dateGetter.parse(response.getString("date_response"));
+                    response.put("date_response", dateFormatter.format(displayDate));
+                }
+                catch (ParseException e) { e.printStackTrace(); }
 
-            questions.getJsonObject(posQuestionToFill).getJsonArray("responses").add(response);
+                questions.getJsonObject(posQuestionToFill).getJsonArray("responses").add(response);
+            }
         }
 
 
@@ -239,11 +252,12 @@ public class FormResponsesExportPDF {
 
                 actionObject.put("content", bytes).put("baseUrl", baseUrl);
                 eb.request(node + "entcore.pdf.generator", actionObject, (Handler<AsyncResult<Message<JsonObject>>>) reply -> {
-                    JsonObject pdfResponse = reply.result().body();
-                    if (!"ok".equals(pdfResponse.getString("status"))) {
-                        badRequest(request, pdfResponse.getString("message"));
+                    if (reply.failed()) {
+                        badRequest(request, reply.cause().getMessage());
                         return;
                     }
+
+                    JsonObject pdfResponse = reply.result().body();
                     byte[] pdf = pdfResponse.getBinary("content");
                     Buffer either = Buffer.buffer(pdf);
                     handler.handle(either);
