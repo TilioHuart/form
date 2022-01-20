@@ -87,7 +87,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             vm.navigatorValue = vm.question.position;
             vm.nbQuestions = $scope.form.nb_questions;
             vm.last = vm.question.position === vm.nbQuestions;
-            vm.isGraphQuestion = vm.question.question_type == Types.SINGLEANSWER || vm.question.question_type == Types.MULTIPLEANSWER;
+            vm.isGraphQuestion = vm.question.question_type == Types.SINGLEANSWER || vm.question.question_type == Types.MULTIPLEANSWER || vm.question.question_type == Types.SINGLEANSWERRADIO;
             await vm.questions.sync(vm.form.id);
 
             if (vm.question.question_type != Types.FREETEXT) {
@@ -101,7 +101,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
                     vm.colors = ColorUtils.interpolateColors(paletteColors, choices.length);
 
                     // Init charts
-                    if (vm.question.question_type == Types.SINGLEANSWER) {
+                    if (vm.question.question_type == Types.SINGLEANSWER || vm.question.question_type == Types.SINGLEANSWERRADIO)  {
                         initSingleAnswerChart();
                     }
                 }
@@ -250,7 +250,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         };
 
         vm.getGraphQuestions = () : Question[] => {
-            return vm.questions.all.filter(q => q.question_type === Types.SINGLEANSWER || q.question_type === Types.MULTIPLEANSWER);
+            return vm.questions.all.filter(q => q.question_type === Types.SINGLEANSWER || q.question_type === Types.MULTIPLEANSWER || q.question_type ===Types.SINGLEANSWERRADIO);
         }
 
         vm.showMoreButton = () : boolean => {
@@ -327,7 +327,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         }
 
         const initChartsForPDF = (question: Question) : any => {
-            let choices = question.question_type === Types.SINGLEANSWER ?
+            let choices = question.question_type === Types.SINGLEANSWER || question.question_type === Types.SINGLEANSWERRADIO?
                 question.choices.all.filter(c => c.nbResponses > 0) :
                 question.choices.all;
 
@@ -351,7 +351,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
         const generateOptions = (dataOptions: any, type: Types) : any => {
             let newOptions;
-            if (type === Types.SINGLEANSWER) {
+            if (type === Types.SINGLEANSWER || type === Types.SINGLEANSWERRADIO) {
                 let options = {
                     chart: {
                         type: 'pie',

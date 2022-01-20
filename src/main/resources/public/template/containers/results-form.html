@@ -37,12 +37,12 @@
             <!-- List of results FREETEXT -->
             <div ng-if="vm.question.question_type == Types.FREETEXT" class="freetext" bind-html="vm.question.statement"></div>
 
-            <!-- List of results SINGLEANSWER, MULTIPLEANSWER -->
-            <div ng-if="vm.question.question_type == Types.SINGLEANSWER || vm.question.question_type == Types.MULTIPLEANSWER"
+            <!-- List of results SINGLEANSWER, MULTIPLEANSWER, SINGLEANSWERRADIO -->
+            <div ng-if="vm.question.question_type == Types.SINGLEANSWER || vm.question.question_type == Types.MULTIPLEANSWER || vm.question.question_type == Types.SINGLEANSWERRADIO"
                  class="choices">
                 <div class="twelve-mobile" ng-class="vm.question.question_type == Types.MULTIPLEANSWER ? 'twelve' : 'five'">
                     <div ng-repeat="choice in vm.question.choices.all" class="choice">
-                        <div class="infos twelve-mobile" ng-class="vm.question.question_type == Types.MULTIPLEANSWER ? 'five' : 'twelve'">
+                        <div class="infos twelve-mobile" ng-class="vm.question.question_type == Types.MULTIPLEANSWER  ? 'five' : 'twelve'">
                             <div class="choice-value eight twelve-mobile ellipsis">
                                 <span ng-if="($index+1) != vm.question.choices.all.length">[[$index + 1]]. </span>[[choice.value]]
                             </div>
@@ -62,8 +62,8 @@
                     </div>
                 </div>
 
-                <!-- Graph for SINGLEANSWER -->
-                <div ng-if="vm.question.question_type == Types.SINGLEANSWER" class="graph-camembert seven zero-mobile">
+                <!-- Graph for SINGLEANSWER, SINGLEANSWERRADIO -->
+                <div ng-if="vm.question.question_type == Types.SINGLEANSWER || vm.question.question_type == Types.SINGLEANSWERRADIO" class="graph-camembert seven zero-mobile">
                     <div class="eight">
                         <div id="singleanswer-response-chart"></div>
                     </div>
@@ -78,6 +78,7 @@
             <!-- List of results SHORTANSWER, LONGANSWER, DATE, TIME, FILE -->
             <div ng-if="vm.question.question_type != Types.SINGLEANSWER &&
                         vm.question.question_type != Types.MULTIPLEANSWER &&
+                        vm.question.question_type != Types.SINGLEANSWERRADIO &&
                         vm.question.question_type != Types.FREETEXT">
                 <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':true" class="distrib">
                     <div class="infos four twelve-mobile">
