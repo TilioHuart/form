@@ -108,12 +108,11 @@ interface ViewModel {
     openNavMyForms() : void;
     closeNavMyForms() : void;
     displayFilterName(name: string) : string;
-    getTitle(title: string): string;
+    getTitle(title: string) : string;
     infiniteScroll() : void;
-    seeMore():void;
+    seeMore() : void;
     $onDestroy() : Promise<void>;
 }
-
 
 export const formsListController = ng.controller('FormsListController', ['$scope',
     function ($scope) {
@@ -125,7 +124,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.editedFolder = new Folder();
     vm.allFormsSelected = false;
     vm.allFoldersSelected = false;
-    vm.targetFolderId = 0;
     vm.responders = [];
     vm.mail = {
         link: "",
@@ -170,13 +168,11 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.$onInit = async () : Promise<void> => {
         await vm.initFolders();
         vm.openFolder(vm.folder);
-
         vm.forms.filters.find(f => f.name === FiltersFilters.SENT).display = true;
         vm.forms.filters.find(f => f.name === FiltersFilters.SHARED).display = true;
         vm.forms.orders.find(o => o.name === FiltersOrders.CREATION_DATE).display = true;
         vm.forms.orders.find(o => o.name === FiltersOrders.MODIFICATION_DATE).display = true;
         vm.forms.orders.find(o => o.name === FiltersOrders.TITLE).display = true;
-
         (window as any).LAZY_MODE = false;
         vm.loading = false;
         $scope.safeApply();
@@ -423,7 +419,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         vm.folders = new Folders();
         await vm.folders.sync();
         vm.switchAllFolders(false);
-
         vm.folderTree = {
             cssTree: "folders-tree",
             get trees() {
@@ -468,9 +463,9 @@ export const formsListController = ng.controller('FormsListController', ['$scope
                 }
             }
         }
-
         vm.openedFolder = vm.folders.trees[0];
         vm.selectedFolder = vm.folders.trees[0];
+        vm.targetFolderId = vm.folders.trees[0].id;
         vm.folder = $scope.folder.id ? $scope.folder : vm.folders.myFormsFolder;
         $scope.safeApply();
     };
@@ -480,12 +475,10 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         let folderElem = vm.folders.getTreeElement(folder.id);
         vm.openedFolder = folderElem;
         vm.selectedFolder = folderElem;
-
         vm.folder = folder;
         $scope.folder = folder;
         vm.folder.children = vm.folders.getChildren(vm.folder.id);
         await vm.forms.sync();
-
         switch (vm.folder.id) {
             case 1:
                 vm.forms.all = vm.forms.all.filter(form => !form.archived && form.owner_id === model.me.userId && form.folder_id === vm.folder.id);
@@ -566,7 +559,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             if (vm.folders.selected.length > 0) {
                 await folderService.move(vm.folders.selected, vm.targetFolderId);
             }
-            else {
+            else{
                 await formService.move(vm.forms.selected, vm.targetFolderId);
             }
             vm.display.lightbox.move = false;
@@ -624,14 +617,19 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.dropped = async (dragged, target) : Promise<void> => {
         if (dragged == target) return;
-
         let originalItem = $('#' + dragged);
         let targetItem = $('#' + target);
         let idOriginalItem = parseInt(originalItem[0].children[0].textContent);
         let idTargetItem = parseInt(targetItem[0].children[0].textContent);
         let typeOriginalItem = originalItem[0].classList[0];
 
-        if (typeOriginalItem == "folder") {
+        if (vm.folders.selected.length > 0) {
+            await folderService.move(vm.folders.selected, idTargetItem ? idTargetItem : 1);
+        }
+        else if(vm.forms.selected.length > 0){
+            await formService.move(vm.forms.selected, idTargetItem ? idTargetItem : 1);
+        }
+        else if (typeOriginalItem == "folder") {
             let draggedItems = vm.folders.all.filter(f => f.id === idOriginalItem);
             await folderService.move(draggedItems, idTargetItem ? idTargetItem : 1);
         }
@@ -648,7 +646,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     // Utils
-
     vm.switchAllForms = (value) : void => {
         value ? vm.forms.selectAll() : vm.forms.deselectAll();
         vm.allFormsSelected = value;
@@ -690,13 +687,11 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         vm.limitTable += vm.tableSize;
     };
 
-
     const initMail = () : void => {
         vm.mail.link = `${window.location.origin}${window.location.pathname}#/form/${vm.forms.selected[0].id}`;
         vm.mail.subject = idiom.translate('formulaire.remind.default.subject');
         vm.mail.body = I18nUtils.getWithParams('formulaire.remind.default.body', [vm.mail.link, vm.mail.link]);
     };
-
 
     vm.$onDestroy = async () : Promise<void> => {
         (window as any).LAZY_MODE = true;

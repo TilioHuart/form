@@ -2,6 +2,9 @@ import { ng, routes } from 'entcore';
 import * as controllers from './controllers';
 import * as services from './services';
 import * as directives from './directives';
+import * as modules from './modules';
+
+
 
 for(let controller in controllers){
     ng.controllers.push(controllers[controller]);
@@ -13,6 +16,10 @@ for (let service in services) {
 
 for (let directive in directives) {
 	ng.directives.push(directives[directive]);
+}
+
+for (let module in modules){
+	ng.addRequiredModule(module);
 }
 
 routes.define(function($routeProvider){

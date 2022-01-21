@@ -3,7 +3,9 @@
      ng-click="vm.selectItem(folder)" ng-dblclick="vm.openFolder(folder)"
      ng-class="{'selected' : folder.selected}">
 
-    <div class="folder" lvl-draggable lvl-drop-target on-drop="vm.dropped(dragEl, dropEl)">
+
+
+    <div class="folder" lvl-draggable lvl-drop-target on-drop="vm.dropped(dragEl,dropEl)">
         <label ng-show="false">[[folder.id]]</label>
         <div class="folder-image three">
             <i class="i-folder hg-icon"></i>

@@ -110,7 +110,10 @@
                  ng-if="!vm.forms.all.empty() && vm.display.grid && form.displayed"
                  ng-click="vm.selectItem(form)" ng-dblclick="vm.openForm(form)"
                  class="item" ng-class="{'selected' : form.selected}">
-                <div class="form domino" lvl-draggable on-drop="vm.dropped(dragEl, dropEl)">
+
+
+                <div class="form domino" lvl-draggable on-drop="vm.dropped(dragEl,dropEl)">
+                    <label ng-show="false">[[form.id]]</label>
                     <div class="four picture" ng-class="{'empty': !form.picture}">
                         <img ng-src="[[(form.picture) || '/formulaire/public/img/empty-image.png']]"/>
                     </div>
