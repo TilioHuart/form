@@ -327,7 +327,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         }
 
         const initChartsForPDF = (question: Question) : any => {
-            let choices = question.question_type === Types.SINGLEANSWER || question.question_type === Types.SINGLEANSWERRADIO?
+            let choices = question.question_type === Types.SINGLEANSWER || question.question_type === Types.SINGLEANSWERRADIO ?
                 question.choices.all.filter(c => c.nbResponses > 0) :
                 question.choices.all;
 

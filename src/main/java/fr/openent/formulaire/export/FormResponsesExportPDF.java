@@ -118,7 +118,7 @@ public class FormResponsesExportPDF {
 
 
             int question_type = questionInfo.getInteger("question_type");
-            boolean isGraph = Arrays.asList(4,5).contains(question_type);
+            boolean isGraph = Arrays.asList(4,5,9).contains(question_type);
 
             if (!hasTooManyResponses || isGraph) {
                 questions.add(new JsonObject()
@@ -141,7 +141,7 @@ public class FormResponsesExportPDF {
 
 
                 // Prepare futures to get graph images
-                if (Arrays.asList(4,5).contains(question_type)) {
+                if (Arrays.asList(4,5,9).contains(question_type)) {
                     questionsGraphs.add(Future.future());
                     getGraphData(questionInfo, questionsGraphs.get(questionsGraphs.size() - 1));
                 }
