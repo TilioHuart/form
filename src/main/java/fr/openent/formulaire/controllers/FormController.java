@@ -721,6 +721,14 @@ public class FormController extends ControllerHelper {
                                         JsonArray users = infos.getJsonObject(i).getJsonArray("users");
                                         responders.addAll(users);
                                     }
+
+                                    if (responders.size() > Formulaire.MAX_USERS_SHARING) {
+                                        String message = "You can't share to more than " + Formulaire.MAX_USERS_SHARING + " people.";
+                                        log.error("[Formulaire@shareResource] " + message);
+                                        renderError(request, new JsonObject().put("error", message));
+                                        return;
+                                    }
+
                                     syncDistributions(request, formId, user, responders, syncEvent -> {
                                         if (syncEvent.isRight()) {
                                             // Update 'collab' property as needed
