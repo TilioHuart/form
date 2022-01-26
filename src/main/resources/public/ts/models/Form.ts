@@ -64,9 +64,10 @@ export class Form implements Selectable, Shareable  {
         this.editable = false;
         this.rgpd = false;
         this.rgpd_goal = null;
-        this.rgpd_lifetime = 12;
+        this.rgpd_lifetime = 3;
         this.displayed = true;
         this.selected = null;
+
     }
 
     toJson() : Object {

@@ -38,7 +38,7 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
             vm.display.date_ending = !!vm.form.date_ending;
             vm.form.nb_responses = vm.form.id ? $scope.getDataIf200(await distributionService.count(vm.form.id)).count : 0;
             vm.form.folder_id = vm.folder.id;
-            vm.rgpdLifetimeChoices = [6, 12, 24, 36];
+            vm.rgpdLifetimeChoices = [3, 6, 9, 12];
             $scope.safeApply();
         };
 
