@@ -1,0 +1,6 @@
+ALTER TABLE formulaire.delegate
+    ALTER COLUMN entity  DROP NOT NULL,
+    ALTER COLUMN mail    DROP NOT NULL,
+    ALTER COLUMN address DROP NOT NULL,
+    ALTER COLUMN zipcode DROP NOT NULL,
+    ALTER COLUMN city    DROP NOT NULL;

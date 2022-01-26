@@ -1,6 +1,7 @@
 import {Directive, idiom, ng} from "entcore";
 import {Delegate, Delegates, Form} from "../models";
 import {i18nUtils} from "../utils";
+import {isArray} from "angular";
 
 interface IViewModel {
     form: Form;
@@ -48,6 +49,11 @@ export const rgpd: Directive = ng.directive('rgpd', () => {
 
             vm.getRgpdDescriptionDelegates = (delegate) : string => {
                 let params = [delegate.entity, delegate.mail, delegate.address, delegate.zipcode, delegate.city];
+                for(let i = 0; i < params.length; i++){
+                    if(params[i] == null){
+                        params[i] = "";
+                    }
+                }
                 return i18nUtils.getWithParams('formulaire.prop.rgpd.description.delegates', params);
             };
 
