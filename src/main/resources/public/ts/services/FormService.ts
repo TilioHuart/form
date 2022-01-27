@@ -90,7 +90,7 @@ export const formService: FormService = {
 
     async update(form: Form) : Promise<any> {
         try {
-            return http.put(`/formulaire/forms/${form.id}`, form);
+            return DataUtils.getData(await http.put(`/formulaire/forms/${form.id}`, form));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.update'));
             throw err;
