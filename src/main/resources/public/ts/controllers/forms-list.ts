@@ -7,6 +7,7 @@ import {folderService} from "../services/FolderService";
 import {Folder, Folders} from "../models/Folder";
 import {Tree, Element} from "entcore/types/src/ts/workspace/model";
 import {I18nUtils} from "../utils";
+import {isNumber} from "angular";
 
 interface ViewModel {
     forms: Forms;
@@ -203,7 +204,9 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         try {
             let formIds = [];
             for (let form of vm.forms.selected) {
-                formIds.push(form.id);
+                if(vm.forms.selected) {
+                    formIds.push(form.id);
+                }
             }
             await formService.duplicate(formIds, vm.folder.id);
             notify.success(idiom.translate('formulaire.success.forms.duplicate'));

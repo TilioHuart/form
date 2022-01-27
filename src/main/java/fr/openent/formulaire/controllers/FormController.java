@@ -274,67 +274,82 @@ public class FormController extends ControllerHelper {
                 RequestUtils.bodyToJsonArray(request, formIds -> {
                     List<Future> formsInfos = new ArrayList<>();
                     // Duplicates form and all questions inside
-                    for (int i = 0; i < formIds.size(); i++) {
-                        Promise<JsonArray> promise = Promise.promise();
-                        formsInfos.add(promise.future());
-                        formService.duplicate(formIds.getInteger(i), user, FutureHelper.handlerJsonArray(promise));
-                    }
-                    CompositeFuture.all(formsInfos).onComplete(evt -> {
-                        if (evt.failed()) {
-                            log.error("[Formulaire@duplicate] Failed to retrieve info : " + evt.cause());
-                            badRequest(request);
-                        }
-                        // Duplicates all potential question choices
-                        List<Future> questionsInfosFutures = new ArrayList<>();
-
-                        for (Object questions : evt.result().list()) {
-                            JsonArray questionsInfos = ((JsonArray) questions);
-                            if(questionsInfos.getJsonObject(0).getInteger("id") != null){
-                                for (int i = 0; i < questionsInfos.size(); i++) {
-                                    JsonObject questionInfo = questionsInfos.getJsonObject(i);
-                                    int questionId = questionInfo.getInteger("id");
-                                    int originalQuestionId = questionInfo.getInteger("original_question_id");
-                                    int question_type = questionInfo.getInteger("question_type");
-                                    if (question_type == 4 || question_type == 5) {
-                                        Promise<JsonObject> promise = Promise.promise();
-                                        questionsInfosFutures.add(promise.future());
-                                        questionChoiceService.duplicate(questionId, originalQuestionId, FutureHelper.handlerJsonObject(promise));
-                                    }
-                                }
-                            }
-                        }
-                        CompositeFuture.all(questionsInfosFutures).onComplete(evt1 -> {
-                            if (evt1.failed()) {
-                                log.error("[Formulaire@duplicate] Failed to retrieve info from questions : " + evt1.cause());
-                                badRequest(request);
-                            }
-                            // Sync folders with this new forms
-                            eventStore.createAndStoreEvent(Formulaire.FormulaireEvent.CREATE.name(), request);
-                            JsonArray questions = (JsonArray)evt.result().list().get(0);
-                            JsonArray newFormIds = new JsonArray();
-                            for (int i = 0; i < evt.result().list().size(); i++) {
-                                newFormIds.add(questions.getJsonObject(0).getInteger("form_id"));
-                            }
-                            relFormFolderService.create(user, newFormIds, folderId.toString(), createRelEvent -> {
-                                if (createRelEvent.isLeft()) {
-                                    log.error("[Formulaire@moveForm] Error in moving forms " + formIds);
-                                    RenderHelper.badRequest(request, createRelEvent);
-                                    return;
-                                }
-
-                                if (folderId != Formulaire.ID_ROOT_FOLDER) { // We do not sync root folder counts (useless)
-                                    folderService.syncNbChildren(user, folderId.toString(), defaultResponseHandler(request));
-                                }
-                                else {
-                                    renderJson(request, createRelEvent.right().getValue());
-                                }
-                            });
-                        });
-                    });
+                    duplicatesFormsQuestions(request, folderId, user, formIds, formsInfos);
                 });
             } else {
                 log.error("User not found in session.");
                 Renders.unauthorized(request);
+            }
+        });
+    }
+
+    private void duplicatesFormsQuestions(HttpServerRequest request, Integer folderId, UserInfos user, JsonArray formIds,
+                                          List<Future> formsInfos) {
+        for (int i = 0; i < formIds.size(); i++) {
+            Promise<JsonArray> promise = Promise.promise();
+            formsInfos.add(promise.future());
+            formService.duplicate(formIds.getInteger(i), user, FutureHelper.handlerJsonArray(promise));
+        }
+        CompositeFuture.all(formsInfos).onComplete(evt -> {
+            if (evt.failed()) {
+                log.error("[Formulaire@duplicate] Failed to retrieve info : " + evt.cause());
+                badRequest(request);
+            }
+            // Duplicates all potential question choices
+            duplicatesQuestionChoices(request, folderId, user, formIds, evt);
+        });
+    }
+
+    private void duplicatesQuestionChoices(HttpServerRequest request, Integer folderId, UserInfos user, JsonArray formIds,
+                                           AsyncResult<CompositeFuture> evt) {
+        List<Future> questionsInfosFutures = new ArrayList<>();
+
+        for (Object questions : evt.result().list()) {
+            JsonArray questionsInfos = ((JsonArray) questions);
+            if(questionsInfos.getJsonObject(0).getInteger("id") != null){
+                for (int i = 0; i < questionsInfos.size(); i++) {
+                    JsonObject questionInfo = questionsInfos.getJsonObject(i);
+                    int questionId = questionInfo.getInteger("id");
+                    int originalQuestionId = questionInfo.getInteger("original_question_id");
+                    int question_type = questionInfo.getInteger("question_type");
+                    if (question_type == 4 || question_type == 5) {
+                        Promise<JsonObject> promise = Promise.promise();
+                        questionsInfosFutures.add(promise.future());
+                        questionChoiceService.duplicate(questionId, originalQuestionId, FutureHelper.handlerJsonObject(promise));
+                    }
+                }
+            }
+        }
+        CompositeFuture.all(questionsInfosFutures).onComplete(evt1 -> {
+            if (evt1.failed()) {
+                log.error("[Formulaire@duplicate] Failed to retrieve info from questions : " + evt1.cause());
+                badRequest(request);
+            }
+            // Sync folders with this new forms
+            syncFoldersForms(request, folderId, user, formIds, evt);
+        });
+    }
+
+    private void syncFoldersForms(HttpServerRequest request, Integer folderId, UserInfos user, JsonArray formIds,
+                                  AsyncResult<CompositeFuture> evt) {
+        eventStore.createAndStoreEvent(Formulaire.FormulaireEvent.CREATE.name(), request);
+        List<Object> questions = evt.result().list();
+        JsonArray newFormIds = new JsonArray();
+        for (Object question : questions) {
+            newFormIds.add(((JsonArray) question).getJsonObject(0).getInteger("form_id"));
+        }
+        relFormFolderService.create(user, newFormIds, folderId.toString(), createRelEvent -> {
+            if (createRelEvent.isLeft()) {
+                log.error("[Formulaire@moveForm] Error in moving forms " + formIds);
+                RenderHelper.badRequest(request, createRelEvent);
+                return;
+            }
+
+            if (folderId != Formulaire.ID_ROOT_FOLDER) { // We do not sync root folder counts (useless)
+                folderService.syncNbChildren(user, folderId.toString(), defaultResponseHandler(request));
+            }
+            else {
+                renderJson(request, createRelEvent.right().getValue());
             }
         });
     }
