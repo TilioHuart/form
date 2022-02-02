@@ -85,9 +85,9 @@ export class Folders extends Selection<Folder> {
                 elements.push(elem);
                 lookup[folder.id] = elem;
             }
-
+            let filter = elements.sort((e1, e2) => e1.name < e2.name ? -1 : 1);
             // Use the lookup to order children
-            for (let elem of elements) {
+            for (let elem of filter) {
                 if (elem.data.parent_id !== null && lookup[elem.data.parent_id]) {
                     lookup[elem.data.parent_id].children.push(elem);
                 }
@@ -95,9 +95,11 @@ export class Folders extends Selection<Folder> {
 
             // Push root elements into final array
             this.trees = [];
-            for (let key in elements) {
-                let elem = elements[key];
-                if (elements[key].data.parent_id === null || !lookup[elem.data.parent_id]) {
+
+
+            for (let key in filter) {
+                let elem = filter[key];
+                if (filter[key].data.parent_id === null || !lookup[elem.data.parent_id]) {
                     this.trees.push(elem);
                 }
             }
