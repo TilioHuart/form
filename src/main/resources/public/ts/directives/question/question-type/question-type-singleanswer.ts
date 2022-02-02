@@ -27,7 +27,7 @@ export const questionTypeSingleanswer: Directive = ng.directive('questionTypeSin
                 <div ng-repeat="choice in vm.question.choices.all">
                     <span>[[$index + 1]].</span>
                     <input type="text" class="ten nine-mobile" ng-model="choice.value" placeholder="Choix [[$index + 1]]" ng-if="!vm.question.selected" disabled>
-                    <input type="text" class="ten nine-mobile" ng-model="choice.value" placeholder="Choix [[$index + 1]]" ng-if="vm.question.selected">
+                    <input type="text" class="ten nine-mobile" ng-model="choice.value" placeholder="Choix [[$index + 1]]" ng-if="vm.question.selected" input-guard>
                     <i class="i-cancel lg-icon" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
                 </div>
                 <div style="display: flex; justify-content: center;" ng-if="vm.question.selected && !vm.hasFormResponses">

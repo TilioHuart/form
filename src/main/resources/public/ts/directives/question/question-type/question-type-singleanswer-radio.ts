@@ -29,7 +29,7 @@ export const questionTypeSingleanswerRadio: Directive = ng.directive('questionTy
                         <input type="radio" id="radio-[[choice.id]]" disabled>
                         <span style="cursor: default"></span>
                         <input type="text" class="ten eight-mobile" ng-model="choice.value" placeholder="Choix [[$index + 1]]" ng-if="!vm.question.selected" disabled>
-                        <input type="text" class="ten eight-mobile" ng-model="choice.value" placeholder="Choix [[$index + 1]]" ng-if="vm.question.selected">
+                        <input type="text" class="ten eight-mobile" ng-model="choice.value" placeholder="Choix [[$index + 1]]" ng-if="vm.question.selected" input-guard>
                     </label>
                     <i class="i-cancel lg-icon" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
                 </div>
