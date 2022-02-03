@@ -11,6 +11,8 @@ import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
@@ -35,6 +37,18 @@ public class QuestionChoiceController extends ControllerHelper {
     public void list(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         questionChoiceService.list(questionId, arrayResponseHandler(request));
+    }
+
+    @Get("/questions/choices/all")
+    @ApiDoc("List of all choices questions")
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void listChoices(HttpServerRequest request){
+        JsonArray questionIds = new JsonArray();
+        for (Integer i=0; i<request.params().size(); i++){
+            questionIds.add(request.getParam(i.toString()));
+        }
+        questionChoiceService.listChoices(questionIds, arrayResponseHandler(request));
     }
 
     @Get("/choices/:choiceId")

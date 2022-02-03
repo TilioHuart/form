@@ -15,6 +15,7 @@ import {Mix} from "entcore-toolkit";
 import {ColorUtils} from "../utils";
 import {Exports, FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
 import http from "axios";
+import {questionChoiceService} from "../services";
 
 interface ViewModel {
     question: Question;
@@ -311,19 +312,24 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             };
             let questions = vm.getGraphQuestions();
             let question : Question = null;
-
-            for (question of questions) {
-                await question.choices.sync(question.id);
-                question = await initQCMandQCU(question);
-                let dataOptions = initChartsForPDF(question);
-                let options = generateOptions(dataOptions, question.question_type);
-                await renderGraphForPDF(options);
-                let idImage = await storeChart(vm.pdfResponseCharts[vm.pdfResponseCharts.length-1]);
-                images.idImagesPerQuestion[question.id] = idImage;
-                images.idImagesForRemove.push(idImage);
+            if(questions.length > 0){
+                let questionIds = questions.map(q=>q.id);
+                let listChoices=Mix.castArrayAs(QuestionChoice, await questionChoiceService.listChoices(questionIds));
+                for (question of questions) {
+                    question.choices.all=[];
+                    question.choices.all=listChoices.filter(c=>c.question_id === question.id);
+                    question = await initQCMandQCU(question);
+                    let dataOptions = initChartsForPDF(question);
+                    let options = generateOptions(dataOptions, question.question_type);
+                    await renderGraphForPDF(options);
+                    let idImage = await storeChart(vm.pdfResponseCharts[vm.pdfResponseCharts.length-1]);
+                    images.idImagesPerQuestion[question.id] = idImage;
+                    images.idImagesForRemove.push(idImage);
+                }
             }
             $scope.safeApply();
             return images;
+
         }
 
         const initChartsForPDF = (question: Question) : any => {

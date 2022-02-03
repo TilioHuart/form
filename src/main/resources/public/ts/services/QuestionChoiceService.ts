@@ -5,6 +5,7 @@ import {DataUtils} from "../utils/data";
 
 export interface QuestionChoiceService {
     list(questionId: number) : Promise<any>;
+    listChoices(questionIds) : Promise<any>;
     get(choiceId: number) : Promise<any>;
     save(choice: QuestionChoice) : Promise<any>;
     create(choice: QuestionChoice) : Promise<any>;
@@ -19,6 +20,15 @@ export const questionChoiceService: QuestionChoiceService = {
         try {
             return DataUtils.getData(await http.get(`/formulaire/questions/${questionId}/choices`));
         } catch (err) {
+            notify.error(idiom.translate('formulaire.error.questionChoiceService.list'));
+            throw err;
+        }
+    },
+
+    async listChoices(questionIds) : Promise<any>{
+        try{
+            return DataUtils.getData(await http.get(`/formulaire/questions/choices/all`, { params: questionIds }));
+        }catch(err){
             notify.error(idiom.translate('formulaire.error.questionChoiceService.list'));
             throw err;
         }

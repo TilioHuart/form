@@ -21,6 +21,13 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
     }
 
     @Override
+    public void listChoices(JsonArray questionIds, Handler<Either<String, JsonArray>> handler){
+        String query = "SELECT * FROM " + Formulaire.QUESTION_CHOICE_TABLE + " WHERE question_id IN " + Sql.listPrepared(questionIds);
+        JsonArray params = new JsonArray().addAll(questionIds);
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
     public void get(String choiceId, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT * FROM " + Formulaire.QUESTION_CHOICE_TABLE + " WHERE id = ?;";
         JsonArray params = new JsonArray().add(choiceId);

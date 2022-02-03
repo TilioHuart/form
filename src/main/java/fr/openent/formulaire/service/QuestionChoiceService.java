@@ -5,6 +5,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.util.List;
+
 public interface QuestionChoiceService {
     /**
      * List all the choices of a specific question
@@ -12,6 +14,13 @@ public interface QuestionChoiceService {
      * @param handler function handler returning JsonArray data
      */
     void list(String questionId, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * ListChoices all the choices of a specific question
+     * @param questionIds JsonArray identifier
+     * @param handler function handler returning JsonArray data
+     */
+    void listChoices(JsonArray questionIds, Handler<Either<String, JsonArray>> handler);
 
     /**
      * Get a specific by id
