@@ -53,6 +53,8 @@ i {
 
   &.hg-icon::before {
     font-size: 45px;
+    @media screen and (max-width:$formulaire-screen-mobile){font-size:35px;}
+    @media screen and (max-width:$formulaire-screen-tablet){font-size:40px;}
   }
 
   // Icons color
