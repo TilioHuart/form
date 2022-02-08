@@ -23,6 +23,8 @@
         "rgpd-cron" : "{{ formRgpdCron|default('0 0 0 */1 * ? *') }}",
         {% endif %}
         "zimbra-max-recipients": {{ formZimbraMaxRecipients|default('50') }},
+		"max-responses-export-PDF": {{ formMaxResponses|default('100') }},
+		"max-users-sharing": {{ formMaxUsers|default('65000') }},
         "publicConf": {
             "xiti": {
                 "ID_SERVICE": {
