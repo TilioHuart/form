@@ -312,7 +312,7 @@ public class FormController extends ControllerHelper {
                     int questionId = questionInfo.getInteger("id");
                     int originalQuestionId = questionInfo.getInteger("original_question_id");
                     int question_type = questionInfo.getInteger("question_type");
-                    if (question_type == 4 || question_type == 5) {
+                    if (question_type == 4 || question_type == 5 || question_type == 9) {
                         Promise<JsonObject> promise = Promise.promise();
                         questionsInfosFutures.add(promise.future());
                         questionChoiceService.duplicate(questionId, originalQuestionId, FutureHelper.handlerJsonObject(promise));

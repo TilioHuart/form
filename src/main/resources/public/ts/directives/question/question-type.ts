@@ -28,7 +28,7 @@ export const questionType: Directive = ng.directive('questionType', () => {
                 <question-type-date question="vm.question" ng-if="vm.question.question_type == vm.types.DATE"></question-type-date>
                 <question-type-time question="vm.question" ng-if="vm.question.question_type == vm.types.TIME"></question-type-time>
                 <question-type-file question="vm.question" ng-if="vm.question.question_type == vm.types.FILE"></question-type-file>
-                <question-type-singleanswer-radio question="vm.question" ng-if="vm.question.question_type == vm.types.SINGLEANSWERRADIO"></question-type-singleanswer-radio>
+                <question-type-singleanswer-radio question="vm.question" has-form-responses="vm.hasFormResponses" ng-if="vm.question.question_type == vm.types.SINGLEANSWERRADIO"></question-type-singleanswer-radio>
             </div>
         `,
 
