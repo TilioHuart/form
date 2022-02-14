@@ -318,6 +318,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
                 for (question of questions) {
                     question.choices.all=[];
                     question.choices.all=listChoices.filter(c=>c.question_id === question.id);
+                    question.choices.replaceSpace();
                     question = await initQCMandQCU(question);
                     let dataOptions = initChartsForPDF(question);
                     let options = generateOptions(dataOptions, question.question_type);

@@ -52,4 +52,11 @@ export class QuestionChoices {
             throw e;
         }
     }
+    replaceSpace = () : void => {
+        for(let i=0; i<this.all.length;i++){
+            this.all[i].value=this.all[i].value.replace(/\u00A0/," ");
+        }
+
+}
+
 }
