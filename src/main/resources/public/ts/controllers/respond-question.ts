@@ -18,6 +18,7 @@ interface ViewModel {
     form: Form;
     nbQuestions: number;
     selectedIndex: boolean[];
+    loading : boolean;
     files: File[];
 
     $onInit() : Promise<void>;
@@ -42,6 +43,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
     vm.form = new Form();
     vm.nbQuestions = 1;
     vm.selectedIndex = [];
+    vm.loading = true;
     vm.files = [];
 
     vm.$onInit = async () : Promise<void> => {
@@ -92,6 +94,8 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             }
             $scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.DISPLAY_FILES, vm.files);
         }
+        vm.loading=false;
+        window.setTimeout(() => vm.loading=true,500);
         $scope.safeApply();
     };
 
@@ -152,44 +156,47 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
     };
 
     const saveResponses = async () : Promise<boolean> => {
-        if (vm.question.question_type === Types.MULTIPLEANSWER ) {
-            for (let i = 0; i < vm.question.choices.all.length; i++) {
-                let checked = vm.selectedIndex[i];
-                let j = 0;
-                let found = false;
-                while (!found && j < vm.responses.all.length) {
-                    found = vm.question.choices.all[i].id === vm.responses.all[j].choice_id;
-                    j++;
+        if(vm.loading){
+            if (vm.question.question_type === Types.MULTIPLEANSWER ) {
+                for (let i = 0; i < vm.question.choices.all.length; i++) {
+                    let checked = vm.selectedIndex[i];
+                    let j = 0;
+                    let found = false;
+                    while (!found && j < vm.responses.all.length) {
+                        found = vm.question.choices.all[i].id === vm.responses.all[j].choice_id;
+                        j++;
+                    }
+                    if (!found && checked) {
+                        let newResponse = new Response(vm.question.id, vm.question.choices.all[i].id,
+                            vm.question.choices.all[i].value, vm.distribution.id);
+                        await responseService.create(newResponse);
+                    }
+                    else if (found && !checked) {
+                        await responseService.delete(vm.responses.all[j-1].id);
+                    }
                 }
-                if (!found && checked) {
-                    let newResponse = new Response(vm.question.id, vm.question.choices.all[i].id,
-                        vm.question.choices.all[i].value, vm.distribution.id);
-                    await responseService.create(newResponse);
+                return true;
+            }
+            if (vm.question.question_type === Types.SINGLEANSWER || vm.question.question_type === Types.SINGLEANSWERRADIO) {
+                if (!vm.response.choice_id) {
+                    vm.response.answer = "";
                 }
-                else if (found && !checked) {
-                    await responseService.delete(vm.responses.all[j-1].id);
+                else {
+                    for (let choice of vm.question.choices.all) {
+                        if (vm.response.choice_id == choice.id) {
+                            vm.response.answer = choice.value;
+                        }
+                    }
                 }
+
+            }
+            vm.response = await responseService.save(vm.response, vm.question.question_type);
+            if (vm.question.question_type === Types.FILE) {
+                return (await saveFiles());
             }
             return true;
         }
-        if (vm.question.question_type === Types.SINGLEANSWER || vm.question.question_type === Types.SINGLEANSWERRADIO) {
-            if (!vm.response.choice_id) {
-                vm.response.answer = "";
-            }
-            else {
-                for (let choice of vm.question.choices.all) {
-                    if (vm.response.choice_id == choice.id) {
-                        vm.response.answer = choice.value;
-                    }
-                }
-            }
-
-        }
-        vm.response = await responseService.save(vm.response, vm.question.question_type);
-        if (vm.question.question_type === Types.FILE) {
-            return (await saveFiles());
-        }
-        return true;
+        return false;
     };
 
     const saveFiles = async () : Promise<boolean> => {
