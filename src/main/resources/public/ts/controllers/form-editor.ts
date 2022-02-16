@@ -52,7 +52,7 @@ interface ViewModel {
     createNewChoice(question: Question) : void;
     deleteChoice(question: Question, index: number) : Promise<void>;
     displayTypeName(typeInfo: string) : string;
-    displayTypeDescritption(description : string) : string;
+    displayTypeDescription(description : string) : string;
     displayTypeIcon(code: number) : string;
     reOrder() : void;
     moveQuestion(index: number, direction: string) : void;
@@ -290,7 +290,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
         };
 
-        vm.displayTypeDescritption = (description : string|number) :string =>{
+        vm.displayTypeDescription = (description : string|number) :string =>{
             return idiom.translate("formulaire.question.type.description." + description);
         }
 

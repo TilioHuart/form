@@ -1,5 +1,5 @@
-import {idiom, model, ng, notify, template, workspace} from 'entcore';
-import {Distribution, Distributions, DistributionStatus, Form, Forms} from "../models";
+import {idiom, model, ng, notify, template, workspace, angular} from 'entcore';
+import {Distribution, Distributions, DistributionStatus, Draggable, Form, Forms} from "../models";
 import {distributionService, formService} from "../services";
 import {FiltersFilters, FiltersOrders, FORMULAIRE_EMIT_EVENT} from "../core/enums";
 import {Mix} from "entcore-toolkit";
@@ -7,7 +7,6 @@ import {folderService} from "../services/FolderService";
 import {Folder, Folders} from "../models/Folder";
 import {Tree, Element} from "entcore/types/src/ts/workspace/model";
 import {I18nUtils} from "../utils";
-import {isNumber} from "angular";
 
 interface ViewModel {
     forms: Forms;
@@ -58,6 +57,8 @@ interface ViewModel {
     folderTree: any;
     openedFolder: Element;
     selectedFolder: Element;
+    draggable : Draggable;
+    draggedItem : any;
 
     createForm() : void;
 
@@ -85,6 +86,7 @@ interface ViewModel {
     selectItem(form: Form) : void;
 
     // Folders functions
+    initDragAndDrop() : void;
     initFolders() : Promise<void>;
     openFolder(folder: Folder, resync?: boolean) : void;
     openCreateFolder() : void;
@@ -99,7 +101,6 @@ interface ViewModel {
     doDeleteFolders() : Promise<void>;
     displayFolder(folder: Folder) : string;
     displayNbItems(folder: Folder) : string;
-    dropped(dragEl, dropEl) : Promise<void>;
     switchAllFolders(value: boolean) : void;
 
     $onInit() : Promise<void>;
@@ -117,7 +118,6 @@ interface ViewModel {
 
 export const formsListController = ng.controller('FormsListController', ['$scope',
     function ($scope) {
-
     const vm: ViewModel = this;
     vm.forms = new Forms();
     vm.distributions = new Distributions();
@@ -176,6 +176,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         vm.forms.orders.find(o => o.name === FiltersOrders.TITLE).display = true;
         (window as any).LAZY_MODE = false;
         vm.loading = false;
+        vm.initDragAndDrop();
         $scope.safeApply();
     };
 
@@ -268,7 +269,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     vm.checkRemind = async () : Promise<void> => {
-        let distributions = Mix.castArrayAs(Distribution, $scope.getDataIf200(await distributionService.listByForm(vm.forms.selected[0].id)));
+        let distributions = Mix.castArrayAs(Distribution, await distributionService.listByForm(vm.forms.selected[0].id));
         let uniqueDistribs : any = [];
         for (let d of distributions){
             if(!uniqueDistribs.map(d => d.responder_id).includes(d.responder_id)) {
@@ -418,6 +419,67 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     // Folders
 
+    vm.initDragAndDrop = () : void => {
+        vm.draggable = {
+            dragConditionHandler(event: DragEvent, content?: any): boolean { return true; },
+            dragStartHandler(event: DragEvent, content?: any): void {
+                try {
+                    event.dataTransfer.setData('application/json', JSON.stringify(content));
+                    vm.draggedItem = content;
+                } catch (e) {
+                    event.dataTransfer.setData('text', JSON.stringify(content));
+                }
+            },
+            dragEndHandler(event: DragEvent, content?: any): void {},
+            dropConditionHandler(event: DragEvent, content?: any): boolean {
+                let folderTarget = angular.element(event.srcElement).scope().folder;
+                let isTargetAlreadyMyParent = folderTarget && folderTarget.id === vm.folder.id;
+
+                // Check if target is self or already parent
+                let isTargetMyself = vm.draggedItem && folderTarget && folderTarget.id === vm.draggedItem.id;
+                let isTargetSelected = vm.folders.selected.filter(f => f.id === folderTarget.id).length > 0;
+
+                // Check if dragged item is in myForms folder
+                let isArchivedItem = vm.draggedItem.archived;
+                let isSharedItem = vm.draggedItem.collab && vm.draggedItem.owner_id != model.me.userId;
+                let isItemInMyForms = !isArchivedItem && !isSharedItem;
+
+                // Check if target is in myForms folder
+                let isTargetSharedFolder = folderTarget.id === vm.folders.sharedFormsFolder.id;
+                let isTargetArchivedFolder = folderTarget.id === vm.folders.archivedFormsFolder.id;
+                let isTargetInMyForms = !isTargetSharedFolder && !isTargetArchivedFolder;
+
+                return !isTargetAlreadyMyParent && !isTargetMyself && !isTargetSelected && isItemInMyForms && isTargetInMyForms;
+            },
+            async dragDropHandler(event: DragEvent, content?: any): Promise<void> {
+                let originalItem = JSON.parse(event.dataTransfer.getData("application/json"));
+                let targetItem = angular.element(event.srcElement).scope().folder;
+
+                let idOriginalItem = originalItem.id;
+                let idTargetItem = targetItem.id;
+
+                if (vm.forms.selected.length > 0) { // Move several forms
+                    await formService.move(vm.forms.selected, idTargetItem ? idTargetItem : 1);
+                }
+                else if (vm.folders.selected.length > 0) { // Move several folders
+                    await folderService.move(vm.folders.selected, idTargetItem ? idTargetItem : 1);
+                }
+                else {
+                    let isForm = !!originalItem.folder_id;
+                    if (isForm) { // Move one form
+                        let draggedItem = vm.forms.all.filter(f => f.id === idOriginalItem);
+                        await formService.move(draggedItem, idTargetItem ? idTargetItem : 1);
+                    }
+                    else if (!isForm) { // Move one folder
+                        let draggedItem = vm.folders.all.filter(f => f.id === idOriginalItem);
+                        await folderService.move(draggedItem, idTargetItem ? idTargetItem : 1);
+                    }
+                }
+                await vm.openFolder(vm.folder);
+            }
+        };
+    };
+
     vm.initFolders = async () : Promise<void> => {
         vm.folders = new Folders();
         await vm.folders.sync();
@@ -483,13 +545,13 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         vm.folder.children = vm.folders.getChildren(vm.folder.id);
         await vm.forms.sync();
         switch (vm.folder.id) {
-            case 1:
+            case vm.folders.myFormsFolder.id:
                 vm.forms.all = vm.forms.all.filter(form => !form.archived && form.owner_id === model.me.userId && form.folder_id === vm.folder.id);
                 break;
-            case 2:
+            case vm.folders.sharedFormsFolder.id:
                 vm.forms.all = vm.forms.all.filter(form => !form.archived && form.collab && form.owner_id != model.me.userId);
                 break;
-            case 3:
+            case vm.folders.archivedFormsFolder.id:
                 vm.forms.all = vm.forms.all.filter(form => form.archived);
                 break;
             default:
@@ -618,31 +680,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         }
     };
 
-    vm.dropped = async (dragged, target) : Promise<void> => {
-        if (dragged == target) return;
-        let originalItem = $('#' + dragged);
-        let targetItem = $('#' + target);
-        let idOriginalItem = parseInt(originalItem[0].children[0].textContent);
-        let idTargetItem = parseInt(targetItem[0].children[0].textContent);
-        let typeOriginalItem = originalItem[0].classList[0];
-
-        if (vm.folders.selected.length > 0) {
-            await folderService.move(vm.folders.selected, idTargetItem ? idTargetItem : 1);
-        }
-        else if(vm.forms.selected.length > 0){
-            await formService.move(vm.forms.selected, idTargetItem ? idTargetItem : 1);
-        }
-        else if (typeOriginalItem == "folder") {
-            let draggedItems = vm.folders.all.filter(f => f.id === idOriginalItem);
-            await folderService.move(draggedItems, idTargetItem ? idTargetItem : 1);
-        }
-        else if (typeOriginalItem == "form") {
-            let draggedItems = vm.forms.all.filter(f => f.id === idOriginalItem);
-            await formService.move(draggedItems, idTargetItem ? idTargetItem : 1);
-        }
-        await vm.openFolder(vm.folder);
-    };
-
     vm.switchAllFolders = (value: boolean) : void => {
         value ? vm.folders.selectAll() : vm.folders.deselectAll();
         vm.allFoldersSelected = value;
@@ -700,4 +737,5 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         (window as any).LAZY_MODE = true;
         $scope.safeApply();
     }
+
 }]);

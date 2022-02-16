@@ -1,7 +1,6 @@
 import {Behaviours, idiom, model, ng, template} from 'entcore';
-import {Distribution, DistributionStatus, Form, Question, QuestionTypes, Types} from "../models";
+import {Distribution, DistributionStatus, Form, Question, QuestionTypes, Types, Folder} from "../models";
 import {distributionService, formService, questionService} from "../services";
-import {AxiosResponse} from "axios";
 import {
 	Direction,
 	Exports,
@@ -12,8 +11,6 @@ import {
 	Pages
 } from "../core/enums";
 import {I18nUtils} from "../utils";
-import {Folder} from "../models/Folder";
-import {DataUtils} from "../utils/data";
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location',
 	($scope, route, $location) => {

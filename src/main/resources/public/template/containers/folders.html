@@ -1,11 +1,12 @@
 <div class="cell folder-article"
      ng-repeat="folder in vm.folders.getChildren(vm.folder.id) | orderBy:'name'"
      ng-click="vm.selectItem(folder)" ng-dblclick="vm.openFolder(folder)"
-     ng-class="{'selected' : folder.selected}">
+     ng-class="{'selected' : folder.selected}"
+     dragstart="vm.draggable.dragStartHandler($originalEvent, folder)"
+     dropcondition="vm.draggable.dropConditionHandler($originalEvent)"
+     dragdrop="vm.draggable.dragDropHandler($originalEvent)">
 
-
-
-    <div class="folder" lvl-draggable lvl-drop-target on-drop="vm.dropped(dragEl,dropEl)">
+    <div class="folder">
         <label ng-show="false">[[folder.id]]</label>
         <div class="folder-image three">
             <i class="i-folder hg-icon"></i>
@@ -15,4 +16,5 @@
             <div class="counters ellipsis">[[vm.displayNbItems(folder)]]</div>
         </div>
     </div>
+
 </div>
