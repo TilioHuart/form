@@ -1,11 +1,10 @@
-import {idiom, model, ng, notify, template, workspace, angular} from 'entcore';
-import {Distribution, Distributions, DistributionStatus, Draggable, Form, Forms} from "../models";
+import {angular, idiom, model, ng, notify, template} from 'entcore';
+import {Distribution, Distributions, DistributionStatus, Draggable, Folder, Folders, Form, Forms} from "../models";
 import {distributionService, formService} from "../services";
 import {FiltersFilters, FiltersOrders, FORMULAIRE_EMIT_EVENT} from "../core/enums";
 import {Mix} from "entcore-toolkit";
 import {folderService} from "../services/FolderService";
-import {Folder, Folders} from "../models/Folder";
-import {Tree, Element} from "entcore/types/src/ts/workspace/model";
+import {Element} from "entcore/types/src/ts/workspace/model";
 import {I18nUtils} from "../utils";
 
 interface ViewModel {
@@ -55,7 +54,7 @@ interface ViewModel {
     };
     loading: boolean;
     folderTree: any;
-    openedFolder: Element;
+    openedFoldersIds: number[];
     selectedFolder: Element;
     draggable : Draggable;
     draggedItem : any;
@@ -163,7 +162,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
     vm.loading = true;
     vm.folderTree = {};
-    vm.openedFolder = null;
+    vm.openedFoldersIds = null;
     vm.selectedFolder = null;
 
     vm.$onInit = async () : Promise<void> => {
@@ -497,30 +496,23 @@ export const formsListController = ng.controller('FormsListController', ['$scope
                 return false;
             },
             isOpenedFolder(folder) {
-                if (vm.openedFolder === folder) {
-                    return true;
-                }
-                else if ((folder as Tree).filter) {
-                    if (!workspace.v2.service.isLazyMode()){
-                        return true;
-                    }
-                }
-                return vm.openedFolder && workspace.v2.service.findFolderInTreeByRefOrId(folder, vm.openedFolder);
+                return vm.openedFoldersIds && vm.openedFoldersIds.filter(id => id === folder.id).length > 0;
             },
             isSelectedFolder(folder) {
                 return vm.selectedFolder === folder;
             },
             openFolder(folder) {
                 if (!vm.folderTree.isDisabled(folder)) {
-                    if (vm.folders.selected.length > 0) {
-                        let selectedIds : any = vm.folders.selected.map(f => f.id);
-                        if (!selectedIds.includes(folder.id)) {
-                            vm.targetFolderId = folder.id;
-                            vm.openedFolder = vm.selectedFolder = folder;
-                        }
-                    }
                     vm.targetFolderId = folder.id;
-                    vm.openedFolder = vm.selectedFolder = folder;
+                    vm.selectedFolder = folder;
+
+                    let indexInOpenedFolders = vm.openedFoldersIds.indexOf(folder.id);
+                    if (indexInOpenedFolders > 0) {
+                        vm.openedFoldersIds.splice(indexInOpenedFolders, 1);
+                    }
+                    else {
+                        vm.openedFoldersIds.push(folder.id);
+                    }
 
                     if (!vm.display.lightbox.move) {
                         vm.openFolder(folder.data);
@@ -528,18 +520,16 @@ export const formsListController = ng.controller('FormsListController', ['$scope
                 }
             }
         }
-        vm.openedFolder = vm.folders.trees[0];
-        vm.selectedFolder = vm.folders.trees[0];
         vm.targetFolderId = vm.folders.trees[0].id;
+        vm.openedFoldersIds = [vm.targetFolderId];
+        vm.selectedFolder = vm.folders.trees[0];
         vm.folder = $scope.folder.id ? $scope.folder : vm.folders.myFormsFolder;
         $scope.safeApply();
     };
 
     vm.openFolder = async (folder: Folder, resync: boolean = true) : Promise<void> => {
         if (resync) await vm.folders.sync();
-        let folderElem = vm.folders.getTreeElement(folder.id);
-        vm.openedFolder = folderElem;
-        vm.selectedFolder = folderElem;
+        vm.selectedFolder = vm.folders.getTreeElement(folder.id);
         vm.folder = folder;
         $scope.folder = folder;
         vm.folder.children = vm.folders.getChildren(vm.folder.id);
@@ -611,7 +601,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.moveItems = () : void => {
         vm.targetFolderId = vm.folders.trees[0].id;
-        vm.openedFolder = vm.folders.trees[0];
+        vm.openedFoldersIds = [vm.targetFolderId];
         vm.selectedFolder = vm.folders.trees[0];
         delete vm.folders.trees[1].name;
         delete vm.folders.trees[2].name;
