@@ -49,7 +49,7 @@ export const questionChoiceService: QuestionChoiceService = {
 
     async create(choice: QuestionChoice) : Promise<any> {
         try {
-            return DataUtils.getData(await await http.post(`/formulaire/questions/${choice.question_id}/choices`, choice));
+            return DataUtils.getData(await http.post(`/formulaire/questions/${choice.question_id}/choices`, choice));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionChoiceService.create'));
             throw err;

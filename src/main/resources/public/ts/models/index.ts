@@ -8,3 +8,4 @@ export * from './Response';
 export * from './ResponseFile';
 export * from './Folder';
 export * from './Draggable';
+export * from './Section';

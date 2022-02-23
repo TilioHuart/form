@@ -6,3 +6,4 @@ export * from './QuestionService';
 export * from './QuestionTypeService';
 export * from './ResponseFileService';
 export * from './ResponseService';
+export * from './SectionService';

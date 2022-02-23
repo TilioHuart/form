@@ -39,6 +39,7 @@ public class Formulaire extends BaseServer {
 	public static String REL_FORM_FOLDER_TABLE;
 	public static String RESPONSE_TABLE;
 	public static String RESPONSE_FILE_TABLE;
+	public static String SECTION_TABLE;
 	public static String USERS_TABLE;
 
 	public static final String ACCESS_RIGHT = "formulaire.access";
@@ -94,12 +95,14 @@ public class Formulaire extends BaseServer {
 		REL_FORM_FOLDER_TABLE = DB_SCHEMA + ".rel_form_folder";
 		RESPONSE_TABLE = DB_SCHEMA + ".response";
 		RESPONSE_FILE_TABLE = DB_SCHEMA + ".response_file";
+		SECTION_TABLE = DB_SCHEMA + ".section";
 		USERS_TABLE = DB_SCHEMA + ".users";
 
 		MAX_RESPONSES_EXPORT_PDF = config.getInteger("max-responses-export-PDF", 100);
 		MAX_USERS_SHARING = config.getInteger("max-users-sharing", 65000);
 
 		final Storage storage = new StorageFactory(vertx, config).getStorage();
+
 
 		// Create and parameter confs for all controllers using sharing system
 		SqlConf distribConf = SqlConfs.createConf(DistributionController.class.getName());
@@ -108,11 +111,16 @@ public class Formulaire extends BaseServer {
 		SqlConf questionConf = SqlConfs.createConf(QuestionController.class.getName());
 		SqlConf responseConf = SqlConfs.createConf(ResponseController.class.getName());
 		SqlConf responseFileConf = SqlConfs.createConf(ResponseFileController.class.getName());
+		SqlConf sectionConf = SqlConfs.createConf(SectionController.class.getName());
 
 		List<SqlConf> confs = new ArrayList<>();
-		confs.add(distribConf); confs.add(formConf);
-		confs.add(questionChoiceConf); confs.add(questionConf);
-		confs.add(responseConf); confs.add(responseFileConf);
+		confs.add(distribConf);
+		confs.add(formConf);
+		confs.add(questionChoiceConf);
+		confs.add(questionConf);
+		confs.add(responseConf);
+		confs.add(responseFileConf);
+		confs.add(sectionConf);
 
 		for (SqlConf conf : confs) {
 			conf.setSchema("formulaire");
@@ -136,6 +144,7 @@ public class Formulaire extends BaseServer {
 		addController(new QuestionTypeController());
 		addController(new ResponseController());
 		addController(new ResponseFileController(storage));
+		addController(new SectionController());
 		addController(new UtilsController(storage));
 		addController(new FolderController());
 
