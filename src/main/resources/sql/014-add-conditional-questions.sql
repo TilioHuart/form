@@ -1,8 +1,8 @@
 CREATE TABLE formulaire.section (
     id              bigserial PRIMARY KEY,
+    form_id         bigint NOT NULL,
     title           VARCHAR NOT NULL,
     description     VARCHAR,
-    form_id         bigint NOT NULL,
     position        bigint NOT NULL,
     CONSTRAINT fk_form_id FOREIGN KEY (form_id) REFERENCES formulaire.form(id) ON UPDATE NO ACTION ON DELETE CASCADE
 );

@@ -29,12 +29,12 @@ public class DefaultSectionService implements SectionService {
 
     @Override
     public void create(JsonObject section, String formId, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO " + Formulaire.SECTION_TABLE + " (title, description, form_id, position) " +
+        String query = "INSERT INTO " + Formulaire.SECTION_TABLE + " (form_id, title, description, position) " +
                 "VALUES (?, ?, ?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
+                .add(formId)
                 .add(section.getString("title", ""))
                 .add(section.getString("description", ""))
-                .add(formId)
                 .add(section.getInteger("position", 0));
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));

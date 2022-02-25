@@ -62,7 +62,7 @@ public class FormResponsesExportPDF {
 
     public void launch() {
         String formId = request.getParam("formId");
-        questionService.list(formId, getQuestionsEvt -> {
+        questionService.listForForm(formId, getQuestionsEvt -> {
             if (getQuestionsEvt.isLeft()) {
                 log.error("[Formulaire@FormExportPDF] Failed to retrieve all questions of the form" + form.getInteger("id") + " : " + getQuestionsEvt.left().getValue());
                 Renders.renderError(request);

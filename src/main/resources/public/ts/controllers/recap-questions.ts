@@ -138,7 +138,7 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
     };
 
     const checkMandatoryQuestions = async () : Promise<boolean> => {
-        let mandatoryQuestions = vm.questions.filter(question => question.mandatory === true);
+        let mandatoryQuestions = vm.questions.all.filter(question => question.mandatory === true);
         for (let question of mandatoryQuestions) {
             let responses = vm.responses.all.filter(r => r.question_id === question.id && r.answer);
             if (responses.length <= 0) {

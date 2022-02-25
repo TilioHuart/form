@@ -32,9 +32,18 @@ public class QuestionController extends ControllerHelper {
     @ApiDoc("List all the questions of a specific form")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    public void list(HttpServerRequest request) {
+    public void listForForm(HttpServerRequest request) {
         String formId = request.getParam("formId");
-        questionService.list(formId, arrayResponseHandler(request));
+        questionService.listForForm(formId, arrayResponseHandler(request));
+    }
+
+    @Get("/sections/:sectionId/questions")
+    @ApiDoc("List all the sections of a specific form")
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void listForSection(HttpServerRequest request) {
+        String sectionId = request.getParam("sectionId");
+        questionService.listForSection(sectionId, arrayResponseHandler(request));
     }
 
     @Get("/forms/:formId/questions/count")

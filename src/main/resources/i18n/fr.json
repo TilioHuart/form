@@ -161,7 +161,11 @@
   "formulaire.form.edit.empty.main": "Votre formulaire est vide",
   "formulaire.form.edit.empty.caption": "Cliquez sur 'Ajouter' pour créez votre premier élément",
 
-  "formulaire.question.selectType": "Sélectionner le type de section",
+  "formulaire.element.new.title": "Sélectionner l'élément à ajouter",
+  "formulaire.element.new.section.title": "Ajouter une nouvelle section",
+  "formulaire.element.new.section.description": "Ajoutez une nouvelle section pour regrouper vos questions sur une même page ou pour personnaliser le parcours des répondants dans vorte formulaire.",
+  "formulaire.element.new.question.title": "Ajouter une nouvelle question",
+
   "formulaire.question.type.FREETEXT": "Zone de texte",
   "formulaire.question.type.SHORTANSWER": "Réponse courte",
   "formulaire.question.type.LONGANSWER": "Paragraphe",

@@ -11,7 +11,14 @@ public interface QuestionService {
      * @param formId form identifier
      * @param handler function handler returning JsonArray data
      */
-    void list(String formId, Handler<Either<String, JsonArray>> handler);
+    void listForForm(String formId, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * List all the sections of a specific form
+     * @param sectionId section identifier
+     * @param handler function handler returning JsonArray data
+     */
+    void listForSection(String sectionId, Handler<Either<String, JsonArray>> handler);
 
     /**
      * List all the questions of a specific form without freetext questions

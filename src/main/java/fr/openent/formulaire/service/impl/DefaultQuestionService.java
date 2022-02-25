@@ -14,9 +14,16 @@ import java.util.List;
 public class DefaultQuestionService implements QuestionService {
 
     @Override
-    public void list(String formId, Handler<Either<String, JsonArray>> handler) {
+    public void listForForm(String formId, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT * FROM " + Formulaire.QUESTION_TABLE + " WHERE form_id = ? ORDER BY position;";
         JsonArray params = new JsonArray().add(formId);
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public void listForSection(String sectionId, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT * FROM " + Formulaire.SECTION_TABLE + " WHERE form_id = ? ORDER BY position;";
+        JsonArray params = new JsonArray().add(sectionId);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 

@@ -105,7 +105,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         vm.saveAll = async (displaySuccess= true) : Promise<void> => {
             vm.dontSave = true;
-            let wrongQuestions = vm.questions.filter(question => !question.title); // TODO check more than just titles later
+            let wrongQuestions = vm.questions.all.filter(question => !question.title); // TODO check more than just titles later
             if (wrongQuestions.length > 0) {
                 notify.error(idiom.translate('formulaire.question.save.missing.field'));
             }
@@ -115,7 +115,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         vm.return = async() : Promise<void> => {
             vm.dontSave = true;
-            let wrongQuestions = vm.questions.filter(question => !question.title); // TODO check more than just titles later
+            let wrongQuestions = vm.questions.all.filter(question => !question.title); // TODO check more than just titles later
             if (wrongQuestions.length > 0) {
                 notify.error(idiom.translate('formulaire.question.save.missing.field'));
                 vm.dontSave = false;

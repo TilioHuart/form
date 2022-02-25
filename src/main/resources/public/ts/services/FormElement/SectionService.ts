@@ -1,11 +1,11 @@
 import {idiom, ng, notify} from 'entcore';
 import http from 'axios';
-import {DataUtils} from "../utils/data";
-import {Section} from "../models/Section";
+import {DataUtils} from "../../utils/data";
+import {Section} from "../../models";
 
 export interface SectionService {
     list(formId: number) : Promise<any>;
-    get(choiceId: number) : Promise<any>;
+    get(sectionId: number) : Promise<any>;
     save(section: Section) : Promise<any>;
     create(section: Section) : Promise<any>;
     update(section: Section) : Promise<any>;

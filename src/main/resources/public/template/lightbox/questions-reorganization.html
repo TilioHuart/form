@@ -2,9 +2,9 @@
     <h2><i18n>formulaire.organize</i18n></h2>
     <div class="drag">
         <ul sortable-list>
-            <li class="row" ng-repeat="question in vm.questions.all | orderBy:'position'"
-                sortable-element data-ng-change="vm.reOrder()" data-ng-model="question.index">
-                <div ng-include="'formulaire/public/template/components/question-item-organization.html'"></div>
+            <li class="row" ng-repeat="formElement in vm.formElements.all | orderBy:'position'"
+                sortable-element data-ng-change="vm.reOrder()" data-ng-model="formElement.index">
+                <div ng-include="'formulaire/public/template/components/formElement-item-organization.html'"></div>
             </li>
         </ul>
     </div>

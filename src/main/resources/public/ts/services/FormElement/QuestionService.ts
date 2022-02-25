@@ -1,10 +1,11 @@
 import {idiom, ng, notify} from 'entcore';
 import http from 'axios';
-import {Question} from "../models";
-import {DataUtils} from "../utils/data";
+import {DataUtils} from "../../utils/data";
+import {Question} from "../../models";
 
 export interface QuestionService {
     list(formId: number) : Promise<any>;
+    // list(id: number, isForSection?: boolean) : Promise<any>;
     countQuestions(formId: number) : Promise<any>;
     get(questionId: number) : Promise<any>;
     getByPosition(idForm: number, position: number) : Promise<any>;
@@ -25,6 +26,16 @@ export const questionService: QuestionService = {
             throw err;
         }
     },
+
+    // async list (id: number, isForSection: boolean = false) : Promise<any> {
+    //     try {
+    //         let parentEntity = isForSection ? 'sections' : 'forms';
+    //         return DataUtils.getData(await http.get(`/formulaire/${parentEntity}/${id}/questions`));
+    //     } catch (err) {
+    //         notify.error(idiom.translate('formulaire.error.questionService.list'));
+    //         throw err;
+    //     }
+    // },
 
     async countQuestions (formId: number) : Promise<any> {
         try {

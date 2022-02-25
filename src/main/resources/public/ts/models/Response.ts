@@ -2,7 +2,7 @@ import {idiom, notify} from "entcore";
 import {responseFileService, responseService} from "../services";
 import {Mix} from "entcore-toolkit";
 import {ResponseFiles} from "./ResponseFile";
-import {Question} from "./Question";
+import {Question} from "./FormElement";
 
 export class Response {
     id: number;

@@ -21,7 +21,7 @@
                             ng-click="vm.organizeQuestions()" ng-disabled="vm.form.nb_responses > 0">
                         <i18n>formulaire.organize</i18n>
                     </button>
-                    <button class="cell cancel dontSave" ng-click="vm.preview()" ng-show="vm.questions.all.length >= 1"><i18n>formulaire.preview</i18n></button>
+                    <button class="cell cancel dontSave" ng-click="vm.goPreview()" ng-show="vm.formElements.all.length >= 1"><i18n>formulaire.preview</i18n></button>
                     <button class="cell" ng-click="vm.saveAll(true)"><i18n>formulaire.save</i18n></button>
                 </div>
             </section>
@@ -31,50 +31,50 @@
             </div>
         </div>
 
-        <div class="edit-form" ng-if="vm.questions.all.length > 0">
-            <!-- List of questions-->
-            <div class="questions" sortable-list ng-if="!isMobile && vm.questions.selected.length == 0 && vm.form.nb_responses <= 0">
-                <div ng-repeat="question in vm.questions.all | orderBy:'position'" class="nine twelve-mobile"
-                     sortable-element data-ng-change="vm.reOrder()" data-ng-model="question.index" guard-root>
-                    <!--  Each questions component -->
-                    <question-item question="question" reorder="true" has-form-responses="vm.form.nb_responses > 0" input-guard></question-item>
+        <div class="edit-form" ng-if="vm.formElements.all.length > 0">
+            <!-- List of formElements-->
+            <div class="questions" sortable-list ng-if="!isMobile && vm.formElements.selected.length == 0 && vm.form.nb_responses <= 0">
+                <div ng-repeat="formElement in vm.formElements.all | orderBy:'position'" class="nine twelve-mobile"
+                     sortable-element data-ng-change="vm.reOrder()" data-ng-model="formElement.index" guard-root>
+                    <!--  Each formElements component -->
+                    <question-item question="formElement" reorder="true" has-form-responses="vm.form.nb_responses > 0" input-guard></question-item>
                 </div>
             </div>
-            <div class="questions" ng-if="isMobile || (!isMobile && vm.questions.selected.length > 0) || vm.form.nb_responses > 0">
-                <div ng-repeat="question in vm.questions.all | orderBy:'position'" class="nine twelve-mobile">
-                    <!--  Each questions component -->
-                    <question-item question="question" reorder="false" has-form-responses="vm.form.nb_responses > 0"></question-item>
+            <div class="questions" ng-if="isMobile || (!isMobile && vm.formElements.selected.length > 0) || vm.form.nb_responses > 0">
+                <div ng-repeat="formElement in vm.formElements.all | orderBy:'position'" class="nine twelve-mobile">
+                    <!--  Each formElements component -->
+                    <question-item question="formElement" reorder="false" has-form-responses="vm.form.nb_responses > 0"></question-item>
                 </div>
             </div>
             <!-- End page buttons -->
             <div class="buttons">
                 <div class="flexend nine zero-mobile">
                     <button class="cell" ng-class="{blueButton: vm.form.nb_responses <= 0}"
-                            reset-guard="vm.createNewQuestion()" ng-disabled="vm.form.nb_responses > 0">
+                            reset-guard="vm.createNewElement()" ng-disabled="vm.form.nb_responses > 0">
                         <i18n>formulaire.add.element</i18n>
                     </button>
                 </div>
-                <div ng-click="vm.createNewQuestion()" class="fab zero-desktop">
+                <div ng-click="vm.createNewElement()" class="fab zero-desktop">
                     +
                 </div>
             </div>
         </div>
 
         <!-- Error page, wrong form -->
-        <div class="error" ng-if="vm.questions.all.length <= 0">
+        <div class="error" ng-if="vm.formElements.all.length <= 0">
             <img src="/formulaire/public/img/empty-form.svg" class="img_mini"/>
             <h1><i18n>formulaire.form.edit.empty.main</i18n></h1>
             <br>
             <div><i18n>formulaire.form.edit.empty.caption</i18n></div>
             <br>
             <div class="buttons">
-                <button class="cell blueButton" ng-click="vm.createNewQuestion()"><i18n>formulaire.add.element</i18n></button>
+                <button class="cell blueButton" ng-click="vm.createNewElement()"><i18n>formulaire.add.element</i18n></button>
             </div>
         </div>
     </div>
 
     <div ng-if="currentPage == Pages.PREVIEW">
-        <div ng-include="'formulaire/public/template/containers/preview-form.html'"></div>
+        <div ng-include="'formulaire/public/template/containers/goPreview-form.html'"></div>
     </div>
 
     <container template='lightbox'></container>
