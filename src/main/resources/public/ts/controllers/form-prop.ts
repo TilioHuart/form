@@ -3,7 +3,7 @@ import {distributionService, formService} from "../services";
 import {Form} from "../models";
 import {FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
 import {Delegates} from "../models";
-import {Folder} from "../models/Folder";
+import {Folder} from "../models";
 
 interface ViewModel {
     form: Form;

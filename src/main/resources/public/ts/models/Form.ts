@@ -39,7 +39,7 @@ export class Form implements Selectable, Shareable  {
         type: string;
         compatible: boolean;
     };
-    nb_questions: number;
+    nb_elements: number;
     nb_responses: number;
     distributions: Distributions;
 

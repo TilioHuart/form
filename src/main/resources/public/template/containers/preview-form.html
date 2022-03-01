@@ -14,7 +14,7 @@
     </section>
 </div>
 
-<div ng-include="'formulaire/public/template/components/progress-bar.html'" ng-if="vm.nbQuestions > 1"></div>
+<progress-bubble-bar form-element="vm.preview.formElement" nb-form-elements="vm.nb_elements" ng-if="vm.nb_elements > 1">></progress-bubble-bar>
 
 <div class="respond-question">
     <!-- RPGD page -->

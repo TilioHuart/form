@@ -1,11 +1,29 @@
 import {idiom, ng, notify, template, angular} from 'entcore';
-import {Form, Question, QuestionChoice, Questions, Response, Responses, Types} from "../models";
-import {distributionService, formService, questionChoiceService, questionService, responseService} from "../services";
+import {
+    Form,
+    FormElement,
+    FormElements,
+    Question,
+    QuestionChoice,
+    Questions,
+    Response,
+    Responses,
+    Section,
+    Types
+} from "../models";
+import {
+    distributionService, formElementService,
+    formService,
+    questionChoiceService,
+    questionService,
+    responseService,
+    sectionService
+} from "../services";
 import {
     Direction,
     FORMULAIRE_BROADCAST_EVENT,
     FORMULAIRE_EMIT_EVENT,
-    FORMULAIRE_QUESTION_EMIT_EVENT,
+    FORMULAIRE_FORM_ELEMENT_EMIT_EVENT,
     Pages
 } from "../core/enums";
 import {folderService} from "../services/FolderService";
@@ -14,40 +32,43 @@ enum PreviewPage { RGPD = 'rgpd', QUESTION = 'question', RECAP = 'recap'}
 
 interface ViewModel {
     form: Form;
-    questions: Questions;
-    newQuestion: Question;
+    formElements: FormElements;
+    newElement: Question|Section;
     dontSave: boolean;
     nbQuestions: number;
     last: boolean;
     display: {
         lightbox: {
-            newQuestion: boolean,
+            newElement: boolean,
             reorganization: boolean,
             delete: boolean,
             undo: boolean
         }
     };
-    question: Question; // Question for preview
-    response: Response; // Response for preview
-    responses: Responses; // Responses list for preview
+    preview: {
+        formElement: FormElement, // Question for preview
+        response: Response, // Response for preview
+        responses: Responses, // Responses list for preview
+        page: string
+    };
     PreviewPage: typeof PreviewPage;
-    previewPage: string;
 
     $onInit() : Promise<void>;
 
     // Editor functions
     saveAll(displaySuccess?: boolean) : Promise<void>;
     return() : Promise<void>;
-    createNewQuestion() : void;
-    doCreateNewQuestion(code: number) : void;
+    createNewElement() : void;
+    doCreateNewElement(code?: number) : void;
     organizeQuestions() : void;
     doOrganizeQuestions() : Promise<void>;
     cancelOrganizeQuestions() : Promise<void>;
     duplicateQuestion() : Promise<void>;
-    deleteQuestion() : Promise<void>;
-    doDeleteQuestion() : Promise<void>;
-    undoQuestionChanges();
-    doUndoQuestionChanges() : Promise<void>;
+    deleteFormElement() : Promise<void>;
+    doDeleteFormElement() : Promise<void>;
+    undoFormElementChanges();
+    doUndoFormElementChanges() : Promise<void>;
+    validateSection(): Promise<void>;
     closeLightbox(action: string): void;
     createNewChoice(question: Question) : void;
     deleteChoice(question: Question, index: number) : Promise<void>;
@@ -58,11 +79,12 @@ interface ViewModel {
     moveQuestion(index: number, direction: string) : void;
 
     // Preview functions
-    preview() : void;
+    goPreview() : void;
     backToEditor() : void;
     prev() : void;
     next() : void;
     displayDefaultOption() : string;
+    isQuestion(formElement: FormElement): boolean;
 }
 
 
@@ -71,52 +93,53 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         const vm: ViewModel = this;
         vm.form = new Form();
-        vm.questions = new Questions();
-        vm.newQuestion = new Question();
+        vm.formElements = new FormElements();
+        vm.newElement = new Question();
         vm.dontSave = false;
         vm.nbQuestions = 0;
         vm.last = false;
         vm.display = {
             lightbox: {
-                newQuestion: false,
+                newElement: false,
                 reorganization: false,
                 delete: false,
                 undo: false
             }
         };
-        vm.question = new Question();
-        vm.response = new Response();
-        vm.responses = new Responses();
+        vm.preview = {
+            formElement: new Question(),
+            response: new Response(),
+            responses: new Responses(),
+            page: PreviewPage.QUESTION
+        };
         vm.PreviewPage = PreviewPage;
-        vm.previewPage = PreviewPage.QUESTION;
 
         vm.$onInit = async () : Promise<void> => {
             vm.form = $scope.form;
             vm.form.nb_responses = vm.form.id ? (await distributionService.count(vm.form.id)).count : 0;
-            await vm.questions.sync(vm.form.id);
-            vm.newQuestion.form_id = vm.form.id;
+            await vm.formElements.sync(vm.form.id);
+            vm.newElement.form_id = vm.form.id;
             vm.dontSave = false;
-            vm.nbQuestions = vm.questions.all.length;
+            vm.nbQuestions = vm.formElements.all.length;
             $scope.safeApply();
         };
-
 
         // Global functions
 
         vm.saveAll = async (displaySuccess= true) : Promise<void> => {
             vm.dontSave = true;
-            let wrongQuestions = vm.questions.all.filter(question => !question.title); // TODO check more than just titles later
-            if (wrongQuestions.length > 0) {
+            let wrongElements = vm.formElements.all.filter(fe => !fe.title); // TODO check more than just titles later
+            if (wrongElements.length > 0) {
                 notify.error(idiom.translate('formulaire.question.save.missing.field'));
             }
-            await saveQuestions(displaySuccess && wrongQuestions.length <= 0);
+            await saveFormElements(displaySuccess && wrongElements.length <= 0);
             vm.dontSave = false;
         };
 
         vm.return = async() : Promise<void> => {
             vm.dontSave = true;
-            let wrongQuestions = vm.questions.all.filter(question => !question.title); // TODO check more than just titles later
-            if (wrongQuestions.length > 0) {
+            let wrongElements = vm.formElements.all.filter(question => !question.title); // TODO check more than just titles later
+            if (wrongElements.length > 0) {
                 notify.error(idiom.translate('formulaire.question.save.missing.field'));
                 vm.dontSave = false;
             } else {
@@ -126,28 +149,37 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
         };
 
-        vm.createNewQuestion = () => {
-            template.open('lightbox', 'lightbox/question-new');
-            vm.display.lightbox.newQuestion = true;
+        vm.createNewElement = () => {
+            template.open('lightbox', 'lightbox/new-element');
+            vm.display.lightbox.newElement = true;
             $scope.safeApply();
         };
 
-        vm.doCreateNewQuestion = async (code: number) => {
+        vm.doCreateNewElement = async (code?) => {
             vm.dontSave = true;
-            vm.newQuestion = new Question();
-            vm.newQuestion.form_id = vm.form.id;
-            vm.newQuestion.question_type = code;
-            vm.newQuestion.position = vm.questions.all.length + 1;
-            if (vm.newQuestion.question_type === Types.MULTIPLEANSWER
-                || vm.newQuestion.question_type === Types.SINGLEANSWER
-                || vm.newQuestion.question_type === Types.SINGLEANSWERRADIO) {
-                for (let i = 0; i < 3; i++) {
-                    vm.newQuestion.choices.all.push(new QuestionChoice());
+
+            vm.newElement = code ? new Question() : new Section();
+            if (vm.newElement instanceof Question) {
+                vm.newElement = new Question();
+                vm.newElement.question_type = code;
+                if (vm.newElement.question_type === Types.MULTIPLEANSWER
+                    || vm.newElement.question_type === Types.SINGLEANSWER
+                    || vm.newElement.question_type === Types.SINGLEANSWERRADIO) {
+                    for (let i = 0; i < 3; i++) {
+                        vm.newElement.choices.all.push(new QuestionChoice());
+                    }
                 }
             }
-            vm.questions.all.push(vm.newQuestion);
-            vm.nbQuestions = vm.questions.all.length;
-            vm.display.lightbox.newQuestion = false;
+            else {
+                vm.newElement = new Section();
+            }
+
+            vm.newElement.form_id = vm.form.id;
+            vm.newElement.position = vm.formElements.all.length + 1;
+            vm.newElement.selected = true;
+            vm.formElements.all.push(vm.newElement);
+            vm.nbQuestions = vm.formElements.all.length;
+            vm.display.lightbox.newElement = false;
             template.close('lightbox');
             vm.dontSave = false;
             $scope.safeApply();
@@ -160,57 +192,59 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         };
 
         vm.doOrganizeQuestions = async () : Promise<void> => {
-            await saveQuestions();
+            await saveFormElements();
             vm.display.lightbox.reorganization = false;
             template.close('lightbox');
             $scope.safeApply();
         };
 
         vm.cancelOrganizeQuestions = async () : Promise<void> => {
-            await vm.questions.sync(vm.form.id);
+            await vm.formElements.sync(vm.form.id);
             vm.closeLightbox('reorganization');
         };
 
-
         // Question functions
+
         vm.duplicateQuestion = async () : Promise<void> => {
             try {
                 vm.dontSave = true;
-                let question = vm.questions.selected[0];
-                await questionService.save(question);
-                for (let i = question.position; i < vm.questions.all.length; i++) {
-                    vm.questions.all[i].position++;
-                    await questionService.save(vm.questions.all[i]);
-                }
-                let duplicata = question;
-                duplicata.position++;
-                let newQuestion = await questionService.create(duplicata);
-                if (question.question_type === Types.SINGLEANSWER
-                    || question.question_type === Types.MULTIPLEANSWER
-                    || question.question_type === Types.SINGLEANSWERRADIO) {
-                    for (let choice of question.choices.all) {
-                        if (choice.value) {
-                            await questionChoiceService.create(new QuestionChoice(newQuestion.id, choice.value));
+                let question = vm.formElements.selected[0];
+                if (question instanceof Question) {
+                    await questionService.save(question);
+                    for (let i = question.position; i < vm.formElements.all.length; i++) {
+                        vm.formElements.all[i].position++;
+                        await formElementService.save(vm.formElements.all[i]);
+                    }
+                    let duplicata = question;
+                    duplicata.position++;
+                    let newQuestion = await questionService.create(duplicata);
+                    if (question.question_type === Types.SINGLEANSWER
+                        || question.question_type === Types.MULTIPLEANSWER
+                        || question.question_type === Types.SINGLEANSWERRADIO) {
+                        for (let choice of question.choices.all) {
+                            if (choice.value) {
+                                await questionChoiceService.create(new QuestionChoice(newQuestion.id, choice.value));
+                            }
                         }
                     }
+                    notify.success(idiom.translate('formulaire.success.question.duplicate'));
+                    await vm.formElements.sync(vm.form.id);
+                    vm.dontSave = false;
+                    $scope.safeApply();
                 }
-                notify.success(idiom.translate('formulaire.success.question.duplicate'));
-                await vm.questions.sync(vm.form.id);
-                vm.dontSave = false;
-                $scope.safeApply();
             }
             catch (e) {
                 throw e;
             }
         };
 
-        vm.deleteQuestion = async () : Promise<void> => {
-            if (vm.questions.selected[0].id != null){
-                let responseCount = await responseService.countByQuestion(vm.questions.selected[0].id);
+        vm.deleteFormElement = async () : Promise<void> => {
+            if (vm.formElements.selected[0].id != null) {
+                let responseCount = await responseService.countByQuestion(vm.formElements.selected[0].id);
                 if (vm.form.sent && responseCount.count>0){
                     notify.error(idiom.translate('formulaire.question.delete.response.fill.warning'));
                 }
-                else if (vm.form.sent && vm.questions.all.length === 1) {
+                else if (vm.form.sent && vm.formElements.all.length === 1) {
                     notify.error(idiom.translate('formulaire.question.delete.empty.warning'));
                 }
                 else {
@@ -220,21 +254,21 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 }
             }
             else{
-                vm.questions.all = vm.questions.all.filter(q => q.id);
+                vm.formElements.all = vm.formElements.all.filter(q => q.id);
             }
         };
 
-        vm.doDeleteQuestion = async () : Promise<void> => {
+        vm.doDeleteFormElement = async () : Promise<void> => {
             try {
-                let question = vm.questions.selected[0];
-                if (question.id) {
-                    await questionService.delete(question.id);
+                let formElement = vm.formElements.selected[0];
+                if (formElement.id) {
+                    await formElementService.delete(formElement);
                 }
                 template.close('lightbox');
                 vm.display.lightbox.delete = false;
                 notify.success(idiom.translate('formulaire.success.question.delete'));
-                await vm.questions.sync(vm.form.id);
-                vm.nbQuestions = vm.questions.all.length;
+                await vm.formElements.sync(vm.form.id);
+                vm.nbQuestions = vm.formElements.all.length;
                 rePositionQuestions();
                 vm.dontSave = false;
                 $scope.safeApply();
@@ -244,27 +278,44 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
         };
 
-        vm.undoQuestionChanges = async () => {
-            if (vm.questions.selected.length > 0) {
-                let question = vm.questions.selected[0];
-                if (question.title || question.statement || question.mandatory || question.choices.all.length > 0) {
+        vm.undoFormElementChanges = async () => {
+            if (vm.formElements.selected.length > 0) {
+                let formElement = vm.formElements.selected[0];
+                let hasChanged = false;
+                if (formElement instanceof Question) {
+                    hasChanged = (!!formElement.title || !!formElement.statement || formElement.mandatory || formElement.choices.all.length > 0);
+                }
+                else if (formElement instanceof Section) {
+                    hasChanged = (!!formElement.title || !!formElement.description || formElement.questions.all.length > 0);
+                }
+
+                if (hasChanged) {
                     vm.dontSave = true;
                     template.open('lightbox', 'lightbox/question-confirm-undo');
                     vm.display.lightbox.undo = true;
                 }
                 else {
-                    await vm.questions.sync(vm.form.id);
+                    await vm.formElements.sync(vm.form.id);
                     $scope.safeApply();
                 }
             }
         };
 
-        vm.doUndoQuestionChanges = async () : Promise<void> => {
-            await vm.questions.sync(vm.form.id);
+        vm.doUndoFormElementChanges = async () : Promise<void> => {
+            await vm.formElements.sync(vm.form.id);
             template.close('lightbox');
             vm.display.lightbox.undo = true;
             vm.dontSave = false;
             $scope.safeApply();
+        };
+
+        vm.validateSection = async () : Promise<void> => {
+            let formElement = vm.formElements.selected[0];
+            if (formElement instanceof Section) {
+                await sectionService.save(formElement);
+                await vm.formElements.sync(vm.form.id);
+                $scope.safeApply();
+            }
         };
 
         vm.closeLightbox = (action: string) : void => {
@@ -273,7 +324,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             vm.dontSave = false;
             $scope.safeApply();
         };
-
 
         // Display functions
 
@@ -290,9 +340,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
         };
 
-        vm.displayTypeDescription = (description : string|number) :string =>{
+        vm.displayTypeDescription = (description : string|number) :string => {
             return idiom.translate("formulaire.question.type.description." + description);
-        }
+        };
 
         vm.displayTypeIcon = (code: number) : string => {
             switch (code) {
@@ -319,7 +369,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         vm.reOrder = () : void => {
             let finished = true;
-            angular.forEach(vm.questions.all, function (question) {
+            angular.forEach(vm.formElements.all, function (question) {
                 if (question.position != parseFloat(question.index) + 1) {
                     question.position = parseFloat(question.index) + 1;
                 }
@@ -333,13 +383,13 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.moveQuestion = (index: number, direction: string) : void => {
             switch (direction) {
                 case Direction.UP: {
-                    vm.questions.all[index].position--;
-                    vm.questions.all[index - 1].position++;
+                    vm.formElements.all[index].position--;
+                    vm.formElements.all[index - 1].position++;
                     break;
                 }
                 case Direction.DOWN: {
-                    vm.questions.all[index].position++;
-                    vm.questions.all[index + 1].position--;
+                    vm.formElements.all[index].position++;
+                    vm.formElements.all[index + 1].position--;
                     break;
                 }
                 default:
@@ -352,29 +402,30 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         // Preview functions
 
-        vm.preview = async () : Promise<void> => {
+        vm.goPreview = async () : Promise<void> => {
             await vm.saveAll(false);
-            vm.responses = new Responses();
-            for (let question of vm.questions.all) {
+            vm.preview.responses = new Responses();
+            for (let question of vm.formElements.all) {
                 let response = new Response();
-                if (vm.question.question_type === Types.MULTIPLEANSWER
-                    || vm.question.question_type === Types.SINGLEANSWERRADIO) {
-                    response.selectedIndex = new Array<boolean>(vm.question.choices.all.length);
+                if (vm.preview.formElement instanceof Question
+                    && (vm.preview.formElement.question_type === Types.MULTIPLEANSWER
+                    || vm.preview.formElement.question_type === Types.SINGLEANSWERRADIO)) {
+                        response.selectedIndex = new Array<boolean>(vm.preview.formElement.choices.all.length);
                 }
-                vm.responses.all.push(response);
+                vm.preview.responses.all.push(response);
             }
             if (vm.form.rgpd) {
-                vm.previewPage = PreviewPage.RGPD;
+                vm.preview.page = PreviewPage.RGPD;
             }
             else {
-                vm.question = vm.questions.all[0];
-                vm.response = vm.responses.all[0];
-                vm.last = vm.question.position === vm.nbQuestions;
-                vm.previewPage = PreviewPage.QUESTION;
+                vm.preview.formElement = vm.formElements.all[0];
+                vm.preview.response = vm.preview.responses.all[0];
+                vm.last = vm.preview.formElement.position === vm.nbQuestions;
+                vm.preview.page = PreviewPage.QUESTION;
             }
             $scope.currentPage = Pages.PREVIEW;
             $scope.safeApply();
-        }
+        };
 
         vm.backToEditor = () : void => {
             $scope.currentPage = Pages.EDIT_FORM;
@@ -382,47 +433,47 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         };
 
         vm.prev = () : void => {
-            if (vm.previewPage === PreviewPage.RECAP) {
-                vm.question = vm.questions.all[vm.nbQuestions - 1];
-                vm.response = vm.responses.all[vm.nbQuestions - 1];
-                vm.last = vm.question.position === vm.nbQuestions;
-                vm.previewPage = PreviewPage.QUESTION;
+            if (vm.preview.page === PreviewPage.RECAP) {
+                vm.preview.formElement = vm.formElements.all[vm.nbQuestions - 1];
+                vm.preview.response = vm.preview.responses.all[vm.nbQuestions - 1];
+                vm.last = vm.preview.formElement.position === vm.nbQuestions;
+                vm.preview.page = PreviewPage.QUESTION;
             }
             else {
-                let prevPosition: number = vm.question.position - 1;
+                let prevPosition: number = vm.preview.formElement.position - 1;
                 vm.last = prevPosition === vm.nbQuestions;
                 if (prevPosition > 0) {
-                    vm.question = vm.questions.all[prevPosition - 1];
-                    vm.response = vm.responses.all[prevPosition - 1];
+                    vm.preview.formElement = vm.formElements.all[prevPosition - 1];
+                    vm.preview.response = vm.preview.responses.all[prevPosition - 1];
                 }
                 else if (vm.form.rgpd) {
-                    vm.question = null;
-                    vm.response = null;
-                    vm.previewPage = PreviewPage.RGPD;
+                    vm.preview.formElement = null;
+                    vm.preview.response = null;
+                    vm.preview.page = PreviewPage.RGPD;
                 }
             }
             $scope.safeApply();
         };
 
         vm.next = () : void => {
-            if (vm.previewPage === PreviewPage.RGPD) {
-                vm.question = vm.questions.all[0];
-                vm.response = vm.responses.all[0];
-                vm.last = vm.question.position === vm.nbQuestions;
-                vm.previewPage = PreviewPage.QUESTION;
+            if (vm.preview.page === PreviewPage.RGPD) {
+                vm.preview.formElement = vm.formElements.all[0];
+                vm.preview.response = vm.preview.responses.all[0];
+                vm.last = vm.preview.formElement.position === vm.nbQuestions;
+                vm.preview.page = PreviewPage.QUESTION;
             }
             else {
-                let nextPosition: number = vm.question.position + 1;
+                let nextPosition: number = vm.preview.formElement.position + 1;
                 vm.last = nextPosition === vm.nbQuestions;
                 if (nextPosition <= vm.nbQuestions) {
-                    vm.question = vm.questions.all[nextPosition - 1];
-                    vm.response = vm.responses.all[nextPosition - 1];
+                    vm.preview.formElement = vm.formElements.all[nextPosition - 1];
+                    vm.preview.response = vm.preview.responses.all[nextPosition - 1];
                 }
                 else {
                     // TODO init what needed for recap page
-                    vm.question = null;
-                    vm.response = null;
-                    vm.previewPage = PreviewPage.RECAP;
+                    vm.preview.formElement = null;
+                    vm.preview.response = null;
+                    vm.preview.page = PreviewPage.RECAP;
                 }
             }
             $scope.safeApply();
@@ -434,40 +485,53 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         // Utils
 
+        vm.isQuestion = (formElement) : boolean => {
+            return formElement instanceof Question;
+        };
+
         const rePositionQuestions = () : void => {
-            vm.questions.all.sort((a, b) => a.position - b.position);
-            for (let i = 0; i < vm.questions.all.length; i++) {
-                vm.questions.all[i].position = i + 1;
+            vm.formElements.all.sort((a, b) => a.position - b.position);
+            for (let i = 0; i < vm.formElements.all.length; i++) {
+                vm.formElements.all[i].position = i + 1;
             }
             $scope.safeApply();
         };
 
-        const saveQuestions = async (displaySuccess: boolean = false) : Promise<void> => {
+        const saveFormElements = async (displaySuccess: boolean = false) : Promise<void> => {
             try {
                 rePositionQuestions();
-                for (let question of vm.questions.all) {
-                    if (!question.title && !question.statement && !question.mandatory && question.choices.all.length <= 0) {
-                        if (question.id) {
-                            question = await questionService.get(question.id);
+                for (let formElement of vm.formElements.all) {
+                    if (formElement instanceof Question && !formElement.title && !formElement.statement && !formElement.mandatory && formElement.choices.all.length <= 0) {
+                        if (formElement.id) {
+                            formElement = await questionService.get(formElement.id);
+                        }
+                    }
+                    else if (formElement instanceof Section && !formElement.title && !formElement.description && formElement.questions.all.length <= 0) {
+                        if (formElement.id) {
+                            formElement = await sectionService.get(formElement.id);
                         }
                     }
                     else {
-                        let newId = (await questionService.save(question)).id;
-                        question.id = newId;
-                        let registeredChoices = [];
-                        for (let choice of question.choices.all) {
-                            if (choice.value && !registeredChoices.find(c => c === choice.value) ) {
-                                choice.question_id = newId;
-                                choice.value=choice.value.replace(/\u00A0/," ");
-                                choice.id = (await questionChoiceService.save(choice)).id;
-                                registeredChoices.push(choice.value);
+                        let newId = (await formElementService.save(formElement)).id;
+                        formElement.id = newId;
+
+                        if (formElement instanceof Question) {
+                            let registeredChoices = [];
+                            for (let choice of formElement.choices.all) {
+                                if (choice.value && !registeredChoices.find(c => c === choice.value)) {
+                                    choice.question_id = newId;
+                                    choice.value = choice.value.replace(/\u00A0/, " ");
+                                    choice.id = (await questionChoiceService.save(choice)).id;
+                                    registeredChoices.push(choice.value);
+                                }
                             }
                         }
+                        // TODO same for formElement.questions if instanceof Section ?
                     }
                 }
                 if (displaySuccess) { notify.success(idiom.translate('formulaire.success.form.save')); }
                 vm.form.setFromJson(await formService.get(vm.form.id));
-                vm.questions.deselectAll();
+                vm.formElements.deselectAll();
                 $scope.safeApply();
             }
             catch (e) {
@@ -479,17 +543,17 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             if (!vm.dontSave && $scope.currentPage === Pages.EDIT_FORM) {
                 let questionPos: number = isInFocusable(event.target);
                 if (questionPos && questionPos > 0) {
-                    let question = vm.questions.all.filter(question => question.position == questionPos)[0];
+                    let question = vm.formElements.all.filter(question => question.position == questionPos)[0];
                     if (!question.selected) {
-                        if (vm.questions.selected.length > 0) {
-                            await saveQuestions();
+                        if (vm.formElements.selected.length > 0) {
+                            await saveFormElements();
                         }
                         // Reselection of the question because the sync has removed the selections
-                        vm.questions.all.filter(question => question.position == questionPos)[0].selected = true;
+                        vm.formElements.all.filter(question => question.position == questionPos)[0].selected = true;
                     }
                 }
                 else if(!isInDontSave(event.target)) {
-                    await saveQuestions();
+                    await saveFormElements();
                 }
                 $scope.safeApply();
             }
@@ -515,8 +579,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         document.onclick = e => { onClickQuestion(e); };
 
-        $scope.$on(FORMULAIRE_QUESTION_EMIT_EVENT.DUPLICATE, () => { vm.duplicateQuestion() });
-        $scope.$on(FORMULAIRE_QUESTION_EMIT_EVENT.DELETE, () => { vm.deleteQuestion() });
-        $scope.$on(FORMULAIRE_QUESTION_EMIT_EVENT.UNDO, () => { vm.undoQuestionChanges() });
+        $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DUPLICATE, () => { vm.duplicateQuestion() });
+        $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DELETE, () => { vm.deleteFormElement() });
+        $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.UNDO, () => { vm.undoFormElementChanges() });
+        $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.VALIDATE, () => { vm.validateSection() });
         $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_FORM_EDITOR, () => { vm.$onInit() });
     }]);

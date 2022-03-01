@@ -47,7 +47,7 @@ export const sectionService: SectionService = {
 
     async update(section: Section) : Promise<any> {
         try {
-            return DataUtils.getData(await http.put(`/formulaire/forms/${section.form_id}/sections`, section));
+            return DataUtils.getData(await http.put(`/formulaire/sections/${section.id}`, section));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.sectionService.update'));
             throw err;

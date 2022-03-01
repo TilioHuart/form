@@ -43,8 +43,7 @@ export class Questions extends Selection<Question> {
 
     sync = async (id: number, isForSection= false) : Promise<void> => {
         try {
-            let data = await questionService.list(id);
-            // let data = await questionService.list(id, isForSection);
+            let data = await questionService.list(id, isForSection);
             this.all = Mix.castArrayAs(Question, data);
             await this.syncChoices();
         } catch (e) {

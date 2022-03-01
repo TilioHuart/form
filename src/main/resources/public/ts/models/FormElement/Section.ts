@@ -48,7 +48,7 @@ export class Sections extends Selection<Section> {
     syncQuestions = async () : Promise<void> => {
         for (let i = 0; i < this.all.length; i++) {
             let questions = this.all[i].questions;
-            // await questions.sync(this.all[i].id, true);
+            await questions.sync(this.all[i].id, true);
         }
     }
 }

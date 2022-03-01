@@ -1,7 +1,6 @@
 import {idiom, model, ng, notify} from "entcore";
 import {
-    Distribution,
-    DistributionStatus, Form,
+    Distribution, Form,
     Question, QuestionChoices,
     Response, ResponseFiles,
     Responses,

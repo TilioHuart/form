@@ -20,14 +20,15 @@ public class DefaultFormService implements FormService {
         StringBuilder query = new StringBuilder();
         JsonArray params = new JsonArray();
 
-        query.append("SELECT f.*, d.nb_responses, q.nb_questions, rff.folder_id ")
+        query.append("SELECT f.*, d.nb_responses, e.nb_elements, rff.folder_id ")
                 .append("FROM ").append(Formulaire.FORM_TABLE).append(" f ")
                 .append("LEFT JOIN ").append(Formulaire.FORM_SHARES_TABLE).append(" fs ON f.id = fs.resource_id ")
                 .append("LEFT JOIN ").append(Formulaire.MEMBERS_TABLE).append(" m ON (fs.member_id = m.id AND m.group_id IS NOT NULL) ")
                 .append("LEFT JOIN (SELECT form_id, COUNT(form_id) AS nb_responses FROM ").append(Formulaire.DISTRIBUTION_TABLE)
                 .append(" WHERE status = ? GROUP BY form_id) d ON d.form_id = f.id ")
-                .append("LEFT JOIN (SELECT form_id, COUNT(*) AS nb_questions FROM ").append(Formulaire.QUESTION_TABLE)
-                .append(" GROUP BY form_id) q ON q.form_id = f.id ")
+                .append("LEFT JOIN (SELECT form_id, COUNT(form_id) AS nb_elements FROM (SELECT id, form_id FROM ")
+                .append(Formulaire.QUESTION_TABLE).append(" UNION SELECT id, form_id FROM ").append(Formulaire.SECTION_TABLE)
+                .append(") AS e GROUP BY form_id) e ON e.form_id = f.id ")
                 .append("LEFT JOIN ").append(Formulaire.REL_FORM_FOLDER_TABLE).append(" rff ON rff.form_id = f.id AND rff.user_id = f.owner_id");
         params.add(Formulaire.FINISHED);
 
@@ -37,7 +38,7 @@ public class DefaultFormService implements FormService {
         }
 
         query.append(" AND (fs.action = ? OR fs.action = ?)) OR f.owner_id = ? ")
-                .append("GROUP BY f.id, d.nb_responses, q.nb_questions, rff.folder_id ")
+                .append("GROUP BY f.id, d.nb_responses, e.nb_elements, rff.folder_id ")
                 .append("ORDER BY f.date_modification DESC;");
         params.add(Formulaire.MANAGER_RESOURCE_BEHAVIOUR).add(Formulaire.CONTRIB_RESOURCE_BEHAVIOUR).add(user.getUserId());
 
@@ -58,23 +59,21 @@ public class DefaultFormService implements FormService {
 
     @Override
     public void listForLinker(List<String> groupsAndUserIds, UserInfos user, Handler<Either<String, JsonArray>> handler) {
-        StringBuilder query = new StringBuilder();
+        String query = "SELECT f.* FROM " + Formulaire.FORM_TABLE + " f " +
+                "LEFT JOIN " + Formulaire.FORM_SHARES_TABLE + " fs ON f.id = fs.resource_id " +
+                "LEFT JOIN " + Formulaire.MEMBERS_TABLE + " m ON (fs.member_id = m.id AND m.group_id IS NOT NULL) " +
+                "WHERE (fs.member_id IN " + Sql.listPrepared(groupsAndUserIds.toArray()) +
+                " AND fs.action = ?) OR f.owner_id = ? " +
+                "GROUP BY f.id " +
+                "ORDER BY f.date_modification DESC;";
+
         JsonArray params = new JsonArray();
-
-        query.append("SELECT f.* FROM ").append(Formulaire.FORM_TABLE).append(" f ")
-                .append("LEFT JOIN ").append(Formulaire.FORM_SHARES_TABLE).append(" fs ON f.id = fs.resource_id ")
-                .append("LEFT JOIN ").append(Formulaire.MEMBERS_TABLE).append(" m ON (fs.member_id = m.id AND m.group_id IS NOT NULL) ")
-                .append("WHERE (fs.member_id IN ").append(Sql.listPrepared(groupsAndUserIds.toArray()))
-                .append(" AND fs.action = ?) OR f.owner_id = ? ")
-                .append("GROUP BY f.id ")
-                .append("ORDER BY f.date_modification DESC;");
-
         for (String groupOrUser : groupsAndUserIds) {
             params.add(groupOrUser);
         }
         params.add(Formulaire.MANAGER_RESOURCE_BEHAVIOUR).add(user.getUserId());
 
-        Sql.getInstance().prepared(query.toString(), params, SqlResult.validResultHandler(handler));
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
     @Override

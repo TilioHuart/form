@@ -37,6 +37,7 @@
   "formulaire.properties": "Propriétés",
   "formulaire.myResponses": "Mes réponses",
   "formulaire.duplicate": "Dupliquer",
+  "formulaire.validate": "Valider",
   "formulaire.rename": "Renommer",
   "formulaire.move": "Déplacer",
   "formulaire.send": "Envoyer",
@@ -163,8 +164,10 @@
 
   "formulaire.element.new.title": "Sélectionner l'élément à ajouter",
   "formulaire.element.new.section.title": "Ajouter une nouvelle section",
-  "formulaire.element.new.section.description": "Ajoutez une nouvelle section pour regrouper vos questions sur une même page ou pour personnaliser le parcours des répondants dans vorte formulaire.",
+  "formulaire.element.new.section.description": "Ajoutez une nouvelle section pour regrouper vos questions sur une même page ou pour personnaliser le parcours des répondants dans votre formulaire.",
   "formulaire.element.new.question.title": "Ajouter une nouvelle question",
+
+  "formulaire.section.no.description": "Pas de description",
 
   "formulaire.question.type.FREETEXT": "Zone de texte",
   "formulaire.question.type.SHORTANSWER": "Réponse courte",
@@ -193,10 +196,15 @@
   "formulaire.question.delete.response.fill.warning": "Vous ne pouvez pas supprimer cette question, des utilisateurs ont déjà répondu",
   "formulaire.question.delete.confirmation": "Êtes-vous sûr(e) de vouloir supprimer cette question ?",
   "formulaire.question.undo.confirmation": "Êtes-vous sûr(e) de vouloir annuler vos changements ?",
-  "formulaire.question.missing.field.title": "Attention, la section ci-dessus nécessite un titre pour être valide.",
-  "formulaire.question.missing.field.choice": "Attention, la section ci-dessus nécessite au moins un choix pour être valide.",
+  "formulaire.question.missing.field.title": "Attention, la question ci-dessus nécessite un titre pour être valide.",
+  "formulaire.question.missing.field.choice": "Attention, la question ci-dessus nécessite au moins un choix pour être valide.",
   "formulaire.question.save.missing.field": "Attention, certaines questions manquent d'informations pour être valides !",
   "formulaire.question.rgpd.title": "Collecte de données à caractère personnel",
+
+  "formulaire.section.title.empty": "Nom de la section",
+  "formulaire.section.missing.field.title": "Attention, la section ci-dessus nécessite un titre pour être valide.",
+  "formulaire.section.missing.field.choice": "Attention, la section ci-dessus nécessite au moins un choix pour être valide.",
+  "formulaire.section.save.missing.field": "Attention, certaines sections manquent d'informations pour être valides !",
 
   "formulaire.response": "réponse",
   "formulaire.response.empty": "Sans réponse",

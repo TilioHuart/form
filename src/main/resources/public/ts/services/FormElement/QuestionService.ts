@@ -4,8 +4,7 @@ import {DataUtils} from "../../utils/data";
 import {Question} from "../../models";
 
 export interface QuestionService {
-    list(formId: number) : Promise<any>;
-    // list(id: number, isForSection?: boolean) : Promise<any>;
+    list(id: number, isForSection?: boolean) : Promise<any>;
     countQuestions(formId: number) : Promise<any>;
     get(questionId: number) : Promise<any>;
     getByPosition(idForm: number, position: number) : Promise<any>;
@@ -18,24 +17,15 @@ export interface QuestionService {
 
 export const questionService: QuestionService = {
 
-    async list (formId: number) : Promise<any> {
+    async list (id: number, isForSection: boolean = false) : Promise<any> {
         try {
-            return DataUtils.getData(await http.get(`/formulaire/forms/${formId}/questions`));
+            let parentEntity = isForSection ? 'sections' : 'forms';
+            return DataUtils.getData(await http.get(`/formulaire/${parentEntity}/${id}/questions`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.list'));
             throw err;
         }
     },
-
-    // async list (id: number, isForSection: boolean = false) : Promise<any> {
-    //     try {
-    //         let parentEntity = isForSection ? 'sections' : 'forms';
-    //         return DataUtils.getData(await http.get(`/formulaire/${parentEntity}/${id}/questions`));
-    //     } catch (err) {
-    //         notify.error(idiom.translate('formulaire.error.questionService.list'));
-    //         throw err;
-    //     }
-    // },
 
     async countQuestions (formId: number) : Promise<any> {
         try {

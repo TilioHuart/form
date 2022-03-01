@@ -146,6 +146,11 @@ i {
     content: "\F18F";
   }
 
+  &.i-validate::before {
+    font-family: 'material-icons';
+    content: "\F12C";
+  }
+
   &.i-plus-circle::before {
     font-family: 'material-icons';
     content: "\F417";
@@ -202,5 +207,10 @@ i {
     font-family: 'material-icons';
     content: "\F2FD";
     color: $formulaire-blue;
+  }
+
+  &.i-edit::before {
+    font-family: 'material-icons';
+    content: "\F3EB";
   }
 }

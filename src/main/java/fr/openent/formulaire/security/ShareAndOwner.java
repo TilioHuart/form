@@ -45,6 +45,9 @@ public class ShareAndOwner implements ResourcesProvider {
                 case "distributionId":
                     query += "(SELECT form_id FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE id = ?)";
                     break;
+                case "sectionId":
+                    query += "(SELECT form_id FROM " + Formulaire.SECTION_TABLE + " WHERE id = ?)";
+                    break;
                 case "questionId":
                     query += "(SELECT form_id FROM " + Formulaire.QUESTION_TABLE + " WHERE id = ?)";
                     break;
@@ -81,12 +84,15 @@ public class ShareAndOwner implements ResourcesProvider {
     private String getKeyByBinding(Binding binding) {
         if (isCountDistribution(binding) || isGetByFormResponderAndStatusDistribution(binding) || isAddDistribution(binding) ||
                 isUpdateForm(binding) || isDeleteForm(binding) || isExportForm(binding) || isSendReminderForm(binding) ||
-                isCreateQuestion(binding) || isFillResponsesResponse(binding)) {
+                isCreateQuestion(binding) || isFillResponsesResponse(binding) || isCreateSection(binding)) {
             return "formId";
         }
         else if (isGetDistribution(binding) || isUpdateDistribution(binding) || isDuplicateWithResponsesDistribution(binding) ||
                 isReplaceDistribution(binding) || isDeleteDistribution(binding) || isListByDistributionResponse(binding)) {
             return "distributionId";
+        }
+        else if (isGetSection(binding) || isUpdateSection(binding) || isDeleteSection(binding)) {
+            return "sectionId";
         }
         else if (isListMineByDistributionResponse(binding) || isCreateQuestionChoice(binding) ||
                 isCreateMultipleQuestionChoice(binding) || isGetQuestion(binding) || isUpdateQuestion(binding) ||
@@ -257,6 +263,23 @@ public class ShareAndOwner implements ResourcesProvider {
 
     private boolean isDeleteAllResponseFile(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.ResponseFileController|deleteAll");
+    }
+
+    // Section
+    private boolean isGetSection(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.SectionController|get");
+    }
+
+    private boolean isCreateSection(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.SectionController|create");
+    }
+
+    private boolean isUpdateSection(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.PUT, "fr.openent.formulaire.controllers.SectionController|update");
+    }
+
+    private boolean isDeleteSection(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.SectionController|delete");
     }
 
 }

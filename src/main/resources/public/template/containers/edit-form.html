@@ -33,19 +33,24 @@
 
         <div class="edit-form" ng-if="vm.formElements.all.length > 0">
             <!-- List of formElements-->
-            <div class="questions" sortable-list ng-if="!isMobile && vm.formElements.selected.length == 0 && vm.form.nb_responses <= 0">
-                <div ng-repeat="formElement in vm.formElements.all | orderBy:'position'" class="nine twelve-mobile"
+            <div class="elements" sortable-list ng-if="!isMobile && vm.formElements.selected.length == 0 && vm.form.nb_responses <= 0">
+                <div ng-repeat="formElement in vm.formElements.all | orderBy:'position'" class="twelve twelve-mobile"
                      sortable-element data-ng-change="vm.reOrder()" data-ng-model="formElement.index" guard-root>
-                    <!--  Each formElements component -->
-                    <question-item question="formElement" reorder="true" has-form-responses="vm.form.nb_responses > 0" input-guard></question-item>
+                    <!--  Question component -->
+                    <question-item question="formElement" reorder="true" has-form-responses="vm.form.nb_responses > 0" input-guard ng-if="vm.isQuestion(formElement)"></question-item>
+                    <!--  Section component -->
+                    <section-item section="formElement" reorder="true" has-form-responses="vm.form.nb_responses > 0" input-guard ng-if="!vm.isQuestion(formElement)"></section-item>
                 </div>
             </div>
-            <div class="questions" ng-if="isMobile || (!isMobile && vm.formElements.selected.length > 0) || vm.form.nb_responses > 0">
-                <div ng-repeat="formElement in vm.formElements.all | orderBy:'position'" class="nine twelve-mobile">
-                    <!--  Each formElements component -->
-                    <question-item question="formElement" reorder="false" has-form-responses="vm.form.nb_responses > 0"></question-item>
+            <div class="elements" ng-if="isMobile || (!isMobile && vm.formElements.selected.length > 0) || vm.form.nb_responses > 0">
+                <div ng-repeat="formElement in vm.formElements.all | orderBy:'position'" class="twelve twelve-mobile">
+                    <!--  Question component -->
+                    <question-item question="formElement" reorder="false" has-form-responses="vm.form.nb_responses > 0" ng-if="vm.isQuestion(formElement)"></question-item>
+                    <!--  Section component -->
+                    <section-item section="formElement" reorder="false" has-form-responses="vm.form.nb_responses > 0" ng-if="!vm.isQuestion(formElement)"></section-item>
                 </div>
             </div>
+
             <!-- End page buttons -->
             <div class="buttons">
                 <div class="flexend nine zero-mobile">
