@@ -5,9 +5,7 @@ import {Question} from "../../models";
 
 export interface QuestionService {
     list(id: number, isForSection?: boolean) : Promise<any>;
-    countQuestions(formId: number) : Promise<any>;
     get(questionId: number) : Promise<any>;
-    getByPosition(idForm: number, position: number) : Promise<any>;
     save(question: Question) : Promise<any>;
     create(question: Question) : Promise<any>;
     createMultiple(questions: Question[], formId: number) : Promise<any>;
@@ -27,27 +25,9 @@ export const questionService: QuestionService = {
         }
     },
 
-    async countQuestions (formId: number) : Promise<any> {
-        try {
-            return DataUtils.getData(await http.get(`/formulaire/forms/${formId}/questions/count`));
-        } catch (err) {
-            notify.error(idiom.translate('formulaire.error.questionService.count'));
-            throw err;
-        }
-    },
-
     async get(questionId: number) : Promise<any> {
         try {
             return DataUtils.getData(await http.get(`/formulaire/questions/${questionId}`));
-        } catch (err) {
-            notify.error(idiom.translate('formulaire.error.questionService.get'));
-            throw err;
-        }
-    },
-
-    async getByPosition(idForm : number, position: number) : Promise<any> {
-        try {
-            return DataUtils.getData(await http.get(`/formulaire/forms/${idForm}/questions/${position}`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.get'));
             throw err;

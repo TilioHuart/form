@@ -5,7 +5,6 @@ import {
     FormElements,
     Question,
     QuestionChoice,
-    Questions,
     Response,
     Responses,
     Section,
@@ -35,7 +34,7 @@ interface ViewModel {
     formElements: FormElements;
     newElement: Question|Section;
     dontSave: boolean;
-    nbQuestions: number;
+    nbFormElements: number;
     last: boolean;
     display: {
         lightbox: {
@@ -83,7 +82,6 @@ interface ViewModel {
     backToEditor() : void;
     prev() : void;
     next() : void;
-    displayDefaultOption() : string;
     isQuestion(formElement: FormElement): boolean;
 }
 
@@ -96,7 +94,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.formElements = new FormElements();
         vm.newElement = new Question();
         vm.dontSave = false;
-        vm.nbQuestions = 0;
+        vm.nbFormElements = 0;
         vm.last = false;
         vm.display = {
             lightbox: {
@@ -120,7 +118,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             await vm.formElements.sync(vm.form.id);
             vm.newElement.form_id = vm.form.id;
             vm.dontSave = false;
-            vm.nbQuestions = vm.formElements.all.length;
+            vm.nbFormElements = vm.formElements.all.length;
             $scope.safeApply();
         };
 
@@ -178,7 +176,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             vm.newElement.position = vm.formElements.all.length + 1;
             vm.newElement.selected = true;
             vm.formElements.all.push(vm.newElement);
-            vm.nbQuestions = vm.formElements.all.length;
+            vm.nbFormElements = vm.formElements.all.length;
             vm.display.lightbox.newElement = false;
             template.close('lightbox');
             vm.dontSave = false;
@@ -203,7 +201,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             vm.closeLightbox('reorganization');
         };
 
-        // Question functions
+        // FormElements functions
 
         vm.duplicateQuestion = async () : Promise<void> => {
             try {
@@ -268,7 +266,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 vm.display.lightbox.delete = false;
                 notify.success(idiom.translate('formulaire.success.question.delete'));
                 await vm.formElements.sync(vm.form.id);
-                vm.nbQuestions = vm.formElements.all.length;
+                vm.nbFormElements = vm.formElements.all.length;
                 rePositionQuestions();
                 vm.dontSave = false;
                 $scope.safeApply();
@@ -405,12 +403,12 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.goPreview = async () : Promise<void> => {
             await vm.saveAll(false);
             vm.preview.responses = new Responses();
-            for (let question of vm.formElements.all) {
+            for (let formElement of vm.formElements.all) {
                 let response = new Response();
-                if (vm.preview.formElement instanceof Question
-                    && (vm.preview.formElement.question_type === Types.MULTIPLEANSWER
-                    || vm.preview.formElement.question_type === Types.SINGLEANSWERRADIO)) {
-                        response.selectedIndex = new Array<boolean>(vm.preview.formElement.choices.all.length);
+                if (formElement instanceof Question &&
+                    (formElement.question_type === Types.MULTIPLEANSWER
+                    || formElement.question_type === Types.SINGLEANSWERRADIO)) {
+                        response.selectedIndex = new Array<boolean>(formElement.choices.all.length);
                 }
                 vm.preview.responses.all.push(response);
             }
@@ -420,7 +418,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             else {
                 vm.preview.formElement = vm.formElements.all[0];
                 vm.preview.response = vm.preview.responses.all[0];
-                vm.last = vm.preview.formElement.position === vm.nbQuestions;
+                vm.last = vm.preview.formElement.position === vm.nbFormElements;
                 vm.preview.page = PreviewPage.QUESTION;
             }
             $scope.currentPage = Pages.PREVIEW;
@@ -434,14 +432,14 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         vm.prev = () : void => {
             if (vm.preview.page === PreviewPage.RECAP) {
-                vm.preview.formElement = vm.formElements.all[vm.nbQuestions - 1];
-                vm.preview.response = vm.preview.responses.all[vm.nbQuestions - 1];
-                vm.last = vm.preview.formElement.position === vm.nbQuestions;
+                vm.preview.formElement = vm.formElements.all[vm.nbFormElements - 1];
+                vm.preview.response = vm.preview.responses.all[vm.nbFormElements - 1];
+                vm.last = vm.preview.formElement.position === vm.nbFormElements;
                 vm.preview.page = PreviewPage.QUESTION;
             }
             else {
                 let prevPosition: number = vm.preview.formElement.position - 1;
-                vm.last = prevPosition === vm.nbQuestions;
+                vm.last = prevPosition === vm.nbFormElements;
                 if (prevPosition > 0) {
                     vm.preview.formElement = vm.formElements.all[prevPosition - 1];
                     vm.preview.response = vm.preview.responses.all[prevPosition - 1];
@@ -459,13 +457,13 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             if (vm.preview.page === PreviewPage.RGPD) {
                 vm.preview.formElement = vm.formElements.all[0];
                 vm.preview.response = vm.preview.responses.all[0];
-                vm.last = vm.preview.formElement.position === vm.nbQuestions;
+                vm.last = vm.preview.formElement.position === vm.nbFormElements;
                 vm.preview.page = PreviewPage.QUESTION;
             }
             else {
                 let nextPosition: number = vm.preview.formElement.position + 1;
-                vm.last = nextPosition === vm.nbQuestions;
-                if (nextPosition <= vm.nbQuestions) {
+                vm.last = nextPosition === vm.nbFormElements;
+                if (nextPosition <= vm.nbFormElements) {
                     vm.preview.formElement = vm.formElements.all[nextPosition - 1];
                     vm.preview.response = vm.preview.responses.all[nextPosition - 1];
                 }
@@ -477,10 +475,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 }
             }
             $scope.safeApply();
-        };
-
-        vm.displayDefaultOption = () : string => {
-            return idiom.translate('formulaire.options.select');
         };
 
         // Utils

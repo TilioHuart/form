@@ -137,7 +137,9 @@ public class Formulaire extends BaseServer {
 		// Init controllers
 		addController(new DelegateController());
 		addController(new DistributionController(timelineHelper));
+		addController(new FolderController());
 		addController(formController);
+		addController(new FormElementController());
 		addController(new FormulaireController(eventStore));
 		addController(new QuestionChoiceController());
 		addController(new QuestionController());
@@ -146,7 +148,6 @@ public class Formulaire extends BaseServer {
 		addController(new ResponseFileController(storage));
 		addController(new SectionController());
 		addController(new UtilsController(storage));
-		addController(new FolderController());
 
 		// CRON
 		RgpdCron rgpdCron = new RgpdCron(storage);

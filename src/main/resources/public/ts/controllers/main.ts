@@ -1,6 +1,6 @@
 import {Behaviours, idiom, model, ng, template} from 'entcore';
 import {Distribution, DistributionStatus, Form, Question, QuestionTypes, Types, Folder} from "../models";
-import {distributionService, formService, questionService} from "../services";
+import {distributionService, formElementService, formService, questionService} from "../services";
 import {
 	Direction,
 	Exports,
@@ -29,7 +29,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.currentPage = Pages.FORMS_LIST;
 		$scope.form = new Form();
 		$scope.distribution = new Distribution();
-		$scope.question = new Question();
+		$scope.formElement = new Question();
 		$scope.questionTypes = new QuestionTypes();
 		$scope.folder = $scope.folder ? $scope.folder : new Folder();
 		$scope.isMobile = window.screen.width <= 500;
@@ -101,15 +101,15 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 					$scope.form.nb_responses = (await distributionService.count(params.formId)).count;
 
 					if ($scope.form.nb_responses > 0) {
-						$scope.form.nb_questions = (await questionService.countQuestions(params.formId)).count;
+						$scope.form.nbFormElements = (await formElementService.countFormElements(params.formId)).count;
 						if (params.position < 1) {
 							$scope.redirectTo(`/form/${params.formId}/results/1`);
 						}
-						else if (params.position > $scope.form.nb_questions) {
-							$scope.redirectTo(`/form/${params.formId}/results/${$scope.form.nb_questions}`);
+						else if (params.position > $scope.form.nbFormElements) {
+							$scope.redirectTo(`/form/${params.formId}/results/${$scope.form.nbFormElements}`);
 						}
 						else {
-							$scope.question = (await questionService.getByPosition(params.formId, params.position));
+							$scope.formElement = (await formElementService.getByPosition(params.formId, params.position));
 							$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_FORM_RESULTS);
 							template.open('main', 'containers/results-form');
 						}
@@ -203,8 +203,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 							}
 
 							if (conditionsOk) {
-								$scope.form.nb_questions = (await questionService.countQuestions($scope.form.id)).count;
-								if (params.position > $scope.form.nb_questions) {
+								$scope.form.nbFormElements = (await formElementService.countFormElements($scope.form.id)).count;
+								if (params.position > $scope.form.nbFormElements) {
 									$scope.redirectTo(`/form/${$scope.form.id}/${$scope.distribution.id}/questions/recap`);
 								}
 								else {
@@ -212,7 +212,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 									let correctedUrl = window.location.origin + window.location.pathname + `#/form/${$scope.form.id}/${$scope.distribution.id}/question/${questionPosition}`;
 									window.location.assign(correctedUrl);
 									$scope.safeApply();
-									$scope.question = await questionService.getByPosition($scope.form.id, questionPosition);
+									$scope.formElement = await formElementService.getByPosition($scope.form.id, questionPosition);
 									$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_RESPOND_QUESTION);
 									template.open('main', 'containers/respond-question');
 								}

@@ -1,21 +1,21 @@
 import {idiom, model, ng, notify} from "entcore";
 import {
-    Distribution, Form,
+    Distribution, Form, FormElement,
     Question, QuestionChoices,
     Response, ResponseFiles,
-    Responses,
+    Responses, Section,
     Types
 } from "../models";
 import {responseFileService, responseService} from "../services";
 import {FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
 
 interface ViewModel {
-    question: Question;
+    formElement: FormElement;
     response: Response;
     responses: Responses;
     distribution: Distribution;
     form: Form;
-    nbQuestions: number;
+    nbFormElements: number;
     selectedIndex: boolean[];
     loading : boolean;
     files: File[];
@@ -28,19 +28,19 @@ interface ViewModel {
     goToRecap() : Promise<void>;
     saveAndQuit() : Promise<void>;
     saveAndQuitGuard() : void;
-    displayDefaultOption() : string;
+    isQuestion(formElement: FormElement) : boolean;
 }
 
 export const respondQuestionController = ng.controller('RespondQuestionController', ['$scope',
     function ($scope) {
 
     const vm: ViewModel = this;
-    vm.question = new Question();
+    vm.formElement = new Question();
     vm.response = new Response();
     vm.responses = new Responses();
     vm.distribution = new Distribution();
     vm.form = new Form();
-    vm.nbQuestions = 1;
+    vm.nbFormElements = 1;
     vm.selectedIndex = [];
     vm.loading = true;
     vm.files = [];
@@ -48,60 +48,63 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
     vm.$onInit = async () : Promise<void> => {
         vm.form = $scope.form;
         vm.distribution = $scope.distribution;
-        vm.question = $scope.question;
-        vm.question.choices = new QuestionChoices();
-        vm.nbQuestions = $scope.form.nb_questions;
-        if (vm.question.question_type === Types.MULTIPLEANSWER
-            || vm.question.question_type === Types.SINGLEANSWER
-            || vm.question.question_type === Types.SINGLEANSWERRADIO) {
-            await vm.question.choices.sync(vm.question.id);
-        }
-        if (vm.question.question_type === Types.MULTIPLEANSWER) {
-            await vm.responses.syncMine(vm.question.id, vm.distribution.id);
-            vm.selectedIndex = new Array<boolean>(vm.question.choices.all.length);
-            for (let i = 0; i < vm.selectedIndex.length; i++) {
-                let check = false;
-                let j = 0;
-                while (!check && j < vm.responses.all.length) {
-                    check = vm.question.choices.all[i].id === vm.responses.all[j].choice_id;
-                    j++;
+        vm.formElement = $scope.formElement;
+        vm.nbFormElements = $scope.form.nbFormElements;
+
+        if (vm.formElement instanceof Question) {
+            vm.formElement.choices = new QuestionChoices();
+            if (vm.formElement.question_type === Types.MULTIPLEANSWER
+                || vm.formElement.question_type === Types.SINGLEANSWER
+                || vm.formElement.question_type === Types.SINGLEANSWERRADIO) {
+                await vm.formElement.choices.sync(vm.formElement.id);
+            }
+            if (vm.formElement.question_type === Types.MULTIPLEANSWER) {
+                await vm.responses.syncMine(vm.formElement.id, vm.distribution.id);
+                vm.selectedIndex = new Array<boolean>(vm.formElement.choices.all.length);
+                for (let i = 0; i < vm.selectedIndex.length; i++) {
+                    let check = false;
+                    let j = 0;
+                    while (!check && j < vm.responses.all.length) {
+                        check = vm.formElement.choices.all[i].id === vm.responses.all[j].choice_id;
+                        j++;
+                    }
+                    vm.selectedIndex[i] = check;
                 }
-                vm.selectedIndex[i] = check;
             }
-        }
-        else {
-            vm.response = new Response();
-            let responses = await responseService.listMineByDistribution(vm.question.id, vm.distribution.id);
-            if (responses.length > 0) {
-                vm.response = responses[0];
+            else {
+                vm.response = new Response();
+                let responses = await responseService.listMineByDistribution(vm.formElement.id, vm.distribution.id);
+                if (responses.length > 0) {
+                    vm.response = responses[0];
+                }
+                if (!vm.response.question_id) { vm.response.question_id = vm.formElement.id; }
+                if (!vm.response.distribution_id) { vm.response.distribution_id = vm.distribution.id; }
             }
-            if (!vm.response.question_id) { vm.response.question_id = vm.question.id; }
-            if (!vm.response.distribution_id) { vm.response.distribution_id = vm.distribution.id; }
-        }
-        if (vm.question.question_type === Types.TIME) { formatTime() }
-        if (vm.question.question_type === Types.FILE) {
-            vm.files = [];
-            if (vm.response.id) {
-                let responseFiles = new ResponseFiles();
-                await responseFiles.sync(vm.response.id);
-                for (let repFile of responseFiles.all) {
-                    if (repFile.id) {
-                        let file = new File([repFile.id], repFile.filename);
-                        vm.files.push(file);
+            if (vm.formElement.question_type === Types.TIME) { formatTime() }
+            if (vm.formElement.question_type === Types.FILE) {
+                vm.files = [];
+                if (vm.response.id) {
+                    let responseFiles = new ResponseFiles();
+                    await responseFiles.sync(vm.response.id);
+                    for (let repFile of responseFiles.all) {
+                        if (repFile.id) {
+                            let file = new File([repFile.id], repFile.filename);
+                            vm.files.push(file);
+                        }
                     }
                 }
+                $scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.DISPLAY_FILES, vm.files);
             }
-            $scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.DISPLAY_FILES, vm.files);
         }
-        vm.loading=false;
-        window.setTimeout(() => vm.loading=true,500);
+
+        vm.loading = false;
+        window.setTimeout(() => vm.loading = true,500);
         $scope.safeApply();
     };
 
     vm.prev = async () : Promise<void> => {
         if (await saveResponses()) {
-            let prevPosition: number = vm.question.position - 1;
-
+            let prevPosition: number = vm.formElement.position - 1;
             if (prevPosition > 0) {
                 $scope.redirectTo(`/form/${vm.form.id}/${vm.distribution.id}/question/${prevPosition}`);
             }
@@ -114,8 +117,8 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
     vm.next = async () : Promise<void> => {
         if (await saveResponses()) {
-            let nextPosition: number = vm.question.position + 1;
-            if (nextPosition <= vm.nbQuestions) {
+            let nextPosition: number = vm.formElement.position + 1;
+            if (nextPosition <= vm.nbFormElements) {
                 $scope.redirectTo(`/form/${vm.form.id}/${vm.distribution.id}/question/${nextPosition}`);
             }
             else {
@@ -150,50 +153,53 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         vm.saveAndQuit();
     };
 
-    vm.displayDefaultOption = () : string => {
-        return idiom.translate('formulaire.options.select');
+    vm.isQuestion = (formElement) : boolean => {
+        return formElement instanceof Question;
     };
 
     const saveResponses = async () : Promise<boolean> => {
         if(vm.loading){
-            if (vm.question.question_type === Types.MULTIPLEANSWER ) {
-                for (let i = 0; i < vm.question.choices.all.length; i++) {
-                    let checked = vm.selectedIndex[i];
-                    let j = 0;
-                    let found = false;
-                    while (!found && j < vm.responses.all.length) {
-                        found = vm.question.choices.all[i].id === vm.responses.all[j].choice_id;
-                        j++;
+            if (vm.formElement instanceof Question) {
+                if (vm.formElement.question_type === Types.MULTIPLEANSWER) {
+                    for (let i = 0; i < vm.formElement.choices.all.length; i++) {
+                        let checked = vm.selectedIndex[i];
+                        let j = 0;
+                        let found = false;
+                        while (!found && j < vm.responses.all.length) {
+                            found = vm.formElement.choices.all[i].id === vm.responses.all[j].choice_id;
+                            j++;
+                        }
+                        if (!found && checked) {
+                            let newResponse = new Response(vm.formElement.id, vm.formElement.choices.all[i].id,
+                                vm.formElement.choices.all[i].value, vm.distribution.id);
+                            await responseService.create(newResponse);
+                        } else if (found && !checked) {
+                            await responseService.delete(vm.responses.all[j - 1].id);
+                        }
                     }
-                    if (!found && checked) {
-                        let newResponse = new Response(vm.question.id, vm.question.choices.all[i].id,
-                            vm.question.choices.all[i].value, vm.distribution.id);
-                        await responseService.create(newResponse);
-                    }
-                    else if (found && !checked) {
-                        await responseService.delete(vm.responses.all[j-1].id);
-                    }
+                    return true;
                 }
-                return true;
-            }
-            if (vm.question.question_type === Types.SINGLEANSWER || vm.question.question_type === Types.SINGLEANSWERRADIO) {
-                if (!vm.response.choice_id) {
-                    vm.response.answer = "";
-                }
-                else {
-                    for (let choice of vm.question.choices.all) {
-                        if (vm.response.choice_id == choice.id) {
-                            vm.response.answer = choice.value;
+                if (vm.formElement.question_type === Types.SINGLEANSWER || vm.formElement.question_type === Types.SINGLEANSWERRADIO) {
+                    if (!vm.response.choice_id) {
+                        vm.response.answer = "";
+                    } else {
+                        for (let choice of vm.formElement.choices.all) {
+                            if (vm.response.choice_id == choice.id) {
+                                vm.response.answer = choice.value;
+                            }
                         }
                     }
                 }
-
+                vm.response = await responseService.save(vm.response, vm.formElement.question_type);
+                if (vm.formElement.question_type === Types.FILE) {
+                    return (await saveFiles());
+                }
+                return true;
             }
-            vm.response = await responseService.save(vm.response, vm.question.question_type);
-            if (vm.question.question_type === Types.FILE) {
-                return (await saveFiles());
+            else if (vm.formElement instanceof Section) {
+                // TODO save each response to each vm.formElement.questions
+                return true;
             }
-            return true;
         }
         return false;
     };

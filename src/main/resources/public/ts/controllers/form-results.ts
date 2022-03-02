@@ -86,7 +86,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             vm.form = $scope.form;
             vm.question = Mix.castAs(Question, $scope.question);
             vm.navigatorValue = vm.question.position;
-            vm.nbQuestions = $scope.form.nb_questions;
+            vm.nbQuestions = $scope.form.nbFormElements;
             vm.last = vm.question.position === vm.nbQuestions;
             vm.isGraphQuestion = vm.question.question_type == Types.SINGLEANSWER || vm.question.question_type == Types.MULTIPLEANSWER || vm.question.question_type == Types.SINGLEANSWERRADIO;
             await vm.questions.sync(vm.form.id);

@@ -6,7 +6,13 @@ import {
     Responses,
     Types
 } from "../models";
-import {distributionService, questionService, responseFileService, responseService} from "../services";
+import {
+    distributionService,
+    formElementService,
+    questionService,
+    responseFileService,
+    responseService
+} from "../services";
 import {FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
 
 interface ViewModel {
@@ -48,7 +54,7 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
 
     vm.$onInit = async () : Promise<void> => {
         vm.form = $scope.form;
-        vm.form.nb_questions = (await questionService.countQuestions(vm.form.id)).count;
+        vm.form.nbFormElements = (await formElementService.countFormElements(vm.form.id)).count;
         vm.distribution = $scope.distribution;
         await vm.questions.sync(vm.form.id);
         await vm.responses.syncByDistribution(vm.distribution.id);
@@ -65,7 +71,7 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
     // Global functions
 
     vm.prev = async () : Promise<void> => {
-        $scope.redirectTo(`/form/${vm.form.id}/${vm.distribution.id}/question/${vm.form.nb_questions}`);
+        $scope.redirectTo(`/form/${vm.form.id}/${vm.distribution.id}/question/${vm.form.nbFormElements}`);
     };
 
     // Display helper functions

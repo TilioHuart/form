@@ -28,26 +28,11 @@ public interface QuestionService {
     void export(String formId, Handler<Either<String, JsonArray>> handler);
 
     /**
-     * Count the number of questions in a specific form
-     * @param formId form identifier
-     * @param handler function handler returning JsonObject data
-     */
-    void countQuestions(String formId, Handler<Either<String, JsonObject>> handler);
-
-    /**
      * Get a specific question by id
      * @param questionId question identifier
      * @param handler function handler returning JsonObject data
      */
     void get(String questionId, Handler<Either<String, JsonObject>> handler);
-
-    /**
-     * Get a specific question by position in a specific form
-     * @param formId form identifier
-     * @param position position of the specific question
-     * @param handler function handler returning JsonObject data
-     */
-    void getByPosition(String formId, String position, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Create a question in a specific form

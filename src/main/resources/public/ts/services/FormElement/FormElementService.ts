@@ -2,9 +2,15 @@ import {idiom, ng, notify} from 'entcore';
 import {FormElement, Question, Section} from "../../models";
 import {questionService} from "./QuestionService";
 import {sectionService} from "./SectionService";
+import {DataUtils} from "../../utils/data";
+import http from "axios";
+import {Mix} from "entcore-toolkit";
+import {FormElementUtil} from "../../utils/formElementUtil";
 
 export interface FormElementService {
+    countFormElements(formId: number) : Promise<any>;
     get(formElement: FormElement) : Promise<any>;
+    getByPosition(idForm: number, position: number) : Promise<any>;
     save(formElement: FormElement) : Promise<any>;
     create(formElement: FormElement) : Promise<any>;
     update(formElement: FormElement) : Promise<any>;
@@ -12,6 +18,15 @@ export interface FormElementService {
 }
 
 export const formElementService: FormElementService = {
+
+    async countFormElements (formId: number) : Promise<any> {
+        try {
+            return DataUtils.getData(await http.get(`/formulaire/forms/${formId}/elements/count`));
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.formElementService.count'));
+            throw err;
+        }
+    },
 
     async get(formElement: FormElement) : Promise<any> {
         try {
@@ -25,7 +40,17 @@ export const formElementService: FormElementService = {
                 throw new TypeError();
             }
         } catch (err) {
-            notify.error(idiom.translate('formulaire.error.sectionService.get'));
+            notify.error(idiom.translate('formulaire.error.formElementService.get'));
+            throw err;
+        }
+    },
+
+    async getByPosition(idForm : number, position: number) : Promise<any> {
+        try {
+            let formElement = DataUtils.getData(await http.get(`/formulaire/forms/${idForm}/elements/${position}`));
+            return FormElementUtil.castFormElement(formElement);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.formElementService.get'));
             throw err;
         }
     },
@@ -46,7 +71,7 @@ export const formElementService: FormElementService = {
                 throw new TypeError();
             }
         } catch (err) {
-            notify.error(idiom.translate('formulaire.error.sectionService.create'));
+            notify.error(idiom.translate('formulaire.error.formElementService.create'));
             throw err;
         }
     },
@@ -63,7 +88,7 @@ export const formElementService: FormElementService = {
                 throw new TypeError();
             }
         } catch (err) {
-            notify.error(idiom.translate('formulaire.error.sectionService.update'));
+            notify.error(idiom.translate('formulaire.error.formElementService.update'));
             throw err;
         }
     },
@@ -80,7 +105,7 @@ export const formElementService: FormElementService = {
                 throw new TypeError();
             }
         } catch (err) {
-            notify.error(idiom.translate('formulaire.error.sectionService.delete'));
+            notify.error(idiom.translate('formulaire.error.formElementService.delete'));
             throw err;
         }
     }

@@ -46,15 +46,6 @@ public class QuestionController extends ControllerHelper {
         questionService.listForSection(sectionId, arrayResponseHandler(request));
     }
 
-    @Get("/forms/:formId/questions/count")
-    @ApiDoc("Count the number of questions in a specific form")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
-    public void countQuestions(HttpServerRequest request) {
-        String formId = request.getParam("formId");
-        questionService.countQuestions(formId, defaultResponseHandler(request));
-    }
-
     @Get("/questions/:questionId")
     @ApiDoc("Get a specific question by id")
     @ResourceFilter(ShareAndOwner.class)
@@ -62,16 +53,6 @@ public class QuestionController extends ControllerHelper {
     public void get(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         questionService.get(questionId, defaultResponseHandler(request));
-    }
-
-    @Get("/forms/:formId/questions/:position")
-    @ApiDoc("Get a specific question by position in a specific form")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
-    public void getByPosition(HttpServerRequest request) {
-        String formId = request.getParam("formId");
-        String position = request.getParam("position");
-        questionService.getByPosition(formId, position, defaultResponseHandler(request));
     }
 
     @Post("/forms/:formId/questions")

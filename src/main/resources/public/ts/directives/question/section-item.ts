@@ -1,6 +1,5 @@
 import {Directive, idiom, ng} from "entcore";
 import {Section, Types} from "../../models";
-import {sectionService} from "../../services";
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "../../core/enums";
 
 interface IViewModel {

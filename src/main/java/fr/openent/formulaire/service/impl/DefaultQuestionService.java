@@ -36,23 +36,9 @@ public class DefaultQuestionService implements QuestionService {
     }
 
     @Override
-    public void countQuestions(String formId, Handler<Either<String, JsonObject>> handler) {
-        String query = "SELECT COUNT (*) FROM " + Formulaire.QUESTION_TABLE + " WHERE form_id = ?;";
-        JsonArray params = new JsonArray().add(formId);
-        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
-    }
-
-    @Override
     public void get(String questionId, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT * FROM " + Formulaire.QUESTION_TABLE + " WHERE id = ?;";
         JsonArray params = new JsonArray().add(questionId);
-        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
-    }
-
-    @Override
-    public void getByPosition(String formId, String position, Handler<Either<String, JsonObject>> handler) {
-        String query = "SELECT * FROM " + Formulaire.QUESTION_TABLE + " WHERE form_id = ? AND position = ?;";
-        JsonArray params = new JsonArray().add(formId).add(position);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
@@ -63,7 +49,7 @@ public class DefaultQuestionService implements QuestionService {
         JsonArray params = new JsonArray()
                 .add(formId)
                 .add(question.getString("title", ""))
-                .add(question.getInteger("position", 0))
+                .add(question.getInteger("position", null))
                 .add(question.getInteger("question_type", 1))
                 .add(question.getString("statement", ""))
                 .add(question.getBoolean("mandatory", false));
@@ -82,7 +68,7 @@ public class DefaultQuestionService implements QuestionService {
             query += "(?, ?, ?, ?, ?, ?), ";
             params.add(formId)
                     .add(question.getString("title", ""))
-                    .add(question.getInteger("position", 0))
+                    .add(question.getInteger("position", null))
                     .add(question.getInteger("question_type", 1))
                     .add(question.getString("statement", ""))
                     .add(question.getBoolean("mandatory", false));
@@ -98,7 +84,7 @@ public class DefaultQuestionService implements QuestionService {
                 "statement = ?, mandatory = ? WHERE id = ? RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(question.getString("title", ""))
-                .add(question.getInteger("position", 0))
+                .add(question.getInteger("position", null))
                 .add(question.getInteger("question_type", 1))
                 .add(question.getString("statement", ""))
                 .add(question.getBoolean("mandatory", false))

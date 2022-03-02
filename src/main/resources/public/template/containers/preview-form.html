@@ -14,9 +14,10 @@
     </section>
 </div>
 
-<progress-bubble-bar form-element="vm.preview.formElement" nb-form-elements="vm.nb_elements" ng-if="vm.nb_elements > 1">></progress-bubble-bar>
+<progress-bubble-bar form-element="vm.preview.formElement" nb-form-elements="vm.nb_elements" ng-if="vm.nb_elements > 1"></progress-bubble-bar>
 
 <div class="respond-question">
+
     <!-- RPGD page -->
     <div class="nine twelve-mobile" ng-if="vm.form.rgpd && vm.preview.page == vm.PreviewPage.RGPD">
         <div class="question rgpd">
@@ -29,55 +30,33 @@
             <button class="cell" ng-click="vm.next()"><i18n>formulaire.respond.form</i18n></button>
         </div>
     </div>
+
     <!-- Question page -->
-    <div class="nine twelve-mobile" ng-if="vm.preview.page == vm.PreviewPage.QUESTION">
-        <div class="question">
-            <div class="question-title">
-                <h4>[[vm.preview.formElement.title]]<span ng-if="vm.preview.formElement.mandatory" style="color:red;margin-left:10px">*</span></h4>
+    <div class="nine twelve-mobile top-spacing-three" ng-if="vm.preview.page == vm.PreviewPage.QUESTION">
+
+        <!-- Display question -->
+        <respond-question-item ng-if="vm.isQuestion(vm.preview.formElement)"
+                               question="vm.preview.formElement"
+                               response="vm.preview.response"
+                               files="vm.preview.files">
+        </respond-question-item>
+
+        <!-- Display section -->
+        <div class="section" ng-if="!vm.isQuestion(vm.preview.formElement)">
+            <div class="section-top">
+                <div class="title"><h4>[[vm.preview.formElement.title]]</h4></div>
+                <div class="description" ng-if="vm.formElement.description">
+                    <div bind-html="vm.preview.formElement.description"></div>
+                </div>
             </div>
-            <div class="question-main">
-                <div ng-if="vm.preview.formElement.question_type == Types.FREETEXT">
-                    <div ng-if="vm.preview.formElement.statement" bind-html="vm.preview.formElement.statement"></div>
-                </div>
-                <div ng-if="vm.preview.formElement.question_type == Types.SHORTANSWER">
-                    <textarea ng-model="vm.preview.response.answer" i18n-placeholder="formulaire.question.type.SHORTANSWER">
-                    </textarea>
-                </div>
-                <div ng-if="vm.preview.formElement.question_type == Types.LONGANSWER">
-                    <editor ng-model="vm.preview.response.answer"></editor>
-                </div>
-                <div ng-if="vm.preview.formElement.question_type == Types.SINGLEANSWER">
-                    <select ng-model="vm.preview.response.choice_id">
-                        <option ng-value="">[[vm.displayDefaultOption()]]</option>
-                        <option ng-repeat="choice in vm.preview.formElement.choices.all" ng-value="choice.id">[[choice.value]]</option>
-                    </select>
-                </div>
-                <div ng-if="vm.preview.formElement.question_type == Types.MULTIPLEANSWER">
-                    <div ng-repeat="choice in vm.preview.formElement.choices.all">
-                        <label for="check-[[choice.id]]">
-                            <input type="checkbox" id="check-[[choice.id]]" ng-model="vm.preview.response.selectedIndex[$index]">
-                            <span>[[choice.value]]</span>
-                        </label>
-                    </div>
-                </div>
-                <div ng-if="vm.formElement.preview.question_type == Types.DATE">
-                    <date-picker ng-model="vm.preview.response.answer"></date-picker>
-                </div>
-                <div ng-if="vm.preview.formElement.question_type == Types.TIME">
-                    <input type="time" ng-model="vm.preview.response.answer"/>
-                </div>
-                <div ng-if="vm.preview.formElement.question_type == Types.FILE">
-                    <formulaire-picker-file files="vm.files" multiple="true"></formulaire-picker-file>
-                </div>
-                <div ng-if ="vm.preview.formElement.question_type == Types.SINGLEANSWERRADIO">
-                    <div ng-repeat ="choice in vm.preview.formElement.choices.all">
-                        <label>
-                            <input type="radio" ng-model="vm.preview.response.choice_id" ng-value="[[choice.id]]">[[choice.value]]
-                        </label>
-                    </div>
+            <div class="section-main">
+                <div ng-repeat="question in vm.preview.formElement.questions | orderBy:'section_position'">
+<!--                    <div ng-include="'formulaire/public/template/components/respond-question-item"></div>-->
                 </div>
             </div>
         </div>
+
+        <!-- Bottom page buttons -->
         <div class="buttons">
             <button class="cell dontSave" ng-if="vm.preview.formElement.position <= 1" ng-disabled="true"><i18n>formulaire.prev</i18n></button>
             <button class="cell cancel dontSave" ng-click="vm.prev()" ng-if="vm.preview.formElement.position > 1"><i18n>formulaire.prev</i18n></button>
@@ -85,5 +64,6 @@
             <button class="cell dontSave" ng-click="vm.backToEditor()" ng-if="vm.last"><i18n>formulaire.finish</i18n></button>
         </div>
     </div>
+
     <!-- TODO Recap page -->
 </div>
