@@ -1,7 +1,7 @@
-import {Question, Section} from "../models";
+import {FormElement, Question, Section} from "../models";
 import {Mix} from "entcore-toolkit";
 
-export class FormElementUtil {
+export class FormElementUtils {
     static castFormElement(formElement: any) : Question|Section {
         if (formElement.statement != undefined) {
             return Mix.castAs(Question, formElement);
@@ -9,5 +9,9 @@ export class FormElementUtil {
         else {
             return Mix.castAs(Section, formElement);
         }
+    };
+
+    static isQuestion(formElement: FormElement) : boolean {
+        return formElement instanceof Question;
     };
 }

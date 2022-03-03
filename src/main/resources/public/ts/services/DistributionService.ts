@@ -1,7 +1,7 @@
 import {idiom, ng, notify} from 'entcore';
 import http from 'axios';
 import {Distribution} from '../models';
-import {DataUtils} from "../utils/data";
+import {DataUtils} from "../utils";
 
 export interface DistributionService {
     list() : Promise<any>;

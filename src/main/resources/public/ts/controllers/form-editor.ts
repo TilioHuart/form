@@ -82,7 +82,6 @@ interface ViewModel {
     backToEditor() : void;
     prev() : void;
     next() : void;
-    isQuestion(formElement: FormElement): boolean;
 }
 
 
@@ -92,7 +91,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         const vm: ViewModel = this;
         vm.form = new Form();
         vm.formElements = new FormElements();
-        vm.newElement = new Question();
         vm.dontSave = false;
         vm.nbFormElements = 0;
         vm.last = false;
@@ -116,7 +114,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             vm.form = $scope.form;
             vm.form.nb_responses = vm.form.id ? (await distributionService.count(vm.form.id)).count : 0;
             await vm.formElements.sync(vm.form.id);
-            vm.newElement.form_id = vm.form.id;
             vm.dontSave = false;
             vm.nbFormElements = vm.formElements.all.length;
             $scope.safeApply();
@@ -478,10 +475,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         };
 
         // Utils
-
-        vm.isQuestion = (formElement) : boolean => {
-            return formElement instanceof Question;
-        };
 
         const rePositionQuestions = () : void => {
             vm.formElements.all.sort((a, b) => a.position - b.position);

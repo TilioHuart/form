@@ -1,7 +1,7 @@
 import {idiom, ng, notify} from 'entcore';
 import http from 'axios';
 import {QuestionChoice} from '../models';
-import {DataUtils} from "../utils/data";
+import {DataUtils} from "../utils";
 
 export interface QuestionChoiceService {
     list(questionId: number) : Promise<any>;

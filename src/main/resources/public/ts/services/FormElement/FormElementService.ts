@@ -2,10 +2,8 @@ import {idiom, ng, notify} from 'entcore';
 import {FormElement, Question, Section} from "../../models";
 import {questionService} from "./QuestionService";
 import {sectionService} from "./SectionService";
-import {DataUtils} from "../../utils/data";
+import {DataUtils, FormElementUtils} from "../../utils";
 import http from "axios";
-import {Mix} from "entcore-toolkit";
-import {FormElementUtil} from "../../utils/formElementUtil";
 
 export interface FormElementService {
     countFormElements(formId: number) : Promise<any>;
@@ -48,7 +46,7 @@ export const formElementService: FormElementService = {
     async getByPosition(idForm : number, position: number) : Promise<any> {
         try {
             let formElement = DataUtils.getData(await http.get(`/formulaire/forms/${idForm}/elements/${position}`));
-            return FormElementUtil.castFormElement(formElement);
+            return FormElementUtils.castFormElement(formElement);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formElementService.get'));
             throw err;

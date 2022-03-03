@@ -1,7 +1,7 @@
 import {idiom, ng, notify} from 'entcore';
 import http from 'axios';
-import {Folder} from '../models/Folder';
-import {DataUtils} from "../utils/data";
+import {Folder} from '../models';
+import {DataUtils} from "../utils";
 
 export interface FolderService {
     list() : Promise<any>;

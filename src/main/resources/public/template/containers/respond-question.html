@@ -22,14 +22,14 @@
         <div class="nine twelve-mobile">
 
             <!-- Display question -->
-            <respond-question-item ng-if="vm.isQuestion(vm.formElement)"
+            <respond-question-item ng-if="FormElementUtils.isQuestion(vm.formElement)"
                                    question="vm.formElement"
                                    response="vm.response"
                                    files="vm.files">
             </respond-question-item>
 
             <!-- Display section -->
-            <div class="section" ng-if="!vm.isQuestion(vm.formElement)">
+            <div class="section" ng-if="!FormElementUtils.isQuestion(vm.formElement)">
                 <div class="section-top">
                     <div class="title"><h4>[[vm.formElement.title]]</h4></div>
                     <div class="description" ng-if="vm.formElement.description">
@@ -37,8 +37,12 @@
                     </div>
                 </div>
                 <div class="section-main">
-                    <div ng-repeat="question in vm.formElement.questions | orderBy:'section_position'">
-<!--                        <div ng-include="'formulaire/public/template/components/respond-question-item"></div>-->
+                    <div ng-repeat="question in vm.formElement.questions.all | orderBy:'section_position'">
+<!--                        <respond-question-item ng-if="FormElementUtils.isQuestion(question)"-->
+<!--                                               question="question"-->
+<!--                                               response="vm.preview.response"-->
+<!--                                               files="vm.preview.files">-->
+<!--                        </respond-question-item>-->
                     </div>
                 </div>
             </div>

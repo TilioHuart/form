@@ -1,7 +1,7 @@
 import {idiom, moment, ng, notify} from 'entcore';
 import http from 'axios';
 import {Form} from '../models';
-import {DataUtils} from "../utils/data";
+import {DataUtils} from "../utils";
 
 export interface FormService {
     list() : Promise<any>;

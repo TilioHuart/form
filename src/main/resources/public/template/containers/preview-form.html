@@ -35,14 +35,14 @@
     <div class="nine twelve-mobile top-spacing-three" ng-if="vm.preview.page == vm.PreviewPage.QUESTION">
 
         <!-- Display question -->
-        <respond-question-item ng-if="vm.isQuestion(vm.preview.formElement)"
+        <respond-question-item ng-if="FormElementUtils.isQuestion(vm.preview.formElement)"
                                question="vm.preview.formElement"
                                response="vm.preview.response"
                                files="vm.preview.files">
         </respond-question-item>
 
         <!-- Display section -->
-        <div class="section" ng-if="!vm.isQuestion(vm.preview.formElement)">
+        <div class="section" ng-if="!FormElementUtils.isQuestion(vm.preview.formElement)">
             <div class="section-top">
                 <div class="title"><h4>[[vm.preview.formElement.title]]</h4></div>
                 <div class="description" ng-if="vm.formElement.description">
@@ -50,8 +50,12 @@
                 </div>
             </div>
             <div class="section-main">
-                <div ng-repeat="question in vm.preview.formElement.questions | orderBy:'section_position'">
-<!--                    <div ng-include="'formulaire/public/template/components/respond-question-item"></div>-->
+                <div ng-repeat="question in vm.preview.formElement.questions.all | orderBy:'section_position'">
+<!--                    <respond-question-item ng-if="FormElementUtils.isQuestion(question)"-->
+<!--                                           question="question"-->
+<!--                                           response="vm.preview.response"-->
+<!--                                           files="vm.preview.files">-->
+<!--                    </respond-question-item>-->
                 </div>
             </div>
         </div>

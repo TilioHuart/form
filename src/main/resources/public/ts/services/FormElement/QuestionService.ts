@@ -1,6 +1,6 @@
 import {idiom, ng, notify} from 'entcore';
 import http from 'axios';
-import {DataUtils} from "../../utils/data";
+import {DataUtils} from "../../utils";
 import {Question} from "../../models";
 
 export interface QuestionService {

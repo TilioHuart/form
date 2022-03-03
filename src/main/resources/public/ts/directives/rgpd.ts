@@ -5,7 +5,6 @@ import {I18nUtils} from "../utils";
 interface IViewModel {
     form: Form;
     delegates: Delegates;
-    i18nUtils: I18nUtils;
 
     $onInit() : Promise<void>;
     getRgpdDescriptionIntro() : string;

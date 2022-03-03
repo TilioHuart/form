@@ -10,7 +10,7 @@ import {
 	FORMULAIRE_EMIT_EVENT,
 	Pages
 } from "../core/enums";
-import {I18nUtils} from "../utils";
+import {FormElementUtils, I18nUtils} from "../utils";
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location',
 	($scope, route, $location) => {
@@ -26,6 +26,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.Pages = Pages;
 		$scope.DistributionStatus = DistributionStatus;
 		$scope.I18nUtils = I18nUtils;
+		$scope.FormElementUtils = FormElementUtils;
 		$scope.currentPage = Pages.FORMS_LIST;
 		$scope.form = new Form();
 		$scope.distribution = new Distribution();

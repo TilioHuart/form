@@ -28,14 +28,12 @@ interface ViewModel {
     goToRecap() : Promise<void>;
     saveAndQuit() : Promise<void>;
     saveAndQuitGuard() : void;
-    isQuestion(formElement: FormElement) : boolean;
 }
 
 export const respondQuestionController = ng.controller('RespondQuestionController', ['$scope',
     function ($scope) {
 
     const vm: ViewModel = this;
-    vm.formElement = new Question();
     vm.response = new Response();
     vm.responses = new Responses();
     vm.distribution = new Distribution();
@@ -151,10 +149,6 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
     vm.saveAndQuitGuard = () => {
         vm.saveAndQuit();
-    };
-
-    vm.isQuestion = (formElement) : boolean => {
-        return formElement instanceof Question;
     };
 
     const saveResponses = async () : Promise<boolean> => {

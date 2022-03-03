@@ -1,22 +1,21 @@
 import {idiom, model, ng, notify, template} from "entcore";
 import {
     Distribution,
-    DistributionStatus, Form,
-    Question, QuestionChoice, Questions,
+    DistributionStatus, Form, FormElements,
+    Question,
     Responses,
     Types
 } from "../models";
 import {
     distributionService,
     formElementService,
-    questionService,
     responseFileService,
     responseService
 } from "../services";
 import {FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
 
 interface ViewModel {
-    questions: Questions;
+    formElements: FormElements;
     responses: Responses;
     distribution: Distribution;
     form: Form;
@@ -28,9 +27,6 @@ interface ViewModel {
 
     $onInit() : Promise<void>;
     prev() : Promise<void>;
-    getStringResponse(question: Question) : string;
-    isSelectedChoice(question: Question, choice: QuestionChoice) : boolean;
-    getResponseFileNames(question: Question) : string[];
     saveAndQuit() : Promise<void>;
     send() : Promise<void>;
     doSend() : Promise<void>;
@@ -42,7 +38,7 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
     function ($scope) {
 
     const vm: ViewModel = this;
-    vm.questions = new Questions();
+    vm.formElements = new FormElements();
     vm.responses = new Responses();
     vm.distribution = new Distribution();
     vm.form = new Form();
@@ -54,11 +50,11 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
 
     vm.$onInit = async () : Promise<void> => {
         vm.form = $scope.form;
-        vm.form.nbFormElements = (await formElementService.countFormElements(vm.form.id)).count;
+        vm.form.nb_elements = (await formElementService.countFormElements(vm.form.id)).count;
         vm.distribution = $scope.distribution;
-        await vm.questions.sync(vm.form.id);
+        await vm.formElements.sync(vm.form.id);
         await vm.responses.syncByDistribution(vm.distribution.id);
-        let fileQuestions = vm.questions.all.filter(q => q.question_type === Types.FILE);
+        let fileQuestions = vm.formElements.all.filter(q => q instanceof Question && q.question_type === Types.FILE);
         for (let fileQuestion of fileQuestions) {
             let response = vm.responses.all.filter(r => r.question_id === fileQuestion.id)[0];
             if(response){
@@ -71,36 +67,8 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
     // Global functions
 
     vm.prev = async () : Promise<void> => {
-        $scope.redirectTo(`/form/${vm.form.id}/${vm.distribution.id}/question/${vm.form.nbFormElements}`);
+        $scope.redirectTo(`/form/${vm.form.id}/${vm.distribution.id}/question/${vm.form.nb_elements}`);
     };
-
-    // Display helper functions
-
-    vm.getStringResponse = (question) : string => {
-        let responses = vm.responses.all.filter(r => r.question_id === question.id);
-        let missingResponse = "<em>" + idiom.translate('formulaire.response.missing') + "</em>";
-        if (responses && responses.length > 0) {
-            let answer = responses[0].answer.toString();
-            return answer ? answer : missingResponse;
-        }
-        return missingResponse;
-    };
-
-    vm.isSelectedChoice = (question, choice) : boolean => {
-        let selectedChoices: any = vm.responses.all.filter(r => r.question_id === question.id).map(r => r.choice_id);
-        return selectedChoices.includes(choice.id);
-    };
-
-    vm.getResponseFileNames = (question) : string[] => {
-        let missingResponse = "<em>" + idiom.translate('formulaire.response.missing') + "</em>";
-        let responses = vm.responses.all.filter(r => r.question_id === question.id);
-        if (responses && responses.length === 1 && responses[0].files.all.length > 0) {
-            return responses[0].files.all.map(rf => rf.filename.substring(rf.filename.indexOf("_") + 1));
-        }
-        return [missingResponse];
-    };
-
-    // Sending actions
 
     vm.send = async () : Promise<void> => {
         if (await checkMandatoryQuestions()) {
@@ -119,7 +87,7 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
         distrib.structure = distrib.structure ? distrib.structure : model.me.structureNames[0];
         await responseService.fillResponses(vm.form.id, vm.distribution.id);
         if (distrib.original_id) {
-            let questionFileIds: any = vm.questions.all.filter(q => q.question_type === Types.FILE).map(q => q.id);
+            let questionFileIds: any = vm.formElements.all.filter(q => q instanceof Question && q.question_type === Types.FILE).map(q => q.id);
             let responseFiles = vm.responses.all.filter(r => questionFileIds.includes(r.question_id));
             for (let responseFile of responseFiles) {
                 await responseFileService.deleteAll(responseFile.original_id);
@@ -144,7 +112,7 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
     };
 
     const checkMandatoryQuestions = async () : Promise<boolean> => {
-        let mandatoryQuestions = vm.questions.all.filter(question => question.mandatory === true);
+        let mandatoryQuestions = vm.formElements.all.filter(q => q instanceof Question && q.mandatory === true);
         for (let question of mandatoryQuestions) {
             let responses = vm.responses.all.filter(r => r.question_id === question.id && r.answer);
             if (responses.length <= 0) {
