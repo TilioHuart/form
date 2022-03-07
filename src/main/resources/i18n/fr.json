@@ -168,6 +168,7 @@
   "formulaire.element.new.question.title": "Ajouter une nouvelle question",
 
   "formulaire.section.no.description": "Pas de description",
+  "formulaire.section.new.question": "+ Ajouter une question",
 
   "formulaire.question.type.FREETEXT": "Zone de texte",
   "formulaire.question.type.SHORTANSWER": "Réponse courte",

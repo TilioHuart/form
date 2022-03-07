@@ -28,7 +28,7 @@
     .question-item, .section-item {
       margin: auto;
 
-      .domino {
+      .domino, .question-item .domino {
         display: flex;
         flex-direction: column;
         margin: 10px 0;
@@ -59,11 +59,11 @@
           }
         }
 
-        &.disabled .focusable {
+        &.disabled .question-main {
           padding: 2% 3% 2% 3%;
         }
 
-        .focusable {
+        .question-main {
           display: flex;
           flex-direction: column;
           padding: 0 3% 2% 3%;
@@ -111,7 +111,7 @@
       align-items: center;
 
       .domino {
-        background: transparent;
+        background: linear-gradient(to bottom right, #f0f2f4, #e9ebef) fixed;
         box-shadow: none;
       }
 
@@ -153,7 +153,14 @@
         }
 
         .questions {
-          padding: 2% 5%;
+          display: flex;
+          flex-direction: column;
+          padding: 0 5%;
+        }
+
+        .addQuestion {
+          text-align: right;
+          padding: 1%;
         }
       }
     }

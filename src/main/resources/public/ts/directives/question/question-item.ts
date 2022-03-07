@@ -8,7 +8,10 @@ interface IViewModel {
     hasFormResponses: boolean,
     Types: typeof Types,
 
-    getTitle(title: string): string
+    getTitle(title: string): string,
+    duplicateQuestion(): void,
+    deleteQuestion(): void,
+    undoQuestionChanges(): void
 }
 
 export const questionItem: Directive = ng.directive('questionItem', () => {
@@ -24,7 +27,7 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
         controllerAs: 'vm',
         bindToController: true,
         template: `
-            <div class="nine question-item">     
+            <div class="question-item" ng-class="vm.question.section_id ? 'twelve' : 'nine'">
                 <div class="domino" ng-class="{'questionError': !vm.question.title || vm.question.choices.length === 0, disabled: vm.hasFormResponses || vm.question.selected}">
                     <div class="question-top grab">
                         <div class="dots" ng-if="vm.reorder || !vm.hasFormResponses">
@@ -32,7 +35,7 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
                             <i class="i-drag xl-icon"></i>
                         </div>
                     </div>
-                    <div class="focusable" id="[[vm.question.position]]">
+                    <div class="question-main focusable">
                         <!-- Title component -->
                         <question-title question="vm.question"></question-title>
                         <!-- Main component -->
@@ -42,10 +45,10 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
                             <div class="mandatory" ng-if="vm.question.question_type != vm.Types.FREETEXT">
                                 <switch ng-model="vm.question.mandatory"></switch><i18n>formulaire.mandatory</i18n>
                             </div>
-                            <i class="i-duplicate lg-icon spaced-right" ng-click="duplicateQuestion()" title="[[vm.getTitle('duplicate')]]"></i>
+                            <i class="i-duplicate lg-icon spaced-right" ng-click="vm.duplicateQuestion()" title="[[vm.getTitle('duplicate')]]"></i>
                             <i class="i-delete lg-icon spaced-right" ng-class="{disabled: vm.hasFormResponses}" 
-                            ng-click="deleteQuestion()" title="[[vm.getTitle('delete')]]"></i>
-                            <i class="i-undo lg-icon spaced-right" ng-click="undoQuestionChanges()" title="[[vm.getTitle('cancel')]]"></i>
+                            ng-click="vm.deleteQuestion()" title="[[vm.getTitle('delete')]]"></i>
+                            <i class="i-undo lg-icon spaced-right" ng-click="vm.undoQuestionChanges()" title="[[vm.getTitle('cancel')]]"></i>
                         </div>
                     </div>
                 </div>
@@ -66,15 +69,15 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
                 return idiom.translate('formulaire.' + title);
             };
 
-            $scope.duplicateQuestion = () : void => {
+            vm.duplicateQuestion = () : void => {
                 $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DUPLICATE);
             }
 
-            $scope.deleteQuestion = () : void => {
+            vm.deleteQuestion = () : void => {
                 $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DELETE);
             }
 
-            $scope.undoQuestionChanges = () : void => {
+            vm.undoQuestionChanges = () : void => {
                 $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.UNDO);
             }
         }

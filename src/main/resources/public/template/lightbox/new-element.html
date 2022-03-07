@@ -1,13 +1,13 @@
 <lightbox class="new-element dontSave" show="vm.display.lightbox.newElement" on-close="vm.closeLightbox('newElement')">
     <h2><i18n>formulaire.element.new.title</i18n></h2>
-    <div class="section" ng-click="vm.doCreateNewElement()">
+    <div class="section" ng-click="vm.doCreateNewElement()" ng-if="!vm.parentSection">
         <div class="subtitle"><i18n>formulaire.element.new.section.title</i18n></div>
         <div><i18n>formulaire.element.new.section.description</i18n></div>
     </div>
     <div class="question">
         <div class="subtitle"><i18n>formulaire.element.new.question.title</i18n></div>
         <div class="dominos">
-            <div ng-repeat="type in questionTypes.all" ng-click="vm.doCreateNewElement(type.code)" class="item" title="[[vm.displayTypeDescription(type.name)]]">
+            <div ng-repeat="type in questionTypes.all" ng-click="vm.doCreateNewElement(type.code, vm.parentSection)" class="item" title="[[vm.displayTypeDescription(type.name)]]">
                 <div class="domino">
                     <div class="data-text">
                         <h5>[[vm.displayTypeName(type.name)]]</h5>

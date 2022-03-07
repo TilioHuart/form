@@ -17,7 +17,7 @@ export const questionTitle: Directive = ng.directive('questionTitle', () => {
         controllerAs: 'vm',
         bindToController: true,
         template: `
-            <div class="question-title" ng-lass="{onedition: vm.reorder || !vm.hasFormResponses}" guard-root>
+            <div class="question-title focusable" ng-class="{onedition: vm.reorder || !vm.hasFormResponses}" guard-root>
                 <div class="twelve" ng-if="vm.question.question_type == vm.types.FREETEXT">
                     <div ng-if="!vm.question.selected">
                         <h4 ng-if="vm.question.title">[[vm.question.title]]</h4>

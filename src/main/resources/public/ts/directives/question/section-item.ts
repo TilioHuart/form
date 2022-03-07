@@ -9,6 +9,12 @@ interface IViewModel {
     types: typeof Types,
 
     getTitle(title: string): string
+    editSection(): void,
+    deleteSection(): void,
+    undoSectionChanges(): void,
+    validateSection(): void,
+    deleteQuestion(): void,
+    addQuestionToSection(): void
 }
 
 export const sectionItem: Directive = ng.directive('sectionItem', () => {
@@ -40,11 +46,11 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                                 <div class="dontSave" ng-if="!vm.section.selected">
                                     <h4 ng-if="vm.section.title">
                                         [[vm.section.title]]
-                                        <i class="i-edit md-icon spaced-left" ng-click="editSection()" title="[[vm.getTitle('edit')]]"></i>
+                                        <i class="i-edit md-icon spaced-left" ng-click="vm.editSection()" title="[[vm.getTitle('edit')]]"></i>
                                     </h4>
                                     <h4 ng-if="!vm.section.title" class="empty">
                                         <i18n>formulaire.section.title.empty</i18n>
-                                        <i class="i-edit md-icon spaced-left" ng-click="editSection()" title="[[vm.getTitle('edit')]]"></i>
+                                        <i class="i-edit md-icon spaced-left" ng-click="vm.editSection()" title="[[vm.getTitle('edit')]]"></i>
                                     </h4>
                                 </div>
                                 <div class="top-spacing-twice dontSave" ng-if="vm.section.selected">
@@ -54,9 +60,9 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                             <!-- Interaction buttons-->
                             <div class="icons dontSave" ng-if="vm.section.selected">
                                 <i class="i-delete lg-icon spaced-right" ng-class="{disabled: vm.hasFormResponses}" 
-                                ng-click="deleteSection()" title="[[vm.getTitle('delete')]]"></i>
-                                <i class="i-undo lg-icon spaced-right" ng-click="undoSectionChanges()" title="[[vm.getTitle('cancel')]]"></i>
-                                <i class="i-validate lg-icon spaced-right" ng-click="validateSection()" title="[[vm.getTitle('validate')]]"></i>
+                                ng-click="vm.deleteSection()" title="[[vm.getTitle('delete')]]"></i>
+                                <i class="i-undo lg-icon spaced-right" ng-click="vm.undoSectionChanges()" title="[[vm.getTitle('cancel')]]"></i>
+                                <i class="i-validate lg-icon spaced-right" ng-click="vm.validateSection()" title="[[vm.getTitle('validate')]]"></i>
                             </div>
                         </div>
                     </div>
@@ -71,9 +77,18 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                                 <editor ng-model="vm.section.description" input-guard></editor>
                             </div>
                         </div>
-                        <!-- Questions children-->
-                        <div class="questions row" ng-if="vm.section.questions.all.length > 0"></div>
-                            <!-- ng-repeat on vm.section.questions-->
+                        <!-- Questions children -->
+                        <div class="questions row" ng-if="vm.section.questions.all.length > 0">
+                             <div ng-repeat="question in vm.section.questions.all">
+                                <question-item question="question" reorder="true" has-form-responses="vm.form.nb_responses > 0" input-guard></question-item>
+                            </div>
+                        </div>
+                        <!-- Add question button -->
+                        <div class="addQuestion row dontSave" ng-if="!vm.section.selected">
+                            <a ng-click="vm.addQuestionToSection()">
+                                <i18n>formulaire.section.new.question</i18n>
+                            </a>
+                        </div>
                     </div>
                 </div>
                 
@@ -92,20 +107,24 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                 return idiom.translate('formulaire.' + title);
             };
 
-            $scope.editSection = () : void => {
+            vm.editSection = () : void => {
                 vm.section.selected = true;
             };
 
-            $scope.deleteSection = () : void => {
+            vm.deleteSection = () : void => {
                 $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DELETE);
             };
 
-            $scope.undoSectionChanges = () : void => {
+            vm.undoSectionChanges = () : void => {
                 $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.UNDO);
             };
 
-            $scope.validateSection = async () : Promise<void> => {
+            vm.validateSection = async () : Promise<void> => {
                 $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.VALIDATE);
+            };
+
+            vm.addQuestionToSection = async () : Promise<void> => {
+                $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.CREATE);
             };
         }
     };

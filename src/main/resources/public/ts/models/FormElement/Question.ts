@@ -9,6 +9,8 @@ export class Question extends FormElement {
     question_type: any;
     statement: string;
     mandatory: boolean;
+    section_id: number;
+    section_position: number;
     choices: QuestionChoices;
 
     constructor() {
@@ -16,6 +18,8 @@ export class Question extends FormElement {
         this.question_type = null;
         this.statement = null;
         this.mandatory = null;
+        this.section_id = null;
+        this.section_position = null;
         this.choices = new QuestionChoices();
     }
 
@@ -29,6 +33,8 @@ export class Question extends FormElement {
             question_type: this.question_type,
             statement: this.statement,
             mandatory: this.mandatory,
+            section_id: this.section_id,
+            section_position: this.section_position,
             choices: this.choices
         }
     }

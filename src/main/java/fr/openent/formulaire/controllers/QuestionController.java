@@ -38,7 +38,7 @@ public class QuestionController extends ControllerHelper {
     }
 
     @Get("/sections/:sectionId/questions")
-    @ApiDoc("List all the sections of a specific form")
+    @ApiDoc("List all the questions of a specific section")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listForSection(HttpServerRequest request) {

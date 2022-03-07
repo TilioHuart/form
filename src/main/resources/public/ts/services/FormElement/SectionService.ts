@@ -2,6 +2,7 @@ import {idiom, ng, notify} from 'entcore';
 import http from 'axios';
 import {DataUtils} from "../../utils";
 import {Section} from "../../models";
+import {Mix} from "entcore-toolkit";
 
 export interface SectionService {
     list(formId: number) : Promise<any>;
@@ -47,7 +48,9 @@ export const sectionService: SectionService = {
 
     async update(section: Section) : Promise<any> {
         try {
-            return DataUtils.getData(await http.put(`/formulaire/sections/${section.id}`, section));
+            let sectionUpdated = Mix.castAs(Section, DataUtils.getData(await http.put(`/formulaire/sections/${section.id}`, section)));
+            await sectionUpdated.questions.sync(sectionUpdated.id, true);
+            return sectionUpdated;
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.sectionService.update'));
             throw err;
