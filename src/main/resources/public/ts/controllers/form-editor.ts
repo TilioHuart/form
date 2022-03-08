@@ -4,10 +4,10 @@ import {
     FormElement,
     FormElements,
     Question,
-    QuestionChoice, Questions,
+    QuestionChoice,
     Response,
     Responses,
-    Section, Sections,
+    Section,
     Types
 } from "../models";
 import {
@@ -47,8 +47,9 @@ interface ViewModel {
     };
     preview: {
         formElement: FormElement, // Question for preview
-        response: Response, // Response for preview
-        responses: Responses, // Responses list for preview
+        formResponses: Responses[], // Responses list for preview
+        elementResponses: Responses, // Response for preview
+        files: File[],
         page: string
     };
     PreviewPage: typeof PreviewPage;
@@ -104,8 +105,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         };
         vm.preview = {
             formElement: new Question(),
-            response: new Response(),
-            responses: new Responses(),
+            formResponses: [],
+            elementResponses: new Responses(),
+            files: [],
             page: PreviewPage.QUESTION
         };
         vm.PreviewPage = PreviewPage;
@@ -416,22 +418,24 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         vm.goPreview = async () : Promise<void> => {
             await vm.saveAll(false);
-            vm.preview.responses = new Responses();
+            vm.preview.formResponses = [];
             for (let formElement of vm.formElements.all) {
-                let response = new Response();
-                if (formElement instanceof Question &&
-                    (formElement.question_type === Types.MULTIPLEANSWER
-                    || formElement.question_type === Types.SINGLEANSWERRADIO)) {
+                let responses = new Responses();
+                if (formElement instanceof Question) {
+                    let response = new Response();
+                    if (formElement.question_type === Types.MULTIPLEANSWER || formElement.question_type === Types.SINGLEANSWERRADIO) {
                         response.selectedIndex = new Array<boolean>(formElement.choices.all.length);
+                    }
+                    responses.all.push(response);
                 }
-                vm.preview.responses.all.push(response);
+                vm.preview.formResponses.push(responses);
             }
             if (vm.form.rgpd) {
                 vm.preview.page = PreviewPage.RGPD;
             }
             else {
                 vm.preview.formElement = vm.formElements.all[0];
-                vm.preview.response = vm.preview.responses.all[0];
+                vm.preview.elementResponses = vm.preview.formResponses[0];
                 vm.last = vm.preview.formElement.position === vm.nbFormElements;
                 vm.preview.page = PreviewPage.QUESTION;
             }
@@ -447,7 +451,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.prev = () : void => {
             if (vm.preview.page === PreviewPage.RECAP) {
                 vm.preview.formElement = vm.formElements.all[vm.nbFormElements - 1];
-                vm.preview.response = vm.preview.responses.all[vm.nbFormElements - 1];
+                vm.preview.elementResponses = vm.preview.formResponses[vm.nbFormElements - 1];
                 vm.last = vm.preview.formElement.position === vm.nbFormElements;
                 vm.preview.page = PreviewPage.QUESTION;
             }
@@ -456,11 +460,11 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 vm.last = prevPosition === vm.nbFormElements;
                 if (prevPosition > 0) {
                     vm.preview.formElement = vm.formElements.all[prevPosition - 1];
-                    vm.preview.response = vm.preview.responses.all[prevPosition - 1];
+                    vm.preview.elementResponses = vm.preview.formResponses[prevPosition - 1];
                 }
                 else if (vm.form.rgpd) {
                     vm.preview.formElement = null;
-                    vm.preview.response = null;
+                    vm.preview.elementResponses = null;
                     vm.preview.page = PreviewPage.RGPD;
                 }
             }
@@ -470,7 +474,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.next = () : void => {
             if (vm.preview.page === PreviewPage.RGPD) {
                 vm.preview.formElement = vm.formElements.all[0];
-                vm.preview.response = vm.preview.responses.all[0];
+                vm.preview.elementResponses = vm.preview.formResponses[0];
                 vm.last = vm.preview.formElement.position === vm.nbFormElements;
                 vm.preview.page = PreviewPage.QUESTION;
             }
@@ -479,12 +483,12 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 vm.last = nextPosition === vm.nbFormElements;
                 if (nextPosition <= vm.nbFormElements) {
                     vm.preview.formElement = vm.formElements.all[nextPosition - 1];
-                    vm.preview.response = vm.preview.responses.all[nextPosition - 1];
+                    vm.preview.elementResponses = vm.preview.formResponses[nextPosition - 1];
                 }
                 else {
                     // TODO init what needed for recap page
                     vm.preview.formElement = null;
-                    vm.preview.response = null;
+                    vm.preview.elementResponses = null;
                     vm.preview.page = PreviewPage.RECAP;
                 }
             }

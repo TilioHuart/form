@@ -38,11 +38,11 @@
                 </div>
                 <div class="section-main">
                     <div ng-repeat="question in vm.formElement.questions.all | orderBy:'section_position'">
-<!--                        <respond-question-item ng-if="FormElementUtils.isQuestion(question)"-->
-<!--                                               question="question"-->
-<!--                                               response="vm.preview.response"-->
-<!--                                               files="vm.preview.files">-->
-<!--                        </respond-question-item>-->
+                        <respond-question-item ng-if="FormElementUtils.isQuestion(question)"
+                                               question="question"
+                                               response="vm.response"
+                                               files="vm.files">
+                        </respond-question-item>
                     </div>
                 </div>
             </div>
