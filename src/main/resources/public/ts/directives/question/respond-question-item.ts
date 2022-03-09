@@ -1,12 +1,28 @@
 import {Directive, idiom, ng} from "entcore";
-import {Question, Types} from "../../models";
+import {
+    Delegates,
+    Distribution,
+    Question,
+    QuestionChoices,
+    Response,
+    ResponseFiles,
+    Responses,
+    Types
+} from "../../models";
+import {responseService} from "../../services";
+import {FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "../../core/enums";
+import {Mix} from "entcore-toolkit";
 
 interface IViewModel {
     question: Question,
     response: Response,
+    distribution: Distribution,
+    selectedIndex: boolean[],
+    responsesChoices: Responses;
     files: any,
     Types: typeof Types,
 
+    $onInit() : Promise<void>;
     displayDefaultOption(): string
 }
 
@@ -17,6 +33,9 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
         scope: {
             question: '=',
             response: '=',
+            distribution: '=',
+            selectedIndex: '=',
+            responsesChoices: '=',
             files: '='
         },
         controllerAs: 'vm',
@@ -45,7 +64,7 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                     <div ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER">
                         <div ng-repeat="choice in vm.question.choices.all">
                             <label for="check-[[choice.id]]">
-                                <input type="checkbox" id="check-[[choice.id]]" ng-model="vm.response.selectedIndex[$index]" input-guard>
+                                <input type="checkbox" id="check-[[choice.id]]" ng-model="vm.selectedIndex[$index]" input-guard>
                                 <span>[[choice.value]]</span>
                             </label>
                         </div>
@@ -70,16 +89,75 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
             </div>
         `,
 
-        controller: async ($scope) => {
+        controller: function ($scope) {
             const vm: IViewModel = <IViewModel> this;
+
+            vm.$onInit = async () : Promise<void> => {
+                vm.files = [];
+                vm.selectedIndex = [];
+                vm.responsesChoices = new Responses();
+                vm.question.choices = new QuestionChoices();
+                
+                if (vm.question.question_type === Types.MULTIPLEANSWER
+                    || vm.question.question_type === Types.SINGLEANSWER
+                    || vm.question.question_type === Types.SINGLEANSWERRADIO) {
+                    await vm.question.choices.sync(vm.question.id);
+                }
+                if (vm.question.question_type === Types.MULTIPLEANSWER) {
+                    await vm.responsesChoices.syncMine(vm.question.id, vm.distribution.id);
+                    vm.selectedIndex = new Array<boolean>(vm.question.choices.all.length);
+                    for (let i = 0; i < vm.selectedIndex.length; i++) {
+                        let check = false;
+                        let j = 0;
+                        while (!check && j < vm.responsesChoices.all.length) {
+                            check = vm.question.choices.all[i].id === vm.responsesChoices.all[j].choice_id;
+                            j++;
+                        }
+                        vm.selectedIndex[i] = check;
+                    }
+                }
+                else {
+                    vm.response = new Response();
+                    let responses = await responseService.listMineByDistribution(vm.question.id, vm.distribution.id);
+                    if (responses.length > 0) {
+                        vm.response = Mix.castAs(Response, responses[0]);
+                    }
+                    if (!vm.response.question_id) { vm.response.question_id = vm.question.id; }
+                    if (!vm.response.distribution_id) { vm.response.distribution_id = vm.distribution.id; }
+                }
+                if (vm.question.question_type === Types.TIME) { formatTime() }
+                if (vm.question.question_type === Types.FILE) {
+                    vm.files = [];
+                    if (vm.response.id) {
+                        let responseFiles = new ResponseFiles();
+                        await responseFiles.sync(vm.response.id);
+                        for (let repFile of responseFiles.all) {
+                            if (repFile.id)  {
+                                let file = new File([repFile.id], repFile.filename);
+                                vm.files.push(file);
+                            }
+                        }
+                    }
+                    $scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.DISPLAY_FILES, vm.files);
+                }
+                $scope.$apply();
+            };
+
+            const formatTime = () : void => {
+                if (vm.response.answer) {
+                    vm.response.answer = new Date("January 01 1970 " + vm.response.answer);
+                }
+            };
         },
-        link: ($scope, $element) => {
+        link: function ($scope, $element) {
             const vm: IViewModel = $scope.vm;
             vm.Types = Types;
 
             vm.displayDefaultOption = () : string => {
                 return idiom.translate('formulaire.options.select');
             };
+
+            $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.REFRESH_QUESTION, () => { vm.$onInit(); });
         }
     };
 });

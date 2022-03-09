@@ -32,7 +32,9 @@ export const formElementService: FormElementService = {
                 return await questionService.get(formElement.id);
             }
             else if (formElement instanceof Section) {
-                return await sectionService.get(formElement.id);
+                let section: Section = await sectionService.get(formElement.id);
+                await section.questions.sync(section.id, true);
+                return section;
             }
             else {
                 throw new TypeError();
@@ -46,7 +48,11 @@ export const formElementService: FormElementService = {
     async getByPosition(idForm : number, position: number) : Promise<any> {
         try {
             let formElement = DataUtils.getData(await http.get(`/formulaire/forms/${idForm}/elements/${position}`));
-            return FormElementUtils.castFormElement(formElement);
+            let castedElement = FormElementUtils.castFormElement(formElement);
+            if (castedElement instanceof Section) {
+                await castedElement.questions.sync(castedElement.id, true);
+            }
+            return castedElement;
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formElementService.get'));
             throw err;
@@ -80,7 +86,9 @@ export const formElementService: FormElementService = {
                 return await questionService.update(formElement);
             }
             else if (formElement instanceof Section) {
-                return await sectionService.update(formElement);
+                let section: Section = await sectionService.update(formElement);
+                await section.questions.sync(section.id, true);
+                return section;
             }
             else {
                 throw new TypeError();

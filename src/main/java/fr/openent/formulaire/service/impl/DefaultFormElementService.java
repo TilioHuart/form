@@ -13,7 +13,7 @@ public class DefaultFormElementService implements FormElementService {
 
     @Override
     public void countFormElements(String formId, Handler<Either<String, JsonObject>> handler) {
-        String countQuestions = "SELECT COUNT(*) FROM " + Formulaire.QUESTION_TABLE + " WHERE form_id = ?";
+        String countQuestions = "SELECT COUNT(*) FROM " + Formulaire.QUESTION_TABLE + " WHERE form_id = ? AND section_id IS NULL";
         String countSections = "SELECT COUNT(*) FROM " + Formulaire.SECTION_TABLE + " WHERE form_id = ?";
         String query = "SELECT ((" + countQuestions + ") + (" + countSections + ")) AS count;";
         JsonArray params = new JsonArray().add(formId).add(formId);

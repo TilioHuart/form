@@ -609,10 +609,10 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         document.onclick = e => { onClickQuestion(e); };
 
-        $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DUPLICATE, (e) => { vm.duplicateQuestion(e.targetScope.vm.question) });
-        $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DELETE, () => { vm.deleteFormElement() });
-        $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.UNDO, () => { vm.undoFormElementChanges() });
-        $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.VALIDATE, () => { vm.validateSection() });
-        $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.CREATE, (e) => { vm.createNewElement(e.targetScope.vm.section) });
+        $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DUPLICATE_ELEMENT, (e) => { vm.duplicateQuestion(e.targetScope.vm.question) });
+        $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DELETE_ELEMENT, () => { vm.deleteFormElement() });
+        $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.UNDO_CHANGES, () => { vm.undoFormElementChanges() });
+        $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.VALIDATE_SECTION, () => { vm.validateSection() });
+        $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.CREATE_QUESTION, (e) => { vm.createNewElement(e.targetScope.vm.section) });
         $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_FORM_EDITOR, () => { vm.$onInit() });
     }]);

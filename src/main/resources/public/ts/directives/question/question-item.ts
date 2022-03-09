@@ -70,15 +70,15 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
             };
 
             vm.duplicateQuestion = () : void => {
-                $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DUPLICATE);
+                $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DUPLICATE_ELEMENT);
             }
 
             vm.deleteQuestion = () : void => {
-                $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DELETE);
+                $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DELETE_ELEMENT);
             }
 
             vm.undoQuestionChanges = () : void => {
-                $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.UNDO);
+                $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.UNDO_CHANGES);
             }
         }
     };

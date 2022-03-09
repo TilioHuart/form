@@ -26,7 +26,9 @@ export const sectionService: SectionService = {
 
     async get(sectionId: number) : Promise<any> {
         try {
-            return DataUtils.getData(await http.get(`/formulaire/sections/${sectionId}`));
+            let section: Section = DataUtils.getData(await http.get(`/formulaire/sections/${sectionId}`));
+            await section.questions.sync(section.id, true);
+            return section;
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.sectionService.get'));
             throw err;

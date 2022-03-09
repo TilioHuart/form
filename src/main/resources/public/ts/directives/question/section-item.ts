@@ -112,19 +112,19 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
             };
 
             vm.deleteSection = () : void => {
-                $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DELETE);
+                $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DELETE_ELEMENT);
             };
 
             vm.undoSectionChanges = () : void => {
-                $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.UNDO);
+                $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.UNDO_CHANGES);
             };
 
             vm.validateSection = async () : Promise<void> => {
-                $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.VALIDATE);
+                $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.VALIDATE_SECTION);
             };
 
             vm.addQuestionToSection = async () : Promise<void> => {
-                $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.CREATE);
+                $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.CREATE_QUESTION);
             };
         }
     };

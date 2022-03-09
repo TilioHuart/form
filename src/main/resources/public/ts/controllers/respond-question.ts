@@ -7,18 +7,18 @@ import {
     Types
 } from "../models";
 import {responseFileService, responseService} from "../services";
-import {FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
+import {FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "../core/enums";
 
 interface ViewModel {
     formElement: FormElement;
-    response: Response;
     responses: Responses;
     distribution: Distribution;
+    selectedIndexList: any;
+    responsesChoicesList: any;
+    filesList: any;
     form: Form;
     nbFormElements: number;
-    selectedIndex: boolean[];
     loading : boolean;
-    files: File[];
 
     $onInit() : Promise<void>;
     prev() : Promise<void>;
@@ -34,69 +34,36 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
     function ($scope) {
 
     const vm: ViewModel = this;
-    vm.response = new Response();
     vm.responses = new Responses();
     vm.distribution = new Distribution();
     vm.form = new Form();
     vm.nbFormElements = 1;
-    vm.selectedIndex = [];
     vm.loading = true;
-    vm.files = [];
 
     vm.$onInit = async () : Promise<void> => {
+        vm.loading = true;
         vm.form = $scope.form;
         vm.distribution = $scope.distribution;
         vm.formElement = $scope.formElement;
         vm.nbFormElements = $scope.form.nbFormElements;
+        vm.responses = new Responses();
+        vm.selectedIndexList = [];
+        vm.responsesChoicesList = [];
+        vm.filesList = [];
 
-        if (vm.formElement instanceof Question) {
-            vm.formElement.choices = new QuestionChoices();
-            if (vm.formElement.question_type === Types.MULTIPLEANSWER
-                || vm.formElement.question_type === Types.SINGLEANSWER
-                || vm.formElement.question_type === Types.SINGLEANSWERRADIO) {
-                await vm.formElement.choices.sync(vm.formElement.id);
-            }
-            if (vm.formElement.question_type === Types.MULTIPLEANSWER) {
-                await vm.responses.syncMine(vm.formElement.id, vm.distribution.id);
-                vm.selectedIndex = new Array<boolean>(vm.formElement.choices.all.length);
-                for (let i = 0; i < vm.selectedIndex.length; i++) {
-                    let check = false;
-                    let j = 0;
-                    while (!check && j < vm.responses.all.length) {
-                        check = vm.formElement.choices.all[i].id === vm.responses.all[j].choice_id;
-                        j++;
-                    }
-                    vm.selectedIndex[i] = check;
-                }
-            }
-            else {
-                vm.response = new Response();
-                let responses = await responseService.listMineByDistribution(vm.formElement.id, vm.distribution.id);
-                if (responses.length > 0) {
-                    vm.response = responses[0];
-                }
-                if (!vm.response.question_id) { vm.response.question_id = vm.formElement.id; }
-                if (!vm.response.distribution_id) { vm.response.distribution_id = vm.distribution.id; }
-            }
-            if (vm.formElement.question_type === Types.TIME) { formatTime() }
-            if (vm.formElement.question_type === Types.FILE) {
-                vm.files = [];
-                if (vm.response.id) {
-                    let responseFiles = new ResponseFiles();
-                    await responseFiles.sync(vm.response.id);
-                    for (let repFile of responseFiles.all) {
-                        if (repFile.id) {
-                            let file = new File([repFile.id], repFile.filename);
-                            vm.files.push(file);
-                        }
-                    }
-                }
-                $scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.DISPLAY_FILES, vm.files);
-            }
+        let nbQuestions = vm.formElement instanceof Question ? 1 : (vm.formElement as Section).questions.all.length;
+        for (let i = 0; i < nbQuestions; i++) {
+            vm.responses.all.push(new Response());
+            let question = vm.formElement instanceof Question ? vm.formElement : (vm.formElement as Section).questions.all[i];
+            vm.selectedIndexList.push(new Array<boolean>(question.choices.all.length));
+            vm.responsesChoicesList.push(new Responses());
+            vm.filesList.push(new Array<File>());
         }
 
-        vm.loading = false;
-        window.setTimeout(() => vm.loading = true,500);
+        $scope.safeApply();
+        $scope.$broadcast(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.REFRESH_QUESTION);
+
+        window.setTimeout(() => vm.loading = false,500);
         $scope.safeApply();
     };
 
@@ -152,77 +119,82 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
     };
 
     const saveResponses = async () : Promise<boolean> => {
-        if(vm.loading){
+        if (!vm.loading) {
             if (vm.formElement instanceof Question) {
-                if (vm.formElement.question_type === Types.MULTIPLEANSWER) {
-                    for (let i = 0; i < vm.formElement.choices.all.length; i++) {
-                        let checked = vm.selectedIndex[i];
-                        let j = 0;
-                        let found = false;
-                        while (!found && j < vm.responses.all.length) {
-                            found = vm.formElement.choices.all[i].id === vm.responses.all[j].choice_id;
-                            j++;
-                        }
-                        if (!found && checked) {
-                            let newResponse = new Response(vm.formElement.id, vm.formElement.choices.all[i].id,
-                                vm.formElement.choices.all[i].value, vm.distribution.id);
-                            await responseService.create(newResponse);
-                        } else if (found && !checked) {
-                            await responseService.delete(vm.responses.all[j - 1].id);
-                        }
-                    }
-                    return true;
-                }
-                if (vm.formElement.question_type === Types.SINGLEANSWER || vm.formElement.question_type === Types.SINGLEANSWERRADIO) {
-                    if (!vm.response.choice_id) {
-                        vm.response.answer = "";
-                    } else {
-                        for (let choice of vm.formElement.choices.all) {
-                            if (vm.response.choice_id == choice.id) {
-                                vm.response.answer = choice.value;
-                            }
-                        }
-                    }
-                }
-                vm.response = await responseService.save(vm.response, vm.formElement.question_type);
-                if (vm.formElement.question_type === Types.FILE) {
-                    return (await saveFiles());
-                }
-                return true;
+                return await saveQuestionResponse(vm.formElement, vm.responses.all[0], vm.selectedIndexList[0], vm.responsesChoicesList[0], vm.filesList[0]);
             }
             else if (vm.formElement instanceof Section) {
-                // TODO save each response to each vm.formElement.questions
+                for (let question of vm.formElement.questions.all) {
+                    let section_position = question.section_position - 1;
+                    let response = vm.responses.all[section_position];
+                    let selectedIndex = vm.selectedIndexList[section_position];
+                    let responsesChoices = vm.responsesChoicesList[section_position];
+                    let files = vm.filesList[section_position];
+                    await saveQuestionResponse(question, response, selectedIndex, responsesChoices, files);
+                }
                 return true;
             }
         }
         return false;
     };
 
-    const saveFiles = async () : Promise<boolean> => {
-        if (vm.files.length > 10) {
+    const saveQuestionResponse = async (question: Question, response?: Response, selectedIndex?: boolean[], responsesChoices?: Responses, files?: File[]) : Promise<boolean> => {
+        if (question.question_type === Types.MULTIPLEANSWER && selectedIndex && responsesChoices) {
+            for (let i = 0; i < question.choices.all.length; i++) {
+                let checked = selectedIndex[i];
+                let j = 0;
+                let found = false;
+                while (!found && j < responsesChoices.all.length) {
+                    found = question.choices.all[i].id === responsesChoices.all[j].choice_id;
+                    j++;
+                }
+                if (!found && checked) {
+                    let newResponse = new Response(question.id, question.choices.all[i].id,
+                        question.choices.all[i].value, vm.distribution.id);
+                    await responseService.create(newResponse);
+                } else if (found && !checked) {
+                    await responseService.delete(responsesChoices.all[j - 1].id);
+                }
+            }
+            return true;
+        }
+        if ((question.question_type === Types.SINGLEANSWER || question.question_type === Types.SINGLEANSWERRADIO) && response) {
+            if (!response.choice_id) {
+                response.answer = "";
+            } else {
+                for (let choice of question.choices.all) {
+                    if (response.choice_id == choice.id) {
+                        response.answer = choice.value;
+                    }
+                }
+            }
+        }
+        response = await responseService.save(response, question.question_type);
+        if (question.question_type === Types.FILE && files) {
+            return (await saveFiles(response, files));
+        }
+        return true;
+    };
+
+    const saveFiles = async (response: Response, files: File[]) : Promise<boolean> => {
+        if (files.length > 10) {
             notify.info(idiom.translate('formulaire.response.file.tooMany'));
             return false;
         }
         else {
-            await responseFileService.deleteAll(vm.response.id);
-            for (let i = 0; i < vm.files.length; i++) {
-                let filename = vm.files[i].name;
-                if (vm.files[i].type && !$scope.form.anonymous) {
+            await responseFileService.deleteAll(response.id);
+            for (let i = 0; i < files.length; i++) {
+                let filename = files[i].name;
+                if (files[i].type && !$scope.form.anonymous) {
                     filename = model.me.firstName + model.me.lastName + "_" + filename;
                 }
                 let file = new FormData();
-                file.append("file", vm.files[i], filename);
-                await responseFileService.create(vm.response.id, file);
+                file.append("file", files[i], filename);
+                await responseFileService.create(vm.responses.all[0].id, file);
             }
-            vm.response.answer = idiom.translate('formulaire.response.file.send');
-            vm.response = await responseService.update(vm.response);
+            response.answer = idiom.translate('formulaire.response.file.send');
+            response = await responseService.update(vm.responses.all[0]);
             return true;
-        }
-    };
-
-    const formatTime = () : void => {
-        if (vm.response.answer) {
-            vm.response.answer = new Date("January 01 1970 " + vm.response.answer);
         }
     };
 
