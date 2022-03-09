@@ -162,6 +162,10 @@ body.formulaire section.main {
   .table {
     table-layout: fixed;
     margin: 10px;
+
+    thead label input[type=checkbox]:checked+span::before, thead label input[type=checkbox]+span::before{
+      border-color: $formulaire-white;
+    }
   }
 
   .toaster-right { float: right; }
