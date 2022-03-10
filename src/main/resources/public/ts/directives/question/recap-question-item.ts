@@ -9,9 +9,9 @@ interface IViewModel {
     Types: typeof Types;
     DistributionStatus: typeof DistributionStatus;
 
-    getStringResponse(question: Question): string;
-    isSelectedChoice(question: Question, choice: QuestionChoice) : boolean;
-    getResponseFileNames(question: Question) : string[];
+    getStringResponse(): string;
+    isSelectedChoice(choice: QuestionChoice) : boolean;
+    getResponseFileNames() : string[];
 }
 
 export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', () => {
@@ -47,8 +47,8 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
                         <div ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER">
                             <div ng-repeat="choice in vm.question.choices.all">
                                 <label>
-                                    <input type="checkbox" disabled checked ng-if="vm.isSelectedChoice(vm.question, choice)">
-                                    <input type="checkbox" disabled ng-if="!vm.isSelectedChoice(vm.question, choice)">
+                                    <input type="checkbox" disabled checked ng-if="vm.isSelectedChoice(choice)">
+                                    <input type="checkbox" disabled ng-if="!vm.isSelectedChoice(choice)">
                                     <span style="cursor: default"></span>
                                     <span class="ten eight-mobile">[[choice.value]]</span>
                                 </label>
@@ -61,15 +61,15 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
                             <div bind-html="vm.getStringResponse(vm.question)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.FILE">
-                            <div ng-repeat="filename in vm.getResponseFileNames(vm.question)">
+                            <div ng-repeat="filename in vm.getResponseFileNames()">
                                 <span bind-html="[[filename]]"></span>
                             </div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.SINGLEANSWERRADIO">
                             <div ng-repeat="choice in vm.question.choices.all">
                                 <label>
-                                    <input type="radio" disabled checked ng-if="vm.isSelectedChoice(vm.question, choice)">
-                                    <input type="radio" disabled ng-if="!vm.isSelectedChoice(vm.question, choice)">
+                                    <input type="radio" disabled checked ng-if="vm.isSelectedChoice(choice)">
+                                    <input type="radio" disabled ng-if="!vm.isSelectedChoice(choice)">
                                     <span style="cursor: default"></span>
                                     <span class="ten eight-mobile">[[choice.value]]</span>
                                 </label>
@@ -89,12 +89,12 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
             const vm: IViewModel = $scope.vm;
             vm.Types = Types;
             vm.DistributionStatus = DistributionStatus;
+            let missingResponse = "<em>" + idiom.translate('formulaire.response.missing') + "</em>";
 
             // Display helper functions
 
-            vm.getStringResponse = (question) : string => {
-                let responses = vm.responses.all.filter(r => r.question_id === question.id);
-                let missingResponse = "<em>" + idiom.translate('formulaire.response.missing') + "</em>";
+            vm.getStringResponse = () : string => {
+                let responses = vm.responses.all.filter(r => r.question_id === vm.question.id);
                 if (responses && responses.length > 0) {
                     let answer = responses[0].answer.toString();
                     return answer ? answer : missingResponse;
@@ -102,18 +102,19 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
                 return missingResponse;
             };
 
-            vm.isSelectedChoice = (question, choice) : boolean => {
-                let selectedChoices: any = vm.responses.all.filter(r => r.question_id === question.id).map(r => r.choice_id);
+            vm.isSelectedChoice = (choice) : boolean => {
+                let selectedChoices: any = vm.responses.all.filter(r => r.question_id === vm.question.id).map(r => r.choice_id);
                 return selectedChoices.includes(choice.id);
             };
 
-            vm.getResponseFileNames = (question) : string[] => {
-                let missingResponse = "<em>" + idiom.translate('formulaire.response.missing') + "</em>";
-                let responses = vm.responses.all.filter(r => r.question_id === question.id);
+            vm.getResponseFileNames = () : string[] => {
+                let responses = vm.responses.all.filter(r => r.question_id === vm.question.id);
                 if (responses && responses.length === 1 && responses[0].files.all.length > 0) {
                     return responses[0].files.all.map(rf => rf.filename.substring(rf.filename.indexOf("_") + 1));
                 }
-                return [missingResponse];
+                else {
+                    return [missingResponse];
+                }
             };
         }
     };

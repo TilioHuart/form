@@ -41,8 +41,7 @@
                 </div>
                 <div class="section-main">
                     <div ng-repeat="question in vm.formElement.questions.all | orderBy:'section_position'">
-                        <respond-question-item ng-if="FormElementUtils.isQuestion(question)"
-                                               question="question"
+                        <respond-question-item question="question"
                                                response="vm.responses.all[question.section_position - 1]"
                                                distribution="vm.distribution"
                                                selected-index="vm.selectedIndexList[question.section_position - 1]"

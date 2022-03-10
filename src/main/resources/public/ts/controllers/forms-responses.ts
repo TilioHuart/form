@@ -63,57 +63,57 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
         vm.forms.all = vm.forms.all.filter(form => !form.archived);
         vm.distributions = new Distributions();
 
-            vm.forms.filters.find(f => f.name === FiltersFilters.TO_DO).display = true;
-            vm.forms.filters.find(f => f.name === FiltersFilters.IN_PROGRESS).display = true;
-            vm.forms.filters.find(f => f.name === FiltersFilters.FINISHED).display = true;
-            vm.forms.orders.find(o => o.name === FiltersOrders.SENDING_DATE).display = true;
-            vm.forms.orders.find(o => o.name === FiltersOrders.TITLE).display = true;
+        vm.forms.filters.find(f => f.name === FiltersFilters.TO_DO).display = true;
+        vm.forms.filters.find(f => f.name === FiltersFilters.IN_PROGRESS).display = true;
+        vm.forms.filters.find(f => f.name === FiltersFilters.FINISHED).display = true;
+        vm.forms.orders.find(o => o.name === FiltersOrders.SENDING_DATE).display = true;
+        vm.forms.orders.find(o => o.name === FiltersOrders.TITLE).display = true;
 
-            try {
-                vm.distributions.all = Mix.castArrayAs(Distribution, await distributionService.listByResponder());
-                for (let form of vm.forms.all) {
-                    form.distributions = new Distributions();
-                    form.distributions.all = vm.distributions.all.filter(d => d.form_id === form.id);
-                }
+        try {
+            vm.distributions.all = Mix.castArrayAs(Distribution, await distributionService.listByResponder());
+            for (let form of vm.forms.all) {
+                form.distributions = new Distributions();
+                form.distributions.all = vm.distributions.all.filter(d => d.form_id === form.id);
             }
-            catch (e) {
-                throw e;
-            }
-
-            vm.sort(FiltersOrders.SENDING_DATE);
-            vm.loading = false;
-            $scope.safeApply();
-        };
-
-        // Functions
-
-        vm.sort = (field: FiltersOrders) : void => {
-            vm.forms.orderByField(field);
-            vm.forms.orderForms();
-            $scope.safeApply();
-        };
-
-        vm.filter = (filter: FiltersFilters) : void => {
-            vm.forms.switchFilter(filter);
-            vm.forms.filterForms();
-            $scope.safeApply();
-        };
-
-        vm.displayFilterName = (name: string) : string => {
-            return idiom.translate("formulaire.filter." + name.toLowerCase());
-        };
-
-        // Utils
-
-        vm.openDistribution = (distrib) : void => {
-            $scope.redirectTo(`/form/${distrib.form_id}/${distrib.id}/questions/recap`);
+        }
+        catch (e) {
+            throw e;
         }
 
-        vm.infiniteScroll = () : void => {
-            vm.limitTo += vm.pageSize;
-        };
+        vm.sort(FiltersOrders.SENDING_DATE);
+        vm.loading = false;
+        $scope.safeApply();
+    };
 
-        // Toaster
+    // Functions
+
+    vm.sort = (field: FiltersOrders) : void => {
+        vm.forms.orderByField(field);
+        vm.forms.orderForms();
+        $scope.safeApply();
+    };
+
+    vm.filter = (filter: FiltersFilters) : void => {
+        vm.forms.switchFilter(filter);
+        vm.forms.filterForms();
+        $scope.safeApply();
+    };
+
+    vm.displayFilterName = (name: string) : string => {
+        return idiom.translate("formulaire.filter." + name.toLowerCase());
+    };
+
+    // Utils
+
+    vm.openDistribution = (distrib) : void => {
+        $scope.redirectTo(`/form/${distrib.form_id}/${distrib.id}/questions/recap`);
+    }
+
+    vm.infiniteScroll = () : void => {
+        vm.limitTo += vm.pageSize;
+    };
+
+    // Toaster
 
     vm.openForm = async (form: Form) : Promise<void> => {
         vm.forms.deselectAll();
@@ -143,22 +143,22 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
         $scope.safeApply();
     };
 
-        vm.selectForm = async(form : Form):Promise <void> =>{
-            if (!form.selected) {
-                vm.forms.deselectAll();
-                if (form.multiple || status != DistributionStatus.FINISHED) {
-                    form.selected = true;
-                }
-            }
-            else {
-                vm.forms.deselectAll();
+    vm.selectForm = async(form : Form):Promise <void> =>{
+        if (!form.selected) {
+            vm.forms.deselectAll();
+            if (form.multiple || status != DistributionStatus.FINISHED) {
+                form.selected = true;
             }
         }
+        else {
+            vm.forms.deselectAll();
+        }
+    }
 
-        vm.openMyResponses = () : void => {
-            template.open('lightbox', 'lightbox/my-responses');
-            vm.display.lightbox.myResponses = true;
-        };
+    vm.openMyResponses = () : void => {
+        template.open('lightbox', 'lightbox/my-responses');
+        vm.display.lightbox.myResponses = true;
+    };
 
     vm.closeMyResponses = () : void => {
         template.close('lightbox');

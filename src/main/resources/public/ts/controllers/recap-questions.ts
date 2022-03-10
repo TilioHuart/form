@@ -54,10 +54,10 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
         vm.distribution = $scope.distribution;
         await vm.formElements.sync(vm.form.id);
         await vm.responses.syncByDistribution(vm.distribution.id);
-        let fileQuestions = vm.formElements.all.filter(q => q instanceof Question && q.question_type === Types.FILE);
+        let fileQuestions = vm.formElements.getAllQuestions().all.filter(q => q.question_type === Types.FILE);
         for (let fileQuestion of fileQuestions) {
             let response = vm.responses.all.filter(r => r.question_id === fileQuestion.id)[0];
-            if(response){
+            if (response) {
                 await response.files.sync(response.id);
             }
         }

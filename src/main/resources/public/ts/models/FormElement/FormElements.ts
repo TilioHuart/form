@@ -57,6 +57,13 @@ export class FormElements extends Selection<FormElement> {
         return sections;
     }
 
+    getAllQuestions = () : Questions => {
+        let questions = this.getQuestions();
+        let sectionQuestions = this.getSections().all.map(s => s.questions.all) as any;
+        questions.all = questions.all.concat(sectionQuestions.flat());
+        return questions;
+    }
+
     getQuestionById = (questionId: number) : Question => {
         let question = this.getQuestions().all.filter(question => question.id === questionId)[0];
         if (question) { return question; }
