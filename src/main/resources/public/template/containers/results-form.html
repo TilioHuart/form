@@ -19,102 +19,16 @@
     </div>
 
     <div class="result-element">
-        <div class="question" ng-if="FormElementUtils.isQuestion(formElement)">
-            <!-- Question title -->
-            <div class="title">
-                <h4 ng-if="vm.formElement.question_type == Types.FREETEXT">[[vm.formElement.title]]</h4>
-                <h4 ng-if="vm.formElement.question_type != Types.FREETEXT && vm.form.nb_responses > 1">
-                    [[vm.formElement.title]] ([[vm.form.nb_responses]] <i18n>formulaire.responses</i18n>)<span ng-if="vm.formElement.mandatory" style="color:red;margin-left:10px">*</span>
-                </h4>
-                <h4 ng-if="vm.formElement.question_type != Types.FREETEXT && vm.form.nb_responses <= 1">
-                    [[vm.formElement.title]] ([[vm.form.nb_responses]] <i18n>formulaire.response</i18n>)<span ng-if="vm.formElement.mandatory" style="color:red;margin-left:10px">*</span>
-                </h4>
-                <button class="cell" ng-click="vm.zipAndDownload()" ng-if="vm.formElement.question_type == Types.FILE">
-                    <i18n>formulaire.form.download.all.files</i18n>
-                </button>
-            </div>
 
-            <!-- List of results FREETEXT -->
-            <div ng-if="vm.formElement.question_type == Types.FREETEXT" class="freetext" bind-html="vm.formElement.statement"></div>
-
-            <!-- List of results SINGLEANSWER, MULTIPLEANSWER, SINGLEANSWERRADIO -->
-            <div ng-if="vm.formElement.question_type == Types.SINGLEANSWER || vm.formElement.question_type == Types.MULTIPLEANSWER || vm.formElement.question_type == Types.SINGLEANSWERRADIO"
-                 class="choices">
-                <div class="twelve-mobile" ng-class="vm.formElement.question_type == Types.MULTIPLEANSWER ? 'twelve' : 'five'">
-                    <div ng-repeat="choice in vm.formElement.choices.all" class="choice">
-                        <div class="infos twelve-mobile" ng-class="vm.formElement.question_type == Types.MULTIPLEANSWER  ? 'five' : 'twelve'">
-                            <div class="choice-value eight twelve-mobile ellipsis">
-                                <span ng-if="($index+1) != vm.formElement.choices.all.length">[[$index + 1]]. </span>[[choice.value]]
-                            </div>
-                            <div class="four twelve-mobile ellipsis bold">
-                                [[choice.nbResponses]]
-                                <i18n ng-if="choice.nbResponses > 1">formulaire.responses</i18n>
-                                <i18n ng-if="choice.nbResponses <= 1">formulaire.response</i18n>
-                                ([[vm.getWidth(choice.nbResponses, 100).toFixed(2)]]%)
-                            </div>
-                        </div>
-                        <!-- Graph for MULTIPLEANSWER -->
-                        <div ng-if="vm.formElement.question_type == Types.MULTIPLEANSWER" class="seven zero-mobile">
-                            <div class="graph-bar"
-                                 ng-style="{width: (vm.getWidth(choice.nbResponses, 95) + '%'), 'background-color': vm.getColor(vm.formElement, choice.id)}">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Graph for SINGLEANSWER, SINGLEANSWERRADIO -->
-                <div ng-if="vm.formElement.question_type == Types.SINGLEANSWER || vm.formElement.question_type == Types.SINGLEANSWERRADIO" class="graph-camembert seven zero-mobile">
-                    <div class="eight">
-                        <div id="singleanswer-response-chart"></div>
-                    </div>
-                </div>
-
-                <!-- Loader -->
-                <div ng-if="vm.loading && !vm.display.lightbox.export" class="twelve loader">
-                    <loader min-height="'10px'"/>
-                </div>
-            </div>
-
-            <!-- List of results SHORTANSWER, LONGANSWER, DATE, TIME, FILE -->
-            <div ng-if="vm.formElement.question_type != Types.SINGLEANSWER &&
-                        vm.formElement.question_type != Types.MULTIPLEANSWER &&
-                        vm.formElement.question_type != Types.SINGLEANSWERRADIO &&
-                        vm.formElement.question_type != Types.FREETEXT">
-                <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':true" class="distrib">
-                    <div class="infos four twelve-mobile">
-                        <div class="four twelve-mobile">[[displayDate(distrib.date_response)]]</div>
-                        <div class="eight twelve-mobile ellipsis" ng-if="!vm.form.anonymous">[[distrib.responder_name]]</div>
-                    </div>
-                    <div class="eight twelve-mobile results">
-                        <div ng-repeat="result in vm.getDataByDistrib(vm.formElement, distrib.id)"
-                             ng-class="{'notLast' : !$last}">
-                            <div ng-if="vm.formElement.question_type == Types.SHORTANSWER ||
-                                        vm.formElement.question_type == Types.LONGANSWER ||
-                                        vm.formElement.question_type == Types.DATE ||
-                                        vm.formElement.question_type == Types.TIME"
-                                 bind-html="result.answer"></div>
-                            <a ng-if="vm.formElement.question_type == Types.FILE" ng-click="vm.downloadFile(result.id)">
-                                <i class="i-download lg-icon spaced-right"></i> [[result.filename]]
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <!-- Loader -->
-                <div ng-if="vm.loading && !vm.display.lightbox.export" class="twelve loader">
-                    <loader min-height="'10px'"/>
-                </div>
-            </div>
-
-            <!-- See more button -->
-            <div ng-if="vm.showMoreButton(vm.formElement)" style="margin: 1%;">
-                <a ng-click="vm.loadMoreResults(vm.formElements)">
-                    <i18n>formulaire.seeMore</i18n>
-                </a>
-            </div>
-        </div>
+        <!-- Display question -->
+        <result-question-item ng-if="FormElementUtils.isQuestion(vm.formElement) && (!vm.loading || vm.display.lightbox.export)"
+                              question="vm.formElement"
+                              form="vm.form"
+                              palette-colors="vm.paletteColors">
+        </result-question-item>
 
         <!-- Display section -->
-        <div class="section" ng-if="!FormElementUtils.isQuestion(formElement)">
+        <div class="section" ng-if="!FormElementUtils.isQuestion(formElement) && (!vm.loading || vm.display.lightbox.export)">
             <div class="section-top">
                 <div class="title"><h4>[[vm.formElement.title]]</h4></div>
                 <div class="description" ng-if="vm.formElement.description">
@@ -123,13 +37,17 @@
             </div>
             <div class="section-main">
                 <div ng-repeat="question in vm.formElement.questions.all | orderBy:'section_position'">
-<!--                    <result-question-item ng-if="FormElementUtils.isQuestion(question)"-->
-<!--                                           question="question"-->
-<!--                                           response="vm.preview.response"-->
-<!--                                           files="vm.preview.files">-->
-<!--                    </result-question-item>-->
+                    <result-question-item question="question"
+                                          form="vm.form"
+                                          palette-colors="vm.paletteColors">
+                    </result-question-item>
                 </div>
             </div>
+        </div>
+
+        <!-- Loader -->
+        <div ng-if="vm.loading && !vm.display.lightbox.export" class="twelve loader">
+            <loader min-height="'10px'"/>
         </div>
 
         <!-- Navigation buttons -->

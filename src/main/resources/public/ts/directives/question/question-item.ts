@@ -58,10 +58,10 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
             </div>
         `,
 
-        controller: async ($scope) => {
+        controller: function ($scope) {
             const vm: IViewModel = <IViewModel> this;
         },
-        link: ($scope, $element) => {
+        link: function ($scope, $element) {
             const vm: IViewModel = $scope.vm;
             vm.Types = Types;
 

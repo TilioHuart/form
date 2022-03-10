@@ -96,10 +96,10 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
             </div>
         `,
 
-        controller: async ($scope) => {
+        controller: function ($scope) {
             const vm: IViewModel = <IViewModel> this;
         },
-        link: ($scope, $element) => {
+        link: function ($scope, $element) {
             const vm: IViewModel = $scope.vm;
             vm.types = Types;
 

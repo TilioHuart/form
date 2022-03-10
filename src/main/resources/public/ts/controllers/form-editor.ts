@@ -525,10 +525,10 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
                         if (formElement instanceof Question) {
                             let registeredChoices = [];
+                            formElement.choices.replaceSpace();
                             for (let choice of formElement.choices.all) {
                                 if (choice.value && !registeredChoices.find(c => c === choice.value)) {
                                     choice.question_id = newId;
-                                    choice.value = choice.value.replace(/\u00A0/, " ");
                                     choice.id = (await questionChoiceService.save(choice)).id;
                                     registeredChoices.push(choice.value);
                                 }

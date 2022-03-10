@@ -82,10 +82,10 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
                 </div>
         `,
 
-        controller: async ($scope) => {
+        controller: function ($scope) {
             const vm: IViewModel = <IViewModel> this;
         },
-        link: ($scope, $element) => {
+        link: function ($scope, $element) {
             const vm: IViewModel = $scope.vm;
             vm.Types = Types;
             vm.DistributionStatus = DistributionStatus;

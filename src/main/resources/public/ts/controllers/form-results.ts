@@ -7,30 +7,25 @@ import {
     Question,
     QuestionChoice,
     QuestionChoices,
-    Questions,
     Responses,
     Types
 } from "../models";
 import {Mix} from "entcore-toolkit";
 import {ColorUtils} from "../utils";
-import {Exports, FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
+import {Exports, FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "../core/enums";
 import http from "axios";
 import {questionChoiceService} from "../services";
 
 interface ViewModel {
     formElement: FormElement;
     formElements: FormElements;
-    results: Responses;
-    distributions: Distributions;
+    results: Responses; // TODO delete avec delete initQCMandQCU pour la refonte export
+    distributions: Distributions; // TODO delete avec delete initQCMandQCU pour la refonte export
     form: Form;
-    nbQuestions: number;
+    nbFormElements: number;
     last: boolean;
     navigatorValue: number;
-    isGraphQuestion: boolean;
-    singleAnswerResponseChart: any;
-    colors: string[];
     typeExport: Exports;
-    choicesForGraph : QuestionChoices;
     pdfResponseCharts: any;
     display: {
         lightbox: {
@@ -38,77 +33,49 @@ interface ViewModel {
         }
     }
     loading: boolean;
+    paletteColors: string[];
 
     $onInit() : Promise<void>;
     export(typeExport: Exports) : void;
     doExport() : void;
-    downloadFile(responseId: number) : void;
-    zipAndDownload() : void;
-    getDataByDistrib(question: Question, distribId: number) : any;
     prev() : Promise<void>;
     next() : Promise<void>;
     goTo(position: number) : Promise<void>;
-    getWidth(nbResponses: number, divisor: number) : number;
-    getColor(question: Question, choiceId: number) : string;
     getGraphQuestions() : Question[];
-    loadMoreResults(question: Question) : Promise<void>;
-    showMoreButton(question: Question) : boolean;
 }
 
 
 export const formResultsController = ng.controller('FormResultsController', ['$scope',
     function ($scope) {
-        let paletteColors = ['#0F2497','#2A9BC7','#77C4E1','#C0E5F2']; // Bleu foncé à bleu clair
 
         const vm: ViewModel = this;
         vm.formElements = new FormElements();
         vm.results = new Responses();
         vm.distributions = new Distributions();
         vm.form = new Form();
-        vm.nbQuestions = 1;
+        vm.nbFormElements = 1;
         vm.last = false;
         vm.navigatorValue = 1;
-        vm.isGraphQuestion = false;
-        vm.singleAnswerResponseChart = null;
-        vm.colors = [];
         vm.typeExport = Exports.CSV;
-        vm.choicesForGraph = new QuestionChoices();
         vm.pdfResponseCharts = [];
         vm.display = {
             lightbox: {
                 export: false
             }
         };
-        vm.loading = true;
+        vm.paletteColors = ['#0F2497','#2A9BC7','#77C4E1','#C0E5F2']; // Dark blue to light blue
 
         vm.$onInit = async () : Promise<void> => {
+            vm.loading = true;
             vm.form = $scope.form;
             vm.formElement = $scope.formElement;
             vm.navigatorValue = vm.formElement.position;
-            vm.nbQuestions = $scope.form.nbFormElements;
-            vm.last = vm.formElement.position === vm.nbQuestions;
+            vm.nbFormElements = $scope.form.nbFormElements;
+            vm.last = vm.formElement.position === vm.nbFormElements;
             await vm.formElements.sync(vm.form.id);
 
-            if (vm.formElement instanceof Question) {
-                vm.isGraphQuestion = vm.formElement.question_type == Types.SINGLEANSWER || vm.formElement.question_type == Types.MULTIPLEANSWER || vm.formElement.question_type == Types.SINGLEANSWERRADIO;
-
-                if (vm.formElement.question_type != Types.FREETEXT) {
-                    await vm.formElement.choices.sync(vm.formElement.id);
-                    await vm.results.sync(vm.formElement, vm.formElement.question_type == Types.FILE, vm.isGraphQuestion ? null : 0);
-                    await vm.distributions.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, vm.isGraphQuestion ? null : 0);
-
-                    if (vm.isGraphQuestion) {
-                        (vm.formElement as Question) = await initQCMandQCU(vm.formElement);
-                        let choices = vm.formElement.choices.all.filter(c => c.nbResponses > 0);
-                        vm.colors = ColorUtils.interpolateColors(paletteColors, choices.length);
-
-                        // Init charts
-                        if (vm.formElement.question_type == Types.SINGLEANSWER || vm.formElement.question_type == Types.SINGLEANSWERRADIO) {
-                            initSingleAnswerChart(vm.formElement);
-                        }
-                    }
-                }
-            }
+            $scope.safeApply();
+            $scope.$broadcast(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.REFRESH_QUESTION);
 
             vm.loading = false;
             $scope.safeApply();
@@ -198,31 +165,6 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             $scope.safeApply();
         };
 
-        vm.downloadFile = (fileId: number) : void => {
-            window.open(`/formulaire/responses/files/${fileId}/download`);
-        };
-
-        vm.zipAndDownload = () : void => {
-            window.open(`/formulaire/responses/${vm.formElement.id}/files/download/zip`);
-        };
-
-        vm.getDataByDistrib = (question: Question, distribId: number) : any => {
-            let results =  vm.results.all.filter(r => r.distribution_id === distribId);
-            if (results.length <= 0) {
-                return [{ answer: "-"}];
-            }
-
-            for (let result of results) {
-                if (result.answer == "") {
-                    result.answer = "-";
-                }
-            }
-            if (question.question_type === Types.FILE) {
-                return results.map(r => r.files)[0].all;
-            }
-            return results;
-        };
-
         vm.prev = async () : Promise<void> => {
             let prevPosition: number = vm.formElement.position - 1;
             if (prevPosition > 0) {
@@ -232,7 +174,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
         vm.next = async () : Promise<void> => {
             let nextPosition: number = vm.formElement.position + 1;
-            if (nextPosition <= vm.nbQuestions) {
+            if (nextPosition <= vm.nbFormElements) {
                 await vm.goTo(nextPosition);
             }
         };
@@ -242,70 +184,12 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             $scope.safeApply();
         };
 
-        vm.getWidth = (nbResponses: number, divisor: number) : number => {
-            let width = nbResponses / (vm.distributions.all.length > 0 ? vm.distributions.all.length : 1) * divisor;
-            return width < 0 ? 0 : (width > divisor ? divisor : width);
-        }
-
-        vm.getColor = (question: Question, choiceId: number) : string => {
-            let colorIndex = question.choices.all.filter(c => c.nbResponses > 0).findIndex(c => c.id === choiceId);
-            return vm.colors[colorIndex];
-        };
-
         vm.getGraphQuestions = () : Question[] => {
             return vm.formElements.all.filter(q => q instanceof Question && (
                 q.question_type === Types.SINGLEANSWER ||
                 q.question_type === Types.MULTIPLEANSWER ||
                 q.question_type ===Types.SINGLEANSWERRADIO)) as Question[];
-        }
-
-        vm.showMoreButton = (question: Question) : boolean => {
-            return vm.form.nb_responses > vm.distributions.all.length && question.question_type != Types.FREETEXT && !vm.isGraphQuestion;
-        }
-
-        vm.loadMoreResults = async (question: Question) : Promise<void> => {
-            if (!vm.isGraphQuestion) {
-                await vm.results.sync(question, question.question_type == Types.FILE, vm.isGraphQuestion ? null : vm.distributions.all.length);
-                await vm.distributions.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, vm.distributions.all.length);
-                $scope.safeApply();
-            }
-        }
-
-        // Charts
-
-        const initSingleAnswerChart = (question: Question) : void => {
-            let choices = question.choices.all.filter(c => c.nbResponses > 0);
-
-            let series = [];
-            let labels = [];
-            let i18nValue = idiom.translate('formulaire.response');
-            i18nValue = i18nValue.charAt(0).toUpperCase() + i18nValue.slice(1);
-
-            for (let choice of choices) {
-                series.push(choice.nbResponses); // Fill data
-                let i = question.choices.all.indexOf(choice) + 1;
-                !choice.id ? labels.push(idiom.translate('formulaire.response.empty')) : labels.push(i18nValue + " " + i); // Fill labels
-            }
-
-            // Generate options with labels and colors
-            let baseHeight = 40 * question.choices.all.length;
-            let options = {
-                chart: {
-                    type: 'pie',
-                    height: baseHeight < 200 ? 200 : (baseHeight > 500 ? 500 : baseHeight)
-                },
-                colors: vm.colors,
-                labels: labels
-            }
-
-            // Generate chart with options and data
-            if (vm.singleAnswerResponseChart) { vm.singleAnswerResponseChart.destroy(); }
-
-            let newOptions = JSON.parse(JSON.stringify(options));
-            newOptions.series = series;
-            vm.singleAnswerResponseChart = new ApexCharts(document.querySelector('#singleanswer-response-chart'), newOptions);
-            vm.singleAnswerResponseChart.render();
-        }
+        };
 
         // PDF
 
@@ -335,7 +219,6 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             }
             $scope.safeApply();
             return images;
-
         }
 
         const initChartsForPDF = (question: Question) : any => {
@@ -357,7 +240,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             return {
                 series: series,
                 labels: labels,
-                colors: ColorUtils.interpolateColors(paletteColors, labels.length)
+                colors: ColorUtils.interpolateColors(vm.paletteColors, labels.length)
             };
         }
 
@@ -395,7 +278,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
                             horizontal: true,
                         }
                     },
-                    colors: ColorUtils.interpolateColors(paletteColors, 1),
+                    colors: ColorUtils.interpolateColors(vm.paletteColors, 1),
                     xaxis: {
                         categories: dataOptions.labels,
                     }
