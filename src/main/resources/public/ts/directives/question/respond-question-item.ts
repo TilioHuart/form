@@ -124,6 +124,7 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                     }
                     if (!vm.response.question_id) { vm.response.question_id = vm.question.id; }
                     if (!vm.response.distribution_id) { vm.response.distribution_id = vm.distribution.id; }
+                    console.log("response for ", vm.question, " : ", vm.response);
                     $scope.$apply();
                 }
                 if (vm.question.question_type === Types.TIME) { formatTime() }
@@ -139,7 +140,6 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                             }
                         }
                     }
-                    $scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.DISPLAY_FILES, vm.files);
                 }
                 $scope.$apply();
             };

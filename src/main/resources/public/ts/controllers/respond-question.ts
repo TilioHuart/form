@@ -119,9 +119,11 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
     };
 
     const saveResponses = async () : Promise<boolean> => {
+        let isSavingOk = false;
+
         if (!vm.loading) {
             if (vm.formElement instanceof Question) {
-                return await saveQuestionResponse(vm.formElement, vm.responses.all[0], vm.selectedIndexList[0], vm.responsesChoicesList[0], vm.filesList[0]);
+                isSavingOk = await saveQuestionResponse(vm.formElement, vm.responses.all[0], vm.selectedIndexList[0], vm.responsesChoicesList[0], vm.filesList[0]);
             }
             else if (vm.formElement instanceof Section) {
                 for (let question of vm.formElement.questions.all) {
@@ -132,10 +134,17 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                     let files = vm.filesList[section_position];
                     await saveQuestionResponse(question, response, selectedIndex, responsesChoices, files);
                 }
-                return true;
+                isSavingOk = true;
             }
         }
-        return false;
+
+        if (isSavingOk) {
+            $scope.$broadcast(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DESTROY_FILE_PICKER);
+            return true;
+        }
+        else {
+            return false;
+        }
     };
 
     const saveQuestionResponse = async (question: Question, response?: Response, selectedIndex?: boolean[], responsesChoices?: Responses, files?: File[]) : Promise<boolean> => {
@@ -190,10 +199,10 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                 }
                 let file = new FormData();
                 file.append("file", files[i], filename);
-                await responseFileService.create(vm.responses.all[0].id, file);
+                await responseFileService.create(response.id, file);
             }
             response.answer = idiom.translate('formulaire.response.file.send');
-            response = await responseService.update(vm.responses.all[0]);
+            response = await responseService.update(response);
             return true;
         }
     };
