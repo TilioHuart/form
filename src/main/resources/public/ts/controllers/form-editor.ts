@@ -253,9 +253,10 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         };
 
         vm.deleteFormElement = async () : Promise<void> => {
-            if (vm.formElements.selected[0].id != null) {
-                let responseCount = await responseService.countByQuestion(vm.formElements.selected[0].id);
-                if (vm.form.sent && responseCount.count>0){
+            let formElement = vm.formElements.getSelectedElement();
+            if (formElement.id) {
+                let responseCount = await responseService.countByQuestion(formElement.id);
+                if (vm.form.sent && responseCount.count > 0){
                     notify.error(idiom.translate('formulaire.question.delete.response.fill.warning'));
                 }
                 else if (vm.form.sent && vm.formElements.all.length === 1) {
@@ -267,14 +268,18 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     vm.display.lightbox.delete = true;
                 }
             }
-            else{
-                vm.formElements.all = vm.formElements.all.filter(q => q.id);
+            else if (formElement instanceof Question && formElement.section_id) {
+                let section = vm.formElements.getSections().all.filter(s => s.id === formElement.id)[0];
+                section.questions.all = section.questions.all.filter(q => q.id);
+            }
+            else {
+                vm.formElements.all = vm.formElements.all.filter(e => e.id);
             }
         };
 
         vm.doDeleteFormElement = async () : Promise<void> => {
             try {
-                let formElement = vm.formElements.selected[0];
+                let formElement = vm.formElements.getSelectedElement();
                 if (formElement.id) {
                     await formElementService.delete(formElement);
                 }

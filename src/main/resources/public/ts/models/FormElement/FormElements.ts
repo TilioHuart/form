@@ -72,11 +72,16 @@ export class FormElements extends Selection<FormElement> {
         return sectionQuestions.flat().filter(q => q.id === questionId)[0];
     }
 
-    hasSelectedElement = () : boolean => {
-        let hasSelected = this.selected.length > 0;
-        for (let section of this.getSections().all) {
-            hasSelected = hasSelected || section.questions.selected.length > 0;
+    getSelectedElement = () : FormElement => {
+        let selectedElement = this.selected[0];
+        if (!selectedElement) {
+            let sectionQuestionsSelected = (this.getSections().all.map(s => s.questions.selected) as any).flat();
+            selectedElement = sectionQuestionsSelected.length > 0 ? sectionQuestionsSelected[0] : null;
         }
-        return hasSelected;
+        return selectedElement;
+    }
+
+    hasSelectedElement = () : boolean => {
+        return !!this.getSelectedElement();
     }
 }
