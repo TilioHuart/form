@@ -124,6 +124,7 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                     }
                     if (!vm.response.question_id) { vm.response.question_id = vm.question.id; }
                     if (!vm.response.distribution_id) { vm.response.distribution_id = vm.distribution.id; }
+                    $scope.$apply();
                 }
                 if (vm.question.question_type === Types.TIME) { formatTime() }
                 if (vm.question.question_type === Types.FILE) {

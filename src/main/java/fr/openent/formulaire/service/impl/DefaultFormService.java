@@ -177,16 +177,30 @@ public class DefaultFormService implements FormService {
                     "anonymous, response_notified, editable, rgpd, rgpd_goal, rgpd_lifetime " +
                     "FROM " + Formulaire.FORM_TABLE + " WHERE id = ? RETURNING id" +
                 "), " +
+                "new_sections AS (" +
+                    "INSERT INTO " + Formulaire.SECTION_TABLE + " (form_id, title, description, position, original_section_id) " +
+                    "SELECT (SELECT id from new_form_id), title, description, position, id " +
+                    "FROM " + Formulaire.SECTION_TABLE + " WHERE form_id = ? " +
+                    "RETURNING id, form_id, original_section_id" +
+                "), " +
+                "new_sections_linked AS (" +
+                    "SELECT ns.id, ns.original_section_id, q.id AS question_id, q.section_position FROM new_sections ns " +
+                    "JOIN " + Formulaire.QUESTION_TABLE + " q ON ns.original_section_id = q.section_id" +
+                "), " +
                 "rows AS (" +
-                    "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, statement, mandatory, original_question_id) " +
-                    "SELECT (SELECT id from new_form_id), title, position, question_type, statement, mandatory, id " +
-                    "FROM " + Formulaire.QUESTION_TABLE + " WHERE form_id = ? " +
-                    "RETURNING form_id, id, original_question_id, question_type)" +
+                    "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
+                    "mandatory, original_question_id, section_id, section_position, conditional) " +
+                    "SELECT (SELECT id from new_form_id), title, position, question_type, statement, mandatory, id, " +
+                    "(SELECT id FROM new_sections_linked WHERE original_section_id = q.section_id LIMIT 1), " +
+                    "(SELECT section_position FROM new_sections_linked WHERE question_id = q.id), conditional " +
+                    "FROM " + Formulaire.QUESTION_TABLE + " q WHERE form_id = ? " +
+                    "RETURNING id, form_id, original_question_id, question_type" +
+                ") " +
                 "SELECT * FROM rows " +
                 "UNION ALL " +
                 "SELECT (SELECT id FROM new_form_id), null, null, null " +
                 "WHERE NOT EXISTS (SELECT * FROM rows);";
-        JsonArray params = new JsonArray().add(user.getUserId()).add(user.getUsername()).add(formId).add(formId);
+        JsonArray params = new JsonArray().add(user.getUserId()).add(user.getUsername()).add(formId).add(formId).add(formId);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 

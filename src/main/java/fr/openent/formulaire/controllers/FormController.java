@@ -283,8 +283,7 @@ public class FormController extends ControllerHelper {
         });
     }
 
-    private void duplicatesFormsQuestions(HttpServerRequest request, Integer folderId, UserInfos user, JsonArray formIds,
-                                          List<Future> formsInfos) {
+    private void duplicatesFormsQuestions(HttpServerRequest request, Integer folderId, UserInfos user, JsonArray formIds, List<Future> formsInfos) {
         for (int i = 0; i < formIds.size(); i++) {
             Promise<JsonArray> promise = Promise.promise();
             formsInfos.add(promise.future());
@@ -300,8 +299,7 @@ public class FormController extends ControllerHelper {
         });
     }
 
-    private void duplicatesQuestionChoices(HttpServerRequest request, Integer folderId, UserInfos user, JsonArray formIds,
-                                           AsyncResult<CompositeFuture> evt) {
+    private void duplicatesQuestionChoices(HttpServerRequest request, Integer folderId, UserInfos user, JsonArray formIds, AsyncResult<CompositeFuture> evt) {
         List<Future> questionsInfosFutures = new ArrayList<>();
 
         for (Object questions : evt.result().list()) {
@@ -309,13 +307,14 @@ public class FormController extends ControllerHelper {
             if(questionsInfos.getJsonObject(0).getInteger("id") != null){
                 for (int i = 0; i < questionsInfos.size(); i++) {
                     JsonObject questionInfo = questionsInfos.getJsonObject(i);
+                    int formId = questionInfo.getInteger("form_id");
                     int questionId = questionInfo.getInteger("id");
                     int originalQuestionId = questionInfo.getInteger("original_question_id");
                     int question_type = questionInfo.getInteger("question_type");
                     if (question_type == 4 || question_type == 5 || question_type == 9) {
                         Promise<JsonObject> promise = Promise.promise();
                         questionsInfosFutures.add(promise.future());
-                        questionChoiceService.duplicate(questionId, originalQuestionId, FutureHelper.handlerJsonObject(promise));
+                        questionChoiceService.duplicate(formId, questionId, originalQuestionId, FutureHelper.handlerJsonObject(promise));
                     }
                 }
             }
@@ -330,8 +329,7 @@ public class FormController extends ControllerHelper {
         });
     }
 
-    private void syncFoldersForms(HttpServerRequest request, Integer folderId, UserInfos user, JsonArray formIds,
-                                  AsyncResult<CompositeFuture> evt) {
+    private void syncFoldersForms(HttpServerRequest request, Integer folderId, UserInfos user, JsonArray formIds, AsyncResult<CompositeFuture> evt) {
         eventStore.createAndStoreEvent(Formulaire.FormulaireEvent.CREATE.name(), request);
         List<Object> questions = evt.result().list();
         JsonArray newFormIds = new JsonArray();

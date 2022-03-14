@@ -1,6 +1,8 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.Formulaire;
+import fr.openent.formulaire.helpers.RenderHelper;
+import fr.openent.formulaire.helpers.UtilsHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.DistributionService;
@@ -181,12 +183,18 @@ public class ResponseController extends ControllerHelper {
         });
     }
 
-    @Delete("/responses/:responseId")
-    @ApiDoc("Delete a specific response")
+    @Delete("/responses/:formId")
+    @ApiDoc("Delete specific responses")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
-        String responseId = request.getParam("responseId");
-        responseService.delete(responseId, defaultResponseHandler(request));
+        RequestUtils.bodyToJsonArray(request, responses -> {
+            JsonArray responseIds = UtilsHelper.getIds(responses);
+            if (responseIds.size() <= 0) {
+                RenderHelper.ok(request);
+                return;
+            }
+            responseService.delete(responseIds, arrayResponseHandler(request));
+        });
     }
 }

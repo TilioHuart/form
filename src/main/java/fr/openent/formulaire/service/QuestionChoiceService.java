@@ -47,11 +47,12 @@ public interface QuestionChoiceService {
 
     /**
      * Duplicate choices of a specific question
+     * @param formId new form identifier
      * @param questionId question identifier
      * @param originalQuestionId original question identifier
      * @param handler function handler returning JsonObject data
      */
-    void duplicate(int questionId, int originalQuestionId, Handler<Either<String, JsonObject>> handler);
+    void duplicate(int formId, int questionId, int originalQuestionId, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Update a specific choice
