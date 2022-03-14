@@ -1,12 +1,9 @@
 import {Mix, Selection} from "entcore-toolkit";
 import {idiom, notify} from "entcore";
-import {FormService, questionService, sectionService} from "../../services";
+import {questionService, sectionService} from "../../services";
 import {Question, Questions} from "./Question";
 import {FormElement} from "./FormElement";
 import {Section, Sections} from "./Section";
-import {Types} from "../QuestionType";
-import {QuestionChoice} from "../QuestionChoice";
-import {FormElementUtils} from "../../utils";
 
 export class FormElements extends Selection<FormElement> {
     all: FormElement[];

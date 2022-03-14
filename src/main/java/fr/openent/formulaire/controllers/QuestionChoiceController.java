@@ -1,6 +1,7 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.Formulaire;
+import fr.openent.formulaire.helpers.RenderHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.security.ShareAndOwner;
@@ -45,10 +46,15 @@ public class QuestionChoiceController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listChoices(HttpServerRequest request){
         JsonArray questionIds = new JsonArray();
-        for (Integer i=0; i<request.params().size(); i++){
+        for (Integer i = 0; i < request.params().size(); i++) {
             questionIds.add(request.getParam(i.toString()));
         }
-        questionChoiceService.listChoices(questionIds, arrayResponseHandler(request));
+        if (questionIds.size() > 0) {
+            questionChoiceService.listChoices(questionIds, arrayResponseHandler(request));
+        }
+        else {
+            RenderHelper.ok(request);
+        }
     }
 
     @Get("/choices/:choiceId")

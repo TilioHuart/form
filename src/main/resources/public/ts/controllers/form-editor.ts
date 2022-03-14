@@ -513,48 +513,29 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         const saveFormElements = async (displaySuccess: boolean = false) : Promise<void> => {
             try {
                 rePositionQuestions();
-                for (let formElement of vm.formElements.all) {
-                    if (formElement instanceof Question && !formElement.title && !formElement.statement && !formElement.mandatory && formElement.choices.all.length <= 0) {
-                        if (formElement.id) {
-                            formElement = await questionService.get(formElement.id);
-                        }
+                let formElement = vm.formElements.getSelectedElement();
+                if (formElement instanceof Question && !formElement.title && !formElement.statement && !formElement.mandatory && formElement.choices.all.length <= 0) {
+                    if (formElement.id) {
+                        vm.formElements.all.filter(e => e.id)[0] = await questionService.get(formElement.id);
                     }
-                    else if (formElement instanceof Section && !formElement.title && !formElement.description && formElement.questions.all.length <= 0) {
-                        if (formElement.id) {
-                            formElement = await sectionService.get(formElement.id);
-                        }
+                }
+                else if (formElement instanceof Section && !formElement.title && !formElement.description && formElement.questions.all.length <= 0) {
+                    if (formElement.id) {
+                        vm.formElements.all.filter(e => e.id)[0] = await sectionService.get(formElement.id);
                     }
-                    else {
-                        let newId = (await formElementService.save(formElement)).id;
-                        formElement.id = newId;
+                }
+                else {
+                    let newId = (await formElementService.save(formElement)).id;
+                    formElement.id = newId;
 
-                        if (formElement instanceof Question) {
-                            let registeredChoices = [];
-                            formElement.choices.replaceSpace();
-                            for (let choice of formElement.choices.all) {
-                                if (choice.value && !registeredChoices.find(c => c === choice.value)) {
-                                    choice.question_id = newId;
-                                    choice.id = (await questionChoiceService.save(choice)).id;
-                                    registeredChoices.push(choice.value);
-                                }
-                            }
-                        }
-                        else if (formElement instanceof Section) {
-                            for (let question of formElement.questions.all) {
-                                if (question.title || question.statement || question.mandatory || question.choices.all.length > 0) {
-                                    question.section_id = newId;
-                                    question.id = (await questionService.save(question)).id;
-
-                                    let registeredChoices = [];
-                                    question.choices.replaceSpace();
-                                    for (let choice of question.choices.all) {
-                                        if (choice.value && !registeredChoices.find(c => c === choice.value)) {
-                                            choice.question_id = question.id;
-                                            choice.id = (await questionChoiceService.save(choice)).id;
-                                            registeredChoices.push(choice.value);
-                                        }
-                                    }
-                                }
+                    if (formElement instanceof Question) {
+                        let registeredChoices = [];
+                        formElement.choices.replaceSpace();
+                        for (let choice of formElement.choices.all) {
+                            if (choice.value && !registeredChoices.find(c => c === choice.value)) {
+                                choice.question_id = newId;
+                                choice.id = (await questionChoiceService.save(choice)).id;
+                                registeredChoices.push(choice.value);
                             }
                         }
                     }

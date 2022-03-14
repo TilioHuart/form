@@ -84,7 +84,7 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                             </div>
                         </div>
                         <!-- Add question button -->
-                        <div class="addQuestion row dontSave" ng-if="!vm.section.selected">
+                        <div class="addQuestion row" ng-if="!vm.section.selected">
                             <a ng-click="vm.addQuestionToSection()">
                                 <i18n>formulaire.section.new.question</i18n>
                             </a>

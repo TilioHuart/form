@@ -28,7 +28,7 @@ export const questionChoiceService: QuestionChoiceService = {
     async listChoices(questionIds) : Promise<any>{
         try{
             return DataUtils.getData(await http.get(`/formulaire/questions/choices/all`, { params: questionIds }));
-        }catch(err){
+        } catch(err){
             notify.error(idiom.translate('formulaire.error.questionChoiceService.list'));
             throw err;
         }

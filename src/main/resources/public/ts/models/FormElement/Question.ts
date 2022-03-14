@@ -1,6 +1,6 @@
-import {Mix, Selectable, Selection} from "entcore-toolkit";
+import {Mix, Selection} from "entcore-toolkit";
 import {idiom, notify} from "entcore";
-import {questionService} from "../../services";
+import {questionChoiceService, questionService} from "../../services";
 import {QuestionChoice, QuestionChoices} from "../QuestionChoice";
 import {Types} from "../QuestionType";
 import {FormElement} from "./FormElement";
@@ -51,7 +51,9 @@ export class Questions extends Selection<Question> {
         try {
             let data = await questionService.list(id, isForSection);
             this.all = Mix.castArrayAs(Question, data);
-            await this.syncChoices();
+            if (this.all.length > 0) {
+                await this.syncChoices();
+            }
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.question.sync'));
             throw e;
@@ -59,16 +61,20 @@ export class Questions extends Selection<Question> {
     }
 
     syncChoices = async () : Promise<void> => {
-        for (let i = 0; i < this.all.length; i++) {
-            if (this.all[i].question_type === Types.SINGLEANSWER
-                || this.all[i].question_type === Types.MULTIPLEANSWER
-                || this.all[i].question_type === Types.SINGLEANSWERRADIO) {
-                let questionChoices = this.all[i].choices;
-                await questionChoices.sync(this.all[i].id);
-                let nbChoices = questionChoices.all.length;
-                if (nbChoices <= 0) {
-                    for (let j = 0; j < 3; j++) {
-                        questionChoices.all.push(new QuestionChoice(this.all[i].id));
+        let data = await questionChoiceService.listChoices(this.all.map(q => q.id));
+        if (data.length > 0) {
+            let listChoices = Mix.castArrayAs(QuestionChoice, data);
+            for (let question of this.all) {
+                if (question.question_type === Types.SINGLEANSWER
+                    || question.question_type === Types.MULTIPLEANSWER
+                    || question.question_type === Types.SINGLEANSWERRADIO) {
+
+                    question.choices.all = listChoices.filter(c => c.question_id === question.id);
+                    let nbChoices = question.choices.all.length;
+                    if (nbChoices <= 0) {
+                        for (let j = 0; j < 3; j++) {
+                            question.choices.all.push(new QuestionChoice(question.id));
+                        }
                     }
                 }
             }
