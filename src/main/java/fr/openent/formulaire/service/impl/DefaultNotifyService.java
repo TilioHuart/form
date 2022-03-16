@@ -36,7 +36,7 @@ public class DefaultNotifyService implements NotifyService {
             JsonObject params = new JsonObject()
                     .put("userUri", "/userbook/annuaire#" + user.getUserId())
                     .put("username", user.getUsername())
-                    .put("formUri", "/formulaire#/form/" + form.getInteger("id") + "/new/question/1")
+                    .put("formUri", "/formulaire#/form/" + form.getInteger("id") + "/new")
                     .put("formName", form.getString("title"))
                     .put("pushNotif", new JsonObject().put("title", "push.notif.formulaire.newForm").put("body", ""));
 

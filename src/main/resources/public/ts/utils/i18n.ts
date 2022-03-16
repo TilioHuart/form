@@ -8,4 +8,8 @@ export class I18nUtils {
         }
         return finalI18n;
     };
+
+    static translate = (key: string) : string => {
+        return idiom.translate(key);
+    }
 }

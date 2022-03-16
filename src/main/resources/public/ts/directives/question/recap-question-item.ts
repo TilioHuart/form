@@ -1,12 +1,23 @@
 import {Directive, idiom, ng} from "entcore";
-import {Distribution, DistributionStatus, Form, Question, QuestionChoice, Responses, Types} from "../../models";
+import {
+    Distribution,
+    DistributionStatus,
+    Form,
+    FormElements,
+    Question,
+    QuestionChoice,
+    Responses,
+    Types
+} from "../../models";
 import {FORMULAIRE_EMIT_EVENT} from "../../core/enums";
 
 interface IViewModel {
     question: Question;
     responses: Responses;
     form: Form;
+    formElements: FormElements;
     distribution: Distribution;
+    historicPosition: number[];
     Types: typeof Types;
     DistributionStatus: typeof DistributionStatus;
 
@@ -24,7 +35,9 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
             question: '=',
             responses: '=',
             form: '=',
-            distribution: '='
+            formElements: '<',
+            distribution: '=',
+            historicPosition: '<'
         },
         controllerAs: 'vm',
         bindToController: true,
@@ -120,7 +133,18 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
             };
 
             vm.openQuestion = () : void => {
-                $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, {path: `/form/${vm.form.id}/${vm.distribution.id}`, position: vm.question.position});
+                let formElementPosition = vm.question.position;
+                if (!vm.question.position) {
+                    let sections = vm.formElements.getSections().all.filter(s => s.id === vm.question.section_id);
+                    formElementPosition = sections.length === 1 ? sections[0].position : null;
+                }
+                let newHistoric = vm.historicPosition.slice(0, vm.historicPosition.indexOf(formElementPosition) + 1);
+                let data = {
+                    path: `/form/${vm.form.id}/${vm.distribution.id}`,
+                    position: formElementPosition,
+                    historicPosition: newHistoric
+                };
+                $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, data);
             };
         }
     };

@@ -81,11 +81,11 @@ public interface ResponseService {
     void update(UserInfos user, String responseId, JsonObject response, Handler<Either<String, JsonObject>> handler);
 
     /**
-     * Delete a specific response
-     * @param responseId response identifier
-     * @param handler function handler returning JsonObject data
+     * Delete specific responses
+     * @param responseIds responses identifiers
+     * @param handler function handler returning JsonArray data
      */
-    void delete(String responseId, Handler<Either<String, JsonObject>> handler);
+    void delete(JsonArray responseIds, Handler<Either<String, JsonArray>> handler);
 
     /**
      * Delete responses by distribution id

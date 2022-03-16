@@ -1,20 +1,21 @@
 import {Directive, idiom, ng} from "entcore";
-import {Section, Types} from "../../models";
+import {FormElements, Section, Types} from "../../models";
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "../../core/enums";
 
 interface IViewModel {
-    section: Section,
-    reorder: boolean,
-    hasFormResponses: boolean,
-    types: typeof Types,
+    section: Section;
+    reorder: boolean;
+    hasFormResponses: boolean;
+    types: typeof Types;
+    formElements: FormElements;
 
-    getTitle(title: string): string
-    editSection(): void,
-    deleteSection(): void,
-    undoSectionChanges(): void,
-    validateSection(): void,
-    deleteQuestion(): void,
-    addQuestionToSection(): void
+    getTitle(title: string): string;
+    editSection(): void;
+    deleteSection(): void;
+    undoSectionChanges(): void;
+    validateSection(): void;
+    deleteQuestion(): void;
+    addQuestionToSection(): void;
 }
 
 export const sectionItem: Directive = ng.directive('sectionItem', () => {
@@ -25,7 +26,8 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
         scope: {
             section: '=',
             reorder: '=',
-            hasFormResponses: '='
+            hasFormResponses: '=',
+            formElements: '<'
         },
         controllerAs: 'vm',
         bindToController: true,
@@ -80,7 +82,11 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                         <!-- Questions children -->
                         <div class="questions row" ng-if="vm.section.questions.all.length > 0">
                              <div ng-repeat="question in vm.section.questions.all">
-                                <question-item question="question" reorder="true" has-form-responses="vm.form.nb_responses > 0" input-guard></question-item>
+                                <question-item question="question"
+                                               reorder="true"
+                                               has-form-responses="vm.form.nb_responses > 0"
+                                               form-elements="vm.formElements" input-guard>
+                                </question-item>
                             </div>
                         </div>
                         <!-- Add question button -->

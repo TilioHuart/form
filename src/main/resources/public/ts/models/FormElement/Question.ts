@@ -11,6 +11,7 @@ export class Question extends FormElement {
     mandatory: boolean;
     section_id: number;
     section_position: number;
+    conditional: boolean;
     choices: QuestionChoices;
 
     constructor() {
@@ -20,6 +21,7 @@ export class Question extends FormElement {
         this.mandatory = null;
         this.section_id = null;
         this.section_position = null;
+        this.conditional = false;
         this.choices = new QuestionChoices();
     }
 
@@ -35,6 +37,7 @@ export class Question extends FormElement {
             mandatory: this.mandatory,
             section_id: this.section_id,
             section_position: this.section_position,
+            conditional: this.conditional,
             choices: this.choices
         }
     }

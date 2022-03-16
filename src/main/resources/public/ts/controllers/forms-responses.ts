@@ -106,7 +106,11 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
     // Utils
 
     vm.openDistribution = (distrib) : void => {
-        $scope.redirectTo(`/form/${distrib.form_id}/${distrib.id}/questions/recap`);
+        let data = {
+            path: `/form/${distrib.form_id}/${distrib.id}/questions/recap`,
+            historicPosition: []
+        };
+        $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, data);
     }
 
     vm.infiniteScroll = () : void => {

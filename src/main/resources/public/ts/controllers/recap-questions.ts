@@ -1,24 +1,14 @@
 import {idiom, model, ng, notify, template} from "entcore";
-import {
-    Distribution,
-    DistributionStatus, Form, FormElements,
-    Question,
-    Responses,
-    Types
-} from "../models";
-import {
-    distributionService,
-    formElementService,
-    responseFileService,
-    responseService
-} from "../services";
-import {FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_EMIT_EVENT} from "../core/enums";
+import {Distribution, DistributionStatus, Form, FormElements, Question, Responses, Section, Types} from "../models";
+import {distributionService, formElementService, responseFileService, responseService} from "../services";
+import {FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
 
 interface ViewModel {
     formElements: FormElements;
     responses: Responses;
     distribution: Distribution;
     form: Form;
+    historicPosition: number[];
     display: {
         lightbox: {
             sending: boolean
@@ -26,7 +16,6 @@ interface ViewModel {
     };
 
     $onInit() : Promise<void>;
-    prev() : Promise<void>;
     saveAndQuit() : Promise<void>;
     send() : Promise<void>;
     doSend() : Promise<void>;
@@ -52,8 +41,23 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
         vm.form = $scope.form;
         vm.form.nb_elements = (await formElementService.countFormElements(vm.form.id)).count;
         vm.distribution = $scope.distribution;
+        vm.historicPosition = $scope.historicPosition;
         await vm.formElements.sync(vm.form.id);
         await vm.responses.syncByDistribution(vm.distribution.id);
+
+        // Get right elements to display
+        if (vm.historicPosition.length > 0) {
+            vm.formElements.all = vm.formElements.all.filter(e => vm.historicPosition.indexOf(e.position) >= 0);
+        }
+        else {
+            let responseQuestionIds = vm.responses.all.map(r => r.question_id);
+            vm.formElements.all = vm.formElements.all.filter(e =>
+                (responseQuestionIds.indexOf(e.id) > 0) ||
+                (e instanceof Section && e.questions.all.map(q => q.id).filter(id => responseQuestionIds.indexOf(id) >= 0).length > 0)
+            );
+        }
+
+        // Get files responses for files question
         let fileQuestions = vm.formElements.getAllQuestions().all.filter(q => q.question_type === Types.FILE);
         for (let fileQuestion of fileQuestions) {
             let response = vm.responses.all.filter(r => r.question_id === fileQuestion.id)[0];
@@ -65,10 +69,6 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
     };
 
     // Global functions
-
-    vm.prev = async () : Promise<void> => {
-        $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, {path: `/form/${vm.form.id}/${vm.distribution.id}`});
-    };
 
     vm.send = async () : Promise<void> => {
         if (await checkMandatoryQuestions()) {
@@ -85,7 +85,7 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
         let distrib = vm.distribution;
         distrib.status = DistributionStatus.FINISHED;
         distrib.structure = distrib.structure ? distrib.structure : model.me.structureNames[0];
-        await responseService.fillResponses(vm.form.id, vm.distribution.id);
+
         if (distrib.original_id) {
             let questionFileIds: any = vm.formElements.all.filter(q => q instanceof Question && q.question_type === Types.FILE).map(q => q.id);
             let responseFiles = vm.responses.all.filter(r => questionFileIds.includes(r.question_id));
@@ -95,6 +95,12 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
             await distributionService.replace(distrib);
         }
         else {
+            let responsesToClean = new Responses();
+            let validatedElements = new FormElements();
+            validatedElements.all = vm.formElements.all.filter(e => vm.historicPosition.indexOf(e.position) >= 0);
+            let validatedQuestionIds = validatedElements.getAllQuestions().all.map(q => q.id);
+            responsesToClean.all = vm.responses.all.filter(r => validatedQuestionIds.indexOf(r.question_id) < 0);
+            await responseService.delete(vm.form.id, responsesToClean.all);
             await distributionService.update(distrib);
         }
         template.close('lightbox');
@@ -112,7 +118,7 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
     };
 
     const checkMandatoryQuestions = async () : Promise<boolean> => {
-        let mandatoryQuestions = vm.formElements.all.filter(q => q instanceof Question && q.mandatory === true);
+        let mandatoryQuestions = vm.formElements.getAllQuestions().all.filter(q => q.mandatory);
         for (let question of mandatoryQuestions) {
             let responses = vm.responses.all.filter(r => r.question_id === question.id && r.answer);
             if (responses.length <= 0) {

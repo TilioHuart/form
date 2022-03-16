@@ -1,6 +1,16 @@
 import {Behaviours, idiom, model, ng, template} from 'entcore';
-import {Distribution, DistributionStatus, Form, Question, QuestionTypes, Types, Folder} from "../models";
-import {distributionService, formElementService, formService, questionService} from "../services";
+import {
+	Distribution,
+	DistributionStatus,
+	Form,
+	Question,
+	QuestionTypes,
+	Types,
+	Folder,
+	FormElements,
+	Questions, Section, Responses
+} from "../models";
+import {distributionService, formElementService, formService, responseService} from "../services";
 import {
 	Direction,
 	Exports,
@@ -35,6 +45,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.folder = $scope.folder ? $scope.folder : new Folder();
 		$scope.isMobile = window.screen.width <= 500;
 		$scope.responsePosition = 1;
+		$scope.historicPosition = [1];
 
 		const init = async () : Promise<void> => {
 			await $scope.questionTypes.sync();
@@ -241,23 +252,29 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form) && !$scope.form.archived) {
 					$scope.distribution = await distributionService.get(params.distributionId);
 					if ($scope.distribution) {
-						if ($scope.distribution.status && $scope.distribution.status === DistributionStatus.FINISHED && $scope.form.editable) {
-							let distribs = await distributionService.listByFormAndResponder($scope.form.id);
-							let distrib = distribs.filter(d => d.status == DistributionStatus.ON_CHANGE)[0];
-							if (distrib) {
-								$scope.distribution = distrib;
+						let hasRespondLastQuestion = await FormElementUtils.hasRespondedLastQuestion($scope.form, $scope.distribution);
+						if (hasRespondLastQuestion) {
+							if ($scope.distribution.status && $scope.distribution.status === DistributionStatus.FINISHED && $scope.form.editable) {
+								let distribs = await distributionService.listByFormAndResponder($scope.form.id);
+								let distrib = distribs.filter(d => d.status == DistributionStatus.ON_CHANGE)[0];
+								if (distrib) {
+									$scope.distribution = distrib;
+								}
+								else {
+									$scope.distribution = await distributionService.duplicateWithResponses($scope.distribution.id);
+								}
+								// $scope.distribution = distrib ? distrib : await distributionService.duplicateWithResponses($scope.distribution.id);
+								let correctedUrl = window.location.origin + window.location.pathname + `#/form/${$scope.form.id}/${$scope.distribution.id}/questions/recap`;
+								window.location.assign(correctedUrl);
+								$scope.safeApply();
 							}
-							else {
-								$scope.distribution = await distributionService.duplicateWithResponses($scope.distribution.id);
-							}
-							// $scope.distribution = distrib ? distrib : await distributionService.duplicateWithResponses($scope.distribution.id);
-							let correctedUrl = window.location.origin + window.location.pathname + `#/form/${$scope.form.id}/${$scope.distribution.id}/questions/recap`;
-							window.location.assign(correctedUrl);
-							$scope.safeApply();
-						}
 
-						$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_RECAP_QUESTIONS);
-						template.open('main', 'containers/recap-questions');
+							$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_RECAP_QUESTIONS);
+							template.open('main', 'containers/recap-questions');
+						}
+						else {
+							$scope.redirectTo(`/form/${$scope.form.id}/${$scope.distribution.id}`);
+						}
 					}
 					else {
 						$scope.redirectTo('/e403');
@@ -317,6 +334,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.$on(FORMULAIRE_EMIT_EVENT.UPDATE_FOLDER, (event, data) => { $scope.folder = data });
 		$scope.$on(FORMULAIRE_EMIT_EVENT.REDIRECT, (event, data) => {
 			$scope.responsePosition = data.position ? data.position : 1;
+			$scope.historicPosition = data.historicPosition ? data.historicPosition : [1];
 			$scope.safeApply();
 			$scope.redirectTo(data.path);
 		});

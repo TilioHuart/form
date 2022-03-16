@@ -36,13 +36,14 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
 
     @Override
     public void create(String questionId, JsonObject choice, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO " + Formulaire.QUESTION_CHOICE_TABLE + " (question_id, value, position, type) " +
+        String query = "INSERT INTO " + Formulaire.QUESTION_CHOICE_TABLE + " (question_id, value, position, type, next_section_id) " +
                 "VALUES (?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(questionId)
                 .add(choice.getString("value", ""))
                 .add(choice.getInteger("position", 0))
-                .add(choice.getString("type", ""));
+                .add(choice.getString("type", ""))
+                .add(choice.getInteger("next_section_id", null));
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
@@ -53,12 +54,13 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
 
         List<JsonObject> allChoices = choices.getList();
         for (JsonObject choice : allChoices) {
-            query += "INSERT INTO " + Formulaire.QUESTION_CHOICE_TABLE + " (question_id, value, position, type) " +
+            query += "INSERT INTO " + Formulaire.QUESTION_CHOICE_TABLE + " (question_id, value, position, type, next_section_id) " +
                     "VALUES (?, ?, ?, ?); ";
             params.add(questionId)
                     .add(choice.getString("value", ""))
                     .add(choice.getInteger("position", 0))
-                    .add(choice.getString("type", ""));
+                    .add(choice.getString("type", ""))
+                    .add(choice.getInteger("next_section_id", null));
         }
 
         query += "RETURNING *;";
@@ -77,11 +79,13 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
 
     @Override
     public void update(String choiceId, JsonObject choice, Handler<Either<String, JsonObject>> handler) {
-        String query = "UPDATE " + Formulaire.QUESTION_CHOICE_TABLE + " SET value = ?, position = ?, type = ? WHERE id = ? RETURNING *;";
+        String query = "UPDATE " + Formulaire.QUESTION_CHOICE_TABLE + " SET value = ?, position = ?, type = ?, next_section_id = ? " +
+                "WHERE id = ? RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(choice.getString("value", ""))
                 .add(choice.getInteger("position", 0))
                 .add(choice.getString("type", ""))
+                .add(choice.getInteger("next_section_id", null))
                 .add(choiceId);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }

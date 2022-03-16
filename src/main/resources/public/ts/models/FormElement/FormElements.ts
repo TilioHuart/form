@@ -48,9 +48,9 @@ export class FormElements extends Selection<FormElement> {
         return questions;
     }
 
-    getSections = () : Sections => {
+    getSections = (minPosition?: number) : Sections => {
         let sections = new Sections();
-        sections.all = this.all.filter(e => e instanceof Section) as Section[];
+        sections.all = this.all.filter(e => e instanceof Section && (minPosition != undefined ? e.position > minPosition : true)) as Section[];
         return sections;
     }
 

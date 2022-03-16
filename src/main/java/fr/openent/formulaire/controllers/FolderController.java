@@ -3,6 +3,7 @@ package fr.openent.formulaire.controllers;
 import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.helpers.RenderHelper;
 import fr.openent.formulaire.helpers.FutureHelper;
+import fr.openent.formulaire.helpers.UtilsHelper;
 import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.service.FolderService;
 import fr.openent.formulaire.service.FormService;
@@ -121,7 +122,7 @@ public class FolderController extends ControllerHelper {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user != null) {
                 RequestUtils.bodyToJsonArray(request, folders -> {
-                    JsonArray folderIds = getIds(folders);
+                    JsonArray folderIds = UtilsHelper.getIds(folders);
 
                     // Get all form ids to archive
                     relFormFolderService.listFormChildrenRecursively(folderIds, childrenEvent -> {
@@ -150,7 +151,7 @@ public class FolderController extends ControllerHelper {
                             }
 
                             // Change all children forms relation folder (replace with "3")
-                            JsonArray formIds = getIds(forms);
+                            JsonArray formIds = UtilsHelper.getIds(forms);
                             Integer parentId = folders.getJsonObject(0).getInteger("parent_id");
 
                             if (formIds.size() > 0) {
@@ -187,7 +188,7 @@ public class FolderController extends ControllerHelper {
             if (user != null) {
                 RequestUtils.bodyToJsonArray(request, folders -> {
                     Integer oldFolderId = folders.getJsonObject(0).getInteger("parent_id");
-                    JsonArray folderIds = getIds(folders);
+                    JsonArray folderIds = UtilsHelper.getIds(folders);
                     folderService.move(folderIds, targetFolderId.toString(), moveEvent -> {
                         if (moveEvent.isLeft()) {
                             log.error("[Formulaire@moveFolder] Error in moving folders " + folderIds);
@@ -224,14 +225,6 @@ public class FolderController extends ControllerHelper {
                 unauthorized(request);
             }
         });
-    }
-
-    private JsonArray getIds(JsonArray items) {
-        JsonArray ids = new JsonArray();
-        for (int i = 0; i < items.size(); i++) {
-            ids.add(items.getJsonObject(i).getInteger("id").toString());
-        }
-        return ids;
     }
 
     private void deleteFolders(HttpServerRequest request, UserInfos user, Integer parentId, JsonArray folderIds) {

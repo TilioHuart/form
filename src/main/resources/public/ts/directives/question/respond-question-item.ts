@@ -12,18 +12,19 @@ import {
 import {responseService} from "../../services";
 import {FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "../../core/enums";
 import {Mix} from "entcore-toolkit";
+import {I18nUtils} from "../../utils";
 
 interface IViewModel {
-    question: Question,
-    response: Response,
-    distribution: Distribution,
-    selectedIndex: boolean[],
+    question: Question;
+    response: Response;
+    distribution: Distribution;
+    selectedIndex: boolean[];
     responsesChoices: Responses;
-    files: any,
-    Types: typeof Types,
+    files: any;
+    Types: typeof Types;
+    I18n: I18nUtils;
 
     $onInit() : Promise<void>;
-    displayDefaultOption(): string
 }
 
 export const respondQuestionItem: Directive = ng.directive('respondQuestionItem', () => {
@@ -57,7 +58,7 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                     </div>
                     <div ng-if="vm.question.question_type == vm.Types.SINGLEANSWER">
                         <select ng-model="vm.response.choice_id" input-guard>
-                            <option ng-value="">[[vm.displayDefaultOption()]]</option>
+                            <option ng-value="">[[vm.I18n.translate('formulaire.options.select')]]</option>
                             <option ng-repeat="choice in vm.question.choices.all" ng-value="choice.id">[[choice.value]]</option>
                         </select>
                     </div>
@@ -153,10 +154,7 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
         link: function ($scope, $element) {
             const vm: IViewModel = $scope.vm;
             vm.Types = Types;
-
-            vm.displayDefaultOption = () : string => {
-                return idiom.translate('formulaire.options.select');
-            };
+            vm.I18n = I18nUtils;
 
             $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.REFRESH_QUESTION, () => { vm.$onInit(); });
         }

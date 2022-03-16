@@ -98,7 +98,6 @@ interface ViewModel {
     closeMoveItems() : void;
     deleteFolders() : void;
     doDeleteFolders() : Promise<void>;
-    displayFolder(folder: Folder) : string;
     displayNbItems(folder: Folder) : string;
     switchAllFolders(value: boolean) : void;
 
@@ -654,10 +653,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         catch (e) {
             throw e;
         }
-    };
-
-    vm.displayFolder = (folder) : string => {
-        return idiom.translate(folder.name);
     };
 
     vm.displayNbItems = (folder) : string => {

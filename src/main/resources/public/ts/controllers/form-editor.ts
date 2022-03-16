@@ -1,30 +1,7 @@
 import {idiom, ng, notify, template, angular} from 'entcore';
-import {
-    Form,
-    FormElement,
-    FormElements,
-    Question,
-    QuestionChoice,
-    Response,
-    Responses,
-    Section,
-    Types
-} from "../models";
-import {
-    distributionService, formElementService,
-    formService,
-    questionChoiceService,
-    questionService,
-    responseService,
-    sectionService
-} from "../services";
-import {
-    Direction,
-    FORMULAIRE_BROADCAST_EVENT,
-    FORMULAIRE_EMIT_EVENT,
-    FORMULAIRE_FORM_ELEMENT_EMIT_EVENT,
-    Pages
-} from "../core/enums";
+import {Form, FormElement, FormElements, Question, QuestionChoice, Response, Responses, Section, Types} from "../models";
+import {distributionService, formElementService, formService, questionChoiceService, questionService, responseService, sectionService} from "../services";
+import {Direction, FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_EMIT_EVENT, FORMULAIRE_FORM_ELEMENT_EMIT_EVENT, Pages} from "../core/enums";
 import {folderService} from "../services/FolderService";
 
 enum PreviewPage { RGPD = 'rgpd', QUESTION = 'question', RECAP = 'recap'}

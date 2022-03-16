@@ -1,8 +1,8 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.Formulaire;
-import fr.openent.formulaire.helpers.RenderHelper;
 import fr.openent.formulaire.helpers.UtilsHelper;
+import fr.openent.formulaire.helpers.RenderHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.DistributionService;

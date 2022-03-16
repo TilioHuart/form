@@ -1,17 +1,21 @@
 import {Directive, idiom, ng} from "entcore";
-import {Question, Types} from "../../models";
+import {FormElements, Question, Section, Types} from "../../models";
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "../../core/enums";
 
 interface IViewModel {
-    question: Question,
-    reorder: boolean,
-    hasFormResponses: boolean,
-    Types: typeof Types,
+    question: Question;
+    reorder: boolean;
+    hasFormResponses: boolean;
+    Types: typeof Types;
+    formElements: FormElements;
 
-    getTitle(title: string): string,
-    duplicateQuestion(): void,
-    deleteQuestion(): void,
-    undoQuestionChanges(): void
+    getTitle(title: string): string;
+    duplicateQuestion(): void;
+    deleteQuestion(): void;
+    undoQuestionChanges(): void;
+    showConditionalSwitch(): boolean;
+    onSwitchMandatory(isMandatory: boolean): void;
+    onSwitchConditional(isConditional: boolean): void;
 }
 
 export const questionItem: Directive = ng.directive('questionItem', () => {
@@ -22,7 +26,8 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
         scope: {
             question: '=',
             reorder: '=',
-            hasFormResponses: '='
+            hasFormResponses: '=',
+            formElements: '<'
         },
         controllerAs: 'vm',
         bindToController: true,
@@ -39,11 +44,14 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
                         <!-- Title component -->
                         <question-title question="vm.question"></question-title>
                         <!-- Main component -->
-                        <question-type question="vm.question" has-form-responses="vm.hasFormResponses"></question-type>
+                        <question-type question="vm.question" has-form-responses="vm.hasFormResponses" form-elements="vm.formElements"></question-type>
                         <!-- Interaction buttons-->
                         <div class="question-bottom" ng-if="vm.question.selected">
-                            <div class="mandatory" ng-if="vm.question.question_type != vm.Types.FREETEXT">
-                                <switch ng-model="vm.question.mandatory"></switch><i18n>formulaire.mandatory</i18n>
+                            <div class="mandatory" ng-if="vm.question.question_type != vm.Types.FREETEXT" title="[[vm.getTitle('mandatory.explanation')]]">
+                                <switch ng-model="vm.question.mandatory" ng-change="vm.onSwitchMandatory(vm.question.mandatory)"></switch><i18n>formulaire.mandatory</i18n>
+                            </div>
+                            <div class="conditional" ng-if="vm.showConditionalSwitch()">
+                                <switch ng-model="vm.question.conditional" ng-change="vm.onSwitchConditional(vm.question.conditional)"></switch><i18n>formulaire.conditional</i18n>
                             </div>
                             <i class="i-duplicate lg-icon spaced-right" ng-click="vm.duplicateQuestion()" title="[[vm.getTitle('duplicate')]]"></i>
                             <i class="i-delete lg-icon spaced-right" ng-class="{disabled: vm.hasFormResponses}" 
@@ -71,15 +79,41 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
 
             vm.duplicateQuestion = () : void => {
                 $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DUPLICATE_ELEMENT);
-            }
+            };
 
             vm.deleteQuestion = () : void => {
                 $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DELETE_ELEMENT);
-            }
+            };
 
             vm.undoQuestionChanges = () : void => {
                 $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.UNDO_CHANGES);
-            }
+            };
+
+            vm.showConditionalSwitch = () : boolean => {
+                let isConditionalQuestionType = vm.question.question_type === Types.SINGLEANSWER || vm.question.question_type === Types.SINGLEANSWERRADIO;
+                if (!isConditionalQuestionType) {
+                    return false;
+                }
+                else if (!vm.question.section_id) {
+                    return true;
+                }
+                else {
+                    let parentSection = vm.formElements.all.filter(e => e.id === vm.question.section_id)[0];
+                    return (parentSection as Section).questions.all.filter(q => q.id != vm.question.id && q.conditional).length <= 0;
+                }
+            };
+
+            vm.onSwitchMandatory = (isMandatory: boolean) : void => {
+                if (!isMandatory && vm.question.conditional) {
+                    vm.question.mandatory = true;
+                }
+                $scope.$apply();
+            };
+
+            vm.onSwitchConditional = (isConditional: boolean) : void => {
+                vm.question.mandatory = isConditional;
+                $scope.$apply();
+            };
         }
     };
 });

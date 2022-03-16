@@ -32,7 +32,7 @@
         </div>
 
         <div class="edit-form" ng-if="vm.formElements.all.length > 0">
-            <!-- List of formElements-->
+            <!-- List of formElements laptop -->
             <div class="elements" sortable-list ng-if="!isMobile && vm.formElements.selected.length == 0 && vm.form.nb_responses <= 0">
                 <div ng-repeat="formElement in vm.formElements.all | orderBy:'position'" class="twelve twelve-mobile"
                      sortable-element data-ng-change="vm.reOrder()" data-ng-model="formElement.index" guard-root>
@@ -40,29 +40,34 @@
                     <question-item ng-if="FormElementUtils.isQuestion(formElement)" input-guard
                                    question="formElement"
                                    reorder="true"
-                                   has-form-responses="vm.form.nb_responses > 0">
+                                   has-form-responses="vm.form.nb_responses > 0"
+                                   form-elements="vm.formElements">
                     </question-item>
                     <!--  Section component -->
                     <section-item ng-if="!FormElementUtils.isQuestion(formElement)" input-guard
                                   section="formElement"
                                   reorder="true"
-                                  has-form-responses="vm.form.nb_responses > 0">
+                                  has-form-responses="vm.form.nb_responses > 0"
+                                  form-elements="vm.formElements">
                     </section-item>
                 </div>
             </div>
+            <!-- List of formElements mobile -->
             <div class="elements" ng-if="isMobile || (!isMobile && vm.formElements.selected.length > 0) || vm.form.nb_responses > 0">
                 <div ng-repeat="formElement in vm.formElements.all | orderBy:'position'" class="twelve twelve-mobile">
                     <!--  Question component -->
                     <question-item ng-if="FormElementUtils.isQuestion(formElement)" input-guard
                                    question="formElement"
                                    reorder="false"
-                                   has-form-responses="vm.form.nb_responses > 0">
+                                   has-form-responses="vm.form.nb_responses > 0"
+                                   form-elements="vm.formElements">
                     </question-item>
                     <!--  Section component -->
                     <section-item ng-if="!FormElementUtils.isQuestion(formElement)" input-guard
                                   section="formElement"
                                   reorder="false"
-                                  has-form-responses="vm.form.nb_responses > 0">
+                                  has-form-responses="vm.form.nb_responses > 0"
+                                  form-elements="vm.formElements">
                     </section-item>
                 </div>
             </div>

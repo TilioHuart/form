@@ -116,10 +116,10 @@ public class DefaultResponseService implements ResponseService {
     }
 
     @Override
-    public void delete(String responseId, Handler<Either<String, JsonObject>> handler) {
-        String query = "DELETE FROM " + Formulaire.RESPONSE_TABLE + " WHERE id = ?;";
-        JsonArray params = new JsonArray().add(responseId);
-        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    public void delete(JsonArray responseIds, Handler<Either<String, JsonArray>> handler) {
+        String query = "DELETE FROM " + Formulaire.RESPONSE_TABLE + " WHERE id IN " + Sql.listPrepared(responseIds) + ";";
+        JsonArray params = new JsonArray().addAll(responseIds);
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
     @Override

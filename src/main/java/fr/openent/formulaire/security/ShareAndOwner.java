@@ -84,7 +84,7 @@ public class ShareAndOwner implements ResourcesProvider {
     private String getKeyByBinding(Binding binding) {
         if (isCountDistribution(binding) || isGetByFormResponderAndStatusDistribution(binding) || isAddDistribution(binding) ||
                 isUpdateForm(binding) || isDeleteForm(binding) || isExportForm(binding) || isSendReminderForm(binding) ||
-                isCreateQuestion(binding) || isFillResponsesResponse(binding) || isCreateSection(binding)) {
+                isCreateQuestion(binding) || isFillResponsesResponse(binding) || isDeleteResponse(binding) || isCreateSection(binding)) {
             return "formId";
         }
         else if (isGetDistribution(binding) || isUpdateDistribution(binding) || isDuplicateWithResponsesDistribution(binding) ||
@@ -103,8 +103,7 @@ public class ShareAndOwner implements ResourcesProvider {
         else if (isUpdateQuestionChoice(binding) || isDeleteQuestionChoice(binding)) {
             return "choiceId";
         }
-        else if (isUpdateResponse(binding) || isDeleteResponse(binding) || isUploadResponseFile(binding) ||
-                isDeleteAllResponseFile(binding)) {
+        else if (isUpdateResponse(binding) || isUploadResponseFile(binding) || isDeleteAllResponseFile(binding)) {
             return "responseId";
         }
         else if (isGetResponseFile(binding) || isDownloadResponseFile(binding)) {

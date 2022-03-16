@@ -1,6 +1,6 @@
 import {idiom, ng, notify, moment} from 'entcore';
 import http from 'axios';
-import {Question, Response, Types} from "../models";
+import {Question, Response, Responses, Types} from "../models";
 import {DataUtils} from "../utils/data";
 
 export interface ResponseService {
@@ -13,7 +13,7 @@ export interface ResponseService {
     create(response: Response) : Promise<any>;
     fillResponses(formId: number, distributionId: number) : Promise<any>;
     update(response: Response) : Promise<any>;
-    delete(responseId: number) : Promise<any>;
+    delete(formId: number, responses: Response[]) : Promise<any>;
 }
 
 export const responseService: ResponseService = {
@@ -107,14 +107,14 @@ export const responseService: ResponseService = {
         }
     },
 
-    async delete(responseId: number) : Promise<any> {
+    async delete(formId, responses) : Promise<any> {
         try {
-            return DataUtils.getData(await http.delete(`/formulaire/responses/${responseId}`));
-        } catch (err) {
+            return DataUtils.getData(await http.delete(`/formulaire/responses/${formId}`, { data: responses } ));
+        } catch (e) {
             notify.error(idiom.translate('formulaire.error.responseService.delete'));
-            throw err;
+            throw e;
         }
-    }
+    },
 };
 
 export const ResponseService = ng.service('ResponseService', (): ResponseService => responseService);

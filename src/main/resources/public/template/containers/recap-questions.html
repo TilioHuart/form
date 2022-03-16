@@ -28,7 +28,9 @@
                                      question="formElement"
                                      responses="vm.responses"
                                      form="vm.form"
-                                     distribution="vm.distribution">
+                                     form-elements="vm.formElements"
+                                     distribution="vm.distribution"
+                                     historic-position="vm.historicPosition">
                 </recap-question-item>
 
                 <!-- Display section -->
@@ -44,14 +46,15 @@
                             <recap-question-item question="question"
                                                  responses="vm.responses"
                                                  form="vm.form"
-                                                 distribution="vm.distribution">
+                                                 form-elements="vm.formElements"
+                                                 distribution="vm.distribution"
+                                                 historic-position="vm.historicPosition">
                             </recap-question-item>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="buttons" ng-if="vm.form.editable || vm.distribution.status != DistributionStatus.FINISHED">
-                <button class="cell" ng-click="vm.prev()"><i18n>formulaire.prev</i18n></button>
+            <div class="buttons alone" ng-if="vm.form.editable || vm.distribution.status != DistributionStatus.FINISHED">
                 <button class="cell" ng-click="vm.send()"><i18n >formulaire.end</i18n></button>
             </div>
         </div>
