@@ -1,5 +1,6 @@
 import {Directive, idiom, ng} from "entcore";
 import {Distribution, DistributionStatus, Form, Question, QuestionChoice, Responses, Types} from "../../models";
+import {FORMULAIRE_EMIT_EVENT} from "../../core/enums";
 
 interface IViewModel {
     question: Question;
@@ -12,6 +13,7 @@ interface IViewModel {
     getStringResponse(): string;
     isSelectedChoice(choice: QuestionChoice) : boolean;
     getResponseFileNames() : string[];
+    openQuestion(): void;
 }
 
 export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', () => {
@@ -77,7 +79,7 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
                         </div>
                     </div>
                     <div class="question-edit" ng-if="(vm.form.editable || vm.distribution.status != vm.DistributionStatus.FINISHED) && vm.question.question_type != vm.Types.FREETEXT">
-                        <a href="#/form/[[vm.form.id]]/[[vm.distribution.id]]/question/[[vm.question.position]]"><i18n>formulaire.edit</i18n></a>
+                        <a ng-click="vm.openQuestion()"><i18n>formulaire.edit</i18n></a>
                     </div>
                 </div>
         `,
@@ -115,6 +117,10 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
                 else {
                     return [missingResponse];
                 }
+            };
+
+            vm.openQuestion = () : void => {
+                $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, {path: `/form/${vm.form.id}/${vm.distribution.id}`, position: vm.question.position});
             };
         }
     };

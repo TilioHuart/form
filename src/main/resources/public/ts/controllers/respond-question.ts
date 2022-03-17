@@ -1,8 +1,8 @@
 import {idiom, model, ng, notify} from "entcore";
 import {
-    Distribution, Form, FormElement,
-    Question, QuestionChoices,
-    Response, ResponseFiles,
+    Distribution, Form, FormElement, FormElements,
+    Question,
+    Response,
     Responses, Section,
     Types
 } from "../models";
@@ -10,6 +10,7 @@ import {responseFileService, responseService} from "../services";
 import {FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "../core/enums";
 
 interface ViewModel {
+    formElements: FormElements;
     formElement: FormElement;
     responses: Responses;
     distribution: Distribution;
@@ -34,7 +35,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
     function ($scope) {
 
     const vm: ViewModel = this;
-    vm.responses = new Responses();
+    vm.formElements = new FormElements();
     vm.distribution = new Distribution();
     vm.form = new Form();
     vm.nbFormElements = 1;
@@ -44,13 +45,21 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         vm.loading = true;
         vm.form = $scope.form;
         vm.distribution = $scope.distribution;
-        vm.formElement = $scope.formElement;
-        vm.nbFormElements = $scope.form.nbFormElements;
+        await vm.formElements.sync(vm.form.id);
+        vm.formElement = vm.formElements.all[$scope.responsePosition - 1];
+        vm.nbFormElements = vm.formElements.all.length;
+
+        initFormElementResponses();
+
+        window.setTimeout(() => vm.loading = false,500);
+        $scope.safeApply();
+    };
+
+    const initFormElementResponses = () => {
         vm.responses = new Responses();
         vm.selectedIndexList = [];
         vm.responsesChoicesList = [];
         vm.filesList = [];
-
         let nbQuestions = vm.formElement instanceof Question ? 1 : (vm.formElement as Section).questions.all.length;
         for (let i = 0; i < nbQuestions; i++) {
             vm.responses.all.push(new Response());
@@ -62,16 +71,15 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
         $scope.safeApply();
         $scope.$broadcast(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.REFRESH_QUESTION);
-
-        window.setTimeout(() => vm.loading = false,500);
-        $scope.safeApply();
     };
 
     vm.prev = async () : Promise<void> => {
         if (await saveResponses()) {
             let prevPosition: number = vm.formElement.position - 1;
             if (prevPosition > 0) {
-                $scope.redirectTo(`/form/${vm.form.id}/${vm.distribution.id}/question/${prevPosition}`);
+                vm.formElement = vm.formElements.all[prevPosition - 1];
+                initFormElementResponses();
+                $scope.safeApply();
             }
         }
     };
@@ -84,7 +92,9 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         if (await saveResponses()) {
             let nextPosition: number = vm.formElement.position + 1;
             if (nextPosition <= vm.nbFormElements) {
-                $scope.redirectTo(`/form/${vm.form.id}/${vm.distribution.id}/question/${nextPosition}`);
+                vm.formElement = vm.formElements.all[nextPosition - 1];
+                initFormElementResponses();
+                $scope.safeApply();
             }
             else {
                 $scope.redirectTo(`/form/${vm.form.id}/${vm.distribution.id}/questions/recap`);
@@ -105,10 +115,6 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
     vm.saveAndQuit = async () : Promise<void> => {
         if (await saveResponses()) {
-            // if (vm.distribution.status == DistributionStatus.TO_DO) {
-            //     vm.distribution.status = DistributionStatus.IN_PROGRESS;
-            //     await distributionService.update(vm.distribution);
-            // }
             notify.success(idiom.translate('formulaire.success.responses.save'));
             window.setTimeout(function () { $scope.redirectTo(`/list/responses`); }, 1000);
         }

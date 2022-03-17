@@ -1,7 +1,7 @@
 import {idiom, ng, template} from 'entcore';
 import {Distribution, Distributions, DistributionStatus, Form, Forms} from "../models";
 import {distributionService} from "../services";
-import {FiltersFilters, FiltersOrders} from "../core/enums";
+import {FiltersFilters, FiltersOrders, FORMULAIRE_EMIT_EVENT} from "../core/enums";
 import {Mix} from "entcore-toolkit";
 
 interface ViewModel {
@@ -124,7 +124,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
                     $scope.redirectTo(`/form/${form.id}/rgpd`);
                 }
                 else {
-                    $scope.redirectTo(`/form/${form.id}/${distrib.id}/question/1`);
+                    $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, {path: `/form/${form.id}/${distrib.id}`});
                 }
             }
             else {
@@ -138,7 +138,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
             let distribs = vm.distributions.all.filter(d => d.form_id === form.id);
             let distrib = distribs.filter(d => d.status == DistributionStatus.TO_DO)[0];
             distrib = distrib ? distrib : await distributionService.add(form.id, distribs[0]);
-            $scope.redirectTo(`/form/${form.id}/${distrib.id}/question/1`);
+            $scope.redirectTo(`/form/${form.id}/${distrib.id}`);
         }
         $scope.safeApply();
     };

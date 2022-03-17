@@ -34,6 +34,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.questionTypes = new QuestionTypes();
 		$scope.folder = $scope.folder ? $scope.folder : new Folder();
 		$scope.isMobile = window.screen.width <= 500;
+		$scope.responsePosition = 1;
 
 		const init = async () : Promise<void> => {
 			await $scope.questionTypes.sync();
@@ -75,6 +76,22 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				if ($scope.canCreate()) {
 					$scope.form = new Form();
 					template.open('main', 'containers/prop-form');
+				}
+				else {
+					$scope.redirectTo('/e403');
+				}
+			},
+			editForm: async (params) => {
+				$scope.currentPage = Pages.EDIT_FORM;
+				await $scope.getFormWithRights(params.formId);
+				if ($scope.canCreate() && $scope.hasShareRightContrib($scope.form)) {
+					if ($scope.form.id) {
+						$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_FORM_EDITOR);
+						template.open('main', 'containers/edit-form');
+					}
+					else {
+						$scope.redirectTo('/list/mine');
+					}
 				}
 				else {
 					$scope.redirectTo('/e403');
@@ -123,36 +140,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 					$scope.redirectTo('/e403');
 				}
 			},
-			editForm: async (params) => {
-				$scope.currentPage = Pages.EDIT_FORM;
-				await $scope.getFormWithRights(params.formId);
-				if ($scope.canCreate() && $scope.hasShareRightContrib($scope.form)) {
-					if ($scope.form.id) {
-						$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_FORM_EDITOR);
-						template.open('main', 'containers/edit-form');
-					}
-					else {
-						$scope.redirectTo('/list/mine');
-					}
-				}
-				else {
-					$scope.redirectTo('/e403');
-				}
-			},
-			respondForm: async (params) => {
-				await $scope.getFormWithRights(params.formId);
-				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form)) {
-					if ($scope.form.rgpd) {
-						$scope.redirectTo(`/form/${params.formId}/rgpd`);
-					}
-					else {
-						$scope.redirectTo(`/form/${params.formId}/new/question/1`);
-					}
-				}
-				else {
-					$scope.redirectTo('/e403');
-				}
-			},
 			rgpdQuestion: async (params) => {
 				$scope.currentPage = Pages.RGPD_QUESTIONS;
 				await $scope.getFormWithRights(params.formId);
@@ -177,60 +164,71 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 					$scope.redirectTo('/list/responses');
 				}
 			},
-			respondQuestion: async (params) => {
-				$scope.currentPage = Pages.RESPOND_QUESTION;
+			respondForm: async (params) => {
 				await $scope.getFormWithRights(params.formId);
-				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form) && !$scope.form.archived) {
-					if ($scope.form.date_opening < new Date() && ($scope.form.date_ending ? ($scope.form.date_ending > new Date()) : true)) {
-						if (params.distributionId == "new") {
-							let distribs = await distributionService.listByFormAndResponder($scope.form.id);
-							let distrib = distribs.filter(d => d.status == DistributionStatus.TO_DO)[0];
-							$scope.distribution = distrib ? distrib : await distributionService.add($scope.form.id, distribs[0]);
-						}
-						else {
-							$scope.distribution = await distributionService.get(params.distributionId);
-						}
+				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form)) {
+					if ($scope.form.rgpd) {
+						$scope.redirectTo(`/form/${params.formId}/rgpd`);
+					}
+					else {
+						$scope.currentPage = Pages.RESPOND_QUESTION;
+						await $scope.getFormWithRights(params.formId);
+						if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form) && !$scope.form.archived) {
+							if ($scope.form.date_opening < new Date() && ($scope.form.date_ending ? ($scope.form.date_ending > new Date()) : true)) {
+								if (!isNaN(params.distributionId)) {
+									$scope.distribution = await distributionService.get(params.distributionId);
+								}
+								else {
+									let distribs = await distributionService.listByFormAndResponder($scope.form.id);
+									let distrib = distribs.filter(d => d.status == DistributionStatus.TO_DO)[0];
+									$scope.distribution = distrib ? distrib : await distributionService.add($scope.form.id, distribs[0]);
+								}
 
-						if ($scope.distribution) {
-							let conditionsOk = false;
-							if ($scope.distribution.status && $scope.distribution.status != DistributionStatus.FINISHED) {
-								conditionsOk = true;
-							}
-							else if ($scope.form.editable) {
-								let distribs = await distributionService.listByFormAndResponder($scope.form.id);
-								let distrib = distribs.filter(d => d.status == DistributionStatus.ON_CHANGE)[0];
-								$scope.distribution = distrib ? distrib : await distributionService.duplicateWithResponses($scope.distribution.id);
-								conditionsOk = true;
-							}
+								if ($scope.distribution) {
+									let conditionsOk = false;
+									if ($scope.distribution.status && $scope.distribution.status != DistributionStatus.FINISHED) {
+										conditionsOk = true;
+									}
+									else if ($scope.form.editable) {
+										let distribs = await distributionService.listByFormAndResponder($scope.form.id);
+										let distrib = distribs.filter(d => d.status == DistributionStatus.ON_CHANGE)[0];
+										$scope.distribution = distrib ? distrib : await distributionService.duplicateWithResponses($scope.distribution.id);
+										conditionsOk = true;
+									}
 
-							if (conditionsOk) {
-								$scope.form.nbFormElements = (await formElementService.countFormElements($scope.form.id)).count;
-								if (params.position > $scope.form.nbFormElements) {
+									if (conditionsOk) {
+										$scope.form.nbFormElements = (await formElementService.countFormElements($scope.form.id)).count;
+										if ($scope.responsePosition > $scope.form.nbFormElements) {
+											$scope.redirectTo(`/form/${$scope.form.id}/${$scope.distribution.id}/questions/recap`);
+										}
+										else {
+											$scope.responsePosition = $scope.responsePosition < 1 ? 1 : $scope.responsePosition;
+											let correctedUrl = window.location.origin + window.location.pathname + `#/form/${$scope.form.id}/${$scope.distribution.id}`;
+											window.location.assign(correctedUrl);
+											$scope.safeApply();
+											$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_RESPOND_QUESTION);
+											template.open('main', 'containers/respond-question');
+										}
+									}
+									else {
+										$scope.redirectTo('/e403');
+									}
+								}
+								else if ($scope.form.multiple) {
 									$scope.redirectTo(`/form/${$scope.form.id}/${$scope.distribution.id}/questions/recap`);
 								}
 								else {
-									let questionPosition = params.position < 1 ? 1 : params.position;
-									let correctedUrl = window.location.origin + window.location.pathname + `#/form/${$scope.form.id}/${$scope.distribution.id}/question/${questionPosition}`;
-									window.location.assign(correctedUrl);
-									$scope.safeApply();
-									$scope.formElement = await formElementService.getByPosition($scope.form.id, questionPosition);
-									$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_RESPOND_QUESTION);
-									template.open('main', 'containers/respond-question');
+									$scope.redirectTo('/e403');
 								}
 							}
 							else {
 								$scope.redirectTo('/e403');
 							}
 						}
-						else if ($scope.form.multiple) {
-							$scope.redirectTo(`/form/${$scope.form.id}/${$scope.distribution.id}/questions/recap`);
-						}
 						else {
 							$scope.redirectTo('/e403');
 						}
-					}
-					else {
-						$scope.redirectTo('/e403');
+
 					}
 				}
 				else {
@@ -317,6 +315,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 
 		$scope.$on(FORMULAIRE_EMIT_EVENT.REFRESH, () => { $scope.safeApply() });
 		$scope.$on(FORMULAIRE_EMIT_EVENT.UPDATE_FOLDER, (event, data) => { $scope.folder = data });
+		$scope.$on(FORMULAIRE_EMIT_EVENT.REDIRECT, (event, data) => {
+			$scope.responsePosition = data.position ? data.position : 1;
+			$scope.safeApply();
+			$scope.redirectTo(data.path);
+		});
 
 
 		// Rights

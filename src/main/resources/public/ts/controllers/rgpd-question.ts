@@ -1,6 +1,6 @@
 import {ng} from "entcore";
 import {Delegates, Distributions, DistributionStatus, Form} from "../models";
-import {FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
+import {FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_EMIT_EVENT} from "../core/enums";
 import {distributionService} from "../services";
 
 interface ViewModel {
@@ -36,7 +36,7 @@ export const rgpdQuestionController = ng.controller('RgpdQuestionController', ['
         if (!vm.form.multiple) {
             let distrib = vm.distributions.all[0];
             if (distrib.status == DistributionStatus.TO_DO) {
-                $scope.redirectTo(`/form/${vm.form.id}/${distrib.id}/question/1`);
+                $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, {path: `/form/${vm.form.id}/${distrib.id}`});
             }
             else {
                 $scope.redirectTo(`/form/${vm.form.id}/${distrib.id}/questions/recap`);
@@ -45,7 +45,7 @@ export const rgpdQuestionController = ng.controller('RgpdQuestionController', ['
         else {
             let distrib = vm.distributions.all.filter(d => d.status == DistributionStatus.TO_DO)[0];
             distrib = distrib ? distrib : await distributionService.add(vm.form.id, vm.distributions.all[0]);
-            $scope.redirectTo(`/form/${vm.form.id}/${distrib.id}/question/1`);
+            $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, {path: `/form/${vm.form.id}/${distrib.id}`});
         }
         $scope.safeApply();
     };

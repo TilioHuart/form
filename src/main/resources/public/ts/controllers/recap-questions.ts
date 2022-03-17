@@ -12,7 +12,7 @@ import {
     responseFileService,
     responseService
 } from "../services";
-import {FORMULAIRE_BROADCAST_EVENT} from "../core/enums";
+import {FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_EMIT_EVENT} from "../core/enums";
 
 interface ViewModel {
     formElements: FormElements;
@@ -67,7 +67,7 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
     // Global functions
 
     vm.prev = async () : Promise<void> => {
-        $scope.redirectTo(`/form/${vm.form.id}/${vm.distribution.id}/question/${vm.form.nb_elements}`);
+        $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, {path: `/form/${vm.form.id}/${vm.distribution.id}`});
     };
 
     vm.send = async () : Promise<void> => {
