@@ -85,7 +85,7 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                                 <question-item question="question"
                                                reorder="true"
                                                has-form-responses="vm.form.nb_responses > 0"
-                                               form-elements="vm.formElements" input-guard>
+                                               form-elements="vm.formElements">
                                 </question-item>
                             </div>
                         </div>
