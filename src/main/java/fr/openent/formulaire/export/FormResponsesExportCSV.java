@@ -163,7 +163,12 @@ public class FormResponsesExportCSV {
     headers.add("Date de réponse");
 
     for (int i = 0; i < questions.size(); i++) {
-      headers.add(questions.getJsonObject(i).getString("title"));
+      JsonObject question = questions.getJsonObject(i);
+      Integer position = question.getInteger("position");
+      Integer parent_position = question.getInteger("parent_position");
+      Integer section_position = question.getInteger("section_position");
+      String displayedPosition = (position != null ? position : parent_position) + "." + (section_position != null ? section_position + "." : "");
+      headers.add(displayedPosition + questions.getJsonObject(i).getString("title"));
     }
 
     StringBuilder builder = new StringBuilder();
