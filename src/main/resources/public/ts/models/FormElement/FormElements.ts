@@ -26,7 +26,7 @@ export class FormElements extends Selection<FormElement> {
             this.all = this.all.concat(Mix.castArrayAs(Section, dataSections));
             await this.syncSectionQuestions();
 
-            this.all.sort((a, b) => (a.position > b.position) ? 1 : ((b.position > a.position) ? -1 : 0));
+            this.all.sort((a, b) => a.position - b.position);
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.question.sync'));
             throw e;

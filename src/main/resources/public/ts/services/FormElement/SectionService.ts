@@ -1,7 +1,7 @@
 import {idiom, ng, notify} from 'entcore';
 import http from 'axios';
 import {DataUtils} from "../../utils";
-import {Section} from "../../models";
+import {Question, Section, Sections} from "../../models";
 import {Mix} from "entcore-toolkit";
 
 export interface SectionService {
@@ -9,7 +9,7 @@ export interface SectionService {
     get(sectionId: number) : Promise<any>;
     save(section: Section) : Promise<any>;
     create(section: Section) : Promise<any>;
-    update(section: Section) : Promise<any>;
+    update(sections: Section[]) : Promise<Section[]>;
     delete(sectionId: number) : Promise<any>;
 }
 
@@ -36,7 +36,7 @@ export const sectionService: SectionService = {
     },
 
     async save(section: Section) : Promise<any> {
-        return section.id ? await this.update(section) : await this.create(section);
+        return section.id ? await this.update([section]) : await this.create(section);
     },
 
     async create(section: Section) : Promise<any> {
@@ -48,11 +48,17 @@ export const sectionService: SectionService = {
         }
     },
 
-    async update(section: Section) : Promise<any> {
+    async update(sections: Section[]) : Promise<Section[]> {
         try {
-            let sectionUpdated = Mix.castAs(Section, DataUtils.getData(await http.put(`/formulaire/sections/${section.id}`, section)));
-            await sectionUpdated.questions.sync(sectionUpdated.id, true);
-            return sectionUpdated;
+            if (sections.length <= 0) {
+                return []
+            }
+            let data = DataUtils.getData(await http.put(`/formulaire/sections/${sections[0].form_id}`, sections));
+            let updatedSections = Mix.castArrayAs(Section, data);
+            for (let section of updatedSections) {
+                await section.questions.sync(section.id, true);
+            }
+            return updatedSections;
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.sectionService.update'));
             throw err;

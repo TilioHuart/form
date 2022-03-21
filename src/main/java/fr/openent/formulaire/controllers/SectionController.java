@@ -11,6 +11,7 @@ import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
@@ -57,14 +58,27 @@ public class SectionController extends ControllerHelper {
         });
     }
 
-    @Put("/sections/:sectionId")
+    @Put("/sections/:formId")
     @ApiDoc("Update a specific section")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
-        String sectionId = request.getParam("sectionId");
-        RequestUtils.bodyToJson(request, question -> {
-            sectionService.update(sectionId, question, defaultResponseHandler(request));
+        String formId = request.getParam("formId");
+        RequestUtils.bodyToJsonArray(request, sections -> {
+            sectionService.update(formId, sections, updatedSectionsEvent -> {
+                if (updatedSectionsEvent.isLeft()) {
+                    log.error("[Formulaire@updateQuestion] Failed to update questions : " + sections);
+                    RenderHelper.badRequest(request, updatedSectionsEvent);
+                    return;
+                }
+
+                JsonArray dataInfos = updatedSectionsEvent.right().getValue();
+                JsonArray updatedSections = new JsonArray();
+                for(int i = 0; i < dataInfos.size(); i++) {
+                    updatedSections.addAll(dataInfos.getJsonArray(i));
+                }
+                renderJson(request, updatedSections);
+            });
         });
     }
 

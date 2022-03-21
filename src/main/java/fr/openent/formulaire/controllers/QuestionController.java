@@ -12,6 +12,7 @@ import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
@@ -78,14 +79,27 @@ public class QuestionController extends ControllerHelper {
         });
     }
 
-    @Put("/questions/:questionId")
+    @Put("/questions/:formId")
     @ApiDoc("Update a specific question")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
-        String questionId = request.getParam("questionId");
-        RequestUtils.bodyToJson(request, question -> {
-            questionService.update(questionId, question, defaultResponseHandler(request));
+        String formId = request.getParam("formId");
+        RequestUtils.bodyToJsonArray(request, questions -> {
+            questionService.update(formId, questions, updatedQuestionsEvent -> {
+                if (updatedQuestionsEvent.isLeft()) {
+                    log.error("[Formulaire@updateQuestion] Failed to update questions : " + questions);
+                    RenderHelper.badRequest(request, updatedQuestionsEvent);
+                    return;
+                }
+
+                JsonArray dataInfos = updatedQuestionsEvent.right().getValue();
+                JsonArray updatedQuestions = new JsonArray();
+                for(int i = 0; i < dataInfos.size(); i++) {
+                    updatedQuestions.addAll(dataInfos.getJsonArray(i));
+                }
+                renderJson(request, updatedQuestions);
+            });
         });
     }
 

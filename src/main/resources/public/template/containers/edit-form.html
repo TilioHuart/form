@@ -33,9 +33,8 @@
 
         <div class="edit-form" ng-if="vm.formElements.all.length > 0">
             <!-- List of formElements laptop -->
-            <div class="elements" sortable-list ng-if="!isMobile && vm.formElements.selected.length == 0 && vm.form.nb_responses <= 0">
-                <div ng-repeat="formElement in vm.formElements.all | orderBy:'position'" class="twelve twelve-mobile"
-                     sortable-element data-ng-change="vm.reOrder()" data-ng-model="formElement.index" guard-root>
+            <div id="container-0" class="elements nested-container" ng-if="!isMobile && vm.formElements.selected.length == 0 && vm.form.nb_responses <= 0">
+                <div ng-repeat="formElement in vm.formElements.all | orderBy:'position'" class="twelve twelve-mobile" guard-root>
                     <!--  Question component -->
                     <question-item ng-if="FormElementUtils.isQuestion(formElement)" input-guard
                                    question="formElement"

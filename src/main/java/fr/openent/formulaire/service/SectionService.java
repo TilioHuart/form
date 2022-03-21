@@ -29,12 +29,12 @@ public interface SectionService {
     void create(JsonObject section, String formId, Handler<Either<String, JsonObject>> handler);
 
     /**
-     * Update a specific section
-     * @param sectionId section identifier
-     * @param section JsonObject data
-     * @param handler function handler returning JsonObject data
+     * Update specific sections
+     * @param formId form identifier
+     * @param sections JsonArray data
+     * @param handler function handler returning JsonArray data
      */
-    void update(String sectionId, JsonObject section, Handler<Either<String, JsonObject>> handler);
+    void update(String formId, JsonArray sections, Handler<Either<String, JsonArray>> handler);
 
     /**
      * Delete a specific section

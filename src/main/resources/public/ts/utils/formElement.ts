@@ -4,12 +4,12 @@ import {
     Question,
     Response, Responses,
     Section,
-    Distribution
+    Distribution, Questions
 } from "../models";
 import {Mix} from "entcore-toolkit";
 
 export class FormElementUtils {
-    static castFormElement(formElement: any) : Question|Section {
+    static castFormElement = (formElement: any) : Question|Section => {
         if (formElement.statement != undefined) {
             return Mix.castAs(Question, formElement);
         }
@@ -18,9 +18,11 @@ export class FormElementUtils {
         }
     };
 
-    static isQuestion(formElement: FormElement) : boolean {
+    static isQuestion = (formElement: FormElement) : boolean => {
         return formElement instanceof Question;
     };
+
+    //
 
     static getLastQuestions = (formElements: FormElements) : any => {
         let lastQuestions = [];
@@ -59,5 +61,42 @@ export class FormElementUtils {
         let matchingQuestions = lastQuestions.filter(q => q.id === response.question_id);
         let question = matchingQuestions.length > 0 ? matchingQuestions[0] : null;
         return question && (question.conditional ? !!response.answer : true);
+    };
+
+    //
+
+    static updateSiblingsPositions = (formElements: FormElements|Questions, isAdd: boolean, goUp: boolean, startIndex: number, endIndex?: number) : void => {
+        if (formElements instanceof Questions) {
+            FormElementUtils.updateSectionPositionsAfter(formElements, isAdd, goUp, startIndex, endIndex);
+        }
+        else {
+            FormElementUtils.updatePositionsAfter(formElements, isAdd, goUp, startIndex, endIndex);
+        }
+    };
+
+    static updatePositionsAfter = (formElements: FormElements|Questions, isAdd: boolean, goUp: boolean, startIndex: number, endIndex?: number) : void => {
+        endIndex = endIndex ? endIndex : formElements.all.length;
+        for (let i = startIndex; i < endIndex; i++) {
+            let formElement = formElements.all[i];
+            if (goUp === null) {
+                isAdd ? formElement.position++ : formElement.position--;
+            }
+            else {
+                goUp ? formElement.position++ : formElement.position--;
+            }
+        }
+    };
+
+    static updateSectionPositionsAfter = (questions: Questions, isAdd: boolean, goUp: boolean, startIndex: number, endIndex?: number) : void => {
+        endIndex = endIndex ? endIndex : questions.all.length;
+        for (let i = startIndex; i < endIndex; i++) {
+            let question = questions.all[i];
+            if (goUp === null) {
+                isAdd ? question.section_position++ : question.section_position--;
+            }
+            else {
+                goUp ? question.section_position++ : question.section_position--;
+            }
+        }
     };
 }

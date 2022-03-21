@@ -59,12 +59,12 @@ public interface QuestionService {
     void createMultiple(JsonArray questions, String formId, Handler<Either<String, JsonArray>> handler);
 
     /**
-     * Update a specific question
-     * @param questionId question identifier
-     * @param question JsonObject data
-     * @param handler function handler returning JsonObject data
+     * Update specific questions
+     * @param formId question identifier
+     * @param questions JsonArray data
+     * @param handler function handler returning JsonArray data
      */
-    void update(String questionId, JsonObject question, Handler<Either<String, JsonObject>> handler);
+    void update(String formId, JsonArray questions, Handler<Either<String, JsonArray>> handler);
 
     /**
      * Delete a specific question

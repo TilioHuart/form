@@ -9,21 +9,23 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
+import org.entcore.common.sql.SqlStatementsBuilder;
 
 public class DefaultSectionService implements SectionService {
+    private final Sql sql = Sql.getInstance();
 
     @Override
     public void list(String formId, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT * FROM " + Formulaire.SECTION_TABLE + " WHERE form_id = ? ORDER BY position;";
         JsonArray params = new JsonArray().add(formId);
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+        sql.prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
     @Override
     public void get(String sectionId, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT * FROM " + Formulaire.SECTION_TABLE + " WHERE id = ?;";
         JsonArray params = new JsonArray().add(sectionId);
-        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+        sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override
@@ -39,22 +41,34 @@ public class DefaultSectionService implements SectionService {
         query += SqlHelper.getUpdateDateModifFormRequest();
         params.addAll(SqlHelper.getParamsForUpdateDateModifFormRequest(formId));
 
-        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+        sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override
-    public void update(String sectionId, JsonObject section, Handler<Either<String, JsonObject>> handler) {
-        String query = "UPDATE " + Formulaire.SECTION_TABLE + " SET title = ?, description = ?, position = ? WHERE id = ? RETURNING *;";
-        JsonArray params = new JsonArray()
-                .add(section.getString("title", ""))
-                .add(section.getString("description", ""))
-                .add(section.getInteger("position", 0))
-                .add(sectionId);
+    public void update(String formId, JsonArray sections, Handler<Either<String, JsonArray>> handler) {
+        if (!sections.isEmpty()) {
+            SqlStatementsBuilder s = new SqlStatementsBuilder();
+            String query = "UPDATE " + Formulaire.SECTION_TABLE + " SET title = ?, description = ?, position = ? WHERE id = ? RETURNING *;";
 
-        query += SqlHelper.getUpdateDateModifFormRequest();
-        params.addAll(SqlHelper.getParamsForUpdateDateModifFormRequest(section.getInteger("form_id").toString()));
+            s.raw("BEGIN;");
+            for (int i = 0; i < sections.size(); i++) {
+                JsonObject section = sections.getJsonObject(i);
+                JsonArray params = new JsonArray()
+                        .add(section.getString("title", ""))
+                        .add(section.getString("description", ""))
+                        .add(section.getInteger("position", 0))
+                        .add(section.getInteger("id", null));
+                s.prepared(query, params);
+            }
 
-        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+            s.prepared(SqlHelper.getUpdateDateModifFormRequest(), SqlHelper.getParamsForUpdateDateModifFormRequest(formId));
+            s.raw("COMMIT;");
+
+            sql.transaction(s.build(), SqlResult.validResultsHandler(handler));
+        }
+        else {
+            handler.handle(new Either.Right<>(new JsonArray()));
+        }
     }
 
     @Override
@@ -65,6 +79,6 @@ public class DefaultSectionService implements SectionService {
         query += SqlHelper.getUpdateDateModifFormRequest();
         params.addAll(SqlHelper.getParamsForUpdateDateModifFormRequest(section.getInteger("form_id").toString()));
 
-        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+        sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 }

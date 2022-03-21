@@ -1,8 +1,20 @@
 import {idiom, ng, notify, template, angular} from 'entcore';
-import {Form, FormElement, FormElements, Question, QuestionChoice, Response, Responses, Section, Types} from "../models";
+import {
+    Form,
+    FormElement,
+    FormElements,
+    Question,
+    QuestionChoice,
+    Response,
+    Responses,
+    Section,
+    Types
+} from "../models";
 import {distributionService, formElementService, formService, questionChoiceService, questionService, responseService, sectionService} from "../services";
-import {Direction, FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_EMIT_EVENT, FORMULAIRE_FORM_ELEMENT_EMIT_EVENT, Pages} from "../core/enums";
+import {FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_EMIT_EVENT, FORMULAIRE_FORM_ELEMENT_EMIT_EVENT, Pages} from "../core/enums";
 import {folderService} from "../services/FolderService";
+import * as Sortable from "sortablejs";
+import {FormElementUtils} from "../utils";
 
 enum PreviewPage { RGPD = 'rgpd', QUESTION = 'question', RECAP = 'recap'}
 
@@ -51,7 +63,6 @@ interface ViewModel {
     displayTypeName(typeInfo: string) : string;
     displayTypeDescription(description : string) : string;
     displayTypeIcon(code: number) : string;
-    reOrder() : void;
     moveQuestion(index: number, direction: string) : void;
 
     // Preview functions
@@ -96,12 +107,96 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             vm.dontSave = false;
             vm.nbFormElements = vm.formElements.all.length;
             $scope.safeApply();
+
+            // Loop through each nested sortable element
+            let nestedSortables = document.querySelectorAll(".nested-container");
+            for (let i = 0; i < nestedSortables.length; i++) {
+                Sortable.create(nestedSortables[i], {
+                    group: 'nested',
+                    animation: 150,
+                    fallbackOnBody: true,
+                    swapThreshold: 0.65,
+                    ghostClass: "sortable-ghost",
+                    onEnd: async function (evt) {
+                        let questionId = angular.element(evt.item.firstElementChild.firstElementChild).scope().vm.question.id;
+                        let newNestedSectionId = evt.to.id.split("-")[1] != "0" ? parseInt(evt.to.id.split("-")[1]) : null;
+                        let oldNestedContainerId = evt.from.id.split("-")[1] != "0" ? parseInt(evt.from.id.split("-")[1]) : null;
+                        let oldSection = oldNestedContainerId ? (vm.formElements.all.filter(e => e instanceof Section && e.id === oldNestedContainerId)[0]) as Section: null;
+                        let oldSiblingQuestions = oldSection ? oldSection.questions : vm.formElements.getQuestions();
+                        let question = oldSiblingQuestions.all.filter(q => q.id === questionId)[0];
+                        let oldIndex = evt.oldIndex;
+                        let newIndex = evt.newIndex;
+                        let indexes = getStartEndIndexes(newIndex, oldIndex);
+                        let cleanResidu = false;
+
+                        if (!newNestedSectionId) {
+                            if (oldSection) { // Item moved FROM oldSection TO vm.formElements
+                                FormElementUtils.updateSiblingsPositions(oldSection.questions, false, null, oldIndex);
+                                FormElementUtils.updateSiblingsPositions(vm.formElements, true, null, newIndex);
+                                question.position = newIndex + 1;
+                                question.section_id = null;
+                                question.section_position = null;
+                                await questionService.update(oldSection.questions.all);
+                                await formElementService.update(vm.formElements.all);
+                                cleanResidu = false;
+                            }
+                            else { // Item moved FROM vm.formElements TO vm.formElements
+                                FormElementUtils.updateSiblingsPositions(vm.formElements, true, indexes.goUp, indexes.startIndex, indexes.endIndex);
+                                question.position = newIndex + 1;
+                                question.section_id = null;
+                                question.section_position = null;
+                                await formElementService.update(vm.formElements.all);
+                            }
+                        }
+                        else {
+                            let newSection = (vm.formElements.all.filter(e => e instanceof Section && e.id === newNestedSectionId)[0]) as Section;
+                            if (oldSection) { // Item moved FROM oldSection TO section with id 'newNestedSectionId'
+                                if (newSection.id != oldSection.id) {
+                                    FormElementUtils.updateSiblingsPositions(oldSection.questions, false, null, oldIndex);
+                                    FormElementUtils.updateSiblingsPositions(newSection.questions, true, null, newIndex);
+                                }
+                                else {
+                                    FormElementUtils.updateSiblingsPositions(newSection.questions, true, indexes.goUp, indexes.startIndex, indexes.endIndex);
+                                }
+                                question.position = null;
+                                question.section_id = newNestedSectionId;
+                                question.section_position = newIndex + 1;
+                                if (newSection.id != oldSection.id) {
+                                    oldSection.questions.all = oldSection.questions.all.filter(q => q.id != question.id);
+                                    newSection.questions.all.push(question);
+                                }
+                                await formElementService.update(newSection.questions.all.concat(oldSection.questions.all));
+                            }
+                            else { // Item moved FROM vm.formElements TO section with id 'newNestedSectionId'
+                                FormElementUtils.updateSiblingsPositions(vm.formElements, false, null, oldIndex);
+                                FormElementUtils.updateSiblingsPositions(newSection.questions, true, null, newIndex);
+                                question.position = null;
+                                question.section_id = newNestedSectionId;
+                                question.section_position = newIndex + 1;
+                                newSection.questions.all.push(question);
+                                await questionService.update(newSection.questions.all);
+                                await formElementService.update(vm.formElements.all);
+                            }
+                        }
+
+                        $scope.safeApply();
+                        await vm.$onInit();
+                        if (cleanResidu) {
+                            let test = document.getElementById("container-0").lastElementChild;
+                            test.remove();
+                            $scope.safeApply();
+                        }
+                    }
+                });
+            }
+            $scope.safeApply();
         };
 
         // Global functions
 
         vm.saveAll = async (displaySuccess= true) : Promise<void> => {
             vm.dontSave = true;
+            // TODO si question conditionnelle potentiellement la mettre en off si l'une existe déjà
             let wrongElements = vm.formElements.all.filter(fe => !fe.title); // TODO check more than just titles later
             if (wrongElements.length > 0) {
                 notify.error(idiom.translate('formulaire.question.save.missing.field'));
@@ -112,6 +207,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         vm.return = async() : Promise<void> => {
             vm.dontSave = true;
+            // TODO si question conditionnelle potentiellement la mettre en off si l'une existe déjà
             let wrongElements = vm.formElements.all.filter(question => !question.title); // TODO check more than just titles later
             if (wrongElements.length > 0) {
                 notify.error(idiom.translate('formulaire.question.save.missing.field'));
@@ -198,15 +294,15 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     let section = vm.formElements.all.filter(e => e instanceof Section && e.id === question.section_id)[0] as Section;
                     for (let i = question.section_position; i < section.questions.all.length; i++) {
                         section.questions.all[i].position++;
-                        await formElementService.save(section.questions.all[i]);
                     }
+                    await formElementService.update(section.questions.all);
                     duplicata.section_position++;
                 }
                 else {
                     for (let i = question.position; i < vm.formElements.all.length; i++) {
                         vm.formElements.all[i].position++;
-                        await formElementService.save(vm.formElements.all[i]);
                     }
+                    await formElementService.update(vm.formElements.all);
                     duplicata.position++;
                 }
                 let newQuestion = await questionService.create(duplicata);
@@ -258,6 +354,19 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             try {
                 let formElement = vm.formElements.getSelectedElement();
                 if (formElement.id) {
+                    if (formElement instanceof Question && formElement.section_id) {
+                        let section = vm.formElements.all.filter(e => e instanceof Section && e.id === (formElement as Question).section_id)[0] as Section;
+                        for (let i = formElement.section_position; i < section.questions.all.length; i++) {
+                            section.questions.all[i].position--;
+                        }
+                        await formElementService.update(section.questions.all);
+                    }
+                    else {
+                        for (let i = formElement.position; i < vm.formElements.all.length; i++) {
+                            vm.formElements.all[i].position--;
+                        }
+                        await formElementService.update(vm.formElements.all);
+                    }
                     await formElementService.delete(formElement);
                 }
                 template.close('lightbox');
@@ -266,7 +375,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 vm.form.setFromJson(await formService.get(vm.form.id));
                 await vm.formElements.sync(vm.form.id);
                 vm.nbFormElements = vm.formElements.all.length;
-                rePositionQuestions();
+                rePositionFormElements(vm.formElements);
                 vm.dontSave = false;
                 $scope.safeApply();
             }
@@ -364,19 +473,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
         };
 
-        vm.reOrder = () : void => {
-            let finished = true;
-            angular.forEach(vm.formElements.all, function (question) {
-                if (question.position != parseFloat(question.index) + 1) {
-                    question.position = parseFloat(question.index) + 1;
-                }
-                if (!question.position) { finished = false }
-            });
-            if (finished) {
-                rePositionQuestions();
-            }
-        };
-
         vm.moveQuestion = (index: number, direction: string) : void => {
             switch (direction) {
                 case Direction.UP: {
@@ -393,7 +489,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     notify.error(idiom.translate('formulaire.error.question.reorganization'));
                     break;
             }
-            rePositionQuestions();
+            rePositionFormElements(vm.formElements);
             $scope.safeApply();
         };
 
@@ -480,17 +576,32 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         // Utils
 
-        const rePositionQuestions = () : void => {
-            vm.formElements.all.sort((a, b) => a.position - b.position);
-            for (let i = 0; i < vm.formElements.all.length; i++) {
-                vm.formElements.all[i].position = i + 1;
+        const getStartEndIndexes = (newIndex: number, oldIndex: number) : any => {
+            let indexes = {startIndex: -1, endIndex: -1, goUp: false};
+            if (newIndex < oldIndex) {
+                indexes.goUp = true;
+                indexes.startIndex = newIndex;
+                indexes.endIndex = oldIndex;
+            }
+            else {
+                indexes.goUp = false;
+                indexes.startIndex = oldIndex;
+                indexes.endIndex = newIndex + 1;
+            }
+            return indexes;
+        }
+
+        const rePositionFormElements = (formElements: FormElements) : void => {
+            formElements.all.sort((a, b) => a.position - b.position);
+            for (let i = 0; i < formElements.all.length; i++) {
+                formElements.all[i].position = i + 1;
             }
             $scope.safeApply();
         };
 
         const saveFormElements = async (displaySuccess: boolean = false) : Promise<void> => {
             try {
-                rePositionQuestions();
+                rePositionFormElements(vm.formElements);
                 let formElement = vm.formElements.getSelectedElement();
                 if (formElement) {
                     if (formElement instanceof Question && !formElement.title && !formElement.statement && !formElement.mandatory && formElement.choices.all.length <= 0) {
@@ -504,7 +615,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         }
                     }
                     else {
-                        let newId = (await formElementService.save(formElement)).id;
+                        let test = await formElementService.save(formElement);
+                        let newId = test.id;
                         formElement.id = newId;
 
                         if (formElement instanceof Question) {

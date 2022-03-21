@@ -11,7 +11,7 @@ export interface FormElementService {
     getByPosition(idForm: number, position: number) : Promise<any>;
     save(formElement: FormElement) : Promise<any>;
     create(formElement: FormElement) : Promise<any>;
-    update(formElement: FormElement) : Promise<any>;
+    update(formElements: FormElement[]) : Promise<any>;
     delete(formElement: FormElement) : Promise<any>;
 }
 
@@ -60,7 +60,7 @@ export const formElementService: FormElementService = {
     },
 
     async save(formElement: FormElement) : Promise<any> {
-        return formElement.id ? await this.update(formElement) : await this.create(formElement);
+        return formElement.id ? (await this.update([formElement]))[0] : await this.create(formElement);
     },
 
     async create(formElement: FormElement) : Promise<any> {
@@ -80,19 +80,12 @@ export const formElementService: FormElementService = {
         }
     },
 
-    async update(formElement: FormElement) : Promise<any> {
+    async update(formElements: FormElement[]) : Promise<any> {
         try {
-            if (formElement instanceof Question) {
-                return await questionService.update(formElement);
-            }
-            else if (formElement instanceof Section) {
-                let section: Section = await sectionService.update(formElement);
-                await section.questions.sync(section.id, true);
-                return section;
-            }
-            else {
-                throw new TypeError();
-            }
+            let updatedQuestions = await questionService.update(formElements.filter(e => e instanceof Question) as Question[]);
+            let updatedSections = await sectionService.update(formElements.filter(e => e instanceof Section) as Section[]);
+            return [].concat(updatedQuestions, updatedSections);
+
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formElementService.update'));
             throw err;

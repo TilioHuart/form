@@ -84,18 +84,19 @@ public class ShareAndOwner implements ResourcesProvider {
     private String getKeyByBinding(Binding binding) {
         if (isCountDistribution(binding) || isGetByFormResponderAndStatusDistribution(binding) || isAddDistribution(binding) ||
                 isUpdateForm(binding) || isDeleteForm(binding) || isExportForm(binding) || isSendReminderForm(binding) ||
-                isCreateQuestion(binding) || isFillResponsesResponse(binding) || isDeleteResponse(binding) || isCreateSection(binding)) {
+                isCreateQuestion(binding) || isFillResponsesResponse(binding) || isDeleteResponse(binding) || isCreateSection(binding) ||
+                isUpdateSection(binding) || isUpdateQuestion(binding)) {
             return "formId";
         }
         else if (isGetDistribution(binding) || isUpdateDistribution(binding) || isDuplicateWithResponsesDistribution(binding) ||
                 isReplaceDistribution(binding) || isDeleteDistribution(binding) || isListByDistributionResponse(binding)) {
             return "distributionId";
         }
-        else if (isGetSection(binding) || isUpdateSection(binding) || isDeleteSection(binding)) {
+        else if (isGetSection(binding) || isDeleteSection(binding)) {
             return "sectionId";
         }
         else if (isListMineByDistributionResponse(binding) || isCreateQuestionChoice(binding) ||
-                isCreateMultipleQuestionChoice(binding) || isGetQuestion(binding) || isUpdateQuestion(binding) ||
+                isCreateMultipleQuestionChoice(binding) || isGetQuestion(binding) ||
                 isDeleteQuestion(binding) || isListResponse(binding) || isCreateResponse(binding) ||
                 isZipAndDownloadResponseFile(binding)) {
             return "questionId";

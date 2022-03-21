@@ -1,7 +1,8 @@
 import {idiom, ng, notify} from 'entcore';
 import http from 'axios';
 import {DataUtils} from "../../utils";
-import {Question} from "../../models";
+import {Question, Section} from "../../models";
+import {Mix} from "entcore-toolkit";
 
 export interface QuestionService {
     list(id: number, isForSection?: boolean) : Promise<any>;
@@ -9,7 +10,7 @@ export interface QuestionService {
     save(question: Question) : Promise<any>;
     create(question: Question) : Promise<any>;
     createMultiple(questions: Question[], formId: number) : Promise<any>;
-    update(question: Question) : Promise<any>;
+    update(questions: Question[]) : Promise<Question[]>;
     delete(questionId: number) : Promise<any>;
 }
 
@@ -35,7 +36,7 @@ export const questionService: QuestionService = {
     },
 
     async save(question: Question) : Promise<any> {
-        return question.id ? await this.update(question) : await this.create(question);
+        return question.id ? (await this.update([question]))[0] : await this.create(question);
     },
 
     async create(question: Question) : Promise<any> {
@@ -56,9 +57,12 @@ export const questionService: QuestionService = {
         }
     },
 
-    async update(question: Question) : Promise<any> {
+    async update(questions: Question[]) : Promise<Question[]> {
         try {
-            return DataUtils.getData(await http.put(`/formulaire/questions/${question.id}`, question));
+            if (questions.length <= 0) {
+                return []
+            }
+            return Mix.castArrayAs(Question, DataUtils.getData(await http.put(`/formulaire/questions/${questions[0].form_id}`, questions)));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.update'));
             throw err;
