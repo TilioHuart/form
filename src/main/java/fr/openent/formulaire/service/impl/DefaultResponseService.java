@@ -155,7 +155,7 @@ public class DefaultResponseService implements ResponseService {
 
     @Override
     public void exportPDFResponses(String formId, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT position, date_response, d.responder_id, responder_name, structure, answer, rf.filename " +
+        String query = "SELECT question_id, date_response, d.responder_id, responder_name, structure, answer, rf.filename " +
             "FROM " + Formulaire.DISTRIBUTION_TABLE + " d " +
             "LEFT JOIN " + Formulaire.RESPONSE_TABLE + " r ON r.distribution_id = d.id " +
             "LEFT JOIN " + Formulaire.RESPONSE_FILE_TABLE + " rf ON rf.response_id = r.id " +

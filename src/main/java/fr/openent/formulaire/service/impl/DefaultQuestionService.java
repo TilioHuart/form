@@ -9,6 +9,7 @@ import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 
+import java.text.Normalizer;
 import java.util.List;
 
 public class DefaultQuestionService implements QuestionService {
@@ -24,6 +25,14 @@ public class DefaultQuestionService implements QuestionService {
     public void listForSection(String sectionId, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT * FROM " + Formulaire.QUESTION_TABLE + " WHERE section_id = ? ORDER BY position;";
         JsonArray params = new JsonArray().add(sectionId);
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public void listForFormAndSection(String formId, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT * FROM " + Formulaire.QUESTION_TABLE + " WHERE form_id = ? " +
+                "ORDER BY position, section_id, section_position;";
+        JsonArray params = new JsonArray().add(formId);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 

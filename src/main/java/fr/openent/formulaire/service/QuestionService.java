@@ -7,18 +7,25 @@ import io.vertx.core.json.JsonObject;
 
 public interface QuestionService {
     /**
-     * List all the questions of a specific form
+     * List all the questions out of sections of a specific form
      * @param formId form identifier
      * @param handler function handler returning JsonArray data
      */
     void listForForm(String formId, Handler<Either<String, JsonArray>> handler);
 
     /**
-     * List all the sections of a specific form
+     * List all the questions in a specific section
      * @param sectionId section identifier
      * @param handler function handler returning JsonArray data
      */
     void listForSection(String sectionId, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * List all the questions (in and out of sections) of a specific form
+     * @param formId section identifier
+     * @param handler function handler returning JsonArray data
+     */
+    void listForFormAndSection(String formId, Handler<Either<String, JsonArray>> handler);
 
     /**
      * List all the questions of a specific form without freetext questions

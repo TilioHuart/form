@@ -185,10 +185,8 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         };
 
         vm.getGraphQuestions = () : Question[] => {
-            return vm.formElements.all.filter(q => q instanceof Question && (
-                q.question_type === Types.SINGLEANSWER ||
-                q.question_type === Types.MULTIPLEANSWER ||
-                q.question_type ===Types.SINGLEANSWERRADIO)) as Question[];
+            return vm.formElements.getAllQuestions().all.filter(q => q.question_type === Types.SINGLEANSWER ||
+                q.question_type === Types.MULTIPLEANSWER || q.question_type ===Types.SINGLEANSWERRADIO);
         };
 
         // PDF

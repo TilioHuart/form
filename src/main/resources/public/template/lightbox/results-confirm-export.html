@@ -14,6 +14,6 @@
     </div>
     <div class="action-buttons">
         <button class="cell cancel" ng-click="vm.display.lightbox.export = false; vm.loading = false;"><i18n>formulaire.cancel</i18n></button>
-        <button class="cell" ng-click="vm.doExport()"><i18n>formulaire.confirm</i18n></button>
+        <button class="cell" ng-disabled="vm.loading" ng-click="vm.doExport()"><i18n>formulaire.confirm</i18n></button>
     </div>
 </lightbox>
