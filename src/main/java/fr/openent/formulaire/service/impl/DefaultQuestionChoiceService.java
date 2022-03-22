@@ -37,7 +37,7 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
     @Override
     public void create(String questionId, JsonObject choice, Handler<Either<String, JsonObject>> handler) {
         String query = "INSERT INTO " + Formulaire.QUESTION_CHOICE_TABLE + " (question_id, value, position, type, next_section_id) " +
-                "VALUES (?, ?, ?, ?) RETURNING *;";
+                "VALUES (?, ?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(questionId)
                 .add(choice.getString("value", ""))
@@ -55,7 +55,7 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
         List<JsonObject> allChoices = choices.getList();
         for (JsonObject choice : allChoices) {
             query += "INSERT INTO " + Formulaire.QUESTION_CHOICE_TABLE + " (question_id, value, position, type, next_section_id) " +
-                    "VALUES (?, ?, ?, ?); ";
+                    "VALUES (?, ?, ?, ?, ?); ";
             params.add(questionId)
                     .add(choice.getString("value", ""))
                     .add(choice.getInteger("position", 0))
