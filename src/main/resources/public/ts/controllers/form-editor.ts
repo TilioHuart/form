@@ -275,8 +275,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         };
 
         vm.undoFormElementChanges = async () => {
-            if (vm.formElements.selected.length > 0) {
-                let formElement = vm.formElements.selected[0];
+            let formElement = vm.formElements.getSelectedElement();
+            if (formElement) {
                 let hasChanged = false;
                 if (formElement instanceof Question) {
                     hasChanged = (!!formElement.title || !!formElement.statement || formElement.mandatory || formElement.choices.all.length > 0);
@@ -491,39 +491,42 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             try {
                 rePositionQuestions();
                 let formElement = vm.formElements.getSelectedElement();
-                if (formElement instanceof Question && !formElement.title && !formElement.statement && !formElement.mandatory && formElement.choices.all.length <= 0) {
-                    if (formElement.id) {
-                        vm.formElements.all.filter(e => e.id)[0] = await questionService.get(formElement.id);
+                if (formElement) {
+                    if (formElement instanceof Question && !formElement.title && !formElement.statement && !formElement.mandatory && formElement.choices.all.length <= 0) {
+                        if (formElement.id) {
+                            vm.formElements.all.filter(e => e.id)[0] = await questionService.get(formElement.id);
+                        }
                     }
-                }
-                else if (formElement instanceof Section && !formElement.title && !formElement.description && formElement.questions.all.length <= 0) {
-                    if (formElement.id) {
-                        vm.formElements.all.filter(e => e.id)[0] = await sectionService.get(formElement.id);
+                    else if (formElement instanceof Section && !formElement.title && !formElement.description && formElement.questions.all.length <= 0) {
+                        if (formElement.id) {
+                            vm.formElements.all.filter(e => e.id)[0] = await sectionService.get(formElement.id);
+                        }
                     }
-                }
-                else {
-                    let newId = (await formElementService.save(formElement)).id;
-                    formElement.id = newId;
+                    else {
+                        let newId = (await formElementService.save(formElement)).id;
+                        formElement.id = newId;
 
-                    if (formElement instanceof Question) {
-                        let registeredChoices = [];
-                        formElement.choices.replaceSpace();
-                        for (let choice of formElement.choices.all) {
-                            if (choice.value && !registeredChoices.find(c => c === choice.value)) {
-                                choice.question_id = newId;
-                                choice.id = (await questionChoiceService.save(choice)).id;
-                                registeredChoices.push(choice.value);
+                        if (formElement instanceof Question) {
+                            let registeredChoices = [];
+                            formElement.choices.replaceSpace();
+                            for (let choice of formElement.choices.all) {
+                                if (choice.value && !registeredChoices.find(c => c === choice.value)) {
+                                    choice.question_id = newId;
+                                    choice.id = (await questionChoiceService.save(choice)).id;
+                                    registeredChoices.push(choice.value);
+                                }
                             }
                         }
                     }
+
+                    if (displaySuccess) { notify.success(idiom.translate('formulaire.success.form.save')); }
+                    vm.form.setFromJson(await formService.get(vm.form.id));
+                    vm.formElements.deselectAll();
+                    for (let section of vm.formElements.getSections().all) {
+                        section.questions.deselectAll();
+                    }
+                    $scope.safeApply();
                 }
-                if (displaySuccess) { notify.success(idiom.translate('formulaire.success.form.save')); }
-                vm.form.setFromJson(await formService.get(vm.form.id));
-                vm.formElements.deselectAll();
-                for (let section of vm.formElements.getSections().all) {
-                    section.questions.deselectAll();
-                }
-                $scope.safeApply();
             }
             catch (e) {
                 throw e;
