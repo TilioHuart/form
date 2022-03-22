@@ -170,6 +170,8 @@
   "formulaire.element.new.section.title": "Ajouter une nouvelle section",
   "formulaire.element.new.section.description": "Ajoutez une nouvelle section pour regrouper vos questions sur une même page ou pour personnaliser le parcours des répondants dans votre formulaire.",
   "formulaire.element.new.question.title": "Ajouter une nouvelle question",
+  "formulaire.element.delete.confirmation": "Êtes-vous sûr(e) de vouloir supprimer cet élément ?",
+  "formulaire.element.undo.confirmation": "Êtes-vous sûr(e) de vouloir annuler vos changements ?",
 
   "formulaire.section.no.description": "Pas de description",
   "formulaire.section.new.question": "+ Ajouter une question",
@@ -199,8 +201,6 @@
   "formulaire.question.file.empty": "Dépôt de fichier",
   "formulaire.question.delete.empty.warning": "Suppression impossible : un formulaire déjà envoyé ne peut être vide",
   "formulaire.question.delete.response.fill.warning": "Vous ne pouvez pas supprimer cette question, des utilisateurs ont déjà répondu",
-  "formulaire.question.delete.confirmation": "Êtes-vous sûr(e) de vouloir supprimer cette question ?",
-  "formulaire.question.undo.confirmation": "Êtes-vous sûr(e) de vouloir annuler vos changements ?",
   "formulaire.question.missing.field.title": "Attention, la question ci-dessus nécessite un titre pour être valide.",
   "formulaire.question.missing.field.choice": "Attention, la question ci-dessus nécessite au moins un choix pour être valide.",
   "formulaire.question.save.missing.field": "Attention, certaines questions manquent d'informations pour être valides !",
