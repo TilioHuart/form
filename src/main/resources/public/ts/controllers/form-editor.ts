@@ -263,6 +263,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 template.close('lightbox');
                 vm.display.lightbox.delete = false;
                 notify.success(idiom.translate('formulaire.success.question.delete'));
+                vm.form.setFromJson(await formService.get(vm.form.id));
                 await vm.formElements.sync(vm.form.id);
                 vm.nbFormElements = vm.formElements.all.length;
                 rePositionQuestions();

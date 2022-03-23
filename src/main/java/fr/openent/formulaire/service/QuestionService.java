@@ -67,8 +67,8 @@ public interface QuestionService {
 
     /**
      * Delete a specific question
-     * @param questionId question identifier
+     * @param question question
      * @param handler function handler returning JsonObject data
      */
-    void delete(String questionId, Handler<Either<String, JsonObject>> handler);
+    void delete(JsonObject question, Handler<Either<String, JsonObject>> handler);
 }

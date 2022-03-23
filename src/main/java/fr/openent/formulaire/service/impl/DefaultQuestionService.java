@@ -1,6 +1,7 @@
 package fr.openent.formulaire.service.impl;
 
 import fr.openent.formulaire.Formulaire;
+import fr.openent.formulaire.helpers.SqlHelper;
 import fr.openent.formulaire.service.QuestionService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
@@ -55,10 +56,12 @@ public class DefaultQuestionService implements QuestionService {
 
     @Override
     public void create(JsonObject question, String formId, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
+        String query = SqlHelper.getUpdateDateModifFormRequest();
+        JsonArray params = SqlHelper.initParamsForUpdateDateModifFormRequest(formId);
+
+        query += "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
                 "mandatory, section_id, section_position, conditional) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
-        JsonArray params = new JsonArray()
-                .add(formId)
+        params.add(formId)
                 .add(question.getString("title", ""))
                 .add(question.getInteger("position", null))
                 .add(question.getInteger("question_type", 1))
@@ -73,9 +76,11 @@ public class DefaultQuestionService implements QuestionService {
 
     @Override
     public void createMultiple(JsonArray questions, String formId, Handler<Either<String, JsonArray>> handler) {
-        String query = "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, " +
+        String query = SqlHelper.getUpdateDateModifFormRequest();
+        JsonArray params = SqlHelper.initParamsForUpdateDateModifFormRequest(formId);
+
+        query += "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, " +
                 "statement, mandatory, section_id, section_position, conditional) VALUES ";
-        JsonArray params = new JsonArray();
 
         List<JsonObject> allQuestions = questions.getList();
         for (JsonObject question : allQuestions) {
@@ -90,17 +95,19 @@ public class DefaultQuestionService implements QuestionService {
                     .add(question.getInteger("section_position", null))
                     .add(question.getBoolean("conditional", false));
         }
-
         query = query.substring(0, query.length() - 2) + " RETURNING *;";
+
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
     @Override
     public void update(String questionId, JsonObject question, Handler<Either<String, JsonObject>> handler) {
-        String query = "UPDATE " + Formulaire.QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, " +
+        String query = SqlHelper.getUpdateDateModifFormRequest();
+        JsonArray params = SqlHelper.initParamsForUpdateDateModifFormRequest(question.getInteger("form_id").toString());
+
+        query += "UPDATE " + Formulaire.QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, " +
                 "statement = ?, mandatory = ?, section_id = ?, section_position = ?, conditional = ?  WHERE id = ? RETURNING *;";
-        JsonArray params = new JsonArray()
-                .add(question.getString("title", ""))
+        params.add(question.getString("title", ""))
                 .add(question.getInteger("position", null))
                 .add(question.getInteger("question_type", 1))
                 .add(question.getString("statement", ""))
@@ -110,16 +117,16 @@ public class DefaultQuestionService implements QuestionService {
                 .add(question.getBoolean("conditional", false))
                 .add(questionId);
 
-        query += "UPDATE " + Formulaire.FORM_TABLE + " SET date_modification = ? WHERE id = ?;";
-        params.add("NOW()").add(question.getInteger("form_id"));
-
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override
-    public void delete(String questionId, Handler<Either<String, JsonObject>> handler) {
-        String query = "DELETE FROM " + Formulaire.QUESTION_TABLE + " WHERE id = ?;";
-        JsonArray params = new JsonArray().add(questionId);
+    public void delete(JsonObject question, Handler<Either<String, JsonObject>> handler) {
+        String query = SqlHelper.getUpdateDateModifFormRequest();
+        JsonArray params = SqlHelper.initParamsForUpdateDateModifFormRequest(question.getInteger("form_id").toString());
+
+        query += "DELETE FROM " + Formulaire.QUESTION_TABLE + " WHERE id = ?;";
+        params.add(question.getInteger("id"));
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 }

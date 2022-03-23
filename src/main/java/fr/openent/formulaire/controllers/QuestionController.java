@@ -1,6 +1,7 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.Formulaire;
+import fr.openent.formulaire.helpers.RenderHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.security.ShareAndOwner;
@@ -94,6 +95,13 @@ public class QuestionController extends ControllerHelper {
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
-        questionService.delete(questionId, defaultResponseHandler(request));
+        questionService.get(questionId, getEvent -> {
+            if (getEvent.isLeft()) {
+                log.error("[Formulaire@deleteQuestion] Failed to get question with id : " + questionId);
+                RenderHelper.badRequest(request, getEvent);
+                return;
+            }
+            questionService.delete(getEvent.right().getValue(), defaultResponseHandler(request));
+        });
     }
 }

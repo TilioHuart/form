@@ -1,6 +1,7 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.Formulaire;
+import fr.openent.formulaire.helpers.RenderHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.SectionService;
@@ -73,6 +74,13 @@ public class SectionController extends ControllerHelper {
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String sectionId = request.getParam("sectionId");
-        sectionService.delete(sectionId, defaultResponseHandler(request));
+        sectionService.get(sectionId, getEvent -> {
+            if (getEvent.isLeft()) {
+                log.error("[Formulaire@deleteSection] Failed to get section with id : " + sectionId);
+                RenderHelper.badRequest(request, getEvent);
+                return;
+            }
+            sectionService.delete(getEvent.right().getValue(), defaultResponseHandler(request));
+        });
     }
 }

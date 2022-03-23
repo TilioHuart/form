@@ -30,7 +30,7 @@ public interface SectionService {
 
     /**
      * Update a specific section
-     * @param sectionId question identifier
+     * @param sectionId section identifier
      * @param section JsonObject data
      * @param handler function handler returning JsonObject data
      */
@@ -38,8 +38,8 @@ public interface SectionService {
 
     /**
      * Delete a specific section
-     * @param sectionId question identifier
+     * @param section section
      * @param handler function handler returning JsonObject data
      */
-    void delete(String sectionId, Handler<Either<String, JsonObject>> handler);
+    void delete(JsonObject section, Handler<Either<String, JsonObject>> handler);
 }
