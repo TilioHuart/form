@@ -26,11 +26,11 @@ export const questionType: Directive = ng.directive('questionType', () => {
                 <question-type-shortanswer question="vm.question" ng-if="vm.question.question_type == vm.types.SHORTANSWER"></question-type-shortanswer>
                 <question-type-longanswer question="vm.question" ng-if="vm.question.question_type == vm.types.LONGANSWER"></question-type-longanswer>
                 <question-type-singleanswer question="vm.question" has-form-responses="vm.hasFormResponses" form-elements="vm.formElements" ng-if="vm.question.question_type == vm.types.SINGLEANSWER"></question-type-singleanswer>
-                <question-type-multipleanswer question="vm.question" has-form-responses="vm.hasFormResponses" form-elements="vm.formElements" ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER"></question-type-multipleanswer>
+                <question-type-multipleanswer question="vm.question" has-form-responses="vm.hasFormResponses" ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER"></question-type-multipleanswer>
                 <question-type-date question="vm.question" ng-if="vm.question.question_type == vm.types.DATE"></question-type-date>
                 <question-type-time question="vm.question" ng-if="vm.question.question_type == vm.types.TIME"></question-type-time>
                 <question-type-file question="vm.question" ng-if="vm.question.question_type == vm.types.FILE"></question-type-file>
-                <question-type-singleanswer-radio question="vm.question" has-form-responses="vm.hasFormResponses" ng-if="vm.question.question_type == vm.types.SINGLEANSWERRADIO"></question-type-singleanswer-radio>
+                <question-type-singleanswer-radio question="vm.question" has-form-responses="vm.hasFormResponses" form-elements="vm.formElements" ng-if="vm.question.question_type == vm.types.SINGLEANSWERRADIO"></question-type-singleanswer-radio>
             </div>
         `,
 
