@@ -246,7 +246,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 }
             }
             else if (formElement instanceof Question && formElement.section_id) {
-                let section = vm.formElements.getSections().all.filter(s => s.id === formElement.id)[0];
+                let section = vm.formElements.getSections().all.filter(s => s.id === (formElement as Question).section_id)[0];
                 section.questions.all = section.questions.all.filter(q => q.id);
             }
             else {
