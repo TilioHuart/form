@@ -44,16 +44,15 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                         </div>
                         <div class="section-top-container">
                             <!-- Title component -->
-                            <div class="title ten">
-                                <div class="dontSave" ng-if="!vm.section.selected">
-                                    <h4 ng-if="vm.section.title">
+                            <div class="title twelve">
+                                <div class="dontSave flex-spaced" ng-if="!vm.section.selected">
+                                    <h4 ng-if="vm.section.title" class="ellipsis">
                                         [[vm.section.title]]
-                                        <i class="i-edit md-icon spaced-left" ng-click="vm.editSection()" title="[[vm.getTitle('edit')]]"></i>
                                     </h4>
                                     <h4 ng-if="!vm.section.title" class="empty">
                                         <i18n>formulaire.section.title.empty</i18n>
-                                        <i class="i-edit md-icon spaced-left" ng-click="vm.editSection()" title="[[vm.getTitle('edit')]]"></i>
                                     </h4>
+                                    <i class="i-edit md-icon" ng-click="vm.editSection()" title="[[vm.getTitle('edit')]]"></i>
                                 </div>
                                 <div class="top-spacing-twice dontSave" ng-if="vm.section.selected">
                                     <input type="text" class="twelve" ng-model="vm.section.title" i18n-placeholder="formulaire.section.title.empty" input-guard>

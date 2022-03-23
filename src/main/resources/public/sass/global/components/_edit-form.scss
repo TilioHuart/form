@@ -146,6 +146,16 @@
           justify-content: space-between;
           align-items: center;
           padding: 0 3%;
+
+          .title i {
+            margin-left: 5%;
+          }
+
+          .flex-spaced {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+          }
         }
 
         i::before, h4, input, input::placeholder {
