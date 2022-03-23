@@ -34,15 +34,6 @@ public class DefaultResponseService implements ResponseService {
     }
 
     @Override
-    public void countByQuestion(String questionId, Handler<Either<String, JsonObject>> handler){ //count
-        String query="SELECT COUNT(*) FROM " + Formulaire.RESPONSE_TABLE + " r " +
-                "JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON d.id = r.distribution_id " +
-                "WHERE question_id = ? AND d.status != ?" ;
-        JsonArray params=new JsonArray().add(questionId).add(Formulaire.TO_DO);
-        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
-    }
-
-    @Override
     public void listMineByDistribution(String questionId, String distributionId, UserInfos user, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " WHERE question_id = ? AND responder_id = ? AND distribution_id = ? " +
                 "ORDER BY choice_id;";
@@ -55,6 +46,15 @@ public class DefaultResponseService implements ResponseService {
         String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " WHERE distribution_id = ? ORDER BY question_id, choice_id;";
         JsonArray params = new JsonArray().add(distributionId);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public void countByQuestions(JsonArray questionIds, Handler<Either<String, JsonObject>> handler) {
+        String query="SELECT COUNT(*) FROM " + Formulaire.RESPONSE_TABLE + " r " +
+                "JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON d.id = r.distribution_id " +
+                "WHERE d.status != ? AND question_id IN " + Sql.listPrepared(questionIds);
+        JsonArray params=new JsonArray().add(Formulaire.TO_DO).addAll(questionIds);
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override

@@ -1,13 +1,13 @@
 import {idiom, ng, notify, moment} from 'entcore';
 import http from 'axios';
-import {Question, Response, Responses, Types} from "../models";
+import {FormElement, Question, Response, Responses, Section, Types} from "../models";
 import {DataUtils} from "../utils/data";
 
 export interface ResponseService {
     list(question: Question, nbLines: number) : Promise<any>;
-    countByQuestion(questionId : number) : Promise<any>;
     listMineByDistribution(questionId: number, distributionId: number) : Promise<any>;
     listByDistribution(distributionId: number) : Promise<any>;
+    countByFormElement(formElement: FormElement) : Promise<any>;
     get(responseId: number) : Promise<any>;
     save(response: Response, questionType?: number) : Promise<any>;
     create(response: Response) : Promise<any>;
@@ -21,14 +21,6 @@ export const responseService: ResponseService = {
         try {
             return DataUtils.getData(await http.get(`/formulaire/questions/${question.id}/responses?nbLines=${nbLines}&formId=${question.form_id}`));
         } catch (err) {
-            notify.error(idiom.translate('formulaire.error.responseService.list'));
-            throw err;
-        }
-    },
-    async countByQuestion (questionId:number):Promise<any>{ //count
-        try{
-            return DataUtils.getData(await http.get(`/formulaire/questions/${questionId}/responses/count`));
-        }catch(err){
             notify.error(idiom.translate('formulaire.error.responseService.list'));
             throw err;
         }
@@ -48,6 +40,24 @@ export const responseService: ResponseService = {
             return DataUtils.getData(await http.get(`/formulaire/responses/distrib/${distributionId}`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.list'));
+            throw err;
+        }
+    },
+
+    async countByFormElement (formElement: FormElement) : Promise<any> {
+        try {
+            let questionIds = [];
+            if (formElement instanceof Section) {
+                for (let question of formElement.questions.all) {
+                    questionIds.push(question.id);
+                }
+            }
+            else if (formElement instanceof Question) {
+                questionIds.push(formElement.id);
+            }
+            return DataUtils.getData(await http.get(`/formulaire/responses/count`, { params: questionIds }));
+        } catch(err) {
+            notify.error(idiom.translate('formulaire.error.responseService.get'));
             throw err;
         }
     },

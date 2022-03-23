@@ -62,14 +62,6 @@ public class ResponseController extends ControllerHelper {
             }
         });
     }
-    @Get("/questions/:questionId/responses/count")
-    @ApiDoc("Count respsonses by questionId")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value ="", type = ActionType.RESOURCE)
-    public void countByQuestion(HttpServerRequest request){ //count
-        String questionId=request.getParam("questionId");
-        responseService.countByQuestion(questionId, defaultResponseHandler(request));
-    }
 
     @Get("/questions/:questionId/responses/:distributionId")
     @ApiDoc("List all my responses to a specific question for a specific distribution")
@@ -102,6 +94,23 @@ public class ResponseController extends ControllerHelper {
                 Renders.unauthorized(request);
             }
         });
+    }
+
+    @Get("/responses/count")
+    @ApiDoc("Count responses by questionId")
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void countByQuestions(HttpServerRequest request){
+        JsonArray questionIds = new JsonArray();
+        for (Integer i = 0; i < request.params().size(); i++) {
+            questionIds.add(request.getParam(i.toString()));
+        }
+        if (questionIds.size() > 0) {
+            responseService.countByQuestions(questionIds, defaultResponseHandler(request));
+        }
+        else {
+            RenderHelper.ok(request);
+        }
     }
 
     @Get("/responses/:responseId")

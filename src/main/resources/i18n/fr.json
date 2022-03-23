@@ -170,7 +170,7 @@
   "formulaire.element.new.section.title": "Ajouter une nouvelle section",
   "formulaire.element.new.section.description": "Ajoutez une nouvelle section pour regrouper vos questions sur une même page ou pour personnaliser le parcours des répondants dans votre formulaire.",
   "formulaire.element.new.question.title": "Ajouter une nouvelle question",
-  "formulaire.element.delete.confirmation": "Êtes-vous sûr(e) de vouloir supprimer cet élément ?",
+  "formulaire.element.delete.confirmation": "Êtes-vous sûr(e) de vouloir supprimer cet élément et tout ce qu'il contient ?",
   "formulaire.element.undo.confirmation": "Êtes-vous sûr(e) de vouloir annuler vos changements ?",
 
   "formulaire.section.no.description": "Pas de description",

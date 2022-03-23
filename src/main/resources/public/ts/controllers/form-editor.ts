@@ -232,7 +232,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.deleteFormElement = async () : Promise<void> => {
             let formElement = vm.formElements.getSelectedElement();
             if (formElement.id) {
-                let responseCount = await responseService.countByQuestion(formElement.id);
+                let responseCount = await responseService.countByFormElement(formElement);
                 if (vm.form.sent && responseCount.count > 0){
                     notify.error(idiom.translate('formulaire.question.delete.response.fill.warning'));
                 }

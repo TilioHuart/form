@@ -16,13 +16,6 @@ public interface ResponseService {
     void list(String questionId, String nbLines, JsonArray distribs, Handler<Either<String, JsonArray>> handler);
 
     /**
-     * Count all the questions with a counter
-     * @param questionId question identifier
-     * @param handler function handler returning JsonObject data
-     */
-    void countByQuestion(String questionId, Handler<Either<String, JsonObject>> handler);
-
-    /**
      * List all my responses to a specific question for a specific distribution
      * @param questionId question identifier
      * @param distributionId distribution identifier
@@ -37,6 +30,13 @@ public interface ResponseService {
      * @param handler function handler returning JsonArray data
      */
     void listByDistribution(String distributionId, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * Count all the responses to a list of questions
+     * @param questionIds questions identifiers
+     * @param handler function handler returning JsonObject data
+     */
+    void countByQuestions(JsonArray questionIds, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Get a specific response by id
