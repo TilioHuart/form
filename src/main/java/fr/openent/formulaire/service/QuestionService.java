@@ -30,9 +30,10 @@ public interface QuestionService {
     /**
      * List all the questions of a specific form without freetext questions
      * @param formId form identifier
+     * @param isPdf is export for PDF
      * @param handler function handler returning JsonArray data
      */
-    void export(String formId, Handler<Either<String, JsonArray>> handler);
+    void export(String formId, boolean isPdf, Handler<Either<String, JsonArray>> handler);
 
     /**
      * Get a specific question by id

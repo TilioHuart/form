@@ -30,6 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static fr.wseduc.webutils.http.Renders.badRequest;
 import static fr.wseduc.webutils.http.Renders.getScheme;
@@ -66,7 +67,7 @@ public class FormResponsesExportPDF {
 
     public void launch() {
         String formId = request.getParam("formId");
-        questionService.listForFormAndSection(formId, getQuestionsEvt -> {
+        questionService.export(formId, true, getQuestionsEvt -> {
             if (getQuestionsEvt.isLeft()) {
                 log.error("[Formulaire@FormExportPDF] Failed to retrieve all questions of the form" + form.getInteger("id") + " : " + getQuestionsEvt.left().getValue());
                 Renders.renderError(request);
@@ -141,6 +142,7 @@ public class FormResponsesExportPDF {
                     )
                     .put("mandatory", questionInfo.getBoolean("mandatory"))
                     .put("section_id", questionInfo.getInteger("section_id"))
+                    .put("position", questionInfo.getInteger("position"))
                     .put("responses", new JsonArray())
                 );
 
@@ -218,8 +220,7 @@ public class FormResponsesExportPDF {
                 }
             }
 
-            JsonArray form_elements = new JsonArray();
-            fillFormElements(form_elements, sectionsInfos, questions);
+            JsonArray form_elements = fillFormElements(sectionsInfos, questions);
 
             // Finish to fill final object with useful form's data
             results.put("form_title", form.getString("title"));
@@ -229,34 +230,33 @@ public class FormResponsesExportPDF {
         });
     }
 
-    private void fillFormElements(JsonArray form_elements, JsonArray sections, JsonArray questions) {
-        HashMap<Integer, JsonObject> mapSections = new HashMap<>();
+    private JsonArray fillFormElements(JsonArray sections, JsonArray questions) {
+        HashMap<Integer, JsonObject> mapSectionsId = new HashMap<>();
+        HashMap<Integer, JsonObject> mapSectionsPosition = new HashMap<>();
         for (Object s : sections) {
             JsonObject section = (JsonObject)s;
             section.put("questions", new JsonArray());
-            mapSections.put(section.getInteger("id"), section);
+            mapSectionsId.put(section.getInteger("id"), section);
+            mapSectionsPosition.put(section.getInteger("position"), section);
         }
 
-        int i = questions.size() - 1;
-        while (i >= 0) {
+        SortedMap<Integer, JsonObject> form_elements = new TreeMap<>();
+        int i = 0;
+        while (i < questions.size()) {
             JsonObject question = questions.getJsonObject(i);
             if (question.getInteger("section_id") != null) {
-                JsonObject section = mapSections.get(question.getInteger("section_id"));
+                JsonObject section = mapSectionsId.get(question.getInteger("section_id"));
                 section.getJsonArray("questions").add(question);
-                questions.remove(i);
             }
             else {
                 question.put("is_question", true);
-                form_elements.add(question);
-                questions.remove(i);
+                form_elements.put(question.getInteger("position"), question);
             }
-            i--;
+            i++;
         }
-        form_elements.addAll(sections);
+        form_elements.putAll(mapSectionsPosition);
 
-        if (questions.size() > 0) {
-            log.error("[Formulaire@FormExportPDF] Warning : some questions have not been treated !");
-        }
+        return new JsonArray(new ArrayList<>(form_elements.values()));
     }
 
     private void getGraphData(JsonObject question, Handler<AsyncResult<String>> handler) {

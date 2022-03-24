@@ -41,7 +41,7 @@ public class FormResponsesExportCSV {
 
   public void launch() {
     String formId = request.getParam("formId");
-    questionService.export(formId, getQuestionsEvt -> {
+    questionService.export(formId, false, getQuestionsEvt -> {
       if (getQuestionsEvt.isLeft()) {
         String message = "[Formulaire@FormExportCSV] Failed to retrieve all questions of the form " + formId;
         log.error(message + " : " + getQuestionsEvt.left().getValue());
@@ -164,10 +164,9 @@ public class FormResponsesExportCSV {
 
     for (int i = 0; i < questions.size(); i++) {
       JsonObject question = questions.getJsonObject(i);
-      Integer position = question.getInteger("position");
-      Integer parent_position = question.getInteger("parent_position");
+      Integer element_position = question.getInteger("element_position");
       Integer section_position = question.getInteger("section_position");
-      String displayedPosition = (position != null ? position : parent_position) + "." + (section_position != null ? section_position + "." : "");
+      String displayedPosition = element_position + "." + (section_position != null ? section_position + "." : "");
       headers.add(displayedPosition + questions.getJsonObject(i).getString("title"));
     }
 
