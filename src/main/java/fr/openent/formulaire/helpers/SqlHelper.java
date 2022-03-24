@@ -11,10 +11,10 @@ public class SqlHelper {
     private SqlHelper() {}
 
     public static String getUpdateDateModifFormRequest() {
-        return "UPDATE " + Formulaire.FORM_TABLE + " SET date_modification = ? WHERE id = ?;";
+        return "UPDATE " + Formulaire.FORM_TABLE + " SET date_modification = ? WHERE id = ?; ";
     }
 
-    public static JsonArray initParamsForUpdateDateModifFormRequest(String formId) {
+    public static JsonArray getParamsForUpdateDateModifFormRequest(String formId) {
         return new JsonArray().add("NOW()").add(formId);
     }
 }

@@ -10,8 +10,6 @@ import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 
-import java.util.List;
-
 public class DefaultSectionService implements SectionService {
 
     @Override
@@ -30,40 +28,43 @@ public class DefaultSectionService implements SectionService {
 
     @Override
     public void create(JsonObject section, String formId, Handler<Either<String, JsonObject>> handler) {
-        String query = SqlHelper.getUpdateDateModifFormRequest();
-        JsonArray params = SqlHelper.initParamsForUpdateDateModifFormRequest(formId);
-
-        query += "INSERT INTO " + Formulaire.SECTION_TABLE + " (form_id, title, description, position) " +
+        String query = "INSERT INTO " + Formulaire.SECTION_TABLE + " (form_id, title, description, position) " +
                 "VALUES (?, ?, ?, ?) RETURNING *;";
-        params.add(formId)
+        JsonArray params = new JsonArray()
+                .add(formId)
                 .add(section.getString("title", ""))
                 .add(section.getString("description", ""))
                 .add(section.getInteger("position", 0));
+
+        query += SqlHelper.getUpdateDateModifFormRequest();
+        params.addAll(SqlHelper.getParamsForUpdateDateModifFormRequest(formId));
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override
     public void update(String sectionId, JsonObject section, Handler<Either<String, JsonObject>> handler) {
-        String query = SqlHelper.getUpdateDateModifFormRequest();
-        JsonArray params = SqlHelper.initParamsForUpdateDateModifFormRequest(section.getInteger("form_id").toString());
-
-        query += "UPDATE " + Formulaire.SECTION_TABLE + " SET title = ?, description = ?, position = ? WHERE id = ? RETURNING *;";
-        params.add(section.getString("title", ""))
+        String query = "UPDATE " + Formulaire.SECTION_TABLE + " SET title = ?, description = ?, position = ? WHERE id = ? RETURNING *;";
+        JsonArray params = new JsonArray()
+                .add(section.getString("title", ""))
                 .add(section.getString("description", ""))
                 .add(section.getInteger("position", 0))
                 .add(sectionId);
+
+        query += SqlHelper.getUpdateDateModifFormRequest();
+        params.addAll(SqlHelper.getParamsForUpdateDateModifFormRequest(section.getInteger("form_id").toString()));
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override
     public void delete(JsonObject section, Handler<Either<String, JsonObject>> handler) {
-        String query = SqlHelper.getUpdateDateModifFormRequest();
-        JsonArray params = SqlHelper.initParamsForUpdateDateModifFormRequest(section.getInteger("form_id").toString());
+        String query = "DELETE FROM " + Formulaire.SECTION_TABLE + " WHERE id = ?;";
+        JsonArray params = new JsonArray().add(section.getInteger("id").toString());
 
-        query += "DELETE FROM " + Formulaire.SECTION_TABLE + " WHERE id = ?;";
-        params.add(section.getInteger("id"));
+        query += SqlHelper.getUpdateDateModifFormRequest();
+        params.addAll(SqlHelper.getParamsForUpdateDateModifFormRequest(section.getInteger("form_id").toString()));
+
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 }

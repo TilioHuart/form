@@ -58,7 +58,7 @@ export const questionChoiceService: QuestionChoiceService = {
 
     async createMultiple(choices: QuestionChoice[], questionId: number) : Promise<any> {
         try {
-            return DataUtils.getData(await http.post(`/formulaire/questions/${questionId}/choices/m`, choices));
+            return DataUtils.getData(await http.post(`/formulaire/questions/${questionId}/choices/multiple`, choices));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionChoiceService.createMultiple'));
             throw err;
