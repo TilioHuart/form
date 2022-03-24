@@ -11,7 +11,13 @@ import {
     Types
 } from "../models";
 import {distributionService, formElementService, formService, questionChoiceService, questionService, responseService, sectionService} from "../services";
-import {FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_EMIT_EVENT, FORMULAIRE_FORM_ELEMENT_EMIT_EVENT, Pages} from "../core/enums";
+import {
+    Direction,
+    FORMULAIRE_BROADCAST_EVENT,
+    FORMULAIRE_EMIT_EVENT,
+    FORMULAIRE_FORM_ELEMENT_EMIT_EVENT,
+    Pages
+} from "../core/enums";
 import {folderService} from "../services/FolderService";
 import * as Sortable from "sortablejs";
 import {FormElementUtils} from "../utils";

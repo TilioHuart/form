@@ -1,6 +1,16 @@
 import {angular, idiom, model, ng, notify, template} from 'entcore';
-import {Distribution, Distributions, DistributionStatus, Draggable, Folder, Folders, Form, Forms} from "../models";
-import {distributionService, formService} from "../services";
+import {
+    Distribution,
+    Distributions,
+    DistributionStatus,
+    Draggable,
+    Folder,
+    Folders,
+    Form,
+    Forms,
+    Question
+} from "../models";
+import {distributionService, formService, questionService} from "../services";
 import {FiltersFilters, FiltersOrders, FORMULAIRE_EMIT_EVENT} from "../core/enums";
 import {Mix} from "entcore-toolkit";
 import {folderService} from "../services/FolderService";
@@ -217,32 +227,41 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         }
     };
 
-    vm.shareForm = () : void => {
-        vm.forms.selected[0].generateShareRights();
-        template.open('lightbox', 'lightbox/form-sharing');
-        vm.display.lightbox.sharing = true;
-        window.setTimeout(async function () {
-            let contribs = document.querySelectorAll('[data-label="Contribuer"]');
-            let gestions = document.querySelectorAll('[data-label="Gérer"]');
-            for (let i = 1; i < contribs.length; i++) {
-                let contribValue = contribs[i].children[0].children[0] as HTMLInputElement;
-                let gestionValue = gestions[i].children[0].children[0] as HTMLInputElement;
-                contribValue.addEventListener('change', (e) => {
-                    let newValue = e.target as HTMLInputElement;
-                    if (!newValue.checked && gestionValue.checked) {
-                        gestionValue.checked = false;
-                    }
-                    $scope.safeApply();
-                });
-                gestionValue.addEventListener('change', (e) => {
-                    let newValue = e.target as HTMLInputElement;
-                    if (newValue.checked && !contribValue.checked) {
-                        contribValue.checked = true;
-                    }
-                    $scope.safeApply();
-                });
-            }
-        }, 500);
+    vm.shareForm = async() : Promise<void> => {
+        let questions =  Mix.castArrayAs(Question, await questionService.list(vm.forms.selected[0].id));
+        let wrongQuestions = questions.filter(question => !question.title);
+        if (wrongQuestions.length > 0){
+            notify.error(idiom.translate('formulaire.blockSharing'));
+
+        }
+        else{
+            vm.forms.selected[0].generateShareRights();
+            template.open('lightbox', 'lightbox/form-sharing');
+            vm.display.lightbox.sharing = true;
+            window.setTimeout(async function () {
+                let contribs = document.querySelectorAll('[data-label="Contribuer"]');
+                let gestions = document.querySelectorAll('[data-label="Gérer"]');
+                for (let i = 1; i < contribs.length; i++) {
+                    let contribValue = contribs[i].children[0].children[0] as HTMLInputElement;
+                    let gestionValue = gestions[i].children[0].children[0] as HTMLInputElement;
+                    contribValue.addEventListener('change', (e) => {
+                        let newValue = e.target as HTMLInputElement;
+                        if (!newValue.checked && gestionValue.checked) {
+                            gestionValue.checked = false;
+                        }
+                        $scope.safeApply();
+                    });
+                    gestionValue.addEventListener('change', (e) => {
+                        let newValue = e.target as HTMLInputElement;
+                        if (newValue.checked && !contribValue.checked) {
+                            contribValue.checked = true;
+                        }
+                        $scope.safeApply();
+                    });
+                }
+            }, 500);
+        }
+
     };
 
     vm.closeShareFormLightbox = () : void => {
