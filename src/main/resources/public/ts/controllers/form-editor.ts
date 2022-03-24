@@ -234,10 +234,10 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             if (formElement.id) {
                 let responseCount = await responseService.countByFormElement(formElement);
                 if (vm.form.sent && responseCount.count > 0){
-                    notify.error(idiom.translate('formulaire.question.delete.response.fill.warning'));
+                    notify.error(idiom.translate('formulaire.element.delete.response.fill.warning'));
                 }
                 else if (vm.form.sent && vm.formElements.all.length === 1) {
-                    notify.error(idiom.translate('formulaire.question.delete.empty.warning'));
+                    notify.error(idiom.translate('formulaire.element.delete.empty.warning'));
                 }
                 else {
                     vm.dontSave = true;
@@ -262,7 +262,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 }
                 template.close('lightbox');
                 vm.display.lightbox.delete = false;
-                notify.success(idiom.translate('formulaire.success.question.delete'));
+                notify.success(idiom.translate('formulaire.success.element.delete'));
                 vm.form.setFromJson(await formService.get(vm.form.id));
                 await vm.formElements.sync(vm.form.id);
                 vm.nbFormElements = vm.formElements.all.length;

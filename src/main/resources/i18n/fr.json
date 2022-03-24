@@ -172,6 +172,8 @@
   "formulaire.element.new.question.title": "Ajouter une nouvelle question",
   "formulaire.element.delete.confirmation": "Êtes-vous sûr(e) de vouloir supprimer cet élément et tout ce qu'il contient ?",
   "formulaire.element.undo.confirmation": "Êtes-vous sûr(e) de vouloir annuler vos changements ?",
+  "formulaire.element.delete.empty.warning": "Suppression impossible : un formulaire déjà envoyé ne peut être vide",
+  "formulaire.element.delete.response.fill.warning": "Vous ne pouvez pas supprimer cet élément, des utilisateurs y ont déjà répondu",
 
   "formulaire.section.no.description": "Pas de description",
   "formulaire.section.new.question": "+ Ajouter une question",
@@ -199,8 +201,6 @@
   "formulaire.question.date.empty": "Date au format : jj/mm/aaaa",
   "formulaire.question.time.empty": "Heure au format : 00:00",
   "formulaire.question.file.empty": "Dépôt de fichier",
-  "formulaire.question.delete.empty.warning": "Suppression impossible : un formulaire déjà envoyé ne peut être vide",
-  "formulaire.question.delete.response.fill.warning": "Vous ne pouvez pas supprimer cette question, des utilisateurs ont déjà répondu",
   "formulaire.question.missing.field.title": "Attention, la question ci-dessus nécessite un titre pour être valide.",
   "formulaire.question.missing.field.choice": "Attention, la question ci-dessus nécessite au moins un choix pour être valide.",
   "formulaire.question.save.missing.field": "Attention, certaines questions manquent d'informations pour être valides !",
@@ -249,7 +249,6 @@
   "formulaire.error.formService.unshare": "Une erreur est survenue lors de la suppression du partage du formulaire",
   "formulaire.error.formService.image": "Une erreur est survenue lors de la récupération de l'image",
   "formulaire.error.formService.checkremind": "Une erreur est survenue lors de la récupération des réponses",
-
 
   "formulaire.error.question.reorganization": "Direction de réorganisation inconnue.",
   "formulaire.error.question.sync": "Une erreur est survenue lors de la synchronisation des questions",
@@ -325,8 +324,8 @@
   "formulaire.success.forms.restore": "Tous les formulaires sélectionnés ont bien été restaurés !",
   "formulaire.success.forms.delete": "Tous les formulaires sélectionnés ont bien été supprimés !",
   "formulaire.success.forms.duplicate": "Tous les formulaires sélectionnés ont bien été dupliqués !",
+  "formulaire.success.element.delete": "Votre élément et tout ce qu'il contient ont bien été supprimés !",
   "formulaire.success.question.duplicate": "Votre question a bien été dupliquée !",
-  "formulaire.success.question.delete": "Votre question a bien été supprimée !",
   "formulaire.success.responses.save": "Vos réponses ont bien été enregistrées !",
   "formulaire.success.reminder.send": "Votre rappel a bien été envoyé !",
   "formulaire.success.folders.delete": "Tous les dossiers sélectionnés ont bien été supprimés !",
