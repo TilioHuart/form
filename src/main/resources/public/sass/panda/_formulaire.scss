@@ -1,0 +1,18 @@
+body.formulaire {
+
+    .drop-down-block .drop-down-label,
+    .drop-down-block .drop-up-label {
+        margin-bottom: 10px !important;
+    }
+
+    section.main {
+        padding-top: 10px !important;
+    }
+
+    label.chip,
+    .chip,
+    contact-chip {
+        display: inline-block;
+        margin: 5px;
+    }
+}
