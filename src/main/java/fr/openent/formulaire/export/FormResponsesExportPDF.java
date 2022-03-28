@@ -15,7 +15,6 @@ import fr.wseduc.webutils.http.Renders;
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -30,6 +29,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.entcore.common.pdf.Pdf;
+import org.entcore.common.pdf.PdfFactory;
+import org.entcore.common.pdf.PdfGenerator;
+
 import static fr.wseduc.webutils.http.Renders.badRequest;
 import static fr.wseduc.webutils.http.Renders.getScheme;
 
@@ -37,7 +40,6 @@ import static fr.wseduc.webutils.http.Renders.getScheme;
 public class FormResponsesExportPDF {
     private static final Logger log = LoggerFactory.getLogger(FormResponsesExportPDF.class);
     private String node;
-    private final EventBus eb;
     private final HttpServerRequest request;
     private final JsonObject config;
     private final Vertx vertx;
@@ -50,10 +52,9 @@ public class FormResponsesExportPDF {
     private final DistributionService distributionService = new DefaultDistributionService();
     private final SimpleDateFormat dateGetter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
     private final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-    private final String autoClosingTags = "img|br|hr|input|area|meta|link|param";
+    private final PdfFactory pdfFactory;
 
-    public FormResponsesExportPDF(EventBus eb, HttpServerRequest request, Vertx vertx, JsonObject config, Storage storage, JsonObject form) {
-        this.eb = eb;
+    public FormResponsesExportPDF(HttpServerRequest request, Vertx vertx, JsonObject config, Storage storage, JsonObject form) {
         this.request = request;
         this.config = config;
         this.vertx = vertx;
@@ -61,6 +62,8 @@ public class FormResponsesExportPDF {
         this.renders = new Renders(this.vertx, config);
         this.form = form;
         dateFormatter.setTimeZone(TimeZone.getTimeZone("Europe/Paris")); // TODO to adapt for not France timezone
+        pdfFactory = new PdfFactory(vertx, new JsonObject().put("node-pdf-generator",
+                config.getJsonObject("node-pdf-generator", new JsonObject())));
     }
 
     public void launch() {
@@ -131,17 +134,18 @@ public class FormResponsesExportPDF {
 
             if (!hasTooManyResponses || isGraph) {
                 questions.add(new JsonObject()
-                    .put("id", questionInfo.getInteger("id"))
-                    .put("title", questionInfo.getString("title"))
-                    .put("question_type", new JsonObject())
-                    .put("statement", questionInfo.getString("statement")
-                        .replace("\"","'")
-                        .replaceAll("<("+autoClosingTags+")[\\w\\W]*?>","$0</$1>")
-                    )
-                    .put("mandatory", questionInfo.getBoolean("mandatory"))
-                    .put("section_id", questionInfo.getInteger("section_id"))
-                    .put("position", questionInfo.getInteger("position"))
-                    .put("responses", new JsonArray())
+                        .put("id", questionInfo.getInteger("id"))
+                        .put("title", questionInfo.getString("title"))
+                        .put("question_type", new JsonObject())
+                        .put("statement", "<div>" + questionInfo.getString("statement")
+                                .replace("\"","'")
+                                .replace("<o:p></o:p>", " ")
+                                + "</div>"
+                        )
+                        .put("mandatory", questionInfo.getBoolean("mandatory"))
+                        .put("section_id", questionInfo.getInteger("section_id"))
+                        .put("position", questionInfo.getInteger("position"))
+                        .put("responses", new JsonArray())
                 );
 
                 // Affect boolean to each type of answer (freetext, simple text, graph)
@@ -178,13 +182,17 @@ public class FormResponsesExportPDF {
                 if (response.getString("answer").isEmpty()) {
                     response.put("answer", "-");
                 }
+                if (questionType == 1) {
+                    response.put("answer", "<div>" + response.getString("answer")
+                            .replace("<o:p></o:p>", " ")
+                            + "</div>");
+                }
                 if (questionType == 2) {
                     response.put("answer", "<div>" + response.getString("answer") + "</div>");
                 }
                 else if (questionType == 3) {
                     response.put("answer", response.getString("answer")
                             .replace("\"","'")
-                            .replaceAll("<("+autoClosingTags+")[\\w\\W]*?>","$0</$1>")
                     );
                 }
 
@@ -277,13 +285,9 @@ public class FormResponsesExportPDF {
     }
 
     private void generatePDF(HttpServerRequest request, JsonObject templateProps, String templateName, Handler<Buffer> handler) {
+        Promise<Pdf> promise = Promise.promise();
         final String templatePath = "./public/template/pdf/";
         final String baseUrl = getScheme(request) + "://" + Renders.getHost(request) + config.getString("app-address") + "/public/";
-
-        node = (String) vertx.sharedData().getLocalMap("server").get("node");
-        if (node == null) {
-            node = "";
-        }
 
         final String path = FileResolver.absolutePath(templatePath + templateName);
 
@@ -293,7 +297,7 @@ public class FormResponsesExportPDF {
                 return;
             }
 
-            StringReader reader = new StringReader(result.result().toString("UTF-8"));
+            StringReader reader = new StringReader(result.result().toString(StandardCharsets.UTF_8));
             renders.processTemplate(request, templateProps, templateName, reader, writer -> {
                 String processedTemplate = ((StringWriter) writer).getBuffer().toString();
                 if (processedTemplate.isEmpty()) {
@@ -304,28 +308,54 @@ public class FormResponsesExportPDF {
                 byte[] bytes;
                 bytes = processedTemplate.getBytes(StandardCharsets.UTF_8);
 
+                node = (String) vertx.sharedData().getLocalMap("server").get("node");
+                if (node == null) {
+                    node = "";
+                }
+
                 actionObject.put("content", bytes).put("baseUrl", baseUrl);
-                eb.request(node + "entcore.pdf.generator", actionObject, (Handler<AsyncResult<Message<JsonObject>>>) reply -> {
-                    if (reply.failed()) {
-                        badRequest(request, reply.cause().getMessage());
-                        return;
-                    }
+                generatePDF("title",processedTemplate)
 
-                    JsonObject pdfResponse = reply.result().body();
-                    byte[] pdf = pdfResponse.getBinary("content");
-                    Buffer either = Buffer.buffer(pdf);
-                    handler.handle(either);
+                        .onSuccess(res -> {
+                            handler.handle(res.getContent());
 
-                    // Remove image files generated for graph display on PDF
-                    JsonArray removesFiles = templateProps.getJsonArray("idImagesFiles");
-                    if (removesFiles != null) {
-                        storage.removeFiles(removesFiles, event -> {
-                            log.info(" [Formulaire@generatePDF] " + event.encode());
+                            // Remove image files generated for graph display on PDF
+                            JsonArray removesFiles = templateProps.getJsonArray("idImagesFiles");
+                            if (removesFiles != null) {
+                                storage.removeFiles(removesFiles, event -> {
+                                    log.info(" [Formulaire@generatePDF] " + event.encode());
+                                });
+                            }
+                        })
+
+                        .onFailure(error -> {
+                            String message = String.format("[FormulaireCommon@%s::generatePDF] Failed to generatePDF:");
+                            log.error(String.format("%s %s"),message,error.getMessage());
+                            promise.fail(message);
                         });
-                    }
-                });
             });
-
         });
+    }
+    public Future<Pdf> generatePDF(String filename, String buffer) {
+        Promise<Pdf> promise = Promise.promise();
+        try {
+            PdfGenerator pdfGenerator = pdfFactory.getPdfGenerator();
+            pdfGenerator.generatePdfFromTemplate(filename, buffer, ar -> {
+                if (ar.failed()) {
+                    String message = String.format("[FormulaireCommon@%s::generatePDF] Failed to generatePdfFromTemplate: " +
+                            "%s", this.getClass().getSimpleName(), ar.cause().getMessage());
+                    log.error(message, ar.cause());
+                    promise.fail(ar.cause().getMessage());
+                } else {
+                    promise.complete(ar.result());
+                }
+            });
+        } catch (Exception e) {
+            String message = String.format("[FormulaireCommon@%s::generatePDF] Failed to generatePDF: " +
+                    "%s", this.getClass().getSimpleName(), e.getMessage());
+            log.error(message);
+            promise.fail(e.getMessage());
+        }
+        return promise.future();
     }
 }

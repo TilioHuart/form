@@ -19,6 +19,11 @@
     "zimbra-max-recipients": ${zimbraMaxRecipients},
     "rgpd-cron": "${rgpdCron}",
     "max-responses-export-PDF": ${maxResponsesExportPDF},
-    "max-users-sharing": ${maxUsersSharing}
+    "max-users-sharing": ${maxUsersSharing},
+    "node-pdf-generator" : {
+        "pdf-connector-id": "exportpdf",
+        "auth": "${nodePdfToken}",
+        "url" : "${nodePdfUri}"
+    }
   }
 }

@@ -636,7 +636,7 @@ public class FormController extends ControllerHelper {
                             case "pdf":
                                 JsonObject form = getEvent.right().getValue();
                                 form.put("images", images);
-                                new FormResponsesExportPDF(eb, request, vertx, config, storage, form).launch();
+                                new FormResponsesExportPDF(request, vertx, config, storage, form).launch();
                                 break;
                             default:
                                 badRequest(request);
