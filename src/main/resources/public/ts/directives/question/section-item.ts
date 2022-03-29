@@ -15,7 +15,8 @@ interface IViewModel {
     undoSectionChanges(): void;
     validateSection(): void;
     deleteQuestion(): void;
-    addQuestionToSection(): void;
+    addQuestionToSection(): Promise<void>;
+    addQuestionToSectionGuard(): void;
 }
 
 export const sectionItem: Directive = ng.directive('sectionItem', () => {
@@ -90,7 +91,7 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                         </div>
                         <!-- Add question button -->
                         <div class="addQuestion row" ng-if="!vm.section.selected">
-                            <a ng-click="vm.addQuestionToSection()">
+                            <a reset-guard="vm.addQuestionToSectionGuard()" reset-guard-id="formTitle">
                                 <i18n>formulaire.section.new.question</i18n>
                             </a>
                         </div>
@@ -131,6 +132,11 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
             vm.addQuestionToSection = async () : Promise<void> => {
                 $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.CREATE_QUESTION);
             };
+
+            vm.addQuestionToSectionGuard = () =>{
+                vm.addQuestionToSection().then();
+            }
+
         }
     };
 });

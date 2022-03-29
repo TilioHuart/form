@@ -9,10 +9,12 @@ CREATE TABLE formulaire.section (
 );
 
 ALTER TABLE formulaire.question
+    ALTER COLUMN position           DROP NOT NULL,
     ADD COLUMN section_id           bigint,
     ADD COLUMN section_position     bigint,
     ADD COLUMN conditional          boolean NOT NULL DEFAULT FALSE,
     ADD CONSTRAINT fk_section_id FOREIGN KEY (section_id) REFERENCES formulaire.section(id) ON UPDATE NO ACTION ON DELETE CASCADE;
+
 
 ALTER TABLE formulaire.question_choice
     ADD COLUMN next_section_id bigint,

@@ -56,7 +56,8 @@ interface ViewModel {
     // Editor functions
     saveAll(displaySuccess?: boolean) : Promise<void>;
     return() : Promise<void>;
-    createNewElement(parentSection?: Section) : void;
+    createNewElement(parentSection?: Section) : Promise<void>;
+    createNewElementGuard() : void;
     doCreateNewElement(code?: number, parentSection?: Section) : void;
     organizeQuestions() : void;
     doOrganizeQuestions() : Promise<void>;
@@ -149,12 +150,16 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
         };
 
-        vm.createNewElement = (parentSection?) => {
+        vm.createNewElement = async (parentSection?) : Promise<void>=> {
             vm.parentSection = parentSection ? parentSection : null;
             template.open('lightbox', 'lightbox/new-element');
             vm.display.lightbox.newElement = true;
             $scope.safeApply();
         };
+
+        vm.createNewElementGuard = () => {
+            vm.createNewElement().then();
+        }
 
         vm.doCreateNewElement = async (code?, parentSection?) => {
             vm.dontSave = true;
