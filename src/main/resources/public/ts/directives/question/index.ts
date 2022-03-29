@@ -1,3 +1,4 @@
+export * from './element-item-organization';
 export * from './question-item';
 export * from './question-title';
 export * from './question-type';

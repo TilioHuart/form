@@ -211,6 +211,12 @@
       visibility: hidden;
     }
 
+    ul {
+      .sortable-ghost {
+        margin-left: 5%;
+      }
+    }
+
     .row-shadow-effect {
       display: flex;
       background-color: rgba(0, 0, 0, 0.01);
@@ -221,6 +227,19 @@
       cursor: grab;
       margin: 1%;
       width: auto;
+
+      &.sectionChild {
+        margin-left: 5%;
+      }
+    }
+
+    .section-orga .row-shadow-effect {
+      background-color: $formulaire-blue;
+      color: white;
+
+      .top .dots i::before {
+        color: white !important;
+      }
     }
 
     .top {
