@@ -114,28 +114,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             vm.nbFormElements = vm.formElements.all.length;
             $scope.safeApply();
 
-            // Loop through each nested sortable element for DragAndDrop of questions
-            let nestedSortables = document.querySelectorAll(".nested-container");
-            for (let i = 0; i < nestedSortables.length; i++) {
-                Sortable.create(nestedSortables[i], {
-                    group: 'nested',
-                    animation: 150,
-                    fallbackOnBody: true,
-                    swapThreshold: 0.65,
-                    ghostClass: "sortable-ghost",
-                    onEnd: async function (evt) {
-                        let cleanResidu = await FormElementUtils.onEndDragAndDrop(evt, vm.formElements);
-                        $scope.safeApply();
-
-                        await vm.$onInit();
-                        if (cleanResidu) {
-                            document.querySelectorAll("[draggable]")[0].remove();
-                            $scope.safeApply();
-                        }
-                    }
-                });
-            }
-
+            initNestedSortables();
             $scope.safeApply();
         };
 
@@ -216,29 +195,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             template.open('lightbox', 'lightbox/questions-reorganization');
             vm.display.lightbox.reorganization = true;
             $scope.safeApply();
-
-            // Loop through each nested sortable element for DragAndDrop in pop reorganization
-            window.setTimeout(() : void => {
-                let orgaNestedSortables = document.querySelectorAll(".orga-nested-container");
-                for (let i = 0; i < orgaNestedSortables.length; i++) {
-                    Sortable.create(orgaNestedSortables[i], {
-                        group: 'orga-nested',
-                        animation: 150,
-                        fallbackOnBody: true,
-                        swapThreshold: 0.65,
-                        ghostClass: "sortable-ghost",
-                        onEnd: async function (evt) {
-                            let refresh = await FormElementUtils.onEndOrgaDragAndDrop(evt, vm.formElements);
-                            $scope.safeApply();
-                            if (refresh) {
-                                await vm.formElements.sync(vm.form.id);
-                                vm.organizeQuestions();
-                            }
-                        }
-                    });
-                }
-                $scope.safeApply();
-            }, 500);
+            initOrgaNestedSortables();
         };
 
         vm.doOrganizeQuestions = async () : Promise<void> => {
@@ -599,6 +556,55 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         // Utils
 
+        const initNestedSortables = () : void => {
+            // Loop through each nested sortable element for DragAndDrop of questions
+            let nestedSortables = document.querySelectorAll(".nested-container");
+            for (let i = 0; i < nestedSortables.length; i++) {
+                Sortable.create(nestedSortables[i], {
+                    group: 'nested',
+                    animation: 150,
+                    fallbackOnBody: true,
+                    swapThreshold: 0.65,
+                    ghostClass: "sortable-ghost",
+                    onEnd: async function (evt) {
+                        let cleanResidu = await FormElementUtils.onEndDragAndDrop(evt, vm.formElements);
+                        $scope.safeApply();
+
+                        await vm.$onInit();
+                        if (cleanResidu) {
+                            document.querySelectorAll("[draggable]")[0].remove();
+                            $scope.safeApply();
+                        }
+                    }
+                });
+            }
+        }
+
+        const initOrgaNestedSortables = () : void => {
+            // Loop through each nested sortable element for DragAndDrop in pop reorganization
+            window.setTimeout(() : void => {
+                let orgaNestedSortables = document.querySelectorAll(".orga-nested-container");
+                for (let i = 0; i < orgaNestedSortables.length; i++) {
+                    Sortable.create(orgaNestedSortables[i], {
+                        group: 'orga-nested',
+                        animation: 150,
+                        fallbackOnBody: true,
+                        swapThreshold: 0.65,
+                        ghostClass: "sortable-ghost",
+                        onEnd: async function (evt) {
+                            let refresh = await FormElementUtils.onEndOrgaDragAndDrop(evt, vm.formElements);
+                            $scope.safeApply();
+                            if (refresh) {
+                                await vm.formElements.sync(vm.form.id);
+                                vm.organizeQuestions();
+                            }
+                        }
+                    });
+                }
+                $scope.safeApply();
+            }, 500);
+        }
+
         const rePositionFormElements = (formElements: FormElements) : void => {
             formElements.all.sort((a, b) => a.position - b.position);
             for (let i = 0; i < formElements.all.length; i++) {
@@ -648,12 +654,12 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     }
 
                     if (displaySuccess) { notify.success(idiom.translate('formulaire.success.form.save')); }
-                    vm.form.setFromJson(await formService.get(vm.form.id));
-                    vm.formElements.deselectAll();
-                    for (let section of vm.formElements.getSections().all) {
-                        section.questions.deselectAll();
-                    }
-                    $scope.safeApply();
+                    await vm.$onInit();
+                    // vm.form.setFromJson(await formService.get(vm.form.id));
+                    // vm.formElements.deselectAll();
+                    // for (let section of vm.formElements.getSections().all) {
+                    //     section.questions.deselectAll();
+                    // }
                 }
             }
             catch (e) {
