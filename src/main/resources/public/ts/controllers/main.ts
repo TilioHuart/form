@@ -213,6 +213,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 											$scope.redirectTo(`/form/${$scope.form.id}/${$scope.distribution.id}/questions/recap`);
 										}
 										else {
+											$scope.historicPosition = [1];
 											$scope.responsePosition = $scope.responsePosition < 1 ? 1 : $scope.responsePosition;
 											let correctedUrl = window.location.origin + window.location.pathname + `#/form/${$scope.form.id}/${$scope.distribution.id}`;
 											window.location.assign(correctedUrl);
