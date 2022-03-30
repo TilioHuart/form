@@ -83,14 +83,8 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             // Get distributions and results
             let results = new Responses();
             let distribs = new Distributions();
-            if (question.id != vm.formElement.id) {
-                await results.sync(question, false, null);
-                await distribs.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, null);
-            }
-            else {
-                results = vm.results;
-                distribs = vm.distributions;
-            }
+            await results.sync(question, false, null);
+            await distribs.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, null);
 
             // Count responses for each choice
             for (let result of results.all) {
