@@ -60,7 +60,7 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                                 </div>
                             </div>
                             <!-- Interaction buttons-->
-                            <div class="icons dontSave" ng-if="vm.section.selected">
+                            <div class="icons-section dontSave" ng-if="vm.section.selected">
                                 <i class="i-delete lg-icon spaced-right" ng-class="{disabled: vm.hasFormResponses}" 
                                 reset-guard="vm.deleteSection()" title="[[vm.getTitle('delete')]]"></i>
                                 <i class="i-undo lg-icon spaced-right" reset-guard="vm.undoSectionChanges()" title="[[vm.getTitle('cancel')]]"></i>
