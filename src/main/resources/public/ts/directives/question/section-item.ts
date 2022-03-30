@@ -33,7 +33,7 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
         controllerAs: 'vm',
         bindToController: true,
         template: `
-            <div class="ten section-item">
+            <div class="ten section-item" guard-root>
                 <div class="domino" ng-class="{'sectionError': !vm.section.title}">
                     <div class="section-top" ng-class="{disabled: vm.hasFormResponses || vm.section.selected}">
                         <!-- Drag and drop icon -->
@@ -62,9 +62,9 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                             <!-- Interaction buttons-->
                             <div class="icons dontSave" ng-if="vm.section.selected">
                                 <i class="i-delete lg-icon spaced-right" ng-class="{disabled: vm.hasFormResponses}" 
-                                ng-click="vm.deleteSection()" title="[[vm.getTitle('delete')]]"></i>
-                                <i class="i-undo lg-icon spaced-right" ng-click="vm.undoSectionChanges()" title="[[vm.getTitle('cancel')]]"></i>
-                                <i class="i-validate lg-icon spaced-right" ng-click="vm.validateSection()" title="[[vm.getTitle('validate')]]"></i>
+                                reset-guard="vm.deleteSection()" title="[[vm.getTitle('delete')]]"></i>
+                                <i class="i-undo lg-icon spaced-right" reset-guard="vm.undoSectionChanges()" title="[[vm.getTitle('cancel')]]"></i>
+                                <i class="i-validate lg-icon spaced-right" reset-guard="vm.validateSection()" title="[[vm.getTitle('validate')]]"></i>
                             </div>
                         </div>
                     </div>
