@@ -59,7 +59,8 @@ interface ViewModel {
     createNewElement(parentSection?: Section) : Promise<void>;
     createNewElementGuard() : void;
     doCreateNewElement(code?: number, parentSection?: Section) : void;
-    organizeQuestions() : void;
+    organizeQuestions() : Promise<void>;
+    organizeQuestionsGuard() : void;
     doOrganizeQuestions() : Promise<void>;
     cancelOrganizeQuestions() : Promise<void>;
     duplicateQuestion(question: Question) : Promise<void>;
@@ -200,12 +201,16 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             $scope.safeApply();
         };
 
-        vm.organizeQuestions = () : void => {
-            template.open('lightbox', 'lightbox/questions-reorganization');
+        vm.organizeQuestions = async () : Promise<void> => {
+            await template.open('lightbox', 'lightbox/questions-reorganization');
             vm.display.lightbox.reorganization = true;
             $scope.safeApply();
             initOrgaNestedSortables();
         };
+
+        vm.organizeQuestionsGuard = () => {
+            vm.organizeQuestions().then();
+        }
 
         vm.doOrganizeQuestions = async () : Promise<void> => {
             await updateAllFormElements();
@@ -634,7 +639,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                             $scope.safeApply();
                             if (refresh) {
                                 await vm.formElements.sync(vm.form.id);
-                                vm.organizeQuestions();
+                                vm.organizeQuestionsGuard();
                             }
                         }
                     });
