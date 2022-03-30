@@ -103,23 +103,28 @@ public class ResponseFileController extends ControllerHelper {
                 JsonObject groupFiles = new JsonObject();
 
                 // Adapt properties for exportAndSendZip functions
+                List<JsonObject> listFilesValid = new ArrayList<>();
                 for (JsonObject file : listFiles) {
-                    String displayDate = "";
-                    try {
-                        displayDate = dateFormatter.format(dateGetter.parse(file.getString("date_response")));
-                    }
-                    catch (ParseException e) { e.printStackTrace(); }
+                    if (file.getString("date_response") != null) {
+                        String displayDate = "";
+                        try {
+                            displayDate = dateFormatter.format(dateGetter.parse(file.getString("date_response")));
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
 
-                    file.put("name", displayDate + file.getString("filename"));
-                    file.put("file", file.getString("id"));
-                    file.put("type", "file");
+                        file.put("name", displayDate + file.getString("filename"));
+                        file.put("file", file.getString("id"));
+                        file.put("type", "file");
 
-                    // Sort files by response_id in the groupFiles array (to add folder parents after)
-                    String responseId = file.getInteger("response_id").toString();
-                    if (!groupFiles.containsKey(responseId)) {
-                        groupFiles.put(responseId, new JsonArray());
+                        // Sort files by response_id in the groupFiles array (to add folder parents after)
+                        String responseId = file.getInteger("response_id").toString();
+                        if (!groupFiles.containsKey(responseId)) {
+                            groupFiles.put(responseId, new JsonArray());
+                        }
+                        groupFiles.getJsonArray(responseId).add(file);
+                        listFilesValid.add(file);
                     }
-                    groupFiles.getJsonArray(responseId).add(file);
                 }
 
                 // Folder management
@@ -133,7 +138,7 @@ public class ResponseFileController extends ControllerHelper {
                                 .put("parent", root.getString("id"))
                                 .put("name", getFolderName(groupFile.getJsonObject(0)));
                         root.getJsonArray("folders").add(folder);
-                        listFiles.add(folder);
+                        listFilesValid.add(folder);
 
                         for (int i = 0; i < nbFilesInGroup; i++) {
                             groupFile.getJsonObject(i).put("parent", folder.getString("id"));
@@ -143,7 +148,7 @@ public class ResponseFileController extends ControllerHelper {
 
                 // Export all files of the 'listFiles' in a folder defined by the 'root' object
                 FolderExporterZip zipBuilder = new FolderExporterZip(storage, vertx.fileSystem(), false);
-                zipBuilder.exportAndSendZip(root, listFiles, request,false).onComplete(zipEvent -> {
+                zipBuilder.exportAndSendZip(root, listFilesValid, request,false).onComplete(zipEvent -> {
                     if (zipEvent.failed()) {
                         log.error("[Formulaire@zipAndDownload] Fail to zip and export files");
                         renderError(request);

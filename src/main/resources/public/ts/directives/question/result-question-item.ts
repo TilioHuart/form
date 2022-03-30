@@ -123,7 +123,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                                         vm.question.question_type == vm.Types.DATE ||
                                         vm.question.question_type == vm.Types.TIME"
                                  bind-html="result.answer"></div>
-                            <a ng-if="vm.question.question_type == vm.Types.FILE" ng-click="vm.downloadFile(result.id)">
+                            <a ng-if="result.id && vm.question.question_type == vm.Types.FILE" ng-click="vm.downloadFile(result.id)">
                                 <i class="i-download lg-icon spaced-right"></i> [[result.filename]]
                             </a>
                         </div>
