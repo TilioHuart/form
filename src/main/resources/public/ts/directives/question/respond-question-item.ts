@@ -95,7 +95,6 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
 
             vm.$onInit = async () : Promise<void> => {
                 vm.files = [];
-                vm.selectedIndex = [];
                 vm.responsesChoices = new Responses();
                 vm.question.choices = new QuestionChoices();
                 
@@ -104,7 +103,8 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                     || vm.question.question_type === Types.SINGLEANSWERRADIO) {
                     await vm.question.choices.sync(vm.question.id);
                 }
-                if (vm.question.question_type === Types.MULTIPLEANSWER) {
+                if (vm.question.question_type === Types.MULTIPLEANSWER && vm.distribution) {
+                    vm.selectedIndex = [];
                     await vm.responsesChoices.syncMine(vm.question.id, vm.distribution.id);
                     vm.selectedIndex = new Array<boolean>(vm.question.choices.all.length);
                     for (let i = 0; i < vm.selectedIndex.length; i++) {
@@ -117,7 +117,7 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                         vm.selectedIndex[i] = check;
                     }
                 }
-                else {
+                else if (vm.distribution) {
                     vm.response = new Response();
                     let responses = await responseService.listMineByDistribution(vm.question.id, vm.distribution.id);
                     if (responses.length > 0) {

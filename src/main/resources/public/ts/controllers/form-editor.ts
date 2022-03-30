@@ -45,6 +45,8 @@ interface ViewModel {
         formResponses: Responses[], // Responses list for preview
         elementResponses: Responses, // Response for preview
         files: File[],
+        choices: Responses,
+        historicPosition: number[],
         page: string
     };
     PreviewPage: typeof PreviewPage;
@@ -102,6 +104,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             formResponses: [],
             elementResponses: new Responses(),
             files: [],
+            choices: new Responses(),
+            historicPosition: [],
             page: PreviewPage.QUESTION
         };
         vm.PreviewPage = PreviewPage;
@@ -495,6 +499,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             else {
                 vm.preview.formElement = vm.formElements.all[0];
                 vm.preview.elementResponses = vm.preview.formResponses[0];
+                vm.preview.historicPosition = [1];
                 vm.last = vm.preview.formElement.position === vm.nbFormElements;
                 vm.preview.page = PreviewPage.QUESTION;
             }
@@ -508,48 +513,76 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         };
 
         vm.prev = () : void => {
-            if (vm.preview.page === PreviewPage.RECAP) {
-                vm.preview.formElement = vm.formElements.all[vm.nbFormElements - 1];
-                vm.preview.elementResponses = vm.preview.formResponses[vm.nbFormElements - 1];
-                vm.last = vm.preview.formElement.position === vm.nbFormElements;
-                vm.preview.page = PreviewPage.QUESTION;
-            }
-            else {
-                let prevPosition: number = vm.preview.formElement.position - 1;
+            let prevPosition = vm.preview.historicPosition[vm.preview.historicPosition.length - 2];
+            if (prevPosition > 0) {
+                vm.preview.formElement = vm.formElements.all[prevPosition - 1];
+                vm.preview.elementResponses = vm.preview.formResponses[prevPosition - 1];
+                vm.preview.historicPosition.pop();
                 vm.last = prevPosition === vm.nbFormElements;
-                if (prevPosition > 0) {
-                    vm.preview.formElement = vm.formElements.all[prevPosition - 1];
-                    vm.preview.elementResponses = vm.preview.formResponses[prevPosition - 1];
-                }
-                else if (vm.form.rgpd) {
-                    vm.preview.formElement = null;
-                    vm.preview.elementResponses = null;
-                    vm.preview.page = PreviewPage.RGPD;
-                }
+                $scope.safeApply();
+                // if (vm.preview.page === PreviewPage.RECAP) {
+                //     vm.preview.formElement = vm.formElements.all[vm.nbFormElements - 1];
+                //     vm.preview.elementResponses = vm.preview.formResponses[vm.nbFormElements - 1];
+                //     vm.last = vm.preview.formElement.position === vm.nbFormElements;
+                //     vm.preview.page = PreviewPage.QUESTION;
+                // }
+            }
+            else if (vm.form.rgpd) {
+                vm.preview.formElement = null;
+                vm.preview.elementResponses = null;
+                vm.preview.page = PreviewPage.RGPD;
             }
             $scope.safeApply();
         };
 
         vm.next = () : void => {
-            if (vm.preview.page === PreviewPage.RGPD) {
-                vm.preview.formElement = vm.formElements.all[0];
-                vm.preview.elementResponses = vm.preview.formResponses[0];
-                vm.last = vm.preview.formElement.position === vm.nbFormElements;
-                vm.preview.page = PreviewPage.QUESTION;
+            let nextPosition: number = vm.preview.formElement.position + 1;
+            let conditionalQuestion = null;
+            let response = null;
+
+            if (vm.preview.formElement instanceof Question && vm.preview.formElement.conditional) {
+                conditionalQuestion = vm.preview.formElement;
+                response = vm.preview.elementResponses.all[0];
             }
-            else {
-                let nextPosition: number = vm.preview.formElement.position + 1;
+            else if (vm.preview.formElement instanceof Section) {
+                let conditionalQuestions = vm.preview.formElement.questions.all.filter(q => q.conditional);
+                if (conditionalQuestions.length === 1) {
+                    conditionalQuestion = conditionalQuestions[0];
+                    response = vm.preview.elementResponses.all[conditionalQuestion.section_position - 1];
+                }
+            }
+
+            if (conditionalQuestion && response) {
+                let choices = conditionalQuestion.choices.all.filter(c => c.id === response.choice_id);
+                let sectionId = choices.length === 1 ? choices[0].next_section_id : null;
+                let filteredSections = vm.formElements.getSections().all.filter(s => s.id === sectionId);
+                let targetSection = filteredSections.length === 1 ? filteredSections[0] : null;
+                nextPosition = targetSection ? targetSection.position : null;
+            }
+            else if (conditionalQuestion && !response) {
+                nextPosition = null;
+            }
+
+            if (nextPosition && nextPosition <= vm.nbFormElements) {
+                vm.preview.formElement = vm.formElements.all[nextPosition - 1];
+                vm.preview.historicPosition.push(vm.preview.formElement.position);
+                vm.preview.elementResponses = vm.preview.formResponses[nextPosition - 1];
                 vm.last = nextPosition === vm.nbFormElements;
-                if (nextPosition <= vm.nbFormElements) {
-                    vm.preview.formElement = vm.formElements.all[nextPosition - 1];
-                    vm.preview.elementResponses = vm.preview.formResponses[nextPosition - 1];
+                if (vm.preview.page == PreviewPage.RGPD) {
+                    vm.preview.historicPosition = [1];
+                    vm.preview.page = PreviewPage.QUESTION;
                 }
-                else {
-                    // TODO init what needed for recap page
-                    vm.preview.formElement = null;
-                    vm.preview.elementResponses = null;
-                    vm.preview.page = PreviewPage.RECAP;
-                }
+                // if (vm.preview.page === PreviewPage.RECAP) {
+                //     vm.preview.formElement = null;
+                //     vm.preview.elementResponses = null;
+                //     vm.preview.page = PreviewPage.RECAP;
+                // }
+            }
+            else if (!nextPosition) {
+                vm.preview.page = PreviewPage.RECAP;
+            }
+            else if (nextPosition <= vm.nbFormElements) {
+                vm.backToEditor();
             }
             $scope.safeApply();
         };

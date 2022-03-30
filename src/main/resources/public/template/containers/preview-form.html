@@ -14,7 +14,7 @@
     </section>
 </div>
 
-<progress-bubble-bar form-element="vm.preview.formElement" nb-form-elements="vm.nbFormElements"></progress-bubble-bar>
+<progress-bubble-bar form-element="vm.preview.formElement" nb-form-elements="vm.nbFormElements" ng-if="vm.preview.page != vm.PreviewPage.RECAP"></progress-bubble-bar>
 
 <div class="respond-question">
 
@@ -38,6 +38,9 @@
         <respond-question-item ng-if="FormElementUtils.isQuestion(vm.preview.formElement)"
                                question="vm.preview.formElement"
                                response="vm.preview.elementResponses.all[0]"
+                               distribution="null"
+                               selected-index="vm.preview.elementResponses.all[0].selectedIndex"
+                               responses-choices="vm.preview.choices"
                                files="vm.preview.files">
         </respond-question-item>
 
@@ -54,6 +57,9 @@
                     <respond-question-item ng-if="FormElementUtils.isQuestion(question)"
                                            question="question"
                                            response="vm.preview.elementResponses.all[question.section_position - 1]"
+                                           distribution="null"
+                                           selected-index="vm.preview.elementResponses.all[question.section_position - 1].selectedIndex"
+                                           responses-choices="vm.preview.choices"
                                            files="vm.preview.files">
                     </respond-question-item>
                 </div>
@@ -69,5 +75,9 @@
         </div>
     </div>
 
-    <!-- TODO Recap page -->
+    <!-- Recap page -->
+    <div class="nine twelve-mobile preview-recap" ng-if="vm.preview.page == vm.PreviewPage.RECAP">
+        <h1><i18n>formulaire.preview.end</i18n></h1>
+        <button class="cell cancel" ng-click="vm.backToEditor()"><i18n>formulaire.backToEditor</i18n></button>
+    </div>
 </div>
