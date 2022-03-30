@@ -50,6 +50,7 @@ interface ViewModel {
         page: string
     };
     PreviewPage: typeof PreviewPage;
+    nestedSortables: any[];
 
     $onInit() : Promise<void>;
 
@@ -111,6 +112,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             page: PreviewPage.QUESTION
         };
         vm.PreviewPage = PreviewPage;
+        vm.nestedSortables = [];
 
         vm.$onInit = async () : Promise<void> => {
             vm.form = $scope.form;
@@ -601,9 +603,13 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         const initNestedSortables = () : void => {
             // Loop through each nested sortable element for DragAndDrop of questions
+            for (let i = 0; i < vm.nestedSortables.length; i++) {
+                vm.nestedSortables[i].destroy();
+            }
+            vm.nestedSortables = [];
             let nestedSortables = document.querySelectorAll(".nested-container");
             for (let i = 0; i < nestedSortables.length; i++) {
-                Sortable.create(nestedSortables[i], {
+                vm.nestedSortables.push(Sortable.create(nestedSortables[i], {
                     group: 'nested',
                     animation: 150,
                     fallbackOnBody: true,
@@ -619,8 +625,15 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                             $scope.safeApply();
                         }
                     }
-                });
+                }));
             }
+        }
+
+        const switchDragAndDropTo = (state: boolean) : void => {
+            for (let i = 0; i < vm.nestedSortables.length; i++) {
+                vm.nestedSortables[i].option("disabled", !state);
+            }
+            $scope.safeApply();
         }
 
         const initOrgaNestedSortables = () : void => {
@@ -665,6 +678,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         const saveFormElements = async (displaySuccess: boolean = false) : Promise<void> => {
             try {
+                switchDragAndDropTo(true);
                 rePositionFormElements(vm.formElements);
                 let formElement = vm.formElements.getSelectedElement();
                 if (formElement) {
@@ -698,11 +712,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
                     if (displaySuccess) { notify.success(idiom.translate('formulaire.success.form.save')); }
                     await vm.$onInit();
-                    // vm.form.setFromJson(await formService.get(vm.form.id));
-                    // vm.formElements.deselectAll();
-                    // for (let section of vm.formElements.getSections().all) {
-                    //     section.questions.deselectAll();
-                    // }
                 }
             }
             catch (e) {
@@ -720,10 +729,12 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         }
                         // Reselection of the question because the sync has removed the selections
                         question.selected = true;
+                        switchDragAndDropTo(false);
                     }
                 }
                 else if (question && !question.id) {
                     question.selected = true;
+                    switchDragAndDropTo(false);
                 }
                 else if(!isInDontSave(event.target)) {
                     await saveFormElements();
