@@ -109,37 +109,28 @@ public class FormResponsesExportCSV {
               allResponses.subList(firstIndexToDelete, lastIndexToDelete).clear();
             }
 
+            // Map responses
+            HashMap<Integer, JsonArray> mapResponses = new HashMap<>();
+            for (Object rep : responses) {
+              JsonObject response = (JsonObject)rep;
+              int questionId = response.getInteger("question_id");
+              if (mapResponses.get(questionId) == null) {
+                mapResponses.put(questionId, new JsonArray());
+              }
+              mapResponses.get(questionId).add(response);
+            }
+
             // Add responses of this responder
             List<JsonObject> allQuestions = questions.getList();
             for (JsonObject question : allQuestions) {
-              if (responses.size() > 0) {
-                JsonObject response = responses.get(0);
-                if (response.getInteger("position") == question.getInteger("position")) {
-                  String answer = "";
-                  boolean choice = true;
-                  int question_id = response.getInteger("question_id");
-                  while (choice && responses.size() > 0) {
-                    if (response.getInteger("question_id") == question_id) {
-                      answer += response.getString("answer") + ";";
-                      question_id = response.getInteger("question_id");
-                      responses.remove(0);
-                      if (responses.size() > 0) {
-                        response = responses.get(0);
-                      }
-                      else {
-                        answer = answer.substring(0, answer.length() - 1);
-                      }
-                    }
-                    else {
-                      answer = answer.substring(0, answer.length() - 1);
-                      choice = false;
-                    }
-                  }
-                  content.append(addResponse(answer, allQuestions.lastIndexOf(question) == nbQuestions - 1));
+              JsonArray questionResponses = mapResponses.get(question.getInteger("id"));
+              if (questionResponses != null && questionResponses.size() > 0) {
+                String answer = "";
+                for (int rep = 0; rep < questionResponses.size(); rep++) {
+                  JsonObject response = questionResponses.getJsonObject(rep);
+                  answer += response.getString("answer") + (rep < questionResponses.size() - 1 ? ";" : "");
                 }
-                else {
-                  content.append(addResponse("", allQuestions.lastIndexOf(question) == nbQuestions - 1));
-                }
+                content.append(addResponse(answer, allQuestions.lastIndexOf(question) == nbQuestions - 1));
               }
               else {
                 content.append(addResponse("", allQuestions.lastIndexOf(question) == nbQuestions - 1));
