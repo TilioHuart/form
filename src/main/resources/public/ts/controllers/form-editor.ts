@@ -621,7 +621,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
                         await vm.$onInit();
                         if (cleanResidu) {
-                            document.querySelectorAll("[draggable]")[0].remove();
+                            document.getElementById('container-0').lastElementChild.remove();
                             $scope.safeApply();
                         }
                     }
