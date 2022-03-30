@@ -7,7 +7,7 @@ import {
     Responses,
     Types
 } from "../../models";
-import {ColorUtils, DateUtils} from "../../utils";
+import {ColorUtils, DateUtils, UtilsUtils} from "../../utils";
 import * as ApexCharts from 'apexcharts';
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "../../core/enums";
 
@@ -21,6 +21,7 @@ interface IViewModel {
     isGraphQuestion: boolean;
     colors: string[];
     singleAnswerResponseChart: any;
+    results: Map<number, Response[]>;
 
     Types: typeof Types;
     DistributionStatus: typeof DistributionStatus;
@@ -115,7 +116,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                         <div class="eight twelve-mobile ellipsis" ng-if="!vm.form.anonymous">[[distrib.responder_name]]</div>
                     </div>
                     <div class="eight twelve-mobile results">
-                        <div ng-repeat="result in vm.getDataByDistrib(distrib.id)"
+                        <div ng-repeat="result in vm.results.get(distrib.id)"
                              ng-class="{'notLast' : !$last}">
                             <div ng-if="vm.question.question_type == vm.Types.SHORTANSWER ||
                                         vm.question.question_type == vm.Types.LONGANSWER ||
@@ -146,15 +147,15 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                 vm.isGraphQuestion = vm.question.question_type == Types.SINGLEANSWER || vm.question.question_type == Types.MULTIPLEANSWER || vm.question.question_type == Types.SINGLEANSWERRADIO;
                 vm.responses = new Responses();
                 vm.distributions = new Distributions();
+                vm.results = new Map();
 
                 if (vm.question.question_type != Types.FREETEXT) {
                     await vm.question.choices.sync(vm.question.id);
                     await vm.responses.sync(vm.question, vm.question.question_type == Types.FILE, vm.isGraphQuestion ? null : 0);
                     await vm.distributions.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, vm.isGraphQuestion ? null : 0);
-                    $scope.$apply();
 
                     if (vm.isGraphQuestion) {
-                        await initQCMandQCU();
+                        initQCMandQCU();
                         let choices = vm.question.choices.all.filter(c => c.nbResponses > 0);
                         vm.colors = ColorUtils.interpolateColors(vm.paletteColors, choices.length);
 
@@ -163,11 +164,17 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                             initSingleAnswerChart();
                         }
                     }
+                    else {
+                        for (let distrib of vm.distributions.all) {
+                            vm.results.set(distrib.id, vm.getDataByDistrib(distrib.id));
+                        }
+
+                    }
                 }
-                $scope.$apply();
+                UtilsUtils.safeApply($scope);
             };
 
-            const initQCMandQCU = async () : Promise<void> => {
+            const initQCMandQCU = () : void => {
                 // Get distributions and results
                 let results = vm.responses;
                 let distribs = vm.distributions;
@@ -248,7 +255,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
 
             vm.getColor = (choiceId: number) : string => {
                 let colorIndex = vm.question.choices.all.filter(c => c.nbResponses > 0).findIndex(c => c.id === choiceId);
-                return vm.colors[colorIndex];
+                return colorIndex >= 0 ? vm.colors[colorIndex] : '#fff';
             };
 
             vm.getDataByDistrib = (distribId: number) : any => {
@@ -276,7 +283,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                 if (!vm.isGraphQuestion) {
                     await vm.responses.sync(vm.question, vm.question.question_type == Types.FILE, vm.isGraphQuestion ? null : vm.distributions.all.length);
                     await vm.distributions.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, vm.distributions.all.length);
-                    $scope.safeApply();
+                    UtilsUtils.safeApply($scope);
                 }
             };
 

@@ -6,13 +6,15 @@ import {
     Form, FormElement, FormElements,
     Question,
     QuestionChoice,
-    QuestionChoices,
     Responses,
     Types
 } from "../models";
 import {Mix} from "entcore-toolkit";
 import {ColorUtils} from "../utils";
-import {Exports, FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "../core/enums";
+import {
+    Exports,
+    FORMULAIRE_BROADCAST_EVENT
+} from "../core/enums";
 import http from "axios";
 import {questionChoiceService} from "../services";
 
@@ -73,10 +75,6 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             vm.nbFormElements = $scope.form.nbFormElements;
             vm.last = vm.formElement.position === vm.nbFormElements;
             await vm.formElements.sync(vm.form.id);
-
-            $scope.safeApply();
-            $scope.$broadcast(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.REFRESH_QUESTION);
-
             vm.loading = false;
             $scope.safeApply();
         };
@@ -199,12 +197,12 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             };
             let questions = vm.getGraphQuestions();
             let question : Question = null;
-            if(questions.length > 0){
-                let questionIds = questions.map(q=>q.id);
-                let listChoices=Mix.castArrayAs(QuestionChoice, await questionChoiceService.listChoices(questionIds));
+            if(questions.length > 0) {
+                let questionIds = questions.map(q => q.id);
+                let listChoices = Mix.castArrayAs(QuestionChoice, await questionChoiceService.listChoices(questionIds));
                 for (question of questions) {
-                    question.choices.all=[];
-                    question.choices.all=listChoices.filter(c=>c.question_id === question.id);
+                    question.choices.all = [];
+                    question.choices.all = listChoices.filter(c => c.question_id === question.id);
                     question.choices.replaceSpace();
                     question = await initQCMandQCU(question);
                     let dataOptions = initChartsForPDF(question);
