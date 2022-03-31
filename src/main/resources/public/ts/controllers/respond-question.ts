@@ -77,6 +77,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                 vm.formElement = vm.formElements.all[prevPosition - 1];
                 vm.historicPosition.pop();
                 await initFormElementResponses();
+                window.scrollTo(0, 0);
                 $scope.safeApply();
             }
         }
@@ -93,6 +94,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                 vm.formElement = vm.formElements.all[nextPosition - 1];
                 vm.historicPosition.push(vm.formElement.position);
                 await initFormElementResponses();
+                window.scrollTo(0, 0);
                 $scope.safeApply();
             }
             else {
@@ -102,8 +104,8 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                 };
                 $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, data);
             }
-
         }
+
     };
 
     vm.nextGuard = () => {
