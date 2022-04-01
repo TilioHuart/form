@@ -231,7 +231,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         let questions =  Mix.castArrayAs(Question, await questionService.list(vm.forms.selected[0].id));
         let wrongQuestions = questions.filter(question => !question.title);
         if (wrongQuestions.length > 0){
-            notify.error(idiom.translate('formulaire.blockSharing'));
+            notify.error(idiom.translate('formulaire.block.sharing'));
 
         }
         else{

@@ -75,6 +75,7 @@
   "formulaire.results.reminder": "N'hésitez pas à leur envoyer un rappel.",
   "formulaire.move.title": "Déplacer la sélection",
   "formulaire.move.folder.tree": "Utilisez l'arbre de navigation suivant pour choisir la cible",
+  "formulaire.block.sharing": "Une ou plusieurs questions de votre formulaire ne sont pas valides. Veuillez corriger ces questions avant d'effectuer le partage.",
 
   "formulaire.prop.multiple.label": "Permettre plusieurs réponses d'un même utilisateur",
   "formulaire.prop.multiple.label.mobile": "Permettre plusieurs réponses",
