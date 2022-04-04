@@ -176,6 +176,7 @@
   "formulaire.element.undo.confirmation": "Êtes-vous sûr(e) de vouloir annuler vos changements ?",
   "formulaire.element.delete.empty.warning": "Suppression impossible : un formulaire déjà envoyé ne peut être vide",
   "formulaire.element.delete.response.fill.warning": "Vous ne pouvez pas supprimer cet élément, des utilisateurs y ont déjà répondu",
+  "formulaire.element.block.sharing.multiple.conditional" : "Une ou plusieurs éléments de votre formulaire ne sont pas valides. Veuillez corriger ces questions avant d'effectuer le partage.",
 
   "formulaire.section.no.description": "Pas de description",
   "formulaire.section.new.question": "+ Ajouter une question",
@@ -212,6 +213,8 @@
   "formulaire.section.missing.field.title": "Attention, la section ci-dessus nécessite un titre pour être valide.",
   "formulaire.section.missing.field.choice": "Attention, la section ci-dessus nécessite au moins un choix pour être valide.",
   "formulaire.section.save.missing.field": "Attention, certaines sections manquent d'informations pour être valides !",
+  "formulaire.element.block.multiple.conditional" : "Attention, la section ci-dessus ne doit comporter qu'une question conditionnelle pour être valide",
+
 
   "formulaire.response": "réponse",
   "formulaire.response.empty": "Sans réponse",

@@ -8,14 +8,15 @@ import {
     Folders,
     Form,
     Forms,
-    Question
+    Question, Questions, Section, Sections
 } from "../models";
-import {distributionService, formService, questionService} from "../services";
+import {distributionService, formElementService, formService, questionService, sectionService} from "../services";
 import {FiltersFilters, FiltersOrders, FORMULAIRE_EMIT_EVENT} from "../core/enums";
 import {Mix} from "entcore-toolkit";
 import {folderService} from "../services/FolderService";
 import {Element} from "entcore/types/src/ts/workspace/model";
 import {I18nUtils} from "../utils";
+import {sectionItem} from "../directives";
 
 interface ViewModel {
     forms: Forms;
@@ -229,38 +230,56 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.shareForm = async() : Promise<void> => {
         let questions =  Mix.castArrayAs(Question, await questionService.list(vm.forms.selected[0].id));
+        let sections = new Sections();
+        await sections.sync(vm.forms.selected[0].id);
+
+        let questionsList = sections.all.map(s => s.questions.all);
+
+        for(let questions of questionsList){
+            let conditionalQuestions = questions.filter(q => q.conditional);
+            let wrongQuestions = questions.filter(question => !question.title);
+
+            if (conditionalQuestions.length >= 2) {
+                notify.error(idiom.translate('formulaire.element.block.sharing.multiple.conditional'));
+                return;
+            }
+            if (wrongQuestions.length > 0){
+                notify.error(idiom.translate('formulaire.block.sharing'));
+                return;
+            }
+        }
+
         let wrongQuestions = questions.filter(question => !question.title);
         if (wrongQuestions.length > 0){
             notify.error(idiom.translate('formulaire.block.sharing'));
+            return;
+        }
 
-        }
-        else{
-            vm.forms.selected[0].generateShareRights();
-            template.open('lightbox', 'lightbox/form-sharing');
-            vm.display.lightbox.sharing = true;
-            window.setTimeout(async function () {
-                let contribs = document.querySelectorAll('[data-label="Contribuer"]');
-                let gestions = document.querySelectorAll('[data-label="Gérer"]');
-                for (let i = 1; i < contribs.length; i++) {
-                    let contribValue = contribs[i].children[0].children[0] as HTMLInputElement;
-                    let gestionValue = gestions[i].children[0].children[0] as HTMLInputElement;
-                    contribValue.addEventListener('change', (e) => {
-                        let newValue = e.target as HTMLInputElement;
-                        if (!newValue.checked && gestionValue.checked) {
-                            gestionValue.checked = false;
-                        }
-                        $scope.safeApply();
-                    });
-                    gestionValue.addEventListener('change', (e) => {
-                        let newValue = e.target as HTMLInputElement;
-                        if (newValue.checked && !contribValue.checked) {
-                            contribValue.checked = true;
-                        }
-                        $scope.safeApply();
-                    });
-                }
-            }, 500);
-        }
+        vm.forms.selected[0].generateShareRights();
+        template.open('lightbox', 'lightbox/form-sharing');
+        vm.display.lightbox.sharing = true;
+        window.setTimeout(async function () {
+            let contribs = document.querySelectorAll('[data-label="Contribuer"]');
+            let gestions = document.querySelectorAll('[data-label="Gérer"]');
+            for (let i = 1; i < contribs.length; i++) {
+                let contribValue = contribs[i].children[0].children[0] as HTMLInputElement;
+                let gestionValue = gestions[i].children[0].children[0] as HTMLInputElement;
+                contribValue.addEventListener('change', (e) => {
+                    let newValue = e.target as HTMLInputElement;
+                    if (!newValue.checked && gestionValue.checked) {
+                        gestionValue.checked = false;
+                    }
+                    $scope.safeApply();
+                });
+                gestionValue.addEventListener('change', (e) => {
+                    let newValue = e.target as HTMLInputElement;
+                    if (newValue.checked && !contribValue.checked) {
+                        contribValue.checked = true;
+                    }
+                    $scope.safeApply();
+                });
+            }
+        }, 500);
 
     };
 

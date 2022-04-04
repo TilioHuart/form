@@ -17,6 +17,7 @@ interface IViewModel {
     deleteQuestion(): void;
     addQuestionToSection(): Promise<void>;
     addQuestionToSectionGuard(): void;
+    verifConditional() : boolean;
 }
 
 export const sectionItem: Directive = ng.directive('sectionItem', () => {
@@ -34,7 +35,7 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
         bindToController: true,
         template: `
             <div class="ten section-item" guard-root>
-                <div class="domino" ng-class="{'sectionError': !vm.section.title}">
+                <div class="domino" ng-class="{'sectionError': !vm.section.title || vm.verifConditional()}">
                     <div class="section-top" ng-class="{disabled: vm.hasFormResponses || vm.section.selected}">
                         <!-- Drag and drop icon -->
                         <div class="section-top-dots grab">
@@ -99,6 +100,7 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                 </div>
                 
                 <div class="warning" ng-if="!vm.section.title"><i18n>formulaire.section.missing.field.title</i18n></div>
+                <div class="warning" ng-if="vm.verifConditional()"><i18n>formulaire.element.block.multiple.conditional</i18n></div>
             </div>
         `,
 
@@ -137,6 +139,9 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                 vm.addQuestionToSection().then();
             }
 
+            vm.verifConditional = (): boolean => {
+                return vm.section.questions.all.filter(q =>q.conditional).length >= 2;
+            }
         }
     };
 });

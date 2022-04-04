@@ -21,6 +21,7 @@ import {
 import {folderService} from "../services/FolderService";
 import * as Sortable from "sortablejs";
 import {FormElementUtils} from "../utils";
+import {Mix} from "entcore-toolkit";
 
 enum PreviewPage { RGPD = 'rgpd', QUESTION = 'question', RECAP = 'recap'}
 
@@ -130,10 +131,22 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         vm.saveAll = async (displaySuccess= true) : Promise<void> => {
             vm.dontSave = true;
-            // TODO si question conditionnelle potentiellement la mettre en off si l'une existe déjà
+            let sections = vm.formElements.getSections();
+            let sectionQuestions = sections.all.filter(s => s.id);
+            let questionsList = sectionQuestions.map(s => s.questions.all);
+
+            for (let questions of questionsList){
+                let conditionalQuestions = questions.filter(q => q.conditional);
+                if (conditionalQuestions.length >= 2) {
+                    notify.error(idiom.translate('formulaire.question.save.missing.field'));
+                    return;
+                }
+            }
+
             let wrongElements = vm.formElements.all.filter(fe => !fe.title); // TODO check more than just titles later
             if (wrongElements.length > 0) {
                 notify.error(idiom.translate('formulaire.question.save.missing.field'));
+                return;
             }
             await saveFormElements(displaySuccess && wrongElements.length <= 0);
             vm.dontSave = false;
@@ -141,7 +154,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         vm.return = async() : Promise<void> => {
             vm.dontSave = true;
-            // TODO si question conditionnelle potentiellement la mettre en off si l'une existe déjà
             let wrongElements = vm.formElements.all.filter(question => !question.title); // TODO check more than just titles later
             if (wrongElements.length > 0) {
                 notify.error(idiom.translate('formulaire.question.save.missing.field'));
@@ -467,6 +479,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         vm.formElements.all.push(question);
                     }
                     else if (question.section_position === parentSection.questions.all.length && direction === Direction.DOWN) { // Take question out (after) of the parentSection
+
                         question.position = parentSection.position + 1;
                         question.section_id = null;
                         question.section_position = null;
