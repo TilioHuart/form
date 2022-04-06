@@ -55,16 +55,34 @@ export class FormElementUtils {
         }
     }
 
-    //
+    // Checking functions for validation form ending
 
-    static getLastQuestions = (formElements: FormElements) : any => {
+    static hasRespondedLastQuestion = async (form: Form, distribution: Distribution) : Promise<boolean> => {
+        let formElements = new FormElements();
+        let responses = new Responses();
+        await formElements.sync(form.id);
+        if (FormElementUtils.isLastElementValid(formElements)) {
+            return true;
+        }
+        else {
+            let lastQuestions = FormElementUtils.getLastConditionalQuestions(formElements);
+            await responses.syncByDistribution(distribution.id);
+            return responses.all.filter(r => FormElementUtils.isValidLastResponse(r, lastQuestions)).length > 0;
+        }
+    };
+
+    static isLastElementValid = (formElements: FormElements) : boolean => {
+        let lastElement = formElements.all[formElements.all.length - 1];
+        let isLastElementValidSection = lastElement instanceof Section && lastElement.questions.all.filter(q => q.conditional).length === 0;
+        let isLastElementValidQuestion = lastElement instanceof Question && !lastElement.conditional;
+        return isLastElementValidSection || isLastElementValidQuestion;
+    };
+
+    static getLastConditionalQuestions = (formElements: FormElements) : any => {
         let lastQuestions = [];
         for (let e of formElements.all) {
             if (e instanceof Question) {
                 if (e.conditional && e.choices.all.filter(c => !c.next_section_id).length > 0) {
-                    lastQuestions.push(e);
-                }
-                else if (!e.conditional && e.position === formElements.all.length) {
                     lastQuestions.push(e);
                 }
             }
@@ -73,30 +91,18 @@ export class FormElementUtils {
                 if (conditionalQuestions.length === 1 && conditionalQuestions[0].choices.all.filter(c => !c.next_section_id).length > 0) {
                     lastQuestions.push(conditionalQuestions[0]);
                 }
-                else if (conditionalQuestions.length <= 0 && e.position === formElements.all.length) {
-                    lastQuestions.push(e.questions.all[e.questions.all.length - 1]);
-                }
             }
         }
         return lastQuestions;
     };
 
-    static hasRespondedLastQuestion = async (form: Form, distribution: Distribution) : Promise<boolean> => {
-        let formElements = new FormElements();
-        let responses = new Responses();
-        await formElements.sync(form.id);
-        await responses.syncByDistribution(distribution.id);
-        let lastQuestions = FormElementUtils.getLastQuestions(formElements);
-        return responses.all.filter(r => FormElementUtils.isLastValidLastResponse(r, lastQuestions)).length > 0;
-    };
-
-    static isLastValidLastResponse = (response: Response, lastQuestions: any) : boolean => {
+    static isValidLastResponse = (response: Response, lastQuestions: any) : boolean => {
         let matchingQuestions = lastQuestions.filter(q => q.id === response.question_id);
         let question = matchingQuestions.length > 0 ? matchingQuestions[0] : null;
         return question && (question.conditional ? !!response.answer : true);
     };
 
-    //
+    // Drag and drop
 
     static onEndDragAndDrop = async (evt: any, formElements: FormElements) : Promise<boolean> => {
         let scopElem = angular.element(evt.item.firstElementChild.firstElementChild).scope().vm;
