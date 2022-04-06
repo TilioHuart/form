@@ -23,7 +23,7 @@ export const questionTypeMultipleanswer: Directive = ng.directive('questionTypeM
         bindToController: true,
         template: `
             <div class="twelve">
-                <div class="choice" ng-repeat="choice in vm.question.choices.all">
+                <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:'id'">
                     <label for="check-[[choice.id]]" class="nine">
                         <input type="checkbox" id="check-[[choice.id]]" disabled>
                         <span style="cursor: default"></span>

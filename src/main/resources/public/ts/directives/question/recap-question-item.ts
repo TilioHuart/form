@@ -60,7 +60,7 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
                             <div bind-html="vm.getStringResponse(vm.question)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER">
-                            <div ng-repeat="choice in vm.question.choices.all">
+                            <div ng-repeat="choice in vm.question.choices.all | orderBy:'id'">
                                 <label>
                                     <input type="checkbox" disabled checked ng-if="vm.isSelectedChoice(choice)">
                                     <input type="checkbox" disabled ng-if="!vm.isSelectedChoice(choice)">
@@ -81,7 +81,7 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
                             </div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.SINGLEANSWERRADIO">
-                            <div ng-repeat="choice in vm.question.choices.all">
+                            <div ng-repeat="choice in vm.question.choices.all | orderBy:'id'">
                                 <label>
                                     <input type="radio" disabled checked ng-if="vm.isSelectedChoice(choice)">
                                     <input type="radio" disabled ng-if="!vm.isSelectedChoice(choice)">
