@@ -81,7 +81,7 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                         </div>
                         <!-- Questions children -->
                         <div id="container-[[vm.section.id]]" class="questions row nested-container" ng-if="vm.section.questions.all.length > 0">
-                             <div ng-repeat="question in vm.section.questions.all">
+                             <div class="childSection" ng-repeat="question in vm.section.questions.all">
                                 <question-item question="question"
                                                reorder="true"
                                                has-form-responses="vm.form.nb_responses > 0"

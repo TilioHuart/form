@@ -119,6 +119,11 @@
       }
     }
 
+    // This one is for DragAndDrop ghost preview
+    .childSection.sortable-ghost {
+      width: 75% !important;
+    }
+
     .section-item {
       margin: auto;
       align-items: center;
@@ -183,6 +188,15 @@
           display: flex;
           flex-direction: column;
           padding: 0 5%;
+
+          // This one is for DragAndDrop ghost preview
+          .sortable-ghost {
+            width: 100% !important;
+
+            .question-item {
+              width: 100% !important;
+            }
+          }
         }
 
         .addQuestion {
@@ -215,6 +229,7 @@
       visibility: hidden;
     }
 
+    // This one is for DragAndDrop ghost preview in pop-up
     ul {
       .sortable-ghost {
         margin-left: 5%;
