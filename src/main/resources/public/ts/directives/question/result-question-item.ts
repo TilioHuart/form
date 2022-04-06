@@ -22,6 +22,7 @@ interface IViewModel {
     colors: string[];
     singleAnswerResponseChart: any;
     results: Map<number, Response[]>;
+    hasFiles: boolean;
 
     Types: typeof Types;
     DistributionStatus: typeof DistributionStatus;
@@ -60,7 +61,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                 <h4 ng-if="vm.question.question_type != vm.Types.FREETEXT && vm.form.nb_responses <= 1">
                     [[vm.question.title]] ([[vm.form.nb_responses]] <i18n>formulaire.response</i18n>)<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span>
                 </h4>
-                <button class="cell" ng-click="vm.zipAndDownload()" ng-if="vm.question.question_type == vm.Types.FILE">
+                <button class="cell" ng-click="vm.zipAndDownload()" ng-if="vm.question.question_type == vm.Types.FILE" ng-disabled="!vm.hasFiles">
                     <i18n>formulaire.form.download.all.files</i18n>
                 </button>
             </div>
@@ -148,6 +149,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                 vm.responses = new Responses();
                 vm.distributions = new Distributions();
                 vm.results = new Map();
+                vm.hasFiles = false;
 
                 if (vm.question.question_type != Types.FREETEXT) {
                     await vm.question.choices.sync(vm.question.id);
@@ -168,7 +170,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                         for (let distrib of vm.distributions.all) {
                             vm.results.set(distrib.id, vm.getDataByDistrib(distrib.id));
                         }
-
+                        vm.hasFiles = (vm.responses.all.map(r => r.files.all) as any).flat().length > 0;
                     }
                 }
                 UtilsUtils.safeApply($scope);
