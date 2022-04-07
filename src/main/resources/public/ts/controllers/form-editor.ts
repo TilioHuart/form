@@ -169,7 +169,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
             vm.newElement = code ? new Question() : new Section();
             if (vm.newElement instanceof Question) {
-                vm.newElement = new Question();
                 vm.newElement.question_type = code;
                 if (vm.newElement.question_type === Types.MULTIPLEANSWER
                     || vm.newElement.question_type === Types.SINGLEANSWER
@@ -181,11 +180,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 if (parentSection) {
                     vm.newElement.section_id = parentSection.id;
                     vm.newElement.section_position = parentSection.questions.all.length + 1;
-                    parentSection.questions.all.push(vm.newElement);
+                    let elementSection = vm.formElements.all.filter(e => e.id === parentSection.id)[0] as Section;
+                    elementSection.questions.all.push(vm.newElement);
                 }
-            }
-            else {
-                vm.newElement = new Section();
             }
 
             vm.newElement.form_id = vm.form.id;
@@ -711,8 +708,12 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     }
 
                     if (displaySuccess) { notify.success(idiom.translate('formulaire.success.form.save')); }
-                    await vm.$onInit();
                 }
+                else {
+                    vm.form.setFromJson(await formService.update(vm.form));
+                    if (displaySuccess) { notify.success(idiom.translate('formulaire.success.form.save')); }
+                }
+                await vm.$onInit();
             }
             catch (e) {
                 throw e;
