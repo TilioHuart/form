@@ -111,7 +111,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                         vm.question.question_type != vm.Types.MULTIPLEANSWER &&
                         vm.question.question_type != vm.Types.SINGLEANSWERRADIO &&
                         vm.question.question_type != vm.Types.FREETEXT">
-                <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':true" class="distrib">
+                <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':true" class="distrib" ng-if="vm.results.get(distrib.id).length > 0">
                     <div class="infos four twelve-mobile">
                         <div class="four twelve-mobile">[[vm.DateUtils.displayDate(distrib.date_response)]]</div>
                         <div class="eight twelve-mobile ellipsis" ng-if="!vm.form.anonymous">[[distrib.responder_name]]</div>
@@ -192,12 +192,9 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
 
                 // Deal with no choice responses
                 let finishedDistribIds : any = distribs.all.map(d => d.id);
-                let resultsDistribIds : any = results.all.map(r => r.distribution_id);
                 let noResponseChoice = new QuestionChoice();
-                let nbEmptyResponse = distribs.all.filter(d => !resultsDistribIds.includes(d.id)).length;
                 noResponseChoice.value = idiom.translate('formulaire.response.empty');
-                noResponseChoice.nbResponses =
-                    nbEmptyResponse + results.all.filter(r => !r.choice_id && finishedDistribIds.includes(r.distribution_id)).length;
+                noResponseChoice.nbResponses = results.all.filter(r => !r.choice_id && finishedDistribIds.includes(r.distribution_id)).length;
 
                 vm.question.choices.all.push(noResponseChoice);
             };
@@ -262,9 +259,6 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
 
             vm.getDataByDistrib = (distribId: number) : any => {
                 let results =  vm.responses.all.filter(r => r.distribution_id === distribId);
-                if (results.length <= 0) {
-                    return [{ answer: "-"}];
-                }
 
                 for (let result of results) {
                     if (result.answer == "") {

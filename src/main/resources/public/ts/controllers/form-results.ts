@@ -97,12 +97,9 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
             // Deal with no choice responses
             let finishedDistribIds : any = distribs.all.map(d => d.id);
-            let resultsDistribIds : any = results.all.map(r => r.distribution_id);
             let noResponseChoice = new QuestionChoice();
-            let nbEmptyResponse = distribs.all.filter(d => !resultsDistribIds.includes(d.id)).length;
             noResponseChoice.value = idiom.translate('formulaire.response.empty');
-            noResponseChoice.nbResponses =
-                nbEmptyResponse + results.all.filter(r => !r.choice_id && finishedDistribIds.includes(r.distribution_id)).length;
+            noResponseChoice.nbResponses = results.all.filter(r => !r.choice_id && finishedDistribIds.includes(r.distribution_id)).length;
 
             question.choices.all.push(noResponseChoice);
 

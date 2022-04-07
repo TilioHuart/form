@@ -183,6 +183,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
     const saveQuestionResponse = async (question: Question, response?: Response, selectedIndex?: boolean[], responsesChoices?: Responses, files?: File[]) : Promise<boolean> => {
         if (question.question_type === Types.MULTIPLEANSWER && selectedIndex && responsesChoices) {
             let responsesToDelete = new Responses();
+            let choiceCreated = false;
             for (let i = 0; i < question.choices.all.length; i++) {
                 let checked = selectedIndex[i];
                 let j = 0;
@@ -195,13 +196,22 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                     let newResponse = new Response(question.id, question.choices.all[i].id,
                         question.choices.all[i].value, vm.distribution.id);
                     await responseService.create(newResponse);
+                    choiceCreated = true;
                 }
                 else if (found && !checked) {
                     responsesToDelete.all.push(responsesChoices.all[j - 1]);
                 }
             }
 
-            if (responsesToDelete.all.length > 0) { await responseService.delete(vm.form.id, responsesToDelete.all); }
+            let emptyChoice = responsesChoices.all.filter(r => !r.choice_id);
+            if (emptyChoice.length > 0 && choiceCreated) { responsesToDelete.all.push(emptyChoice[0]); }
+
+            if (responsesToDelete.all.length > 0) {
+                await responseService.delete(vm.form.id, responsesToDelete.all);
+            }
+            if ((responsesChoices.all.length <= 0 || responsesToDelete.all.length === responsesChoices.all.length) && !choiceCreated) {
+                await responseService.create(new Response(question.id, null, null, vm.distribution.id));
+            }
             return true;
         }
         if ((question.question_type === Types.SINGLEANSWER || question.question_type === Types.SINGLEANSWERRADIO) && response) {
