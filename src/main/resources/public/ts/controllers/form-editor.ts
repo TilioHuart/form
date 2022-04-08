@@ -68,7 +68,8 @@ interface ViewModel {
     duplicateQuestion(question: Question) : Promise<void>;
     deleteFormElement() : Promise<void>;
     doDeleteFormElement() : Promise<void>;
-    undoFormElementChanges();
+    undoFormElementChanges() : Promise<void>;
+    undoFormElementChangesGuard(): void;
     doUndoFormElementChanges() : Promise<void>;
     validateSection(): Promise<void>;
     closeLightbox(action: string): void;
@@ -337,7 +338,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
         };
 
-        vm.undoFormElementChanges = async () => {
+        vm.undoFormElementChanges = async () : Promise<void> => {
             let formElement = vm.formElements.getSelectedElement();
             if (formElement) {
                 let hasChanged = false;
@@ -359,6 +360,10 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 }
             }
         };
+
+        vm.undoFormElementChangesGuard = () => {
+            vm.undoFormElementChanges().then();
+        }
 
         vm.doUndoFormElementChanges = async () : Promise<void> => {
             await vm.formElements.sync(vm.form.id);
@@ -780,7 +785,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DUPLICATE_ELEMENT, (e) => { vm.duplicateQuestion(e.targetScope.vm.question) });
         $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DELETE_ELEMENT, () => { vm.deleteFormElement() });
-        $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.UNDO_CHANGES, () => { vm.undoFormElementChanges() });
+        $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.UNDO_CHANGES, () => { vm.undoFormElementChangesGuard() });
         $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.VALIDATE_SECTION, () => { vm.validateSection() });
         $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.CREATE_QUESTION, (e) => { vm.createNewElement(e.targetScope.vm.section) });
         $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.MOVE_QUESTION, (event, data) => { vm.moveQuestion(data.formElement, data.direction) });

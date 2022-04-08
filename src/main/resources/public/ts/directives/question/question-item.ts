@@ -11,7 +11,7 @@ interface IViewModel {
 
     getTitle(title: string): string;
     duplicateQuestion(): void;
-    deleteQuestion(): void;
+    deleteQuestion(): Promise<void>;
     undoQuestionChanges(): void;
     showConditionalSwitch(): boolean;
     onSwitchMandatory(isMandatory: boolean): void;
@@ -81,13 +81,14 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
                 $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DUPLICATE_ELEMENT);
             };
 
-            vm.deleteQuestion = () : void => {
+            vm.deleteQuestion =  async() : Promise<void> => {
                 $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DELETE_ELEMENT);
             };
 
             vm.undoQuestionChanges = () : void => {
                 $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.UNDO_CHANGES);
             };
+
 
             vm.showConditionalSwitch = () : boolean => {
                 let isConditionalQuestionType = vm.question.question_type === Types.SINGLEANSWER || vm.question.question_type === Types.SINGLEANSWERRADIO;

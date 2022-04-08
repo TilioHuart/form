@@ -34,8 +34,8 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
         controllerAs: 'vm',
         bindToController: true,
         template: `
-            <div class="ten section-item" guard-root>
-                <div class="domino" ng-class="{'sectionError': !vm.section.title || vm.verifConditional()}">
+            <div class="ten section-item">
+                <div class="domino" ng-class="{'sectionError': !vm.section.title}">
                     <div class="section-top" ng-class="{disabled: vm.hasFormResponses || vm.section.selected}">
                         <!-- Drag and drop icon -->
                         <div class="section-top-dots grab">
@@ -46,7 +46,7 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                         </div>
                         <div class="section-top-container">
                             <!-- Title component -->
-                            <div class="title twelve">
+                            <div class="title twelve" guard-root="formTitle">
                                 <div class="dontSave flex-spaced" ng-if="!vm.section.selected">
                                     <h4 ng-if="vm.section.title" class="ellipsis">
                                         [[vm.section.title]]

@@ -28,7 +28,7 @@ export const questionTypeSingleanswerRadio: Directive = ng.directive('questionTy
         bindToController: true,
         template: `
             <div class="twelve">
-                <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:'id'">
+                <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:'id'" guard-root="formTitle">
                     <label for="radio-[[choice.id]]" ng-class="vm.question.conditional ? 'five four-mobile' : 'nine'">
                         <input type="radio" id="radio-[[choice.id]]" disabled>
                         <span style="cursor: default"></span>

@@ -28,7 +28,7 @@ export const questionTypeSingleanswer: Directive = ng.directive('questionTypeSin
         bindToController: true,
         template: `
             <div class="twelve">
-                <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:'id'">
+                <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:'id'" guard-root="formTitle">
                     <span class="content-line">[[$index + 1]].</span>
                     <input type="text" ng-model="choice.value" ng-if="!vm.question.selected" disabled
                             ng-class="vm.question.conditional ? 'five four-mobile' : 'nine'" placeholder="Choix [[$index + 1]]">
