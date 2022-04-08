@@ -5,6 +5,7 @@ export abstract class FormElement implements Selectable {
     form_id: number;
     title: string;
     position: number;
+    nb_responses: number;
     selected: boolean;
 
     protected constructor() {
@@ -12,6 +13,7 @@ export abstract class FormElement implements Selectable {
         this.form_id = null;
         this.title = null;
         this.position = null;
+        this.nb_responses = 0;
         this.selected = null;
     }
 
@@ -21,6 +23,7 @@ export abstract class FormElement implements Selectable {
             form_id: this.form_id,
             title: this.title,
             position: this.position,
+            nb_responses: this.nb_responses,
             selected: this.selected
         }
     }

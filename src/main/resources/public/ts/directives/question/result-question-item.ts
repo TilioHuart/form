@@ -10,6 +10,7 @@ import {
 import {ColorUtils, DateUtils, UtilsUtils} from "../../utils";
 import * as ApexCharts from 'apexcharts';
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "../../core/enums";
+import {responseService} from "../../services";
 
 interface IViewModel {
     question: Question;
@@ -23,12 +24,14 @@ interface IViewModel {
     singleAnswerResponseChart: any;
     results: Map<number, Response[]>;
     hasFiles: boolean;
+    nbResponses;
 
     Types: typeof Types;
     DistributionStatus: typeof DistributionStatus;
     DateUtils: DateUtils;
 
     $onInit() : Promise<void>;
+    syncResultsMap() : void;
     downloadFile(fileId: number) : void;
     zipAndDownload() : void;
     getWidth(nbResponses: number, divisor: number) : number;
@@ -55,11 +58,11 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
             <!-- Question title -->
             <div class="title">
                 <h4 ng-if="vm.question.question_type == vm.Types.FREETEXT">[[vm.question.title]]</h4>
-                <h4 ng-if="vm.question.question_type != vm.Types.FREETEXT && vm.form.nb_responses > 1">
-                    [[vm.question.title]] ([[vm.form.nb_responses]] <i18n>formulaire.responses</i18n>)<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span>
+                <h4 ng-if="vm.question.question_type != vm.Types.FREETEXT && vm.nbResponses > 1">
+                    [[vm.question.title]] ([[vm.nbResponses]] <i18n>formulaire.responses</i18n>)<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span>
                 </h4>
-                <h4 ng-if="vm.question.question_type != vm.Types.FREETEXT && vm.form.nb_responses <= 1">
-                    [[vm.question.title]] ([[vm.form.nb_responses]] <i18n>formulaire.response</i18n>)<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span>
+                <h4 ng-if="vm.question.question_type != vm.Types.FREETEXT && vm.nbResponses <= 1">
+                    [[vm.question.title]] ([[vm.nbResponses]] <i18n>formulaire.response</i18n>)<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span>
                 </h4>
                 <button class="cell" ng-click="vm.zipAndDownload()" ng-if="vm.question.question_type == vm.Types.FILE" ng-disabled="!vm.hasFiles">
                     <i18n>formulaire.form.download.all.files</i18n>
@@ -150,6 +153,8 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                 vm.distributions = new Distributions();
                 vm.results = new Map();
                 vm.hasFiles = false;
+                vm.nbResponses = (await responseService.countByFormElement(vm.question)).count;
+                // vm.nbResponses = (vm.results as any).map(e => e[1]).flat().length;
 
                 if (vm.question.question_type != Types.FREETEXT) {
                     await vm.question.choices.sync(vm.question.id);
@@ -167,9 +172,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                         }
                     }
                     else {
-                        for (let distrib of vm.distributions.all) {
-                            vm.results.set(distrib.id, vm.getDataByDistrib(distrib.id));
-                        }
+                        vm.syncResultsMap();
                         vm.hasFiles = (vm.responses.all.map(r => r.files.all) as any).flat().length > 0;
                     }
                 }
@@ -239,6 +242,13 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
             vm.DistributionStatus = DistributionStatus;
             vm.DateUtils = DateUtils;
 
+            vm.syncResultsMap = () : void => {
+                vm.results = new Map();
+                for (let distrib of vm.distributions.all) {
+                    vm.results.set(distrib.id, vm.getDataByDistrib(distrib.id));
+                }
+            };
+
             vm.downloadFile = (fileId: number) : void => {
                 window.open(`/formulaire/responses/files/${fileId}/download`);
             };
@@ -272,13 +282,15 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
             };
 
             vm.showMoreButton = () : boolean => {
-                return vm.form.nb_responses > vm.distributions.all.length && vm.question.question_type != Types.FREETEXT && !vm.isGraphQuestion;
+                let nbResponsesDisplayed = new Set(vm.responses.all.map(r => r.distribution_id)).size;
+                return vm.nbResponses > nbResponsesDisplayed && vm.question.question_type != Types.FREETEXT && !vm.isGraphQuestion;
             };
 
             vm.loadMoreResults = async () : Promise<void> => {
                 if (!vm.isGraphQuestion) {
                     await vm.responses.sync(vm.question, vm.question.question_type == Types.FILE, vm.isGraphQuestion ? null : vm.distributions.all.length);
                     await vm.distributions.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, vm.distributions.all.length);
+                    vm.syncResultsMap();
                     UtilsUtils.safeApply($scope);
                 }
             };

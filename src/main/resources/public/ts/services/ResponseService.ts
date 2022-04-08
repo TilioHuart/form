@@ -1,7 +1,7 @@
 import {idiom, ng, notify, moment} from 'entcore';
 import http from 'axios';
-import {FormElement, Question, Response, Responses, Section, Types} from "../models";
-import {DataUtils} from "../utils/data";
+import {FormElement, Question, Response, Section, Types} from "../models";
+import {DataUtils} from "../utils";
 
 export interface ResponseService {
     list(question: Question, nbLines: number) : Promise<any>;

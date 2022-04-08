@@ -52,8 +52,8 @@ public class DefaultResponseService implements ResponseService {
     public void countByQuestions(JsonArray questionIds, Handler<Either<String, JsonObject>> handler) {
         String query="SELECT COUNT(*) FROM " + Formulaire.RESPONSE_TABLE + " r " +
                 "JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON d.id = r.distribution_id " +
-                "WHERE d.status != ? AND question_id IN " + Sql.listPrepared(questionIds);
-        JsonArray params=new JsonArray().add(Formulaire.TO_DO).addAll(questionIds);
+                "WHERE d.status = ? AND question_id IN " + Sql.listPrepared(questionIds);
+        JsonArray params=new JsonArray().add(Formulaire.FINISHED).addAll(questionIds);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
