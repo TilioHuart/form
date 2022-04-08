@@ -17,13 +17,13 @@ export class QuestionChoice {
     next_section_id: number;
     nbResponses: number;
 
-    constructor (questionId?: number, value?: string, type?: ChoiceTypes) {
+    constructor (questionId?: number, value?: string, next_section_id?: number, type?: ChoiceTypes) {
         this.id = null;
         this.question_id = questionId ? questionId : null;
         this.value = value ? value : "";
         this.position = null;
         this.type = type ? type : ChoiceTypes.TXT;
-        this.next_section_id = null;
+        this.next_section_id = next_section_id ? next_section_id : null;
         this.nbResponses = 0;
     }
 

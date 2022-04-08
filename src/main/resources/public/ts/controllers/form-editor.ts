@@ -261,6 +261,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 if (question.question_type === Types.SINGLEANSWER
                     || question.question_type === Types.MULTIPLEANSWER
                     || question.question_type === Types.SINGLEANSWERRADIO) {
+                    question.choices.all.sort((a, b) => a.id - b.id);
                     for (let choice of question.choices.all) {
                         if (choice.value) {
                             await questionChoiceService.create(new QuestionChoice(newQuestion.id, choice.value));

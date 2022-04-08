@@ -72,7 +72,7 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
         String query = "INSERT INTO " + Formulaire.QUESTION_CHOICE_TABLE + " (question_id, value, type, next_section_id) " +
                 "SELECT ?, value, type, (SELECT id FROM " + Formulaire.SECTION_TABLE + " WHERE original_section_id = qc.next_section_id AND form_id = ?) " +
                 "FROM " + Formulaire.QUESTION_CHOICE_TABLE + " qc " +
-                "WHERE question_id = ? ORDER BY id;";
+                "WHERE question_id = ? ORDER BY qc.id;";
         JsonArray params = new JsonArray().add(questionId).add(formId).add(originalQuestionId);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
