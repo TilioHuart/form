@@ -256,7 +256,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 						if (hasRespondLastQuestion) {
 							if ($scope.distribution.status && $scope.distribution.status === DistributionStatus.FINISHED && $scope.form.editable) {
 								let distribs = await distributionService.listByFormAndResponder($scope.form.id);
-								let distrib = distribs.filter(d => d.status == DistributionStatus.ON_CHANGE)[0];
+								let distrib = distribs.filter(d => d.status == DistributionStatus.ON_CHANGE && d.original_id === $scope.distribution.id)[0];
 								if (distrib) {
 									$scope.distribution = distrib;
 								}
