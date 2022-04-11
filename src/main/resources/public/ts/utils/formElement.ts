@@ -121,7 +121,7 @@ export class FormElementUtils {
         let oldIndex = evt.oldIndex;
         let newIndex = evt.newIndex;
         let indexes = FormElementUtils.getStartEndIndexes(newIndex, oldIndex);
-        let cleanResidu = false;
+        let cleanResidue = false;
 
         if (newNestedSectionId && item instanceof Section) {
             return false;
@@ -136,7 +136,7 @@ export class FormElementUtils {
                 item.section_position = null;
                 await questionService.update(oldSection.questions.all);
                 await formElementService.update(formElements.all);
-                cleanResidu = true;
+                cleanResidue = true;
             }
             else { // Item moved FROM vm.formElements TO vm.formElements
                 FormElementUtils.updateSiblingsPositions(formElements, true, indexes.goUp, indexes.startIndex, indexes.endIndex);
@@ -177,7 +177,7 @@ export class FormElementUtils {
             }
         }
 
-        return cleanResidu;
+        return cleanResidue;
     };
 
     static onEndOrgaDragAndDrop = async (evt: any, formElements: FormElements) : Promise<boolean> => {

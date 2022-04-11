@@ -63,7 +63,7 @@ public class DefaultQuestionService implements QuestionService {
         JsonArray params = new JsonArray()
                 .add(formId)
                 .add(question.getString("title", ""))
-                .add(question.getInteger("position", null))
+                .add(question.getInteger("section_position", null) != null ? null : question.getInteger("position", null))
                 .add(question.getInteger("question_type", 1))
                 .add(question.getString("statement", ""))
                 .add(question.getBoolean("conditional", false) || question.getBoolean("mandatory", false))
@@ -88,7 +88,7 @@ public class DefaultQuestionService implements QuestionService {
             query += "(?, ?, ?, ?, ?, ?, ?, ?, ?), ";
             params.add(formId)
                     .add(question.getString("title", ""))
-                    .add(question.getInteger("position", null))
+                    .add(question.getInteger("section_position", null) != null ? null : question.getInteger("position", null))
                     .add(question.getInteger("question_type", 1))
                     .add(question.getString("statement", ""))
                     .add(question.getBoolean("mandatory", false))
@@ -116,7 +116,7 @@ public class DefaultQuestionService implements QuestionService {
                 JsonObject question = questions.getJsonObject(i);
                 JsonArray params = new JsonArray()
                         .add(question.getString("title", ""))
-                        .add(question.getInteger("position", null))
+                        .add(question.getInteger("section_position", null) != null ? null : question.getInteger("position", null))
                         .add(question.getInteger("question_type", 1))
                         .add(question.getString("statement", ""))
                         .add(question.getBoolean("mandatory", false))

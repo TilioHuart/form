@@ -57,7 +57,8 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                                     <i class="i-edit md-icon" ng-click="vm.editSection()" title="[[vm.getTitle('edit')]]"></i>
                                 </div>
                                 <div class="top-spacing-twice dontSave" ng-if="vm.section.selected">
-                                    <input type="text" class="twelve" ng-model="vm.section.title" i18n-placeholder="formulaire.section.title.empty" input-guard>
+                                    <input type="text" class="twelve" i18n-placeholder="formulaire.section.title.empty"
+                                           ng-model="vm.section.title" ng-keydown="$event.keyCode === 13 && vm.validateSection()" input-guard>
                                 </div>
                             </div>
                             <!-- Interaction buttons-->

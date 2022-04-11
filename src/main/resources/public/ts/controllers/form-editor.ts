@@ -21,7 +21,6 @@ import {
 import {folderService} from "../services/FolderService";
 import * as Sortable from "sortablejs";
 import {FormElementUtils} from "../utils";
-import {Mix} from "entcore-toolkit";
 
 enum PreviewPage { RGPD = 'rgpd', QUESTION = 'question', RECAP = 'recap'}
 
@@ -632,11 +631,11 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     swapThreshold: 0.65,
                     ghostClass: "sortable-ghost",
                     onEnd: async function (evt) {
-                        let cleanResidu = await FormElementUtils.onEndDragAndDrop(evt, vm.formElements);
+                        let cleanResidue = await FormElementUtils.onEndDragAndDrop(evt, vm.formElements);
                         $scope.safeApply();
 
                         await vm.$onInit();
-                        if (cleanResidu) {
+                        if (cleanResidue) {
                             document.getElementById('container-0').lastElementChild.remove();
                             $scope.safeApply();
                         }
