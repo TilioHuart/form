@@ -55,6 +55,8 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
                 (responseQuestionIds.indexOf(e.id) > 0) ||
                 (e instanceof Section && e.questions.all.map(q => q.id).filter(id => responseQuestionIds.indexOf(id) >= 0).length > 0)
             );
+            vm.historicPosition = vm.formElements.all.map(e => e.position);
+            vm.historicPosition.sort( (a, b) => a - b);
         }
 
         // Get files responses for files question
