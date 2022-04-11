@@ -13,6 +13,6 @@ public class DefaultDelegateService implements DelegateService {
     @Override
     public void list(Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT * FROM " + Formulaire.DELEGATE_TABLE + ";";
-        Sql.getInstance().raw(query, SqlResult.validResultHandler(handler));
+        Sql.getInstance().prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
     }
 }
