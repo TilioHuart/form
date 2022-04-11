@@ -1,4 +1,4 @@
-package fr.openent.formulaire.helpers;
+package fr.openent.formulaire.helpers.folder_exporter;
 
 import java.nio.file.Paths;
 import java.util.List;

@@ -1,8 +1,7 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.Formulaire;
-import fr.openent.formulaire.helpers.FolderExporterZip;
-import fr.openent.formulaire.helpers.RenderHelper;
+import fr.openent.formulaire.helpers.folder_exporter.FolderExporterZip;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.ResponseFileService;

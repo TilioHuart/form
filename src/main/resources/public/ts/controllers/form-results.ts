@@ -79,33 +79,6 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             $scope.safeApply();
         };
 
-        const initQCMandQCU = async (question: Question) : Promise<Question> => {
-            // Get distributions and results
-            let results = new Responses();
-            let distribs = new Distributions();
-            await results.sync(question, false, null);
-            await distribs.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, null);
-
-            // Count responses for each choice
-            for (let result of results.all) {
-                for (let choice of question.choices.all) {
-                    if (result.choice_id === choice.id) {
-                        choice.nbResponses++;
-                    }
-                }
-            }
-
-            // Deal with no choice responses
-            let finishedDistribIds : any = distribs.all.map(d => d.id);
-            let noResponseChoice = new QuestionChoice();
-            noResponseChoice.value = idiom.translate('formulaire.response.empty');
-            noResponseChoice.nbResponses = results.all.filter(r => !r.choice_id && finishedDistribIds.includes(r.distribution_id)).length;
-
-            question.choices.all.push(noResponseChoice);
-
-            return question;
-        }
-
         // Functions
 
         vm.export = (typeExport: Exports) : void => {
@@ -187,22 +160,32 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
                 idImagesForRemove : [] // all id images (to remove from storage after export PDF)
             };
             let questions = vm.getGraphQuestions();
-            let question : Question = null;
-            if(questions.length > 0) {
+
+            if (questions.length > 0) {
+                // Sync form responses
+                let results = new Responses();
+                await results.syncForForm(vm.form.id);
+                // Sync form distributions
+                let distribs = new Distributions();
+                await distribs.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, null);
+                // Sync questions choices
                 let questionIds = questions.map(q => q.id);
                 let listChoices = Mix.castArrayAs(QuestionChoice, await questionChoiceService.listChoices(questionIds));
-                for (question of questions) {
+
+                for (let question of questions) {
+                    // Format question choices
                     question.choices.all = [];
                     question.choices.all = listChoices.filter(c => c.question_id === question.id);
                     question.choices.replaceSpace();
-                    question = await initQCMandQCU(question);
+                    let questionResults = results.all.filter(r => r.question_id === question.id);
+                    await question.fillChoicesInfo(distribs, questionResults);
+                    // Generate graphs
                     let dataOptions = initChartsForPDF(question);
                     let options = generateOptions(dataOptions, question.question_type);
                     await renderGraphForPDF(options);
-                    let idImage = await storeChart(vm.pdfResponseCharts[vm.pdfResponseCharts.length-1]);
-                    images.idImagesPerQuestion[question.id] = idImage;
-                    images.idImagesForRemove.push(idImage);
                 }
+
+                await storeAllCharts(questions, vm.pdfResponseCharts, images);
             }
             $scope.safeApply();
             return images;
@@ -281,14 +264,32 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             await vm.pdfResponseCharts[vm.pdfResponseCharts.length - 1].render();
         }
 
-        const storeChart = async (chart: ApexCharts) : Promise<number> => {
-            let image = await chart.dataURI();
-            let blob = new Blob([image["imgURI"]], {type: 'image/png'});
+        const storeAllCharts = async (questions: Question[], charts: ApexCharts[], images: any) : Promise<any> => {
             let formData = new FormData();
-            formData.append('file', blob);
-            let response = await http.post('/formulaire/file/img', formData);
-            return response.data._id;
-        };
+            for (let i = 0; i < charts.length; i++) {
+                let question = questions[i];
+                let chart = charts[i];
+
+                let image = await chart.dataURI();
+                let blob = new Blob([image["imgURI"]], {type: 'image/png'});
+                formData.append(`graph-${vm.form.id}-${question.id}`, blob);
+            }
+
+            let config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Number-Files': charts.length
+                }
+            };
+            let { data } = await http.post('/formulaire/file/img/multiple', formData, config);
+
+            for (let file of data) {
+                let fileId = file.id;
+                let questionId = file.metadata.name.split('-')[2];
+                images.idImagesPerQuestion[questionId] = fileId;
+                images.idImagesForRemove.push(fileId);
+            }
+        }
 
         $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_FORM_RESULTS, () => { vm.$onInit() });
     }]);

@@ -32,6 +32,13 @@ public interface ResponseService {
     void listByDistribution(String distributionId, Handler<Either<String, JsonArray>> handler);
 
     /**
+     * List all responses for a specific form
+     * @param formId form identifier
+     * @param handler function handler returning JsonArray data
+     */
+    void listByForm(String formId, Handler<Either<String, JsonArray>> handler);
+
+    /**
      * Count all the responses to a list of questions
      * @param questionIds questions identifiers
      * @param handler function handler returning JsonObject data

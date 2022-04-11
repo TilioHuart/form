@@ -49,6 +49,15 @@ public class DefaultResponseService implements ResponseService {
     }
 
     @Override
+    public void listByForm(String formId, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT r.* FROM " + Formulaire.RESPONSE_TABLE + " r " +
+                "JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON d.id = r.distribution_id " +
+                "WHERE form_id = ? ORDER BY question_id, choice_id;";
+        JsonArray params = new JsonArray().add(formId);
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
     public void countByQuestions(JsonArray questionIds, Handler<Either<String, JsonObject>> handler) {
         String query="SELECT COUNT(*) FROM " + Formulaire.RESPONSE_TABLE + " r " +
                 "JOIN " + Formulaire.DISTRIBUTION_TABLE + " d ON d.id = r.distribution_id " +

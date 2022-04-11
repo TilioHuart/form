@@ -1,13 +1,14 @@
 package fr.openent.formulaire.controllers;
 
-import fr.openent.formulaire.Formulaire;
+import fr.openent.formulaire.helpers.upload_file.Attachment;
+import fr.openent.formulaire.helpers.upload_file.FileHelper;
 import fr.openent.formulaire.security.CreationRight;
-import fr.openent.formulaire.security.ShareAndOwner;
 import fr.wseduc.rs.Post;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.http.Renders;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -46,5 +47,25 @@ public class UtilsController extends ControllerHelper {
                 badRequest(request, "[Formulaire@postImage] Wrong format file");
             }
         });
+    }
+
+    @Post("/file/img/multiple")
+    @ResourceFilter(CreationRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void postMultipleImages(final HttpServerRequest request) {
+        String nbFiles = request.getHeader("Number-Files");
+        int nbFilesToUpload = nbFiles != null ? Integer.parseInt(nbFiles) : 0;
+        FileHelper.uploadMultipleFiles(nbFilesToUpload, request, storage, vertx)
+            .onSuccess(files -> {
+                JsonArray jsonFiles = new JsonArray();
+                for (Attachment file : files) {
+                    jsonFiles.add(file.toJson());
+                }
+                renderJson(request, jsonFiles);
+            })
+            .onFailure(err -> {
+                log.error("[Formulaire@postMultipleImages] An error has occurred during upload files: " + err.getMessage());
+                renderError(request);
+            });
     }
 }

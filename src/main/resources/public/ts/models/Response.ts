@@ -79,4 +79,14 @@ export class Responses {
             throw e;
         }
     }
+
+    syncForForm = async (formId: number) : Promise<void> => {
+        try {
+            let data = await responseService.listByForm(formId);
+            this.all = Mix.castArrayAs(Response, data);
+        } catch (e) {
+            notify.error(idiom.translate('formulaire.error.response.sync'));
+            throw e;
+        }
+    }
 }

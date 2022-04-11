@@ -5,6 +5,7 @@ import {DataUtils} from "../utils";
 
 export interface ResponseService {
     list(question: Question, nbLines: number) : Promise<any>;
+    listByForm(formId: number) : Promise<any>;
     listMineByDistribution(questionId: number, distributionId: number) : Promise<any>;
     listByDistribution(distributionId: number) : Promise<any>;
     countByFormElement(formElement: FormElement) : Promise<any>;
@@ -20,6 +21,15 @@ export const responseService: ResponseService = {
     async list(question: Question, nbLines: number) : Promise<any> {
         try {
             return DataUtils.getData(await http.get(`/formulaire/questions/${question.id}/responses?nbLines=${nbLines}&formId=${question.form_id}`));
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.responseService.list'));
+            throw err;
+        }
+    },
+
+    async listByForm(formId: number) : Promise<any> {
+        try {
+            return DataUtils.getData(await http.get(`/formulaire/forms/${formId}/responses`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.list'));
             throw err;

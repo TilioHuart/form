@@ -96,6 +96,15 @@ public class ResponseController extends ControllerHelper {
         });
     }
 
+    @Get("/forms/:formId/responses")
+    @ApiDoc("List all the responses to a specific question")
+    @ResourceFilter(ShareAndOwner.class)
+    @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void listByForm(HttpServerRequest request) {
+        String formId = request.params().get("formId");
+        responseService.listByForm(formId, arrayResponseHandler(request));
+    }
+
     @Get("/responses/count")
     @ApiDoc("Count responses by questionId")
     @ResourceFilter(AccessRight.class)

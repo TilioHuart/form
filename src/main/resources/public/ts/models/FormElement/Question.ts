@@ -4,6 +4,8 @@ import {questionChoiceService, questionService} from "../../services";
 import {QuestionChoice, QuestionChoices} from "../QuestionChoice";
 import {Types} from "../QuestionType";
 import {FormElement} from "./FormElement";
+import {Distributions} from "../Distribution";
+import {Response} from "../Response";
 
 export class Question extends FormElement {
     question_type: any;
@@ -40,6 +42,25 @@ export class Question extends FormElement {
             conditional: this.conditional,
             choices: this.choices
         }
+    }
+
+    fillChoicesInfo = async (distribs: Distributions, results: Response[]) : Promise<void> => {
+        // Count responses for each choice
+        for (let result of results) {
+            for (let choice of this.choices.all) {
+                if (result.choice_id === choice.id) {
+                    choice.nbResponses++;
+                }
+            }
+        }
+
+        // Deal with no choice responses
+        let finishedDistribIds : any = distribs.all.map(d => d.id);
+        let noResponseChoice = new QuestionChoice();
+        noResponseChoice.value = idiom.translate('formulaire.response.empty');
+        noResponseChoice.nbResponses = results.filter(r => !r.choice_id && finishedDistribIds.includes(r.distribution_id)).length;
+
+        this.choices.all.push(noResponseChoice);
     }
 }
 
