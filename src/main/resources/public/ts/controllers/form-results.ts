@@ -178,7 +178,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
                     question.choices.all = listChoices.filter(c => c.question_id === question.id);
                     question.choices.replaceSpace();
                     let questionResults = results.all.filter(r => r.question_id === question.id);
-                    await question.fillChoicesInfo(distribs, questionResults);
+                    question.fillChoicesInfo(distribs, questionResults);
                     // Generate graphs
                     let dataOptions = initChartsForPDF(question);
                     let options = generateOptions(dataOptions, question.question_type);

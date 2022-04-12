@@ -36,7 +36,7 @@ interface IViewModel {
     zipAndDownload() : void;
     getWidth(nbResponses: number, divisor: number) : number;
     getColor(choiceId: number) : string;
-    getDataByDistrib(distribId: number) : any;
+    formatAnswers(distribId: number) : any;
     showMoreButton() : boolean;
     loadMoreResults() : Promise<void>;
 }
@@ -125,10 +125,12 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                             <div ng-if="vm.question.question_type == vm.Types.SHORTANSWER ||
                                         vm.question.question_type == vm.Types.LONGANSWER ||
                                         vm.question.question_type == vm.Types.DATE ||
-                                        vm.question.question_type == vm.Types.TIME"
+                                        vm.question.question_type == vm.Types.TIME ||
+                                        (vm.question.question_type == vm.Types.FILE && result[0].files.all.length <= 0)"
                                  bind-html="result.answer"></div>
-                            <a ng-if="result.id && vm.question.question_type == vm.Types.FILE" ng-click="vm.downloadFile(result.id)">
-                                <i class="i-download lg-icon spaced-right"></i> [[result.filename]]
+                            <a ng-if="vm.question.question_type == vm.Types.FILE && result[0].files.all.length > 0 && result[0].files.all[0].id"
+                               ng-click="vm.downloadFile(result[0].files.all[0].id)">
+                                <i class="i-download lg-icon spaced-right"></i> [[result[0].files.all[0].filename]]
                             </a>
                         </div>
                     </div>
@@ -153,16 +155,15 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                 vm.distributions = new Distributions();
                 vm.results = new Map();
                 vm.hasFiles = false;
-                vm.nbResponses = (await responseService.countByFormElement(vm.question)).count;
-                // vm.nbResponses = (vm.results as any).map(e => e[1]).flat().length;
 
                 if (vm.question.question_type != Types.FREETEXT) {
                     await vm.question.choices.sync(vm.question.id);
                     await vm.responses.sync(vm.question, vm.question.question_type == Types.FILE, vm.isGraphQuestion ? null : 0);
                     await vm.distributions.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, vm.isGraphQuestion ? null : 0);
+                    vm.nbResponses = new Set(vm.responses.all.map(r => r.distribution_id)).size;
 
                     if (vm.isGraphQuestion) {
-                        initQCMandQCU();
+                        vm.question.fillChoicesInfo(vm.distributions, vm.responses.all);
                         let choices = vm.question.choices.all.filter(c => c.nbResponses > 0);
                         vm.colors = ColorUtils.interpolateColors(vm.paletteColors, choices.length);
 
@@ -177,29 +178,6 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                     }
                 }
                 UtilsUtils.safeApply($scope);
-            };
-
-            const initQCMandQCU = () : void => {
-                // Get distributions and results
-                let results = vm.responses;
-                let distribs = vm.distributions;
-
-                // Count responses for each choice
-                for (let result of results.all) {
-                    for (let choice of vm.question.choices.all) {
-                        if (result.choice_id === choice.id) {
-                            choice.nbResponses++;
-                        }
-                    }
-                }
-
-                // Deal with no choice responses
-                let finishedDistribIds : any = distribs.all.map(d => d.id);
-                let noResponseChoice = new QuestionChoice();
-                noResponseChoice.value = idiom.translate('formulaire.response.empty');
-                noResponseChoice.nbResponses = results.all.filter(r => !r.choice_id && finishedDistribIds.includes(r.distribution_id)).length;
-
-                vm.question.choices.all.push(noResponseChoice);
             };
 
             const initSingleAnswerChart = () : void => {
@@ -244,8 +222,8 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
 
             vm.syncResultsMap = () : void => {
                 vm.results = new Map();
-                for (let distrib of vm.distributions.all) {
-                    vm.results.set(distrib.id, vm.getDataByDistrib(distrib.id));
+                for (let distribution of vm.distributions.all) {
+                    vm.results.set(distribution.id, vm.formatAnswers(distribution.id));
                 }
             };
 
@@ -267,16 +245,12 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                 return colorIndex >= 0 ? vm.colors[colorIndex] : '#fff';
             };
 
-            vm.getDataByDistrib = (distribId: number) : any => {
+            vm.formatAnswers = (distribId: number) : any => {
                 let results =  vm.responses.all.filter(r => r.distribution_id === distribId);
-
                 for (let result of results) {
                     if (result.answer == "") {
                         result.answer = "-";
                     }
-                }
-                if (vm.question.question_type === Types.FILE) {
-                    return results.map(r => r.files)[0].all;
                 }
                 return results;
             };

@@ -248,8 +248,8 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                 file.append("file", files[i], filename);
                 await responseFileService.create(response.id, file);
             }
-            response.answer = idiom.translate('formulaire.response.file.send');
-            response = await responseService.update(response);
+            response.answer = files.length > 0 ? idiom.translate('formulaire.response.file.send') : "";
+            await responseService.update(response);
             return true;
         }
     };

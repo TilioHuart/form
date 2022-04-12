@@ -44,7 +44,7 @@ export class Question extends FormElement {
         }
     }
 
-    fillChoicesInfo = async (distribs: Distributions, results: Response[]) : Promise<void> => {
+    fillChoicesInfo = (distribs: Distributions, results: Response[]) : void => {
         // Count responses for each choice
         for (let result of results) {
             for (let choice of this.choices.all) {

@@ -1,7 +1,7 @@
 import {idiom, notify} from "entcore";
 import {responseFileService, responseService} from "../services";
 import {Mix} from "entcore-toolkit";
-import {ResponseFiles} from "./ResponseFile";
+import {ResponseFile, ResponseFiles} from "./ResponseFile";
 import {Question} from "./FormElement";
 
 export class Response {
@@ -51,7 +51,7 @@ export class Responses {
             if (isFileQuestion) {
                 let files = await responseFileService.listByQuestion(question.id);
                 for (let i = this.all.length - 1; i >= this.all.length - data.length; i--) {
-                    this.all[i].files.all = Mix.castArrayAs(ResponseFiles, files.filter(r => r.response_id === this.all[i].id));
+                    this.all[i].files.all = Mix.castArrayAs(ResponseFile, files.filter(r => r.response_id === this.all[i].id));
                 }
             }
         } catch (e) {
