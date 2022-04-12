@@ -25,7 +25,7 @@ export const elementItemOrganization: Directive = ng.directive('elementItemOrgan
         controllerAs: 'vm',
         bindToController: true,
         template: `
-            <div class="row-shadow-effect" ng-class="{ sectionChild: vm.isSectionChild }">
+            <div class="row-shadow-effect dontSave" ng-class="{ sectionChild: vm.isSectionChild }">
                 <div class="top">
                     <div class="dots">
                         <i class="i-drag lg-icon dark-grey"></i>
