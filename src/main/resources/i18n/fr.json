@@ -176,7 +176,7 @@
   "formulaire.element.undo.confirmation": "Êtes-vous sûr(e) de vouloir annuler vos changements ?",
   "formulaire.element.delete.empty.warning": "Suppression impossible : un formulaire déjà envoyé ne peut être vide",
   "formulaire.element.delete.response.fill.warning": "Vous ne pouvez pas supprimer cet élément, des utilisateurs y ont déjà répondu",
-  "formulaire.element.block.sharing.multiple.conditional" : "Une ou plusieurs éléments de votre formulaire ne sont pas valides. Veuillez corriger ces questions avant d'effectuer le partage.",
+  "formulaire.element.block.sharing.multiple.conditional" : "Un ou plusieurs éléments de votre formulaire ne sont pas valides. Veuillez corriger ces éléments avant d'effectuer le partage.",
 
   "formulaire.section.no.description": "Pas de description",
   "formulaire.section.new.question": "+ Ajouter une question",
