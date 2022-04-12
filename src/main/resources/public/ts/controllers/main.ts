@@ -335,7 +335,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.$on(FORMULAIRE_EMIT_EVENT.REDIRECT, (event, data) => {
 			$scope.responsePosition = data.position ? data.position : 1;
 			$scope.historicPosition = data.historicPosition ? data.historicPosition : [];
-			$scope.form = data.form ? data.form : [];
+			if (data.form) $scope.form = data.form;
 			$scope.safeApply();
 			$scope.redirectTo(data.path);
 		});
