@@ -222,6 +222,7 @@
   "formulaire.response.file.send": "Fichier déposé",
   "formulaire.response.file.tooMany": "Le nombre de fichiers est trop important. Veuillez les compresser en un unique fichier .zip d'abord.",
   "formulaire.response.open": "Ouvrir ma réponse",
+  "formulaire.response.next.invalid": "Veuillez répondre à la question obligatoire pour décider de la suite de votre parcours.",
   "formulaire.responses": "réponses",
   "formulaire.responses.send.title": "Valider l'envoi",
   "formulaire.responses.send.selectStructure": "Veuillez sélectionnez votre établissement : ",

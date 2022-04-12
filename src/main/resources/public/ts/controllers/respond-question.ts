@@ -89,7 +89,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
     vm.next = async () : Promise<void> => {
         if (await saveResponses()) {
-            let nextPosition = getNextPosition();
+            let nextPosition = getNextPositionIfValid();
             if (nextPosition && nextPosition <= vm.nbFormElements) {
                 vm.formElement = vm.formElements.all[nextPosition - 1];
                 vm.historicPosition.push(vm.formElement.position);
@@ -97,7 +97,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                 window.scrollTo(0, 0);
                 $scope.safeApply();
             }
-            else {
+            else if (nextPosition != undefined) {
                 let data = {
                     path: `/form/${vm.form.id}/${vm.distribution.id}/questions/recap`,
                     historicPosition: vm.historicPosition
@@ -105,14 +105,13 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                 $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, data);
             }
         }
-
     };
 
     vm.nextGuard = () => {
         vm.next().then();
     };
 
-    const getNextPosition = () : number => {
+    const getNextPositionIfValid = () : number => {
         let nextPosition: number = vm.formElement.position + 1;
         let conditionalQuestion = null;
         let response = null;
@@ -129,7 +128,11 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             }
         }
 
-        if (conditionalQuestion && response) {
+        if (conditionalQuestion && response && !response.choice_id) {
+            notify.info('formulaire.response.next.invalid');
+            nextPosition = undefined;
+        }
+        else if (conditionalQuestion && response) {
             let choices = conditionalQuestion.choices.all.filter(c => c.id === response.choice_id);
             let sectionId = choices.length === 1 ? choices[0].next_section_id : null;
             let filteredSections = vm.formElements.getSections().all.filter(s => s.id === sectionId);

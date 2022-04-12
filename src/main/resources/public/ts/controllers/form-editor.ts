@@ -579,15 +579,16 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 }
             }
 
-            if (conditionalQuestion && response) {
+            if (conditionalQuestion && response && !response.choice_id) {
+                notify.info('formulaire.response.next.invalid');
+                nextPosition = null;
+            }
+            else if (conditionalQuestion && response) {
                 let choices = conditionalQuestion.choices.all.filter(c => c.id === response.choice_id);
                 let sectionId = choices.length === 1 ? choices[0].next_section_id : null;
                 let filteredSections = vm.formElements.getSections().all.filter(s => s.id === sectionId);
                 let targetSection = filteredSections.length === 1 ? filteredSections[0] : null;
                 nextPosition = targetSection ? targetSection.position : null;
-            }
-            else if (conditionalQuestion && !response) {
-                nextPosition = null;
             }
 
             if (nextPosition && nextPosition <= vm.nbFormElements) {
@@ -605,11 +606,11 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 //     vm.preview.page = PreviewPage.RECAP;
                 // }
             }
-            else if (!nextPosition) {
-                vm.preview.page = PreviewPage.RECAP;
-            }
-            else if (nextPosition <= vm.nbFormElements) {
+            else if (nextPosition && nextPosition <= vm.nbFormElements) {
                 vm.backToEditor();
+            }
+            else if (nextPosition != undefined) {
+                vm.preview.page = PreviewPage.RECAP;
             }
             $scope.safeApply();
         };
