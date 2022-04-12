@@ -45,7 +45,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.folder = $scope.folder ? $scope.folder : new Folder();
 		$scope.isMobile = window.screen.width <= 500;
 		$scope.responsePosition = 1;
-		$scope.historicPosition = [1];
+		$scope.historicPosition = [];
 
 		const init = async () : Promise<void> => {
 			await $scope.questionTypes.sync();
@@ -334,7 +334,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.$on(FORMULAIRE_EMIT_EVENT.UPDATE_FOLDER, (event, data) => { $scope.folder = data });
 		$scope.$on(FORMULAIRE_EMIT_EVENT.REDIRECT, (event, data) => {
 			$scope.responsePosition = data.position ? data.position : 1;
-			$scope.historicPosition = data.historicPosition ? data.historicPosition : [1];
+			$scope.historicPosition = data.historicPosition ? data.historicPosition : [];
 			$scope.safeApply();
 			$scope.redirectTo(data.path);
 		});

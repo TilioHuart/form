@@ -106,11 +106,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
     // Utils
 
     vm.openDistribution = (distrib) : void => {
-        let data = {
-            path: `/form/${distrib.form_id}/${distrib.id}/questions/recap`,
-            historicPosition: []
-        };
-        $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, data);
+        $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, { path: `/form/${distrib.form_id}/${distrib.id}/questions/recap` });
     }
 
     vm.infiniteScroll = () : void => {
@@ -128,11 +124,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
                     $scope.redirectTo(`/form/${form.id}/rgpd`);
                 }
                 else {
-                    let data = {
-                        path: `/form/${form.id}/${distrib.id}`,
-                        historicPosition: [1]
-                    };
-                    $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, data);
+                    $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, { path: `/form/${form.id}/${distrib.id}` });
                 }
             }
             else {
@@ -146,11 +138,7 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
             let distribs = vm.distributions.all.filter(d => d.form_id === form.id);
             let distrib = distribs.filter(d => d.status == DistributionStatus.TO_DO)[0];
             distrib = distrib ? distrib : await distributionService.add(form.id, distribs[0]);
-            let data = {
-                path: `/form/${form.id}/${distrib.id}`,
-                historicPosition: [1]
-            };
-            $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, data);
+            $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, { path: `/form/${form.id}/${distrib.id}` });
         }
         $scope.safeApply();
     };

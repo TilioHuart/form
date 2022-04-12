@@ -43,7 +43,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         await vm.formElements.sync(vm.form.id);
         vm.formElement = vm.formElements.all[$scope.responsePosition - 1];
         vm.nbFormElements = vm.formElements.all.length;
-        vm.historicPosition = $scope.historicPosition;
+        vm.historicPosition = $scope.historicPosition.length > 0 ? $scope.historicPosition : [1];
 
         await initFormElementResponses();
 
