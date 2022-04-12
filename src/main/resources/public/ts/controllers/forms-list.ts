@@ -200,8 +200,11 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     // Toaster
 
     vm.openForm = (form: Form) : void => {
-        $scope.form = form;
-        $scope.redirectTo(`/form/${form.id}/edit`);
+        let data = {
+            path: `/form/${form.id}/edit`,
+            form: form
+        };
+        $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, data);
         $scope.safeApply();
     };
 
