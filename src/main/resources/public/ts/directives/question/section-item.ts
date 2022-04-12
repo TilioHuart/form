@@ -17,7 +17,7 @@ interface IViewModel {
     deleteQuestion(): void;
     addQuestionToSection(): Promise<void>;
     addQuestionToSectionGuard(): void;
-    verifConditional() : boolean;
+    hasMultipleConditionals() : boolean;
 }
 
 export const sectionItem: Directive = ng.directive('sectionItem', () => {
@@ -35,7 +35,7 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
         bindToController: true,
         template: `
             <div class="ten section-item">
-                <div class="domino" ng-class="{'sectionError': !vm.section.title}">
+                <div class="domino" ng-class="{'sectionError': !vm.section.title || vm.verifConditional()}">
                     <div class="section-top" ng-class="{disabled: vm.hasFormResponses || vm.section.selected}">
                         <!-- Drag and drop icon -->
                         <div class="section-top-dots grab">
@@ -140,7 +140,7 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                 vm.addQuestionToSection().then();
             }
 
-            vm.verifConditional = (): boolean => {
+            vm.hasMultipleConditionals = (): boolean => {
                 return vm.section.questions.all.filter(q =>q.conditional).length >= 2;
             }
         }
