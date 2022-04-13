@@ -126,12 +126,13 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                                         vm.question.question_type == vm.Types.LONGANSWER ||
                                         vm.question.question_type == vm.Types.DATE ||
                                         vm.question.question_type == vm.Types.TIME ||
-                                        (vm.question.question_type == vm.Types.FILE && result[0].files.all.length <= 0)"
+                                        (vm.question.question_type == vm.Types.FILE && result.files.all.length <= 0)"
                                  bind-html="result.answer"></div>
-                            <a ng-if="vm.question.question_type == vm.Types.FILE && result[0].files.all.length > 0 && result[0].files.all[0].id"
-                               ng-click="vm.downloadFile(result[0].files.all[0].id)">
-                                <i class="i-download lg-icon spaced-right"></i> [[result[0].files.all[0].filename]]
-                            </a>
+                            <div ng-repeat="file in result.files.all" ng-if="vm.question.question_type == vm.Types.FILE">
+                                <a ng-if="file.id" ng-click="vm.downloadFile(file.id)">
+                                    <i class="i-download lg-icon spaced-right"></i> [[file.filename]]
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -148,7 +149,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
 
         controller: function ($scope) {
             const vm: IViewModel = <IViewModel> this;
-            
+
             vm.$onInit = async () : Promise<void> => {
                 vm.isGraphQuestion = vm.question.question_type == Types.SINGLEANSWER || vm.question.question_type == Types.MULTIPLEANSWER || vm.question.question_type == Types.SINGLEANSWERRADIO;
                 vm.responses = new Responses();
@@ -215,7 +216,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
             };
         },
         link: function ($scope, $element) {
-           const vm: IViewModel = $scope.vm;
+            const vm: IViewModel = $scope.vm;
             vm.Types = Types;
             vm.DistributionStatus = DistributionStatus;
             vm.DateUtils = DateUtils;
@@ -248,7 +249,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
             vm.formatAnswers = (distribId: number) : any => {
                 let results =  vm.responses.all.filter(r => r.distribution_id === distribId);
                 for (let result of results) {
-                    if (result.answer == "") {
+                    if (result.answer == "" || (vm.question.question_type === Types.FILE && result.files.all.length <= 0)) {
                         result.answer = "-";
                     }
                 }

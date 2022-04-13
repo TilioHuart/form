@@ -1,6 +1,5 @@
-import {Directive, idiom, ng} from "entcore";
+import {Directive, ng} from "entcore";
 import {
-    Delegates,
     Distribution,
     Question,
     QuestionChoices,
@@ -10,7 +9,7 @@ import {
     Types
 } from "../../models";
 import {responseService} from "../../services";
-import {FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "../../core/enums";
+import { FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "../../core/enums";
 import {Mix} from "entcore-toolkit";
 import {I18nUtils} from "../../utils";
 
