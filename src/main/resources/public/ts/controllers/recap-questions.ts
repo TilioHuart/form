@@ -94,15 +94,11 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
             for (let responseFile of responseFiles) {
                 await responseFileService.deleteAll(responseFile.original_id);
             }
+            await cleanResponses();
             await distributionService.replace(distrib);
         }
         else {
-            let responsesToClean = new Responses();
-            let validatedElements = new FormElements();
-            validatedElements.all = vm.formElements.all.filter(e => vm.historicPosition.indexOf(e.position) >= 0);
-            let validatedQuestionIds = validatedElements.getAllQuestions().all.map(q => q.id);
-            responsesToClean.all = vm.responses.all.filter(r => validatedQuestionIds.indexOf(r.question_id) < 0);
-            await responseService.delete(vm.form.id, responsesToClean.all);
+            await cleanResponses();
             await distributionService.update(distrib);
         }
         template.close('lightbox');
@@ -129,6 +125,15 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
         }
         return true;
     };
+
+    const cleanResponses = async () : Promise<void> => {
+        let responsesToClean = new Responses();
+        let validatedElements = new FormElements();
+        validatedElements.all = vm.formElements.all.filter(e => vm.historicPosition.indexOf(e.position) >= 0);
+        let validatedQuestionIds = validatedElements.getAllQuestions().all.map(q => q.id);
+        responsesToClean.all = vm.responses.all.filter(r => validatedQuestionIds.indexOf(r.question_id) < 0);
+        await responseService.delete(vm.form.id, responsesToClean.all);
+    }
 
     $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_RECAP_QUESTIONS, () => { vm.$onInit() });
 }]);
