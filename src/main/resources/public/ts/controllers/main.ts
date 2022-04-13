@@ -189,7 +189,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 							$scope.distribution = distrib ? distrib : await distributionService.add($scope.form.id, distribs[0]);
 						}
 
-						if ($scope.distribution) {
+						if ($scope.distribution && $scope.distribution.form_id == params.formId) {
 							let conditionsOk = false;
 							if ($scope.distribution.status && $scope.distribution.status != DistributionStatus.FINISHED) {
 								conditionsOk = true;
@@ -239,7 +239,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				await $scope.getFormWithRights(params.formId);
 				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form) && !$scope.form.archived) {
 					$scope.distribution = await distributionService.get(params.distributionId);
-					if ($scope.distribution) {
+					if ($scope.distribution && $scope.distribution.form_id == params.formId) {
 						let hasRespondLastQuestion = await FormElementUtils.hasRespondedLastQuestion($scope.form, $scope.distribution);
 						if (hasRespondLastQuestion) {
 							if ($scope.distribution.status && $scope.distribution.status === DistributionStatus.FINISHED && $scope.form.editable) {
