@@ -176,70 +176,58 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				}
 			},
 			respondForm: async (params) => {
+				$scope.currentPage = Pages.RESPOND_QUESTION;
 				await $scope.getFormWithRights(params.formId);
-				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form)) {
-					if ($scope.form.rgpd) {
-						$scope.redirectTo(`/form/${params.formId}/rgpd`);
-					}
-					else {
-						$scope.currentPage = Pages.RESPOND_QUESTION;
-						await $scope.getFormWithRights(params.formId);
-						if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form) && !$scope.form.archived) {
-							if ($scope.form.date_opening < new Date() && ($scope.form.date_ending ? ($scope.form.date_ending > new Date()) : true)) {
-								if (!isNaN(params.distributionId)) {
-									$scope.distribution = await distributionService.get(params.distributionId);
-								}
-								else {
-									let distribs = await distributionService.listByFormAndResponder($scope.form.id);
-									let distrib = distribs.filter(d => d.status == DistributionStatus.TO_DO)[0];
-									$scope.distribution = distrib ? distrib : await distributionService.add($scope.form.id, distribs[0]);
-								}
+				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form) && !$scope.form.archived) {
+					if ($scope.form.date_opening < new Date() && ($scope.form.date_ending ? ($scope.form.date_ending > new Date()) : true)) {
+						if (!isNaN(params.distributionId)) {
+							$scope.distribution = await distributionService.get(params.distributionId);
+						}
+						else {
+							let distribs = await distributionService.listByFormAndResponder($scope.form.id);
+							let distrib = distribs.filter(d => d.status == DistributionStatus.TO_DO)[0];
+							$scope.distribution = distrib ? distrib : await distributionService.add($scope.form.id, distribs[0]);
+						}
 
-								if ($scope.distribution) {
-									let conditionsOk = false;
-									if ($scope.distribution.status && $scope.distribution.status != DistributionStatus.FINISHED) {
-										conditionsOk = true;
-									}
-									else if ($scope.form.editable) {
-										let distribs = await distributionService.listByFormAndResponder($scope.form.id);
-										let distrib = distribs.filter(d => d.status == DistributionStatus.ON_CHANGE)[0];
-										$scope.distribution = distrib ? distrib : await distributionService.duplicateWithResponses($scope.distribution.id);
-										conditionsOk = true;
-									}
+						if ($scope.distribution) {
+							let conditionsOk = false;
+							if ($scope.distribution.status && $scope.distribution.status != DistributionStatus.FINISHED) {
+								conditionsOk = true;
+							}
+							else if ($scope.form.editable) {
+								let distribs = await distributionService.listByFormAndResponder($scope.form.id);
+								let distrib = distribs.filter(d => d.status == DistributionStatus.ON_CHANGE)[0];
+								$scope.distribution = distrib ? distrib : await distributionService.duplicateWithResponses($scope.distribution.id);
+								conditionsOk = true;
+							}
 
-									if (conditionsOk) {
-										$scope.form.nbFormElements = (await formElementService.countFormElements($scope.form.id)).count;
-										if ($scope.responsePosition > $scope.form.nbFormElements) {
-											$scope.redirectTo(`/form/${$scope.form.id}/${$scope.distribution.id}/questions/recap`);
-										}
-										else {
-											$scope.responsePosition = $scope.responsePosition < 1 ? 1 : $scope.responsePosition;
-											let correctedUrl = window.location.origin + window.location.pathname + `#/form/${$scope.form.id}/${$scope.distribution.id}`;
-											window.location.assign(correctedUrl);
-											$scope.safeApply();
-											$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_RESPOND_QUESTION);
-											template.open('main', 'containers/respond-question');
-										}
-									}
-									else {
-										$scope.redirectTo('/e403');
-									}
-								}
-								else if ($scope.form.multiple) {
+							if (conditionsOk) {
+								$scope.form.nbFormElements = (await formElementService.countFormElements($scope.form.id)).count;
+								if ($scope.responsePosition > $scope.form.nbFormElements) {
 									$scope.redirectTo(`/form/${$scope.form.id}/${$scope.distribution.id}/questions/recap`);
 								}
 								else {
-									$scope.redirectTo('/e403');
+									$scope.responsePosition = $scope.responsePosition < 1 ? 1 : $scope.responsePosition;
+									let correctedUrl = window.location.origin + window.location.pathname + `#/form/${$scope.form.id}/${$scope.distribution.id}`;
+									window.location.assign(correctedUrl);
+									$scope.safeApply();
+									$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_RESPOND_QUESTION);
+									template.open('main', 'containers/respond-question');
 								}
 							}
 							else {
 								$scope.redirectTo('/e403');
 							}
 						}
+						else if ($scope.form.multiple) {
+							$scope.redirectTo(`/form/${$scope.form.id}/${$scope.distribution.id}/questions/recap`);
+						}
 						else {
 							$scope.redirectTo('/e403');
 						}
-
+					}
+					else {
+						$scope.redirectTo('/e403');
 					}
 				}
 				else {
