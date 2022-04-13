@@ -221,7 +221,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
                     formIds.push(form.id);
                 }
             }
-            await formService.duplicate(formIds, vm.folder.id);
+            let targetFolderId = vm.folder.id === vm.folders.sharedFormsFolder.id ? vm.folders.myFormsFolder.id : vm.folder.id;
+            await formService.duplicate(formIds, targetFolderId);
             notify.success(idiom.translate('formulaire.success.forms.duplicate'));
             vm.openFolder(vm.folder);
             $scope.safeApply();
