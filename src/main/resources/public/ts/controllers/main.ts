@@ -251,13 +251,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 								else {
 									$scope.distribution = await distributionService.duplicateWithResponses($scope.distribution.id);
 								}
-								// $scope.distribution = distrib ? distrib : await distributionService.duplicateWithResponses($scope.distribution.id);
-								let correctedUrl = window.location.origin + window.location.pathname + `#/form/${$scope.form.id}/${$scope.distribution.id}/questions/recap`;
-								window.location.assign(correctedUrl);
-								$scope.safeApply();
 							}
-
-							$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_RECAP_QUESTIONS);
 							template.open('main', 'containers/recap-questions');
 						}
 						else {
