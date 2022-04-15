@@ -256,6 +256,14 @@
   "formulaire.error.formService.image": "Une erreur est survenue lors de la récupération de l'image",
   "formulaire.error.formService.checkremind": "Une erreur est survenue lors de la récupération des réponses",
 
+  "formulaire.error.formElements.sync": "Une erreur est survenue lors de la synchronisation des éléments",
+  "formulaire.error.formElementService.list": "Une erreur est survenue lors de la récupération des éléments",
+  "formulaire.error.formElementService.count": "Une erreur est survenue lors du décompte des éléments",
+  "formulaire.error.formElementService.get": "Une erreur est survenue lors de la récupération de l'éléments",
+  "formulaire.error.formElementService.create": "Une erreur est survenue lors de la création du nouvel élément",
+  "formulaire.error.formElementService.update": "Une erreur est survenue lors de la sauvegarde de l'élément",
+  "formulaire.error.formElementService.delete": "Une erreur est survenue lors de la suppression de l'élément",
+
   "formulaire.error.question.reorganization": "Direction de réorganisation inconnue.",
   "formulaire.error.question.sync": "Une erreur est survenue lors de la synchronisation des questions",
   "formulaire.error.questionService.list": "Une erreur est survenue lors de la récupération des questions",

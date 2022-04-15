@@ -28,7 +28,7 @@ export class FormElements extends Selection<FormElement> {
 
             this.all.sort((a, b) => a.position - b.position);
         } catch (e) {
-            notify.error(idiom.translate('formulaire.error.question.sync'));
+            notify.error(idiom.translate('formulaire.error.formElements.sync'));
             throw e;
         }
     }
