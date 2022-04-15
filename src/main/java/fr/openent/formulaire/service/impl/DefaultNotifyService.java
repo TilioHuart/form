@@ -33,10 +33,11 @@ public class DefaultNotifyService implements NotifyService {
                 return;
             }
 
+            String endPath = form.getBoolean("rgpd") ? "rgpd" : "new";
             JsonObject params = new JsonObject()
                     .put("userUri", "/userbook/annuaire#" + user.getUserId())
                     .put("username", user.getUsername())
-                    .put("formUri", "/formulaire#/form/" + form.getInteger("id") + "/new")
+                    .put("formUri", "/formulaire#/form/" + form.getInteger("id") + "/" + endPath)
                     .put("formName", form.getString("title"))
                     .put("pushNotif", new JsonObject().put("title", "push.notif.formulaire.newForm").put("body", ""));
 

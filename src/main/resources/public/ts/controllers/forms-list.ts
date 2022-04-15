@@ -755,7 +755,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     const initMail = () : void => {
-        vm.mail.link = `${window.location.origin}${window.location.pathname}#/form/${vm.forms.selected[0].id}`;
+        let endPath = vm.forms.selected[0].rgpd ? 'rgpd' : 'new';
+        vm.mail.link = `${window.location.origin}${window.location.pathname}#/form/${vm.forms.selected[0].id}/${endPath}`;
         vm.mail.subject = idiom.translate('formulaire.remind.default.subject');
         vm.mail.body = I18nUtils.getWithParams('formulaire.remind.default.body', [vm.mail.link, vm.mail.link]);
     };
