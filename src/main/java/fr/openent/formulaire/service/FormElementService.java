@@ -19,7 +19,7 @@ public interface FormElementService {
      * @param position position of the specific form element
      * @param handler function handler returning JsonObject data
      */
-    void getIdByPosition(String formId, String position, Handler<Either<String, JsonObject>> handler);
+    void getTypeAndIdByPosition(String formId, String position, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Get a specific element by position in a specific form

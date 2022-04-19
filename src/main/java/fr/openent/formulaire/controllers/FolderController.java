@@ -179,7 +179,7 @@ public class FolderController extends ControllerHelper {
     }
 
     @Put("/folders/move/:folderId")
-    @ApiDoc("Move a folder")
+    @ApiDoc("Move several folders")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void move(HttpServerRequest request) {

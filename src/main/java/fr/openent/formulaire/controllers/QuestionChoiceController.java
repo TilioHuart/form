@@ -3,7 +3,6 @@ package fr.openent.formulaire.controllers;
 import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.helpers.RenderHelper;
 import fr.openent.formulaire.security.AccessRight;
-import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.QuestionChoiceService;
 import fr.openent.formulaire.service.impl.DefaultQuestionChoiceService;
@@ -12,7 +11,6 @@ import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -41,7 +39,7 @@ public class QuestionChoiceController extends ControllerHelper {
     }
 
     @Get("/questions/choices/all")
-    @ApiDoc("List of all choices questions")
+    @ApiDoc("List all the choices of a specific questions")
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listChoices(HttpServerRequest request){

@@ -80,7 +80,7 @@ public class QuestionController extends ControllerHelper {
     }
 
     @Put("/questions/:formId")
-    @ApiDoc("Update a specific question")
+    @ApiDoc("Update specific questions")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {

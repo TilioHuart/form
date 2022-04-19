@@ -39,7 +39,7 @@ public class FormElementController extends ControllerHelper {
     public void getByPosition(HttpServerRequest request) {
         String formId = request.getParam("formId");
         String position = request.getParam("position");
-        formElementService.getIdByPosition(formId, position, event -> {
+        formElementService.getTypeAndIdByPosition(formId, position, event -> {
             if (event.isLeft()) {
                 log.error("[Formulaire@getByPosition] Error in getting form element id of position " + position + " for form " + formId);
                 RenderHelper.badRequest(request, event);

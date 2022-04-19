@@ -5,8 +5,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-import java.util.List;
-
 public interface QuestionChoiceService {
     /**
      * List all the choices of a specific question

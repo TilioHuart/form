@@ -1,7 +1,6 @@
 package fr.openent.formulaire.service.impl;
 
 import fr.openent.formulaire.Formulaire;
-import fr.openent.formulaire.helpers.UtilsHelper;
 import fr.openent.formulaire.service.DistributionService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;

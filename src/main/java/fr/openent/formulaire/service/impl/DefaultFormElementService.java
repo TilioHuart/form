@@ -21,7 +21,7 @@ public class DefaultFormElementService implements FormElementService {
     }
 
     @Override
-    public void getIdByPosition(String formId, String position, Handler<Either<String, JsonObject>> handler) {
+    public void getTypeAndIdByPosition(String formId, String position, Handler<Either<String, JsonObject>> handler) {
         String getQuestions = "SELECT id, 'question' AS element_type FROM " + Formulaire.QUESTION_TABLE + " WHERE form_id = ? AND position = ?";
         String getSections = "SELECT id, 'section' AS element_type FROM " + Formulaire.SECTION_TABLE + " WHERE form_id = ? AND position = ?";
         String query = getQuestions + " UNION " + getSections + ";";

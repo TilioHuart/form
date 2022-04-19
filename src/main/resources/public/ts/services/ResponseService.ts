@@ -47,7 +47,7 @@ export const responseService: ResponseService = {
 
     async listByDistribution(distributionId: number) : Promise<any> {
         try {
-            return DataUtils.getData(await http.get(`/formulaire/responses/distrib/${distributionId}`));
+            return DataUtils.getData(await http.get(`/formulaire/responses/distributions/${distributionId}`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.list'));
             throw err;

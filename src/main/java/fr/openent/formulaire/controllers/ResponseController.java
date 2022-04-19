@@ -80,7 +80,7 @@ public class ResponseController extends ControllerHelper {
         });
     }
 
-    @Get("/responses/distrib/:distributionId")
+    @Get("/responses/distributions/:distributionId")
     @ApiDoc("List all responses for a specific distribution")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
@@ -97,7 +97,7 @@ public class ResponseController extends ControllerHelper {
     }
 
     @Get("/forms/:formId/responses")
-    @ApiDoc("List all the responses to a specific question")
+    @ApiDoc("List all the responses to a specific form")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void listByForm(HttpServerRequest request) {

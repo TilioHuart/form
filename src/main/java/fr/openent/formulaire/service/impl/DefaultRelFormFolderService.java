@@ -1,7 +1,6 @@
 package fr.openent.formulaire.service.impl;
 
 import fr.openent.formulaire.Formulaire;
-import fr.openent.formulaire.service.FolderService;
 import fr.openent.formulaire.service.RelFormFolderService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
@@ -10,8 +9,6 @@ import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
-
-import java.text.Normalizer;
 
 public class DefaultRelFormFolderService implements RelFormFolderService {
     @Override
