@@ -631,8 +631,13 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     fallbackOnBody: true,
                     swapThreshold: 0.65,
                     ghostClass: "sortable-ghost",
+
+                    onStart: function (evt) {
+                        document.querySelector('header').style.pointerEvents = 'none';
+                    },
                     onEnd: async function (evt) {
                         let cleanResidue = await FormElementUtils.onEndDragAndDrop(evt, vm.formElements);
+                        document.querySelector('header').style.removeProperty('pointer-events');
                         $scope.safeApply();
 
                         await vm.$onInit();
