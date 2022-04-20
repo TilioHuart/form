@@ -11,12 +11,9 @@
   flex-direction: column;
   align-content: space-between;
 
-  [sortable-element] {
-    cursor: default;
-
-    :not(.disabled) .grab {
-      cursor: grab;
-    }
+  .question-item .domino:not(.disabled) > .grab,
+  .section-top:not(.disabled) > .grab {
+    cursor: grab;
   }
 
   .elements {
@@ -27,6 +24,7 @@
 
     .question-item, .section-item {
       margin: auto;
+      cursor: default;
 
       .domino, .question-item .domino {
         display: flex;
