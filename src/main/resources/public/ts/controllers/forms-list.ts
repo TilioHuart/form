@@ -8,15 +8,14 @@ import {
     Folders,
     Form,
     Forms,
-    Question, Questions, Section, Sections
+    Question, Sections
 } from "../models";
-import {distributionService, formElementService, formService, questionService, sectionService} from "../services";
+import {distributionService, formService, questionService} from "../services";
 import {FiltersFilters, FiltersOrders, FORMULAIRE_EMIT_EVENT} from "../core/enums";
 import {Mix} from "entcore-toolkit";
 import {folderService} from "../services/FolderService";
 import {Element} from "entcore/types/src/ts/workspace/model";
 import {I18nUtils} from "../utils";
-import {sectionItem} from "../directives";
 
 interface ViewModel {
     forms: Forms;
@@ -237,11 +236,11 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         let sections = new Sections();
         await sections.sync(vm.forms.selected[0].id);
 
+        // Check validity of questions children of sections
         let questionsList = sections.all.map(s => s.questions.all);
-
-        for(let questions of questionsList){
+        for (let questions of questionsList) {
             let conditionalQuestions = questions.filter(q => q.conditional);
-            let wrongQuestions = questions.filter(question => !question.title);
+            let wrongQuestions = questions.filter(q => !q.title);
 
             if (conditionalQuestions.length >= 2) {
                 notify.error(idiom.translate('formulaire.element.block.sharing.multiple.conditional'));
@@ -253,8 +252,10 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             }
         }
 
+        // Check validity of main question and section
         let wrongQuestions = questions.filter(question => !question.title);
-        if (wrongQuestions.length > 0){
+        let wrongSections = sections.filter(s => !s.title);
+        if (wrongQuestions.length > 0 || wrongSections.length > 0){
             notify.error(idiom.translate('formulaire.block.sharing'));
             return;
         }
