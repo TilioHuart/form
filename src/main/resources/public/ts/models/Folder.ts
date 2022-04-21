@@ -1,6 +1,6 @@
 import {Selectable, Selection} from "entcore-toolkit";
 import {Mix} from 'entcore-toolkit';
-import {folderService} from "../services/FolderService";
+import {folderService} from "../services";
 import {idiom, workspace} from "entcore";
 import {Element} from "entcore/types/src/ts/workspace/model";
 

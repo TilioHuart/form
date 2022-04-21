@@ -70,15 +70,6 @@ public interface ResponseService {
     void create(JsonObject response, UserInfos user, String questionId, Handler<Either<String, JsonObject>> handler);
 
     /**
-     * Create empty responses to fill missing ones for a specific distribution
-     * @param questionIds JsonArray ids of missing questions
-     * @param distributionId distribution identifier
-     * @param user user connected
-     * @param handler function handler returning JsonObject data
-     */
-    void fillResponses(JsonArray questionIds, String distributionId, UserInfos user, Handler<Either<String, JsonObject>> handler);
-
-    /**
      * Update a specific response
      * @param user user connected
      * @param responseId response identifier
@@ -90,9 +81,10 @@ public interface ResponseService {
     /**
      * Delete specific responses
      * @param responseIds responses identifiers
+     * @param formId form identifier
      * @param handler function handler returning JsonArray data
      */
-    void delete(JsonArray responseIds, Handler<Either<String, JsonArray>> handler);
+    void delete(JsonArray responseIds, String formId, Handler<Either<String, JsonArray>> handler);
 
     /**
      * Delete responses by distribution id

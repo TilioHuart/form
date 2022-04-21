@@ -1,10 +1,10 @@
 package fr.openent.formulaire.export;
 
+import fr.openent.formulaire.helpers.RenderHelper;
 import fr.openent.formulaire.service.QuestionService;
 import fr.openent.formulaire.service.ResponseService;
 import fr.openent.formulaire.service.impl.DefaultQuestionService;
 import fr.openent.formulaire.service.impl.DefaultResponseService;
-import fr.wseduc.webutils.http.Renders;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -14,6 +14,8 @@ import io.vertx.core.logging.LoggerFactory;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static fr.wseduc.webutils.http.Renders.notFound;
 
 public class FormResponsesExportCSV {
   private static final Logger log = LoggerFactory.getLogger(FormResponsesExportCSV.class);
@@ -42,9 +44,14 @@ public class FormResponsesExportCSV {
     String formId = request.getParam("formId");
     questionService.export(formId, false, getQuestionsEvt -> {
       if (getQuestionsEvt.isLeft()) {
-        String message = "[Formulaire@FormExportCSV] Failed to retrieve all questions of the form " + formId;
-        log.error(message + " : " + getQuestionsEvt.left().getValue());
-        Renders.renderError(request);
+        log.error("[Formulaire@FormExportCSV] Failed to retrieve all questions of the form " + formId);
+        RenderHelper.internalError(request, getQuestionsEvt);
+        return;
+      }
+      if (getQuestionsEvt.right().getValue().isEmpty()) {
+        String message = "[Formulaire@FormExportCSV] No questions found for form with id " + formId;
+        log.error(message);
+        notFound(request, message);
         return;
       }
 
@@ -54,9 +61,14 @@ public class FormResponsesExportCSV {
 
       responseService.getExportCSVResponders(formId, getRespondersEvt -> {
         if (getRespondersEvt.isLeft()) {
-          String message = "[Formulaire@FormExportCSV] Failed to retrieve responders infos of the form " + formId;
-          log.error(message + " : " + getRespondersEvt.left().getValue());
-          Renders.renderError(request);
+          log.error("[Formulaire@FormExportCSV] Failed to retrieve responders infos of the form " + formId);
+          RenderHelper.internalError(request, getRespondersEvt);
+          return;
+        }
+        if (getRespondersEvt.right().getValue().isEmpty()) {
+          String message = "[Formulaire@FormExportCSV] No responders found for form with id " + formId;
+          log.error(message);
+          notFound(request, message);
           return;
         }
 
@@ -64,19 +76,18 @@ public class FormResponsesExportCSV {
 
         responseService.exportCSVResponses(formId, getResponsesEvt -> {
           if (getResponsesEvt.isLeft()) {
-            String message = "[Formulaire@FormExportCSV] Failed to retrieve all responses of the form " + formId;
-            log.error(message + " : " + getResponsesEvt.left().getValue());
-            Renders.renderError(request);
+            log.error("[Formulaire@FormExportCSV] Failed to retrieve all responses of the form " + formId);
+            RenderHelper.internalError(request, getResponsesEvt);
+            return;
+          }
+          if (getResponsesEvt.right().getValue().isEmpty()) {
+            String message = "[Formulaire@FormExportCSV] No responses found for form with id " + formId;
+            log.error(message);
+            notFound(request, message);
             return;
           }
 
           List<JsonObject> allResponses = getResponsesEvt.right().getValue().getList();
-          if (allResponses.isEmpty()) {
-            log.info("[Formulaire@FormExportCSV] No responses found for the form : " + formId);
-            Renders.notFound(request);
-            return;
-          }
-
           for (int r = 0; r < responders.size(); r++) {
             // Add responder infos
             content.append(getUserInfos(responders.getJsonObject(r)));

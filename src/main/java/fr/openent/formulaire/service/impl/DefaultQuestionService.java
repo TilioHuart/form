@@ -57,6 +57,31 @@ public class DefaultQuestionService implements QuestionService {
     }
 
     @Override
+    public void getSectionIdsWithConditionalQuestions(String formId, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT DISTINCT section_id FROM " + Formulaire.QUESTION_TABLE + " WHERE form_id = ? AND section_id IS NOT NULL AND conditional = ?;";
+        JsonArray params = new JsonArray().add(formId).add(true);
+        sql.prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public void getSectionIdsByForm(String questionId, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT * FROM " + Formulaire.SECTION_TABLE  +
+                " WHERE form_id = (SELECT form_id FROM " + Formulaire.QUESTION_TABLE + " WHERE id = ?);";
+        JsonArray params = new JsonArray().add(questionId);
+        sql.prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public void getFormPosition(String questionId, Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT DISTINCT (SELECT MAX(pos) as position FROM (VALUES (q.position), (s.position)) AS value(pos)) " +
+                "FROM " + Formulaire.QUESTION_TABLE + " q " +
+                "LEFT JOIN " + Formulaire.SECTION_TABLE + " s ON s.id = q.section_id " +
+                "WHERE q.id = ?;";
+        JsonArray params = new JsonArray().add(questionId);
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    @Override
     public void create(JsonObject question, String formId, Handler<Either<String, JsonObject>> handler) {
         String query = "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
                 "mandatory, section_id, section_position, conditional) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
@@ -75,33 +100,6 @@ public class DefaultQuestionService implements QuestionService {
         params.addAll(SqlHelper.getParamsForUpdateDateModifFormRequest(formId));
 
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
-    }
-
-    @Override
-    public void createMultiple(JsonArray questions, String formId, Handler<Either<String, JsonArray>> handler) {
-        String query = "INSERT INTO " + Formulaire.QUESTION_TABLE + " (form_id, title, position, question_type, " +
-                "statement, mandatory, section_id, section_position, conditional) VALUES ";
-        JsonArray params = new JsonArray();
-
-        List<JsonObject> allQuestions = questions.getList();
-        for (JsonObject question : allQuestions) {
-            query += "(?, ?, ?, ?, ?, ?, ?, ?, ?), ";
-            params.add(formId)
-                    .add(question.getString("title", ""))
-                    .add(question.getInteger("section_position", null) != null ? null : question.getInteger("position", null))
-                    .add(question.getInteger("question_type", 1))
-                    .add(question.getString("statement", ""))
-                    .add(question.getBoolean("conditional", false) || question.getBoolean("mandatory", false))
-                    .add(question.getInteger("section_id", null))
-                    .add(question.getInteger("section_position", null))
-                    .add(question.getBoolean("conditional", false));
-        }
-        query = query.substring(0, query.length() - 2) + " RETURNING *;";
-
-        query += SqlHelper.getUpdateDateModifFormRequest();
-        params.addAll(SqlHelper.getParamsForUpdateDateModifFormRequest(formId));
-
-        sql.prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
     @Override

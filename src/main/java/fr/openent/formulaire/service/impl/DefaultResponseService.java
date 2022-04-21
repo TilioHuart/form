@@ -10,6 +10,8 @@ import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
 
+import java.text.Normalizer;
+
 public class DefaultResponseService implements ResponseService {
 
     @Override
@@ -17,7 +19,7 @@ public class DefaultResponseService implements ResponseService {
         String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " r ";
         JsonArray params = new JsonArray().add(questionId);
 
-        if (!nbLines.equals("null")) {
+        if (nbLines != null) {
             query += "WHERE question_id = ? AND distribution_id IN " + Sql.listPrepared(distribs);
             for (int i = 0; i < distribs.size(); i++) {
                 params.add(distribs.getJsonObject(i).getInteger("id"));
@@ -98,20 +100,6 @@ public class DefaultResponseService implements ResponseService {
     }
 
     @Override
-    public void fillResponses(JsonArray questionIds, String distributionId, UserInfos user, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO " + Formulaire.RESPONSE_TABLE + " (question_id, answer, responder_id, distribution_id) VALUES ";
-        JsonArray params = new JsonArray();
-
-        for (int i = 0; i < questionIds.size(); i++) {
-            query += "(?, ?, ?, ?), ";
-            params.add(questionIds.getJsonObject(i).getInteger("id")).add("").add(user.getUserId()).add(distributionId);
-        }
-
-        query = query.substring(0, query.length() - 2) + ";";
-        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
-    }
-
-    @Override
     public void update(UserInfos user, String responseId, JsonObject response, Handler<Either<String, JsonObject>> handler) {
         String query = "UPDATE " + Formulaire.RESPONSE_TABLE + " SET answer = ?, choice_id = ? " +
                 "WHERE responder_id = ? AND id = ? RETURNING *;";
@@ -125,9 +113,13 @@ public class DefaultResponseService implements ResponseService {
     }
 
     @Override
-    public void delete(JsonArray responseIds, Handler<Either<String, JsonArray>> handler) {
-        String query = "DELETE FROM " + Formulaire.RESPONSE_TABLE + " WHERE id IN " + Sql.listPrepared(responseIds) + ";";
-        JsonArray params = new JsonArray().addAll(responseIds);
+    public void delete(JsonArray responseIds, String formId, Handler<Either<String, JsonArray>> handler) {
+        String query = "DELETE FROM " + Formulaire.RESPONSE_TABLE + " WHERE id IN (" +
+                "SELECT r.id FROM " + Formulaire.RESPONSE_TABLE + " r " +
+                "JOIN " + Formulaire.QUESTION_TABLE + " q ON r.question_id = q.id " +
+                "JOIN " + Formulaire.FORM_TABLE + " ON q.form_id = f.id " +
+                "WHERE f.id = ? AND r.id IN " + Sql.listPrepared(responseIds) + ");";
+        JsonArray params = new JsonArray().add(formId).addAll(responseIds);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 

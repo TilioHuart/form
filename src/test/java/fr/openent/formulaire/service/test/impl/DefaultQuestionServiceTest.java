@@ -157,39 +157,6 @@ public class DefaultQuestionServiceTest {
     }
 
     @Test
-    public void createMultiple(TestContext ctx) {
-        Async async = ctx.async();
-        String expectedQuery = "INSERT INTO formulaire.question (form_id, title, position, question_type, statement, mandatory, section_id, section_position, conditional) VALUES ";
-        JsonArray questions = new JsonArray();
-        List<JsonObject> allQuestions = questions.getList();
-        JsonArray expectedParams = new JsonArray();
-        for (JsonObject question : allQuestions){
-            expectedQuery += "(?, ?, ?, ?, ?, ?, ?, ?, ?), ";
-            expectedParams.add("form_id")
-                    .add(question.getString("title", ""))
-                    .add(question.getInteger("section_position", null) != null ? null : question.getInteger("position", null))
-                    .add(question.getInteger("question_type", 1))
-                    .add(question.getString("statement", ""))
-                    .add(question.getBoolean("mandatory", false))
-                    .add(question.getInteger("section_id", null))
-                    .add(question.getInteger("section_position", null))
-                    .add(question.getBoolean("conditional", false));
-        }
-        expectedQuery = expectedQuery.substring(0, expectedQuery.length() - 2) + " RETURNING *;";
-        String expectedQueryResult = expectedQuery + SqlHelper.getUpdateDateModifFormRequest();
-        expectedParams.addAll(SqlHelper.getParamsForUpdateDateModifFormRequest("form_id"));
-
-        vertx.eventBus().consumer("fr.openent.formulaire", message -> {
-            JsonObject body = (JsonObject) message.body();
-            ctx.assertEquals("prepared", body.getString("action"));
-            ctx.assertEquals(expectedQueryResult, body.getString("statement"));
-            ctx.assertEquals(expectedParams.toString(), body.getJsonArray("values").toString());
-            async.complete();
-        });
-        defaultQuestionService.createMultiple(questions,"form_id",null);
-    }
-
-    @Test
     public void update(TestContext ctx) {
         Async async = ctx.async();
         JsonObject tabQuestion = new JsonObject();

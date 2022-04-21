@@ -10,10 +10,9 @@ import {
     Forms,
     Question, Sections
 } from "../models";
-import {distributionService, formService, questionService} from "../services";
+import {distributionService, formService, questionService, folderService} from "../services";
 import {FiltersFilters, FiltersOrders, FORMULAIRE_EMIT_EVENT} from "../core/enums";
 import {Mix} from "entcore-toolkit";
-import {folderService} from "../services/FolderService";
 import {Element} from "entcore/types/src/ts/workspace/model";
 import {I18nUtils} from "../utils";
 
@@ -391,7 +390,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             for (let form of vm.forms.selected) {
                 await formService.restore(form, vm.folders.myFormsFolder.id);
             }
-            await formService.move(vm.forms.selected, vm.folders.myFormsFolder.id);
+            await formService.move(vm.forms.selected.map(f => f.id), vm.folders.myFormsFolder.id);
             template.close('lightbox');
             notify.success(idiom.translate('formulaire.success.forms.restore'));
             vm.openFolder(vm.folder, false);
@@ -500,7 +499,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
                 let idTargetItem = targetItem.id;
 
                 if (vm.forms.selected.length > 0) { // Move several forms
-                    await formService.move(vm.forms.selected, idTargetItem ? idTargetItem : 1);
+                    await formService.move(vm.forms.selected.map(f => f.id), idTargetItem ? idTargetItem : 1);
                 }
                 else if (vm.folders.selected.length > 0) { // Move several folders
                     await folderService.move(vm.folders.selected, idTargetItem ? idTargetItem : 1);
@@ -508,8 +507,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
                 else {
                     let isForm = !!originalItem.folder_id;
                     if (isForm) { // Move one form
-                        let draggedItem = vm.forms.all.filter(f => f.id === idOriginalItem);
-                        await formService.move(draggedItem, idTargetItem ? idTargetItem : 1);
+                        let draggedItemIds = vm.forms.all.filter(f => f.id === idOriginalItem).map(f => f.id);
+                        await formService.move(draggedItemIds, idTargetItem ? idTargetItem : 1);
                     }
                     else if (!isForm) { // Move one folder
                         let draggedItem = vm.folders.all.filter(f => f.id === idOriginalItem);
@@ -657,7 +656,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
                 await folderService.move(vm.folders.selected, vm.targetFolderId);
             }
             else{
-                await formService.move(vm.forms.selected, vm.targetFolderId);
+                await formService.move(vm.forms.selected.map(f => f.id), vm.targetFolderId);
             }
             vm.display.lightbox.move = false;
             template.close('lightbox');
@@ -685,7 +684,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.doDeleteFolders = async () : Promise<void> => {
         try {
-            await folderService.delete(vm.folders.selected);
+            await folderService.delete(vm.folders.selected.map(f => f.id));
             template.close('lightbox');
             vm.display.lightbox.delete = false;
             vm.display.warning = false;
@@ -699,7 +698,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     vm.displayNbItems = (folder) : string => {
-        if (folder.nb_folder_children + folder.nb_form_children <= 0) {
+        if (!folder.nb_folder_children ||!folder.nb_form_children || folder.nb_folder_children + folder.nb_form_children <= 0) {
             return idiom.translate('formulaire.folder.empty');
         }
         else {

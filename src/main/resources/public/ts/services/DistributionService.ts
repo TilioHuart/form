@@ -12,7 +12,7 @@ export interface DistributionService {
     count(formId: number) : Promise<any>;
     get(distributionId: number) : Promise<any>;
     getByFormResponderAndStatus(formId: number) : Promise<any>;
-    add(formId: number, distribution: Distribution) : Promise<any>;
+    add(distributionId: number) : Promise<any>;
     duplicateWithResponses(distributionId: number) : Promise<any>;
     update(distribution: Distribution) : Promise<any>;
     replace(distribution: Distribution) : Promise<any>;
@@ -92,9 +92,9 @@ export const distributionService: DistributionService = {
         }
     },
 
-    async add(formId: number, distribution: Distribution) : Promise<any> {
+    async add(distributionId: number) : Promise<any> {
         try {
-            return DataUtils.getData(await http.post(`/formulaire/distributions/forms/${formId}/add`, distribution));
+            return DataUtils.getData(await http.post(`/formulaire/distributions/${distributionId}/add`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.create'));
             throw err;

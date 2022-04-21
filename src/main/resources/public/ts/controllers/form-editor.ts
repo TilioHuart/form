@@ -10,7 +10,7 @@ import {
     Section,
     Types
 } from "../models";
-import {distributionService, formElementService, formService, questionChoiceService, questionService, responseService, sectionService} from "../services";
+import {distributionService, formElementService, formService, questionChoiceService, questionService, responseService, sectionService, folderService} from "../services";
 import {
     Direction,
     FORMULAIRE_BROADCAST_EVENT,
@@ -18,7 +18,6 @@ import {
     FORMULAIRE_FORM_ELEMENT_EMIT_EVENT,
     Pages
 } from "../core/enums";
-import {folderService} from "../services/FolderService";
 import * as Sortable from "sortablejs";
 import {FormElementUtils} from "../utils";
 

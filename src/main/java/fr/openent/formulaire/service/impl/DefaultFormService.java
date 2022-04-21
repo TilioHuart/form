@@ -4,16 +4,16 @@ import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.service.FormService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
+import org.entcore.common.sql.SqlStatementsBuilder;
 import org.entcore.common.user.UserInfos;
 import java.util.List;
-import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 
 public class DefaultFormService implements FormService {
+    private final Sql sql = Sql.getInstance();
 
     @Override
     public void list(List<String> groupsAndUserIds, UserInfos user, Handler<Either<String, JsonArray>> handler) {
@@ -137,34 +137,41 @@ public class DefaultFormService implements FormService {
 
     @Override
     public void createMultiple(JsonArray forms, UserInfos user, Handler<Either<String, JsonArray>> handler) {
-        String query = "";
-        JsonArray params = new JsonArray();
-
-        List<JsonObject> allForms = forms.getList();
-        for (JsonObject form : allForms) {
-            query += "INSERT INTO " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, picture, " +
+        if (!forms.isEmpty()) {
+            SqlStatementsBuilder s = new SqlStatementsBuilder();
+            String query = "INSERT INTO " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, picture, " +
                     "date_creation, date_modification, date_opening, date_ending, multiple, anonymous, response_notified, " +
                     "editable, rgpd, rgpd_goal, rgpd_lifetime) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?); ";
-            params.add(user.getUserId())
-                    .add(user.getUsername())
-                    .add(form.getString("title", ""))
-                    .add(form.getString("description", ""))
-                    .add(form.getString("picture", ""))
-                    .add("NOW()").add("NOW()")
-                    .add(form.getString("date_opening", "NOW()"))
-                    .add(form.getString("date_ending", null))
-                    .add(form.getBoolean("multiple", false))
-                    .add(form.getBoolean("anonymous", false))
-                    .add(form.getBoolean("response_notified", false))
-                    .add(form.getBoolean("editable", false))
-                    .add(form.getBoolean("rgpd", false))
-                    .add(form.getString("rgpd_goal", ""))
-                    .add(form.getInteger("rgpd_lifetime", 12));
-        }
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
 
-        query += "RETURNING *;";
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+            s.raw("BEGIN;");
+            for (int i = 0; i < forms.size(); i++) {
+                JsonObject form = forms.getJsonObject(i);
+                JsonArray params = new JsonArray()
+                        .add(user.getUserId())
+                        .add(user.getUsername())
+                        .add(form.getString("title", ""))
+                        .add(form.getString("description", ""))
+                        .add(form.getString("picture", ""))
+                        .add("NOW()").add("NOW()")
+                        .add(form.getString("date_opening", "NOW()"))
+                        .add(form.getString("date_ending", null))
+                        .add(form.getBoolean("multiple", false))
+                        .add(form.getBoolean("anonymous", false))
+                        .add(form.getBoolean("response_notified", false))
+                        .add(form.getBoolean("editable", false))
+                        .add(form.getBoolean("rgpd", false))
+                        .add(form.getString("rgpd_goal", ""))
+                        .add(form.getInteger("rgpd_lifetime", 12));
+                s.prepared(query, params);
+            }
+            s.raw("COMMIT;");
+
+            sql.transaction(s.build(), SqlResult.validResultsHandler(handler));
+        }
+            else {
+            handler.handle(new Either.Right<>(new JsonArray()));
+        }
     }
 
     @Override
@@ -199,7 +206,7 @@ public class DefaultFormService implements FormService {
                 ") " +
                 "SELECT * FROM rows " +
                 "UNION ALL " +
-                "SELECT (SELECT id FROM new_form_id), null, null, null " +
+                "SELECT null, (SELECT id FROM new_form_id), null, null " +
                 "WHERE NOT EXISTS (SELECT * FROM rows)" +
                 "ORDER BY id;";
         JsonArray params = new JsonArray().add(user.getUserId()).add(user.getUsername()).add(formId).add(formId).add(formId);
@@ -277,15 +284,15 @@ public class DefaultFormService implements FormService {
     }
 
     @Override
-    public void getImage(EventBus eb, String idImage, Handler<Either<String, JsonObject>> handler) {
-        JsonObject action = new JsonObject().put("action", "getDocument").put("id", idImage);
-        String WORKSPACE_BUS_ADDRESS = "org.entcore.workspace";
-        eb.send(WORKSPACE_BUS_ADDRESS, action, handlerToAsyncHandler(message -> {
-            if (idImage.equals("")) {
-                handler.handle(new Either.Left<>("[DefaultFormService@getImage] An error id image"));
-            } else {
-                handler.handle(new Either.Right<>(message.body().getJsonObject("result")));
-            }
-        }));
+    public void checkFormsRights(List<String> groupsAndUserIds, UserInfos user, String right, JsonArray formIds, Handler<Either<String, JsonObject>> handler) {
+        String query = "SELECT COUNT(DISTINCT f.id) FROM " + Formulaire.FORM_TABLE + " f " +
+                "LEFT JOIN " + Formulaire.FORM_SHARES_TABLE + " fs ON fs.resource_id = f.id " +
+                "WHERE ((member_id IN " + Sql.listPrepared(groupsAndUserIds) + " AND action = ?) OR owner_id = ?) AND id IN " + Sql.listPrepared(formIds);
+        JsonArray params = (new fr.wseduc.webutils.collections.JsonArray(groupsAndUserIds))
+                .add(right)
+                .add(user.getUserId())
+                .addAll(formIds);
+
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 }

@@ -15,7 +15,7 @@ public interface RelFormFolderService {
     void listAll(UserInfos user, Handler<Either<String, JsonArray>> handler);
 
     /**
-     * List all the relations form-folders for the folder of an user
+     * List all the relations form-folders for the folder of a user
      * @param user      user connected
      * @param folderId  folder identifier
      * @param handler   function handler returning JsonArray data
@@ -23,7 +23,15 @@ public interface RelFormFolderService {
     void listByFolder(UserInfos user, String folderId, Handler<Either<String, JsonArray>> handler);
 
     /**
-     * List all the children forms for the folder of an user
+     * List all the relations form-folders for specific forms
+     * @param user      user connected
+     * @param formIds   forms identifiers
+     * @param handler   function handler returning JsonArray data
+     */
+    void listMineByFormIds(UserInfos user, JsonArray formIds, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * List all the children forms for the folders of an user
      * @param folderIds folder identifiers
      * @param handler   function handler returning JsonArray data
      */
@@ -43,7 +51,16 @@ public interface RelFormFolderService {
      * @param folderId  folder identifier
      * @param handler   function handler returning JsonArray data
      */
-    void create(UserInfos user, JsonArray formIds, String folderId, Handler<Either<String, JsonArray>> handler);
+    void create(UserInfos user, JsonArray formIds, Integer folderId, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * Create relations form-folder for multiple folders
+     * @param user      user connected
+     * @param formIds   forms identifiers
+     * @param folderIds  folders identifiers
+     * @param handler   function handler returning JsonArray data
+     */
+    void createMultiple(UserInfos user, JsonArray formIds, JsonArray folderIds, Handler<Either<String, JsonArray>> handler);
 
     /**
      * Update multiple relations form-folder
@@ -52,5 +69,5 @@ public interface RelFormFolderService {
      * @param newFolderId   new folder identifier
      * @param handler       function handler returning JsonArray data
      */
-    void update(UserInfos user, JsonArray formIds, String newFolderId, Handler<Either<String, JsonArray>> handler);
+    void update(UserInfos user, JsonArray formIds, int newFolderId, Handler<Either<String, JsonArray>> handler);
 }

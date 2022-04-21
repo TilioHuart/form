@@ -43,20 +43,33 @@ public interface QuestionService {
     void get(String questionId, Handler<Either<String, JsonObject>> handler);
 
     /**
+     * Get the section ids with conditional questions for a specific form
+     * @param formId form identifier
+     * @param handler function handler returning JsonArray data
+     */
+    void getSectionIdsWithConditionalQuestions(String formId, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * Get the section ids of a specific form thanks to a question id
+     * @param questionId question identifier
+     * @param handler function handler returning JsonArray data
+     */
+    void getSectionIdsByForm(String questionId, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * Get form position corresponding to a specific question
+     * @param questionId question identifier
+     * @param handler function handler returning JsonObject data
+     */
+    void getFormPosition(String questionId, Handler<Either<String, JsonObject>> handler);
+
+    /**
      * Create a question in a specific form
      * @param question JsonObject data
      * @param formId form identifier
      * @param handler function handler returning JsonObject data
      */
     void create(JsonObject question, String formId, Handler<Either<String, JsonObject>> handler);
-
-    /**
-     * Create several questions in a specific form
-     * @param questions JsonArray data
-     * @param formId form identifier
-     * @param handler function handler returning JsonArray data
-     */
-    void createMultiple(JsonArray questions, String formId, Handler<Either<String, JsonArray>> handler);
 
     /**
      * Update specific questions

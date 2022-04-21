@@ -31,6 +31,8 @@ public class DelegateController extends ControllerHelper {
     public void initRGPDRight(final HttpServerRequest request) {
     }
 
+    // API
+
     @Get("/delegates")
     @ApiDoc("List all delegates of the platform")
     @ResourceFilter(RgpdRight.class)

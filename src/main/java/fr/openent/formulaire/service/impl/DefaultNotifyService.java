@@ -1,7 +1,6 @@
 package fr.openent.formulaire.service.impl;
 
 import fr.openent.formulaire.service.NotifyService;
-import fr.wseduc.webutils.http.Renders;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import org.entcore.common.notification.TimelineHelper;
@@ -11,6 +10,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.user.UserUtils;
+
+import static fr.wseduc.webutils.http.Renders.unauthorized;
 
 public class DefaultNotifyService implements NotifyService {
     private final static Logger log = LoggerFactory.getLogger(DefaultNotifyService.class);
@@ -28,8 +29,9 @@ public class DefaultNotifyService implements NotifyService {
     public void notifyNewForm(HttpServerRequest request, JsonObject form, JsonArray responders) {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
+                String message = "[Formulaire@notifyNewForm] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
                 return;
             }
 
@@ -49,8 +51,9 @@ public class DefaultNotifyService implements NotifyService {
     public void notifyResponse(HttpServerRequest request, JsonObject form, JsonArray managers) {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
+                String message = "[Formulaire@notifyResponse] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
                 return;
             }
 

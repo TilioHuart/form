@@ -1,6 +1,6 @@
 import {Selectable, Selection} from "entcore-toolkit";
 import {idiom, notify, Rights, Shareable} from "entcore";
-import {formService} from "../services";
+import {formService, utilsService} from "../services";
 import {Distribution, Distributions, DistributionStatus} from "./Distribution";
 import {FiltersFilters, FiltersOrders} from "../core/enums";
 
@@ -151,7 +151,7 @@ export class Form implements Selectable, Shareable  {
     setInfoImage = async () : Promise<void> => {
         const typesImgNoSend = ["image/png", "image/jpg", "image/jpeg", "image/gif"];
         try {
-            let { metadata } = await formService.getInfoImage(this);
+            let { metadata } = await utilsService.getInfoImage(this);
             this.infoImg = {
                 name: metadata.filename,
                 type: metadata["content-type"],

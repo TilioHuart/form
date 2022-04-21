@@ -254,6 +254,7 @@
   "formulaire.error.formService.delete": "Une erreur est survenue lors de la suppression du formulaire",
   "formulaire.error.formService.move": "Une erreur est survenue lors du déplacement des formulaires",
   "formulaire.error.formService.remind": "Une erreur est survenue lors de l'envoi du rappel",
+  "formulaire.error.formService.export": "Une erreur est survenue lors de l'export des résultats",
   "formulaire.error.formService.unshare": "Une erreur est survenue lors de la suppression du partage du formulaire",
   "formulaire.error.formService.image": "Une erreur est survenue lors de la récupération de l'image",
   "formulaire.error.formService.checkremind": "Une erreur est survenue lors de la récupération des réponses",
@@ -271,7 +272,6 @@
   "formulaire.error.questionService.list": "Une erreur est survenue lors de la récupération des questions",
   "formulaire.error.questionService.count": "Une erreur est survenue lors du décompte des questions",
   "formulaire.error.questionService.create": "Une erreur est survenue lors de la création de la nouvelle question",
-  "formulaire.error.questionService.createMultiple": "Une erreur est survenue lors de la création des questions",
   "formulaire.error.questionService.get": "Une erreur est survenue lors de la récupération de la question",
   "formulaire.error.questionService.update": "Une erreur est survenue lors de la sauvegarde de la question",
   "formulaire.error.questionService.delete": "Une erreur est survenue lors de la suppression de la question",
@@ -284,7 +284,6 @@
   "formulaire.error.questionChoiceService.list": "Une erreur est survenue lors de la récupération des choix de question",
   "formulaire.error.questionChoiceService.get": "Une erreur est survenue lors de la récupération du choix de question",
   "formulaire.error.questionChoiceService.create": "Une erreur est survenue lors de la création du nouveau choix de question",
-  "formulaire.error.questionChoiceService.createMultiple": "Une erreur est survenue lors de la création des choix de question",
   "formulaire.error.questionChoiceService.update": "Une erreur est survenue lors de la sauvegarde du choix de question",
   "formulaire.error.questionChoiceService.delete": "Une erreur est survenue lors de la suppression du choix de question",
 
@@ -323,6 +322,9 @@
   "formulaire.error.sectionService.create": "Une erreur est survenue lors de la création de la nouvelle section",
   "formulaire.error.sectionService.update": "Une erreur est survenue lors de la sauvegarde de la section",
   "formulaire.error.sectionService.delete": "Une erreur est survenue lors de la suppression des sections",
+
+  "formulaire.error.utilsService.get": "Une erreur est survenue lors de la récupération de l'image",
+  "formulaire.error.utilsService.create": "Une erreur est survenue lors de la création des fichiers",
 
   "formulaire.error.delegateService.sync": "Une erreur est survenue lors de la synchronisation des délégués",
   "formulaire.error.delegateService.list": "Une erreur est survenue lors de la récupération des délégués",

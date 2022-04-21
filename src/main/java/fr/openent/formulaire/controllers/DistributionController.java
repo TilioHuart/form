@@ -17,7 +17,6 @@ import fr.openent.formulaire.service.impl.DefaultResponseService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
-import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
@@ -53,8 +52,10 @@ public class DistributionController extends ControllerHelper {
     public void listBySender(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
+                String message = "[Formulaire@listBySender] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
             }
             distributionService.listBySender(user, arrayResponseHandler(request));
         });
@@ -67,8 +68,10 @@ public class DistributionController extends ControllerHelper {
     public void listByResponder(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
+                String message = "[Formulaire@listByResponder] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
             }
             distributionService.listByResponder(user, arrayResponseHandler(request));
         });
@@ -83,6 +86,23 @@ public class DistributionController extends ControllerHelper {
         distributionService.listByForm(formId, arrayResponseHandler(request));
     }
 
+    @Get("/distributions/forms/:formId/listMine")
+    @ApiDoc("List all the distributions for a specific form sent to me")
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void listByFormAndResponder(HttpServerRequest request) {
+        String formId = request.getParam("formId");
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user == null) {
+                String message = "[Formulaire@listByFormAndResponder] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
+            }
+            distributionService.listByFormAndResponder(formId, user, arrayResponseHandler(request));
+        });
+    }
+
     @Get("/distributions/forms/:formId/list/:status")
     @ApiDoc("List all the distributions of a specific form with a specific status")
     @ResourceFilter(CreationRight.class)
@@ -92,21 +112,6 @@ public class DistributionController extends ControllerHelper {
         String status = request.getParam("status");
         String nbLines = request.params().get("nbLines");
         distributionService.listByFormAndStatus(formId, status, nbLines, arrayResponseHandler(request));
-    }
-
-    @Get("/distributions/forms/:formId/listMine")
-    @ApiDoc("List all the distributions for a specific form sent to me")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
-    public void listByFormAndResponder(HttpServerRequest request) {
-        String formId = request.getParam("formId");
-        UserUtils.getUserInfos(eb, request, user -> {
-            if (user == null) {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
-            }
-            distributionService.listByFormAndResponder(formId, user, arrayResponseHandler(request));
-        });
     }
 
     @Get("/distributions/forms/:formId/count")
@@ -126,8 +131,10 @@ public class DistributionController extends ControllerHelper {
         String distributionId = request.getParam("distributionId");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
+                String message = "[Formulaire@getDistribution] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
             }
             distributionService.get(distributionId, defaultResponseHandler(request));
         });
@@ -141,49 +148,113 @@ public class DistributionController extends ControllerHelper {
         String formId = request.getParam("formId");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
+                String message = "[Formulaire@getByFormResponderAndStatus] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
             }
             distributionService.getByFormResponderAndStatus(formId, user, defaultResponseHandler(request));
         });
     }
 
-    @Post("/distributions/forms/:formId/add")
+    @Post("/distributions/:distributionId/add")
     @ApiDoc("Create a new distribution based on an already existing one")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void add(HttpServerRequest request) {
-        String formId = request.getParam("formId");
+        String distributionId = request.getParam("distributionId");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
+                String message = "[Formulaire@addDistribution] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
             }
-            RequestUtils.bodyToJson(request, distribution -> {
-                distributionService.countMyToDo(formId, user, countEvent -> {
-                    if (countEvent.isLeft()) {
-                        log.error("[Formulaire@createDistribution] Error in counting not finished distributions for formId " + formId);
-                        RenderHelper.badRequest(request, countEvent);
+
+            distributionService.get(distributionId, distributionEvt -> {
+                if (distributionEvt.isLeft()) {
+                    log.error("[Formulaire@addDistribution] Fail to get distribution with id " + distributionId);
+                    RenderHelper.internalError(request, distributionEvt);
+                    return;
+                }
+                if (distributionEvt.right().getValue().isEmpty()) {
+                    String message = "[Formulaire@addDistribution] No distribution found for id " + distributionId;
+                    log.error(message);
+                    notFound(request, message);
+                    return;
+                }
+
+                JsonObject distribution = distributionEvt.right().getValue();
+                String formId = distribution.getInteger("form_id").toString();
+                String ownerDistribution = distribution.getString("responder_id");
+
+                // Check that distribution is owned by the connected user
+                if (ownerDistribution == null || !ownerDistribution.equals(user.getUserId())) {
+                    String message = "[Formulaire@addDistribution] You're not owner of the distribution with id " + distributionId;
+                    log.error(message);
+                    unauthorized(request, message);
+                    return;
+                }
+
+                distributionService.countMyToDo(formId, user, countEvt -> {
+                    if (countEvt.isLeft()) {
+                        log.error("[Formulaire@addDistribution] Error in counting not finished distributions for formId " + formId);
+                        RenderHelper.internalError(request, countEvt);
+                        return;
                     }
-                    if (countEvent.right().getValue().getInteger("count") == 0) {
-                        distributionService.add(distribution, defaultResponseHandler(request));
+
+                    if (countEvt.right().getValue().getInteger("count") > 0) {
+                        log.error("[Formulaire@addDistribution] A not finished distribution already exists for this responder for formId " + formId);
+                        conflict(request);
+                        return;
                     }
-                    else {
-                        log.error("[Formulaire@createDistribution] A not finished distribution already exists for formId " + formId);
-                        Renders.conflict(request);
-                    }
+
+                    distributionService.add(distribution, defaultResponseHandler(request));
                 });
             });
         });
     }
 
     @Post("/distributions/:distributionId/duplicate")
-    @ApiDoc("Duplicate a distribution by id")
+    @ApiDoc("Duplicate a distribution and its responses based on distributionId")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void duplicateWithResponses(HttpServerRequest request) {
         String distributionId = request.getParam("distributionId");
-        distributionService.duplicateWithResponses(distributionId, defaultResponseHandler(request));
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user == null) {
+                String message = "[Formulaire@duplicateWithResponses] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
+            }
+
+            distributionService.get(distributionId, distributionEvt -> {
+                if (distributionEvt.isLeft()) {
+                    log.error("[Formulaire@duplicateWithResponses] Fail to get distribution with id " + distributionId);
+                    RenderHelper.internalError(request, distributionEvt);
+                    return;
+                }
+                if (distributionEvt.right().getValue().isEmpty()) {
+                    String message = "[Formulaire@duplicateWithResponses] No distribution found for id " + distributionId;
+                    log.error(message);
+                    notFound(request, message);
+                    return;
+                }
+
+                String ownerDistribution = distributionEvt.right().getValue().getString("responder_id");
+
+                // Check that distribution is owned by the connected user
+                if (ownerDistribution == null || !ownerDistribution.equals(user.getUserId())) {
+                    String message = "[Formulaire@duplicateWithResponses] You're not owner of the distribution with id " + distributionId;
+                    log.error(message);
+                    unauthorized(request, message);
+                    return;
+                }
+
+                distributionService.duplicateWithResponses(distributionId, defaultResponseHandler(request));
+            });
+        });
     }
 
     @Put("/distributions/:distributionId")
@@ -192,48 +263,104 @@ public class DistributionController extends ControllerHelper {
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
         String distributionId = request.getParam("distributionId");
-        RequestUtils.bodyToJson(request, distribution -> {
-            UserUtils.getUserInfos(eb, request, user -> {
-                if (user == null) {
-                    log.error("User not found in session.");
-                    Renders.unauthorized(request);
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user == null) {
+                String message = "[Formulaire@updateDistribution] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
+            }
+
+            RequestUtils.bodyToJson(request, distribution -> {
+                if (distribution == null || distribution.isEmpty()) {
+                    log.error("[Formulaire@updateDistribution] No distribution to update.");
+                    noContent(request);
                     return;
                 }
-                distributionService.update(distributionId, distribution, updateEvent -> {
-                    if (updateEvent.isLeft()) {
-                        log.error("[Formulaire@updateDistribution] Error in updating distribution " + distributionId);
-                        RenderHelper.badRequest(request, updateEvent);
+
+                // Check that distribution ids are corresponding
+                if (!distribution.getInteger("id").toString().equals(distributionId)) {
+                    String message = "[Formulaire@updateDistribution] Distribution ids in URL and payload don't match : " +
+                            distributionId + " and " + distribution.getInteger("id");
+                    log.error(message);
+                    badRequest(request, message);
+                    return;
+                }
+
+                distributionService.get(distributionId, distributionEvt -> {
+                    if (distributionEvt.isLeft()) {
+                        log.error("[Formulaire@updateDistribution] Fail to get distribution with id " + distributionId);
+                        RenderHelper.internalError(request, distributionEvt);
+                        return;
                     }
-                    if (distribution.getString("status").equals(Formulaire.FINISHED)) {
-                        String formId = distribution.getInteger("form_id").toString();
-                        formService.get(formId, user, getEvent -> {
-                            if (getEvent.isLeft()) {
-                                log.error("[Formulaire@updateDistribution] Error in getting form with id " + formId);
-                                RenderHelper.badRequest(request, getEvent);
-                            }
-
-                            JsonObject form = getEvent.right().getValue();
-                            if (form.getBoolean("response_notified")) {
-                                formService.listManagers(form.getInteger("id").toString(), listManagersEvent -> {
-                                    if (listManagersEvent.isLeft()) {
-                                        log.error("[Formulaire@updateDistribution] Error in listing managers for form with id " + formId);
-                                        RenderHelper.badRequest(request, listManagersEvent);
-                                    }
-
-                                    JsonArray managers = listManagersEvent.right().getValue();
-                                    JsonArray managerIds = new JsonArray();
-                                    for (int i = 0; i < managers.size(); i++) {
-                                        managerIds.add(managers.getJsonObject(i).getString("id"));
-                                    }
-
-                                    notifyService.notifyResponse(request, form, managerIds);
-                                    renderJson(request, new JsonObject(), 200);
-                                });
-                            }
-                        });
+                    if (distributionEvt.right().getValue().isEmpty()) {
+                        String message = "[Formulaire@updateDistribution] No distribution found for id " + distributionId;
+                        log.error(message);
+                        notFound(request, message);
+                        return;
                     }
-                    renderJson(request, new JsonObject(), 200);
+
+                    String ownerDistribution = distributionEvt.right().getValue().getString("responder_id");
+
+                    // Check that distribution is owned by the connected user
+                    if (ownerDistribution == null || !ownerDistribution.equals(user.getUserId())) {
+                        String message = "[Formulaire@updateDistribution] You're not owner of the distribution with id " + distributionId;
+                        log.error(message);
+                        unauthorized(request, message);
+                        return;
+                    }
+
+                    distributionService.update(distributionId, distribution, updateDistributionEvt -> {
+                        if (updateDistributionEvt.isLeft()) {
+                            log.error("[Formulaire@updateDistribution] Error in updating distribution " + distributionId);
+                            RenderHelper.internalError(request, updateDistributionEvt);
+                            return;
+                        }
+
+                        JsonObject finalDistribution = updateDistributionEvt.right().getValue();
+
+                        if (finalDistribution.getString("status").equals(Formulaire.FINISHED)) {
+                            String formId = finalDistribution.getInteger("form_id").toString();
+                            formService.get(formId, user, formEvt -> {
+                                if (formEvt.isLeft()) {
+                                    log.error("[Formulaire@updateDistribution] Error in getting form with id " + formId);
+                                    RenderHelper.internalError(request, formEvt);
+                                    return;
+                                }
+                                if (formEvt.right().getValue().isEmpty()) {
+                                    String message = "[Formulaire@updateDistribution] No form found for id " + formId;
+                                    log.error(message);
+                                    notFound(request, message);
+                                    return;
+                                }
+
+                                JsonObject form = formEvt.right().getValue();
+                                if (form.getBoolean("response_notified")) {
+                                    formService.listManagers(form.getInteger("id").toString(), listManagersEvent -> {
+                                        if (listManagersEvent.isLeft()) {
+                                            log.error("[Formulaire@updateDistribution] Error in listing managers for form with id " + formId);
+                                            RenderHelper.internalError(request, listManagersEvent);
+                                            return;
+                                        }
+
+                                        JsonArray managers = listManagersEvent.right().getValue();
+                                        JsonArray managerIds = new JsonArray();
+                                        for (int i = 0; i < managers.size(); i++) {
+                                            managerIds.add(managers.getJsonObject(i).getString("id"));
+                                        }
+
+                                        notifyService.notifyResponse(request, form, managerIds);
+                                        renderJson(request, finalDistribution, 200);
+                                    });
+                                }
+                            });
+                        }
+                        else {
+                            renderJson(request, finalDistribution, 200);
+                        }
+                    });
                 });
+
             });
         });
     }
@@ -245,40 +372,78 @@ public class DistributionController extends ControllerHelper {
     public void replace(HttpServerRequest request) {
         String distributionId = request.getParam("distributionId");
         String originalDistributionId = request.getParam("originalDistributionId");
-
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
+                String message = "[Formulaire@replaceDistribution] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
             }
-            distributionService.get(originalDistributionId, getEvent -> {
-                if (getEvent.isLeft()) {
+
+            distributionService.get(originalDistributionId, originalDistributionEvt -> {
+                if (originalDistributionEvt.isLeft()) {
                     log.error("[Formulaire@replaceDistribution] Error in getting distribution with id " + originalDistributionId);
-                    RenderHelper.badRequest(request, getEvent);
+                    RenderHelper.internalError(request, originalDistributionEvt);
+                    return;
+                }
+                if (originalDistributionEvt.right().getValue().isEmpty()) {
+                    String message = "[Formulaire@replaceDistribution] No distribution found for id " + originalDistributionId;
+                    log.error(message);
+                    notFound(request, message);
+                    return;
                 }
 
-                JsonObject distribution = getEvent.right().getValue();
-                if (distribution.getString("responder_id").equals(user.getUserId())) {
-                    distributionService.delete(originalDistributionId, deleteDistribEvent -> {
-                        if (deleteDistribEvent.isLeft()) {
+                JsonObject originalDistribution = originalDistributionEvt.right().getValue();
+
+                // Check that distribution is owned by the connected user
+                if (!originalDistribution.getString("responder_id").equals(user.getUserId())) {
+                    String message = "[Formulaire@replaceDistribution] You're not owner of the distribution with id " + originalDistributionId;
+                    log.error(message);
+                    unauthorized(request, message);
+                    return;
+                }
+
+                distributionService.get(distributionId, distributionEvt -> {
+                    if (distributionEvt.isLeft()) {
+                        log.error("[Formulaire@replaceDistribution] Error in getting distribution with id " + distributionId);
+                        RenderHelper.internalError(request, distributionEvt);
+                        return;
+                    }
+                    if (distributionEvt.right().getValue().isEmpty()) {
+                        String message = "[Formulaire@replaceDistribution] No distribution found for id " + distributionId;
+                        log.error(message);
+                        notFound(request, message);
+                        return;
+                    }
+
+                    JsonObject distribution = distributionEvt.right().getValue();
+
+                    // Check that distribution is owned by the connected user
+                    if (!distribution.getString("responder_id").equals(user.getUserId())) {
+                        String message = "[Formulaire@replaceDistribution] You're not owner of the distribution with id " + distributionId;
+                        log.error(message);
+                        unauthorized(request, message);
+                        return;
+                    }
+
+                    distributionService.delete(originalDistributionId, deleteDistribEvt -> {
+                        if (deleteDistribEvt.isLeft()) {
                             log.error("[Formulaire@replaceDistribution] Error in deleting distribution with id " + originalDistributionId);
-                            RenderHelper.badRequest(request, deleteDistribEvent);
+                            RenderHelper.internalError(request, deleteDistribEvt);
+                            return;
                         }
 
-                        responseService.deleteMultipleByDistribution(originalDistributionId, deleteRepEvent -> {
-                            if (deleteRepEvent.isLeft()) {
+                        responseService.deleteMultipleByDistribution(originalDistributionId, deleteRepEvt -> {
+                            if (deleteRepEvt.isLeft()) {
                                 log.error("[Formulaire@replaceDistribution] Error in deleting responses for distribution with id " + originalDistributionId);
-                                RenderHelper.badRequest(request, deleteRepEvent);
+                                RenderHelper.internalError(request, deleteRepEvt);
+                                return;
                             }
 
                             distributionService.update(distributionId, distribution, defaultResponseHandler(request));
                         });
                     });
-                }
-                else {
-                    log.error("[Formulaire@replaceDistribution] Deleting a distribution not owned is forbidden.");
-                    Renders.unauthorized(request);
-                }
+                });
             });
         });
     }

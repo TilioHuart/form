@@ -3,6 +3,7 @@ package fr.openent.formulaire.controllers;
 import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.export.FormResponsesExportCSV;
 import fr.openent.formulaire.export.FormResponsesExportPDF;
+import fr.openent.formulaire.helpers.DataChecker;
 import fr.openent.formulaire.helpers.FutureHelper;
 import fr.openent.formulaire.helpers.RenderHelper;
 import fr.openent.formulaire.helpers.UtilsHelper;
@@ -17,7 +18,6 @@ import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.http.Renders;
-import fr.wseduc.webutils.http.response.DefaultResponseHandler;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.*;
 import io.vertx.core.eventbus.Message;
@@ -46,6 +46,7 @@ public class FormController extends ControllerHelper {
     private final FormService formService;
     private final DistributionService distributionService;
     private final QuestionChoiceService questionChoiceService;
+    private final ResponseService responseService;
     private final ResponseFileService responseFileService;
     private final FormSharesService formShareService;
     private final FolderService folderService;
@@ -60,6 +61,7 @@ public class FormController extends ControllerHelper {
         this.formService = new DefaultFormService();
         this.distributionService = new DefaultDistributionService();
         this.questionChoiceService = new DefaultQuestionChoiceService();
+        this.responseService = new DefaultResponseService();
         this.responseFileService = new DefaultResponseFileService();
         this.formShareService = new DefaultFormSharesService();
         this.folderService = new DefaultFolderService();
@@ -100,52 +102,57 @@ public class FormController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                final List<String> groupsAndUserIds = new ArrayList<>();
-                groupsAndUserIds.add(user.getUserId());
-                if (user.getGroupsIds() != null) {
-                    groupsAndUserIds.addAll(user.getGroupsIds());
-                }
-                formService.list(groupsAndUserIds, user, arrayResponseHandler(request));
-            } else {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
+            if (user == null) {
+                String message = "[Formulaire@listForms] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
             }
+
+            final List<String> groupsAndUserIds = new ArrayList<>();
+            groupsAndUserIds.add(user.getUserId());
+            if (user.getGroupsIds() != null) {
+                groupsAndUserIds.addAll(user.getGroupsIds());
+            }
+            formService.list(groupsAndUserIds, user, arrayResponseHandler(request));
         });
     }
 
-    @Get("/sentForms")
+    @Get("/forms/sent")
     @ApiDoc("List all the forms sent to me")
     @ResourceFilter(ResponseRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listSentForms(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                formService.listSentForms(user, arrayResponseHandler(request));
-            } else {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
+            if (user == null) {
+                String message = "[Formulaire@listSentForms] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
             }
+            formService.listSentForms(user, arrayResponseHandler(request));
         });
     }
 
-    @Get("/linker")
+    @Get("/forms/linker")
     @ApiDoc("List all the forms for the linker")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listForLinker(final HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                final List<String> groupsAndUserIds = new ArrayList<>();
-                groupsAndUserIds.add(user.getUserId());
-                if (user.getGroupsIds() != null) {
-                    groupsAndUserIds.addAll(user.getGroupsIds());
-                }
-                formService.listForLinker(groupsAndUserIds, user, arrayResponseHandler(request));
-            } else {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
+            if (user == null) {
+                String message = "[Formulaire@listForLinker] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
             }
+
+            final List<String> groupsAndUserIds = new ArrayList<>();
+            groupsAndUserIds.add(user.getUserId());
+            if (user.getGroupsIds() != null) {
+                groupsAndUserIds.addAll(user.getGroupsIds());
+            }
+            formService.listForLinker(groupsAndUserIds, user, arrayResponseHandler(request));
         });
     }
 
@@ -157,10 +164,12 @@ public class FormController extends ControllerHelper {
         String formId = request.getParam("formId");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
+                String message = "[Formulaire@getForm] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
                 return;
             }
+
             formService.get(formId, user, defaultResponseHandler(request));
         });
     }
@@ -171,45 +180,102 @@ public class FormController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                RequestUtils.bodyToJson(request, form -> {
-                    formService.create(form, user, createEvent -> {
-                        if (createEvent.isLeft()) {
-                            log.error("[Formulaire@create] Failed to create form : " + form);
-                            RenderHelper.badRequest(request, createEvent);
+            if (user == null) {
+                String message = "[Formulaire@createForm] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
+            }
+
+            RequestUtils.bodyToJson(request, form -> {
+                if (form == null || form.isEmpty()) {
+                    log.error("[Formulaire@createForm] No form to create.");
+                    noContent(request);
+                    return;
+                }
+
+                // date_ending should be after date_opening if not null
+                boolean areDateValid = DataChecker.checkFormDatesValidity(new JsonArray().add(form));
+                if (!areDateValid) {
+                    String message = "[Formulaire@createForm] You cannot create a form with a ending date before the opening date.";
+                    log.error(message);
+                    badRequest(request, message);
+                    return;
+                }
+
+                // RGPD lifetime should be in [3, 6, 9, 12]
+                boolean isRGPDLifetimeOk = DataChecker.checkRGPDLifetimeValidity(new JsonArray().add(form));
+                if (!isRGPDLifetimeOk) {
+                    String message = "[Formulaire@createForm] Wrong RGPD lifetime value : " + form.getInteger("rgpd_lifetime");
+                    log.error(message);
+                    badRequest(request, message);
+                    return;
+                }
+
+                // Check if parent folder is Archive or Share folders
+                Integer folderId = form.getInteger("folder_id") != null ? form.getInteger("folder_id") : Formulaire.ID_ROOT_FOLDER;
+                if (folderId == Formulaire.ID_SHARED_FOLDER || folderId == Formulaire.ID_ARCHIVED_FOLDER) {
+                    String message = "[Formulaire@createForm] You cannot create a folder into the folder with id : " + folderId;
+                    log.error(message);
+                    badRequest(request, message);
+                    return;
+                }
+
+                folderService.get(folderId.toString(), folderEvt -> {
+                    if (folderEvt.isLeft()) {
+                        log.error("[Formulaire@createForm] Fail to get folder for id " + folderId);
+                        RenderHelper.internalError(request, folderEvt);
+                        return;
+                    }
+                    if (folderEvt.right().getValue().isEmpty()) {
+                        String message = "[Formulaire@createForm] No folder found for id " + folderId;
+                        log.error(message);
+                        notFound(request, message);
+                        return;
+                    }
+
+                    // Check if the folder is owned by the connected user (if custom folder)
+                    JsonObject folder = folderEvt.right().getValue();
+                    if (folderId != Formulaire.ID_ROOT_FOLDER && !folder.getString("user_id").equals(user.getUserId())) {
+                        String message = "[Formulaire@createForm] Your not owner of the folder with id " + folderId;
+                        log.error(message);
+                        unauthorized(request, message);
+                        return;
+                    }
+
+                    formService.create(form, user, createEvt -> {
+                        if (createEvt.isLeft() || createEvt.right().getValue().isEmpty()) {
+                            log.error("[Formulaire@createForm] Failed to create form : " + form);
+                            RenderHelper.internalError(request, createEvt);
                             return;
                         }
 
                         eventStore.createAndStoreEvent(Formulaire.FormulaireEvent.CREATE.name(), request);
-                        String formId = createEvent.right().getValue().getInteger("id").toString();
-                        Integer folderId = form.getInteger("folder_id");
-                        relFormFolderService.create(user, new JsonArray().add(formId), folderId.toString(), createRelEvent -> {
-                            if (createRelEvent.isLeft()) {
-                                log.error("[Formulaire@create] Failed to create relation form-folder for form : " + form);
-                                RenderHelper.badRequest(request, createRelEvent);
+                        String formId = createEvt.right().getValue().getInteger("id").toString();
+                        relFormFolderService.create(user, new JsonArray().add(formId), folderId, createRelEvt -> {
+                            if (createRelEvt.isLeft() || createEvt.right().getValue().isEmpty()) {
+                                log.error("[Formulaire@createForm] Failed to create relation form-folder for form : " + form);
+                                RenderHelper.internalError(request, createRelEvt);
                                 return;
                             }
 
                             if (folderId != Formulaire.ID_ROOT_FOLDER) { // We do not sync root folder counts (useless)
-                                folderService.syncNbChildren(user, folderId.toString(), syncEvent -> {
-                                    if (syncEvent.isLeft()) {
+                                folderService.syncNbChildren(user, new JsonArray().add(folderId), syncEvt -> {
+                                    if (syncEvt.isLeft()) {
                                         log.error("[Formulaire@moveForm] Error in sync children counts for folder " + folderId);
-                                        RenderHelper.badRequest(request, syncEvent);
+                                        RenderHelper.internalError(request, syncEvt);
                                         return;
                                     }
-                                    renderJson(request, createEvent.right().getValue());
+                                    renderJson(request, createEvt.right().getValue());
                                 });
                             }
                             else {
-                                renderJson(request, createEvent.right().getValue());
+                                renderJson(request, createEvt.right().getValue());
                             }
                         });
                     });
                 });
-            } else {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
-            }
+            });
         });
     }
 
@@ -219,67 +285,190 @@ public class FormController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void createMultiple(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                RequestUtils.bodyToJsonArray(request, forms -> {
-                    formService.createMultiple(forms, user, createEvent -> {
-                        if (createEvent.isLeft()) {
-                            log.error("[Formulaire@createMultiple] Failed to create forms : " + forms);
-                            RenderHelper.badRequest(request, createEvent);
+            if (user == null) {
+                String message = "[Formulaire@createMultipleForm] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
+            }
+
+            RequestUtils.bodyToJsonArray(request, forms -> {
+                if (forms == null || forms.isEmpty()) {
+                    log.error("[Formulaire@createMultipleForm] No forms to create.");
+                    noContent(request);
+                    return;
+                }
+
+                // date_ending should be after date_ending if not null
+                boolean areDateValid = DataChecker.checkFormDatesValidity(forms);
+                if (!areDateValid) {
+                    String message = "[Formulaire@createMultipleForm] You cannot create a form with an ending date before the opening date.";
+                    log.error(message);
+                    badRequest(request, message);
+                    return;
+                }
+
+                // RGPD lifetime should be in [3, 6, 9, 12]
+                boolean isRGPDLifetimeOk = DataChecker.checkRGPDLifetimeValidity(forms);
+                if (!isRGPDLifetimeOk) {
+                    String message = "[Formulaire@createMultipleForm] A RGPD lifetime value should be in " + Formulaire.RGPD_LIFETIME_VALUES;
+                    log.error(message);
+                    badRequest(request, message);
+                    return;
+                }
+
+                JsonArray folderIds = UtilsHelper.getByProp(forms, "folder_id");
+                folderService.listByIds(folderIds, foldersEvt -> {
+                    if (foldersEvt.isLeft()) {
+                        log.error("[Formulaire@createMultipleForm] Fail to list folders for ids " + folderIds);
+                        RenderHelper.internalError(request, foldersEvt);
+                        return;
+                    }
+                    if (foldersEvt.right().getValue().isEmpty()) {
+                        String message = "[Formulaire@createMultipleForm] No folders found for ids " + folderIds;
+                        log.error(message);
+                        notFound(request, message);
+                        return;
+                    }
+
+                    // Check if one of the folders is not owned by the connected user
+                    JsonArray folders = foldersEvt.right().getValue();
+                    boolean areUserIdsOk = DataChecker.checkFolderIdsValidity(folders, user.getUserId());
+                    if (!areUserIdsOk) {
+                        String message = "[Formulaire@createMultipleForm] Your not owner of one of the folders with ids " + folderIds;
+                        log.error(message);
+                        unauthorized(request, message);
+                        return;
+                    }
+
+                    formService.createMultiple(forms, user, formsEvt -> {
+                        if (formsEvt.isLeft()) {
+                            log.error("[Formulaire@createMultipleForm] Failed to create forms : " + forms);
+                            RenderHelper.internalError(request, formsEvt);
                             return;
                         }
-
                         eventStore.createAndStoreEvent(Formulaire.FormulaireEvent.CREATE.name(), request);
-                        JsonArray formIds = UtilsHelper.getIds(forms);
-                        Integer folderId = forms.getJsonObject(0).getInteger("folder_id");
-                        relFormFolderService.create(user, formIds, folderId.toString(), createRelEvent -> {
-                            if (createRelEvent.isLeft()) {
-                                log.error("[Formulaire@create] Failed to create relation form-folder for forms : " + formIds);
-                                RenderHelper.badRequest(request, createRelEvent);
+
+                        // Get result of creation
+                        JsonArray createdFormsInfos = formsEvt.right().getValue();
+                        JsonArray createdForms = new JsonArray();
+                        for (int k = 0; k < createdFormsInfos.size(); k++) {
+                            createdForms.addAll(createdFormsInfos.getJsonArray(k));
+                        }
+
+                        JsonArray formIds = UtilsHelper.getIds(createdForms, false);
+                        JsonArray finalFolderIds = UtilsHelper.getByProp(forms, "folder_id");
+                        relFormFolderService.createMultiple(user, formIds, finalFolderIds, createRelEvt -> {
+                            if (createRelEvt.isLeft()) {
+                                log.error("[Formulaire@createMultipleForm] Failed to create relations form-folder for forms : " + formIds);
+                                RenderHelper.internalError(request, createRelEvt);
                                 return;
                             }
 
-                            if (folderId != Formulaire.ID_ROOT_FOLDER) { // We do not sync root folder counts (useless)
-                                folderService.syncNbChildren(user, folderId.toString(), syncEvent -> {
-                                    if (syncEvent.isLeft()) {
-                                        log.error("[Formulaire@moveForm] Error in sync children counts for folder " + folderId);
-                                        RenderHelper.badRequest(request, syncEvent);
+                            JsonArray folderIdsToSync = new JsonArray();
+                            for (int j = 0; j < finalFolderIds.size(); j++) {
+                                if (finalFolderIds.getInteger(j) != Formulaire.ID_ROOT_FOLDER) {
+                                    folderIdsToSync.add(finalFolderIds.getInteger(j));
+                                }
+                            }
+
+                            if (folderIdsToSync.size() > 0) {
+                                folderService.syncNbChildren(user, folderIdsToSync, syncEvt -> {
+                                    if (syncEvt.isLeft()) {
+                                        log.error("[Formulaire@createMultipleForm] Error in sync children counts for folders with ids " + folderIdsToSync);
+                                        RenderHelper.internalError(request, syncEvt);
                                         return;
                                     }
-                                    renderJson(request, createEvent.right().getValue());
+                                    renderJson(request, createdForms);
                                 });
                             }
                             else {
-                                renderJson(request, createEvent.right().getValue());
+                                renderJson(request, createdForms);
                             }
-
-                            renderJson(request, createEvent.right().getValue());
                         });
                     });
                 });
-            } else {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
-            }
+            });
         });
     }
 
     @Post("/forms/duplicate/:folderId")
-    @ApiDoc("Duplicate several forms")
+    @ApiDoc("Duplicate several forms and put them into a specific folder")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void duplicate(HttpServerRequest request) {
         Integer folderId = Integer.parseInt(request.getParam("folderId"));
         UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                RequestUtils.bodyToJsonArray(request, formIds -> {
-                    List<Future> formsInfos = new ArrayList<>();
-                    // Duplicates form and all questions inside
-                    duplicatesFormsQuestions(request, folderId, user, formIds, formsInfos);
-                });
-            } else {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
+            if (user == null) {
+                String message = "[Formulaire@duplicateForms] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
             }
+
+            RequestUtils.bodyToJsonArray(request, formIds -> {
+                if (formIds == null || formIds.isEmpty()) {
+                    log.error("[Formulaire@duplicateForms] No forms to duplicate.");
+                    noContent(request);
+                    return;
+                }
+
+                final List<String> groupsAndUserIds = new ArrayList<>();
+                groupsAndUserIds.add(user.getUserId());
+                if (user.getGroupsIds() != null) {
+                    groupsAndUserIds.addAll(user.getGroupsIds());
+                }
+
+                formService.checkFormsRights(groupsAndUserIds, user, Formulaire.CONTRIB_RESOURCE_BEHAVIOUR, formIds, hasRightsEvt -> {
+                    if (hasRightsEvt.isLeft()) {
+                        log.error("[Formulaire@duplicateForms] Fail to check rights for method " + hasRightsEvt);
+                        RenderHelper.internalError(request, hasRightsEvt);
+                        return;
+                    }
+                    if (hasRightsEvt.right().getValue().isEmpty()) {
+                        String message = "[Formulaire@duplicateForms] No rights found for forms with ids " + formIds;
+                        log.error(message);
+                        notFound(request, message);
+                        return;
+                    }
+
+                    // Check if user is owner or contributor to all the forms
+                    Long count = hasRightsEvt.right().getValue().getLong("count");
+                    if (count == null || count != formIds.size()) {
+                        String message = "[Formulaire@duplicateForms] You're missing rights on one form or more.";
+                        log.error(message);
+                        unauthorized(request, message);
+                        return;
+                    }
+
+                    folderService.get(folderId.toString(), folderEvt -> {
+                        if (folderEvt.isLeft()) {
+                            log.error("[Formulaire@duplicateForms] Fail to get folder for id " + folderId);
+                            RenderHelper.internalError(request, folderEvt);
+                            return;
+                        }
+                        if (folderEvt.right().getValue().isEmpty()) {
+                            String message = "[Formulaire@duplicateForms] No folder found for id " + folderId;
+                            log.error(message);
+                            notFound(request, message);
+                            return;
+                        }
+
+                        // Check if the folder is not owned by the connected user
+                        JsonObject folder = folderEvt.right().getValue();
+                        if (!folder.getString("user_id").equals(user.getUserId())) {
+                            String message = "[Formulaire@duplicateForms] You're not owner of the folder with id " + folderId;
+                            log.error(message);
+                            unauthorized(request, message);
+                            return;
+                        }
+
+                        List<Future> formsInfos = new ArrayList<>();
+                        // Duplicates form and all questions inside
+                        duplicatesFormsQuestions(request, folderId, user, formIds, formsInfos);
+                    });
+                });
+            });
         });
     }
 
@@ -289,22 +478,24 @@ public class FormController extends ControllerHelper {
             formsInfos.add(promise.future());
             formService.duplicate(formIds.getInteger(i), user, FutureHelper.handlerJsonArray(promise));
         }
-        CompositeFuture.all(formsInfos).onComplete(evt -> {
-            if (evt.failed()) {
-                log.error("[Formulaire@duplicate] Failed to retrieve info : " + evt.cause());
-                badRequest(request);
+        CompositeFuture.all(formsInfos).onComplete(formsInfosEvt -> {
+            if (formsInfosEvt.failed()) {
+                log.error("[Formulaire@duplicateForms] Failed to retrieve info for forms with ids " + formIds);
+                RenderHelper.internalError(request, formsInfosEvt);
+                return;
             }
             // Duplicates all potential question choices
-            duplicatesQuestionChoices(request, folderId, user, formIds, evt);
+            duplicatesQuestionChoices(request, folderId, user, formIds, formsInfosEvt);
         });
     }
 
-    private void duplicatesQuestionChoices(HttpServerRequest request, Integer folderId, UserInfos user, JsonArray formIds, AsyncResult<CompositeFuture> evt) {
+    private void duplicatesQuestionChoices(HttpServerRequest request, Integer folderId, UserInfos user, JsonArray formIds, AsyncResult<CompositeFuture> questionsEvt) {
         List<Future> questionsInfosFutures = new ArrayList<>();
 
-        for (Object questions : evt.result().list()) {
+        for (Object questions : questionsEvt.result().list()) {
             JsonArray questionsInfos = ((JsonArray) questions);
-            if(questionsInfos.getJsonObject(0).getInteger("id") != null){
+            if (questionsInfos.getJsonObject(0).getInteger("id") != null
+            && questionsInfos.getJsonObject(0).getInteger("form_id") != null) {
                 for (int i = 0; i < questionsInfos.size(); i++) {
                     JsonObject questionInfo = questionsInfos.getJsonObject(i);
                     int formId = questionInfo.getInteger("form_id");
@@ -319,35 +510,35 @@ public class FormController extends ControllerHelper {
                 }
             }
         }
-        CompositeFuture.all(questionsInfosFutures).onComplete(evt1 -> {
-            if (evt1.failed()) {
-                log.error("[Formulaire@duplicate] Failed to retrieve info from questions : " + evt1.cause());
-                badRequest(request);
+        CompositeFuture.all(questionsInfosFutures).onComplete(choicesEvt -> {
+            if (choicesEvt.failed()) {
+                log.error("[Formulaire@duplicateForms] Failed to duplicate choices for questions of forms with ids " + formIds);
+                RenderHelper.internalError(request, choicesEvt);
+                return;
             }
             // Sync folders with this new forms
-            syncFoldersForms(request, folderId, user, formIds, evt);
+            syncFoldersForms(request, folderId, user, formIds, questionsEvt);
         });
     }
 
-    private void syncFoldersForms(HttpServerRequest request, Integer folderId, UserInfos user, JsonArray formIds, AsyncResult<CompositeFuture> evt) {
+    private void syncFoldersForms(HttpServerRequest request, Integer folderId, UserInfos user, JsonArray formIds, AsyncResult<CompositeFuture> questionsEvt) {
         eventStore.createAndStoreEvent(Formulaire.FormulaireEvent.CREATE.name(), request);
-        List<Object> questions = evt.result().list();
         JsonArray newFormIds = new JsonArray();
-        for (Object question : questions) {
+        for (Object question : questionsEvt.result().list()) {
             newFormIds.add(((JsonArray) question).getJsonObject(0).getInteger("form_id"));
         }
-        relFormFolderService.create(user, newFormIds, folderId.toString(), createRelEvent -> {
-            if (createRelEvent.isLeft()) {
-                log.error("[Formulaire@moveForm] Error in moving forms " + formIds);
-                RenderHelper.badRequest(request, createRelEvent);
+        relFormFolderService.create(user, newFormIds, folderId, createRelEvt -> {
+            if (createRelEvt.isLeft()) {
+                log.error("[Formulaire@duplicateForms] Error in moving forms with ids " + formIds);
+                RenderHelper.internalError(request, createRelEvt);
                 return;
             }
 
             if (folderId != Formulaire.ID_ROOT_FOLDER) { // We do not sync root folder counts (useless)
-                folderService.syncNbChildren(user, folderId.toString(), defaultResponseHandler(request));
+                folderService.syncNbChildren(user, new JsonArray().add(folderId), arrayResponseHandler(request));
             }
             else {
-                renderJson(request, createRelEvent.right().getValue());
+                renderJson(request, createRelEvt.right().getValue());
             }
         });
     }
@@ -358,8 +549,75 @@ public class FormController extends ControllerHelper {
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
         String formId = request.getParam("formId");
-        RequestUtils.bodyToJson(request, form -> {
-            formService.update(formId, form, defaultResponseHandler(request));
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user == null) {
+                String message = "[Formulaire@moveForms] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
+            }
+
+            RequestUtils.bodyToJson(request, form -> {
+                if (form == null || form.isEmpty()) {
+                    log.error("[Formulaire@updateForm] No form to update.");
+                    noContent(request);
+                    return;
+                }
+
+                // date_ending should be after date_ending if not null
+                boolean areDateValid = DataChecker.checkFormDatesValidity(new JsonArray().add(form));
+                if (!areDateValid) {
+                    String message = "[Formulaire@updateForm] You cannot update a form with an ending date before the opening date.";
+                    log.error(message);
+                    badRequest(request, message);
+                    return;
+                }
+
+                // RGPD lifetime should be in [3, 6, 9, 12]
+                boolean isRGPDLifetimeOk = DataChecker.checkRGPDLifetimeValidity(new JsonArray().add(form));
+                if (!isRGPDLifetimeOk) {
+                    String message = "[Formulaire@updateForm] Wrong RGPD lifetime value : " + form.getInteger("rgpd_lifetime");
+                    log.error(message);
+                    badRequest(request, message);
+                    return;
+                }
+
+                // Check if some properties can be changed (unable if there are already responses)
+                responseService.listByForm(formId, responsesEvt -> {
+                    if (responsesEvt.isLeft()) {
+                        log.error("[Formulaire@updateForm] Fail to get responses for form with id " + formId);
+                        RenderHelper.internalError(request, responsesEvt);
+                        return;
+                    }
+
+                    if (!responsesEvt.right().getValue().isEmpty()) {
+                        formService.get(formId, user, formEvt -> {
+                            if (formEvt.isLeft()) {
+                                log.error("[Formulaire@updateForm] Fail to get form for id " + formId);
+                                RenderHelper.internalError(request, formEvt);
+                                return;
+                            }
+                            if (formEvt.right().getValue().isEmpty()) {
+                                String message = "[Formulaire@updateForm] No form found for id " + formId;
+                                log.error(message);
+                                notFound(request, message);
+                                return;
+                            }
+
+                            // Reset props ''multiple', 'anonymous' and 'rgpd' to their current values
+                            JsonObject formRef = formEvt.right().getValue();
+                            form.put("multiple", formRef.getBoolean("multiple"));
+                            form.put("anonymous", formRef.getBoolean("anonymous"));
+                            form.put("rgpd", formRef.getBoolean("rgpd"));
+
+                            formService.update(formId, form, defaultResponseHandler(request));
+                        });
+                    }
+                    else {
+                        formService.update(formId, form, defaultResponseHandler(request));
+                    }
+                });
+            });
         });
     }
 
@@ -369,94 +627,159 @@ public class FormController extends ControllerHelper {
     @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String formId = request.getParam("formId");
-        responseFileService.listByForm(formId, responseFileIds -> {
-            if (responseFileIds.isRight()) {
-                JsonArray ids = responseFileIds.right().getValue();
-                JsonArray fileIds = new JsonArray();
+        responseFileService.listByForm(formId, responseFileIdsEvt -> {
+            if (responseFileIdsEvt.isLeft()) {
+                log.error("[Formulaire@deleteForm] Failed to retrieve files' ids for form : " + formId);
+                RenderHelper.internalError(request, responseFileIdsEvt);
+                return;
+            }
 
-                if (ids != null && ids.size() > 0) {
-                    for (Object fileId : ids) {
-                        if (fileId instanceof JsonObject) {
-                            fileIds.add(((JsonObject) fileId).getString("id"));
-                        }
+            JsonArray responseFileIds = responseFileIdsEvt.right().getValue();
+            if (responseFileIds != null && responseFileIds.size() > 0) {
+                JsonArray fileIds = UtilsHelper.getStringIds(responseFileIdsEvt.right().getValue());
+
+                ResponseFileController.deleteFiles(storage, fileIds, deleteFilesEvt -> {
+                    if (deleteFilesEvt.isLeft()) {
+                        log.error("[Formulaire@deleteForm] Fail to delete files in storage");
+                        RenderHelper.internalError(request, deleteFilesEvt);
+                        return;
                     }
 
-                    ResponseFileController.deleteFiles(storage, fileIds, deleteFilesEvt -> {
-                        if (deleteFilesEvt.isRight()) {
-                            responseFileService.deleteAll(fileIds, deleteResponseFilesEvt -> {
-                                if (deleteResponseFilesEvt.isRight()) {
-                                    formService.delete(formId, defaultResponseHandler(request));
-                                    // TODO sync folder count children (should decrement because of the deletion)
-                                }
-                                else {
-                                    log.error("[Formulaire@delete] Fail to delete response files in bdd");
-                                    renderError(request, new JsonObject().put("message", deleteResponseFilesEvt.left().getValue()));
-                                }
-                            });
+                    responseFileService.deleteAll(fileIds, deleteResponseFilesEvt -> {
+                        if (deleteResponseFilesEvt.isLeft()) {
+                            log.error("[Formulaire@deleteForm] Fail to delete response files in BDD");
+                            RenderHelper.internalError(request, deleteResponseFilesEvt);
+                            return;
                         }
-                        else {
-                            log.error("[Formulaire@delete] Fail to delete files in storage");
-                            renderError(request, new JsonObject().put("message", deleteFilesEvt.left().getValue()));
-                        }
+
+                        formService.delete(formId, defaultResponseHandler(request));
                     });
-                }
-                else {
-                    formService.delete(formId, defaultResponseHandler(request));
-                }
+                });
             }
             else {
-                log.error("[Formulaire@delete] Failed to retrieve files' ids for form : " + formId);
-                badRequest(request, responseFileIds.left().getValue());
+                formService.delete(formId, defaultResponseHandler(request));
             }
         });
     }
 
     @Put("/forms/move/:folderId")
-    @ApiDoc("Update a specific form")
+    @ApiDoc("Move specific forms to a specific folder")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void move(HttpServerRequest request) {
         Integer targetFolderId = Integer.parseInt(request.getParam("folderId"));
         UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                RequestUtils.bodyToJsonArray(request, forms -> {
-                    Integer oldFolderId = forms.getJsonObject(0).getInteger("folder_id");
-                    JsonArray formIds = UtilsHelper.getIds(forms);
-                    relFormFolderService.update(user, formIds, targetFolderId.toString(), updateEvent -> {
-                        if (updateEvent.isLeft()) {
-                            log.error("[Formulaire@moveForm] Error in moving forms " + forms);
-                            RenderHelper.badRequest(request, updateEvent);
+            if (user == null) {
+                String message = "[Formulaire@moveForms] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
+            }
+
+            RequestUtils.bodyToJsonArray(request, formIds -> {
+                if (formIds == null || formIds.isEmpty()) {
+                    log.error("[Formulaire@moveForms] No forms to move.");
+                    noContent(request);
+                    return;
+                }
+
+                final List<String> groupsAndUserIds = new ArrayList<>();
+                groupsAndUserIds.add(user.getUserId());
+                if (user.getGroupsIds() != null) {
+                    groupsAndUserIds.addAll(user.getGroupsIds());
+                }
+
+                formService.checkFormsRights(groupsAndUserIds, user, Formulaire.CONTRIB_RESOURCE_BEHAVIOUR, formIds, hasRightsEvt -> {
+                    if (hasRightsEvt.isLeft()) {
+                        log.error("[Formulaire@moveForms] Fail to check rights for method " + hasRightsEvt);
+                        RenderHelper.internalError(request, hasRightsEvt);
+                        return;
+                    }
+                    if (hasRightsEvt.right().getValue().isEmpty()) {
+                        String message = "[Formulaire@moveForms] No rights found for forms with ids " + formIds;
+                        log.error(message);
+                        notFound(request, message);
+                        return;
+                    }
+
+                    // Check if user is owner or contributor to all the forms
+                    Long count = hasRightsEvt.right().getValue().getLong("count");
+                    if (count == null || count != formIds.size()) {
+                        String message = "[Formulaire@moveForms] You're missing rights on one form or more.";
+                        log.error(message);
+                        unauthorized(request, message);
+                        return;
+                    }
+
+                    relFormFolderService.listMineByFormIds(user, formIds, relFormFolderEvt -> {
+                        if (relFormFolderEvt.isLeft()) {
+                            log.error("[Formulaire@moveForms] Failed to get relation form-folders for forms with id " + formIds);
+                            RenderHelper.internalError(request, relFormFolderEvt);
+                            return;
+                        }
+                        if (relFormFolderEvt.right().getValue().isEmpty()) {
+                            String message = "[Formulaire@moveForms] No relation form-folders found for forms with ids " + formIds;
+                            log.error(message);
+                            notFound(request, message);
                             return;
                         }
 
-                        if (targetFolderId != Formulaire.ID_ROOT_FOLDER) { // We do not sync root folder counts (useless)
-                            folderService.syncNbChildren(user, targetFolderId.toString(), syncEvent -> {
-                                if (syncEvent.isLeft()) {
-                                    log.error("[Formulaire@moveForm] Error in sync children counts for folder " + targetFolderId);
-                                    RenderHelper.badRequest(request, syncEvent);
+                        // Check if one of the folders is not owned by the connected user
+                        JsonArray relFormFolders = relFormFolderEvt.right().getValue();
+                        if (relFormFolders.size() != formIds.size()) {
+                            String message = "[Formulaire@moveForms] You're not owner of all the folders containing forms with ids " + formIds;
+                            log.error(message);
+                            unauthorized(request, message);
+                            return;
+                        }
+
+                        folderService.get(targetFolderId.toString(), targetedFolderEvt -> {
+                            if (targetedFolderEvt.isLeft()) {
+                                log.error("[Formulaire@moveForms] Failed to get folder with id " + targetFolderId);
+                                RenderHelper.internalError(request, targetedFolderEvt);
+                                return;
+                            }
+                            if (targetedFolderEvt.right().getValue().isEmpty()) {
+                                String message = "[Formulaire@moveForms] No folder found with id " + targetFolderId;
+                                log.error(message);
+                                notFound(request, message);
+                                return;
+                            }
+
+                            // Check if one of the folders is not owned by the connected user
+                            String folderOwner = targetedFolderEvt.right().getValue().getString("user_id");
+                            if (folderOwner == null || !user.getUserId().equals(folderOwner)) {
+                                String message = "[Formulaire@moveForms] You're not owner of the targeted folder with id " + targetFolderId;
+                                log.error(message);
+                                unauthorized(request, message);
+                                return;
+                            }
+
+                            relFormFolderService.update(user, formIds, targetFolderId, updateEvt -> {
+                                if (updateEvt.isLeft()) {
+                                    log.error("[Formulaire@moveForms] Error in moving forms with ids " + formIds);
+                                    RenderHelper.internalError(request, updateEvt);
                                     return;
                                 }
-                                if (oldFolderId != Formulaire.ID_ROOT_FOLDER) { // We do not sync root folder counts (useless)
-                                    folderService.syncNbChildren(user, oldFolderId.toString(), defaultResponseHandler(request));
+                                JsonArray folderIds = UtilsHelper.getByProp(relFormFolders, "folder_id").add(targetFolderId);
+                                JsonArray folderIdsToSync = new JsonArray();
+                                for (int j = 0; j < folderIds.size(); j++) {
+                                    if (folderIds.getInteger(j) != Formulaire.ID_ROOT_FOLDER) {
+                                        folderIdsToSync.add(folderIds.getInteger(j));
+                                    };
+                                }
+
+                                if (folderIdsToSync.size() > 0) {
+                                    folderService.syncNbChildren(user, folderIdsToSync, arrayResponseHandler(request));
                                 }
                                 else {
-                                    renderJson(request, syncEvent.right().getValue());
+                                    renderJson(request, updateEvt.right().getValue());
                                 }
                             });
-                        }
-                        else if (oldFolderId != Formulaire.ID_ROOT_FOLDER) { // We do not sync root folder counts (useless)
-                            folderService.syncNbChildren(user, oldFolderId.toString(), defaultResponseHandler(request));
-                        }
-                        else {
-                            renderJson(request, updateEvent.right().getValue());
-                        }
+                        });
                     });
                 });
-            }
-            else {
-                log.error("User not found in session.");
-                unauthorized(request);
-            }
+            });
         });
     }
 
@@ -466,106 +789,131 @@ public class FormController extends ControllerHelper {
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void sendReminder(HttpServerRequest request) {
         String formId = request.getParam("formId");
-        RequestUtils.bodyToJson(request, mail -> {
-            UserUtils.getUserInfos(eb, request, user -> {
-                if (user != null) {
-                    formService.get(formId, user, getFormEvent -> {
-                        if (getFormEvent.isRight()) {
-                            JsonObject form = getFormEvent.right().getValue();
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user == null) {
+                String message = "[Formulaire@sendReminder] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
+            }
 
-                            distributionService.listByForm(formId, getDistributions -> {
-                                if (getDistributions.isRight()) {
-                                    JsonArray distributions = getDistributions.right().getValue();
-                                    JsonArray localRespondersIds = new JsonArray();
-                                    JsonArray listMails = new JsonArray();
+            RequestUtils.bodyToJson(request, mail -> {
+                if (mail == null || mail.isEmpty()) {
+                    log.error("[Formulaire@sendReminder] No mail to send.");
+                    noContent(request);
+                    return;
+                }
 
-                                    // Generate list of mails to send
-                                    for (int i = 0; i < distributions.size(); i++) {
-                                        String id = distributions.getJsonObject(i).getString("responder_id");
-                                        if (!localRespondersIds.contains(id)) {
-                                            if (form.getBoolean("multiple")) {
-                                                localRespondersIds.add(id);
-                                            }
-                                            else if (distributions.getJsonObject(i).getString("date_response") == null) {
-                                                localRespondersIds.add(id);
-                                            }
-                                        }
+                formService.get(formId, user, formEvent -> {
+                    if (formEvent.isLeft()) {
+                        log.error("[Formulaire@sendReminder] Fail to get form " + formId + " : " + formEvent.left().getValue());
+                        RenderHelper.internalError(request, formEvent);
+                        return;
+                    }
+                    if (formEvent.right().getValue().isEmpty()) {
+                        String message = "[Formulaire@sendReminder] No form found for id " + formId;
+                        log.error(message);
+                        notFound(request, message);
+                        return;
+                    }
 
-                                        // Generate new mail object if limit or end loop are reached
-                                        if (i == distributions.size() - 1 || localRespondersIds.size() == config.getInteger("zimbra-max-recipients", 50)) {
-                                            JsonObject message = new JsonObject()
-                                                    .put("subject", mail.getString("subject"))
-                                                    .put("body", mail.getString("body"))
-                                                    .put("to", new JsonArray())
-                                                    .put("cci", localRespondersIds);
+                    // Should not send reminder if form is not sent
+                    JsonObject form = formEvent.right().getValue();
+                    if (!form.getBoolean("sent")) {
+                        String message = "[Formulaire@sendReminder] You cannot send a reminder for a form which is not already send for response.";
+                        log.error(message);
+                        badRequest(request, message);
+                        return;
+                    }
 
-                                            JsonObject action = new JsonObject()
-                                                    .put("action", "send")
-                                                    .put("userId", user.getUserId())
-                                                    .put("username", user.getUsername())
-                                                    .put("message", message);
+                    distributionService.listByForm(formId, distributionsEvent -> {
+                        if (distributionsEvent.isLeft()) {
+                            log.error("[Formulaire@sendReminder] Fail to retrieve distributions for form with id : " + formId);
+                            RenderHelper.internalError(request, distributionsEvent);
+                            return;
+                        }
+                        if (distributionsEvent.right().getValue().isEmpty()) {
+                            String message = "[Formulaire@sendReminder] No distributions found for form with id " + formId;
+                            log.error(message);
+                            notFound(request, message);
+                            return;
+                        }
 
-                                            listMails.add(action);
-                                            localRespondersIds = new JsonArray();
-                                        }
-                                    }
+                        JsonArray distributions = distributionsEvent.right().getValue();
+                        JsonArray localRespondersIds = new JsonArray();
+                        JsonArray listMails = new JsonArray();
 
-
-                                    // Prepare futures to get message responses
-                                    List<Future> mails = new ArrayList<>();
-                                    mails.addAll(Collections.nCopies(listMails.size(), Promise.promise().future()));
-
-                                    // Code to send mails
-                                    for (int i = 0; i < listMails.size(); i++) {
-                                        Future future = mails.get(i);
-
-                                        // Send mail via Conversation app if it exists or else with Zimbra
-                                        eb.request("org.entcore.conversation", listMails.getJsonObject(i), (Handler<AsyncResult<Message<JsonObject>>>) messageEvent -> {
-                                            if (!"ok".equals(messageEvent.result().body().getString("status"))) {
-                                                log.error("[Formulaire@sendReminder] Failed to send reminder : " + messageEvent.cause());
-                                                future.handle(Future.failedFuture(messageEvent.cause()));
-                                            }
-                                            future.handle(Future.succeededFuture(messageEvent.result().body()));
-                                        });
-                                    }
-
-
-                                    // Try to send effectively mails with code below and get results
-                                    CompositeFuture.all(mails).onComplete(evt -> {
-                                        if (evt.failed()) {
-                                            log.error("[Zimbra@sendMessage] Failed to send reminder : " + evt.cause());
-                                            Future.failedFuture(evt.cause());
-                                        }
-
-                                        // Update 'reminded' prop of the form
-                                        form.put("reminded", true);
-                                        formService.update(formId, form, updateEvent -> {
-                                            if (updateEvent.isRight()) {
-                                                renderJson(request, updateEvent.right().getValue());
-                                            }
-                                            else {
-                                                log.error("[Formulaire@sendReminder] Fail to update form " + formId + " : " + updateEvent.left().getValue());
-                                                renderError(request, new JsonObject().put("message", updateEvent.left().getValue()));
-                                            }
-                                        });
-                                    });
+                        // Generate list of mails to send
+                        for (int i = 0; i < distributions.size(); i++) {
+                            String id = distributions.getJsonObject(i).getString("responder_id");
+                            if (!localRespondersIds.contains(id)) {
+                                if (form.getBoolean("multiple")) {
+                                    localRespondersIds.add(id);
                                 }
-                                else {
-                                    String error = getDistributions.left().getValue();
-                                    log.error("[Formulaire@sendReminder] Fail to retrieve distributions of form " + formId + " : " + error);
-                                    renderError(request, new JsonObject().put("message", error));
+                                else if (distributions.getJsonObject(i).getString("date_response") == null) {
+                                    localRespondersIds.add(id);
                                 }
+                            }
+
+                            // Generate new mail object if limit or end loop are reached
+                            if (i == distributions.size() - 1 || localRespondersIds.size() == config.getInteger("zimbra-max-recipients", 50)) {
+                                JsonObject message = new JsonObject()
+                                        .put("subject", mail.getString("subject", ""))
+                                        .put("body", mail.getString("body", ""))
+                                        .put("to", new JsonArray())
+                                        .put("cci", localRespondersIds);
+
+                                JsonObject action = new JsonObject()
+                                        .put("action", "send")
+                                        .put("userId", user.getUserId())
+                                        .put("username", user.getUsername())
+                                        .put("message", message);
+
+                                listMails.add(action);
+                                localRespondersIds = new JsonArray();
+                            }
+                        }
+
+
+                        // Prepare futures to get message responses
+                        List<Future> mails = new ArrayList<>();
+                        mails.addAll(Collections.nCopies(listMails.size(), Promise.promise().future()));
+
+                        // Code to send mails
+                        for (int i = 0; i < listMails.size(); i++) {
+                            Future future = mails.get(i);
+
+                            // Send mail via Conversation app if it exists or else with Zimbra
+                            eb.request("org.entcore.conversation", listMails.getJsonObject(i), (Handler<AsyncResult<Message<JsonObject>>>) messageEvent -> {
+                                if (!messageEvent.result().body().getString("status").equals("ok")) {
+                                    log.error("[Formulaire@sendReminder] Failed to send reminder : " + messageEvent.cause());
+                                    future.handle(Future.failedFuture(messageEvent.cause()));
+                                }
+                                future.handle(Future.succeededFuture(messageEvent.result().body()));
                             });
                         }
-                        else {
-                            log.error("[Formulaire@sendReminder] Fail to get form " + formId + " : " + getFormEvent.left().getValue());
-                            renderError(request, new JsonObject().put("message", getFormEvent.left().getValue()));
-                        }
+
+                        // Try to send effectively mails with code below and get results
+                        CompositeFuture.all(mails).onComplete(sendMailsEvt -> {
+                            if (sendMailsEvt.failed()) {
+                                log.error("[Formulaire@sendReminder] Failed to send reminder : " + sendMailsEvt.cause());
+                                RenderHelper.internalError(request, sendMailsEvt);
+                                return;
+                            }
+
+                            // Update 'reminded' prop of the form
+                            form.put("reminded", true);
+                            formService.update(formId, form, updateEvt -> {
+                                if (updateEvt.isLeft()) {
+                                    log.error("[Formulaire@sendReminder] Fail to update form " + formId + " : " + updateEvt.left().getValue());
+                                    RenderHelper.internalError(request, updateEvt);
+                                    return;
+                                }
+                                renderJson(request, updateEvt.right().getValue());
+                            });
+                        });
                     });
-                } else {
-                    log.error("User not found in session.");
-                    Renders.unauthorized(request);
-                }
+                });
             });
         });
     }
@@ -577,17 +925,19 @@ public class FormController extends ControllerHelper {
     public void getMyFormRights(HttpServerRequest request) {
         String formId = request.getParam("formId");
         UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                List<String> groupsAndUserIds = new ArrayList();
-                groupsAndUserIds.add(user.getUserId());
-                if (user.getGroupsIds() != null) {
-                    groupsAndUserIds.addAll(user.getGroupsIds());
-                }
-                formService.getMyFormRights(formId, groupsAndUserIds, arrayResponseHandler(request));
-            } else {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
+            if (user == null) {
+                String message = "[Formulaire@getMyFormRights] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
             }
+
+            List<String> groupsAndUserIds = new ArrayList();
+            groupsAndUserIds.add(user.getUserId());
+            if (user.getGroupsIds() != null) {
+                groupsAndUserIds.addAll(user.getGroupsIds());
+            }
+            formService.getMyFormRights(formId, groupsAndUserIds, arrayResponseHandler(request));
         });
     }
 
@@ -597,23 +947,25 @@ public class FormController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void getAllMyFormRights(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                List<String> groupsAndUserIds = new ArrayList();
-                groupsAndUserIds.add(user.getUserId());
-                if (user.getGroupsIds() != null) {
-                    groupsAndUserIds.addAll(user.getGroupsIds());
-                }
-                formService.getAllMyFormRights(groupsAndUserIds, arrayResponseHandler(request));
-            } else {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
+            if (user == null) {
+                String message = "[Formulaire@getAllMyFormRights] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
             }
+
+            List<String> groupsAndUserIds = new ArrayList();
+            groupsAndUserIds.add(user.getUserId());
+            if (user.getGroupsIds() != null) {
+                groupsAndUserIds.addAll(user.getGroupsIds());
+            }
+            formService.getAllMyFormRights(groupsAndUserIds, arrayResponseHandler(request));
         });
     }
 
     // Exports
 
-    @Post("/export/:fileType/:formId")
+    @Post("/forms/:formId/export/:fileType")
     @ApiDoc("Export a specific form's responses into a file (CSV or PDF)")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
@@ -623,44 +975,47 @@ public class FormController extends ControllerHelper {
         RequestUtils.bodyToJson(request, images -> {
             UserUtils.getUserInfos(eb, request, user -> {
                 if (user == null) {
-                    log.error("User not found in session.");
-                    Renders.unauthorized(request);
+                    String message = "[Formulaire@exportForm] User not found in session.";
+                    log.error(message);
+                    unauthorized(request, message);
                     return;
                 }
+
                 formService.get(formId, user, getEvent -> {
-                    if (getEvent.isRight()) {
-                        switch (fileType) {
-                            case "csv":
-                                new FormResponsesExportCSV(request, getEvent.right().getValue()).launch();
-                                break;
-                            case "pdf":
-                                JsonObject form = getEvent.right().getValue();
-                                form.put("images", images);
-                                new FormResponsesExportPDF(request, vertx, config, storage, form).launch();
-                                break;
-                            default:
-                                badRequest(request);
-                                break;
-                        }
-                    }
-                    else {
+                    if (getEvent.isLeft()) {
                         log.error("[Formulaire@export] Error in getting form to export responses of form " + formId);
+                        RenderHelper.internalError(request, getEvent);
+                        return;
+                    }
+                    if (getEvent.right().getValue().isEmpty()) {
+                        String message = "[Formulaire@export] No form found for id " + formId;
+                        log.error(message);
+                        notFound(request, message);
+                        return;
+                    }
+
+                    switch (fileType) {
+                        case "csv":
+                            new FormResponsesExportCSV(request, getEvent.right().getValue()).launch();
+                            break;
+                        case "pdf":
+                            JsonObject form = getEvent.right().getValue();
+                            form.put("images", images);
+                            new FormResponsesExportPDF(request, vertx, config, storage, form).launch();
+                            break;
+                        default:
+                            String message = "[Formulaire@export] Wrong export format type : " + fileType;
+                            log.error(message);
+                            badRequest(request, message);
+                            break;
                     }
                 });
             });
         });
     }
 
-    // Image
 
-    @Get("/info/image/:idImage")
-    @ApiDoc("Get image info from workspace for a specific image")
-    @ResourceFilter(CreationRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
-    public void getInfoImg(final HttpServerRequest request) {
-        String idImage = request.getParam("idImage");
-        formService.getImage(eb, idImage, DefaultResponseHandler.defaultResponseHandler(request));
-    }
+
 
     // Share/Sending functions
 
@@ -679,20 +1034,14 @@ public class FormController extends ControllerHelper {
     @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void shareSubmit(final HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                request.pause();
-                final String formId = request.params().get("id");
-                formService.get(formId, user, getFormHandler -> {
-                    request.resume();
-                    final String formName = getFormHandler.right().getValue().getString("title");
-                    JsonObject params = new fr.wseduc.webutils.collections.JsonObject();
-                    FormController.super.shareJsonSubmit(request, null, false, params, null);
-                });
+            if (user == null) {
+                String message = "[Formulaire@shareSubmit] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
             }
-            else {
-                log.error("User not found in session.");
-                unauthorized(request);
-            }
+
+            FormController.super.shareJsonSubmit(request, null, false, new JsonObject(), null);
         });
     }
 
@@ -702,85 +1051,104 @@ public class FormController extends ControllerHelper {
     @SecuredAction(value = Formulaire.MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void shareResource(final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "share", shareFormObject -> {
+            if (shareFormObject == null || shareFormObject.isEmpty()) {
+                log.error("[Formulaire@shareResource] No forms to share.");
+                noContent(request);
+                return;
+            }
+
             UserUtils.getUserInfos(eb, request, user -> {
-                if (user != null) {
-                    // Get all ids, filter the one about sending (response right)
-                    final String formId = request.params().get("id");
-                    Map<String, Object> idUsers = shareFormObject.getJsonObject("users").getMap();
-                    Map<String, Object> idGroups = shareFormObject.getJsonObject("groups").getMap();
-                    Map<String, Object> idBookmarks = shareFormObject.getJsonObject("bookmarks").getMap();
+                if (user == null) {
+                    String message = "[Formulaire@shareResource] User not found in session.";
+                    log.error(message);
+                    unauthorized(request, message);
+                    return;
+                }
 
-                    JsonArray usersIds = new JsonArray(new ArrayList<>(filterIdsForSending(idUsers).keySet()));
-                    JsonArray groupsIds = new JsonArray(new ArrayList<>(filterIdsForSending(idGroups).keySet()));
-                    JsonArray bookmarksIds = new JsonArray(new ArrayList<>(filterIdsForSending(idBookmarks).keySet()));
+                // Get all ids, filter the one about sending (response right)
+                final String formId = request.params().get("id");
+                Map<String, Object> idUsers = shareFormObject.getJsonObject("users").getMap();
+                Map<String, Object> idGroups = shareFormObject.getJsonObject("groups").getMap();
+                Map<String, Object> idBookmarks = shareFormObject.getJsonObject("bookmarks").getMap();
 
-                    // Get group ids and users ids from bookmarks and add them to previous lists
-                    neoService.getIdsFromBookMarks(bookmarksIds, eventBookmarks -> {
-                        if (eventBookmarks.isRight()) {
-                            JsonArray ids = eventBookmarks.right().getValue().getJsonObject(0).getJsonArray("ids").getJsonObject(0).getJsonArray("ids");
-                            for (int i = 0; i < ids.size(); i++) {
-                                JsonObject id = ids.getJsonObject(i);
-                                boolean isGroup = id.getString("name") != null;
-                                (isGroup ? groupsIds : usersIds).add(id.getString("id"));
+                JsonArray usersIds = new JsonArray(new ArrayList<>(filterIdsForSending(idUsers).keySet()));
+                JsonArray groupsIds = new JsonArray(new ArrayList<>(filterIdsForSending(idGroups).keySet()));
+                JsonArray bookmarksIds = new JsonArray(new ArrayList<>(filterIdsForSending(idBookmarks).keySet()));
+
+                // Get group ids and users ids from bookmarks and add them to previous lists
+                neoService.getIdsFromBookMarks(bookmarksIds, eventBookmarks -> {
+                    if (eventBookmarks.isLeft()) {
+                        log.error("[Formulaire@shareResource] Fail to get ids from bookmarks' ids");
+                        RenderHelper.internalError(request, eventBookmarks);
+                        return;
+                    }
+                    if (eventBookmarks.right().getValue().isEmpty()) {
+                        String message = "[Formulaire@shareResource] No bookmarks found for ids " + bookmarksIds;
+                        log.error(message);
+                        notFound(request, message);
+                        return;
+                    }
+
+                    JsonArray ids = eventBookmarks.right().getValue().getJsonObject(0).getJsonArray("ids").getJsonObject(0).getJsonArray("ids");
+                    for (int i = 0; i < ids.size(); i++) {
+                        JsonObject id = ids.getJsonObject(i);
+                        boolean isGroup = id.getString("name") != null;
+                        (isGroup ? groupsIds : usersIds).add(id.getString("id"));
+                    }
+
+                    // Get all users ids from usersIds & groupsIds
+                    // Sync with distribution table
+                    neoService.getUsersInfosFromIds(usersIds, groupsIds, eventUsers -> {
+                        if (eventUsers.isLeft()) {
+                            log.error("[Formulaire@shareResource] Fail to get users' ids from groups' ids");
+                            RenderHelper.internalError(request, eventUsers);
+                            return;
+                        }
+                        if (eventUsers.right().getValue().isEmpty()) {
+                            String message = "[Formulaire@shareResource] No users found for ids " + usersIds + " or group ids " + groupsIds;
+                            log.error(message);
+                            notFound(request, message);
+                            return;
+                        }
+
+                        JsonArray infos = eventUsers.right().getValue();
+                        JsonArray responders = new JsonArray();
+                        for (int i = 0; i < infos.size(); i++) {
+                            JsonArray users = infos.getJsonObject(i).getJsonArray("users");
+                            responders.addAll(users);
+                        }
+
+                        // Check max sharing limit
+                        if (responders.size() > Formulaire.MAX_USERS_SHARING) {
+                            String message = "You can't share to more than " + Formulaire.MAX_USERS_SHARING + " people.";
+                            log.error("[Formulaire@shareResource] " + message);
+                            badRequest(request, message);
+                            return;
+                        }
+
+                        syncDistributions(request, formId, user, responders, syncEvent -> {
+                            if (syncEvent.isLeft()) {
+                                log.error("[Formulaire@shareResource] Fail to sync distributions for form " + formId);
+                                RenderHelper.internalError(request, syncEvent);
+                                return;
                             }
 
-                            // Get all users ids from usersIds & groupsIds
-                            // Sync with distribution table
-                            neoService.getUsersInfosFromIds(usersIds, groupsIds, eventUsers -> {
-                                if (eventUsers.isRight()) {
-                                    JsonArray infos = eventUsers.right().getValue();
-                                    JsonArray responders = new JsonArray();
-                                    for (int i = 0; i < infos.size(); i++) {
-                                        JsonArray users = infos.getJsonObject(i).getJsonArray("users");
-                                        responders.addAll(users);
-                                    }
-
-                                    if (responders.size() > Formulaire.MAX_USERS_SHARING) {
-                                        String message = "You can't share to more than " + Formulaire.MAX_USERS_SHARING + " people.";
-                                        log.error("[Formulaire@shareResource] " + message);
-                                        renderError(request, new JsonObject().put("error", message));
-                                        return;
-                                    }
-
-                                    syncDistributions(request, formId, user, responders, syncEvent -> {
-                                        if (syncEvent.isRight()) {
-                                            // Update 'collab' property as needed
-                                            List<Map<String, Object>> idsObjects = new ArrayList<>();
-                                            idsObjects.add(idUsers);
-                                            idsObjects.add(idGroups);
-                                            idsObjects.add(idBookmarks);
-                                            updateFormCollabProp(formId, user, idsObjects, updateEvent -> {
-                                                if (updateEvent.isRight()) {
-                                                    fixBugAutoUnsharing(request, formId, user, shareFormObject);
-                                                }
-                                                else {
-                                                    log.error("[Formulaire@shareResource] Fail to update collab prop for form " + formId);
-                                                    renderError(request, new JsonObject().put("error", updateEvent.left().getValue()));
-                                                }
-                                            });
-                                        }
-                                        else {
-                                            log.error("[Formulaire@shareResource] Fail to sync distributions for form " + formId);
-                                            renderError(request, new JsonObject().put("error", syncEvent.left().getValue()));
-                                        }
-                                    });
+                            // Update 'collab' property as needed
+                            List<Map<String, Object>> idsObjects = new ArrayList<>();
+                            idsObjects.add(idUsers);
+                            idsObjects.add(idGroups);
+                            idsObjects.add(idBookmarks);
+                            updateFormCollabProp(formId, user, idsObjects, updateEvent -> {
+                                if (updateEvent.isLeft()) {
+                                    log.error("[Formulaire@shareResource] Fail to update collab prop for form " + formId);
+                                    RenderHelper.internalError(request, updateEvent);
+                                    return;
                                 }
-                                else {
-                                    log.error("[Formulaire@shareResource] Fail to get users' ids from groups' ids");
-                                    renderError(request, new JsonObject().put("error", eventUsers.left().getValue()));
-                                }
+                                fixBugAutoUnsharing(request, formId, user, shareFormObject);
                             });
-                        }
-                        else {
-                            log.error("[Formulaire@shareResource] Fail to get ids from bookmarks' ids");
-                            renderError(request, new JsonObject().put("error", eventBookmarks.left().getValue()));
-                        }
+                        });
                     });
-                }
-                else {
-                    log.error("User not found in session.");
-                    unauthorized(request);
-                }
+                });
             });
         });
     }
@@ -799,16 +1167,22 @@ public class FormController extends ControllerHelper {
     }
 
     private void syncDistributions(HttpServerRequest request, String formId, UserInfos user, JsonArray responders, Handler<Either<String, JsonObject>> handler) {
-        List<String> respondersFromSharing = UtilsHelper.getUserIds(responders).getList();
+        List<String> respondersFromSharing = UtilsHelper.getStringIds(responders).getList();
 
-        distributionService.getResponders(formId, getRespondersEvt -> {
-            if (getRespondersEvt.isLeft()) {
+        distributionService.getResponders(formId, respondersEvt -> {
+            if (respondersEvt.isLeft()) {
                 log.error("[Formulaire@removeDeletedDistributions] Fail to get responders to form " + formId);
-                handler.handle(new Either.Left<>(getRespondersEvt.left().getValue()));
+                handler.handle(new Either.Left<>(respondersEvt.left().getValue()));
+                return;
+            }
+            if (respondersEvt.right().getValue().isEmpty()) {
+                String message = "[Formulaire@removeDeletedDistributions] No responders found for form with id " + formId;
+                log.error(message);
+                notFound(request, message);
                 return;
             }
 
-            List<String> respondersFromBDD = UtilsHelper.getUserIds(getRespondersEvt.right().getValue()).getList();
+            List<String> respondersFromBDD = UtilsHelper.getStringIds(respondersEvt.right().getValue()).getList();
 
             // List the responders already in BDD
             List<String> existingResponders = new ArrayList<>(respondersFromSharing);
@@ -826,7 +1200,6 @@ public class FormController extends ControllerHelper {
                     newResponders.add(responder);
                 }
             }
-
 
             distributionService.setActiveValue(false, formId, deactivatedResponders, deactivateEvent -> {
                 if (deactivateEvent.isLeft()) {
@@ -859,150 +1232,194 @@ public class FormController extends ControllerHelper {
     private void addNewDistributions(HttpServerRequest request, String formId, UserInfos user, List<JsonObject> newResponders,
                                      List<String> existingResponders, Handler<Either<String, JsonObject>> handler) {
         distributionService.createMultiple(formId, user, newResponders, addEvent -> {
-            if (addEvent.isRight()) {
-                JsonArray respondersIds = UtilsHelper.getUserIds(new JsonArray(newResponders));
-                if (!existingResponders.isEmpty()) {
-                    distributionService.setActiveValue(true, formId, existingResponders, updateEvent -> {
-                        if (updateEvent.isRight()) {
-                            formService.get(formId, user, getFormEvent -> {
-                                if (getFormEvent.isLeft()) {
-                                    handler.handle(new Either.Right<>(getFormEvent.right().getValue()));
-                                    log.error("[Formulaire@addNewDistributions] Fail to get infos for form with id " + formId);
-                                    return;
-                                }
-                                JsonObject form = getFormEvent.right().getValue();
-                                notifyService.notifyNewForm(request, form, respondersIds);
-                                handler.handle(new Either.Right<>(getFormEvent.right().getValue()));
-                            });
-                        } else {
-                            log.error("[Formulaire@addNewDistributions] Fail to update distributions");
-                            handler.handle(new Either.Left<>(updateEvent.left().getValue()));
-                        }
-                    });
-                }
-                else {
-                    formService.get(formId, user, getFormEvent -> {
-                        if (getFormEvent.isLeft()) {
-                            handler.handle(new Either.Right<>(getFormEvent.right().getValue()));
-                            log.error("[Formulaire@addNewDistributions] Fail to get infos for form with id " + formId);
-                            return;
-                        }
-                        JsonObject form = getFormEvent.right().getValue();
-                        notifyService.notifyNewForm(request, form, respondersIds);
-                        handler.handle(new Either.Right<>(getFormEvent.right().getValue()));
-                    });
-                }
-            }
-            else {
+            if (addEvent.isLeft()) {
                 log.error("[Formulaire@addNewDistributions] Fail to add distributions");
                 handler.handle(new Either.Left<>(addEvent.left().getValue()));
+                return;
+            }
+
+            JsonArray respondersIds = UtilsHelper.getStringIds(new JsonArray(newResponders));
+            if (!existingResponders.isEmpty()) {
+                distributionService.setActiveValue(true, formId, existingResponders, updateEvent -> {
+                    if (updateEvent.isLeft()) {
+                        log.error("[Formulaire@addNewDistributions] Fail to update distributions");
+                        handler.handle(new Either.Left<>(updateEvent.left().getValue()));
+                        return;
+                    }
+
+                    formService.get(formId, user, formEvent -> {
+                        if (formEvent.isLeft()) {
+                            log.error("[Formulaire@addNewDistributions] Fail to get infos for form with id " + formId);
+                            handler.handle(new Either.Right<>(formEvent.right().getValue()));
+                            return;
+                        }
+                        if (formEvent.right().getValue().isEmpty()) {
+                            String message = "[Formulaire@addNewDistributions] No form found for id " + formId;
+                            log.error(message);
+                            handler.handle(new Either.Left<>(message));
+                            return;
+                        }
+
+                        JsonObject form = formEvent.right().getValue();
+                        notifyService.notifyNewForm(request, form, respondersIds);
+                        handler.handle(new Either.Right<>(formEvent.right().getValue()));
+                    });
+                });
+            }
+            else {
+                formService.get(formId, user, formEvent -> {
+                    if (formEvent.isLeft()) {
+                        log.error("[Formulaire@addNewDistributions] Fail to get infos for form with id " + formId);
+                        handler.handle(new Either.Right<>(formEvent.right().getValue()));
+                        return;
+                    }
+                    if (formEvent.right().getValue().isEmpty()) {
+                        String message = "[Formulaire@addNewDistributions] No form found for id " + formId;
+                        log.error(message);
+                        handler.handle(new Either.Left<>(message));
+                        return;
+                    }
+
+                    JsonObject form = formEvent.right().getValue();
+                    notifyService.notifyNewForm(request, form, respondersIds);
+                    handler.handle(new Either.Right<>(formEvent.right().getValue()));
+                });
             }
         });
     }
 
     private void updateFormSentProp(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler) {
-        distributionService.listByForm(formId, getDistributionsEvent -> {
-            if (getDistributionsEvent.isRight()) {
-                boolean value = !getDistributionsEvent.right().getValue().isEmpty();
-                formService.get(formId, user, getEvent -> {
-                    if (getEvent.isRight()) {
-                        JsonObject form = getEvent.right().getValue();
-                        form.put("sent", value);
-                        formService.update(formId, form, updateEvent -> {
-                            if (updateEvent.isRight()) {
-                                handler.handle(new Either.Right<>(updateEvent.right().getValue()));
-                            } else {
-                                log.error("[Formulaire@updateFormSentProp] Fail to update form");
-                                handler.handle(new Either.Left<>(updateEvent.left().getValue()));
-                            }
-                        });
-                    } else {
-                        log.error("[Formulaire@updateFormSentProp] Fail to get form");
-                        handler.handle(new Either.Left<>(getEvent.left().getValue()));
-                    }
-                });
-            } else {
+        distributionService.listByForm(formId, distributionsEvent -> {
+            if (distributionsEvent.isLeft()) {
                 log.error("[Formulaire@updateFormSentProp] Fail to get distributions of the form");
-                handler.handle(new Either.Left<>(getDistributionsEvent.left().getValue()));
+                handler.handle(new Either.Left<>(distributionsEvent.left().getValue()));
+                return;
             }
+            if (distributionsEvent.right().getValue().isEmpty()) {
+                String message = "[Formulaire@updateFormSentProp] No distributions found for form with id " + formId;
+                log.error(message);
+                handler.handle(new Either.Left<>(message));
+                return;
+            }
+
+            boolean value = !distributionsEvent.right().getValue().isEmpty();
+            formService.get(formId, user, formEvent -> {
+                if (formEvent.isLeft()) {
+                    log.error("[Formulaire@updateFormSentProp] Fail to get form");
+                    handler.handle(new Either.Left<>(formEvent.left().getValue()));
+                    return;
+                }
+                if (formEvent.right().getValue().isEmpty()) {
+                    String message = "[Formulaire@updateFormSentProp] No form found for id " + formId;
+                    log.error(message);
+                    handler.handle(new Either.Left<>(message));
+                    return;
+                }
+
+                JsonObject form = formEvent.right().getValue();
+                form.put("sent", value);
+                formService.update(formId, form, updateEvent -> {
+                    if (updateEvent.isLeft()) {
+                        log.error("[Formulaire@updateFormSentProp] Fail to update form");
+                        handler.handle(new Either.Left<>(updateEvent.left().getValue()));
+                        return;
+                    }
+
+                    handler.handle(new Either.Right<>(updateEvent.right().getValue()));
+                });
+            });
         });
     }
 
     private void updateFormCollabProp(String formId, UserInfos user, List<Map<String, Object>> idsObjects, Handler<Either<String, JsonObject>> handler) {
-        formService.get(formId, user, getEvent -> {
-            if (getEvent.isRight()) {
-                JsonObject form = getEvent.right().getValue();
+        formService.get(formId, user, formEvent -> {
+            if (formEvent.isLeft()) {
+                log.error("[Formulaire@updateFormCollabProp] Fail to get form : " + formEvent.left().getValue());
+                handler.handle(new Either.Left<>(formEvent.left().getValue()));
+                return;
+            }
+            if (formEvent.right().getValue().isEmpty()) {
+                String message = "[Formulaire@updateFormCollabProp] No form found for id " + formId;
+                log.error(message);
+                handler.handle(new Either.Left<>(message));
+                return;
+            }
 
-                boolean isShared = false;
-                int i = 0;
-                while (!isShared && i < idsObjects.size()) { // Iterate over "users", "groups", "bookmarks"
-                    int j = 0;
-                    Map<String, Object> o = idsObjects.get(i);
-                    List<Object> values = new ArrayList<Object>(o.values());
+            JsonObject form = formEvent.right().getValue();
 
-                    while (!isShared && j < values.size()) { // Iterate over each pair id-actions
-                        List<String> actions = (ArrayList)(values.get(j));
+            boolean isShared = false;
+            int i = 0;
+            while (!isShared && i < idsObjects.size()) { // Iterate over "users", "groups", "bookmarks"
+                int j = 0;
+                Map<String, Object> o = idsObjects.get(i);
+                List<Object> values = new ArrayList<Object>(o.values());
 
-                        int k = 0;
-                        while (!isShared && k < actions.size()) { // Iterate over each action for an id
-                            if (actions.get(k).equals(Formulaire.CONTRIB_RESOURCE_BEHAVIOUR) ||
-                                actions.get(k).equals(Formulaire.MANAGER_RESOURCE_BEHAVIOUR)) {
-                                    isShared = true;
-                            }
-                            k++;
+                while (!isShared && j < values.size()) { // Iterate over each pair id-actions
+                    List<String> actions = (ArrayList)(values.get(j));
+
+                    int k = 0;
+                    while (!isShared && k < actions.size()) { // Iterate over each action for an id
+                        if (actions.get(k).equals(Formulaire.CONTRIB_RESOURCE_BEHAVIOUR) ||
+                            actions.get(k).equals(Formulaire.MANAGER_RESOURCE_BEHAVIOUR)) {
+                                isShared = true;
                         }
-                        j++;
+                        k++;
                     }
-                    i++;
+                    j++;
                 }
+                i++;
+            }
 
-                if (!isShared && !form.getString("owner_id").equals(user.getUserId())) {
-                    isShared = true;
+            if (!isShared && !form.getString("owner_id").equals(user.getUserId())) {
+                isShared = true;
+            }
+
+            form.put("collab", isShared);
+            formService.update(formId, form, updateEvent -> {
+                if (updateEvent.isLeft()) {
+                    log.error("[Formulaire@updateFormCollabProp] Fail to update form : " + updateEvent.left().getValue());
+                    handler.handle(new Either.Left<>(updateEvent.left().getValue()));
                 }
-
-                form.put("collab", isShared);
-                formService.update(formId, form, updateEvent -> {
-                    if (updateEvent.isLeft()) {
-                        handler.handle(new Either.Left<>(updateEvent.left().getValue()));
-                        log.error("[Formulaire@updateFormCollabProp] Fail to update form : " + updateEvent.left().getValue());
-                    }
-                    else {
-                        handler.handle(new Either.Right<>(updateEvent.right().getValue()));
-                    }
-                });
-            }
-            else {
-                handler.handle(new Either.Left<>(getEvent.left().getValue()));
-                log.error("[Formulaire@updateFormCollabProp] Fail to get form : " + getEvent.left().getValue());
-            }
+                else {
+                    handler.handle(new Either.Right<>(updateEvent.right().getValue()));
+                }
+            });
         });
     }
 
     private void fixBugAutoUnsharing(HttpServerRequest request, String formId, UserInfos user, JsonObject shareFormObject) {
-        formShareService.getSharedWithMe(formId, user, event -> {
-            if (event.isRight() && event.right().getValue() != null) {
-                JsonArray rights = event.right().getValue();
-                String id = user.getUserId();
-                shareFormObject.getJsonObject("users").put(id, new JsonArray());
+        formShareService.getSharedWithMe(formId, user, formSharedEvt -> {
+            if (formSharedEvt.isLeft()) {
+                String message = "[Formulaire@getSharedWithMe] Fail to get user's shared rights";
+                log.error(message);
+                badRequest(request, message);
+                return;
+            }
+            if (formSharedEvt.right().getValue().isEmpty()) {
+                String message = "[Formulaire@getSharedWithMe] No sharing found for form with id " + formId;
+                log.error(message);
+                notFound(request, message);
+                return;
+            }
 
-                for (int i = 0; i < rights.size(); i++) {
-                    JsonObject right = rights.getJsonObject(i);
-                    shareFormObject.getJsonObject("users").getJsonArray(id).add(right.getString("action"));
+            JsonArray rights = formSharedEvt.right().getValue();
+            String id = user.getUserId();
+            shareFormObject.getJsonObject("users").put(id, new JsonArray());
+
+            for (int i = 0; i < rights.size(); i++) {
+                JsonObject right = rights.getJsonObject(i);
+                shareFormObject.getJsonObject("users").getJsonArray(id).add(right.getString("action"));
+            }
+
+            // Classic sharing stuff (putting or removing ids from form_shares table accordingly)
+            this.getShareService().share(user.getUserId(), formId, shareFormObject, (r) -> {
+                if (r.isRight()) {
+                    this.doShareSucceed(request, formId, user, shareFormObject, r.right().getValue(), false);
+                } else {
+                    JsonObject error = (new JsonObject()).put("error", r.left().getValue());
+                    Renders.renderJson(request, error, 400);
                 }
-
-                // Classic sharing stuff (putting or removing ids from form_shares table accordingly)
-                this.getShareService().share(user.getUserId(), formId, shareFormObject, (r) -> {
-                    if (r.isRight()) {
-                        this.doShareSucceed(request, formId, user, shareFormObject, r.right().getValue(), false);
-                    } else {
-                        JsonObject error = (new JsonObject()).put("error", r.left().getValue());
-                        Renders.renderJson(request, error, 400);
-                    }
-                });
-            }
-            else {
-                log.error("[Formulaire@getSharedWithMe] Fail to get user's shared rights");
-            }
+            });
         });
     }
 }

@@ -28,6 +28,14 @@ public class DefaultRelFormFolderService implements RelFormFolderService {
     }
 
     @Override
+    public void listMineByFormIds(UserInfos user, JsonArray formIds, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT * FROM " + Formulaire.REL_FORM_FOLDER_TABLE + " WHERE user_id = ? AND form_id IN " + Sql.listPrepared(formIds);
+        JsonArray params = new JsonArray().add(user.getUserId()).addAll(formIds);
+
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
     public void listFormChildrenRecursively(JsonArray folderIds, Handler<Either<String, JsonArray>> handler) {
         String query =
                 "WITH RECURSIVE descendant AS (" +
@@ -54,7 +62,7 @@ public class DefaultRelFormFolderService implements RelFormFolderService {
     }
 
     @Override
-    public void create(UserInfos user, JsonArray formIds, String folderId, Handler<Either<String, JsonArray>> handler) {
+    public void create(UserInfos user, JsonArray formIds, Integer folderId, Handler<Either<String, JsonArray>> handler) {
         String query = "INSERT INTO " + Formulaire.REL_FORM_FOLDER_TABLE + " (user_id, form_id, folder_id) VALUES ";
         JsonArray params = new JsonArray();
 
@@ -69,7 +77,27 @@ public class DefaultRelFormFolderService implements RelFormFolderService {
     }
 
     @Override
-    public void update(UserInfos user, JsonArray formIds, String newFolderId, Handler<Either<String, JsonArray>> handler) {
+    public void createMultiple(UserInfos user, JsonArray formIds, JsonArray folderIds, Handler<Either<String, JsonArray>> handler) {
+        if (formIds.size() != folderIds.size()) {
+            handler.handle(new Either.Left<>("[Formulaire@createRelFormFolder] There must be as mush formIds that folderIds"));
+        }
+        else {
+            String query = "INSERT INTO " + Formulaire.REL_FORM_FOLDER_TABLE + " (user_id, form_id, folder_id) VALUES ";
+            JsonArray params = new JsonArray();
+
+            for (int i = 0; i < formIds.size(); i++) {
+                query += "(?, ?, ?), ";
+                params.add(user.getUserId()).add(formIds.getInteger(i)).add(folderIds.getInteger(i));
+            }
+
+            query = query.substring(0, query.length() - 2) + " RETURNING *;";
+
+            Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+        }
+    }
+
+    @Override
+    public void update(UserInfos user, JsonArray formIds, int newFolderId, Handler<Either<String, JsonArray>> handler) {
         String query = "UPDATE " + Formulaire.REL_FORM_FOLDER_TABLE + " SET folder_id = ? " +
                 "WHERE user_id = ? AND form_id IN " + Sql.listPrepared(formIds) + " RETURNING *;";
         JsonArray params = new JsonArray().add(newFolderId).add(user.getUserId()).addAll(formIds);

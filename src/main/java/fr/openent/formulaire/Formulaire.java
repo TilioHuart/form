@@ -18,6 +18,7 @@ import org.entcore.common.storage.Storage;
 import org.entcore.common.storage.StorageFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import fr.wseduc.cron.CronTrigger;
 
@@ -65,10 +66,16 @@ public class Formulaire extends BaseServer {
 	public static int MAX_RESPONSES_EXPORT_PDF;
 	public static int MAX_USERS_SHARING;
 	public static final int ID_ROOT_FOLDER = 1;
+	public static final int ID_SHARED_FOLDER = 2;
+	public static final int ID_ARCHIVED_FOLDER = 3;
+	public static final List<Integer> FORBIDDEN_FOLDER_IDS = Arrays.asList(ID_ROOT_FOLDER, ID_SHARED_FOLDER, ID_ARCHIVED_FOLDER);
 	public static final int NB_NEW_LINES = 10;
 	public static final String DELETED_USER = "Utilisateur supprimé";
 	public static final String DELETED_USER_FILE = "utilisateurSupprimé_Fichier";
 	public static final String UNKNOW_STRUCTURE = "Structure inconnue";
+	public static final List<Integer> RGPD_LIFETIME_VALUES = Arrays.asList(3,6,9,12);
+	public static final List<Integer> GRAPH_QUESTIONS = Arrays.asList(4,5,9);
+	public static final List<Integer> CONDITIONAL_QUESTIONS = Arrays.asList(4,5,9);
 
 	@Override
 	public void start() throws Exception {
@@ -137,6 +144,7 @@ public class Formulaire extends BaseServer {
 		// Init controllers
 		addController(new DelegateController());
 		addController(new DistributionController(timelineHelper));
+		addController(new UtilsController(storage));
 		addController(new FolderController());
 		addController(formController);
 		addController(new FormElementController());
@@ -147,7 +155,6 @@ public class Formulaire extends BaseServer {
 		addController(new ResponseController());
 		addController(new ResponseFileController(storage));
 		addController(new SectionController());
-		addController(new UtilsController(storage));
 
 		// CRON
 		RgpdCron rgpdCron = new RgpdCron(storage);

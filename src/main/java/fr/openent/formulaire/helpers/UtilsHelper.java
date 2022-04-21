@@ -10,15 +10,20 @@ public class UtilsHelper {
 
     private UtilsHelper() {}
 
-    public static JsonArray getIds(JsonArray items) {
+    public static JsonArray getIds(JsonArray items, boolean toString) {
         JsonArray ids = new JsonArray();
         for (int i = 0; i < items.size(); i++) {
-            ids.add(items.getJsonObject(i).getInteger("id").toString());
+            Integer item = items.getJsonObject(i).getInteger("id");
+            ids.add(toString ? item.toString() : item);
         }
         return ids;
     }
 
-    public static JsonArray getUserIds(JsonArray users) {
+    public static JsonArray getIds(JsonArray items) {
+        return getIds(items, true);
+    }
+
+    public static JsonArray getStringIds(JsonArray users) {
         JsonArray userIds = new JsonArray();
         for (int i = 0; i < users.size(); i++) {
             userIds.add(users.getJsonObject(i).getString("id"));

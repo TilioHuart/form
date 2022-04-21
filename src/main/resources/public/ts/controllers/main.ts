@@ -6,11 +6,9 @@ import {
 	Question,
 	QuestionTypes,
 	Types,
-	Folder,
-	FormElements,
-	Questions, Section, Responses
+	Folder
 } from "../models";
-import {distributionService, formElementService, formService, responseService} from "../services";
+import {distributionService, formElementService, formService} from "../services";
 import {
 	Direction,
 	Exports,
@@ -186,7 +184,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 						else {
 							let distribs = await distributionService.listByFormAndResponder($scope.form.id);
 							let distrib = distribs.filter(d => d.status == DistributionStatus.TO_DO)[0];
-							$scope.distribution = distrib ? distrib : await distributionService.add($scope.form.id, distribs[0]);
+							$scope.distribution = distrib ? distrib : await distributionService.add(distribs[0].id);
 						}
 
 						if ($scope.distribution && $scope.distribution.form_id == params.formId) {

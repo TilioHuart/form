@@ -36,14 +36,6 @@ public interface QuestionChoiceService {
     void create(String questionId, JsonObject choice, Handler<Either<String, JsonObject>> handler);
 
     /**
-     * Create several choices for a specific question
-     * @param choices JsonArray data
-     * @param questionId question identifier
-     * @param handler function handler returning JsonArray data
-     */
-    void createMultiple(JsonArray choices, String questionId, Handler<Either<String, JsonArray>> handler);
-
-    /**
      * Duplicate choices of a specific question
      * @param formId new form identifier
      * @param questionId question identifier

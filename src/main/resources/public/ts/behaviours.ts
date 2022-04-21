@@ -1,5 +1,6 @@
 import {Behaviours} from 'entcore';
 import http from "axios";
+import {formService} from "./services";
 
 const rights = {
     resources: {
@@ -25,7 +26,7 @@ Behaviours.register('formulaire', {
     rights: rights,
     dependencies: {},
     loadResources: async function(): Promise<any> {
-        const { data } = await http.get('/formulaire/linker');
+        const data = await formService.listForLinker();
         this.resources = data.map(function (f) {
             if (!f.picture) f.picture = '../../../../formulaire/public/img/logo.svg';
             let endPath = f.rgpd ? 'rgpd' : 'new';

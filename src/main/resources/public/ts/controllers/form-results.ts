@@ -15,8 +15,7 @@ import {
     Exports,
     FORMULAIRE_BROADCAST_EVENT
 } from "../core/enums";
-import http from "axios";
-import {questionChoiceService} from "../services";
+import {formService, questionChoiceService, utilsService} from "../services";
 
 interface ViewModel {
     formElement: FormElement;
@@ -95,12 +94,12 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
             // Generate document (CSV or PDF) and store it in a blob
             if (vm.typeExport === Exports.CSV) {
-                doc = await http.post(`/formulaire/export/csv/${vm.formElement.form_id}`, {});
+                doc = formService.export(vm.formElement.form_id, Exports.CSV);
                 blob = new Blob(["\ufeff" + doc.data], {type: 'text/csv; charset=utf-18'});
             }
             else {
                 let images = await prepareDataForPDF();
-                doc = await http.post(`/formulaire/export/pdf/${vm.formElement.form_id}`, images, {responseType: "arraybuffer"});
+                doc = formService.export(vm.formElement.form_id, Exports.PDF, images);
                 blob = new Blob([doc.data], {type: 'application/pdf; charset=utf-18'});
             }
 
@@ -281,7 +280,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
                     'Number-Files': charts.length
                 }
             };
-            let { data } = await http.post('/formulaire/file/img/multiple', formData, config);
+            let data = await utilsService.postMultipleFiles(formData, config);
 
             for (let file of data) {
                 let fileId = file.id;

@@ -48,26 +48,6 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
     }
 
     @Override
-    public void createMultiple(JsonArray choices, String questionId, Handler<Either<String, JsonArray>> handler) {
-        String query = "";
-        JsonArray params = new JsonArray();
-
-        List<JsonObject> allChoices = choices.getList();
-        for (JsonObject choice : allChoices) {
-            query += "INSERT INTO " + Formulaire.QUESTION_CHOICE_TABLE + " (question_id, value, position, type, next_section_id) " +
-                    "VALUES (?, ?, ?, ?, ?); ";
-            params.add(questionId)
-                    .add(choice.getString("value", ""))
-                    .add(choice.getInteger("position", 0))
-                    .add(choice.getString("type", ""))
-                    .add(choice.getInteger("next_section_id", null));
-        }
-
-        query += "RETURNING *;";
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
-    }
-
-    @Override
     public void duplicate(int formId, int questionId, int originalQuestionId, Handler<Either<String, JsonObject>> handler) {
         String query = "INSERT INTO " + Formulaire.QUESTION_CHOICE_TABLE + " (question_id, value, type, next_section_id) " +
                 "SELECT ?, value, type, (SELECT id FROM " + Formulaire.SECTION_TABLE + " WHERE original_section_id = qc.next_section_id AND form_id = ?) " +

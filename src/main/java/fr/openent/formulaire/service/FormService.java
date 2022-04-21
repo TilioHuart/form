@@ -108,11 +108,12 @@ public interface FormService {
      */
     void getAllMyFormRights(List<String> groupsAndUserIds, Handler<Either<String, JsonArray>> handler);
 
-    /**
-     * Get image info form workspace for a specific image
-     * @param eb event bus
-     * @param idImage image identifier
+    /** Check if the connected user has the rights on a list of specific forms
+     * @param groupsAndUserIds list of neo ids including the connected user
+     * @param user user connected
+     * @param right right to check
+     * @param formIds form identifiers
      * @param handler function handler returning JsonObject data
      */
-    void getImage (EventBus eb, String idImage, Handler<Either<String, JsonObject>> handler);
+    void checkFormsRights (List<String> groupsAndUserIds, UserInfos user, String right, JsonArray formIds, Handler<Either<String, JsonObject>> handler);
 }

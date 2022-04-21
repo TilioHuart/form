@@ -40,27 +40,26 @@ public class DefaultDistributionService implements DistributionService {
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
-    @Override
-    public void listByFormAndStatus(String formId, String status, String nbLines, Handler<Either<String, JsonArray>> handler) {
-        String query = "WITH distribs AS (SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? AND status = ? " +
-                "ORDER BY date_response DESC) " +
-                "SELECT * FROM distribs";
-        JsonArray params = new JsonArray().add(formId).add(status);
-
-        if (!nbLines.equals("null")) {
-            query += " LIMIT ? OFFSET ?";
-            params.add(Formulaire.NB_NEW_LINES).add(nbLines);
-        }
-
-        query += ";";
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
-    }
-
     public void listByFormAndResponder(String formId, UserInfos user, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE +
                 " WHERE form_id = ? AND responder_id = ? AND active = ? " +
                 "ORDER BY date_sending DESC;";
         JsonArray params = new JsonArray().add(formId).add(user.getUserId()).add(true);
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public void listByFormAndStatus(String formId, String status, String nbLines, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE form_id = ? AND status = ? " +
+                "ORDER BY date_response DESC";
+        JsonArray params = new JsonArray().add(formId).add(status);
+
+        if (nbLines != null) {
+            query += " LIMIT ? OFFSET ?";
+            params.add(Formulaire.NB_NEW_LINES).add(nbLines);
+        }
+
+        query += ";";
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 

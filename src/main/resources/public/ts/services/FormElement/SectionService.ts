@@ -51,9 +51,9 @@ export const sectionService: SectionService = {
     async update(sections: Section[]) : Promise<Section[]> {
         try {
             if (sections.length <= 0) {
-                return []
+                return [];
             }
-            let data = DataUtils.getData(await http.put(`/formulaire/sections/${sections[0].form_id}`, sections));
+            let data = DataUtils.getData(await http.put(`/formulaire/forms/${sections[0].form_id}/sections`, sections));
             let updatedSections = Mix.castArrayAs(Section, data);
             for (let section of updatedSections) {
                 await section.questions.sync(section.id, true);

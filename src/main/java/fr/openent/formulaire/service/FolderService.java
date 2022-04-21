@@ -15,6 +15,13 @@ public interface FolderService {
     void list(UserInfos user, Handler<Either<String, JsonArray>> handler);
 
     /**
+     * List all the folders from a list of ids
+     * @param folderIds folder identifiers
+     * @param handler   function handler returning JsonArray data
+     */
+    void listByIds(JsonArray folderIds, Handler<Either<String, JsonArray>> handler);
+
+    /**
      * Get a folder by id
      * @param folderId  folder identifier
      * @param handler   function handler returning JsonObject data
@@ -24,9 +31,10 @@ public interface FolderService {
     /**
      * Create a folder
      * @param folder    folder to create
+     * @param user      connected user
      * @param handler   function handler returning JsonObject data
      */
-    void create(JsonObject folder, Handler<Either<String, JsonObject>> handler);
+    void create(JsonObject folder, UserInfos user, Handler<Either<String, JsonObject>> handler);
 
     /**
      * Update a folder
@@ -52,10 +60,10 @@ public interface FolderService {
     void move(JsonArray folderIds, String parentId, Handler<Either<String, JsonArray>> handler);
 
     /**
-     * Sync number of children for a folder
+     * Sync number of children for a list of specific folders
      * @param user      user connected
-     * @param folderId  folder identifier
+     * @param folderIds  folder identifiers
      * @param handler   function handler returning JsonObject data
      */
-    void syncNbChildren(UserInfos user, String folderId, Handler<Either<String, JsonObject>> handler);
+    void syncNbChildren(UserInfos user, JsonArray folderIds, Handler<Either<String, JsonArray>> handler);
 }

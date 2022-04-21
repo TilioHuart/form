@@ -1,6 +1,7 @@
 package fr.openent.formulaire.export;
 
 import fr.openent.formulaire.Formulaire;
+import fr.openent.formulaire.helpers.RenderHelper;
 import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.QuestionService;
 import fr.openent.formulaire.service.ResponseService;
@@ -14,7 +15,6 @@ import fr.wseduc.webutils.data.FileResolver;
 import fr.wseduc.webutils.http.Renders;
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -33,8 +33,7 @@ import org.entcore.common.pdf.Pdf;
 import org.entcore.common.pdf.PdfFactory;
 import org.entcore.common.pdf.PdfGenerator;
 
-import static fr.wseduc.webutils.http.Renders.badRequest;
-import static fr.wseduc.webutils.http.Renders.getScheme;
+import static fr.wseduc.webutils.http.Renders.*;
 
 
 public class FormResponsesExportPDF {
@@ -67,43 +66,72 @@ public class FormResponsesExportPDF {
     }
 
     public void launch() {
-        String formId = request.getParam("formId");
+        String formId = form.getInteger("id").toString();
         questionService.export(formId, true, getQuestionsEvt -> {
             if (getQuestionsEvt.isLeft()) {
-                log.error("[Formulaire@FormExportPDF] Failed to retrieve all questions of the form" + form.getInteger("id") + " : " + getQuestionsEvt.left().getValue());
-                Renders.renderError(request);
+                log.error("[Formulaire@FormExportPDF] Failed to retrieve all questions for the form with id " + formId);
+                RenderHelper.internalError(request, getQuestionsEvt);
+                return;
+            }
+            if (getQuestionsEvt.right().getValue().isEmpty()) {
+                String message = "[Formulaire@FormExportPDF] No questions found for form with id " + formId;
+                log.error(message);
+                notFound(request, message);
+                return;
             }
 
             JsonArray questionsInfo = getQuestionsEvt.right().getValue();
             sectionService.list(formId, getSectionsEvt -> {
                 if (getSectionsEvt.isLeft()) {
-                    log.error("[Formulaire@FormExportPDF] Failed to retrieve all sections of the form" + form.getInteger("id") + " : " + getSectionsEvt.left().getValue());
-                    Renders.renderError(request);
+                    log.error("[Formulaire@FormExportPDF] Failed to retrieve all sections for the form with id " + formId);
+                    RenderHelper.internalError(request, getSectionsEvt);
+                    return;
+                }
+                if (getSectionsEvt.right().getValue().isEmpty()) {
+                    String message = "[Formulaire@FormExportPDF] No sections found for form with id " + formId;
+                    log.error(message);
+                    notFound(request, message);
+                    return;
                 }
 
                 JsonArray sectionsInfos = getSectionsEvt.right().getValue();
-                distributionService.countFinished(form.getInteger("id").toString(), countRepEvent -> {
-                    if (countRepEvent.isLeft()) {
-                        log.error("[Formulaire@FormExportPDF] Failed to count nb responses of the form " + form.getInteger("id") + " : " + countRepEvent.left().getValue());
-                        Renders.renderError(request);
+                distributionService.countFinished(form.getInteger("id").toString(), countRepEvt -> {
+                    if (countRepEvt.isLeft()) {
+                        log.error("[Formulaire@FormExportPDF] Failed to count nb responses for the form with id " + formId);
+                        RenderHelper.internalError(request, countRepEvt);
+                        return;
+                    }
+                    if (countRepEvt.right().getValue().isEmpty()) {
+                        String message = "[Formulaire@FormExportPDF] No distributions found for form with id " + formId;
+                        log.error(message);
+                        notFound(request, message);
+                        return;
                     }
 
-                    int nbResponseTot = countRepEvent.right().getValue().getInteger("count");
+                    int nbResponseTot = countRepEvt.right().getValue().getInteger("count");
                     boolean hasTooManyResponses = nbResponseTot > Formulaire.MAX_RESPONSES_EXPORT_PDF;
 
                     responseService.exportPDFResponses(formId, getResponsesEvt -> {
                         if (getResponsesEvt.isLeft()) {
-                            log.error("[Formulaire@FormExportPDF] Failed to get data for PDF export of the form " + form.getInteger("id") + " : " + getResponsesEvt.left().getValue());
-                            badRequest(request);
+                            log.error("[Formulaire@FormExportPDF] Failed to get data for PDF export for the form with id " + formId);
+                            RenderHelper.internalError(request, getResponsesEvt);
+                            return;
+                        }
+                        if (getResponsesEvt.right().getValue().isEmpty()) {
+                            String message = "[Formulaire@FormExportPDF] No responses found for form with id " + formId;
+                            log.error(message);
+                            notFound(request, message);
+                            return;
                         }
 
-                        formatData(getResponsesEvt.right().getValue(), questionsInfo, sectionsInfos, hasTooManyResponses, formatDataEvent -> {
-                            if (formatDataEvent.isLeft()) {
-                                log.error("[Formulaire@FormExportPDF] Failed to format data of the form " + form.getInteger("id") + " : " + formatDataEvent.left().getValue());
-                                Renders.renderError(request);
+                        formatData(getResponsesEvt.right().getValue(), questionsInfo, sectionsInfos, hasTooManyResponses, formatDataEvt -> {
+                            if (formatDataEvt.isLeft()) {
+                                log.error("[Formulaire@FormExportPDF] Failed to format data for the form with id" + formId);
+                                RenderHelper.internalError(request, formatDataEvt);
+                                return;
                             }
 
-                            JsonObject results = formatDataEvent.right().getValue();
+                            JsonObject results = formatDataEvt.right().getValue();
                             results.put("nbResponseTot", nbResponseTot);
 
                             generatePDF(request, results,"results.xhtml", pdf ->
@@ -137,7 +165,8 @@ public class FormResponsesExportPDF {
                         .put("id", questionInfo.getInteger("id"))
                         .put("title", questionInfo.getString("title"))
                         .put("question_type", new JsonObject())
-                        .put("statement", "<div>" + questionInfo.getString("statement")
+                        .put("statement",
+                                "<div>" + questionInfo.getString("statement")
                                 .replace("\"","'")
                                 .replace("<o:p></o:p>", " ")
                                 + "</div>"
@@ -183,7 +212,8 @@ public class FormResponsesExportPDF {
                     response.put("answer", "-");
                 }
                 if (questionType == 1) {
-                    response.put("answer", "<div>" + response.getString("answer")
+                    response.put("answer",
+                            "<div>" + response.getString("answer")
                             .replace("<o:p></o:p>", " ")
                             + "</div>");
                 }
@@ -241,9 +271,11 @@ public class FormResponsesExportPDF {
         HashMap<Integer, JsonObject> mapSectionsPosition = new HashMap<>();
         for (Object s : sections) {
             JsonObject section = (JsonObject)s;
-            section.put("description", section.getString("description")
+            section.put("description",
+                    "<div>" + section.getString("description")
                     .replace("\"","'")
-                    .replaceAll("<("+autoClosingTags+")[\\w\\W]*?>","$0</$1>")
+                    .replace("<o:p></o:p>", " ")
+                    + "</div>"
             );
             section.put("questions", new JsonArray());
             mapSectionsId.put(section.getInteger("id"), section);
@@ -314,46 +346,42 @@ public class FormResponsesExportPDF {
                 }
 
                 actionObject.put("content", bytes).put("baseUrl", baseUrl);
-                generatePDF("title",processedTemplate)
+                generatePDF("title", processedTemplate)
+                    .onSuccess(res -> {
+                        handler.handle(res.getContent());
 
-                        .onSuccess(res -> {
-                            handler.handle(res.getContent());
-
-                            // Remove image files generated for graph display on PDF
-                            JsonArray removesFiles = templateProps.getJsonArray("idImagesFiles");
-                            if (removesFiles != null) {
-                                storage.removeFiles(removesFiles, event -> {
-                                    log.info(" [Formulaire@generatePDF] " + event.encode());
-                                });
-                            }
-                        })
-
-                        .onFailure(error -> {
-                            String message = String.format("[FormulaireCommon@%s::generatePDF] Failed to generatePDF:");
-                            log.error(String.format("%s %s"),message,error.getMessage());
-                            promise.fail(message);
-                        });
+                        // Remove image files generated for graph display on PDF
+                        JsonArray removesFiles = templateProps.getJsonArray("idImagesFiles");
+                        if (removesFiles != null) {
+                            storage.removeFiles(removesFiles, event -> {
+                                log.info(" [Formulaire@generatePDF] " + event.encode());
+                            });
+                        }
+                    })
+                    .onFailure(error -> {
+                        String message = "[Formulaire@generatePDF] Failed to generatePDF : " + error.getMessage();
+                        log.error(message);
+                        promise.fail(message);
+                    });
             });
         });
     }
+
     public Future<Pdf> generatePDF(String filename, String buffer) {
         Promise<Pdf> promise = Promise.promise();
         try {
             PdfGenerator pdfGenerator = pdfFactory.getPdfGenerator();
             pdfGenerator.generatePdfFromTemplate(filename, buffer, ar -> {
                 if (ar.failed()) {
-                    String message = String.format("[FormulaireCommon@%s::generatePDF] Failed to generatePdfFromTemplate: " +
-                            "%s", this.getClass().getSimpleName(), ar.cause().getMessage());
-                    log.error(message, ar.cause());
+                    log.error("[Formulaire@generatePDF] Failed to generatePdfFromTemplate : " + ar.cause().getMessage());
                     promise.fail(ar.cause().getMessage());
                 } else {
                     promise.complete(ar.result());
                 }
             });
-        } catch (Exception e) {
-            String message = String.format("[FormulaireCommon@%s::generatePDF] Failed to generatePDF: " +
-                    "%s", this.getClass().getSimpleName(), e.getMessage());
-            log.error(message);
+        }
+        catch (Exception e) {
+            log.error("[Formulaire@generatePDF] Failed to generatePDF: " + e.getMessage());
             promise.fail(e.getMessage());
         }
         return promise.future();

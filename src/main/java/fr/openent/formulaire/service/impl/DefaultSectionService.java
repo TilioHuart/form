@@ -36,7 +36,7 @@ public class DefaultSectionService implements SectionService {
                 .add(formId)
                 .add(section.getString("title", ""))
                 .add(section.getString("description", ""))
-                .add(section.getInteger("position", 0));
+                .add(section.getInteger("position", null));
 
         query += SqlHelper.getUpdateDateModifFormRequest();
         params.addAll(SqlHelper.getParamsForUpdateDateModifFormRequest(formId));
@@ -56,7 +56,7 @@ public class DefaultSectionService implements SectionService {
                 JsonArray params = new JsonArray()
                         .add(section.getString("title", ""))
                         .add(section.getString("description", ""))
-                        .add(section.getInteger("position", 0))
+                        .add(section.getInteger("position", null))
                         .add(section.getInteger("id", null));
                 s.prepared(query, params);
             }

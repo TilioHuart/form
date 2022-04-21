@@ -6,21 +6,29 @@ import fr.openent.formulaire.helpers.RenderHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.DistributionService;
+import fr.openent.formulaire.service.QuestionChoiceService;
+import fr.openent.formulaire.service.QuestionService;
 import fr.openent.formulaire.service.ResponseService;
 import fr.openent.formulaire.service.impl.DefaultDistributionService;
+import fr.openent.formulaire.service.impl.DefaultQuestionChoiceService;
+import fr.openent.formulaire.service.impl.DefaultQuestionService;
 import fr.openent.formulaire.service.impl.DefaultResponseService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
-import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserUtils;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
 
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
@@ -28,11 +36,17 @@ import static org.entcore.common.http.response.DefaultResponseHandler.defaultRes
 public class ResponseController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(ResponseController.class);
     private final ResponseService responseService;
+    private final QuestionService questionService;
+    private final QuestionChoiceService questionChoiceService;
     private final DistributionService distributionService;
+    private final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
+    private final SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm");
 
     public ResponseController() {
         super();
         this.responseService = new DefaultResponseService();
+        this.questionService = new DefaultQuestionService();
+        this.questionChoiceService = new DefaultQuestionChoiceService();
         this.distributionService = new DefaultDistributionService();
     }
 
@@ -46,24 +60,23 @@ public class ResponseController extends ControllerHelper {
         String formId = request.params().get("formId");
 
         distributionService.listByFormAndStatus(formId, Formulaire.FINISHED, nbLines, getDistribsEvent -> {
-            if (getDistribsEvent.isRight()) {
-                JsonArray distribs = getDistribsEvent.right().getValue();
-                if (distribs != null && !distribs.isEmpty()) {
-                    responseService.list(questionId, nbLines, distribs, arrayResponseHandler(request));
-                }
-                else {
-                    log.error("[Formulaire@list] No more responses to load for form " + formId);
-                    Renders.ok(request);
-                }
+            if (getDistribsEvent.isLeft()) {
+                log.error("[Formulaire@listResponse] Fail to list finished distributions for form wih id : " + formId);
+                RenderHelper.internalError(request, getDistribsEvent);
+                return;
             }
-            else {
-                log.error("[Formulaire@list] Fail to list finished ditributions for form " + formId);
-                Renders.badRequest(request);
+            if (getDistribsEvent.right().getValue().isEmpty()) {
+                String message = "[Formulaire@listResponse] No distribution found for form with id " + formId;
+                log.error(message);
+                notFound(request, message);
+                return;
             }
+
+            responseService.list(questionId, nbLines, getDistribsEvent.right().getValue(), arrayResponseHandler(request));
         });
     }
 
-    @Get("/questions/:questionId/responses/:distributionId")
+    @Get("/questions/:questionId/distributions/:distributionId/responses")
     @ApiDoc("List all my responses to a specific question for a specific distribution")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
@@ -71,28 +84,30 @@ public class ResponseController extends ControllerHelper {
         String questionId = request.getParam("questionId");
         String distributionId = request.getParam("distributionId");
         UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                responseService.listMineByDistribution(questionId, distributionId, user, arrayResponseHandler(request));
-            } else {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
+            if (user == null) {
+                String message = "[Formulaire@listMineByDistribution] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
             }
+            responseService.listMineByDistribution(questionId, distributionId, user, arrayResponseHandler(request));
         });
     }
 
-    @Get("/responses/distributions/:distributionId")
+    @Get("/distributions/:distributionId/responses")
     @ApiDoc("List all responses for a specific distribution")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void listByDistribution(HttpServerRequest request) {
         String distributionId = request.getParam("distributionId");
         UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                responseService.listByDistribution(distributionId, arrayResponseHandler(request));
-            } else {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
+            if (user == null) {
+                String message = "[Formulaire@listByDistribution] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
             }
+            responseService.listByDistribution(distributionId, arrayResponseHandler(request));
         });
     }
 
@@ -114,12 +129,12 @@ public class ResponseController extends ControllerHelper {
         for (Integer i = 0; i < request.params().size(); i++) {
             questionIds.add(request.getParam(i.toString()));
         }
-        if (questionIds.size() > 0) {
-            responseService.countByQuestions(questionIds, defaultResponseHandler(request));
+        if (questionIds.size() <= 0) {
+            log.error("[Formulaire@countByQuestions] No questionIds to count.");
+            noContent(request);
+            return;
         }
-        else {
-            RenderHelper.ok(request);
-        }
+        responseService.countByQuestions(questionIds, defaultResponseHandler(request));
     }
 
     @Get("/responses/:responseId")
@@ -128,6 +143,13 @@ public class ResponseController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String responseId = request.getParam("responseId");
+
+        // TODO get user infos
+        // TODO get response
+        // TODO get formId (via distrib ?)
+        // TODO getMyFormRights
+        // TODO if connected user neither responder nor has rights then unauthorized()
+
         responseService.get(responseId, defaultResponseHandler(request));
     }
 
@@ -138,47 +160,77 @@ public class ResponseController extends ControllerHelper {
     public void create(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
         UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                RequestUtils.bodyToJson(request, response -> {
-                    responseService.create(response, user, questionId, defaultResponseHandler(request));
-                });
-            } else {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
+            if (user == null) {
+                String message = "[Formulaire@createResponse] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
             }
-        });
-    }
 
-    @Post("/forms/:formId/responses/fill/:distributionId")
-    @ApiDoc("Create empty responses for missing responses")
-    @ResourceFilter(ShareAndOwner.class)
-    @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
-    public void fillResponses(HttpServerRequest request) {
-        String formId = request.getParam("formId");
-        String distributionId = request.getParam("distributionId");
-        RequestUtils.bodyToJson(request, response -> {
-            responseService.getMissingResponses(formId, distributionId, getMissingResponsesEvent -> {
-                if (getMissingResponsesEvent.isRight()) {
-                    JsonArray questionIds = getMissingResponsesEvent.right().getValue();
-                    UserUtils.getUserInfos(eb, request, user -> {
-                        if (user != null) {
-                            if (questionIds != null && !questionIds.isEmpty()) {
-                                responseService.fillResponses(questionIds, distributionId, user, defaultResponseHandler(request));
+            RequestUtils.bodyToJson(request, response -> {
+                if (response == null || response.isEmpty()) {
+                    log.error("[Formulaire@createResponse] No response to create.");
+                    noContent(request);
+                    return;
+                }
+
+                questionService.get(questionId, questionEvt -> {
+                    if (questionEvt.isLeft()) {
+                        log.error("[Formulaire@createResponse] Fail to get question corresponding to id : " + questionId);
+                        RenderHelper.internalError(request, questionEvt);
+                        return;
+                    }
+                    if (questionEvt.right().getValue().isEmpty()) {
+                        String message = "[Formulaire@createResponse] No question found for id " + questionId;
+                        log.error(message);
+                        notFound(request, message);
+                        return;
+                    }
+
+                    JsonObject question = questionEvt.right().getValue();
+                    int question_type = question.getInteger("question_type");
+                    Integer choice_id = response.getInteger("choice_id");
+
+                    // If there is a choice it should match an existing QuestionChoice for this question
+                    if (choice_id != null && Arrays.asList(4,5,9).contains(question_type)) {
+                        questionChoiceService.get(choice_id.toString(), choiceEvt -> {
+                            if (choiceEvt.isLeft()) {
+                                log.error("[Formulaire@createResponse] Fail to get question choice corresponding to id : " + choice_id);
+                                RenderHelper.internalError(request, choiceEvt);
+                                return;
                             }
-                            else {
-                                Renders.ok(request);
+                            if (choiceEvt.right().getValue().isEmpty()) {
+                                String message = "[Formulaire@createResponse] No choice found for id " + choice_id;
+                                log.error(message);
+                                notFound(request, message);
+                                return;
                             }
-                        } else {
-                            log.error("User not found in session.");
-                            Renders.unauthorized(request);
+
+                            JsonObject choice = choiceEvt.right().getValue();
+
+                            // Check choice validity
+                            if (!choice.getInteger("question_id").toString().equals(questionId) ||
+                                    !choice.getString("value").equals(response.getString("answer"))) {
+                                String message ="[Formulaire@updateResponse] Wrong choice for response " + response;
+                                log.error(message);
+                                badRequest(request, message);
+                                return;
+                            }
+                            responseService.create(response, user, questionId, defaultResponseHandler(request));
+                        });
+                    }
+                    else {
+                        if (question_type == 6) {
+                            try { dateFormatter.parse(response.getString("answer")); }
+                            catch (ParseException e) { e.printStackTrace(); }
                         }
-                    });
-
-                }
-                else {
-                    log.error("[Formulaire@getMissingResponses] Fail to missing responses for form " + formId);
-                    Renders.badRequest(request);
-                }
+                        if (question_type == 7) {
+                            try { timeFormatter.parse(response.getString("answer")); }
+                            catch (ParseException e) { e.printStackTrace(); }
+                        }
+                        responseService.create(response, user, questionId, defaultResponseHandler(request));
+                    }
+                });
             });
         });
     }
@@ -190,14 +242,79 @@ public class ResponseController extends ControllerHelper {
     public void update(HttpServerRequest request) {
         String responseId = request.getParam("responseId");
         UserUtils.getUserInfos(eb, request, user -> {
-            if (user != null) {
-                RequestUtils.bodyToJson(request, response -> {
-                    responseService.update(user, responseId, response, defaultResponseHandler(request));
-                });
-            } else {
-                log.error("User not found in session.");
-                Renders.unauthorized(request);
+            if (user == null) {
+                String message = "[Formulaire@updateResponse] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
             }
+
+            RequestUtils.bodyToJson(request, response -> {
+                if (response == null || response.isEmpty()) {
+                    log.error("[Formulaire@updateResponse] No response to update.");
+                    noContent(request);
+                    return;
+                }
+
+                Integer questionId = response.getInteger("question_id");
+                questionService.get(questionId.toString(), questionEvt -> {
+                    if (questionEvt.isLeft()) {
+                        log.error("[Formulaire@updateResponse] Fail to get question corresponding to id : " + questionId);
+                        RenderHelper.badRequest(request, questionEvt);
+                        return;
+                    }
+                    if (questionEvt.right().getValue().isEmpty()) {
+                        String message = "[Formulaire@updateResponse] No question found for id " + questionId;
+                        log.error(message);
+                        notFound(request, message);
+                        return;
+                    }
+
+                    JsonObject question = questionEvt.right().getValue();
+                    int question_type = question.getInteger("question_type");
+                    Integer choice_id = response.getInteger("choice_id");
+
+                    // If there is a choice it should match an existing QuestionChoice for this question
+                    if (choice_id != null && Arrays.asList(4,5,9).contains(question_type)) {
+                        questionChoiceService.get(choice_id.toString(), choiceEvt -> {
+                            if (choiceEvt.isLeft()) {
+                                log.error("[Formulaire@updateResponse] Fail to get question choice corresponding to id : " + choice_id);
+                                RenderHelper.badRequest(request, choiceEvt);
+                                return;
+                            }
+                            if (choiceEvt.right().getValue().isEmpty()) {
+                                String message = "[Formulaire@updateResponse] No choice found for id " + choice_id;
+                                log.error(message);
+                                notFound(request, message);
+                                return;
+                            }
+
+                            JsonObject choice = choiceEvt.right().getValue();
+
+                            // Check choice validity
+                            if (!choice.getInteger("question_id").equals(questionId) ||
+                                    !choice.getString("value").equals(response.getString("answer"))) {
+                                log.error("[Formulaire@updateResponse] Wrong choice for response " + response);
+                                renderError(request);
+                                return;
+                            }
+
+                            responseService.update(user, responseId, response, defaultResponseHandler(request));
+                        });
+                    }
+                    else {
+                        if (question_type == 6) {
+                            try { dateFormatter.parse(response.getString("answer")); }
+                            catch (ParseException e) { e.printStackTrace(); }
+                        }
+                        if (question_type == 7) {
+                            try { timeFormatter.parse(response.getString("answer")); }
+                            catch (ParseException e) { e.printStackTrace(); }
+                        }
+                        responseService.update(user, responseId, response, defaultResponseHandler(request));
+                    }
+                });
+            });
         });
     }
 
@@ -206,13 +323,15 @@ public class ResponseController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
+        String formId = request.getParam("formId");
         RequestUtils.bodyToJsonArray(request, responses -> {
-            JsonArray responseIds = UtilsHelper.getIds(responses);
-            if (responseIds.size() <= 0) {
-                RenderHelper.ok(request);
+            if (responses == null || responses.isEmpty()) {
+                log.error("[Formulaire@deleteResponses] No responses to delete.");
+                noContent(request);
                 return;
             }
-            responseService.delete(responseIds, arrayResponseHandler(request));
+
+            responseService.delete(UtilsHelper.getIds(responses), formId, arrayResponseHandler(request));
         });
     }
 }

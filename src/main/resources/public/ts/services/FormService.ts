@@ -2,10 +2,12 @@ import {idiom, moment, ng, notify} from 'entcore';
 import http from 'axios';
 import {Form} from '../models';
 import {DataUtils} from "../utils";
+import {Exports} from "../core/enums";
 
 export interface FormService {
     list() : Promise<any>;
     listSentForms() : Promise<any>;
+    listForLinker() : Promise<any>;
     get(formId: number) : Promise<any>;
     save(form: Form) : Promise<any>;
     create(form: Form) : Promise<any>;
@@ -15,12 +17,12 @@ export interface FormService {
     archive(form: Form, destinationFolderId: number) : Promise<any>;
     restore(form: Form, destinationFolderId: number) : Promise<any>;
     delete(formId: number) : Promise<any>;
-    move(forms : Form[], parentId: number) : Promise<any>;
+    move(formIds : number[], parentId: number) : Promise<any>;
     sendReminder(formId: number, mail: {}) : Promise<any>;
+    export(formId: number, type: string, images?: any) : Promise<any>;
     unshare(formId: number) : Promise<any>;
     getMyFormRights(formId: number) : Promise<any>;
     getAllMyFormRights() : Promise<any>;
-    getInfoImage(form: Form) : Promise<any>;
 }
 
 export const formService: FormService = {
@@ -35,7 +37,16 @@ export const formService: FormService = {
 
     async listSentForms() : Promise<any> {
         try {
-            return DataUtils.getData(await http.get('/formulaire/sentForms'));
+            return DataUtils.getData(await http.get('/formulaire/forms/sent'));
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.formService.list'));
+            throw err;
+        }
+    },
+
+    async listForLinker() : Promise<any> {
+        try {
+            return DataUtils.getData(await http.get('/formulaire/forms/linker'));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.list'));
             throw err;
@@ -53,10 +64,10 @@ export const formService: FormService = {
 
     async save(form: Form) : Promise<any> {
         if (form.date_opening != null) {
-            form.date_opening = moment(form.date_opening.setHours(0,0,0,0)).format();
+            form.date_opening = moment(form.date_opening.setHours(0,0,0,0));
         }
         if (form.date_ending != null) {
-            form.date_ending = moment(form.date_ending.setHours(23,59,59,999)).format();
+            form.date_ending = moment(form.date_ending.setHours(23,59,59,999));
         }
         return form.id ? await this.update(form) : await this.create(form);
     },
@@ -129,9 +140,9 @@ export const formService: FormService = {
         }
     },
 
-    async move(forms, parentId) : Promise<any> {
+    async move(formIds, parentId) : Promise<any> {
         try {
-            return DataUtils.getData(await http.put(`/formulaire/forms/move/${parentId}`, forms));
+            return DataUtils.getData(await http.put(`/formulaire/forms/move/${parentId}`, formIds));
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.formService.move'));
             throw e;
@@ -143,6 +154,23 @@ export const formService: FormService = {
             return DataUtils.getData(await http.post(`/formulaire/forms/${formId}/remind`, mail));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.remind'));
+            throw err;
+        }
+    },
+
+    async export(formId: number, type: string, images: any) : Promise<any> {
+        try {
+            if (type === Exports.CSV) {
+                return await http.post(`/formulaire/forms/${formId}/export/csv`, {});
+            }
+            else if (type === Exports.PDF) {
+                return await http.post(`/formulaire/forms/${formId}/export/pdf`, images, {responseType: "arraybuffer"});
+            }
+            else {
+                notify.error(idiom.translate('formulaire.error.formService.export'));
+            }
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.formService.export'));
             throw err;
         }
     },
@@ -172,15 +200,6 @@ export const formService: FormService = {
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.get'));
             throw err;
-        }
-    },
-
-    async getInfoImage(form: Form) : Promise<any> {
-        try {
-            return DataUtils.getData(await http.get(`/formulaire/info/image/${form.picture ? form.picture.split("/").slice(-1)[0] : null}`));
-        } catch (e) {
-            notify.error(idiom.translate('formulaire.error.formService.image'));
-            throw e;
         }
     }
 };

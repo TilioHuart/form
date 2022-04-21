@@ -12,7 +12,6 @@ export interface ResponseService {
     get(responseId: number) : Promise<any>;
     save(response: Response, questionType?: number) : Promise<any>;
     create(response: Response) : Promise<any>;
-    fillResponses(formId: number, distributionId: number) : Promise<any>;
     update(response: Response) : Promise<any>;
     delete(formId: number, responses: Response[]) : Promise<any>;
 }
@@ -38,7 +37,7 @@ export const responseService: ResponseService = {
 
     async listMineByDistribution(questionId: number, distributionId: number) : Promise<any> {
         try {
-            return DataUtils.getData(await http.get(`/formulaire/questions/${questionId}/responses/${distributionId}`));
+            return DataUtils.getData(await http.get(`/formulaire/questions/${questionId}/distributions/${distributionId}/responses`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.list'));
             throw err;
@@ -47,7 +46,7 @@ export const responseService: ResponseService = {
 
     async listByDistribution(distributionId: number) : Promise<any> {
         try {
-            return DataUtils.getData(await http.get(`/formulaire/responses/distributions/${distributionId}`));
+            return DataUtils.getData(await http.get(`/formulaire/distributions/${distributionId}/responses`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.list'));
             throw err;
@@ -103,15 +102,6 @@ export const responseService: ResponseService = {
     async create(response: Response) : Promise<any> {
         try {
             return DataUtils.getData(await http.post(`/formulaire/questions/${response.question_id}/responses`, response));
-        } catch (err) {
-            notify.error(idiom.translate('formulaire.error.responseService.create'));
-            throw err;
-        }
-    },
-
-    async fillResponses(formId: number, distributionId: number) : Promise<any> {
-        try {
-            return DataUtils.getData(await http.post(`/formulaire/forms/${formId}/responses/fill/${distributionId}`, {}));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.create'));
             throw err;

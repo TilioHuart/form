@@ -2,8 +2,8 @@ package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.helpers.RenderHelper;
+import fr.openent.formulaire.helpers.UtilsHelper;
 import fr.openent.formulaire.security.AccessRight;
-import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.QuestionService;
 import fr.openent.formulaire.service.impl.DefaultQuestionService;
@@ -13,6 +13,7 @@ import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
@@ -64,41 +65,167 @@ public class QuestionController extends ControllerHelper {
     public void create(HttpServerRequest request) {
         String formId = request.getParam("formId");
         RequestUtils.bodyToJson(request, question -> {
-            questionService.create(question, formId, defaultResponseHandler(request));
+            if (question == null || question.isEmpty()) {
+                log.error("[Formulaire@createQuestion] No question to create.");
+                noContent(request);
+                return;
+            }
+
+            Long sectionId = question.getLong("section_id");
+            Long sectionPosition = question.getLong("section_position");
+
+            // Check section infos validity
+            if (sectionId == null ^ sectionPosition == null) {
+                String message = "[Formulaire@createQuestion] sectionId and sectionPosition must be both null or both not null.";
+                log.error(message);
+                badRequest(request, message);
+                return;
+            }
+            else if (sectionId != null && (sectionId <= 0 || sectionPosition <= 0)) {
+                String message = "[Formulaire@createQuestion] sectionId and sectionPosition must have values greater than 0.";
+                log.error(message);
+                badRequest(request, message);
+                return;
+            }
+            else if (sectionPosition != null && question.getInteger("position") != null) {
+                String message = "[Formulaire@createQuestion] A question is either in or out of a section, it cannot have a position and a section_position.";
+                log.error(message);
+                badRequest(request, message);
+                return;
+            }
+            else if (question.getBoolean("conditional") && !Formulaire.CONDITIONAL_QUESTIONS.contains(question.getInteger("question_type"))) {
+                String message = "[Formulaire@createQuestion] A question conditional question must be of type : " + Formulaire.CONDITIONAL_QUESTIONS;
+                log.error(message);
+                badRequest(request, message);
+                return;
+            }
+
+            // If it's a conditional question in a section, check if another one already exists
+            if (question.getBoolean("conditional")) {
+                questionService.getSectionIdsWithConditionalQuestions(formId, sectionIdsEvent -> {
+                    if (sectionIdsEvent.isLeft()) {
+                        log.error("[Formulaire@createQuestion] Failed to get section ids for form with id : " + formId);
+                        RenderHelper.internalError(request, sectionIdsEvent);
+                        return;
+                    }
+                    if (sectionIdsEvent.right().getValue().isEmpty()) {
+                        String message = "[Formulaire@createQuestion] No section ids found for form with id " + formId;
+                        log.error(message);
+                        notFound(request, message);
+                        return;
+                    }
+
+                    JsonArray sectionIds = UtilsHelper.getByProp(sectionIdsEvent.right().getValue(), "section_id");
+                    if (!sectionIds.contains(sectionId)) {
+                        String message = "[Formulaire@createQuestion] A conditional question is already existing for the section with id : " + sectionId;
+                        log.error(message);
+                        badRequest(request, message);
+                        return;
+                    }
+
+                    questionService.create(question, formId, defaultResponseHandler(request));
+                });
+            }
+            else {
+                questionService.create(question, formId, defaultResponseHandler(request));
+            }
         });
     }
 
-    @Post("/forms/:formId/questions/multiple")
-    @ApiDoc("Create several questions in a specific form")
-    @ResourceFilter(CreationRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
-    public void createMultiple(HttpServerRequest request) {
-        String formId = request.getParam("formId");
-        RequestUtils.bodyToJsonArray(request, questions -> {
-            questionService.createMultiple(questions, formId, arrayResponseHandler(request));
-        });
-    }
-
-    @Put("/questions/:formId")
+    @Put("/forms/:formId/questions")
     @ApiDoc("Update specific questions")
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
         String formId = request.getParam("formId");
         RequestUtils.bodyToJsonArray(request, questions -> {
-            questionService.update(formId, questions, updatedQuestionsEvent -> {
-                if (updatedQuestionsEvent.isLeft()) {
-                    log.error("[Formulaire@updateQuestion] Failed to update questions : " + questions);
-                    RenderHelper.badRequest(request, updatedQuestionsEvent);
+            if (questions == null || questions.isEmpty()) {
+                log.error("[Formulaire@updateQuestions] No questions to update.");
+                noContent(request);
+                return;
+            }
+
+            // Check section infos validity
+            int i = 0;
+            while (i < questions.size()) {
+                JsonObject question = questions.getJsonObject(i);
+                Long sectionId = question.getLong("section_id");
+                Long sectionPosition = question.getLong("section_position");
+
+                if (sectionId == null ^ sectionPosition == null) {
+                    String message = "[Formulaire@updateQuestions] sectionId and sectionPosition must be both null or both not null : " + question;
+                    log.error(message);
+                    badRequest(request, message);
+                    return;
+                }
+                else if (sectionId != null && (sectionId <= 0 || sectionPosition <= 0)) {
+                    String message = "[Formulaire@updateQuestions] sectionId and sectionPosition must have values greater than 0 : " + question;
+                    log.error(message);
+                    badRequest(request, message);
+                    return;
+                }
+                else if (sectionPosition != null && question.getInteger("position") != null) {
+                    String message = "[Formulaire@updateQuestions] A question is either in or out of a section, it cannot have a position and a section_position : " + question;
+                    log.error(message);
+                    badRequest(request, message);
+                    return;
+                }
+                else if (question.getBoolean("conditional") && !Formulaire.CONDITIONAL_QUESTIONS.contains(question.getInteger("question_type"))) {
+                    String message = "[Formulaire@updateQuestions] A question conditional question must be of type : " + Formulaire.CONDITIONAL_QUESTIONS;
+                    log.error(message);
+                    badRequest(request, message);
+                    return;
+                }
+                i++;
+            }
+
+            // Check if sections of conditional questions to create already have conditional questions
+            questionService.getSectionIdsWithConditionalQuestions(formId, sectionIdsEvent -> {
+                if (sectionIdsEvent.isLeft()) {
+                    log.error("[Formulaire@updateQuestions] Failed to get section ids for form with id : " + formId);
+                    RenderHelper.internalError(request, sectionIdsEvent);
+                    return;
+                }
+                if (sectionIdsEvent.right().getValue().isEmpty()) {
+                    String message = "[Formulaire@updateQuestions] No section ids found for form with id " + formId;
+                    log.error(message);
+                    notFound(request, message);
                     return;
                 }
 
-                JsonArray dataInfos = updatedQuestionsEvent.right().getValue();
-                JsonArray updatedQuestions = new JsonArray();
-                for(int i = 0; i < dataInfos.size(); i++) {
-                    updatedQuestions.addAll(dataInfos.getJsonArray(i));
+                JsonArray sectionIds = UtilsHelper.getByProp(sectionIdsEvent.right().getValue(), "section_id");
+                Long conflictingSectionId = null;
+                int j = 0;
+                while (conflictingSectionId == null && j < questions.size()) {
+                    JsonObject question = questions.getJsonObject(j);
+                    if (question.getBoolean("conditional") && sectionIds.contains(question.getLong("section_id"))) {
+                        conflictingSectionId = question.getLong("section_id");
+                    }
+                    j++;
                 }
-                renderJson(request, updatedQuestions);
+
+                if (conflictingSectionId != null) {
+                    String errorMessage = "[Formulaire@updateQuestions] A conditional question is already existing for the section with id : " + conflictingSectionId;
+                    log.error(errorMessage);
+                    badRequest(request, errorMessage);
+                    return;
+                }
+
+                // If no conditional question conflict, we update
+                questionService.update(formId, questions, updatedQuestionsEvent -> {
+                    if (updatedQuestionsEvent.isLeft()) {
+                        log.error("[Formulaire@updateQuestions] Failed to update questions : " + questions);
+                        RenderHelper.internalError(request, updatedQuestionsEvent);
+                        return;
+                    }
+
+                    JsonArray updatedQuestionsInfos = updatedQuestionsEvent.right().getValue();
+                    JsonArray updatedQuestions = new JsonArray();
+                    for (int k = 0; k < updatedQuestionsInfos.size(); k++) {
+                        updatedQuestions.addAll(updatedQuestionsInfos.getJsonArray(k));
+                    }
+                    renderJson(request, updatedQuestions);
+                });
             });
         });
     }
@@ -112,7 +239,7 @@ public class QuestionController extends ControllerHelper {
         questionService.get(questionId, getEvent -> {
             if (getEvent.isLeft()) {
                 log.error("[Formulaire@deleteQuestion] Failed to get question with id : " + questionId);
-                RenderHelper.badRequest(request, getEvent);
+                RenderHelper.internalError(request, getEvent);
                 return;
             }
             questionService.delete(getEvent.right().getValue(), defaultResponseHandler(request));

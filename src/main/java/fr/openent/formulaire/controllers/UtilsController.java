@@ -1,8 +1,11 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.formulaire.helpers.RenderHelper;
 import fr.openent.formulaire.helpers.upload_file.Attachment;
 import fr.openent.formulaire.helpers.upload_file.FileHelper;
 import fr.openent.formulaire.security.CreationRight;
+import fr.wseduc.rs.ApiDoc;
+import fr.wseduc.rs.Get;
 import fr.wseduc.rs.Post;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
@@ -16,6 +19,8 @@ import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.storage.Storage;
 
+import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
+
 public class UtilsController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(UtilsController.class);
     private final Storage storage;
@@ -25,34 +30,38 @@ public class UtilsController extends ControllerHelper {
         this.storage = storage;
     }
 
-    @Post("/file/img")
+    @Get("/files/:idImage/info")
+    @ApiDoc("Get image info from workspace for a specific image")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    public void postImage(final HttpServerRequest request){
-        this.storage.writeUploadFile(request, uploaded -> {
-            if (!"ok".equals(uploaded.getString("status"))) {
-                log.error(uploaded.encode());
-                badRequest(request, uploaded.getString("message"));
-                return;
-            }
+    public void getInfoImg(final HttpServerRequest request) {
+        String idImage = request.getParam("idImage");
 
-            // Format verification (should be an image)
-            JsonObject metadata = uploaded.getJsonObject("metadata");
-            String contentType = metadata.getString("content-type");
+        if (idImage == null || idImage.equals("")) {
+            String message = "[Formulaire@getInfoImg] The image id must not be empty.";
+            log.error(message);
+            badRequest(request, message);
+            return;
+        }
 
-            if (contentType.contains("image")) {
-                Renders.renderJson(request, uploaded);
+        JsonObject action = new JsonObject().put("action", "getDocument").put("id", idImage);
+        eb.request("org.entcore.workspace", action, handlerToAsyncHandler(infos -> {
+            if (!infos.body().getString("status").equals("ok")) {
+                String message = "[Formulaire@getInfoImg] Failed to get info for image with id : " + idImage;
+                log.error(message);
+                RenderHelper.internalError(request, infos.body().getJsonObject("result").toString());
             }
             else {
-                badRequest(request, "[Formulaire@postImage] Wrong format file");
+                Renders.renderJson(request, infos.body().getJsonObject("result"), 200);
             }
-        });
+        }));
     }
 
-    @Post("/file/img/multiple")
+    @Post("/files")
+    @ApiDoc("Upload several files into the storage")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    public void postMultipleImages(final HttpServerRequest request) {
+    public void postMultipleFiles(final HttpServerRequest request) {
         String nbFiles = request.getHeader("Number-Files");
         int nbFilesToUpload = nbFiles != null ? Integer.parseInt(nbFiles) : 0;
         FileHelper.uploadMultipleFiles(nbFilesToUpload, request, storage, vertx)
@@ -65,7 +74,7 @@ public class UtilsController extends ControllerHelper {
             })
             .onFailure(err -> {
                 log.error("[Formulaire@postMultipleImages] An error has occurred during upload files: " + err.getMessage());
-                renderError(request);
+                RenderHelper.internalError(request, err.getMessage());
             });
     }
 }

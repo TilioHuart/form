@@ -82,21 +82,21 @@ public class ShareAndOwner implements ResourcesProvider {
 
 
     private String getKeyByBinding(Binding binding) {
-        if (isCountDistribution(binding) || isGetByFormResponderAndStatusDistribution(binding) || isAddDistribution(binding) ||
+        if (isCountDistribution(binding) || isGetByFormResponderAndStatusDistribution(binding) ||
                 isUpdateForm(binding) || isDeleteForm(binding) || isExportForm(binding) || isSendReminderForm(binding) ||
-                isCreateQuestion(binding) || isListByFormResponse(binding) || isFillResponsesResponse(binding) ||
-                isDeleteResponse(binding) || isCreateSection(binding) || isUpdateSection(binding) || isUpdateQuestion(binding)) {
+                isCreateQuestion(binding) || isListByFormResponse(binding) || isDeleteResponse(binding) ||
+                isCreateSection(binding) || isUpdateSection(binding) || isUpdateQuestion(binding)) {
             return "formId";
         }
-        else if (isGetDistribution(binding) || isUpdateDistribution(binding) || isDuplicateWithResponsesDistribution(binding) ||
-                isReplaceDistribution(binding) || isDeleteDistribution(binding) || isListByDistributionResponse(binding)) {
+        else if (isGetDistribution(binding) || isAddDistribution(binding) || isUpdateDistribution(binding) ||
+                isDuplicateWithResponsesDistribution(binding) || isReplaceDistribution(binding) ||
+                isDeleteDistribution(binding) || isListByDistributionResponse(binding)) {
             return "distributionId";
         }
         else if (isGetSection(binding) || isDeleteSection(binding)) {
             return "sectionId";
         }
-        else if (isListMineByDistributionResponse(binding) || isCreateQuestionChoice(binding) ||
-                isCreateMultipleQuestionChoice(binding) || isGetQuestion(binding) ||
+        else if (isListMineByDistributionResponse(binding) || isCreateQuestionChoice(binding) || isGetQuestion(binding) ||
                 isDeleteQuestion(binding) || isListResponse(binding) || isCreateResponse(binding) ||
                 isZipAndDownloadResponseFile(binding)) {
             return "questionId";
@@ -186,10 +186,6 @@ public class ShareAndOwner implements ResourcesProvider {
         return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.QuestionChoiceController|create");
     }
 
-    private boolean isCreateMultipleQuestionChoice(final Binding binding) {
-        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.QuestionChoiceController|createMultiple");
-    }
-
     private boolean isUpdateQuestionChoice(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.PUT, "fr.openent.formulaire.controllers.QuestionChoiceController|update");
     }
@@ -234,10 +230,6 @@ public class ShareAndOwner implements ResourcesProvider {
 
     private boolean isCreateResponse(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.ResponseController|create");
-    }
-
-    private boolean isFillResponsesResponse(final Binding binding) {
-        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.ResponseController|fillResponses");
     }
 
     private boolean isUpdateResponse(final Binding binding) {
