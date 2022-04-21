@@ -235,6 +235,10 @@ public class FormResponsesExportPDF {
         HashMap<Integer, JsonObject> mapSectionsPosition = new HashMap<>();
         for (Object s : sections) {
             JsonObject section = (JsonObject)s;
+            section.put("description", section.getString("description")
+                    .replace("\"","'")
+                    .replaceAll("<("+autoClosingTags+")[\\w\\W]*?>","$0</$1>")
+            );
             section.put("questions", new JsonArray());
             mapSectionsId.put(section.getInteger("id"), section);
             mapSectionsPosition.put(section.getInteger("position"), section);
