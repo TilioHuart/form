@@ -7,3 +7,4 @@ export * from './main';
 export * from './recap-questions';
 export * from './respond-question';
 export * from './rgpd-question';
+export * from './public/index';

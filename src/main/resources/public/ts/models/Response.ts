@@ -18,7 +18,7 @@ export class Response {
         this.id = null;
         this.question_id = question_id ? question_id : null;
         this.choice_id = choice_id ? choice_id : null;
-        this.answer =  answer ? answer : null;
+        this.answer =  answer ? answer : "";
         this.distribution_id = distribution_id ? distribution_id : null;
         this.original_id = null;
         this.files = new ResponseFiles();

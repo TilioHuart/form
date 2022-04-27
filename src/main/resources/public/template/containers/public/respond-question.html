@@ -1,0 +1,52 @@
+<div ng-controller="PublicRespondQuestionController as vm">
+    <div class="row">
+        <section class="cell ten">
+            <div>
+                <h1>
+                    <i18n>formulaire.title</i18n><i18n>formulaire.separator</i18n>[[vm.form.title]]
+                </h1>
+            </div>
+        </section>
+    </div>
+
+    <progress-bubble-bar form-element="vm.formElement" nb-form-elements="vm.nbFormElements"></progress-bubble-bar>
+
+    <div class="respond-question">
+        <div class="nine twelve-mobile">
+
+            <!-- Display question -->
+            <public-question-item ng-if="FormElementUtils.isQuestion(vm.formElement)"
+                                  question="vm.formElement"
+                                  distribution-key="vm.distributionKey"
+                                  response="vm.allResponsesInfos.get(vm.formElement).responses.all[0]"
+                                  selected-index="vm.allResponsesInfos.get(vm.formElement).selectedIndexList[0]">
+            </public-question-item>
+
+            <!-- Display section -->
+            <div class="section" ng-if="!FormElementUtils.isQuestion(vm.formElement)">
+                <div class="section-top">
+                    <div class="title"><h4>[[vm.formElement.title]]</h4></div>
+                    <div class="description" ng-if="vm.formElement.description">
+                        <div ng-bind="vm.formElement.description"></div>
+                    </div>
+                </div>
+                <div class="section-main">
+                    <div ng-repeat="question in vm.formElement.questions.all | orderBy:'section_position'">
+                        <public-question-item question="question"
+                                              distribution-key="vm.distributionKey"
+                                              response="vm.allResponsesInfos.get(vm.formElement).responses.all[question.section_position - 1]"
+                                              selected-index="vm.allResponsesInfos.get(vm.formElement).selectedIndexList[question.section_position - 1]">
+                        </public-question-item>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom page buttons -->
+            <div class="buttons">
+                <button class="cell" ng-if="vm.formElement.position <= 1" ng-disabled="true"><i18n>formulaire.prev</i18n></button>
+                <button class="cell cancel" reset-guard="vm.prev()" ng-if="vm.formElement.position > 1"><i18n>formulaire.prev</i18n></button>
+                <button class="cell" reset-guard="vm.next()"><i18n>formulaire.next</i18n></button>
+            </div>
+        </div>
+    </div>
+</div>

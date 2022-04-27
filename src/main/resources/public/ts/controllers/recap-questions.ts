@@ -16,7 +16,6 @@ interface ViewModel {
     };
 
     $onInit() : Promise<void>;
-    saveAndQuit() : Promise<void>;
     send() : Promise<void>;
     doSend() : Promise<void>;
     checkMultiEtab() : boolean;

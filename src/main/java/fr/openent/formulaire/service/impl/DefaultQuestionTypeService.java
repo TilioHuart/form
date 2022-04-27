@@ -16,11 +16,4 @@ public class DefaultQuestionTypeService implements QuestionTypeService {
         String query = "SELECT * FROM " + Formulaire.QUESTION_TYPE_TABLE + " ORDER BY code;";
         Sql.getInstance().prepared(query, new JsonArray(), SqlResult.validResultHandler(handler));
     }
-
-    @Override
-    public void get(String code, Handler<Either<String, JsonObject>> handler) {
-        String query = "SELECT * FROM " + Formulaire.QUESTION_TYPE_TABLE + " WHERE code = ?;";
-        JsonArray params = new JsonArray().add(code);
-        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
-    }
 }

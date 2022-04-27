@@ -241,6 +241,7 @@
   "formulaire.error.404": "Désolé, la page que vous cherchez n'existe pas",
   "formulaire.error.409": "Vous avez déjà répondu à ce formulaire.",
   "formulaire.error.backToMenu": "Retour à la liste des formulaires",
+  "formulaire.public.thanks": "Merci pour vos réponses",
 
   "formulaire.error.form.sync": "Une erreur est survenue lors de la synchronisation des formulaires",
   "formulaire.error.formService.list": "Une erreur est survenue lors de la récupération des formulaires",

@@ -155,6 +155,7 @@ public class Formulaire extends BaseServer {
 		addController(new ResponseController());
 		addController(new ResponseFileController(storage));
 		addController(new SectionController());
+		addController(new POCController());
 
 		// CRON
 		RgpdCron rgpdCron = new RgpdCron(storage);

@@ -44,6 +44,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.isMobile = window.screen.width <= 500;
 		$scope.responsePosition = 1;
 		$scope.historicPosition = [];
+		$scope.formKey = "";
 
 		const init = async () : Promise<void> => {
 			await $scope.questionTypes.sync();
@@ -263,6 +264,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				else {
 					$scope.redirectTo('/e403');
 				}
+			},
+			respondPublicForm: (params) => {
+				$scope.formKey = params.formKey;
+				template.open('main', 'containers/public/respond-question');
 			},
 			e403: () => {
 				$scope.currentPage = Pages.E403;

@@ -28,6 +28,7 @@ routes.define(function($routeProvider){
 		.when('/form/:formId/rgpd', { action: 'rgpdQuestion' })
 		.when('/form/:formId/:distributionId', { action: 'respondForm' })
 		.when('/form/:formId/:distributionId/questions/recap', { action: 'recapQuestions' })
+		.when('/form/:formKey', { action: 'respondPublicForm' })
 		.when('/e403', { action: 'e403' })
 		.when('/e404', { action: 'e404' })
 		.when('/e409', { action: 'e409' })

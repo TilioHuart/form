@@ -7,4 +7,5 @@ export * from './QuestionChoiceService';
 export * from './QuestionTypeService';
 export * from './ResponseFileService';
 export * from './ResponseService';
+export * from './POCService';
 export * from './UtilsService';

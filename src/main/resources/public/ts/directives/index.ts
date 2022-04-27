@@ -4,3 +4,4 @@ export * from './loader';
 export * from './question/index';
 export * from './progress-bar';
 export * from './rgpd';
+export * from './public/index';

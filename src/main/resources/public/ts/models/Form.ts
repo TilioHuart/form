@@ -1,8 +1,10 @@
-import {Selectable, Selection} from "entcore-toolkit";
+import {Mix, Selectable, Selection} from "entcore-toolkit";
 import {idiom, notify, Rights, Shareable} from "entcore";
 import {formService, utilsService} from "../services";
 import {Distribution, Distributions, DistributionStatus} from "./Distribution";
 import {FiltersFilters, FiltersOrders} from "../core/enums";
+import {FormElement, FormElements, Question, Questions, Section} from "./FormElement";
+import {QuestionChoice, QuestionChoices} from "./QuestionChoice";
 
 export class Form implements Selectable, Shareable  {
     shared: any;
@@ -107,6 +109,51 @@ export class Form implements Selectable, Shareable  {
                 this[key] = new Date(this[key]);
             }
         }
+    };
+
+    formatFormElements = (formElements: FormElements) : void => {
+        for (let e of this['form_elements']) {
+            if (!e['questions']) {
+                formElements.all.push(this.formatIntoQuestion(e));
+            }
+            else {
+                formElements.all.push(this.formatIntoSection(e));
+            }
+        }
+        formElements.all.sort((a, b) => a.position - b.position);
+        delete this['form_elements'];
+    };
+
+    formatIntoSection = (e: FormElement) : Section => {
+        let questions = new Questions();
+        if (e['questions']) {
+            for (let q of e['questions']) {
+                questions.all.push(this.formatIntoQuestion(q));
+            }
+        }
+        questions.all.sort((a, b) => a.section_position - b.section_position);
+
+        let section = Mix.castAs(Section, e);
+        section.questions = questions;
+        return section;
+    };
+
+    formatIntoQuestion = (e: FormElement) : Question => {
+        let questionChoices = new QuestionChoices();
+        if (e['choices']) {
+            questionChoices.all = Mix.castArrayAs(QuestionChoice, e['choices']);
+        }
+        questionChoices.all.sort((a, b) => a.id - b.id);
+
+        let question = Mix.castAs(Question, e);
+        question.choices = questionChoices;
+        return question;
+    };
+
+    getDistributionKey = () : string => {
+        let distributionKey = this['distribution_key'].toString();
+        delete this['distribution_key']
+        return distributionKey;
     };
 
     generateShareRights = () : void => {
