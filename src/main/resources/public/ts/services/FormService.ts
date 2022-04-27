@@ -111,7 +111,7 @@ export const formService: FormService = {
     async archive(form: Form, destinationFolderId: number) : Promise<any> {
         try {
             form.archived = true;
-            await this.move([form], destinationFolderId);
+            await this.move([form.id], destinationFolderId);
             return await this.update(form);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.archive'));

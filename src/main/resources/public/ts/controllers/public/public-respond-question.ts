@@ -1,6 +1,5 @@
-import {idiom, ng, notify, template} from 'entcore';
-import {Form, FormElement, FormElements, Question, Response, Responses, Section} from "../../models";
-import {pocService} from "../../services";
+import {moment, ng, notify, template} from 'entcore';
+import {Form, FormElement, FormElements, Question, Response, Responses, Section, Types} from "../../models";
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "../../core/enums";
 import {Mix} from "entcore-toolkit";
 import {PublicUtils} from "../../utils/public";
@@ -15,7 +14,6 @@ interface ViewModel {
 
 	form: Form;
 	nbFormElements: number;
-	loading : boolean;
 	historicPosition: number[];
 
 	$onInit(): Promise<void>;
@@ -27,58 +25,37 @@ export const publicRespondQuestionController = ng.controller('PublicRespondQuest
 	function ($scope) {
 
 	const vm: ViewModel = this;
-	vm.formElements = new FormElements();
 	vm.form = new Form();
+	vm.formElements = new FormElements();
 	vm.nbFormElements = 1;
 	vm.allResponsesInfos = new Map();
 
 	vm.$onInit = async () : Promise<void> => {
-		vm.loading = true;
-		vm.formKey = $scope.formKey;
-		vm.historicPosition = [1];
+		syncWithStorageData();
+		let formElementPosition = vm.historicPosition[vm.historicPosition.length - 1];
+		vm.formElement = vm.formElements.all[formElementPosition - 1];
+		initFormElementResponses();
 
-		// Get cookies --> Check if distrib finished
-
-		if (!sessionStorage.getItem('data')) {
-			vm.form.setFromJson(await pocService.getPublicFormByKey(vm.formKey));
-			vm.form.formatFormElements(vm.formElements);
-
-			vm.distributionKey = vm.form.getDistributionKey();
-			vm.formElement = vm.formElements.all[0];
-			initFormElementResponses();
-			updateStorage();
-		}
-		else {
-			syncWithStorageData();
-			vm.formElement = vm.formElements.all[0];
-		}
-
-		vm.nbFormElements = vm.formElements.all.length;
-
-		window.setTimeout(() => vm.loading = false,500);
 		$scope.safeApply();
 	};
 
 	vm.prev = () : void => {
+		formatResponses();
 		let prevPosition = vm.historicPosition[vm.historicPosition.length - 2];
 		if (prevPosition > 0) {
 			vm.formElement = vm.formElements.all[prevPosition - 1];
 			vm.historicPosition.pop();
-			initFormElementResponses();
-			window.scrollTo(0, 0);
-			$scope.safeApply();
+			goToFormElement();
 		}
 	};
 
 	vm.next = () : void => {
+		formatResponses();
 		let nextPosition = getNextPositionIfValid();
 		if (nextPosition && nextPosition <= vm.nbFormElements) {
 			vm.formElement = vm.formElements.all[nextPosition - 1];
 			vm.historicPosition.push(vm.formElement.position);
-			initFormElementResponses();
-			updateStorage();
-			window.scrollTo(0, 0);
-			$scope.safeApply();
+			goToFormElement();
 		}
 		else if (nextPosition !== undefined) {
 			updateStorage();
@@ -87,6 +64,13 @@ export const publicRespondQuestionController = ng.controller('PublicRespondQuest
 	};
 
 	// Utils
+
+	const goToFormElement = () : void => {
+		initFormElementResponses();
+		updateStorage();
+		window.scrollTo(0, 0);
+		$scope.safeApply();
+	};
 
 	const getNextPositionIfValid = () : number => {
 		let nextPosition: number = vm.formElement.position + 1;
@@ -120,6 +104,28 @@ export const publicRespondQuestionController = ng.controller('PublicRespondQuest
 		return nextPosition;
 	};
 
+	const formatResponses = () : void => {
+		let questions = vm.formElement instanceof Section ? vm.formElement.questions.all : [vm.formElement];
+		let responses = vm.allResponsesInfos.get(vm.formElement).responses.all;
+
+		for (let i = 0; i < questions.length; i++) {
+			let question = questions[i];
+			let response = responses[i];
+
+			let questionType = (question as Question).question_type;
+			if (questionType === Types.TIME) {
+				if (typeof response.answer != "string") {
+					response.answer = moment(response.answer).format("HH:mm");
+				}
+			}
+			else if (questionType === Types.DATE) {
+				if (typeof response.answer != "string") {
+					response.answer = moment(response.answer).format("DD/MM/YYYY");
+				}
+			}
+		}
+	};
+
 	const initFormElementResponses = () : void => {
 		if (!vm.allResponsesInfos.has(vm.formElement)) {
 			let responses = new Responses();
@@ -147,27 +153,24 @@ export const publicRespondQuestionController = ng.controller('PublicRespondQuest
 	};
 
 	const updateStorage = () : void => {
-		let data = {
-			formKey: vm.formKey,
-			distributionKey: vm.distributionKey,
-			form: vm.form,
-			formElements: vm.formElements,
-			nbFormElements: vm.nbFormElements,
-			historicPosition: vm.historicPosition,
-			allResponsesInfos: vm.allResponsesInfos
-		};
-		sessionStorage.setItem('data', JSON.stringify(data));
+		sessionStorage.setItem('formKey', JSON.stringify(vm.formKey));
+		sessionStorage.setItem('distributionKey', JSON.stringify(vm.distributionKey));
+		sessionStorage.setItem('form', JSON.stringify(vm.form));
+		sessionStorage.setItem('formElements', JSON.stringify(vm.formElements));
+		sessionStorage.setItem('nbFormElements', JSON.stringify(vm.nbFormElements));
+		sessionStorage.setItem('historicPosition', JSON.stringify(vm.historicPosition));
+		sessionStorage.setItem('allResponsesInfos', JSON.stringify(vm.allResponsesInfos));
 	};
 
 	const syncWithStorageData = () : void => {
-		let data = JSON.parse(sessionStorage.getItem('data'));
-
-		vm.form = Mix.castAs(Form, data.form);
-		vm.formKey = data.formKey;
-		vm.distributionKey = data.distributionKey;
-		vm.nbFormElements = data.nbFormElements;
-		vm.historicPosition = data.historicPosition;
-		PublicUtils.formatStorageData(data, vm.formElements, vm.allResponsesInfos);
+		vm.form = Mix.castAs(Form, JSON.parse(sessionStorage.getItem('form')));
+		vm.formKey = JSON.parse(sessionStorage.getItem('formKey'));
+		vm.distributionKey = JSON.parse(sessionStorage.getItem('distributionKey'));
+		vm.nbFormElements = JSON.parse(sessionStorage.getItem('nbFormElements'));
+		vm.historicPosition = JSON.parse(sessionStorage.getItem('historicPosition'));
+		let dataFormElements = JSON.parse(sessionStorage.getItem('formElements'));
+		let dataResponsesInfos = JSON.parse(sessionStorage.getItem('allResponsesInfos'));
+		PublicUtils.formatStorageData(dataFormElements, vm.formElements, dataResponsesInfos, vm.allResponsesInfos);
 	};
 
 }]);

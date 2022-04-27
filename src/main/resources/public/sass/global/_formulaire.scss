@@ -293,100 +293,13 @@ body.formulaire section.main {
     }
   }
 
-  // Prop-form
+  .public_link {
+    font-size: 14px;
+    font-style: italic;
+    margin-top: 1%;
 
-  .prop-form {
-    display: flex;
-    justify-content: center;
-
-    .item {
-      width: 60%;
-      @media screen and (max-width: $formulaire-screen-laptop) { width: 100%; }
-
-      .domino {
-        .picture {
-          &:hover {
-            cursor: pointer;
-          }
-
-          image-select {
-            width: 100%;
-          }
-        }
-
-        .data {
-          padding: 10px 20px;
-
-          &-text {
-            .title {
-              font-weight: bold;
-              margin: 10px 0 5px 0;
-            }
-
-            .interval {
-              font-size: 12px;
-              @media screen and (max-width: $formulaire-screen-mobile) {
-                margin-left: 5px;
-              }
-
-              .opening { margin-right: 10px; }
-
-              input {
-                text-align: center;
-                @media screen and (max-width: $formulaire-screen-mobile) {
-                  font-size: 10px;
-                }
-              }
-            }
-
-            .multiple, .editable, .anonymous, .notified {
-              height: 24px;
-            }
-
-            .multiple, .editable, .anonymous, .notified, .collectData {
-              font-size: 12px;
-              display: flex;
-              align-items: baseline;
-              margin-bottom: 1%;
-
-              .text {
-                display: flex;
-                flex-direction: column;
-                margin-left: 5px;
-              }
-            }
-
-            .collectData {
-              &-inputs{
-                margin: 2% 2% 2% 25px;
-
-                .goal input {
-                  margin: 0;
-                  font-size: 12px;
-                }
-              }
-
-              &-description {
-                border: solid 1px $formulaire-grey;
-                padding: 2%;
-              }
-            }
-          }
-
-          &-bottom {
-            display: flex;
-            justify-content: flex-end;
-            align-items: flex-end;
-            @media screen and (max-width: $formulaire-screen-mobile) {
-              margin-top: 5%;
-            }
-
-            &.date {
-              justify-content: space-between;
-            }
-          }
-        }
-      }
+    a {
+      margin-left: 1%;
     }
   }
 

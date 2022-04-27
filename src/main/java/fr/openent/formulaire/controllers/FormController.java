@@ -746,9 +746,10 @@ public class FormController extends ControllerHelper {
                                 return;
                             }
 
-                            // Check if one of the folders is not owned by the connected user
+                            // Check if targetFolderId is not owned by the connected user
                             String folderOwner = targetedFolderEvt.right().getValue().getString("user_id");
-                            if (folderOwner == null || !user.getUserId().equals(folderOwner)) {
+                            if (!Formulaire.FORBIDDEN_FOLDER_IDS.contains(targetFolderId) &&
+                                (folderOwner == null || !user.getUserId().equals(folderOwner))) {
                                 String message = "[Formulaire@moveForms] You're not owner of the targeted folder with id " + targetFolderId;
                                 log.error(message);
                                 unauthorized(request, message);
@@ -1175,12 +1176,6 @@ public class FormController extends ControllerHelper {
                 handler.handle(new Either.Left<>(respondersEvt.left().getValue()));
                 return;
             }
-            if (respondersEvt.right().getValue().isEmpty()) {
-                String message = "[Formulaire@removeDeletedDistributions] No responders found for form with id " + formId;
-                log.error(message);
-                notFound(request, message);
-                return;
-            }
 
             List<String> respondersFromBDD = UtilsHelper.getStringIds(respondersEvt.right().getValue()).getList();
 
@@ -1295,14 +1290,8 @@ public class FormController extends ControllerHelper {
                 handler.handle(new Either.Left<>(distributionsEvent.left().getValue()));
                 return;
             }
-            if (distributionsEvent.right().getValue().isEmpty()) {
-                String message = "[Formulaire@updateFormSentProp] No distributions found for form with id " + formId;
-                log.error(message);
-                handler.handle(new Either.Left<>(message));
-                return;
-            }
 
-            boolean value = !distributionsEvent.right().getValue().isEmpty();
+            boolean hasDistributions = !distributionsEvent.right().getValue().isEmpty();
             formService.get(formId, user, formEvent -> {
                 if (formEvent.isLeft()) {
                     log.error("[Formulaire@updateFormSentProp] Fail to get form");
@@ -1317,7 +1306,7 @@ public class FormController extends ControllerHelper {
                 }
 
                 JsonObject form = formEvent.right().getValue();
-                form.put("sent", value);
+                form.put("sent", hasDistributions);
                 formService.update(formId, form, updateEvent -> {
                     if (updateEvent.isLeft()) {
                         log.error("[Formulaire@updateFormSentProp] Fail to update form");
@@ -1393,12 +1382,6 @@ public class FormController extends ControllerHelper {
                 String message = "[Formulaire@getSharedWithMe] Fail to get user's shared rights";
                 log.error(message);
                 badRequest(request, message);
-                return;
-            }
-            if (formSharedEvt.right().getValue().isEmpty()) {
-                String message = "[Formulaire@getSharedWithMe] No sharing found for form with id " + formId;
-                log.error(message);
-                notFound(request, message);
                 return;
             }
 

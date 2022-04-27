@@ -22,8 +22,8 @@ export const rgpd: Directive = ng.directive('rgpd', () => {
         bindToController: true,
         template: `
             <div class="rgpd">
-                <div class="bottom-spacing-three" bind-html="vm.getRgpdDescriptionIntro()"></div>
-                <div ng-repeat="delegate in vm.delegates.all" bind-html="vm.getRgpdDescriptionDelegates(delegate)"></div>
+                <div class="bottom-spacing-three" ng-bind-html="vm.getRgpdDescriptionIntro()"></div>
+                <div ng-repeat="delegate in vm.delegates.all" ng-bind-html="vm.getRgpdDescriptionDelegates(delegate)"></div>
             </div>
         `,
 

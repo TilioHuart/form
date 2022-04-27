@@ -22,6 +22,7 @@ export class Distribution  {
     active: boolean;
     structure: string;
     original_id: number;
+    public_key: string;
 
     constructor() {
         this.id = null;
@@ -36,6 +37,7 @@ export class Distribution  {
         this.active = true;
         this.structure = null;
         this.original_id = null;
+        this.public_key = null;
     }
 
     toJson() : Object {
@@ -51,7 +53,8 @@ export class Distribution  {
             date_response: this.date_response,
             active: this.active,
             structure: this.structure,
-            original_id: this.original_id
+            original_id: this.original_id,
+            public_key: this.public_key
         }
     }
 }

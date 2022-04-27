@@ -1,10 +1,17 @@
 <lightbox show="vm.display.lightbox.checkremind" on-close="vm.closeCheckRemind()">
     <h2><i18n>formulaire.form.checkremind.title</i18n></h2>
 
+    <!-- If form is anonymous -->
 
     <div ng-if="vm.forms.selected[0].anonymous">
         <i18n>formulaire.checkremind.anonymous</i18n><b>[[vm.forms.selected[0].title]]</b> : [[vm.forms.selected[0].nb_responses]]
     </div>
+
+    <div class="action-buttons alone" ng-if="vm.forms.selected[0].anonymous">
+        <button class="cell cancel" ng-click="vm.closeCheckRemind()"><i18n>formulaire.close</i18n></button>
+    </div>
+
+    <!-- If form is not anonymous -->
 
     <div ng-if="!vm.forms.selected[0].anonymous">
         <i18n>formulaire.checkremind.name</i18n><b>[[vm.forms.selected[0].title]]</b> :
@@ -60,7 +67,7 @@
         <infinite-scroll scrolled="vm.infiniteScroll()" loading-mode="true"></infinite-scroll>
     </div>
 
-    <div class="action-buttons">
+    <div class="action-buttons" ng-if="!vm.forms.selected[0].anonymous">
         <button class="cell cancel" ng-click="vm.closeCheckRemind()"><i18n>formulaire.cancel</i18n></button>
         <button class="cell" ng-click="vm.remind()"><i18n>formulaire.remind.title</i18n></button>
     </div>

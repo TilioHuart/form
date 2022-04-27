@@ -1,0 +1,26 @@
+<div ng-controller="PublicRgpdController as vm">
+    <div class="row">
+        <section class="cell ten">
+            <div>
+                <h1>
+                    <i18n>formulaire.title</i18n><i18n>formulaire.separator</i18n>[[vm.form.title]]
+                </h1>
+            </div>
+        </section>
+    </div>
+
+    <div class="respond-question">
+        <div class="nine twelve-mobile">
+            <div class="question rgpd">
+                <h4><i18n>formulaire.question.rgpd.title</i18n></h4>
+                <div class="question-main">
+                    <rgpd form="vm.form" ng-if="vm.form.rgpd"></rgpd>
+                    <div>(Texte à propos des cookies and co)</div>
+                </div>
+            </div>
+            <div class="buttons alone">
+                <button class="cell" ng-click="vm.startForm()"><i18n>formulaire.respond.form</i18n></button>
+            </div>
+        </div>
+    </div>
+</div>

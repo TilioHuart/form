@@ -13,17 +13,18 @@ import {Mix} from "entcore-toolkit";
 export class PublicUtils {
     /**
      * Returns an array of colors interpolated between a list of given colors
-     * @param data sessionStorage data transformed into JSON
+     * @param dataFormElements sessionStorage data transformed into JSON
      * @param formElements formElements to fill
+     * @param dataResponsesInfos sessionStorage data transformed into JSON
      * @param allResponsesInfos allResponsesInfos to fill
      */
-    static formatStorageData = (data: any, formElements: FormElements, allResponsesInfos: any) : void => {
+    static formatStorageData = (dataFormElements: any, formElements: FormElements, dataResponsesInfos: any, allResponsesInfos: any) : void => {
         // Format form elements
-        PublicUtils.formatFormElements(data.formElements, formElements);
+        PublicUtils.formatFormElements(dataFormElements, formElements);
 
         // Format mapping
         allResponsesInfos.clear();
-        for (let responseInfo of data.allResponsesInfos) {
+        for (let responseInfo of dataResponsesInfos) {
             let isSection = responseInfo[0].description !== undefined;
             let key = formElements.filter(e => e instanceof (isSection ? Section : Question) && e.id === responseInfo[0].id)[0];
 
@@ -79,5 +80,32 @@ export class PublicUtils {
         let question = Mix.castAs(Question, e);
         question.choices = questionChoices;
         return question;
+    };
+
+    // Cookies
+
+    static getCookie = (name: string) : string => {
+        let indexOfCookieName = document.cookie.indexOf(name+'=');
+        if (indexOfCookieName >= 0) {
+            let startIndexOfCookieValue = indexOfCookieName + name.length + 1;
+            let endIndexOfCookieValue = document.cookie.indexOf(';', startIndexOfCookieValue);
+            if (endIndexOfCookieValue < 0) { endIndexOfCookieValue = document.cookie.length; }
+
+            if (startIndexOfCookieValue >= 0 && endIndexOfCookieValue > startIndexOfCookieValue) {
+                return document.cookie.substring(startIndexOfCookieValue, endIndexOfCookieValue);
+            }
+        }
+
+        return null;
+    };
+
+    static setCookie = (name: string, value: string, expires?: Date, path= '/', domain?: string, secure = false, sameSite = 'strict') : void => {
+        let cookie = `${name} = ${value}`;
+        if (expires) { cookie += `; expires = ${expires.toUTCString()}` }
+        if (path) { cookie += `; path = ${path}` }
+        if (domain) { cookie += `; domain = ${domain}` }
+        if (secure) { cookie += `; secure = ${secure}` }
+        if (sameSite) { cookie += `; samesite = ${sameSite}` }
+        document.cookie = cookie;
     };
 }

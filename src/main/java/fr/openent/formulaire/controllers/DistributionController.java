@@ -353,6 +353,9 @@ public class DistributionController extends ControllerHelper {
                                         renderJson(request, finalDistribution, 200);
                                     });
                                 }
+                                else {
+                                    renderJson(request, finalDistribution, 200);
+                                }
                             });
                         }
                         else {

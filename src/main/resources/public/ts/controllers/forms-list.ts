@@ -15,6 +15,7 @@ import {FiltersFilters, FiltersOrders, FORMULAIRE_EMIT_EVENT} from "../core/enum
 import {Mix} from "entcore-toolkit";
 import {Element} from "entcore/types/src/ts/workspace/model";
 import {I18nUtils} from "../utils";
+import * as Clipboard from 'clipboard';
 
 interface ViewModel {
     forms: Forms;
@@ -184,6 +185,17 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         (window as any).LAZY_MODE = false;
         vm.loading = false;
         vm.initDragAndDrop();
+
+        // Clipboard
+        let clipboard = new Clipboard('.clipboard-link-field');
+        clipboard.on('success', function(e) {
+            e.clearSelection();
+            notify.info('formulaire.share.link.copy.success');
+        });
+        clipboard.on('error', function(e) {
+            notify.error('formulaire.share.link.copy.error');
+        });
+
         $scope.safeApply();
     };
 
@@ -290,7 +302,9 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.closeShareFormLightbox = () : void => {
         template.close('lightbox');
         vm.display.lightbox.sharing = false;
-        window.setTimeout(async function () { await vm.openFolder(vm.folder, false); }, 100);
+        if (!vm.forms.selected[0].is_public) {
+            window.setTimeout(async function () { await vm.openFolder(vm.folder, false); }, 100);
+        }
     };
 
     vm.seeResultsForm = () : void => {
@@ -713,6 +727,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     // Utils
+
     vm.switchAllForms = (value) : void => {
         value ? vm.forms.selectAll() : vm.forms.deselectAll();
         vm.allFormsSelected = value;

@@ -17,6 +17,7 @@ for (let directive in directives) {
 
 routes.define(function($routeProvider){
 	$routeProvider
+		.when('/', { action: 'list' })
 		.when('/list', { action: 'list' })
 		.when('/list/mine', { action: 'formsList' })
 		.when('/list/responses', { action: 'formsResponses' })
@@ -32,5 +33,5 @@ routes.define(function($routeProvider){
 		.when('/e403', { action: 'e403' })
 		.when('/e404', { action: 'e404' })
 		.when('/e409', { action: 'e409' })
-		.otherwise({ redirectTo: '/list' });
+		.otherwise({ redirectTo: '/e404' });
 });

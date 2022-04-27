@@ -267,7 +267,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			},
 			respondPublicForm: (params) => {
 				$scope.formKey = params.formKey;
-				template.open('main', 'containers/public/respond-question');
+				template.open('main', 'containers/public/home-page');
 			},
 			e403: () => {
 				$scope.currentPage = Pages.E403;

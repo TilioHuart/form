@@ -28,6 +28,8 @@ export class Form implements Selectable, Shareable  {
     archived: boolean;
     multiple: boolean;
     anonymous: boolean;
+    is_public: boolean;
+    public_key: string;
     response_notified: boolean;
     editable: boolean;
     displayed: boolean;
@@ -62,6 +64,8 @@ export class Form implements Selectable, Shareable  {
         this.archived = false;
         this.multiple = false;
         this.anonymous = false;
+        this.is_public = false;
+        this.public_key = null;
         this.response_notified = false;
         this.editable = false;
         this.rgpd = false;
@@ -90,6 +94,8 @@ export class Form implements Selectable, Shareable  {
             archived: this.archived,
             multiple: this.multiple,
             anonymous: this.anonymous,
+            is_public: this.is_public,
+            public_key: this.public_key,
             response_notified: this.response_notified,
             editable: this.editable,
             rgpd: this.rgpd,
@@ -208,6 +214,10 @@ export class Form implements Selectable, Shareable  {
             notify.error(idiom.translate('formulaire.error.form.image'));
             throw e;
         }
+    };
+
+    getPublicLink = () : string => {
+        return `${window.location.origin}${window.location.pathname}/p#/form/${this.public_key}`;
     };
 }
 

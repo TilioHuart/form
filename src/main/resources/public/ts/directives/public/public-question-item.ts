@@ -2,7 +2,6 @@ import {Directive, ng} from "entcore";
 import {
     Question,
     Response,
-    Responses,
     Types
 } from "../../models";
 import { FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "../../core/enums";
@@ -12,7 +11,7 @@ interface IViewModel {
     question: Question;
     distributionKey: string;
     response: Response;
-    selectedIndex: boolean[];
+    selectedIndexes: boolean[];
     Types: typeof Types;
     I18n: I18nUtils;
 
@@ -27,7 +26,7 @@ export const publicQuestionItem: Directive = ng.directive('publicQuestionItem', 
             question: '=',
             distributionKey: '=',
             response: '=',
-            selectedIndex: '='
+            selectedIndexes: '='
         },
         controllerAs: 'vm',
         bindToController: true,
@@ -38,7 +37,7 @@ export const publicQuestionItem: Directive = ng.directive('publicQuestionItem', 
                 </div>
                 <div class="question-main">
                     <div ng-if="vm.question.question_type == vm.Types.FREETEXT">
-                        <div ng-if="vm.question.statement" bind-html="vm.question.statement"></div>
+                        <div ng-if="vm.question.statement" ng-bind-html="vm.question.statement"></div>
                     </div>
                     <div ng-if="vm.question.question_type == vm.Types.SHORTANSWER">
                         <textarea ng-model="vm.response.answer" i18n-placeholder="formulaire.question.type.SHORTANSWER" input-guard></textarea>
@@ -55,7 +54,7 @@ export const publicQuestionItem: Directive = ng.directive('publicQuestionItem', 
                     <div ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER">
                         <div ng-repeat="choice in vm.question.choices.all | orderBy:'id'">
                             <label for="check-[[choice.id]]">
-                                <input type="checkbox" id="check-[[choice.id]]" ng-model="vm.selectedIndex[$index]" input-guard>
+                                <input type="checkbox" id="check-[[choice.id]]" ng-model="vm.selectedIndexes[$index]" input-guard>
                                 <span>[[choice.value]]</span>
                             </label>
                         </div>

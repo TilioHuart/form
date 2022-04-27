@@ -35,8 +35,6 @@ public class DelegateController extends ControllerHelper {
 
     @Get("/delegates")
     @ApiDoc("List all delegates of the platform")
-    @ResourceFilter(RgpdRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
         delegateService.list(arrayResponseHandler(request));
     }

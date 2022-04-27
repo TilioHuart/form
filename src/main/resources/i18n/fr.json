@@ -79,6 +79,9 @@
   "formulaire.move.folder.tree": "Utilisez l'arbre de navigation suivant pour choisir la cible",
   "formulaire.block.sharing": "Une ou plusieurs questions de votre formulaire ne sont pas valides. Veuillez corriger ces questions avant d'effectuer le partage.",
 
+  "formulaire.prop.public.label": "Créer un formulaire public",
+  "formulaire.prop.public.description": "Un formulaire public est anonyme et doit impérativement comporter une date de fin.",
+  "formulaire.prop.public.link": "Lien du formulaire : ",
   "formulaire.prop.multiple.label": "Permettre plusieurs réponses d'un même utilisateur",
   "formulaire.prop.multiple.label.mobile": "Permettre plusieurs réponses",
   "formulaire.prop.editable.label": "Permettre à l'utilisateur de modifier les réponses envoyées",
@@ -93,6 +96,10 @@
   "formulaire.prop.rgpd.goal.description": "Par exemple :\n- organisation d'une sortie scolaire avec nuitées\n- planification des interventions des parents dans le cadre du projet \"découverte des métiers\"",
   "formulaire.prop.rgpd.description.intro": "Vos informations à caractère personnel sont recueillies pour : <b>{0}</b>. Elles seront conservées dans nos fichiers jusqu'au <b>{1}</b>. Elles seront détruites à cette date. En application du Règlement Général de Protection des données (RGPD), vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation au traitement de vos données. Pour exercer ce droit ou pour toute question concernant le traitement de vos données personnelles, vous pouvez contacter :",
   "formulaire.prop.rgpd.description.delegates": "<div><b>Le délégué à la protection des données {0}</b> ({1})</div><div class='left-spacing'>{2}</br>{3} {4}</div>",
+
+  "formulaire.share.link.access": "Lien d'accès au formulaire : ",
+  "formulaire.share.link.copy.success": "Le lien est copié dans le presse-papier.",
+  "formulaire.share.link.copy.error": "Une erreur est survenue lors de la copie du lien.",
 
   "formulaire.checkremind.anonymous": "Nombre de réponses au formulaire ",
   "formulaire.checkremind.name": "Utilisateurs auxquels a été envoyé le formulaire ",
@@ -241,7 +248,8 @@
   "formulaire.error.404": "Désolé, la page que vous cherchez n'existe pas",
   "formulaire.error.409": "Vous avez déjà répondu à ce formulaire.",
   "formulaire.error.backToMenu": "Retour à la liste des formulaires",
-  "formulaire.public.thanks": "Merci pour vos réponses",
+  "formulaire.public.end.thanks": "Merci pour vos réponses",
+  "formulaire.public.end.sorry": "Désolé, vous ne pouvez pas répondre à ce formulaire",
 
   "formulaire.error.form.sync": "Une erreur est survenue lors de la synchronisation des formulaires",
   "formulaire.error.formService.list": "Une erreur est survenue lors de la récupération des formulaires",

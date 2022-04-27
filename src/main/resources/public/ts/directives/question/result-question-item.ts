@@ -69,7 +69,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
             </div>
 
             <!-- List of results FREETEXT -->
-            <div ng-if="vm.question.question_type == vm.Types.FREETEXT" class="freetext" bind-html="vm.question.statement"></div>
+            <div ng-if="vm.question.question_type == vm.Types.FREETEXT" class="freetext" ng-bind-html="vm.question.statement"></div>
 
             <!-- List of results SINGLEANSWER, MULTIPLEANSWER, SINGLEANSWERRADIO -->
             <div class="choices" ng-if="vm.question.question_type == vm.Types.SINGLEANSWER ||
@@ -128,7 +128,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                                         vm.question.question_type == vm.Types.DATE ||
                                         vm.question.question_type == vm.Types.TIME ||
                                         (vm.question.question_type == vm.Types.FILE && result.files.all.length <= 0)"
-                                 bind-html="result.answer"></div>
+                                 ng-bind-html="result.answer"></div>
                             <div ng-repeat="file in result.files.all" ng-if="vm.question.question_type == vm.Types.FILE">
                                 <a ng-if="file.id" ng-click="vm.downloadFile(file.id)">
                                     <i class="i-download lg-icon spaced-right"></i> [[file.filename]]

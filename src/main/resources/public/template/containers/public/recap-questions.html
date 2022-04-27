@@ -14,38 +14,36 @@
         <div class="nine twelve-mobile questions">
             <div ng-repeat="formElement in vm.formElements.all | orderBy:'position'">
 
-<!--                &lt;!&ndash; Display question &ndash;&gt;-->
-<!--                <public-recap-question-item ng-if="FormElementUtils.isQuestion(formElement)"-->
-<!--                                     question="formElement"-->
-<!--                                     responses="vm.responses"-->
-<!--                                     form="vm.form"-->
-<!--                                     form-elements="vm.formElements"-->
-<!--                                     distribution="vm.distribution"-->
-<!--                                     historic-position="vm.historicPosition">-->
-<!--                </public-recap-question-item>-->
+                <!-- Display question -->
+                <public-recap-question-item ng-if="FormElementUtils.isQuestion(formElement)"
+                                            question="formElement"
+                                            responses="vm.responses"
+                                            form="vm.form"
+                                            form-elements="vm.formElements"
+                                            historic-position="vm.historicPosition">
+                </public-recap-question-item>
 
-<!--                &lt;!&ndash; Display section &ndash;&gt;-->
-<!--                <div class="section" ng-if="!FormElementUtils.isQuestion(formElement)">-->
-<!--                    <div class="section-top">-->
-<!--                        <div class="title"><h4>[[formElement.title]]</h4></div>-->
-<!--                        <div class="description" ng-if="formElement.description">-->
-<!--                            <div bind-html="formElement.description"></div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <div class="section-main">-->
-<!--                        <div ng-repeat="question in formElement.questions.all | orderBy:'section_position'">-->
-<!--                            <public-recap-question-item question="question"-->
-<!--                                                 responses="vm.responses"-->
-<!--                                                 form="vm.form"-->
-<!--                                                 form-elements="vm.formElements"-->
-<!--                                                 distribution="vm.distribution"-->
-<!--                                                 historic-position="vm.historicPosition">-->
-<!--                            </public-recap-question-item>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
+                <!-- Display section -->
+                <div class="section" ng-if="!FormElementUtils.isQuestion(formElement)">
+                    <div class="section-top">
+                        <div class="title"><h4>[[formElement.title]]</h4></div>
+                        <div class="description" ng-if="formElement.description">
+                            <div ng-bind-html="formElement.description"></div>
+                        </div>
+                    </div>
+                    <div class="section-main">
+                        <div ng-repeat="question in formElement.questions.all | orderBy:'section_position'">
+                            <public-recap-question-item question="question"
+                                                        responses="vm.responses"
+                                                        form="vm.form"
+                                                        form-elements="vm.formElements"
+                                                        historic-position="vm.historicPosition">
+                            </public-recap-question-item>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="buttons alone" ng-if="vm.form.editable || vm.distribution.status != DistributionStatus.FINISHED">
+            <div class="buttons alone">
                 <button class="cell" ng-click="vm.send()"><i18n >formulaire.end</i18n></button>
             </div>
         </div>

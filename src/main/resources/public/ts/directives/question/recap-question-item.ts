@@ -48,16 +48,16 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
                     </div>
                     <div class="question-main">
                         <div ng-if="vm.question.question_type == vm.Types.FREETEXT">
-                            <div ng-if="vm.question.statement" bind-html="vm.question.statement"></div>
+                            <div ng-if="vm.question.statement" ng-bind-html="vm.question.statement"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.SHORTANSWER">
-                            <div bind-html="vm.getStringResponse(vm.question)"></div>
+                            <div ng-bind-html="vm.getStringResponse(vm.question)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.LONGANSWER">
-                            <div bind-html="vm.getStringResponse(vm.question)"></div>
+                            <div ng-bind-html="vm.getStringResponse(vm.question)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.SINGLEANSWER">
-                            <div bind-html="vm.getStringResponse(vm.question)"></div>
+                            <div ng-bind-html="vm.getStringResponse(vm.question)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER">
                             <div ng-repeat="choice in vm.question.choices.all | orderBy:'id'">
@@ -70,14 +70,14 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
                             </div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.DATE">
-                            <div bind-html="vm.getStringResponse(vm.question)"></div>
+                            <div ng-bind-html="vm.getStringResponse(vm.question)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.TIME">
-                            <div bind-html="vm.getStringResponse(vm.question)"></div>
+                            <div ng-bind-html="vm.getStringResponse(vm.question)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.FILE">
                             <div ng-repeat="filename in vm.getResponseFileNames()">
-                                <span bind-html="[[filename]]"></span>
+                                <span ng-bind-html="[[filename]]"></span>
                             </div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.SINGLEANSWERRADIO">

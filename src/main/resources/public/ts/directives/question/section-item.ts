@@ -74,7 +74,7 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                         <!-- Description -->
                         <div class="description row">
                             <div ng-if="!vm.section.selected">
-                                <div ng-if="vm.section.description" bind-html="vm.section.description"></div>
+                                <div ng-if="vm.section.description" ng-bind-html="vm.section.description"></div>
                                 <div ng-if="!vm.section.description" class="nodescription"><i18n>formulaire.section.no.description</i18n></div>
                             </div>
                             <div class="dontSave" ng-if="vm.section.selected">

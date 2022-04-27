@@ -20,23 +20,4 @@ describe('QuestionTypeService', () => {
          done();
       });
    });
-
-   const code = 2;
-   test('returns data when retrieve is correctly called', done => {
-      const mock = new MockAdapter(axios);
-      const data = {response: true};
-      mock.onGet(`/formulaire/types/${code}`).reply(200, data);
-      questionTypeService.get(code).then(response => {
-         expect(response).toEqual(data);
-         done();
-      });
-   });
-
-   test('returns data when retrieve is correctly called other method', done => {
-      let spy = jest.spyOn(axios, "get");
-      questionTypeService.get(code).then(response => {
-         expect(spy).toHaveBeenCalledWith((`/formulaire/types/${code}`));
-         done();
-      });
-   });
 });

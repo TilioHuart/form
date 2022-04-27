@@ -9,15 +9,13 @@ import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.sql.SqlStatementsBuilder;
-import org.entcore.common.user.UserInfos;
-
-import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class DefaultPOCService implements POCService {
     @Override
     public void getFormByKey(String formKey, Handler<Either<String, JsonObject>> handler) {
-        String query = "SELECT * FROM " + Formulaire.FORM_TABLE + " WHERE id = ?;"; // TODO 'key' instead of 'id'
+        String query = "SELECT * FROM " + Formulaire.FORM_TABLE + " WHERE public_key = ?;";
         JsonArray params = new JsonArray().add(formKey);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
@@ -25,21 +23,22 @@ public class DefaultPOCService implements POCService {
     @Override
     public void createDistribution(JsonObject form, Handler<Either<String, JsonObject>> handler) {
         String query = "INSERT INTO " + Formulaire.DISTRIBUTION_TABLE + " (form_id, sender_id, sender_name, " +
-                "responder_id, responder_name, status, date_sending, active) " +
-                " VALUES (?, ?, ?, '', '', ?, ?, ?) RETURNING *;";
+                "responder_id, responder_name, status, date_sending, active, public_key) " +
+                " VALUES (?, ?, ?, '', '', ?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(form.getInteger("id", null))
                 .add(form.getString("owner_id", ""))
                 .add(form.getString("owner_name", ""))
                 .add(Formulaire.TO_DO)
                 .add("NOW()")
-                .add(true);
+                .add(true)
+                .add(UUID.randomUUID().toString());
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override
     public void getDistributionByKey(String distributionKey, Handler<Either<String, JsonObject>> handler) {
-        String query = "SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE id = ?;"; // TODO 'key' instead of 'id'
+        String query = "SELECT * FROM " + Formulaire.DISTRIBUTION_TABLE + " WHERE public_key = ?;";
         JsonArray params = new JsonArray().add(distributionKey);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
@@ -83,7 +82,7 @@ public class DefaultPOCService implements POCService {
         String query = "UPDATE " + Formulaire.DISTRIBUTION_TABLE + " SET status = ?, date_response = ?";
         JsonArray params = new JsonArray().add(Formulaire.FINISHED).add("NOW()");
 
-        query += " WHERE id = ? RETURNING *;"; // TODO 'key' instead of 'id'
+        query += " WHERE public_key = ? RETURNING *;";
         params.add(distributionKey);
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));

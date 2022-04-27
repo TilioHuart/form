@@ -3,7 +3,9 @@ import {
     Form,
     FormElement,
     FormElements,
-    Responses
+    Response,
+    Responses,
+    Types
 } from "../../models";
 import { pocService } from "../../services";
 import {Mix} from "entcore-toolkit";
@@ -38,8 +40,8 @@ export const publicRecapQuestionsController = ng.controller('PublicRecapQuestion
     function ($scope) {
 
     const vm: ViewModel = this;
-    vm.formElements = new FormElements();
     vm.form = new Form();
+    vm.formElements = new FormElements();
     vm.allResponsesInfos = new Map();
     vm.responses = new Responses();
     vm.display = {
@@ -50,39 +52,34 @@ export const publicRecapQuestionsController = ng.controller('PublicRecapQuestion
 
     vm.$onInit = async () : Promise<void> => {
         syncWithStorageData();
-        vm.allResponsesInfos.forEach((value) => {vm.responses.all = vm.responses.all.concat(value.responses.all)});
+        vm.formElements.all = vm.formElements.all.filter(e => vm.historicPosition.indexOf(e.position) >= 0);
+        let allQuestions = vm.formElements.getAllQuestions().all;
+        let questionIdsToDisplay = allQuestions.map(q => q.id);
+        vm.allResponsesInfos.forEach((value) => {
+            for (let i = 0; i < value.responses.all.length; i++) {
+                let response = value.responses.all[i];
+
+                if (questionIdsToDisplay.indexOf(response.question_id) >= 0) {
+                    let correspondingQuestion = allQuestions.filter(q => q.id === response.question_id)[0];
+
+                    if (correspondingQuestion.question_type === Types.MULTIPLEANSWER) {
+                        let questionChoices = correspondingQuestion.choices.all.sort((a, b) => a.id - b.id);
+
+                        for (let j = 0; j < value.selectedIndexList[i].length; j++) {
+                            if (value.selectedIndexList[i][j]) {
+                                vm.responses.all.push(new Response(correspondingQuestion.id, questionChoices[j].id));
+                            }
+                        }
+                    }
+                    else {
+                        vm.responses.all.push(response);
+                    }
+                }
+            }
+        });
         formatResponsesAnswer();
 
-    //     vm.form = $scope.form;
-    //     vm.form.nb_elements = (await formElementService.countFormElements(vm.form.id)).count;
-    //     vm.distribution = $scope.distribution;
-    //     vm.historicPosition = $scope.historicPosition;
-    //     await vm.formElements.sync(vm.form.id);
-    //     await vm.responses.syncByDistribution(vm.distribution.id);
-    //
-    //     // Get right elements to display
-    //     if (vm.historicPosition.length > 0) {
-    //         vm.formElements.all = vm.formElements.all.filter(e => vm.historicPosition.indexOf(e.position) >= 0);
-    //     }
-    //     else {
-    //         let responseQuestionIds = vm.responses.all.map(r => r.question_id);
-    //         vm.formElements.all = vm.formElements.all.filter(e =>
-    //             (responseQuestionIds.indexOf(e.id) > 0) ||
-    //             (e instanceof Section && e.questions.all.map(q => q.id).filter(id => responseQuestionIds.indexOf(id) >= 0).length > 0)
-    //         );
-    //         vm.historicPosition = vm.formElements.all.map(e => e.position);
-    //         vm.historicPosition.sort( (a, b) => a - b);
-    //     }
-    //
-    //     // Get files responses for files question
-    //     let fileQuestions = vm.formElements.getAllQuestions().all.filter(q => q.question_type === Types.FILE);
-    //     for (let fileQuestion of fileQuestions) {
-    //         let response = vm.responses.all.filter(r => r.question_id === fileQuestion.id)[0];
-    //         if (response) {
-    //             await response.files.sync(response.id);
-    //         }
-    //     }
-    //     $scope.safeApply();
+        $scope.safeApply();
     };
 
     // Global functions
@@ -107,23 +104,22 @@ export const publicRecapQuestionsController = ng.controller('PublicRecapQuestion
         vm.display.lightbox.sending = false;
         notify.success(idiom.translate('formulaire.success.responses.save'));
         window.setTimeout(function () {
-            // TODO clean what's necessary
             sessionStorage.clear();
-            template.open('main', 'containers/public/thanks');
+            template.open('main', 'containers/public/end/thanks');
         }, 1000);
     };
 
     // Utils
 
     const syncWithStorageData = () : void => {
-        let data = JSON.parse(sessionStorage.getItem('data'));
-
-        vm.form = Mix.castAs(Form, data.form);
-        vm.formKey = data.formKey;
-        vm.distributionKey = data.distributionKey;
-        vm.nbFormElements = data.nbFormElements;
-        vm.historicPosition = data.historicPosition;
-        PublicUtils.formatStorageData(data, vm.formElements, vm.allResponsesInfos);
+        vm.form = Mix.castAs(Form, JSON.parse(sessionStorage.getItem('form')));
+        vm.formKey = JSON.parse(sessionStorage.getItem('formKey'));
+        vm.distributionKey = JSON.parse(sessionStorage.getItem('distributionKey'));
+        vm.nbFormElements = JSON.parse(sessionStorage.getItem('nbFormElements'));
+        vm.historicPosition = JSON.parse(sessionStorage.getItem('historicPosition'));
+        let dataFormElements = JSON.parse(sessionStorage.getItem('formElements'));
+        let dataResponsesInfos = JSON.parse(sessionStorage.getItem('allResponsesInfos'));
+        PublicUtils.formatStorageData(dataFormElements, vm.formElements, dataResponsesInfos, vm.allResponsesInfos);
     };
 
     const formatResponsesAnswer = () : void => {
@@ -151,78 +147,4 @@ export const publicRecapQuestionsController = ng.controller('PublicRecapQuestion
         }
         return true;
     };
-
-    // const saveResponses = async () : Promise<boolean> => {
-    //     console.log("saving responses");
-    //     return true;
-    //
-    //     let isSavingOk = false;
-    //
-    //     if (!vm.loading) {
-    //     	if (vm.formElement instanceof Question) {
-    //     		isSavingOk = await saveQuestionResponse(vm.formElement, vm.responses.all[0], vm.selectedIndexList[0], vm.responsesChoicesList[0]);
-    //     	}
-    //     	else if (vm.formElement instanceof Section) {
-    //     		for (let question of vm.formElement.questions.all) {
-    //     			let section_position = question.section_position - 1;
-    //     			let response = vm.responses.all[section_position];
-    //     			let selectedIndex = vm.selectedIndexList[section_position];
-    //     			let responsesChoices = vm.responsesChoicesList[section_position];
-    //     			await saveQuestionResponse(question, response, selectedIndex, responsesChoices);
-    //     		}
-    //     		isSavingOk = true;
-    //     	}
-    //     }
-    //
-    //     return isSavingOk;
-    // };
-
-    // const saveQuestionResponse = async (question: Question, response?: Response, selectedIndex?: boolean[], responsesChoices?: Responses) : Promise<boolean> => {
-    // 	if (question.question_type === Types.MULTIPLEANSWER && selectedIndex && responsesChoices) {
-    // 		let responsesToDelete = new Responses();
-    // 		let choiceCreated = false;
-    // 		for (let i = 0; i < question.choices.all.length; i++) {
-    // 			let checked = selectedIndex[i];
-    // 			let j = 0;
-    // 			let found = false;
-    // 			while (!found && j < responsesChoices.all.length) {
-    // 				found = question.choices.all[i].id === responsesChoices.all[j].choice_id;
-    // 				j++;
-    // 			}
-    // 			if (!found && checked) {
-    // 				let newResponse = new Response(question.id, question.choices.all[i].id,
-    // 					question.choices.all[i].value, vm.distribution.id);
-    // 				await responseService.create(newResponse);
-    // 				choiceCreated = true;
-    // 			}
-    // 			else if (found && !checked) {
-    // 				responsesToDelete.all.push(responsesChoices.all[j - 1]);
-    // 			}
-    // 		}
-    //
-    // 		let emptyChoice = responsesChoices.all.filter(r => !r.choice_id);
-    // 		if (emptyChoice.length > 0 && choiceCreated) { responsesToDelete.all.push(emptyChoice[0]); }
-    //
-    // 		if (responsesToDelete.all.length > 0) {
-    // 			await responseService.delete(vm.form.id, responsesToDelete.all);
-    // 		}
-    // 		if ((responsesChoices.all.length <= 0 || responsesToDelete.all.length === responsesChoices.all.length) && !choiceCreated) {
-    // 			await responseService.create(new Response(question.id, null, null, vm.distribution.id));
-    // 		}
-    // 		return true;
-    // 	}
-    // 	if ((question.question_type === Types.SINGLEANSWER || question.question_type === Types.SINGLEANSWERRADIO) && response) {
-    // 		if (!response.choice_id) {
-    // 			response.answer = "";
-    // 		} else {
-    // 			for (let choice of question.choices.all) {
-    // 				if (response.choice_id == choice.id) {
-    // 					response.answer = choice.value;
-    // 				}
-    // 			}
-    // 		}
-    // 	}
-    // 	await responseService.save(response, question.question_type);
-    // 	return true;
-    // };
 }]);

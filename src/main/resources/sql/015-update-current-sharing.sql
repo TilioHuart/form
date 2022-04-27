@@ -1,1 +1,0 @@
-DELETE FROM formulaire.form_shares WHERE action = 'fr-openent-formulaire-controllers-QuestionChoiceController|createMultiple';
