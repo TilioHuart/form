@@ -97,7 +97,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                 window.scrollTo(0, 0);
                 $scope.safeApply();
             }
-            else if (nextPosition != undefined) {
+            else if (nextPosition !== undefined) {
                 let data = {
                     path: `/form/${vm.form.id}/${vm.distribution.id}/questions/recap`,
                     historicPosition: vm.historicPosition
