@@ -1,5 +1,5 @@
 import {idiom, ng, notify} from 'entcore';
-import http from 'axios';
+import http, {AxiosResponse} from 'axios';
 import {DataUtils} from "../utils";
 
 export interface QuestionTypeService {

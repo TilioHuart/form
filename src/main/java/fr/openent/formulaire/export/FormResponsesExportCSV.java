@@ -5,7 +5,6 @@ import fr.openent.formulaire.service.ResponseService;
 import fr.openent.formulaire.service.impl.DefaultQuestionService;
 import fr.openent.formulaire.service.impl.DefaultResponseService;
 import fr.wseduc.webutils.http.Renders;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

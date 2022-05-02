@@ -10,8 +10,9 @@
 /node_modules/
 /src/main/resources/public/dist/
 /src/main/resources/public/js/
-/src/main/resources/view/
+/src/main/resources/view
 /src/main/resources/public/font
 /src/main/resources/public/template/entcore/
 /rev-manifest.json
 /build.sh
+/coverage/front/cobertura-coverage.xml
