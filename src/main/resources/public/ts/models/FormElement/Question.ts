@@ -20,7 +20,7 @@ export class Question extends FormElement {
         super();
         this.question_type = null;
         this.statement = null;
-        this.mandatory = null;
+        this.mandatory = false;
         this.section_id = null;
         this.section_position = null;
         this.conditional = false;

@@ -91,7 +91,7 @@ public class DefaultQuestionService implements QuestionService {
                     .add(question.getInteger("section_position", null) != null ? null : question.getInteger("position", null))
                     .add(question.getInteger("question_type", 1))
                     .add(question.getString("statement", ""))
-                    .add(question.getBoolean("mandatory", false))
+                    .add(question.getBoolean("conditional", false) || question.getBoolean("mandatory", false))
                     .add(question.getInteger("section_id", null))
                     .add(question.getInteger("section_position", null))
                     .add(question.getBoolean("conditional", false));
@@ -119,7 +119,7 @@ public class DefaultQuestionService implements QuestionService {
                         .add(question.getInteger("section_position", null) != null ? null : question.getInteger("position", null))
                         .add(question.getInteger("question_type", 1))
                         .add(question.getString("statement", ""))
-                        .add(question.getBoolean("mandatory", false))
+                        .add(question.getBoolean("conditional", false) || question.getBoolean("mandatory", false))
                         .add(question.getInteger("section_id", null))
                         .add(question.getInteger("section_position", null))
                         .add(question.getBoolean("conditional", false))

@@ -67,7 +67,7 @@ public class SectionController extends ControllerHelper {
         RequestUtils.bodyToJsonArray(request, sections -> {
             sectionService.update(formId, sections, updatedSectionsEvent -> {
                 if (updatedSectionsEvent.isLeft()) {
-                    log.error("[Formulaire@updateQuestion] Failed to update questions : " + sections);
+                    log.error("[Formulaire@updateQuestion] Failed to update sections : " + sections);
                     RenderHelper.badRequest(request, updatedSectionsEvent);
                     return;
                 }
