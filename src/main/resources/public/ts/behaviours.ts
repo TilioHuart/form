@@ -28,13 +28,14 @@ Behaviours.register('formulaire', {
         const { data } = await http.get('/formulaire/linker');
         this.resources = data.map(function (f) {
             if (!f.picture) f.picture = '../../../../formulaire/public/img/logo.svg';
+            let endPath = f.rgpd ? 'rgpd' : 'new';
 
             return {
                 id: f.id,
                 icon: f.picture,
                 title: f.title,
                 ownerName: f.owner_name,
-                path: '/formulaire#/form/' + f.id
+                path: `/formulaire#/form/${f.id}/${endPath}`
             }
         });
     },
