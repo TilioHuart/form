@@ -3,14 +3,13 @@ import {
     Distributions,
     DistributionStatus,
     Form,
-    Question, QuestionChoice,
+    Question,
     Responses,
     Types
 } from "../../models";
 import {ColorUtils, DateUtils, UtilsUtils} from "../../utils";
 import * as ApexCharts from 'apexcharts';
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "../../core/enums";
-import {responseService} from "../../services";
 
 interface IViewModel {
     question: Question;
@@ -87,8 +86,10 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                             </div>
                             <div class="four twelve-mobile ellipsis bold">
                                 [[choice.nbResponses]]
-                                <i18n ng-if="choice.nbResponses > 1">formulaire.responses</i18n>
-                                <i18n ng-if="choice.nbResponses <= 1">formulaire.response</i18n>
+                                <i18n ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER && choice.nbResponses <= 1">formulaire.vote</i18n>
+                                <i18n ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER && choice.nbResponses > 1">formulaire.votes</i18n>
+                                <i18n ng-if="vm.question.question_type != vm.Types.MULTIPLEANSWER && choice.nbResponses <= 1">formulaire.response</i18n>
+                                <i18n ng-if="vm.question.question_type != vm.Types.MULTIPLEANSWER && choice.nbResponses > 1">formulaire.responses</i18n>
                                 ([[vm.getWidth(choice.nbResponses, 100).toFixed(2)]]%)
                             </div>
                         </div>

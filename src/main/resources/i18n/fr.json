@@ -68,6 +68,8 @@
   "formulaire.goTo": "Aller à ",
   "formulaire.date.opening": "Date d'ouverture",
   "formulaire.date.ending": "Date de fermeture",
+  "formulaire.vote": "vote",
+  "formulaire.votes": "votes",
   "formulaire.options.select": "-- Sélectionnez une option --",
   "formulaire.archive.title": "Supprimer les formulaires sélectionnés",
   "formulaire.delete.title": "Supprimer définitivement",
@@ -229,7 +231,7 @@
   "formulaire.responses.send.text": "Une fois votre formulaire envoyé vous ne pourrez plus modifier vos réponses.",
   "formulaire.responses.send.text.editable.first": "Après validation de l'envoi, vos réponses pourront être consultées par le propriétaire et les gestionnaires de ce formulaire. Vous pourrez toujours modifier vos réponses plus tard.",
   "formulaire.responses.send.text.editable.modif": "Voulez-vous valider et envoyer les modifications apportées à votre réponse ?",
-  "formulaire.responses.send.continue": "Voulez-vous continuez ?",
+  "formulaire.responses.send.continue": "Voulez-vous continuer ?",
   "formulaire.responses.empty": "Vous n'avez aucun formulaire en attente de réponse.",
   "formulaire.responses.empty.notif": "Vous recevrez une notification dès qu'un formulaire vous aura été envoyé.",
 
