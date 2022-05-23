@@ -243,7 +243,7 @@ public class DefaultFormService implements FormService {
                     "INSERT INTO  " + Formulaire.FORM_TABLE + " (owner_id, owner_name, title, description, picture, " +
                     "date_opening, date_ending, multiple, anonymous, response_notified, editable, rgpd, rgpd_goal, rgpd_lifetime, is_public, public_key) " +
                     "SELECT ?, ?, concat(title, ' - Copie'), description, picture, date_opening, date_ending, multiple, " +
-                    "anonymous, response_notified, editable, rgpd, rgpd_goal, rgpd_lifetime, is_public, CASE is_public WHEN TRUE THEN " + UUID.randomUUID() + " END" +
+                    "anonymous, response_notified, editable, rgpd, rgpd_goal, rgpd_lifetime, is_public, CASE is_public WHEN TRUE THEN '" + UUID.randomUUID() + "' END " +
                     "FROM " + Formulaire.FORM_TABLE + " WHERE id = ? RETURNING id" +
                 "), " +
                 "new_sections AS (" +

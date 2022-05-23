@@ -456,7 +456,7 @@ public class FormController extends ControllerHelper {
 
                         // Check if the folder is not owned by the connected user
                         JsonObject folder = folderEvt.right().getValue();
-                        if (!folder.getString("user_id").equals(user.getUserId())) {
+                        if (folderId != Formulaire.ID_ROOT_FOLDER && !folder.getString("user_id").equals(user.getUserId())) {
                             String message = "[Formulaire@duplicateForms] You're not owner of the folder with id " + folderId;
                             log.error(message);
                             unauthorized(request, message);
