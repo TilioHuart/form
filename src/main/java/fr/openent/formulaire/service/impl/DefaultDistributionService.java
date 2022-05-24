@@ -54,7 +54,7 @@ public class DefaultDistributionService implements DistributionService {
                 "ORDER BY date_response DESC";
         JsonArray params = new JsonArray().add(formId).add(status);
 
-        if (nbLines != null) {
+        if (nbLines != null && !nbLines.equals("null")) {
             query += " LIMIT ? OFFSET ?";
             params.add(Formulaire.NB_NEW_LINES).add(nbLines);
         }

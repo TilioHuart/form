@@ -19,7 +19,7 @@ public class DefaultResponseService implements ResponseService {
         String query = "SELECT * FROM " + Formulaire.RESPONSE_TABLE + " r ";
         JsonArray params = new JsonArray().add(questionId);
 
-        if (nbLines != null) {
+        if (nbLines != null && !nbLines.equals("null")) {
             query += "WHERE question_id = ? AND distribution_id IN " + Sql.listPrepared(distribs);
             for (int i = 0; i < distribs.size(); i++) {
                 params.add(distribs.getJsonObject(i).getInteger("id"));
