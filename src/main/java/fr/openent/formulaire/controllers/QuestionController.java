@@ -186,12 +186,6 @@ public class QuestionController extends ControllerHelper {
                     RenderHelper.internalError(request, sectionIdsEvent);
                     return;
                 }
-                if (sectionIdsEvent.right().getValue().isEmpty()) {
-                    String message = "[Formulaire@updateQuestions] No section ids found for form with id " + formId;
-                    log.error(message);
-                    notFound(request, message);
-                    return;
-                }
 
                 JsonArray sectionIds = UtilsHelper.getByProp(sectionIdsEvent.right().getValue(), "section_id");
                 Long conflictingSectionId = null;
