@@ -1105,12 +1105,6 @@ public class FormController extends ControllerHelper {
                             RenderHelper.internalError(request, eventUsers);
                             return;
                         }
-                        if (eventUsers.right().getValue().isEmpty()) {
-                            String message = "[Formulaire@shareResource] No users found for ids " + usersIds + " or group ids " + groupsIds;
-                            log.error(message);
-                            notFound(request, message);
-                            return;
-                        }
 
                         JsonArray infos = eventUsers.right().getValue();
                         JsonArray responders = new JsonArray();
