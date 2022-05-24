@@ -223,7 +223,19 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         }
 
         vm.doOrganizeQuestions = async () : Promise<void> => {
-            await updateAllFormElements();
+            for (let question of vm.formElements.getAllQuestions().all) {
+                if ((question.section_id || question.section_position) && question.position) {
+                    if (question.position > 0) {
+                        question.section_id = null;
+                        question.section_position = null;
+                    }
+                    else if (question.section_position > 0) {
+                        question.position = null;
+                    }
+                }
+            }
+
+            await formElementService.update(vm.formElements.getAllQuestions().all);
             vm.display.lightbox.reorganization = false;
             template.close('lightbox');
             $scope.safeApply();
@@ -483,7 +495,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         vm.formElements.all.push(question);
                     }
                     else if (question.section_position === parentSection.questions.all.length && direction === Direction.DOWN) { // Take question out (after) of the parentSection
-
                         question.position = parentSection.position + 1;
                         question.section_id = null;
                         question.section_position = null;
@@ -687,13 +698,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 formElements.all[i].position = i + 1;
             }
             $scope.safeApply();
-        };
-
-        const updateAllFormElements = async () : Promise<void> => {
-            await formElementService.update(vm.formElements.all);
-            for (let section of vm.formElements.getSections().all) {
-                await formElementService.update(section.questions.all);
-            }
         };
 
         const saveFormElements = async (displaySuccess: boolean = false) : Promise<void> => {
