@@ -10,7 +10,7 @@ export interface FolderService {
     create(folder: Folder) : Promise<any>;
     update(folder: Folder) : Promise<any>;
     delete(folderIds: number[]) : Promise<any>;
-    move(folders: Folder[], parentId: number) : Promise<any>;
+    move(formIds : number[], parentId: number) : Promise<any>;
 }
 
 export const folderService: FolderService = {
@@ -64,9 +64,9 @@ export const folderService: FolderService = {
         }
     },
 
-    async move(folders, parentId) : Promise<any> {
+    async move(formIds, parentId) : Promise<any> {
         try {
-            return DataUtils.getData(await http.put(`/formulaire/folders/${parentId}/move`, folders));
+            return DataUtils.getData(await http.put(`/formulaire/folders/${parentId}/move`, formIds));
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.folderService.move'));
             throw e;

@@ -280,52 +280,52 @@ public class FolderController extends ControllerHelper {
                             RenderHelper.internalError(request, childrenEvent);
                             return;
                         }
-                        if (childrenEvent.right().getValue().isEmpty()) {
-                            String message = "[Formulaire@deleteFolders] No children forms found for folder with ids " + folderIds;
-                            log.error(message);
-                            notFound(request, message);
-                            return;
-                        }
 
-                        // Change status all children forms to "archived"
+
                         JsonArray forms = childrenEvent.right().getValue();
-                        List<Future> syncFutures = new ArrayList<>();
-                        for (int j = 0; j < forms.size(); j++) {
-                            JsonObject form = forms.getJsonObject(j);
-                            String formId = form.getInteger("id").toString();
-                            form.remove("archived");
-                            form.put("archived", true);
-                            Promise<JsonObject> promise = Promise.promise();
-                            syncFutures.add(promise.future());
-                            formService.update(formId, form, FutureHelper.handlerJsonObject(promise));
-                        }
-
-                        CompositeFuture.all(syncFutures).onComplete(evt -> {
-                            if (evt.failed()) {
-                                String message = "[Formulaire@deleteFolders] Failed to sync number children of folders : " + evt.cause().getMessage();
-                                log.error(message);
-                                RenderHelper.internalError(request, message);
-                                return;
+                        Integer parentId = folders.getJsonObject(0).getInteger("parent_id");
+                        if (!forms.isEmpty()) {
+                            // Change status all children forms to "archived"
+                            List<Future> syncFutures = new ArrayList<>();
+                            for (int j = 0; j < forms.size(); j++) {
+                                JsonObject form = forms.getJsonObject(j);
+                                String formId = form.getInteger("id").toString();
+                                form.remove("archived");
+                                form.put("archived", true);
+                                Promise<JsonObject> promise = Promise.promise();
+                                syncFutures.add(promise.future());
+                                formService.update(formId, form, FutureHelper.handlerJsonObject(promise));
                             }
 
-                            // Change all children forms relation folder (replace with "3")
-                            JsonArray formIds = UtilsHelper.getIds(forms);
-                            Integer parentId = folders.getJsonObject(0).getInteger("parent_id");
+                            CompositeFuture.all(syncFutures).onComplete(evt -> {
+                                if (evt.failed()) {
+                                    String message = "[Formulaire@deleteFolders] Failed to sync number children of folders : " + evt.cause().getMessage();
+                                    log.error(message);
+                                    RenderHelper.internalError(request, message);
+                                    return;
+                                }
 
-                            if (formIds.size() > 0) {
-                                relFormFolderService.update(user, formIds, Formulaire.ID_ARCHIVED_FOLDER, updateRelEvent -> {
-                                    if (updateRelEvent.isLeft()) {
-                                        log.error("[Formulaire@deleteFolders] Error in updating relation form-folder for forms with ids " + formIds);
-                                        RenderHelper.internalError(request, updateRelEvent);
-                                        return;
-                                    }
+                                // Change all children forms relation folder (replace with "3")
+                                JsonArray formIds = UtilsHelper.getIds(forms);
+
+                                if (formIds.size() > 0) {
+                                    relFormFolderService.update(user, formIds, Formulaire.ID_ARCHIVED_FOLDER, updateRelEvent -> {
+                                        if (updateRelEvent.isLeft()) {
+                                            log.error("[Formulaire@deleteFolders] Error in updating relation form-folder for forms with ids " + formIds);
+                                            RenderHelper.internalError(request, updateRelEvent);
+                                            return;
+                                        }
+                                        deleteFolders(request, user, parentId, folderIds);
+                                    });
+                                }
+                                else {
                                     deleteFolders(request, user, parentId, folderIds);
-                                });
-                            }
-                            else {
-                                deleteFolders(request, user, parentId, folderIds);
-                            }
-                        });
+                                }
+                            });
+                        }
+                        else {
+                            deleteFolders(request, user, parentId, folderIds);
+                        }
                     });
                 });
             });
@@ -376,7 +376,7 @@ public class FolderController extends ControllerHelper {
                     }
 
                     // Check if targeted folder is owned by the connected user
-                    if (!folderEvent.right().getValue().getString("user_id").equals(user.getUserId())) {
+                    if (targetFolderId != Formulaire.ID_ROOT_FOLDER && !folderEvent.right().getValue().getString("user_id").equals(user.getUserId())) {
                         String message = "[Formulaire@moveFolders] You cannot move folders into a folder you don't own : " + targetFolderId;
                         log.error(message);
                         badRequest(request, message);

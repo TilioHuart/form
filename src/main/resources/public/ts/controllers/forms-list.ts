@@ -516,7 +516,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
                     await formService.move(vm.forms.selected.map(f => f.id), idTargetItem ? idTargetItem : 1);
                 }
                 else if (vm.folders.selected.length > 0) { // Move several folders
-                    await folderService.move(vm.folders.selected, idTargetItem ? idTargetItem : 1);
+                    await folderService.move(vm.folders.selected.map(f => f.id), idTargetItem ? idTargetItem : 1);
                 }
                 else {
                     let isForm = !!originalItem.folder_id;
@@ -525,8 +525,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
                         await formService.move(draggedItemIds, idTargetItem ? idTargetItem : 1);
                     }
                     else if (!isForm) { // Move one folder
-                        let draggedItem = vm.folders.all.filter(f => f.id === idOriginalItem);
-                        await folderService.move(draggedItem, idTargetItem ? idTargetItem : 1);
+                        let draggedItemIds = vm.folders.all.filter(f => f.id === idOriginalItem).map(f => f.id);
+                        await folderService.move(draggedItemIds, idTargetItem ? idTargetItem : 1);
                     }
                 }
                 await vm.openFolder(vm.folder);
@@ -667,7 +667,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.doMoveItems = async () : Promise<void> => {
         try {
             if (vm.folders.selected.length > 0) {
-                await folderService.move(vm.folders.selected, vm.targetFolderId);
+                await folderService.move(vm.folders.selected.map(f => f.id), vm.targetFolderId);
             }
             else{
                 await formService.move(vm.forms.selected.map(f => f.id), vm.targetFolderId);
