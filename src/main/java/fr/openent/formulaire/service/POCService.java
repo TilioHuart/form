@@ -2,9 +2,9 @@ package fr.openent.formulaire.service;
 
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.entcore.common.user.UserInfos;
 
 public interface POCService {
     /**
@@ -43,5 +43,18 @@ public interface POCService {
      */
     void finishDistribution(String distributionKey, Handler<Either<String, JsonObject>> handler);
 
+    /**
+     * List all the managers of a form
+     * @param formId form identifier
+     * @param handler function handler returning JsonArray data
+     */
+    void listManagers(String formId, Handler<Either<String, JsonArray>> handler);
 
+    /**
+     * Send notification when a response is send
+     * @param request request
+     * @param form form responded
+     * @param managers ids of the managers of the form
+     */
+    void notifyResponse(HttpServerRequest request, JsonObject form, JsonArray managers);
 }

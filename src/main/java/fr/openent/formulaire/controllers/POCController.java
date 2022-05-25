@@ -33,8 +33,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 
-import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
-
 public class POCController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(POCController.class);
     private final POCService pocService;
@@ -46,9 +44,9 @@ public class POCController extends ControllerHelper {
     private final SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm");
     private final long minTimeToAllowResponse = 4 * 1000;
 
-    public POCController() {
+    public POCController(TimelineHelper timelineHelper) {
         super();
-        this.pocService = new DefaultPOCService();
+        this.pocService = new DefaultPOCService(timelineHelper);
         this.sectionService = new DefaultSectionService();
         this.questionService = new DefaultQuestionService();
         this.questionChoiceService = new DefaultQuestionChoiceService();
@@ -394,7 +392,36 @@ public class POCController extends ControllerHelper {
                                 cookie.setSameSite(CookieSameSite.STRICT);
                                 request.response().addCookie(cookie);
 
-                                pocService.finishDistribution(distributionKey, defaultResponseHandler(request));
+                                pocService.finishDistribution(distributionKey, finalDistributionEvt -> {
+                                    if (finalDistributionEvt.isLeft()) {
+                                        log.error("[Formulaire@createPublicResponses] Fail to finish distribution with key : " + distributionKey);
+                                        RenderHelper.badRequest(request, finalDistributionEvt);
+                                        return;
+                                    }
+
+                                    JsonObject finalDistribution = finalDistributionEvt.right().getValue();
+                                    if (form.getBoolean("response_notified")) {
+                                        pocService.listManagers(form.getInteger("id").toString(), listManagersEvt -> {
+                                            if (listManagersEvt.isLeft()) {
+                                                log.error("[Formulaire@createPublicResponses] Error in listing managers for form with id " + formId);
+                                                RenderHelper.internalError(request, listManagersEvt);
+                                                return;
+                                            }
+
+                                            JsonArray managers = listManagersEvt.right().getValue();
+                                            JsonArray managerIds = new JsonArray();
+                                            for (int j = 0; j < managers.size(); j++) {
+                                                managerIds.add(managers.getJsonObject(j).getString("id"));
+                                            }
+
+                                            pocService.notifyResponse(request, form, managerIds);
+                                            renderJson(request, finalDistribution, 200);
+                                        });
+                                    }
+                                    else {
+                                        renderJson(request, finalDistribution, 200);
+                                    }
+                                });
                             });
                         });
                     });
