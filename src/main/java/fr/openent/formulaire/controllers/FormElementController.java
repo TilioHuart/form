@@ -39,21 +39,21 @@ public class FormElementController extends ControllerHelper {
     public void getByPosition(HttpServerRequest request) {
         String formId = request.getParam("formId");
         String position = request.getParam("position");
-        formElementService.getTypeAndIdByPosition(formId, position, formElementEvent -> {
-            if (formElementEvent.isLeft()) {
+        formElementService.getTypeAndIdByPosition(formId, position, formElementEvt -> {
+            if (formElementEvt.isLeft()) {
                 log.error("[Formulaire@getFormElement] Error in getting form element id of position " + position + " in form " + formId);
-                RenderHelper.internalError(request, formElementEvent);
+                RenderHelper.internalError(request, formElementEvt);
                 return;
             }
-            if (formElementEvent.right().getValue().isEmpty()) {
+            if (formElementEvt.right().getValue().isEmpty()) {
                 String message = "[Formulaire@getFormElement] No form element found of position " + position + " in form " + formId;
                 log.error(message);
                 notFound(request, message);
                 return;
             }
 
-            String elementId = formElementEvent.right().getValue().getLong("id").toString();
-            String elementType = formElementEvent.right().getValue().getString("element_type");
+            String elementId = formElementEvt.right().getValue().getLong("id").toString();
+            String elementType = formElementEvt.right().getValue().getString("element_type");
             formElementService.getByTypeAndId(elementId, elementType, defaultResponseHandler(request));
         });
     }

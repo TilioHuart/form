@@ -75,15 +75,15 @@ public class SectionController extends ControllerHelper {
 
             // Check if position is not already used
             Long position = section.getLong("position");
-            formElementService.getTypeAndIdByPosition(formId, position.toString(), formElementEvent -> {
-                if (formElementEvent.isLeft()) {
+            formElementService.getTypeAndIdByPosition(formId, position.toString(), formElementEvt -> {
+                if (formElementEvt.isLeft()) {
                     log.error("[Formulaire@createSection] Error in getting form element id of position " + position + " for form " + formId);
-                    RenderHelper.internalError(request, formElementEvent);
+                    RenderHelper.internalError(request, formElementEvt);
                     return;
                 }
 
-                if (!formElementEvent.right().getValue().isEmpty()) {
-                    String message = "[Formulaire@createSection] You cannot create a section with a position already occupied : " + formElementEvent.right().getValue();
+                if (!formElementEvt.right().getValue().isEmpty()) {
+                    String message = "[Formulaire@createSection] You cannot create a section with a position already occupied : " + formElementEvt.right().getValue();
                     log.error(message);
                     badRequest(request, message);
                     return;
@@ -116,14 +116,14 @@ public class SectionController extends ControllerHelper {
                 return;
             }
 
-            sectionService.update(formId, sections, updatedSectionsEvent -> {
-                if (updatedSectionsEvent.isLeft()) {
+            sectionService.update(formId, sections, updatedSectionsEvt -> {
+                if (updatedSectionsEvt.isLeft()) {
                     log.error("[Formulaire@updateQuestion] Failed to update sections : " + sections);
-                    RenderHelper.internalError(request, updatedSectionsEvent);
+                    RenderHelper.internalError(request, updatedSectionsEvt);
                     return;
                 }
 
-                JsonArray updatedSectionsInfos = updatedSectionsEvent.right().getValue();
+                JsonArray updatedSectionsInfos = updatedSectionsEvt.right().getValue();
                 JsonArray updatedSections = new JsonArray();
                 for(int i = 0; i < updatedSectionsInfos.size(); i++) {
                     updatedSections.addAll(updatedSectionsInfos.getJsonArray(i));
@@ -139,13 +139,13 @@ public class SectionController extends ControllerHelper {
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String sectionId = request.getParam("sectionId");
-        sectionService.get(sectionId, getEvent -> {
-            if (getEvent.isLeft() || getEvent.right().getValue().isEmpty()) {
+        sectionService.get(sectionId, getEvt -> {
+            if (getEvt.isLeft() || getEvt.right().getValue().isEmpty()) {
                 log.error("[Formulaire@deleteSection] Failed to get section with id : " + sectionId);
-                RenderHelper.internalError(request, getEvent);
+                RenderHelper.internalError(request, getEvt);
                 return;
             }
-            sectionService.delete(getEvent.right().getValue(), defaultResponseHandler(request));
+            sectionService.delete(getEvt.right().getValue(), defaultResponseHandler(request));
         });
     }
 }

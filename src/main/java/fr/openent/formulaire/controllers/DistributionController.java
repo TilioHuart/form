@@ -336,14 +336,14 @@ public class DistributionController extends ControllerHelper {
 
                                 JsonObject form = formEvt.right().getValue();
                                 if (form.getBoolean("response_notified")) {
-                                    formService.listManagers(form.getInteger("id").toString(), listManagersEvent -> {
-                                        if (listManagersEvent.isLeft()) {
+                                    formService.listManagers(form.getInteger("id").toString(), listManagersEvt -> {
+                                        if (listManagersEvt.isLeft()) {
                                             log.error("[Formulaire@updateDistribution] Error in listing managers for form with id " + formId);
-                                            RenderHelper.internalError(request, listManagersEvent);
+                                            RenderHelper.internalError(request, listManagersEvt);
                                             return;
                                         }
 
-                                        JsonArray managers = listManagersEvent.right().getValue();
+                                        JsonArray managers = listManagersEvt.right().getValue();
                                         JsonArray managerIds = new JsonArray();
                                         for (int i = 0; i < managers.size(); i++) {
                                             managerIds.add(managers.getJsonObject(i).getString("id"));

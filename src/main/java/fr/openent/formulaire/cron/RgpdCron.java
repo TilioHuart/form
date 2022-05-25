@@ -34,8 +34,8 @@ public class RgpdCron extends ControllerHelper implements Handler<Long> {
     @Override
     public void handle(Long event) {
         log.info("[Formulaire@RgpdCron] Formulaire RGPD cron started");
-        deleteOldDataForRgpd(deleteEvent -> {
-            if (deleteEvent.isLeft()) {
+        deleteOldDataForRgpd(deleteEvt -> {
+            if (deleteEvt.isLeft()) {
                 log.info("[Formulaire@RgpdCron] RGPD cron failed");
             }
             else {
@@ -45,43 +45,43 @@ public class RgpdCron extends ControllerHelper implements Handler<Long> {
     }
 
     public void deleteOldDataForRgpd(Handler<Either<String, JsonObject>> handler) {
-        distributionService.deleteOldDistributions(deleteDistribsEvent -> {
-            if (deleteDistribsEvent.isLeft()) {
+        distributionService.deleteOldDistributions(deleteDistribsEvt -> {
+            if (deleteDistribsEvt.isLeft()) {
                 log.error("[Formulaire@deleteOldDataForRgpd] An error occurred while deleting distributions for old responses");
-                handler.handle(new Either.Left<>(deleteDistribsEvent.left().getValue()));
+                handler.handle(new Either.Left<>(deleteDistribsEvt.left().getValue()));
                 return;
             }
 
-            JsonArray deletedDistrib = deleteDistribsEvent.right().getValue();
+            JsonArray deletedDistrib = deleteDistribsEvt.right().getValue();
             if (deletedDistrib.isEmpty()) {
                 handler.handle(new Either.Right<>(new JsonObject()));
                 return;
             }
 
             JsonArray deletedDistribIds = UtilsHelper.getIds(deletedDistrib);
-            responseService.deleteOldResponse(deletedDistribIds, deleteResponseEvent -> {
-                if (deleteResponseEvent.isLeft()) {
+            responseService.deleteOldResponse(deletedDistribIds, deleteResponseEvt -> {
+                if (deleteResponseEvt.isLeft()) {
                     log.error("[Formulaire@deleteOldDataForRgpd] Failed to delete old responses for RGPD forms");
-                    handler.handle(new Either.Left<>(deleteResponseEvent.left().getValue()));
+                    handler.handle(new Either.Left<>(deleteResponseEvt.left().getValue()));
                     return;
                 }
 
                 logDeletedDistribInfos(deletedDistrib);
 
-                if (deleteResponseEvent.right().getValue().isEmpty()) {
+                if (deleteResponseEvt.right().getValue().isEmpty()) {
                     handler.handle(new Either.Right<>(new JsonObject()));
                     return;
                 }
 
-                JsonArray deletedRepIds = UtilsHelper.getIds(deleteResponseEvent.right().getValue());
-                responseFileService.deleteAllByResponse(deletedRepIds, deleteFilesEvent -> {
-                    if (deleteFilesEvent.isLeft()) {
+                JsonArray deletedRepIds = UtilsHelper.getIds(deleteResponseEvt.right().getValue());
+                responseFileService.deleteAllByResponse(deletedRepIds, deleteFilesEvt -> {
+                    if (deleteFilesEvt.isLeft()) {
                         log.error("[Formulaire@deleteOldDataForRgpd] An error occurred while deleting files for responses " + deletedRepIds);
-                        handler.handle(new Either.Left<>(deleteFilesEvent.left().getValue()));
+                        handler.handle(new Either.Left<>(deleteFilesEvt.left().getValue()));
                         return;
                     }
 
-                    JsonArray deletedFiles = deleteFilesEvent.right().getValue();
+                    JsonArray deletedFiles = deleteFilesEvt.right().getValue();
                     if (!deletedFiles.isEmpty()) {
                         ResponseFileController.deleteFiles(storage, deletedFiles, handler);
                     }

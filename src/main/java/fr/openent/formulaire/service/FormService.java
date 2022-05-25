@@ -33,14 +33,14 @@ public interface FormService {
     void listForLinker(List<String> groupsAndUserIds, UserInfos user, Handler<Either<String, JsonArray>> handler);
 
     /**
-     * List all the managers to a form
+     * List all the contributors to a form
      * @param formId form identifier
      * @param handler function handler returning JsonArray data
      */
     void listContributors(String formId, Handler<Either<String, JsonArray>> handler);
 
     /**
-     * List all the contributors to a form
+     * List all the managers of a form
      * @param formId form identifier
      * @param handler function handler returning JsonArray data
      */

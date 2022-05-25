@@ -103,13 +103,13 @@ public class FolderController extends ControllerHelper {
                     return;
                 }
 
-                folderService.get(parentId.toString(), folderEvent -> {
-                    if (folderEvent.isLeft()) {
+                folderService.get(parentId.toString(), folderEvt -> {
+                    if (folderEvt.isLeft()) {
                         log.error("[Formulaire@createFolder] Error in getting folder with id " + parentId);
-                        RenderHelper.internalError(request, folderEvent);
+                        RenderHelper.internalError(request, folderEvt);
                         return;
                     }
-                    if (folderEvent.right().getValue().isEmpty()) {
+                    if (folderEvt.right().getValue().isEmpty()) {
                         String message = "[Formulaire@createFolder] No folder found for id " + parentId;
                         log.error(message);
                         notFound(request, message);
@@ -117,7 +117,7 @@ public class FolderController extends ControllerHelper {
                     }
 
                     // Check if parent folder is owned by the user
-                    String ownerOfParentFolder = folderEvent.right().getValue().getString("user_id");
+                    String ownerOfParentFolder = folderEvt.right().getValue().getString("user_id");
                     if (parentId != Formulaire.ID_ROOT_FOLDER && !user.getUserId().equals(ownerOfParentFolder)) {
                         String message = "[Formulaire@createFolder] Your not owner of the folder with id " + parentId;
                         log.error(message);
@@ -125,10 +125,10 @@ public class FolderController extends ControllerHelper {
                         return;
                     }
 
-                    folderService.create(folder, user, createEvent -> {
-                        if (createEvent.isLeft()) {
+                    folderService.create(folder, user, createEvt -> {
+                        if (createEvt.isLeft()) {
                             log.error("[Formulaire@createFolder] Error in creating folder " + folder);
-                            RenderHelper.internalError(request, createEvent);
+                            RenderHelper.internalError(request, createEvt);
                             return;
                         }
 
@@ -160,13 +160,13 @@ public class FolderController extends ControllerHelper {
                     return;
                 }
 
-                folderService.get(folderId, folderEvent -> {
-                    if (folderEvent.isLeft()) {
+                folderService.get(folderId, folderEvt -> {
+                    if (folderEvt.isLeft()) {
                         log.error("[Formulaire@updateFolder] Failed to get folder with id " + folderId);
-                        RenderHelper.internalError(request, folderEvent);
+                        RenderHelper.internalError(request, folderEvt);
                         return;
                     }
-                    if (folderEvent.right().getValue().isEmpty()) {
+                    if (folderEvt.right().getValue().isEmpty()) {
                         String message = "[Formulaire@updateFolder] No folder found for id " + folderId;
                         log.error(message);
                         notFound(request, message);
@@ -174,7 +174,7 @@ public class FolderController extends ControllerHelper {
                     }
 
                     // Check if connected user is owner of the folder
-                    JsonObject baseFolder = folderEvent.right().getValue();
+                    JsonObject baseFolder = folderEvt.right().getValue();
                     if (baseFolder.isEmpty() || !baseFolder.getString("user_id").equals(user.getUserId())) {
                         String message = "[Formulaire@updateFolder] Your not owner of the folder with id " + folderId;
                         log.error(message);
@@ -191,13 +191,13 @@ public class FolderController extends ControllerHelper {
                         return;
                     }
 
-                    folderService.get(parentId.toString(), parentFolderEvent -> {
-                        if (parentFolderEvent.isLeft()) {
+                    folderService.get(parentId.toString(), parentFolderEvt -> {
+                        if (parentFolderEvt.isLeft()) {
                             log.error("[Formulaire@updateFolder] Failed to get folder with id " + parentId);
-                            RenderHelper.internalError(request, parentFolderEvent);
+                            RenderHelper.internalError(request, parentFolderEvt);
                             return;
                         }
-                        if (parentFolderEvent.right().getValue().isEmpty()) {
+                        if (parentFolderEvt.right().getValue().isEmpty()) {
                             String message = "[Formulaire@updateFolder] No folder found for id " + parentId;
                             log.error(message);
                             notFound(request, message);
@@ -205,7 +205,7 @@ public class FolderController extends ControllerHelper {
                         }
 
                         // Check if parent folder is owned by the user
-                        String ownerOfParentFolder = parentFolderEvent.right().getValue().getString("user_id");
+                        String ownerOfParentFolder = parentFolderEvt.right().getValue().getString("user_id");
                         if (parentId != Formulaire.ID_ROOT_FOLDER && !user.getUserId().equals(ownerOfParentFolder)) {
                             String message = "[Formulaire@updateFolder] Your not owner of the folder with id " + parentId;
                             log.error(message);
@@ -250,13 +250,13 @@ public class FolderController extends ControllerHelper {
                     return;
                 }
 
-                folderService.listByIds(folderIds, foldersEvent -> {
-                    if (foldersEvent.isLeft()) {
+                folderService.listByIds(folderIds, foldersEvt -> {
+                    if (foldersEvt.isLeft()) {
                         log.error("[Formulaire@deleteFolders] Fail to list folders with ids " + folderIds);
-                        RenderHelper.internalError(request, foldersEvent);
+                        RenderHelper.internalError(request, foldersEvt);
                         return;
                     }
-                    if (foldersEvent.right().getValue().isEmpty()) {
+                    if (foldersEvt.right().getValue().isEmpty()) {
                         String message = "[Formulaire@deleteFolders] No folders found for ids " + folderIds;
                         log.error(message);
                         notFound(request, message);
@@ -264,7 +264,7 @@ public class FolderController extends ControllerHelper {
                     }
 
                     // Check if one of the folders is not owned by the connected user
-                    JsonArray folders = foldersEvent.right().getValue();
+                    JsonArray folders = foldersEvt.right().getValue();
                     boolean areUserIdsOk = DataChecker.checkFolderIdsValidity(folders, user.getUserId());
                     if (!areUserIdsOk) {
                         String message = "[Formulaire@deleteFolders] Delete a folder not owned is forbidden.";
@@ -274,15 +274,15 @@ public class FolderController extends ControllerHelper {
                     }
 
                     // Get all form ids to archive
-                    relFormFolderService.listFormChildrenRecursively(folderIds, childrenEvent -> {
-                        if (childrenEvent.isLeft()) {
+                    relFormFolderService.listFormChildrenRecursively(folderIds, childrenEvt -> {
+                        if (childrenEvt.isLeft()) {
                             log.error("[Formulaire@deleteFolders] Error in listing children forms for folders " + folderIds);
-                            RenderHelper.internalError(request, childrenEvent);
+                            RenderHelper.internalError(request, childrenEvt);
                             return;
                         }
 
 
-                        JsonArray forms = childrenEvent.right().getValue();
+                        JsonArray forms = childrenEvt.right().getValue();
                         Integer parentId = folders.getJsonObject(0).getInteger("parent_id");
                         if (!forms.isEmpty()) {
                             // Change status all children forms to "archived"
@@ -309,10 +309,10 @@ public class FolderController extends ControllerHelper {
                                 JsonArray formIds = UtilsHelper.getIds(forms);
 
                                 if (formIds.size() > 0) {
-                                    relFormFolderService.update(user, formIds, Formulaire.ID_ARCHIVED_FOLDER, updateRelEvent -> {
-                                        if (updateRelEvent.isLeft()) {
+                                    relFormFolderService.update(user, formIds, Formulaire.ID_ARCHIVED_FOLDER, updateRelEvt -> {
+                                        if (updateRelEvt.isLeft()) {
                                             log.error("[Formulaire@deleteFolders] Error in updating relation form-folder for forms with ids " + formIds);
-                                            RenderHelper.internalError(request, updateRelEvent);
+                                            RenderHelper.internalError(request, updateRelEvt);
                                             return;
                                         }
                                         deleteFolders(request, user, parentId, folderIds);
@@ -362,13 +362,13 @@ public class FolderController extends ControllerHelper {
                     return;
                 }
 
-                folderService.get(targetFolderId.toString(), folderEvent -> {
-                    if (folderEvent.isLeft()) {
+                folderService.get(targetFolderId.toString(), folderEvt -> {
+                    if (folderEvt.isLeft()) {
                         log.error("[Formulaire@moveFolders] Fail to get folder with id : " + targetFolderId);
-                        RenderHelper.internalError(request, folderEvent);
+                        RenderHelper.internalError(request, folderEvt);
                         return;
                     }
-                    if (folderEvent.right().getValue().isEmpty()) {
+                    if (folderEvt.right().getValue().isEmpty()) {
                         String message = "[Formulaire@deleteFolders] No folder found for id " + targetFolderId;
                         log.error(message);
                         notFound(request, message);
@@ -376,20 +376,20 @@ public class FolderController extends ControllerHelper {
                     }
 
                     // Check if targeted folder is owned by the connected user
-                    if (targetFolderId != Formulaire.ID_ROOT_FOLDER && !folderEvent.right().getValue().getString("user_id").equals(user.getUserId())) {
+                    if (targetFolderId != Formulaire.ID_ROOT_FOLDER && !folderEvt.right().getValue().getString("user_id").equals(user.getUserId())) {
                         String message = "[Formulaire@moveFolders] You cannot move folders into a folder you don't own : " + targetFolderId;
                         log.error(message);
                         badRequest(request, message);
                         return;
                     }
 
-                    folderService.listByIds(folderIds, foldersEvent -> {
-                        if (foldersEvent.isLeft()) {
+                    folderService.listByIds(folderIds, foldersEvt -> {
+                        if (foldersEvt.isLeft()) {
                             log.error("[Formulaire@moveFolders] Fail to list folders with ids : " + folderIds);
-                            RenderHelper.internalError(request, foldersEvent);
+                            RenderHelper.internalError(request, foldersEvt);
                             return;
                         }
-                        if (foldersEvent.right().getValue().isEmpty()) {
+                        if (foldersEvt.right().getValue().isEmpty()) {
                             String message = "[Formulaire@deleteFolders] No folders found for ids " + folderIds;
                             log.error(message);
                             notFound(request, message);
@@ -397,7 +397,7 @@ public class FolderController extends ControllerHelper {
                         }
 
                         // Check if one of the folders is not owned by the connected user
-                        JsonArray folders = foldersEvent.right().getValue();
+                        JsonArray folders = foldersEvt.right().getValue();
                         boolean areUserIdsOk = DataChecker.checkFolderIdsValidity(folders, user.getUserId());
                         if (!areUserIdsOk) {
                             String message = "[Formulaire@moveFolder] Move a folder not owned is forbidden.";
@@ -406,10 +406,10 @@ public class FolderController extends ControllerHelper {
                             return;
                         }
 
-                        folderService.move(folderIds, targetFolderId.toString(), moveEvent -> {
-                            if (moveEvent.isLeft()) {
+                        folderService.move(folderIds, targetFolderId.toString(), moveEvt -> {
+                            if (moveEvt.isLeft()) {
                                 log.error("[Formulaire@moveFolder] Error in moving folders with ids : " + folderIds);
-                                RenderHelper.internalError(request, moveEvent);
+                                RenderHelper.internalError(request, moveEvt);
                                 return;
                             }
 
@@ -437,10 +437,10 @@ public class FolderController extends ControllerHelper {
 
     private void deleteFolders(HttpServerRequest request, UserInfos user, Integer parentId, JsonArray folderIds) {
         // Delete folders (and their children by cascade effect)
-        folderService.delete(folderIds, deleteEvent -> {
-            if (deleteEvent.isLeft()) {
+        folderService.delete(folderIds, deleteEvt -> {
+            if (deleteEvt.isLeft()) {
                 log.error("[Formulaire@deleteFolders] Error in deleting folders with ids " + folderIds);
-                RenderHelper.internalError(request, deleteEvent);
+                RenderHelper.internalError(request, deleteEvt);
                 return;
             }
 

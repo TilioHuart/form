@@ -305,8 +305,8 @@ public class FormResponsesExportPDF {
         String idFile = form.getJsonObject("images").getJsonObject("idImagesPerQuestion").getString(question.getLong("id").toString());
 
         if (idFile != null) {
-            storage.readFile(idFile, readFileEvent -> {
-                String graph = readFileEvent.getString(0, readFileEvent.length());
+            storage.readFile(idFile, readFileEvt -> {
+                String graph = readFileEvt.getString(0, readFileEvt.length());
                 handler.handle(Future.succeededFuture(graph));
             });
         }
@@ -353,8 +353,8 @@ public class FormResponsesExportPDF {
                         // Remove image files generated for graph display on PDF
                         JsonArray removesFiles = templateProps.getJsonArray("idImagesFiles");
                         if (removesFiles != null) {
-                            storage.removeFiles(removesFiles, event -> {
-                                log.info(" [Formulaire@generatePDF] " + event.encode());
+                            storage.removeFiles(removesFiles, removeEvt -> {
+                                log.info(" [Formulaire@generatePDF] " + removeEvt.encode());
                             });
                         }
                     })

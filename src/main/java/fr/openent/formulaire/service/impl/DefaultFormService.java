@@ -4,7 +4,6 @@ import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.service.FormService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
@@ -17,8 +16,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-
-import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 
 public class DefaultFormService implements FormService {
     private final Sql sql = Sql.getInstance();

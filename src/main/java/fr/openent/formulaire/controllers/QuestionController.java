@@ -102,20 +102,20 @@ public class QuestionController extends ControllerHelper {
 
             // If it's a conditional question in a section, check if another one already exists
             if (question.getBoolean("conditional")) {
-                questionService.getSectionIdsWithConditionalQuestions(formId, sectionIdsEvent -> {
-                    if (sectionIdsEvent.isLeft()) {
+                questionService.getSectionIdsWithConditionalQuestions(formId, sectionIdsEvt -> {
+                    if (sectionIdsEvt.isLeft()) {
                         log.error("[Formulaire@createQuestion] Failed to get section ids for form with id : " + formId);
-                        RenderHelper.internalError(request, sectionIdsEvent);
+                        RenderHelper.internalError(request, sectionIdsEvt);
                         return;
                     }
-                    if (sectionIdsEvent.right().getValue().isEmpty()) {
+                    if (sectionIdsEvt.right().getValue().isEmpty()) {
                         String message = "[Formulaire@createQuestion] No section ids found for form with id " + formId;
                         log.error(message);
                         notFound(request, message);
                         return;
                     }
 
-                    JsonArray sectionIds = UtilsHelper.getByProp(sectionIdsEvent.right().getValue(), "section_id");
+                    JsonArray sectionIds = UtilsHelper.getByProp(sectionIdsEvt.right().getValue(), "section_id");
                     if (!sectionIds.contains(sectionId)) {
                         String message = "[Formulaire@createQuestion] A conditional question is already existing for the section with id : " + sectionId;
                         log.error(message);
@@ -180,14 +180,14 @@ public class QuestionController extends ControllerHelper {
             }
 
             // Check if sections of conditional questions to create already have conditional questions
-            questionService.getSectionIdsWithConditionalQuestions(formId, sectionIdsEvent -> {
-                if (sectionIdsEvent.isLeft()) {
+            questionService.getSectionIdsWithConditionalQuestions(formId, sectionIdsEvt -> {
+                if (sectionIdsEvt.isLeft()) {
                     log.error("[Formulaire@updateQuestions] Failed to get section ids for form with id : " + formId);
-                    RenderHelper.internalError(request, sectionIdsEvent);
+                    RenderHelper.internalError(request, sectionIdsEvt);
                     return;
                 }
 
-                JsonArray sectionIds = UtilsHelper.getByProp(sectionIdsEvent.right().getValue(), "section_id");
+                JsonArray sectionIds = UtilsHelper.getByProp(sectionIdsEvt.right().getValue(), "section_id");
                 Long conflictingSectionId = null;
                 int j = 0;
                 while (conflictingSectionId == null && j < questions.size()) {
@@ -206,14 +206,14 @@ public class QuestionController extends ControllerHelper {
                 }
 
                 // If no conditional question conflict, we update
-                questionService.update(formId, questions, updatedQuestionsEvent -> {
-                    if (updatedQuestionsEvent.isLeft()) {
+                questionService.update(formId, questions, updatedQuestionsEvt -> {
+                    if (updatedQuestionsEvt.isLeft()) {
                         log.error("[Formulaire@updateQuestions] Failed to update questions : " + questions);
-                        RenderHelper.internalError(request, updatedQuestionsEvent);
+                        RenderHelper.internalError(request, updatedQuestionsEvt);
                         return;
                     }
 
-                    JsonArray updatedQuestionsInfos = updatedQuestionsEvent.right().getValue();
+                    JsonArray updatedQuestionsInfos = updatedQuestionsEvt.right().getValue();
                     JsonArray updatedQuestions = new JsonArray();
                     for (int k = 0; k < updatedQuestionsInfos.size(); k++) {
                         updatedQuestions.addAll(updatedQuestionsInfos.getJsonArray(k));
@@ -230,13 +230,13 @@ public class QuestionController extends ControllerHelper {
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
-        questionService.get(questionId, getEvent -> {
-            if (getEvent.isLeft()) {
+        questionService.get(questionId, questionsEvt -> {
+            if (questionsEvt.isLeft()) {
                 log.error("[Formulaire@deleteQuestion] Failed to get question with id : " + questionId);
-                RenderHelper.internalError(request, getEvent);
+                RenderHelper.internalError(request, questionsEvt);
                 return;
             }
-            questionService.delete(getEvent.right().getValue(), defaultResponseHandler(request));
+            questionService.delete(questionsEvt.right().getValue(), defaultResponseHandler(request));
         });
     }
 }

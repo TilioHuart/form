@@ -75,20 +75,20 @@ public class ResponseFileController extends ControllerHelper {
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void download(HttpServerRequest request) {
         String fileId = request.getParam("fileId");
-        responseFileService.get(fileId, fileEvent -> {
-            if (fileEvent.isLeft()) {
+        responseFileService.get(fileId, fileEvt -> {
+            if (fileEvt.isLeft()) {
                 log.error("[Formulaire@downloadFile] Error in getting responseFile with id : " + fileId);
-                RenderHelper.internalError(request, fileEvent);
+                RenderHelper.internalError(request, fileEvt);
                 return;
             }
-            if (fileEvent.right().getValue().isEmpty()) {
+            if (fileEvt.right().getValue().isEmpty()) {
                 String message = "[Formulaire@downloadFile] No file found for id " + fileId;
                 log.error(message);
                 notFound(request, message);
                 return;
             }
 
-            JsonObject file = fileEvent.right().getValue();
+            JsonObject file = fileEvt.right().getValue();
             storage.sendFile(file.getString("id"), file.getString("filename"), request, false, new JsonObject());
         });
     }
@@ -99,20 +99,20 @@ public class ResponseFileController extends ControllerHelper {
     @SecuredAction(value = Formulaire.CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void zipAndDownload(HttpServerRequest request) {
         String questionId = request.getParam("questionId");
-        responseFileService.listByQuestion(questionId, responseFilesEvent -> {
-            if (responseFilesEvent.isLeft()) {
+        responseFileService.listByQuestion(questionId, responseFilesEvt -> {
+            if (responseFilesEvt.isLeft()) {
                 log.error("[Formulaire@zipAndDownload] Error in getting responseFiles for question with id : " + questionId);
-                RenderHelper.internalError(request, responseFilesEvent);
+                RenderHelper.internalError(request, responseFilesEvt);
                 return;
             }
-            if (responseFilesEvent.right().getValue().isEmpty()) {
+            if (responseFilesEvt.right().getValue().isEmpty()) {
                 String message = "[Formulaire@zipAndDownload] No response files found for question with id " + questionId;
                 log.error(message);
                 notFound(request, message);
                 return;
             }
 
-            List<JsonObject> listFiles = responseFilesEvent.right().getValue().getList();
+            List<JsonObject> listFiles = responseFilesEvt.right().getValue().getList();
             JsonObject root = new JsonObject()
                     .put("id", UUID.randomUUID().toString())
                     .put("type", "folder")
@@ -166,10 +166,10 @@ public class ResponseFileController extends ControllerHelper {
 
             // Export all files of the 'listFiles' in a folder defined by the 'root' object
             FolderExporterZip zipBuilder = new FolderExporterZip(storage, vertx.fileSystem(), false);
-            zipBuilder.exportAndSendZip(root, listFilesValid, request,false).onComplete(zipEvent -> {
-                if (zipEvent.failed()) {
+            zipBuilder.exportAndSendZip(root, listFilesValid, request,false).onComplete(zipEvt -> {
+                if (zipEvt.failed()) {
                     log.error("[Formulaire@zipAndDownload] Fail to zip and export files");
-                    RenderHelper.internalError(request, zipEvent.cause().getMessage());
+                    RenderHelper.internalError(request, zipEvt.cause().getMessage());
                     return;
                 }
 
@@ -197,8 +197,8 @@ public class ResponseFileController extends ControllerHelper {
                 String name = entries.getJsonObject("metadata").getString("filename");
                 String type = entries.getJsonObject("metadata").getString("content-type");
 
-                responseFileService.create(responseId, fileId, name, type, createEvent -> {
-                    if (createEvent.isLeft()) {
+                responseFileService.create(responseId, fileId, name, type, createEvt -> {
+                    if (createEvt.isLeft()) {
                         log.error("[Formulaire@uploadFile] Fail to create in database file " + fileId);
 
                         deleteFiles(storage, new JsonArray().add(fileId), deleteFilesEvt -> {
@@ -208,7 +208,7 @@ public class ResponseFileController extends ControllerHelper {
                                 return;
                             }
 
-                            RenderHelper.internalError(request, createEvent);
+                            RenderHelper.internalError(request, createEvt);
                         });
                     }
 
@@ -234,14 +234,14 @@ public class ResponseFileController extends ControllerHelper {
             return;
         }
 
-        responseFileService.deleteAllByResponse(new JsonArray().add(responseId), deleteEvent -> {
-            if (deleteEvent.isLeft()) {
+        responseFileService.deleteAllByResponse(new JsonArray().add(responseId), deleteEvt -> {
+            if (deleteEvt.isLeft()) {
                 log.error("[Formulaire@deleteAllFile] An error occurred while deleting files for response with id : " + responseId);
-                RenderHelper.internalError(request, deleteEvent);
+                RenderHelper.internalError(request, deleteEvt);
                 return;
             }
 
-            JsonArray deletedFiles = deleteEvent.right().getValue();
+            JsonArray deletedFiles = deleteEvt.right().getValue();
             request.response().setStatusCode(204).end();
             if (!deletedFiles.isEmpty()) {
                 deleteFiles(storage, deletedFiles, deleteFilesEvt -> {

@@ -94,13 +94,13 @@ public class QuestionChoiceController extends ControllerHelper {
 
             Integer nextSectionId = choice.getInteger("next_section_id", null);
             if (nextSectionId != null) {
-                questionService.getSectionIdsByForm(questionId, sectionsEvent -> {
-                    if (sectionsEvent.isLeft()) {
+                questionService.getSectionIdsByForm(questionId, sectionsEvt -> {
+                    if (sectionsEvt.isLeft()) {
                         log.error("[Formulaire@createQuestionChoice] Failed to get section for form of the question with id : " + questionId);
-                        RenderHelper.internalError(request, sectionsEvent);
+                        RenderHelper.internalError(request, sectionsEvt);
                         return;
                     }
-                    if (sectionsEvent.right().getValue().isEmpty()) {
+                    if (sectionsEvt.right().getValue().isEmpty()) {
                         String message = "[Formulaire@createQuestionChoice] No section found for form of question with id " + questionId;
                         log.error(message);
                         notFound(request, message);
@@ -108,7 +108,7 @@ public class QuestionChoiceController extends ControllerHelper {
                     }
 
                     // Check if values of next_section_id exist
-                    JsonArray sections = sectionsEvent.right().getValue();
+                    JsonArray sections = sectionsEvt.right().getValue();
                     JsonArray sectionIds = UtilsHelper.getIds(sections, false);
                     if (!sectionIds.contains(nextSectionId)) {
                         String message = "[Formulaire@createQuestionChoice] Wrong value for the next_section_id, this form has no section with id : " + nextSectionId;
@@ -118,20 +118,20 @@ public class QuestionChoiceController extends ControllerHelper {
                     }
 
                     // Check if targeted section is after the current question
-                    questionService.getFormPosition(questionId, positionEvent -> {
-                        if (positionEvent.isLeft()) {
+                    questionService.getFormPosition(questionId, positionEvt -> {
+                        if (positionEvt.isLeft()) {
                             log.error("[Formulaire@createQuestionChoice] Failed to get form position for question with id : " + questionId);
-                            RenderHelper.internalError(request, sectionsEvent);
+                            RenderHelper.internalError(request, sectionsEvt);
                             return;
                         }
-                        if (positionEvent.right().getValue().isEmpty()) {
+                        if (positionEvt.right().getValue().isEmpty()) {
                             String message = "[Formulaire@createQuestionChoice] No position found for question with id " + questionId;
                             log.error(message);
                             notFound(request, message);
                             return;
                         }
 
-                        Integer currentQuestionPosition = positionEvent.right().getValue().getInteger("position");
+                        Integer currentQuestionPosition = positionEvt.right().getValue().getInteger("position");
                         JsonObject targetedSection = null;
                         int i = 0;
                         while (targetedSection == null && i < sections.size()) {
@@ -183,13 +183,13 @@ public class QuestionChoiceController extends ControllerHelper {
             String questionId = choice.getInteger("question_id").toString();
             Integer nextSectionId = choice.getInteger("next_section_id", null);
             if (nextSectionId != null) {
-                questionService.getSectionIdsByForm(questionId, sectionsEvent -> {
-                    if (sectionsEvent.isLeft()) {
+                questionService.getSectionIdsByForm(questionId, sectionsEvt -> {
+                    if (sectionsEvt.isLeft()) {
                         log.error("[Formulaire@updateQuestionChoice] Failed to get section for form of the question with id : " + questionId);
-                        RenderHelper.internalError(request, sectionsEvent);
+                        RenderHelper.internalError(request, sectionsEvt);
                         return;
                     }
-                    if (sectionsEvent.right().getValue().isEmpty()) {
+                    if (sectionsEvt.right().getValue().isEmpty()) {
                         String message = "[Formulaire@updateQuestionChoice] No sections found for form of the question with id " + questionId;
                         log.error(message);
                         notFound(request, message);
@@ -197,7 +197,7 @@ public class QuestionChoiceController extends ControllerHelper {
                     }
 
                     // Check if values of next_section_id exist
-                    JsonArray sections = sectionsEvent.right().getValue();
+                    JsonArray sections = sectionsEvt.right().getValue();
                     JsonArray sectionIds = UtilsHelper.getIds(sections, false);
                     if (sections.isEmpty() || !sectionIds.contains(nextSectionId)) {
                         String message = "[Formulaire@updateQuestionChoice] Wrong value for the next_section_id, this form has no section with id : " + nextSectionId;
@@ -207,20 +207,20 @@ public class QuestionChoiceController extends ControllerHelper {
                     }
 
                     // Check if targeted section is after the current question
-                    questionService.getFormPosition(questionId, positionEvent -> {
-                        if (positionEvent.isLeft()) {
+                    questionService.getFormPosition(questionId, positionEvt -> {
+                        if (positionEvt.isLeft()) {
                             log.error("[Formulaire@updateQuestionChoice] Failed to get form position for question with id : " + questionId);
-                            RenderHelper.internalError(request, sectionsEvent);
+                            RenderHelper.internalError(request, sectionsEvt);
                             return;
                         }
-                        if (positionEvent.right().getValue().isEmpty()) {
+                        if (positionEvt.right().getValue().isEmpty()) {
                             String message = "[Formulaire@updateQuestionChoice] No position found for question with id " + questionId;
                             log.error(message);
                             notFound(request, message);
                             return;
                         }
 
-                        Integer currentQuestionPosition = positionEvent.right().getValue().getInteger("position");
+                        Integer currentQuestionPosition = positionEvt.right().getValue().getInteger("position");
                         JsonObject targetedSection = null;
                         int i = 0;
                         while (targetedSection == null && i < sections.size()) {

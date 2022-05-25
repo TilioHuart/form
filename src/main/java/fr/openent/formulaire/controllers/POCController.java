@@ -24,6 +24,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
+import org.entcore.common.notification.TimelineHelper;
 import org.entcore.common.user.UserUtils;
 
 import java.text.ParseException;
@@ -74,14 +75,14 @@ public class POCController extends ControllerHelper {
             return;
         }
 
-        pocService.getFormByKey(formKey, formEvent -> {
-            if (formEvent.isLeft() || formEvent.right().getValue().isEmpty()) {
+        pocService.getFormByKey(formKey, formEvt -> {
+            if (formEvt.isLeft() || formEvt.right().getValue().isEmpty()) {
                 log.error("[Formulaire@getPublicFormByKey] Fail to get form with key : " + formKey);
-                RenderHelper.badRequest(request, formEvent);
+                RenderHelper.badRequest(request, formEvt);
                 return;
             }
 
-            JsonObject form = formEvent.right().getValue();
+            JsonObject form = formEvt.right().getValue();
 
             // Check date_ending validity
             if (form.getString("date_ending") == null || form.getString("date_ending") == null) {
@@ -112,34 +113,34 @@ public class POCController extends ControllerHelper {
 
             // Get all form data (sections, questions, question_choices)
             String formId = form.getInteger("id").toString();
-            sectionService.list(formId, sectionsEvent -> {
-                if (sectionsEvent.isLeft()) {
+            sectionService.list(formId, sectionsEvt -> {
+                if (sectionsEvt.isLeft()) {
                     log.error("[Formulaire@getPublicFormByKey] Fail to get sections for form with key : " + formKey);
-                    RenderHelper.badRequest(request, formEvent);
+                    RenderHelper.badRequest(request, formEvt);
                     return;
                 }
 
-                JsonArray sections = sectionsEvent.right().getValue();
+                JsonArray sections = sectionsEvt.right().getValue();
                 form.put("form_elements", sections);
 
-                questionService.listForFormAndSection(formId, questionsEvent -> {
-                    if (questionsEvent.isLeft()) {
+                questionService.listForFormAndSection(formId, questionsEvt -> {
+                    if (questionsEvt.isLeft()) {
                         log.error("[Formulaire@getPublicFormByKey] Fail to get questions for form with key : " + formKey);
-                        RenderHelper.badRequest(request, formEvent);
+                        RenderHelper.badRequest(request, formEvt);
                         return;
                     }
 
-                    JsonArray questions = questionsEvent.right().getValue();
+                    JsonArray questions = questionsEvt.right().getValue();
                     JsonArray questionIds = UtilsHelper.getIds(questions);
 
-                    questionChoiceService.listChoices(questionIds, questionChoicesEvent -> {
-                        if (questionChoicesEvent.isLeft()) {
+                    questionChoiceService.listChoices(questionIds, questionChoicesEvt -> {
+                        if (questionChoicesEvt.isLeft()) {
                             log.error("[Formulaire@getPublicFormByKey] Fail to get choices for questions with ids : " + questionIds);
-                            RenderHelper.badRequest(request, formEvent);
+                            RenderHelper.badRequest(request, formEvt);
                             return;
                         }
 
-                        JsonArray questionsChoices = questionChoicesEvent.right().getValue();
+                        JsonArray questionsChoices = questionChoicesEvt.right().getValue();
                         HashMap<Integer, JsonArray> questionsChoicesMapped = new HashMap<>();
                         HashMap<Integer, JsonObject> sectionsMapped = new HashMap<>();
 
@@ -183,14 +184,14 @@ public class POCController extends ControllerHelper {
                         }
 
                         // Create a new distribution, get the generated key and return the form data with it
-                        pocService.createDistribution(form, distributionEvent -> {
-                            if (distributionEvent.isLeft()) {
+                        pocService.createDistribution(form, distributionEvt -> {
+                            if (distributionEvt.isLeft()) {
                                 log.error("[Formulaire@createPublicDistribution] Fail to create a distribution for form with key : " + formKey);
-                                RenderHelper.badRequest(request, formEvent);
+                                RenderHelper.badRequest(request, formEvt);
                                 return;
                             }
 
-                            form.put("distribution_key", distributionEvent.right().getValue().getString("public_key"));
+                            form.put("distribution_key", distributionEvt.right().getValue().getString("public_key"));
                             renderJson(request, form);
                         });
                     });
@@ -221,23 +222,23 @@ public class POCController extends ControllerHelper {
         request.pause();
 
         // Check if 'formKey' and 'distributionKey' are existing and matching
-        pocService.getFormByKey(formKey, formEvent -> {
-            if (formEvent.isLeft() || formEvent.right().getValue().isEmpty()) {
+        pocService.getFormByKey(formKey, formEvt -> {
+            if (formEvt.isLeft() || formEvt.right().getValue().isEmpty()) {
                 log.error("[Formulaire@createPublicResponses] Fail to get form for key : " + formKey);
-                RenderHelper.badRequest(request, formEvent);
+                RenderHelper.badRequest(request, formEvt);
                 return;
             }
 
-            JsonObject form = formEvent.right().getValue();
+            JsonObject form = formEvt.right().getValue();
             Integer formId = form.getInteger("id");
-            pocService.getDistributionByKey(distributionKey, distributionEvent -> {
-                if (distributionEvent.isLeft() || distributionEvent.right().getValue().isEmpty()) {
+            pocService.getDistributionByKey(distributionKey, distributionEvt -> {
+                if (distributionEvt.isLeft() || distributionEvt.right().getValue().isEmpty()) {
                     log.error("[Formulaire@createPublicResponses] Fail to get distribution for key : " + distributionKey);
-                    RenderHelper.badRequest(request, distributionEvent);
+                    RenderHelper.badRequest(request, distributionEvt);
                     return;
                 }
 
-                JsonObject distribution = distributionEvent.right().getValue();
+                JsonObject distribution = distributionEvt.right().getValue();
                 if (!distribution.getInteger("form_id").equals(formId)) {
                     log.error("[Formulaire@createPublicResponses] The distributionKey provided is not matching the formKey " + formKey);
                     badRequest(request);
@@ -273,24 +274,24 @@ public class POCController extends ControllerHelper {
 
                 RequestUtils.bodyToJsonArray(request, responses -> {
                     // Get question and question_choices information
-                    questionService.listForFormAndSection(formId.toString(), questionsEvent -> {
-                        if (questionsEvent.isLeft()) {
+                    questionService.listForFormAndSection(formId.toString(), questionsEvt -> {
+                        if (questionsEvt.isLeft()) {
                             log.error("[Formulaire@createPublicResponses] Fail to get questions corresponding to form with id : " + formId);
-                            RenderHelper.badRequest(request, questionsEvent);
+                            RenderHelper.badRequest(request, questionsEvt);
                             return;
                         }
 
-                        JsonArray questions = questionsEvent.right().getValue();
+                        JsonArray questions = questionsEvt.right().getValue();
                         JsonArray questionIds = UtilsHelper.getIds(questions);
 
-                        questionChoiceService.listChoices(questionIds, questionChoicesEvent -> {
-                            if (questionChoicesEvent.isLeft()) {
+                        questionChoiceService.listChoices(questionIds, questionChoicesEvt -> {
+                            if (questionChoicesEvt.isLeft()) {
                                 log.error("[Formulaire@createPublicResponses] Fail to get choices for questions with ids : " + questionIds);
-                                RenderHelper.badRequest(request, formEvent);
+                                RenderHelper.badRequest(request, formEvt);
                                 return;
                             }
 
-                            JsonArray questionsChoices = questionChoicesEvent.right().getValue();
+                            JsonArray questionsChoices = questionChoicesEvt.right().getValue();
                             HashMap<Integer, JsonArray> questionsChoicesMapped = new HashMap<>();
                             HashMap<Integer, JsonObject> questionsMapped = new HashMap<>();
 
@@ -380,10 +381,10 @@ public class POCController extends ControllerHelper {
                             }
 
                             // Save responses and change the status of the distribution
-                            pocService.createResponses(responses, distribution, responsesEvent -> {
-                                if (responsesEvent.isLeft()) {
+                            pocService.createResponses(responses, distribution, responsesEvt -> {
+                                if (responsesEvt.isLeft()) {
                                     log.error("[Formulaire@createPublicResponses] Fail to create responses : " + responses);
-                                    RenderHelper.badRequest(request, responsesEvent);
+                                    RenderHelper.badRequest(request, responsesEvt);
                                     return;
                                 }
 

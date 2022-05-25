@@ -805,13 +805,13 @@ public class FormController extends ControllerHelper {
                     return;
                 }
 
-                formService.get(formId, user, formEvent -> {
-                    if (formEvent.isLeft()) {
-                        log.error("[Formulaire@sendReminder] Fail to get form " + formId + " : " + formEvent.left().getValue());
-                        RenderHelper.internalError(request, formEvent);
+                formService.get(formId, user, formEvt -> {
+                    if (formEvt.isLeft()) {
+                        log.error("[Formulaire@sendReminder] Fail to get form " + formId + " : " + formEvt.left().getValue());
+                        RenderHelper.internalError(request, formEvt);
                         return;
                     }
-                    if (formEvent.right().getValue().isEmpty()) {
+                    if (formEvt.right().getValue().isEmpty()) {
                         String message = "[Formulaire@sendReminder] No form found for id " + formId;
                         log.error(message);
                         notFound(request, message);
@@ -819,7 +819,7 @@ public class FormController extends ControllerHelper {
                     }
 
                     // Should not send reminder if form is not sent
-                    JsonObject form = formEvent.right().getValue();
+                    JsonObject form = formEvt.right().getValue();
                     if (!form.getBoolean("sent")) {
                         String message = "[Formulaire@sendReminder] You cannot send a reminder for a form which is not already send for response.";
                         log.error(message);
@@ -827,20 +827,20 @@ public class FormController extends ControllerHelper {
                         return;
                     }
 
-                    distributionService.listByForm(formId, distributionsEvent -> {
-                        if (distributionsEvent.isLeft()) {
+                    distributionService.listByForm(formId, distributionsEvt -> {
+                        if (distributionsEvt.isLeft()) {
                             log.error("[Formulaire@sendReminder] Fail to retrieve distributions for form with id : " + formId);
-                            RenderHelper.internalError(request, distributionsEvent);
+                            RenderHelper.internalError(request, distributionsEvt);
                             return;
                         }
-                        if (distributionsEvent.right().getValue().isEmpty()) {
+                        if (distributionsEvt.right().getValue().isEmpty()) {
                             String message = "[Formulaire@sendReminder] No distributions found for form with id " + formId;
                             log.error(message);
                             notFound(request, message);
                             return;
                         }
 
-                        JsonArray distributions = distributionsEvent.right().getValue();
+                        JsonArray distributions = distributionsEvt.right().getValue();
                         JsonArray localRespondersIds = new JsonArray();
                         JsonArray listMails = new JsonArray();
 
@@ -885,12 +885,12 @@ public class FormController extends ControllerHelper {
                             Future future = mails.get(i);
 
                             // Send mail via Conversation app if it exists or else with Zimbra
-                            eb.request("org.entcore.conversation", listMails.getJsonObject(i), (Handler<AsyncResult<Message<JsonObject>>>) messageEvent -> {
-                                if (!messageEvent.result().body().getString("status").equals("ok")) {
-                                    log.error("[Formulaire@sendReminder] Failed to send reminder : " + messageEvent.cause());
-                                    future.handle(Future.failedFuture(messageEvent.cause()));
+                            eb.request("org.entcore.conversation", listMails.getJsonObject(i), (Handler<AsyncResult<Message<JsonObject>>>) messageEvt -> {
+                                if (!messageEvt.result().body().getString("status").equals("ok")) {
+                                    log.error("[Formulaire@sendReminder] Failed to send reminder : " + messageEvt.cause());
+                                    future.handle(Future.failedFuture(messageEvt.cause()));
                                 }
-                                future.handle(Future.succeededFuture(messageEvent.result().body()));
+                                future.handle(Future.succeededFuture(messageEvt.result().body()));
                             });
                         }
 
@@ -982,13 +982,13 @@ public class FormController extends ControllerHelper {
                     return;
                 }
 
-                formService.get(formId, user, getEvent -> {
-                    if (getEvent.isLeft()) {
+                formService.get(formId, user, formEvt -> {
+                    if (formEvt.isLeft()) {
                         log.error("[Formulaire@export] Error in getting form to export responses of form " + formId);
-                        RenderHelper.internalError(request, getEvent);
+                        RenderHelper.internalError(request, formEvt);
                         return;
                     }
-                    if (getEvent.right().getValue().isEmpty()) {
+                    if (formEvt.right().getValue().isEmpty()) {
                         String message = "[Formulaire@export] No form found for id " + formId;
                         log.error(message);
                         notFound(request, message);
@@ -997,10 +997,10 @@ public class FormController extends ControllerHelper {
 
                     switch (fileType) {
                         case "csv":
-                            new FormResponsesExportCSV(request, getEvent.right().getValue()).launch();
+                            new FormResponsesExportCSV(request, formEvt.right().getValue()).launch();
                             break;
                         case "pdf":
-                            JsonObject form = getEvent.right().getValue();
+                            JsonObject form = formEvt.right().getValue();
                             form.put("images", images);
                             new FormResponsesExportPDF(request, vertx, config, storage, form).launch();
                             break;
@@ -1077,20 +1077,14 @@ public class FormController extends ControllerHelper {
                 JsonArray bookmarksIds = new JsonArray(new ArrayList<>(filterIdsForSending(idBookmarks).keySet()));
 
                 // Get group ids and users ids from bookmarks and add them to previous lists
-                neoService.getIdsFromBookMarks(bookmarksIds, eventBookmarks -> {
-                    if (eventBookmarks.isLeft()) {
+                neoService.getIdsFromBookMarks(bookmarksIds, bookmarksEvt -> {
+                    if (bookmarksEvt.isLeft()) {
                         log.error("[Formulaire@shareResource] Fail to get ids from bookmarks' ids");
-                        RenderHelper.internalError(request, eventBookmarks);
-                        return;
-                    }
-                    if (eventBookmarks.right().getValue().isEmpty()) {
-                        String message = "[Formulaire@shareResource] No bookmarks found for ids " + bookmarksIds;
-                        log.error(message);
-                        notFound(request, message);
+                        RenderHelper.internalError(request, bookmarksEvt);
                         return;
                     }
 
-                    JsonArray ids = eventBookmarks.right().getValue().getJsonObject(0).getJsonArray("ids").getJsonObject(0).getJsonArray("ids");
+                    JsonArray ids = bookmarksEvt.right().getValue().getJsonObject(0).getJsonArray("ids").getJsonObject(0).getJsonArray("ids");
                     for (int i = 0; i < ids.size(); i++) {
                         JsonObject id = ids.getJsonObject(i);
                         boolean isGroup = id.getString("name") != null;
@@ -1099,14 +1093,14 @@ public class FormController extends ControllerHelper {
 
                     // Get all users ids from usersIds & groupsIds
                     // Sync with distribution table
-                    neoService.getUsersInfosFromIds(usersIds, groupsIds, eventUsers -> {
-                        if (eventUsers.isLeft()) {
+                    neoService.getUsersInfosFromIds(usersIds, groupsIds, usersEvt -> {
+                        if (usersEvt.isLeft()) {
                             log.error("[Formulaire@shareResource] Fail to get users' ids from groups' ids");
-                            RenderHelper.internalError(request, eventUsers);
+                            RenderHelper.internalError(request, usersEvt);
                             return;
                         }
 
-                        JsonArray infos = eventUsers.right().getValue();
+                        JsonArray infos = usersEvt.right().getValue();
                         JsonArray responders = new JsonArray();
                         for (int i = 0; i < infos.size(); i++) {
                             JsonArray users = infos.getJsonObject(i).getJsonArray("users");
@@ -1121,10 +1115,10 @@ public class FormController extends ControllerHelper {
                             return;
                         }
 
-                        syncDistributions(request, formId, user, responders, syncEvent -> {
-                            if (syncEvent.isLeft()) {
+                        syncDistributions(request, formId, user, responders, syncEvt -> {
+                            if (syncEvt.isLeft()) {
                                 log.error("[Formulaire@shareResource] Fail to sync distributions for form " + formId);
-                                RenderHelper.internalError(request, syncEvent);
+                                RenderHelper.internalError(request, syncEvt);
                                 return;
                             }
 
@@ -1133,10 +1127,10 @@ public class FormController extends ControllerHelper {
                             idsObjects.add(idUsers);
                             idsObjects.add(idGroups);
                             idsObjects.add(idBookmarks);
-                            updateFormCollabProp(formId, user, idsObjects, updateEvent -> {
-                                if (updateEvent.isLeft()) {
+                            updateFormCollabProp(formId, user, idsObjects, updateEvt -> {
+                                if (updateEvt.isLeft()) {
                                     log.error("[Formulaire@shareResource] Fail to update collab prop for form " + formId);
-                                    RenderHelper.internalError(request, updateEvent);
+                                    RenderHelper.internalError(request, updateEvt);
                                     return;
                                 }
                                 fixBugAutoUnsharing(request, formId, user, shareFormObject);
@@ -1190,10 +1184,10 @@ public class FormController extends ControllerHelper {
                 }
             }
 
-            distributionService.setActiveValue(false, formId, deactivatedResponders, deactivateEvent -> {
-                if (deactivateEvent.isLeft()) {
+            distributionService.setActiveValue(false, formId, deactivatedResponders, deactivateEvt -> {
+                if (deactivateEvt.isLeft()) {
                     log.error("[Formulaire@removeDeletedDistributions] Fail to deactivate distributions");
-                    handler.handle(new Either.Left<>(deactivateEvent.left().getValue()));
+                    handler.handle(new Either.Left<>(deactivateEvt.left().getValue()));
                     return;
                 }
 
@@ -1204,14 +1198,14 @@ public class FormController extends ControllerHelper {
                         return;
                     }
 
-                    updateFormSentProp(formId, user, updateSentPropEvent -> {
-                        if (updateSentPropEvent.isLeft()) {
-                            log.error(updateSentPropEvent.left().getValue());
-                            handler.handle(new Either.Left<>(updateSentPropEvent.left().getValue()));
+                    updateFormSentProp(formId, user, updateSentPropEvt -> {
+                        if (updateSentPropEvt.isLeft()) {
+                            log.error(updateSentPropEvt.left().getValue());
+                            handler.handle(new Either.Left<>(updateSentPropEvt.left().getValue()));
                             return;
                         }
 
-                        handler.handle(new Either.Right<>(updateSentPropEvent.right().getValue()));
+                        handler.handle(new Either.Right<>(updateSentPropEvt.right().getValue()));
                     });
                 });
             });
@@ -1220,115 +1214,115 @@ public class FormController extends ControllerHelper {
 
     private void addNewDistributions(HttpServerRequest request, String formId, UserInfos user, List<JsonObject> newResponders,
                                      List<String> existingResponders, Handler<Either<String, JsonObject>> handler) {
-        distributionService.createMultiple(formId, user, newResponders, addEvent -> {
-            if (addEvent.isLeft()) {
+        distributionService.createMultiple(formId, user, newResponders, addEvt -> {
+            if (addEvt.isLeft()) {
                 log.error("[Formulaire@addNewDistributions] Fail to add distributions");
-                handler.handle(new Either.Left<>(addEvent.left().getValue()));
+                handler.handle(new Either.Left<>(addEvt.left().getValue()));
                 return;
             }
 
             JsonArray respondersIds = UtilsHelper.getStringIds(new JsonArray(newResponders));
             if (!existingResponders.isEmpty()) {
-                distributionService.setActiveValue(true, formId, existingResponders, updateEvent -> {
-                    if (updateEvent.isLeft()) {
+                distributionService.setActiveValue(true, formId, existingResponders, updateEvt -> {
+                    if (updateEvt.isLeft()) {
                         log.error("[Formulaire@addNewDistributions] Fail to update distributions");
-                        handler.handle(new Either.Left<>(updateEvent.left().getValue()));
+                        handler.handle(new Either.Left<>(updateEvt.left().getValue()));
                         return;
                     }
 
-                    formService.get(formId, user, formEvent -> {
-                        if (formEvent.isLeft()) {
+                    formService.get(formId, user, formEvt -> {
+                        if (formEvt.isLeft()) {
                             log.error("[Formulaire@addNewDistributions] Fail to get infos for form with id " + formId);
-                            handler.handle(new Either.Right<>(formEvent.right().getValue()));
+                            handler.handle(new Either.Right<>(formEvt.right().getValue()));
                             return;
                         }
-                        if (formEvent.right().getValue().isEmpty()) {
+                        if (formEvt.right().getValue().isEmpty()) {
                             String message = "[Formulaire@addNewDistributions] No form found for id " + formId;
                             log.error(message);
                             handler.handle(new Either.Left<>(message));
                             return;
                         }
 
-                        JsonObject form = formEvent.right().getValue();
+                        JsonObject form = formEvt.right().getValue();
                         notifyService.notifyNewForm(request, form, respondersIds);
-                        handler.handle(new Either.Right<>(formEvent.right().getValue()));
+                        handler.handle(new Either.Right<>(formEvt.right().getValue()));
                     });
                 });
             }
             else {
-                formService.get(formId, user, formEvent -> {
-                    if (formEvent.isLeft()) {
+                formService.get(formId, user, formEvt -> {
+                    if (formEvt.isLeft()) {
                         log.error("[Formulaire@addNewDistributions] Fail to get infos for form with id " + formId);
-                        handler.handle(new Either.Right<>(formEvent.right().getValue()));
+                        handler.handle(new Either.Right<>(formEvt.right().getValue()));
                         return;
                     }
-                    if (formEvent.right().getValue().isEmpty()) {
+                    if (formEvt.right().getValue().isEmpty()) {
                         String message = "[Formulaire@addNewDistributions] No form found for id " + formId;
                         log.error(message);
                         handler.handle(new Either.Left<>(message));
                         return;
                     }
 
-                    JsonObject form = formEvent.right().getValue();
+                    JsonObject form = formEvt.right().getValue();
                     notifyService.notifyNewForm(request, form, respondersIds);
-                    handler.handle(new Either.Right<>(formEvent.right().getValue()));
+                    handler.handle(new Either.Right<>(formEvt.right().getValue()));
                 });
             }
         });
     }
 
     private void updateFormSentProp(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler) {
-        distributionService.listByForm(formId, distributionsEvent -> {
-            if (distributionsEvent.isLeft()) {
+        distributionService.listByForm(formId, distributionsEvt -> {
+            if (distributionsEvt.isLeft()) {
                 log.error("[Formulaire@updateFormSentProp] Fail to get distributions of the form");
-                handler.handle(new Either.Left<>(distributionsEvent.left().getValue()));
+                handler.handle(new Either.Left<>(distributionsEvt.left().getValue()));
                 return;
             }
 
-            boolean hasDistributions = !distributionsEvent.right().getValue().isEmpty();
-            formService.get(formId, user, formEvent -> {
-                if (formEvent.isLeft()) {
+            boolean hasDistributions = !distributionsEvt.right().getValue().isEmpty();
+            formService.get(formId, user, formEvt -> {
+                if (formEvt.isLeft()) {
                     log.error("[Formulaire@updateFormSentProp] Fail to get form");
-                    handler.handle(new Either.Left<>(formEvent.left().getValue()));
+                    handler.handle(new Either.Left<>(formEvt.left().getValue()));
                     return;
                 }
-                if (formEvent.right().getValue().isEmpty()) {
+                if (formEvt.right().getValue().isEmpty()) {
                     String message = "[Formulaire@updateFormSentProp] No form found for id " + formId;
                     log.error(message);
                     handler.handle(new Either.Left<>(message));
                     return;
                 }
 
-                JsonObject form = formEvent.right().getValue();
+                JsonObject form = formEvt.right().getValue();
                 form.put("sent", hasDistributions);
-                formService.update(formId, form, updateEvent -> {
-                    if (updateEvent.isLeft()) {
+                formService.update(formId, form, updateEvt -> {
+                    if (updateEvt.isLeft()) {
                         log.error("[Formulaire@updateFormSentProp] Fail to update form");
-                        handler.handle(new Either.Left<>(updateEvent.left().getValue()));
+                        handler.handle(new Either.Left<>(updateEvt.left().getValue()));
                         return;
                     }
 
-                    handler.handle(new Either.Right<>(updateEvent.right().getValue()));
+                    handler.handle(new Either.Right<>(updateEvt.right().getValue()));
                 });
             });
         });
     }
 
     private void updateFormCollabProp(String formId, UserInfos user, List<Map<String, Object>> idsObjects, Handler<Either<String, JsonObject>> handler) {
-        formService.get(formId, user, formEvent -> {
-            if (formEvent.isLeft()) {
-                log.error("[Formulaire@updateFormCollabProp] Fail to get form : " + formEvent.left().getValue());
-                handler.handle(new Either.Left<>(formEvent.left().getValue()));
+        formService.get(formId, user, formEvt -> {
+            if (formEvt.isLeft()) {
+                log.error("[Formulaire@updateFormCollabProp] Fail to get form : " + formEvt.left().getValue());
+                handler.handle(new Either.Left<>(formEvt.left().getValue()));
                 return;
             }
-            if (formEvent.right().getValue().isEmpty()) {
+            if (formEvt.right().getValue().isEmpty()) {
                 String message = "[Formulaire@updateFormCollabProp] No form found for id " + formId;
                 log.error(message);
                 handler.handle(new Either.Left<>(message));
                 return;
             }
 
-            JsonObject form = formEvent.right().getValue();
+            JsonObject form = formEvt.right().getValue();
 
             boolean isShared = false;
             int i = 0;
@@ -1358,13 +1352,13 @@ public class FormController extends ControllerHelper {
             }
 
             form.put("collab", isShared);
-            formService.update(formId, form, updateEvent -> {
-                if (updateEvent.isLeft()) {
-                    log.error("[Formulaire@updateFormCollabProp] Fail to update form : " + updateEvent.left().getValue());
-                    handler.handle(new Either.Left<>(updateEvent.left().getValue()));
+            formService.update(formId, form, updateEvt -> {
+                if (updateEvt.isLeft()) {
+                    log.error("[Formulaire@updateFormCollabProp] Fail to update form : " + updateEvt.left().getValue());
+                    handler.handle(new Either.Left<>(updateEvt.left().getValue()));
                 }
                 else {
-                    handler.handle(new Either.Right<>(updateEvent.right().getValue()));
+                    handler.handle(new Either.Right<>(updateEvt.right().getValue()));
                 }
             });
         });

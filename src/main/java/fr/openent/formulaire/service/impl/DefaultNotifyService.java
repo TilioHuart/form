@@ -19,7 +19,6 @@ public class DefaultNotifyService implements NotifyService {
     private final TimelineHelper timelineHelper;
     private final EventBus eb;
 
-
     public DefaultNotifyService(TimelineHelper timelineHelper, EventBus eb){
         this.timelineHelper = timelineHelper;
         this.eb = eb;
