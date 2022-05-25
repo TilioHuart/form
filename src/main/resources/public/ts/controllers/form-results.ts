@@ -94,12 +94,12 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
             // Generate document (CSV or PDF) and store it in a blob
             if (vm.typeExport === Exports.CSV) {
-                doc = formService.export(vm.formElement.form_id, Exports.CSV);
+                doc = await formService.export(vm.formElement.form_id, Exports.CSV);
                 blob = new Blob(["\ufeff" + doc.data], {type: 'text/csv; charset=utf-18'});
             }
             else {
                 let images = await prepareDataForPDF();
-                doc = formService.export(vm.formElement.form_id, Exports.PDF, images);
+                doc = await formService.export(vm.formElement.form_id, Exports.PDF, images);
                 blob = new Blob([doc.data], {type: 'application/pdf; charset=utf-18'});
             }
 
