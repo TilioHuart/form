@@ -27,3 +27,18 @@ rgpdCron = String
 maxResponsesExportPDF = Integer
 maxUsersSharing = Integer
 </pre>
+
+Il y aura aussi à ajouter des variables d'environnement dans votre ent-core.json afin d'utiliser l'export pdf :
+
+<pre>
+{
+  "config": {
+     ...
+     "node-pdf-generator" : {
+        "pdf-connector-id": "exportpdf",
+        "auth": String,
+        "url" : String
+     }
+  }
+}
+</pre>
