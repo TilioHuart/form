@@ -117,7 +117,7 @@ public class DefaultResponseService implements ResponseService {
         String query = "DELETE FROM " + Formulaire.RESPONSE_TABLE + " WHERE id IN (" +
                 "SELECT r.id FROM " + Formulaire.RESPONSE_TABLE + " r " +
                 "JOIN " + Formulaire.QUESTION_TABLE + " q ON r.question_id = q.id " +
-                "JOIN " + Formulaire.FORM_TABLE + " ON q.form_id = f.id " +
+                "JOIN " + Formulaire.FORM_TABLE + " f ON q.form_id = f.id " +
                 "WHERE f.id = ? AND r.id IN " + Sql.listPrepared(responseIds) + ");";
         JsonArray params = new JsonArray().add(formId).addAll(responseIds);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
