@@ -5,6 +5,7 @@ import {
     FormElements,
     Question,
     QuestionChoice,
+    QuestionTypes,
     Response,
     Responses,
     Section,
@@ -31,6 +32,7 @@ interface ViewModel {
     dontSave: boolean;
     nbFormElements: number;
     last: boolean;
+    questionTypes: QuestionTypes;
     display: {
         lightbox: {
             newElement: boolean,
@@ -94,6 +96,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.dontSave = false;
         vm.nbFormElements = 0;
         vm.last = false;
+        vm.questionTypes = new QuestionTypes();
         vm.display = {
             lightbox: {
                 newElement: false,
@@ -120,6 +123,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             await vm.formElements.sync(vm.form.id);
             vm.dontSave = false;
             vm.nbFormElements = vm.formElements.all.length;
+            vm.questionTypes.all = vm.form.is_public ? $scope.questionTypes.all.filter(qt => qt.code != Types.FILE) : $scope.questionTypes.all;
             $scope.safeApply();
 
             initNestedSortables();

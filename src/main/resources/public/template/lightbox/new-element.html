@@ -7,7 +7,8 @@
     <div class="question">
         <div class="subtitle"><i18n>formulaire.element.new.question.title</i18n></div>
         <div class="dominos">
-            <div ng-repeat="type in questionTypes.all" ng-click="vm.doCreateNewElement(type.code, vm.parentSection)" class="item" title="[[vm.displayTypeDescription(type.name)]]">
+            <div ng-repeat="type in vm.questionTypes.all" class="item"
+                 ng-click="vm.doCreateNewElement(type.code, vm.parentSection)" title="[[vm.displayTypeDescription(type.name)]]">
                 <div class="domino">
                     <div class="data-text">
                         <h5>[[vm.displayTypeName(type.name)]]</h5>
