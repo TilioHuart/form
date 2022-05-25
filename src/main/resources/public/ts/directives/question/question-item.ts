@@ -33,7 +33,7 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
         bindToController: true,
         template: `
             <div class="question-item" ng-class="vm.question.section_id ? 'twelve' : 'nine'">
-                <div class="domino" ng-class="{'questionError': !vm.question.title || vm.question.choices.length === 0, disabled: vm.hasFormResponses || vm.question.selected}">
+                <div class="domino" ng-class="{'questionError': !vm.question.title || vm.question.choices.length === 0, 'disabled': vm.hasFormResponses || vm.question.selected}">
                     <div class="question-top grab">
                         <div class="dots" ng-if="vm.reorder || !vm.hasFormResponses">
                             <i class="i-drag xl-icon"></i>
@@ -53,9 +53,10 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
                             <div class="conditional" ng-if="vm.showConditionalSwitch()">
                                 <switch ng-model="vm.question.conditional" ng-change="vm.onSwitchConditional(vm.question.conditional)"></switch><i18n>formulaire.conditional</i18n>
                             </div>
-                            <i class="i-duplicate lg-icon spaced-right" ng-click="vm.duplicateQuestion()" title="[[vm.getTitle('duplicate')]]"></i>
+                            <i class="i-duplicate lg-icon spaced-right" ng-click="vm.duplicateQuestion()"
+                                ng-class="{disabled: vm.hasFormResponses}"  title="[[vm.getTitle('duplicate')]]"></i>
                             <i class="i-delete lg-icon spaced-right" ng-class="{disabled: vm.hasFormResponses}" 
-                            reset-guard="vm.deleteQuestion()" title="[[vm.getTitle('delete')]]" reset-guard-id="formTitle"></i>
+                                reset-guard="vm.deleteQuestion()" title="[[vm.getTitle('delete')]]" reset-guard-id="formTitle"></i>
                             <i class="i-undo lg-icon spaced-right" reset-guard="vm.undoQuestionChanges()" title="[[vm.getTitle('cancel')]]" reset-guard-id="formTitle"></i>
                         </div>
                     </div>
@@ -78,11 +79,15 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
             };
 
             vm.duplicateQuestion = () : void => {
-                $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DUPLICATE_ELEMENT);
+                if (!vm.hasFormResponses) {
+                    $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DUPLICATE_ELEMENT);
+                }
             };
 
             vm.deleteQuestion =  async() : Promise<void> => {
-                $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DELETE_ELEMENT);
+                if (!vm.hasFormResponses) {
+                    $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DELETE_ELEMENT);
+                }
             };
 
             vm.undoQuestionChanges = () : void => {
@@ -105,6 +110,9 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
             };
 
             vm.onSwitchMandatory = (isMandatory: boolean) : void => {
+                if (vm.hasFormResponses) {
+                    vm.question.mandatory = !isMandatory;
+                }
                 if (!isMandatory && vm.question.conditional) {
                     vm.question.mandatory = true;
                 }

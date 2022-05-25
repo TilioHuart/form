@@ -71,7 +71,7 @@ public class QuestionController extends ControllerHelper {
         String formId = request.getParam("formId");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
-                String message = "[Formulaire@updateDistribution] User not found in session.";
+                String message = "[Formulaire@createQuestion] User not found in session.";
                 log.error(message);
                 unauthorized(request, message);
                 return;
@@ -125,6 +125,14 @@ public class QuestionController extends ControllerHelper {
 
                     JsonObject form = formEvt.right().getValue();
 
+                    // Check if form is already send
+                    if (form.getBoolean("sent")) {
+                        String message = "[Formulaire@createQuestion] You cannot create a question for a form already sent : " + formId;
+                        log.error(message);
+                        badRequest(request, message);
+                        return;
+                    }
+
                     // Check if the type of question if it's for a public form (type FILE is forbidden)
                     if (form.getBoolean("is_public") && question.getInteger("question_type") != null && question.getInteger("question_type") == 8) {
                         String message = "[Formulaire@createQuestion] You cannot create a question type FILE for the public form with id " + formId;
@@ -174,7 +182,7 @@ public class QuestionController extends ControllerHelper {
         String formId = request.getParam("formId");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
-                String message = "[Formulaire@updateDistribution] User not found in session.";
+                String message = "[Formulaire@updateQuestions] User not found in session.";
                 log.error(message);
                 unauthorized(request, message);
                 return;
@@ -220,12 +228,12 @@ public class QuestionController extends ControllerHelper {
 
                 formService.get(formId, user, formEvt -> {
                     if (formEvt.isLeft()) {
-                        log.error("[Formulaire@createQuestion] Failed to get form with id : " + formId);
+                        log.error("[Formulaire@updateQuestions] Failed to get form with id : " + formId);
                         RenderHelper.internalError(request, formEvt);
                         return;
                     }
                     if (formEvt.right().getValue().isEmpty()) {
-                        String message = "[Formulaire@createQuestion] No form found for form with id " + formId;
+                        String message = "[Formulaire@updateQuestions] No form found for form with id " + formId;
                         log.error(message);
                         notFound(request, message);
                         return;
@@ -236,7 +244,7 @@ public class QuestionController extends ControllerHelper {
                     // Check if the type of question if it's for a public form (type FILE is forbidden)
                     JsonArray questionTypes = UtilsHelper.getByProp(questions, "question_type");
                     if (form.getBoolean("is_public") && questionTypes.contains(8)) {
-                        String message = "[Formulaire@createQuestion] You cannot create a question type FILE for the public form with id " + formId;
+                        String message = "[Formulaire@updateQuestions] You cannot create a question type FILE for the public form with id " + formId;
                         log.error(message);
                         badRequest(request, message);
                         return;

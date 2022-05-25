@@ -82,17 +82,26 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                             </div>
                         </div>
                         <!-- Questions children -->
-                        <div id="container-[[vm.section.id]]" class="questions row nested-container">
+                        <div id="container-[[vm.section.id]]" class="questions row nested-container" ng-if="!vm.hasFormResponses">
                              <div class="childSection" ng-repeat="question in vm.section.questions.all">
                                 <question-item question="question"
-                                               reorder="true"
-                                               has-form-responses="vm.form.nb_responses > 0"
+                                               reorder="vm.reorder"
+                                               has-form-responses="vm.hasFormResponses"
+                                               form-elements="vm.formElements">
+                                </question-item>
+                            </div>
+                        </div>
+                        <div class="questions row" ng-if="vm.hasFormResponses">
+                             <div class="childSection" ng-repeat="question in vm.section.questions.all">
+                                <question-item question="question"
+                                               reorder="vm.reorder"
+                                               has-form-responses="vm.hasFormResponses"
                                                form-elements="vm.formElements">
                                 </question-item>
                             </div>
                         </div>
                         <!-- Add question button -->
-                        <div class="addQuestion row" ng-if="!vm.section.selected">
+                        <div class="addQuestion row" ng-if="!vm.section.selected && !vm.hasFormResponses">
                             <a reset-guard="vm.addQuestionToSectionGuard()" reset-guard-id="formTitle">
                                 <i18n>formulaire.section.new.question</i18n>
                             </a>
