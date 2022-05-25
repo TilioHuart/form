@@ -69,6 +69,6 @@
 
     <div class="action-buttons" ng-if="!vm.forms.selected[0].anonymous">
         <button class="cell cancel" ng-click="vm.closeCheckRemind()"><i18n>formulaire.cancel</i18n></button>
-        <button class="cell" ng-click="vm.remind()"><i18n>formulaire.remind.title</i18n></button>
+        <button class="cell" ng-click="vm.remind()" ng-disabled="vm.form.sent"><i18n>formulaire.remind.title</i18n></button>
     </div>
 </lightbox>
