@@ -87,12 +87,6 @@ public class FormResponsesExportPDF {
                     RenderHelper.internalError(request, getSectionsEvt);
                     return;
                 }
-                if (getSectionsEvt.right().getValue().isEmpty()) {
-                    String message = "[Formulaire@FormExportPDF] No sections found for form with id " + formId;
-                    log.error(message);
-                    notFound(request, message);
-                    return;
-                }
 
                 JsonArray sectionsInfos = getSectionsEvt.right().getValue();
                 distributionService.countFinished(form.getInteger("id").toString(), countRepEvt -> {
