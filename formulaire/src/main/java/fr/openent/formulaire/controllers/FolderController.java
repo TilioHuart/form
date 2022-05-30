@@ -414,7 +414,8 @@ public class FolderController extends ControllerHelper {
                             }
 
                             // Get the folders to sync
-                            JsonArray folderIdsToSync = new JsonArray().add(targetFolderId);
+                            folderIds.add(targetFolderId);
+                            JsonArray folderIdsToSync = new JsonArray();
                             for (int j = 0; j < folderIds.size(); j++) {
                                 if (folderIds.getInteger(j) != ID_ROOT_FOLDER) {
                                     folderIdsToSync.add(folderIds.getInteger(j));

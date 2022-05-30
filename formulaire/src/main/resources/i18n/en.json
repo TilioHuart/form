@@ -139,6 +139,7 @@
   "formulaire.folder.nbFolderChildren" : "Nombre de sous-dossiers",
   "formulaire.folder.nbFormChildren" : "Nombre de formulaires",
   "formulaire.folder.nbItems" : "{0} dossier(s), {1} formulaire(s)",
+  "formulaire.folder.nbItems.error" : "Compteurs indisponibles",
   "formulaire.folder.empty" : "Dossier vide",
   "formulaire.folder.create": "Créer un dossier",
   "formulaire.folder.rename": "Renommer un dossier",

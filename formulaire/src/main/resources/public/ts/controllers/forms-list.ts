@@ -712,7 +712,11 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     vm.displayNbItems = (folder) : string => {
-        if (!folder.nb_folder_children ||!folder.nb_form_children || folder.nb_folder_children + folder.nb_form_children <= 0) {
+        if (folder.nb_folder_children === undefined || folder.nb_form_children === undefined
+            || folder.nb_folder_children === null || folder.nb_form_children === null) {
+            return idiom.translate('formulaire.folder.nbItems.error');
+        }
+        else if (folder.nb_folder_children + folder.nb_form_children <= 0) {
             return idiom.translate('formulaire.folder.empty');
         }
         else {
