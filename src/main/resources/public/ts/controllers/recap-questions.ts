@@ -51,7 +51,7 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
         else {
             let responseQuestionIds = vm.responses.all.map(r => r.question_id);
             vm.formElements.all = vm.formElements.all.filter(e =>
-                (responseQuestionIds.indexOf(e.id) > 0) ||
+                (responseQuestionIds.indexOf(e.id) >= 0) ||
                 (e instanceof Section && e.questions.all.map(q => q.id).filter(id => responseQuestionIds.indexOf(id) >= 0).length > 0)
             );
             vm.historicPosition = vm.formElements.all.map(e => e.position);

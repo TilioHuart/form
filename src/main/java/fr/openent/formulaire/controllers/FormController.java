@@ -136,7 +136,7 @@ public class FormController extends ControllerHelper {
 
     @Get("/forms/linker")
     @ApiDoc("List all the forms for the linker")
-    @ResourceFilter(CreationRight.class)
+    @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listForLinker(final HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {

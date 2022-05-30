@@ -443,6 +443,7 @@ public class DistributionController extends ControllerHelper {
                                 return;
                             }
 
+                            distribution.put("status", Formulaire.FINISHED);
                             distributionService.update(distributionId, distribution, defaultResponseHandler(request));
                         });
                     });
