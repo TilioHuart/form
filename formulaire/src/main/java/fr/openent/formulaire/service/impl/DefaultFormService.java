@@ -71,12 +71,12 @@ public class DefaultFormService implements FormService {
         String query = "SELECT f.* FROM " + Tables.FORM + " f " +
                 "LEFT JOIN " + Tables.FORM_SHARES + " fs ON f.id = fs.resource_id " +
                 "LEFT JOIN " + Tables.MEMBERS + " m ON (fs.member_id = m.id AND m.group_id IS NOT NULL) " +
-                "WHERE (fs.member_id IN " + Sql.listPrepared(groupsAndUserIds.toArray()) +
-                " AND fs.action = ?) OR f.owner_id = ? " +
+                "WHERE f.archived = ? AND f.sent = ? AND ((fs.member_id IN " + Sql.listPrepared(groupsAndUserIds.toArray()) +
+                " AND fs.action = ?) OR f.owner_id = ? )" +
                 "GROUP BY f.id " +
                 "ORDER BY f.date_modification DESC;";
 
-        JsonArray params = new JsonArray();
+        JsonArray params = new JsonArray().add(false).add(true);
         for (String groupOrUser : groupsAndUserIds) {
             params.add(groupOrUser);
         }
