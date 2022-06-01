@@ -1,0 +1,11 @@
+{
+	"main" : "fr.openent.formulaire_public.FormulairePublic",
+	"port" : 8077,
+	"app-name" : "Formulaire-public",
+	"app-address" : "/formulaire-public",
+	"app-icon" : "formulaire-large",
+	"app-displayName" : "Formulaire-public",
+	"mode": "dev",
+	"entcore.port" : 8090,
+	"auto-redeploy": false
+}

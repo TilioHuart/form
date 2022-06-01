@@ -10,8 +10,9 @@ module.exports = {
     ],
     "testPathIgnorePatterns": [
         "/node_modules/",
-        "<rootDir>/form/build/",
-        "<rootDir>/form/out/"
+        "<rootDir>/common/build/",
+        "<rootDir>/formulaire/build/",
+        "<rootDir>/formulaire/out/"
     ],
     "verbose": true,
     "testURL": "http://localhost/",
@@ -19,5 +20,10 @@ module.exports = {
     "coverageReporters": [
         "text",
         "cobertura"
-    ]
+    ],
+    "moduleNameMapper": {
+        "^@common(.*)$": "<rootDir>/common/src/main/resources/ts$1",
+        "^@formulaire(.*)$": "<rootDir>/formulaire/src/main/resources/public/ts$1",
+        "^@formulairepublic(.*)$": "<rootDir>/formulaire-public/src/main/resources/public/ts$1"
+    }
 };

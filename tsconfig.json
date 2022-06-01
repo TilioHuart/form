@@ -6,14 +6,30 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "noImplicitAny": false,
-    "lib": ["es2015", "dom"],
+    "lib": [
+      "es2015",
+      "dom"
+    ],
     "types": [
       "jquery",
       "core-js",
       "jest"
-    ]
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@common/*": [
+        "common/src/main/resources/ts/*"
+      ],
+      "@formulaire/*": [
+        "formulaire/src/main/resources/public/ts/*"
+      ],
+      "@formulairepublic/*": [
+        "formulaire-public/src/main/resources/public/ts/*"
+      ]
+    }
   },
   "exclude": [
-    "build", "node_modules"
+    "*/build",
+    "node_modules"
   ]
 }

@@ -1,0 +1,53 @@
+<div ng-controller="RecapQuestionsController as vm">
+    <div class="row">
+        <section class="cell ten">
+            <div>
+                <h1>
+                    <i18n>formulaire.public.title</i18n><i18n>formulaire.public.separator</i18n>
+                    [[vm.form.title]]<i18n>formulaire.public.separator</i18n><i18n>formulaire.public.recap</i18n>
+                </h1>
+            </div>
+        </section>
+    </div>
+
+    <div class="respond-question">
+        <div class="nine twelve-mobile questions">
+            <div ng-repeat="formElement in vm.formElements.all | orderBy:'position'">
+
+                <!-- Display question -->
+                <public-recap-question-item ng-if="FormElementUtils.isQuestion(formElement)"
+                                            question="formElement"
+                                            responses="vm.responses"
+                                            form="vm.form"
+                                            form-elements="vm.formElements"
+                                            historic-position="vm.historicPosition">
+                </public-recap-question-item>
+
+                <!-- Display section -->
+                <div class="section" ng-if="!FormElementUtils.isQuestion(formElement)">
+                    <div class="section-top">
+                        <div class="title"><h4>[[formElement.title]]</h4></div>
+                        <div class="description" ng-if="formElement.description">
+                            <div ng-bind-html="formElement.description"></div>
+                        </div>
+                    </div>
+                    <div class="section-main">
+                        <div ng-repeat="question in formElement.questions.all | orderBy:'section_position'">
+                            <public-recap-question-item question="question"
+                                                        responses="vm.responses"
+                                                        form="vm.form"
+                                                        form-elements="vm.formElements"
+                                                        historic-position="vm.historicPosition">
+                            </public-recap-question-item>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="buttons alone">
+                <button class="cell" ng-click="vm.send()"><i18n >formulaire.public.end</i18n></button>
+            </div>
+        </div>
+    </div>
+
+    <container template='lightbox'></container>
+</div>

@@ -28,7 +28,7 @@ buildNode () {
       docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "npm install --no-bin-links && node_modules/gulp/bin/gulp.js build"
       ;;
     *)
-      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "npm install --no-bin-links && node_modules/gulp/bin/gulp.js build"
+      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "npm install && node_modules/gulp/bin/gulp.js build"
   esac
 }
 
@@ -75,6 +75,36 @@ publish () {
   docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle publish
 }
 
+formulaire:buildNode() {
+  case $(uname -s) in
+  MINGW*)
+    docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "npm install --no-bin-links && node_modules/gulp/bin/gulp.js build --module=formulaire"
+    ;;
+  *)
+    docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "npm install && node_modules/gulp/bin/gulp.js build --module=formulaire"
+    ;;
+  esac
+}
+
+formulaire:buildGradle() {
+  docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle :formulaire:shadowJar :formulaire:install :formulaire:publishToMavenLocal
+}
+
+formulairePublic:buildNode() {
+  case $(uname -s) in
+  MINGW*)
+    docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "npm install --no-bin-links && node_modules/gulp/bin/gulp.js build --module=formulaire-public"
+    ;;
+  *)
+    docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "npm install && node_modules/gulp/bin/gulp.js build --module=formulaire-public"
+    ;;
+  esac
+}
+
+formulairePublic:buildGradle() {
+  docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle :formulaire-public:shadowJar :formulaire-public:install :formulaire-public:publishToMavenLocal
+}
+
 for param in "$@"
 do
   case $param in
@@ -104,6 +134,24 @@ do
       ;;
     testGradle)
       testGradle
+      ;;
+    formulaire:buildNode)
+      formulaire:buildNode
+      ;;
+    formulaire:buildGradle)
+      formulaire:buildGradle
+      ;;
+    formulaire)
+      formulaire:buildNode && formulaire:buildGradle
+      ;;
+    formulairePublic:buildNode)
+      formulairePublic:buildNode
+      ;;
+    formulairePublic:buildGradle)
+      formulairePublic:buildGradle
+      ;;
+    formulairePublic)
+      formulairePublic:buildNode && formulairePublic:buildGradle
       ;;
     *)
       echo "Invalid argument : $param"
