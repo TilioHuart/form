@@ -130,7 +130,9 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
             };
 
             vm.deleteSection = () : void => {
-                $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DELETE_ELEMENT);
+                if (!vm.hasFormResponses) {
+                    $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DELETE_ELEMENT);
+                }
             };
 
             vm.undoSectionChanges = () : void => {
@@ -142,7 +144,9 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
             };
 
             vm.addQuestionToSection = async () : Promise<void> => {
-                $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.CREATE_QUESTION);
+                if (!vm.hasFormResponses) {
+                    $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.CREATE_QUESTION);
+                }
             };
 
             vm.addQuestionToSectionGuard = () =>{
@@ -150,7 +154,7 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
             }
 
             vm.hasMultipleConditionals = (): boolean => {
-                return vm.section.questions.all.filter(q =>q.conditional).length >= 2;
+                return vm.section.questions.all.filter(q =>q.conditional).length > 1;
             }
         }
     };

@@ -165,7 +165,7 @@
           }
         }
 
-        i::before, h4, input, input::placeholder {
+        i:not(.disabled)::before, h4, input, input::placeholder {
           color: white !important;
         }
       }
