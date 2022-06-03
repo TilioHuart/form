@@ -40,7 +40,7 @@
                                     <date-picker ng-model="vm.form.date_ending" ng-if="vm.display.date_ending" size="10"></date-picker>
                                 </span>
                             </div>
-                            <div class="public">
+                            <div class="public" ng-if="canCreatePublic()">
                                 <div class="text">
                                     <label for="isPublic">
                                         <input type="checkbox" id="isPublic" ng-model="vm.form.is_public"

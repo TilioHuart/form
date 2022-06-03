@@ -343,6 +343,10 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 			return $scope.hasRight(Behaviours.applicationsBehaviours.formulaire.rights.workflow.rgpd);
 		};
 
+		$scope.canCreatePublic = () => {
+			return $scope.hasRight(Behaviours.applicationsBehaviours.formulaire.rights.workflow.creationPublic);
+		};
+
 		$scope.hasShareRightManager = (form : Form) => {
 			return form.owner_id === model.me.userId || (form.myRights && form.myRights.includes(Behaviours.applicationsBehaviours.formulaire.rights.resources.manager.right));
 		};

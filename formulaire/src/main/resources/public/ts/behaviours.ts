@@ -17,7 +17,8 @@ const rights = {
         access: 'fr.openent.formulaire.controllers.FormulaireController|render',
         creation: 'fr.openent.formulaire.controllers.FormController|initCreationRight',
         response: 'fr.openent.formulaire.controllers.FormController|initResponseRight',
-        rgpd: 'fr.openent.formulaire.controllers.DelegateController|initRGPDRight'
+        rgpd: 'fr.openent.formulaire.controllers.DelegateController|initRGPDRight',
+        creationPublic: 'fr.openent.formulaire.controllers.FormController|initCreationPublicRight'
     }
 };
 

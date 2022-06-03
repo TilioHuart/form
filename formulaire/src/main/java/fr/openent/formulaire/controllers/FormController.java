@@ -4,10 +4,7 @@ import fr.openent.formulaire.export.FormResponsesExportCSV;
 import fr.openent.formulaire.export.FormResponsesExportPDF;
 import fr.openent.formulaire.helpers.DataChecker;
 import fr.openent.formulaire.helpers.FutureHelper;
-import fr.openent.formulaire.security.AccessRight;
-import fr.openent.formulaire.security.CreationRight;
-import fr.openent.formulaire.security.ResponseRight;
-import fr.openent.formulaire.security.ShareAndOwner;
+import fr.openent.formulaire.security.*;
 import fr.openent.formulaire.service.*;
 import fr.openent.formulaire.service.impl.*;
 import fr.wseduc.rs.*;
@@ -83,6 +80,10 @@ public class FormController extends ControllerHelper {
 
     @SecuredAction(RESPONSE_RIGHT)
     public void initResponseRight(final HttpServerRequest request) {
+    }
+
+    @SecuredAction(CREATION_PUBLIC_RIGHT)
+    public void initCreationPublicRight(final HttpServerRequest request) {
     }
 
     // Init sharing rights
@@ -199,6 +200,15 @@ public class FormController extends ControllerHelper {
                     return;
                 }
 
+                // Check if the user has right to create a public form
+                boolean isFormPublic = form.getBoolean("is_public");
+                if (isFormPublic && !WorkflowActionUtils.hasRight(user, WorkflowActions.CREATION_RIGHT.toString())) {
+                    String message = "[Formulaire@createForm] You are not authorized to create a public form.";
+                    log.error(message);
+                    unauthorized(request, message);
+                    return;
+                }
+
                 // date_ending should be after date_opening if not null
                 boolean areDateValid = DataChecker.checkFormDatesValidity(new JsonArray().add(form));
                 if (!areDateValid) {
@@ -301,6 +311,14 @@ public class FormController extends ControllerHelper {
                 if (forms == null || forms.isEmpty()) {
                     log.error("[Formulaire@createMultipleForm] No forms to create.");
                     noContent(request);
+                    return;
+                }
+
+                // Check if the user has right to create a public form
+                if (DataChecker.hasPublicForm(forms) && !WorkflowActionUtils.hasRight(user, WorkflowActions.CREATION_RIGHT.toString())) {
+                    String message = "[Formulaire@createMultipleForm] You are not authorized to create a public form.";
+                    log.error(message);
+                    unauthorized(request, message);
                     return;
                 }
 
@@ -566,6 +584,15 @@ public class FormController extends ControllerHelper {
                 if (form == null || form.isEmpty()) {
                     log.error("[Formulaire@updateForm] No form to update.");
                     noContent(request);
+                    return;
+                }
+
+                // Check if the user has right to update a public form
+                boolean isFormPublic = form.getBoolean("is_public");
+                if (isFormPublic && !WorkflowActionUtils.hasRight(user, WorkflowActions.CREATION_RIGHT.toString())) {
+                    String message = "[Formulaire@createForm] You are not authorized to create a public form.";
+                    log.error(message);
+                    unauthorized(request, message);
                     return;
                 }
 

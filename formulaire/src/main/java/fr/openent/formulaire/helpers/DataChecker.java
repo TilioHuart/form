@@ -79,4 +79,19 @@ public class DataChecker {
         }
         return arePositionsOk;
     }
+
+    // Check if one of the forms is public
+    public static boolean hasPublicForm(JsonArray forms) {
+        JsonArray publicProps = getByProp(forms, "is_public");
+        int i = 0;
+        while (i < publicProps.size()) {
+            boolean publicProp = publicProps.getBoolean(i);
+            if (publicProp) {
+                return true;
+            }
+            i++;
+        }
+        return false;
+    }
+
 }
