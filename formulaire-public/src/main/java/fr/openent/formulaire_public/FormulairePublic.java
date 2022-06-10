@@ -1,5 +1,6 @@
 package fr.openent.formulaire_public;
 
+import fr.openent.formulaire_public.controllers.CaptchaController;
 import fr.openent.formulaire_public.controllers.FormulairePublicController;
 import fr.openent.formulaire_public.controllers.FormController;
 import io.vertx.core.eventbus.EventBus;
@@ -19,6 +20,7 @@ public class FormulairePublic extends BaseServer {
 		final TimelineHelper timelineHelper = new TimelineHelper(vertx, eb, config);
 
 		// Init controllers
+		addController(new CaptchaController());
 		addController(new FormController(timelineHelper));
 		addController(new FormulairePublicController());
 	}

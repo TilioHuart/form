@@ -2,6 +2,7 @@ package fr.openent.form.core.constants;
 
 public class Tables {
     public static final String DB_SCHEMA = "formulaire";
+    public static final String CAPTCHA = DB_SCHEMA + ".captcha";
     public static final String DELEGATE = DB_SCHEMA + ".delegate";
     public static final String DISTRIBUTION = DB_SCHEMA + ".distribution";
     public static final String FOLDER = DB_SCHEMA + ".folder";

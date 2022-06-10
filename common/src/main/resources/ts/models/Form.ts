@@ -158,8 +158,14 @@ export class Form implements Selectable, Shareable  {
 
     getDistributionKey = () : string => {
         let distributionKey = this['distribution_key'].toString();
-        delete this['distribution_key']
+        delete this['distribution_key'];
         return distributionKey;
+    };
+
+    getDistributionCaptcha = () : string => {
+        let distributionCaptcha = this['distribution_captcha'].toString();
+        delete this['distribution_captcha'];
+        return distributionCaptcha;
     };
 
     generateShareRights = () : void => {

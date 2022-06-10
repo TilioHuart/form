@@ -1,12 +1,11 @@
 import {ng, template} from "entcore";
 import {Delegates, Form, FormElements} from "@common/models";
-import {publicService} from "../services";
+import {formService} from "../services";
 import {Mix} from "entcore-toolkit";
 import {PublicUtils} from "../utils";
 
 interface ViewModel {
     formKey: string;
-    distributionKey: string;
     form: Form;
     formElements: FormElements;
     delegates: Delegates;
@@ -32,7 +31,7 @@ export const homeController = ng.controller('HomeController', ['$scope',
         }
         else {
             if (!sessionStorage.getItem('formKey')) {
-                let form = await publicService.getPublicFormByKey(vm.formKey)
+                let form = await formService.getPublicFormByKey(vm.formKey)
                     .catch(reason => {
                         template.open('main', 'containers/end/sorry');
                         $scope.safeApply();
@@ -41,7 +40,6 @@ export const homeController = ng.controller('HomeController', ['$scope',
 
                 vm.form.setFromJson(form);
                 vm.form.formatFormElements(vm.formElements);
-                vm.distributionKey = vm.form.getDistributionKey();
                 updateStorage();
             }
             else {
@@ -63,7 +61,8 @@ export const homeController = ng.controller('HomeController', ['$scope',
 
     const updateStorage = () : void => {
         sessionStorage.setItem('formKey', JSON.stringify(vm.formKey));
-        sessionStorage.setItem('distributionKey', JSON.stringify(vm.distributionKey));
+        sessionStorage.setItem('distributionKey', JSON.stringify(vm.form.getDistributionKey()));
+        sessionStorage.setItem('distributionCaptcha', JSON.stringify(vm.form.getDistributionCaptcha()));
         sessionStorage.setItem('form', JSON.stringify(vm.form));
         sessionStorage.setItem('formElements', JSON.stringify(vm.formElements));
         sessionStorage.setItem('nbFormElements', JSON.stringify(vm.formElements.all.length));

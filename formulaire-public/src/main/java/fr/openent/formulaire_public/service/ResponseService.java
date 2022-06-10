@@ -10,7 +10,7 @@ public interface ResponseService {
      * Create multiple responses
      * @param responses JsonArray data
      * @param distribution distribution to answer
-     * @param handler function handler returning JsonObject data
+     * @param handler function handler returning JsonArray data
      */
     void createResponses(JsonArray responses, JsonObject distribution, Handler<Either<String, JsonArray>> handler);
 }

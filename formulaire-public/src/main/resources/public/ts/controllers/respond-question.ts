@@ -6,7 +6,6 @@ import {PublicUtils} from "../utils";
 
 interface ViewModel {
 	formKey: string;
-	distributionKey: string;
 	formElements: FormElements;
 	allResponsesInfos: Map<FormElement, { responses: Responses, selectedIndexList: any, responsesChoicesList: any }>;
 
@@ -59,7 +58,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 		}
 		else if (nextPosition !== undefined) {
 			updateStorage();
-			template.open('main', 'containers/recap-questions');
+			template.open('main', 'containers/recap');
 		}
 	};
 
@@ -154,7 +153,6 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
 	const updateStorage = () : void => {
 		sessionStorage.setItem('formKey', JSON.stringify(vm.formKey));
-		sessionStorage.setItem('distributionKey', JSON.stringify(vm.distributionKey));
 		sessionStorage.setItem('form', JSON.stringify(vm.form));
 		sessionStorage.setItem('formElements', JSON.stringify(vm.formElements));
 		sessionStorage.setItem('nbFormElements', JSON.stringify(vm.nbFormElements));
@@ -165,7 +163,6 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 	const syncWithStorageData = () : void => {
 		vm.form = Mix.castAs(Form, JSON.parse(sessionStorage.getItem('form')));
 		vm.formKey = JSON.parse(sessionStorage.getItem('formKey'));
-		vm.distributionKey = JSON.parse(sessionStorage.getItem('distributionKey'));
 		vm.nbFormElements = JSON.parse(sessionStorage.getItem('nbFormElements'));
 		vm.historicPosition = JSON.parse(sessionStorage.getItem('historicPosition'));
 		let dataFormElements = JSON.parse(sessionStorage.getItem('formElements'));

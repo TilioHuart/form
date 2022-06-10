@@ -1,0 +1,42 @@
+<div ng-controller="CaptchaController as vm">
+    <div class="row">
+        <section class="cell ten">
+            <div>
+                <h1>
+                    <i18n>formulaire.public.title</i18n><i18n>formulaire.public.separator</i18n>[[vm.form.title]]
+                </h1>
+            </div>
+        </section>
+    </div>
+
+    <div class="respond-question">
+        <div class="nine twelve-mobile">
+
+            <div class="section">
+                <div class="section-top">
+                    <div class="title"><h4 class="ellipsis"><i18n>formulaire.public.captcha.title</i18n></h4></div>
+                    <div class="description"><i18n>formulaire.public.captcha.description</i18n></div>
+                </div>
+                <div class="section-main">
+                    <div class="question">
+                        <div class="question-title flex-spaced">
+                            <h4>[[vm.captcha.title]]</h4>
+                            <i class="i-reload md-icon" ng-click="vm.generateNewCaptcha()" title="[[idiom.translate('formulaire.public.captcha.reload.description')]]"></i>
+                        </div>
+                        <div class="question-main">
+                            <textarea ng-model="vm.responseCaptcha.answer" i18n-placeholder="formulaire.public.question.type.SHORTANSWER"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom page buttons -->
+            <div class="buttons">
+                <button class="cell" ng-click="vm.backToRecap()"><i18n>formulaire.public.prev</i18n></button>
+                <button class="cell" ng-click="vm.send()"><i18n>formulaire.public.send</i18n></button>
+            </div>
+        </div>
+    </div>
+
+    <container template='lightbox'></container>
+</div>

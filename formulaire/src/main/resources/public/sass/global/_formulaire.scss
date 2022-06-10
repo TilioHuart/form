@@ -150,6 +150,12 @@ body.formulaire section.main {
     margin-top: 0;
   }
 
+  .flex-spaced {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
 
   // Forms-list
 

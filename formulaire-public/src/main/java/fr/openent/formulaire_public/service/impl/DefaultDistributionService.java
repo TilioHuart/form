@@ -23,9 +23,10 @@ public class DefaultDistributionService implements DistributionService {
 
     @Override
     public void createDistribution(JsonObject form, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO " + Tables.DISTRIBUTION + " (form_id, sender_id, sender_name, " +
-                "responder_id, responder_name, status, date_sending, active, public_key) " +
-                " VALUES (?, ?, ?, '', '', ?, ?, ?, ?) RETURNING *;";
+        String query = "WITH newCaptchaId AS (SELECT id FROM " + Tables.CAPTCHA + " ORDER BY RANDOM() LIMIT 1) " +
+                "INSERT INTO " + Tables.DISTRIBUTION + " (form_id, sender_id, sender_name, responder_id, responder_name, " +
+                "status, date_sending, active, public_key, captcha_id) " +
+                "VALUES (?, ?, ?, '', '', ?, ?, ?, ?, (SELECT id FROM newCaptchaId)) RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(form.getInteger("id", null))
                 .add(form.getString("owner_id", ""))
@@ -34,6 +35,16 @@ public class DefaultDistributionService implements DistributionService {
                 .add("NOW()")
                 .add(true)
                 .add(UUID.randomUUID().toString());
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    @Override
+    public void updateCaptchaDistribution(String distributionKey, Handler<Either<String, JsonObject>> handler) {
+        String query = "WITH oldCaptchaId AS (SELECT captcha_id FROM " + Tables.DISTRIBUTION + " WHERE public_key = ?), " +
+                "newCaptchaId AS (SELECT id FROM " + Tables.CAPTCHA + " WHERE id != (SELECT captcha_id FROM oldCaptchaId) ORDER BY RANDOM() LIMIT 1) " +
+                "UPDATE " + Tables.DISTRIBUTION + " SET captcha_id = (SELECT id FROM newCaptchaId) WHERE public_key = ? RETURNING *;";
+        JsonArray params = new JsonArray().add(distributionKey).add(distributionKey);
+
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 

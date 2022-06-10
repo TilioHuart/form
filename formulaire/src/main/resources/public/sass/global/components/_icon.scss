@@ -213,4 +213,9 @@ i {
     font-family: 'material-icons';
     content: "\F3EB";
   }
+
+  &.i-reload::before {
+    font-family: 'material-icons';
+    content: "\F453";
+  }
 }

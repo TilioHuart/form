@@ -7,7 +7,6 @@
   "formulaire.public.cancel": "Annuler",
   "formulaire.public.recap": "Récapitulatif",
   "formulaire.public.edit": "Modifier",
-  "formulaire.public.end": "Terminer et envoyer",
   "formulaire.public.end.404": "Désolé, la page que vous cherchez n'existe pas",
   "formulaire.public.rgpd.title": "Collecte de données à caractère personnel",
   "formulaire.public.respond.form": "Répondre au formulaire",
@@ -18,13 +17,20 @@
   "formulaire.public.responses.send.continue": "Voulez-vous continuer ?",
   "formulaire.public.warning.send.missing.responses.missing": "Vous n'avez pas répondu à toutes les questions obligatoires !",
   "formulaire.public.success.responses.save": "Vos réponses ont bien été enregistrées !",
-  "formulaire.question.type.SHORTANSWER": "Réponse courte",
-  "formulaire.error.formService.get": "Une erreur est survenue lors de la récupération du formulaire",
-  "formulaire.error.responseService.create": "Une erreur est survenue lors de la création de la nouvelle réponse",
+  "formulaire.public.question.type.SHORTANSWER": "Réponse courte",
+  "formulaire.public.error.formService.get": "Une erreur est survenue lors de la récupération du formulaire",
+  "formulaire.public.error.responseService.create": "Une erreur est survenue lors de la création de la nouvelle réponse",
 
 
   "formulaire.public.end.thanks": "Merci pour vos réponses",
   "formulaire.public.end.sorry": "Désolé, vous ne pouvez pas répondre à ce formulaire",
   "formulaire.public.rgpd.text.1": "Pour nous permettre de contrôler qu'un utilisateur ne réponde qu'une seule fois au sondage et éviter toute réponse usurpée par des envois automatiques générés par un robot, nous avons besoin de recueillir des informations de cookie vous concernant.",
-  "formulaire.public.rgpd.text.2": "Seules les informations de sessions liées au traitement de ce formulaire sont nécessaires. Ces informations seront dans tous les cas détruire à la date de clôture du formulaire ou au plus tard au bout de 6 mois."
+  "formulaire.public.rgpd.text.2": "Seules les informations de sessions liées au traitement de ce formulaire sont nécessaires. Ces informations seront dans tous les cas détruire à la date de clôture du formulaire ou au plus tard au bout de 6 mois.",
+  "formulaire.public.end": "Terminer",
+  "formulaire.public.send": "Envoyer",
+  "formulaire.public.captcha.title": "Captcha",
+  "formulaire.public.captcha.description": "Avant d'envoyer vos réponses, veuillez résoudre le calcul suivant.",
+  "formulaire.public.captcha.reload.description": "Charger un nouveau calcul",
+  "formulaire.public.error.captchaService.get": "Une erreur est survenue lors de la récupération du captcha",
+  "formulaire.public.error.captcha": "La réponse au CAPTCHA est erronée. Veuillez réessayer."
 }

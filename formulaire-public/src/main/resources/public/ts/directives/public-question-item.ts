@@ -9,7 +9,6 @@ import {I18nUtils} from "@common/utils";
 
 interface IViewModel {
     question: Question;
-    distributionKey: string;
     response: Response;
     selectedIndexes: boolean[];
     Types: typeof Types;
@@ -24,7 +23,6 @@ export const publicQuestionItem: Directive = ng.directive('publicQuestionItem', 
         transclude: true,
         scope: {
             question: '=',
-            distributionKey: '=',
             response: '=',
             selectedIndexes: '='
         },
@@ -32,7 +30,7 @@ export const publicQuestionItem: Directive = ng.directive('publicQuestionItem', 
         bindToController: true,
         template: `
             <div class="question" guard-root>
-                <div class="question-title">
+                <div class="question-title flex-spaced">
                     <h4>[[vm.question.title]]<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span></h4>
                 </div>
                 <div class="question-main">
@@ -40,7 +38,7 @@ export const publicQuestionItem: Directive = ng.directive('publicQuestionItem', 
                         <div ng-if="vm.question.statement" ng-bind-html="vm.question.statement"></div>
                     </div>
                     <div ng-if="vm.question.question_type == vm.Types.SHORTANSWER">
-                        <textarea ng-model="vm.response.answer" i18n-placeholder="formulaire.question.type.SHORTANSWER" input-guard></textarea>
+                        <textarea ng-model="vm.response.answer" i18n-placeholder="formulaire.public.question.type.SHORTANSWER" input-guard></textarea>
                     </div>
                     <div ng-if="vm.question.question_type == vm.Types.LONGANSWER">
                         <textarea ng-model="vm.response.answer" input-guard></textarea>

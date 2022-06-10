@@ -7,36 +7,26 @@ import {
     Responses,
     Types
 } from "@common/models";
-import { publicService } from "../services";
 import {Mix} from "entcore-toolkit";
 import {PublicUtils} from "../utils";
 
 interface ViewModel {
     formKey: string;
     distributionKey: string;
+    formElement: FormElement;
+    form: Form;
     formElements: FormElements;
     allResponsesInfos: Map<FormElement, { responses: Responses, selectedIndexList: any, responsesChoicesList: any }>;
-
-    formElement: FormElement;
-
-    form: Form;
+    responses: Responses;
     nbFormElements: number;
     loading : boolean;
     historicPosition: number[];
 
-    responses: Responses;
-    display: {
-        lightbox: {
-            sending: boolean
-        }
-    };
-
     $onInit() : Promise<void>;
-    send() : Promise<void>;
-    doSend() : Promise<void>;
+    goCaptcha(): Promise<void>;
 }
 
-export const recapQuestionsController = ng.controller('RecapQuestionsController', ['$scope',
+export const recapController = ng.controller('RecapController', ['$scope',
     function ($scope) {
 
     const vm: ViewModel = this;
@@ -44,11 +34,6 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
     vm.formElements = new FormElements();
     vm.allResponsesInfos = new Map();
     vm.responses = new Responses();
-    vm.display = {
-        lightbox: {
-            sending: false
-        }
-    };
 
     vm.$onInit = async () : Promise<void> => {
         syncWithStorageData();
@@ -84,29 +69,17 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
 
     // Global functions
 
-    vm.send = async () : Promise<void> => {
+    vm.goCaptcha = async () : Promise<void> => {
         let validatedQuestionIds = getQuestionIdsFromPositionHistoric();
         vm.responses.all = vm.responses.all.filter(r => validatedQuestionIds.indexOf(r.question_id) >= 0);
 
         if (await checkMandatoryQuestions(validatedQuestionIds)) {
-            template.open('lightbox', 'lightbox/responses-confirm-sending');
-            vm.display.lightbox.sending = true;
+            sessionStorage.setItem('responses', JSON.stringify(vm.responses));
+            template.open('main', 'containers/captcha');
         }
         else {
             notify.error(idiom.translate('formulaire.public.warning.send.missing.responses.missing'));
         }
-    };
-
-    vm.doSend = async () : Promise<void> => {
-        await publicService.sendResponses(vm.formKey, vm.distributionKey, vm.responses);
-
-        template.close('lightbox');
-        vm.display.lightbox.sending = false;
-        notify.success(idiom.translate('formulaire.public.success.responses.save'));
-        window.setTimeout(function () {
-            sessionStorage.clear();
-            template.open('main', 'containers/end/thanks');
-        }, 1000);
     };
 
     // Utils

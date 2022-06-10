@@ -20,6 +20,13 @@ public interface DistributionService {
     void createDistribution(JsonObject form, Handler<Either<String, JsonObject>> handler);
 
     /**
+     * Change captcha of a specific distribution
+     * @param distributionKey distribution key identifier
+     * @param handler function handler returning JsonObject data
+     */
+    void updateCaptchaDistribution(String distributionKey, Handler<Either<String, JsonObject>> handler);
+
+    /**
      * Finish a specific distribution
      * @param distributionKey distribution key identifier
      * @param handler function handler returning JsonObject data

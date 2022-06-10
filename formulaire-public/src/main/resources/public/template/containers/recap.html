@@ -1,4 +1,4 @@
-<div ng-controller="RecapQuestionsController as vm">
+<div ng-controller="RecapController as vm">
     <div class="row">
         <section class="cell ten">
             <div>
@@ -44,10 +44,8 @@
                 </div>
             </div>
             <div class="buttons alone">
-                <button class="cell" ng-click="vm.send()"><i18n >formulaire.public.end</i18n></button>
+                <button class="cell" ng-click="vm.goCaptcha()"><i18n >formulaire.public.end</i18n></button>
             </div>
         </div>
     </div>
-
-    <container template='lightbox'></container>
 </div>
