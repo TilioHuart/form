@@ -1,5 +1,6 @@
 package fr.openent.formulaire;
 
+import fr.openent.form.core.constants.Constants;
 import fr.openent.formulaire.controllers.*;
 import fr.openent.formulaire.cron.RgpdCron;
 import fr.openent.formulaire.service.impl.FormulaireRepositoryEvents;
@@ -29,6 +30,9 @@ public class Formulaire extends BaseServer {
 	@Override
 	public void start() throws Exception {
 		super.start();
+
+		Constants.MAX_RESPONSES_EXPORT_PDF = config.getInteger("max-responses-export-PDF", 100);
+		Constants.MAX_USERS_SHARING = config.getInteger("max-users-sharing", 65000);
 
 		final EventBus eb = getEventBus(vertx);
 		final TimelineHelper timelineHelper = new TimelineHelper(vertx, eb, config);
