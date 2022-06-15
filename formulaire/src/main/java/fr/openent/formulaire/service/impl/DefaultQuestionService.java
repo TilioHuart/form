@@ -57,9 +57,18 @@ public class DefaultQuestionService implements QuestionService {
     }
 
     @Override
-    public void getSectionIdsWithConditionalQuestions(String formId, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT DISTINCT section_id FROM " + Tables.QUESTION + " WHERE form_id = ? AND section_id IS NOT NULL AND conditional = ?;";
+    public void getSectionIdsWithConditionalQuestions(String formId, JsonArray questionIds, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT DISTINCT section_id FROM " + Tables.QUESTION + " WHERE form_id = ? AND conditional = ? " +
+                "AND section_id IS NOT NULL ";
         JsonArray params = new JsonArray().add(formId).add(true);
+
+        if (questionIds.size() > 0) {
+            query += "AND id NOT IN " + Sql.listPrepared(questionIds);
+            params.addAll(questionIds);
+        }
+
+        query += ";";
+
         sql.prepared(query, params, SqlResult.validResultHandler(handler));
     }
 

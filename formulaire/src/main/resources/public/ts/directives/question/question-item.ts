@@ -56,8 +56,8 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
                             <i class="i-duplicate lg-icon spaced-right" ng-click="vm.duplicateQuestion()"
                                 ng-class="{disabled: vm.hasFormResponses}"  title="[[vm.getTitle('duplicate')]]"></i>
                             <i class="i-delete lg-icon spaced-right" ng-class="{disabled: vm.hasFormResponses}" 
-                                reset-guard="vm.deleteQuestion()" title="[[vm.getTitle('delete')]]" reset-guard-id="formTitle"></i>
-                            <i class="i-undo lg-icon spaced-right" reset-guard="vm.undoQuestionChanges()" title="[[vm.getTitle('cancel')]]" reset-guard-id="formTitle"></i>
+                                ng-click="vm.deleteQuestion()" title="[[vm.getTitle('delete')]]"></i>
+                            <i class="i-undo lg-icon spaced-right" ng-click="vm.undoQuestionChanges()" title="[[vm.getTitle('cancel')]]"></i>
                         </div>
                     </div>
                 </div>

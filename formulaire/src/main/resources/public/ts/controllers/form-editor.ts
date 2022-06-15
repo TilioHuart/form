@@ -69,7 +69,6 @@ interface ViewModel {
     deleteFormElement() : Promise<void>;
     doDeleteFormElement() : Promise<void>;
     undoFormElementChanges() : Promise<void>;
-    undoFormElementChangesGuard(): void;
     doUndoFormElementChanges() : Promise<void>;
     validateSection(): Promise<void>;
     closeLightbox(action: string): void;
@@ -327,13 +326,13 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         for (let i = formElement.section_position; i < section.questions.all.length; i++) {
                             section.questions.all[i].position--;
                         }
-                        await formElementService.update(section.questions.all);
+                        await formElementService.update(section.questions.all.slice(formElement.section_position));
                     }
                     else {
                         for (let i = formElement.position; i < vm.formElements.all.length; i++) {
                             vm.formElements.all[i].position--;
                         }
-                        await formElementService.update(vm.formElements.all);
+                        await formElementService.update(vm.formElements.all.slice(formElement.position));
                     }
                     await formElementService.delete(formElement);
                 }
@@ -374,10 +373,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 }
             }
         };
-
-        vm.undoFormElementChangesGuard = () => {
-            vm.undoFormElementChanges().then();
-        }
 
         vm.doUndoFormElementChanges = async () : Promise<void> => {
             await vm.formElements.sync(vm.form.id);
@@ -797,7 +792,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DUPLICATE_ELEMENT, (e) => { vm.duplicateQuestion(e.targetScope.vm.question) });
         $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DELETE_ELEMENT, () => { vm.deleteFormElement() });
-        $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.UNDO_CHANGES, () => { vm.undoFormElementChangesGuard() });
+        $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.UNDO_CHANGES, () => { vm.undoFormElementChanges() });
         $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.VALIDATE_SECTION, () => { vm.validateSection() });
         $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.CREATE_QUESTION, (e) => { vm.createNewElement(e.targetScope.vm.section) });
         $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.MOVE_QUESTION, (event, data) => { vm.moveQuestion(data.formElement, data.direction) });

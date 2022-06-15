@@ -1,5 +1,6 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.ShareAndOwner;
 import fr.openent.formulaire.service.FormService;
@@ -143,22 +144,16 @@ public class QuestionController extends ControllerHelper {
                     }
 
                     // If it's a conditional question in a section, check if another one already exists
-                    if (question.getBoolean("conditional")) {
-                        questionService.getSectionIdsWithConditionalQuestions(formId, sectionIdsEvt -> {
+                    if (question.getBoolean("conditional") && sectionId != null) {
+                        questionService.getSectionIdsWithConditionalQuestions(formId, new JsonArray(), sectionIdsEvt -> {
                             if (sectionIdsEvt.isLeft()) {
                                 log.error("[Formulaire@createQuestion] Failed to get section ids for form with id : " + formId);
                                 renderInternalError(request, sectionIdsEvt);
                                 return;
                             }
-                            if (sectionIdsEvt.right().getValue().isEmpty()) {
-                                String message = "[Formulaire@createQuestion] No section ids found for form with id " + formId;
-                                log.error(message);
-                                notFound(request, message);
-                                return;
-                            }
 
                             JsonArray sectionIds = getByProp(sectionIdsEvt.right().getValue(), "section_id");
-                            if (!sectionIds.contains(sectionId)) {
+                            if (sectionIds.contains(sectionId)) {
                                 String message = "[Formulaire@createQuestion] A conditional question is already existing for the section with id : " + sectionId;
                                 log.error(message);
                                 badRequest(request, message);
@@ -167,7 +162,8 @@ public class QuestionController extends ControllerHelper {
 
                             questionService.create(question, formId, defaultResponseHandler(request));
                         });
-                    } else {
+                    }
+                    else {
                         questionService.create(question, formId, defaultResponseHandler(request));
                     }
                 });
@@ -252,7 +248,8 @@ public class QuestionController extends ControllerHelper {
                     }
 
                     // Check if sections of conditional questions to create already have conditional questions
-                    questionService.getSectionIdsWithConditionalQuestions(formId, sectionIdsEvt -> {
+                    JsonArray questionIds = UtilsHelper.getIds(questions);
+                    questionService.getSectionIdsWithConditionalQuestions(formId, questionIds, sectionIdsEvt -> {
                         if (sectionIdsEvt.isLeft()) {
                             log.error("[Formulaire@updateQuestions] Failed to get section ids for form with id : " + formId);
                             renderInternalError(request, sectionIdsEvt);
@@ -271,9 +268,9 @@ public class QuestionController extends ControllerHelper {
                         }
 
                         if (conflictingSectionId != null) {
-                            String errorMessage = "[Formulaire@updateQuestions] A conditional question is already existing for the section with id : " + conflictingSectionId;
-                            log.error(errorMessage);
-                            badRequest(request, errorMessage);
+                            String message = "[Formulaire@updateQuestions] A conditional question is already existing for the section with id : " + conflictingSectionId;
+                            log.error(message);
+                            badRequest(request, message);
                             return;
                         }
 

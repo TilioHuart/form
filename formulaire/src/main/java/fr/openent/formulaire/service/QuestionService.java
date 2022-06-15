@@ -45,9 +45,10 @@ public interface QuestionService {
     /**
      * Get the section ids with conditional questions for a specific form
      * @param formId form identifier
+     * @param questionIds question identifiers to omit
      * @param handler function handler returning JsonArray data
      */
-    void getSectionIdsWithConditionalQuestions(String formId, Handler<Either<String, JsonArray>> handler);
+    void getSectionIdsWithConditionalQuestions(String formId, JsonArray questionIds, Handler<Either<String, JsonArray>> handler);
 
     /**
      * Get the section ids of a specific form thanks to a question id
