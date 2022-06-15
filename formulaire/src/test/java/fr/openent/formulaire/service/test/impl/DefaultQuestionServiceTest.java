@@ -1,7 +1,6 @@
 package fr.openent.formulaire.service.test.impl;
 
 import fr.openent.form.core.constants.Tables;
-import fr.openent.formulaire.Formulaire;
 import fr.openent.formulaire.service.impl.DefaultQuestionService;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -14,11 +13,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.lang.reflect.Field;
-
 import static fr.openent.form.helpers.SqlHelper.getParamsForUpdateDateModifFormRequest;
 import static fr.openent.form.helpers.SqlHelper.getUpdateDateModifFormRequest;
-import static org.junit.Assert.fail;
 
 @RunWith(VertxUnitRunner.class)
 public class DefaultQuestionServiceTest {
@@ -30,12 +26,6 @@ public class DefaultQuestionServiceTest {
         vertx = Vertx.vertx();
         defaultQuestionService = new DefaultQuestionService();
         Sql.getInstance().init(vertx.eventBus(), "fr.openent.formulaire");
-        try {
-            setFinalStatic(Tables.class.getDeclaredField("QUESTION"), Tables.QUESTION);
-            setFinalStatic(Tables.class.getDeclaredField("SECTION"), Tables.SECTION);
-            setFinalStatic(Tables.class.getDeclaredField("FORM"), Tables.FORM);
-        }
-        catch (Exception e) {fail();}
     }
 
     @Test
@@ -127,7 +117,7 @@ public class DefaultQuestionServiceTest {
     @Test
     public void create(TestContext ctx) {
         Async async = ctx.async();
-        String expectedQuery = "INSERT INTO " + Tables.QUESTION + "(form_id, title, position, question_type, statement, " +
+        String expectedQuery = "INSERT INTO " + Tables.QUESTION + " (form_id, title, position, question_type, statement, " +
                 "mandatory, section_id, section_position, conditional) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
 
         JsonObject question = new JsonObject();
@@ -224,10 +214,5 @@ public class DefaultQuestionServiceTest {
             async.complete();
         });
         defaultQuestionService.delete(tabQuestion, null);
-    }
-
-    static void setFinalStatic(Field field, String newValue) throws Exception {
-        field.setAccessible(true);
-        field.set(null, newValue);
     }
 }
