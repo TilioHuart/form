@@ -186,16 +186,6 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         vm.loading = false;
         vm.initDragAndDrop();
 
-        // Clipboard
-        let clipboard = new Clipboard('.clipboard-link-field');
-        clipboard.on('success', function(e) {
-            e.clearSelection();
-            notify.info('formulaire.share.link.copy.success');
-        });
-        clipboard.on('error', function(e) {
-            notify.error('formulaire.share.link.copy.error');
-        });
-
         $scope.safeApply();
     };
 

@@ -1,4 +1,4 @@
-import {Behaviours, idiom, model, ng, template} from 'entcore';
+import {Behaviours, idiom, model, ng, notify, template} from 'entcore';
 import {
 	Distribution,
 	DistributionStatus,
@@ -19,6 +19,7 @@ import {
 	Pages
 } from "@common/core/enums";
 import {FormElementUtils, I18nUtils} from "@common/utils";
+import * as Clipboard from "clipboard";
 
 export const mainController = ng.controller('MainController', ['$scope', 'route', '$location',
 	($scope, route, $location) => {
@@ -47,6 +48,16 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 
 		const init = async () : Promise<void> => {
 			await $scope.questionTypes.sync();
+
+			// Clipboard
+			let clipboard = new Clipboard('.clipboard-link-field');
+			clipboard.on('success', function(e) {
+				e.clearSelection();
+				notify.info('formulaire.link.copy.success');
+			});
+			clipboard.on('error', function(e) {
+				notify.error('formulaire.link.copy.error');
+			});
 		}
 
 		// Routing & template opening
