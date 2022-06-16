@@ -25,7 +25,7 @@
   "formulaire.public.end.thanks": "Merci pour vos réponses",
   "formulaire.public.end.sorry": "Désolé, vous ne pouvez pas répondre à ce formulaire",
   "formulaire.public.rgpd.text.1": "Pour nous permettre de contrôler qu'un utilisateur ne réponde qu'une seule fois au sondage et éviter toute réponse usurpée par des envois automatiques générés par un robot, nous avons besoin de recueillir des informations de cookie vous concernant.",
-  "formulaire.public.rgpd.text.2": "Seules les informations de sessions liées au traitement de ce formulaire sont nécessaires. Ces informations seront dans tous les cas détruire à la date de clôture du formulaire ou au plus tard au bout de 6 mois.",
+  "formulaire.public.rgpd.text.2": "Seules les informations de sessions liées au traitement de ce formulaire sont nécessaires. Ces informations seront, dans tous les cas, détruites à la date de clôture du formulaire ou au plus tard au bout de 6 mois.",
   "formulaire.public.end": "Terminer",
   "formulaire.public.send": "Envoyer",
   "formulaire.public.captcha.title": "Captcha",
