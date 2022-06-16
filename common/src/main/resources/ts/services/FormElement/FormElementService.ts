@@ -81,6 +81,9 @@ export const formElementService: FormElementService = {
 
     async update(formElements: FormElement[]) : Promise<any> {
         try {
+            if (formElements.length <= 0) {
+                return [];
+            }
             let updatedQuestions = await questionService.update(formElements.filter(e => e instanceof Question) as Question[]);
             let updatedSections = await sectionService.update(formElements.filter(e => e instanceof Section) as Section[]);
             return [].concat(updatedQuestions, updatedSections);

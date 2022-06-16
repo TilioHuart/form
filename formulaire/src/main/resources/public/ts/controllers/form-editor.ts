@@ -254,21 +254,21 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.duplicateQuestion = async (question: Question) : Promise<void> => {
             try {
                 vm.dontSave = true;
-                await questionService.save(question);
+                let questionId = (await questionService.save(question)).id;
                 let duplicata = question;
                 if (question.section_id) {
                     let section = vm.formElements.all.filter(e => e instanceof Section && e.id === question.section_id)[0] as Section;
                     for (let i = question.section_position; i < section.questions.all.length; i++) {
-                        section.questions.all[i].position++;
+                        section.questions.all[i].section_position++;
                     }
-                    await formElementService.update(section.questions.all);
+                    await formElementService.update(section.questions.all.slice(question.section_position));
                     duplicata.section_position++;
                 }
                 else {
                     for (let i = question.position; i < vm.formElements.all.length; i++) {
                         vm.formElements.all[i].position++;
                     }
-                    await formElementService.update(vm.formElements.all);
+                    await formElementService.update(vm.formElements.all.slice(question.position));
                     duplicata.position++;
                 }
                 let newQuestion = await questionService.create(duplicata);
@@ -277,7 +277,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     || question.question_type === Types.SINGLEANSWERRADIO) {
                     question.choices.all.sort((a, b) => a.id - b.id);
                     for (let choice of question.choices.all) {
+                        if (!choice.question_id) choice.question_id = questionId;
                         if (choice.value) {
+                            await questionChoiceService.save(choice);
                             await questionChoiceService.create(new QuestionChoice(newQuestion.id, choice.value));
                         }
                     }

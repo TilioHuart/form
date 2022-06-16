@@ -13,8 +13,8 @@ public class UtilsHelper {
     public static JsonArray getIds(JsonArray items, boolean toString) {
         JsonArray ids = new JsonArray();
         for (int i = 0; i < items.size(); i++) {
-            Integer item = items.getJsonObject(i).getInteger("id");
-            ids.add(toString ? item.toString() : item);
+            Integer id = items.getJsonObject(i).getInteger("id");
+            ids.add(toString && id != null ? id.toString() : id);
         }
         return ids;
     }
