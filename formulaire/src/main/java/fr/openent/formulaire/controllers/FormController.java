@@ -574,7 +574,7 @@ public class FormController extends ControllerHelper {
         String formId = request.getParam("formId");
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
-                String message = "[Formulaire@moveForms] User not found in session.";
+                String message = "[Formulaire@updateForm] User not found in session.";
                 log.error(message);
                 unauthorized(request, message);
                 return;
@@ -590,7 +590,7 @@ public class FormController extends ControllerHelper {
                 // Check if the user has right to update a public form
                 boolean isFormPublic = form.getBoolean("is_public");
                 if (isFormPublic && !WorkflowActionUtils.hasRight(user, WorkflowActions.CREATION_RIGHT.toString())) {
-                    String message = "[Formulaire@createForm] You are not authorized to create a public form.";
+                    String message = "[Formulaire@updateForm] You are not authorized to create a public form.";
                     log.error(message);
                     unauthorized(request, message);
                     return;

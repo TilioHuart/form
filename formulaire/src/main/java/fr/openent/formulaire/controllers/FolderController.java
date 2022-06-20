@@ -414,11 +414,12 @@ public class FolderController extends ControllerHelper {
                             }
 
                             // Get the folders to sync
-                            folderIds.add(targetFolderId);
                             JsonArray folderIdsToSync = new JsonArray();
-                            for (int j = 0; j < folderIds.size(); j++) {
-                                if (folderIds.getInteger(j) != ID_ROOT_FOLDER) {
-                                    folderIdsToSync.add(folderIds.getInteger(j));
+                            folderIdsToSync.add(targetFolderId);
+                            for (int j = 0; j < folders.size(); j++) {
+                                JsonObject folder = folders.getJsonObject(j);
+                                if (folder.getInteger("parent_id") != ID_ROOT_FOLDER) {
+                                    folderIdsToSync.add(folder.getInteger("parent_id"));
                                 }
                             }
 

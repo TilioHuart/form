@@ -76,21 +76,33 @@ public class DefaultFolderService implements FolderService {
 
     @Override
     public void syncNbChildren(UserInfos user, JsonArray newFolderIds, Handler<Either<String, JsonArray>> handler) {
-        String query = "UPDATE " + Tables.FOLDER + " folder " +
-                "SET nb_folder_children = CASE WHEN counts.nb_folders IS NULL THEN 0 ELSE counts.nb_folders END, " +
-                "nb_form_children = CASE WHEN counts.nb_forms IS NULL THEN 0 ELSE counts.nb_forms END " +
-                "FROM ( " +
-                    "SELECT * FROM ( " +
-                        "SELECT COUNT(*) AS nb_folders, parent_id FROM " + Tables.FOLDER +
-                        " WHERE user_id = ? GROUP BY parent_id " +
-                    ") AS f " +
-                    "FULL JOIN ( " +
-                        "SELECT COUNT(*) AS nb_forms, folder_id FROM " + Tables.REL_FORM_FOLDER +
-                        " WHERE user_id = ? GROUP BY folder_id " +
-                    ") AS rff ON rff.folder_id = f.parent_id " +
-                ") AS counts " +
-                "WHERE folder.id IN " + Sql.listPrepared(newFolderIds) +
-                " AND folder.id = counts.parent_id OR folder.id = counts.folder_id;";
+        String query =
+                "WITH updated_ids AS (" +
+                    "UPDATE " + Tables.FOLDER + " folder " +
+                    "SET nb_folder_children = CASE WHEN counts.nb_folders IS NULL THEN 0 ELSE counts.nb_folders END, " +
+                    "nb_form_children = CASE WHEN counts.nb_forms IS NULL THEN 0 ELSE counts.nb_forms END " +
+                    "FROM ( " +
+                        "SELECT * FROM ( " +
+                            "SELECT COUNT(*) AS nb_folders, parent_id FROM " + Tables.FOLDER +
+                            " WHERE user_id = ? GROUP BY parent_id " +
+                        ") AS f " +
+                        "FULL JOIN ( " +
+                            "SELECT COUNT(*) AS nb_forms, folder_id FROM " + Tables.REL_FORM_FOLDER +
+                            " WHERE user_id = ? GROUP BY folder_id " +
+                        ") AS rff ON rff.folder_id = f.parent_id " +
+                    ") AS counts " +
+                    "WHERE folder.id IN " + Sql.listPrepared(newFolderIds) +
+                    " AND (folder.id = counts.parent_id OR folder.id = counts.folder_id)" +
+                    "RETURNING id, folder.parent_id, name, user_id, nb_folder_children, nb_form_children" +
+                ")," +
+                "other_updated_ids AS (" +
+                    "UPDATE " + Tables.FOLDER +
+                    " SET nb_folder_children = 0, nb_form_children = 0 " +
+                    "WHERE folder.id IN " + Sql.listPrepared(newFolderIds) +
+                    " AND folder.id NOT IN (SELECT id FROM updated_ids) " +
+                    "RETURNING *" +
+                ")" +
+                "SELECT * FROM updated_ids UNION SELECT * FROM other_updated_ids";
         JsonArray params = new JsonArray().add(user.getUserId()).add(user.getUserId()).addAll(newFolderIds);
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
