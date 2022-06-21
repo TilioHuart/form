@@ -15,7 +15,6 @@ import {FiltersFilters, FiltersOrders, FORMULAIRE_EMIT_EVENT} from "@common/core
 import {Mix} from "entcore-toolkit";
 import {Element} from "entcore/types/src/ts/workspace/model";
 import {I18nUtils} from "@common/utils";
-import * as Clipboard from 'clipboard';
 
 interface ViewModel {
     forms: Forms;

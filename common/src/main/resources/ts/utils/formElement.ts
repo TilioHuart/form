@@ -13,7 +13,7 @@ import {formElementService, questionService} from "../services";
 
 export class FormElementUtils {
     static castFormElement = (formElement: any) : Question|Section => {
-        if (formElement.statement != undefined) {
+        if (formElement.statement !== undefined) {
             return Mix.castAs(Question, formElement);
         }
         else {
