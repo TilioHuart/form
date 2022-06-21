@@ -160,7 +160,7 @@ public class FormResponsesExportPDF {
                         .put("title", questionInfo.getString("title"))
                         .put("question_type", new JsonObject())
                         .put("statement",
-                                "<div>" + questionInfo.getString("statement")
+                                "<div>" + questionInfo.getString("statement", "")
                                 .replace("\"","'")
                                 .replace("<o:p></o:p>", " ")
                                 + "</div>"
@@ -207,17 +207,15 @@ public class FormResponsesExportPDF {
                 }
                 if (questionType == 1) {
                     response.put("answer",
-                            "<div>" + response.getString("answer")
-                            .replace("<o:p></o:p>", " ")
+                            "<div>" + response.getString("answer", "")
+                                    .replace("<o:p></o:p>", " ")
                             + "</div>");
                 }
                 if (questionType == 2) {
                     response.put("answer", "<div>" + response.getString("answer") + "</div>");
                 }
                 else if (questionType == 3) {
-                    response.put("answer", response.getString("answer")
-                            .replace("\"","'")
-                    );
+                    response.put("answer", response.getString("answer", "").replace("\"","'"));
                 }
 
                 // Format date_response
