@@ -22,7 +22,7 @@ INSERT INTO formulaire.captcha(question, answer) VALUES
 ('Combien font trois plus trois ?', 'six'),
 ('Combien font quatre plus seize ?', 'vingt'),
 ('Combien font cinq plus six ?', 'onze'),
-('Combien font six plus sept ?', 'quinze'),
+('Combien font six plus sept ?', 'treize'),
 ('Combien font sept plus deux ?', 'neuf'),
 ('Combien font huit plus zéro ?', 'huit'),
 ('Combien font neuf plus quatre ?', 'treize'),

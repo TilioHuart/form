@@ -9,7 +9,7 @@ import java.util.List;
 public class CaptchaHelper {
     private static final Logger log = LoggerFactory.getLogger(CaptchaHelper.class);
     private static final List<String> numbers = Arrays.asList("zero", "un", "deux", "trois", "quatre", "cinq", "six", "sept",
-            "huit", "neuf", "dix", "onze", "douze", "treize", "quatorze","quinze", "seize");
+            "huit", "neuf", "dix", "onze", "douze", "treize", "quatorze","quinze", "seize", "dix-sept", "dix_huit", "dix-neuf", "vingt");
 
     private CaptchaHelper() {}
 
