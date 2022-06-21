@@ -103,7 +103,7 @@ public class DefaultFolderService implements FolderService {
                     "RETURNING *" +
                 ")" +
                 "SELECT * FROM updated_ids UNION SELECT * FROM other_updated_ids";
-        JsonArray params = new JsonArray().add(user.getUserId()).add(user.getUserId()).addAll(newFolderIds);
+        JsonArray params = new JsonArray().add(user.getUserId()).add(user.getUserId()).addAll(newFolderIds).addAll(newFolderIds);
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
