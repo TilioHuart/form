@@ -237,6 +237,7 @@ public class FormController extends ControllerHelper {
                 }
 
                 JsonObject distribution = distributionEvt.right().getValue();
+                // Check if the distribution matches the formKey received
                 if (!distribution.getInteger("form_id").equals(formId)) {
                     String message = "[FormulairePublic@createPublicResponses] The distributionKey provided is not matching the formKey " + formKey;
                     log.error(message);
@@ -291,7 +292,7 @@ public class FormController extends ControllerHelper {
                         if (captchaAnswer == null || !captchaAnswer.equals(captchaSolution)) {
                             String message = "[FormulairePublic@createPublicResponses] Wrong response for CAPTCHA with id " + captchaId + " : " + captchaResponse;
                             log.error(message);
-                            badRequest(request, message);
+                            renderJson(request, distribution, 200);
                             return;
                         }
 

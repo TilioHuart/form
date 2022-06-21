@@ -1,5 +1,5 @@
 import {idiom, ng, notify, template} from "entcore";
-import {Question, Response, Responses} from "@common/models";
+import {DistributionStatus, Question, Response, Responses} from "@common/models";
 import {captchaService, responseService} from "../services";
 import {Mix} from "entcore-toolkit";
 
@@ -62,12 +62,13 @@ export const captchaController = ng.controller('CaptchaController', ['$scope',
     };
 
     vm.doSend = async () : Promise<void> => {
-        let response = await responseService.sendResponses(vm.formKey, vm.distributionKey, vm.responseCaptcha, vm.responses);
+        let distributionData = await responseService.sendResponses(vm.formKey, vm.distributionKey, vm.responseCaptcha, vm.responses);
+        let distribution = Mix.castAs(Question, distributionData);
 
         template.close('lightbox');
         vm.display.lightbox.sending = false;
 
-        if (!response) {
+        if (distribution.status != DistributionStatus.FINISHED) {
             notify.error(idiom.translate('formulaire.public.error.captcha'));
             await vm.generateNewCaptcha();
         }
