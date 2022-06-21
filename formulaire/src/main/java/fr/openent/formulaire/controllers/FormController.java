@@ -923,7 +923,9 @@ public class FormController extends ControllerHelper {
                                     log.error("[Formulaire@sendReminder] Failed to send reminder : " + messageEvt.cause());
                                     future.handle(Future.failedFuture(messageEvt.cause()));
                                 }
-                                future.handle(Future.succeededFuture(messageEvt.result().body()));
+                                else {
+                                    future.handle(Future.succeededFuture(messageEvt.result().body()));
+                                }
                             });
                         }
 
