@@ -59,10 +59,8 @@ interface ViewModel {
     saveAll(displaySuccess?: boolean) : Promise<void>;
     return() : Promise<void>;
     createNewElement(parentSection?: Section) : Promise<void>;
-    createNewElementGuard() : void;
     doCreateNewElement(code?: number, parentSection?: Section) : void;
     organizeQuestions() : Promise<void>;
-    organizeQuestionsGuard() : void;
     doOrganizeQuestions() : Promise<void>;
     cancelOrganizeQuestions() : Promise<void>;
     duplicateQuestion(question: Question) : Promise<void>;
@@ -174,10 +172,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             $scope.safeApply();
         };
 
-        vm.createNewElementGuard = () => {
-            vm.createNewElement().then();
-        }
-
         vm.doCreateNewElement = async (code?, parentSection?) => {
             vm.dontSave = true;
 
@@ -220,10 +214,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             $scope.safeApply();
             initOrgaNestedSortables();
         };
-
-        vm.organizeQuestionsGuard = () => {
-            vm.organizeQuestions().then();
-        }
 
         vm.doOrganizeQuestions = async () : Promise<void> => {
             for (let question of vm.formElements.getAllQuestions().all) {
@@ -684,7 +674,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                             $scope.safeApply();
                             if (refresh) {
                                 await vm.formElements.sync(vm.form.id);
-                                vm.organizeQuestionsGuard();
+                                vm.organizeQuestions();
                             }
                         }
                     });
