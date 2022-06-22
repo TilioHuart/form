@@ -881,10 +881,8 @@ public class FormController extends ControllerHelper {
                         for (int i = 0; i < distributions.size(); i++) {
                             String id = distributions.getJsonObject(i).getString("responder_id");
                             if (!localRespondersIds.contains(id)) {
-                                if (form.getBoolean("multiple")) {
-                                    localRespondersIds.add(id);
-                                }
-                                else if (distributions.getJsonObject(i).getString("date_response") == null) {
+                                if (form.getBoolean("multiple") || form.getBoolean("anonymous") ||
+                                    distributions.getJsonObject(i).getString("date_response") == null) {
                                     localRespondersIds.add(id);
                                 }
                             }

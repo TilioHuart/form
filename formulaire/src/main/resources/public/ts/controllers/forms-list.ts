@@ -315,7 +315,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         let distributions = Mix.castArrayAs(Distribution, await distributionService.listByForm(vm.forms.selected[0].id));
         let uniqueDistribs : any = [];
         for (let d of distributions){
-            if(!uniqueDistribs.map(d => d.responder_id).includes(d.responder_id)) {
+            if (!uniqueDistribs.map(d => d.responder_id).includes(d.responder_id)) {
                 uniqueDistribs.push(d);
             }
         }
@@ -331,13 +331,13 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             vm.responders.push(responderInfo);
         }
         template.open('lightbox','lightbox/form-check-remind');
-        vm.display.lightbox.checkremind=true;
+        vm.display.lightbox.checkremind = true;
     };
 
     vm.closeCheckRemind = async () : Promise<void> => {
         vm.display.lightbox.checkremind = false;
         template.close('lightbox');
-        vm.limitTable= vm.tableSize;
+        vm.limitTable = vm.tableSize;
     };
 
     vm.remind = async () : Promise<void> => {

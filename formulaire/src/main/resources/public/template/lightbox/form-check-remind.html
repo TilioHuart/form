@@ -67,7 +67,7 @@
         <infinite-scroll scrolled="vm.infiniteScroll()" loading-mode="true"></infinite-scroll>
     </div>
 
-    <div class="action-buttons" ng-if="!vm.forms.selected[0].anonymous">
+    <div class="action-buttons" ng-if="!vm.forms.selected[0].is_public">
         <button class="cell cancel" ng-click="vm.closeCheckRemind()"><i18n>formulaire.cancel</i18n></button>
         <button class="cell" ng-click="vm.remind()" ng-disabled="vm.form.sent"><i18n>formulaire.remind.title</i18n></button>
     </div>
