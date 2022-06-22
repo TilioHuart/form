@@ -62,6 +62,10 @@ export class Question extends FormElement {
 
         this.choices.all.push(noResponseChoice);
     }
+
+    isGraphQuestion = () : boolean => {
+        return this.question_type == Types.SINGLEANSWER || this.question_type == Types.MULTIPLEANSWER || this.question_type == Types.SINGLEANSWERRADIO;
+    }
 }
 
 export class Questions extends Selection<Question> {

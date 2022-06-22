@@ -152,7 +152,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
             const vm: IViewModel = <IViewModel> this;
 
             vm.$onInit = async () : Promise<void> => {
-                vm.isGraphQuestion = vm.question.question_type == Types.SINGLEANSWER || vm.question.question_type == Types.MULTIPLEANSWER || vm.question.question_type == Types.SINGLEANSWERRADIO;
+                vm.isGraphQuestion = vm.question.isGraphQuestion();
                 vm.responses = new Responses();
                 vm.distributions = new Distributions();
                 vm.results = new Map();
@@ -160,7 +160,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
 
                 if (vm.question.question_type != Types.FREETEXT) {
                     await vm.question.choices.sync(vm.question.id);
-                    await vm.responses.sync(vm.question, vm.question.question_type == Types.FILE, vm.isGraphQuestion ? null : 0);
+                    await vm.responses.sync(vm.question, vm.question.question_type == Types.FILE);
                     await vm.distributions.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, vm.isGraphQuestion ? null : 0);
                     vm.nbResponses = new Set(vm.responses.all.map(r => r.distribution_id)).size;
 
@@ -225,7 +225,9 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
             vm.syncResultsMap = () : void => {
                 vm.results = new Map();
                 for (let distribution of vm.distributions.all) {
-                    vm.results.set(distribution.id, vm.formatAnswers(distribution.id));
+                    if (!vm.results.get(distribution.id)) {
+                        vm.results.set(distribution.id, vm.formatAnswers(distribution.id));
+                    }
                 }
             };
 
@@ -258,13 +260,11 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
             };
 
             vm.showMoreButton = () : boolean => {
-                let nbResponsesDisplayed = new Set(vm.responses.all.map(r => r.distribution_id)).size;
-                return vm.nbResponses > nbResponsesDisplayed && vm.question.question_type != Types.FREETEXT && !vm.isGraphQuestion;
+                return vm.nbResponses > vm.distributions.all.length && vm.question.question_type != Types.FREETEXT && !vm.isGraphQuestion;
             };
 
             vm.loadMoreResults = async () : Promise<void> => {
                 if (!vm.isGraphQuestion) {
-                    await vm.responses.sync(vm.question, vm.question.question_type == Types.FILE, vm.isGraphQuestion ? null : vm.distributions.all.length);
                     await vm.distributions.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, vm.distributions.all.length);
                     vm.syncResultsMap();
                     UtilsUtils.safeApply($scope);
