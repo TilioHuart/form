@@ -749,11 +749,10 @@ public class FormController extends ControllerHelper {
                             renderInternalError(request, relFormFolderEvt);
                             return;
                         }
-                        if (relFormFolderEvt.right().getValue().isEmpty()) {
-                            String message = "[Formulaire@moveForms] No relation form-folders found for forms with ids " + formIds;
-                            log.error(message);
-                            notFound(request, message);
-                            return;
+
+                        // Check case if form shared with me and doesn't have rel_form_folder
+                        if (relFormFolderEvt.right().getValue().isEmpty() && targetFolderId == ID_ARCHIVED_FOLDER) {
+                            relFormFolderService.create(user, formIds, targetFolderId, arrayResponseHandler(request));
                         }
 
                         // Check if one of the folders is not owned by the connected user

@@ -391,9 +391,13 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.restoreForms = async () : Promise<void> => {
         try {
             for (let form of vm.forms.selected) {
-                await formService.restore(form, vm.folders.myFormsFolder.id);
+                if (form.owner_id === model.me.userId) {
+                    await formService.restore(form, vm.folders.myFormsFolder.id);
+                }
+                else if ($scope.hasShareRightContrib(form)) {
+                    await formService.restore(form, vm.folders.sharedFormsFolder.id);
+                }
             }
-            await formService.move(vm.forms.selected.map(f => f.id), vm.folders.myFormsFolder.id);
             template.close('lightbox');
             notify.success(idiom.translate('formulaire.success.forms.restore'));
             vm.openFolder(vm.folder, false);
