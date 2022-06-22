@@ -3,8 +3,10 @@ package fr.openent.formulaire.controllers;
 import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.ShareAndOwner;
+import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.FormService;
 import fr.openent.formulaire.service.QuestionService;
+import fr.openent.formulaire.service.impl.DefaultDistributionService;
 import fr.openent.formulaire.service.impl.DefaultFormService;
 import fr.openent.formulaire.service.impl.DefaultQuestionService;
 import fr.wseduc.rs.*;
@@ -31,11 +33,13 @@ public class QuestionController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(QuestionController.class);
     private final QuestionService questionService;
     private final FormService formService;
+    private final DistributionService distributionService;
 
     public QuestionController() {
         super();
-        this.formService = new DefaultFormService();
         this.questionService = new DefaultQuestionService();
+        this.formService = new DefaultFormService();
+        this.distributionService = new DefaultDistributionService();
     }
 
     @Get("/forms/:formId/questions")
@@ -127,45 +131,54 @@ public class QuestionController extends ControllerHelper {
 
                     JsonObject form = formEvt.right().getValue();
 
-                    // Check if form is already send
-                    if (form.getBoolean("sent")) {
-                        String message = "[Formulaire@createQuestion] You cannot create a question for a form already sent : " + formId;
-                        log.error(message);
-                        badRequest(request, message);
-                        return;
-                    }
+                    // Check if form is not already responded
+                    distributionService.countFinished(formId, countRepEvt -> {
+                        if (countRepEvt.isLeft()) {
+                            log.error("[Formulaire@createQuestion] Failed to count finished distributions form form with id : " + formId);
+                            renderInternalError(request, countRepEvt);
+                            return;
+                        }
 
-                    // Check if the type of question if it's for a public form (type FILE is forbidden)
-                    if (form.getBoolean("is_public") && question.getInteger("question_type") != null && question.getInteger("question_type") == 8) {
-                        String message = "[Formulaire@createQuestion] You cannot create a question type FILE for the public form with id " + formId;
-                        log.error(message);
-                        badRequest(request, message);
-                        return;
-                    }
+                        int nbResponseTot = countRepEvt.right().getValue().getInteger("count", 0);
+                        if (nbResponseTot > 0) {
+                            String message = "[Formulaire@createQuestion] You cannot create a question for a form already responded";
+                            log.error(message);
+                            badRequest(request, message);
+                            return;
+                        }
 
-                    // If it's a conditional question in a section, check if another one already exists
-                    if (question.getBoolean("conditional") && sectionId != null) {
-                        questionService.getSectionIdsWithConditionalQuestions(formId, new JsonArray(), sectionIdsEvt -> {
-                            if (sectionIdsEvt.isLeft()) {
-                                log.error("[Formulaire@createQuestion] Failed to get section ids for form with id : " + formId);
-                                renderInternalError(request, sectionIdsEvt);
-                                return;
-                            }
+                        // Check if the type of question if it's for a public form (type FILE is forbidden)
+                        if (form.getBoolean("is_public") && question.getInteger("question_type") != null && question.getInteger("question_type") == 8) {
+                            String message = "[Formulaire@createQuestion] You cannot create a question type FILE for the public form with id " + formId;
+                            log.error(message);
+                            badRequest(request, message);
+                            return;
+                        }
 
-                            JsonArray sectionIds = getByProp(sectionIdsEvt.right().getValue(), "section_id");
-                            if (sectionIds.contains(sectionId)) {
-                                String message = "[Formulaire@createQuestion] A conditional question is already existing for the section with id : " + sectionId;
-                                log.error(message);
-                                badRequest(request, message);
-                                return;
-                            }
+                        // If it's a conditional question in a section, check if another one already exists
+                        if (question.getBoolean("conditional") && sectionId != null) {
+                            questionService.getSectionIdsWithConditionalQuestions(formId, new JsonArray(), sectionIdsEvt -> {
+                                if (sectionIdsEvt.isLeft()) {
+                                    log.error("[Formulaire@createQuestion] Failed to get section ids for form with id : " + formId);
+                                    renderInternalError(request, sectionIdsEvt);
+                                    return;
+                                }
 
+                                JsonArray sectionIds = getByProp(sectionIdsEvt.right().getValue(), "section_id");
+                                if (sectionIds.contains(sectionId)) {
+                                    String message = "[Formulaire@createQuestion] A conditional question is already existing for the section with id : " + sectionId;
+                                    log.error(message);
+                                    badRequest(request, message);
+                                    return;
+                                }
+
+                                questionService.create(question, formId, defaultResponseHandler(request));
+                            });
+                        }
+                        else {
                             questionService.create(question, formId, defaultResponseHandler(request));
-                        });
-                    }
-                    else {
-                        questionService.create(question, formId, defaultResponseHandler(request));
-                    }
+                        }
+                    });
                 });
             });
         });

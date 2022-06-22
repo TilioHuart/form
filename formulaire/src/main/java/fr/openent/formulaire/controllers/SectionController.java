@@ -3,8 +3,10 @@ package fr.openent.formulaire.controllers;
 import fr.openent.formulaire.helpers.DataChecker;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.ShareAndOwner;
+import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.FormElementService;
 import fr.openent.formulaire.service.SectionService;
+import fr.openent.formulaire.service.impl.DefaultDistributionService;
 import fr.openent.formulaire.service.impl.DefaultFormElementService;
 import fr.openent.formulaire.service.impl.DefaultSectionService;
 import fr.wseduc.bus.BusAddress;
@@ -34,11 +36,13 @@ public class SectionController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(SectionController.class);
     private final SectionService sectionService;
     private final FormElementService formElementService;
+    private final DistributionService distributionService;
 
     public SectionController() {
         super();
         this.sectionService = new DefaultSectionService();
         this.formElementService = new DefaultFormElementService();
+        this.distributionService = new DefaultDistributionService();
     }
 
     @Get("/forms/:formId/sections")
@@ -72,31 +76,48 @@ public class SectionController extends ControllerHelper {
                 return;
             }
 
-            // Check position value validity
-            if (section.getLong("position", 0L) < 1) {
-                String message = "[Formulaire@createSection] You cannot create a section with a position null or under 1 : " + section.getLong("position");
-                log.error(message);
-                badRequest(request, message);
-                return;
-            }
-
-            // Check if position is not already used
-            Long position = section.getLong("position");
-            formElementService.getTypeAndIdByPosition(formId, position.toString(), formElementEvt -> {
-                if (formElementEvt.isLeft()) {
-                    log.error("[Formulaire@createSection] Error in getting form element id of position " + position + " for form " + formId);
-                    renderInternalError(request, formElementEvt);
+            // Check if form is not already responded
+            distributionService.countFinished(formId, countRepEvt -> {
+                if (countRepEvt.isLeft()) {
+                    log.error("[Formulaire@createQuestion] Failed to count finished distributions form form with id : " + formId);
+                    renderInternalError(request, countRepEvt);
                     return;
                 }
 
-                if (!formElementEvt.right().getValue().isEmpty()) {
-                    String message = "[Formulaire@createSection] You cannot create a section with a position already occupied : " + formElementEvt.right().getValue();
+                int nbResponseTot = countRepEvt.right().getValue().getInteger("count", 0);
+                if (nbResponseTot > 0) {
+                    String message = "[Formulaire@createQuestion] You cannot create a question for a form already responded";
                     log.error(message);
                     badRequest(request, message);
                     return;
                 }
 
-                sectionService.create(section, formId, defaultResponseHandler(request));
+                // Check position value validity
+                if (section.getLong("position", 0L) < 1) {
+                    String message = "[Formulaire@createSection] You cannot create a section with a position null or under 1 : " + section.getLong("position");
+                    log.error(message);
+                    badRequest(request, message);
+                    return;
+                }
+
+                // Check if position is not already used
+                Long position = section.getLong("position");
+                formElementService.getTypeAndIdByPosition(formId, position.toString(), formElementEvt -> {
+                    if (formElementEvt.isLeft()) {
+                        log.error("[Formulaire@createSection] Error in getting form element id of position " + position + " for form " + formId);
+                        renderInternalError(request, formElementEvt);
+                        return;
+                    }
+
+                    if (!formElementEvt.right().getValue().isEmpty()) {
+                        String message = "[Formulaire@createSection] You cannot create a section with a position already occupied : " + formElementEvt.right().getValue();
+                        log.error(message);
+                        badRequest(request, message);
+                        return;
+                    }
+
+                    sectionService.create(section, formId, defaultResponseHandler(request));
+                });
             });
         });
     }
