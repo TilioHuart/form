@@ -1,5 +1,6 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.export.FormResponsesExportCSV;
 import fr.openent.formulaire.export.FormResponsesExportPDF;
 import fr.openent.formulaire.helpers.DataChecker;
@@ -754,10 +755,18 @@ public class FormController extends ControllerHelper {
                         if (relFormFolderEvt.right().getValue().isEmpty() && targetFolderId == ID_ARCHIVED_FOLDER) {
                             relFormFolderService.create(user, formIds, targetFolderId, arrayResponseHandler(request));
                         }
+                        else if (relFormFolderEvt.right().getValue().isEmpty()) {
+                            String message = "[Formulaire@moveForms] No relation form-folders found for forms with ids " + formIds;
+                            log.error(message);
+                            notFound(request, message);
+                            return;
+                        }
 
                         // Check if one of the folders is not owned by the connected user
                         JsonArray relFormFolders = relFormFolderEvt.right().getValue();
-                        if (relFormFolders.size() != formIds.size()) {
+                        List<Integer> checker = new ArrayList<Integer>(UtilsHelper.getByProp(relFormFolders, "folder_id").getList());
+                        checker.retainAll(BASE_FOLDER_IDS);
+                        if (relFormFolders.size() != (formIds.size() - checker.size())) {
                             String message = "[Formulaire@moveForms] You're not owner of all the folders containing forms with ids " + formIds;
                             log.error(message);
                             unauthorized(request, message);
@@ -779,7 +788,7 @@ public class FormController extends ControllerHelper {
 
                             // Check if targetFolderId is not owned by the connected user
                             String folderOwner = targetedFolderEvt.right().getValue().getString("user_id");
-                            if (!FORBIDDEN_FOLDER_IDS.contains(targetFolderId) &&
+                            if (!BASE_FOLDER_IDS.contains(targetFolderId) &&
                                 (folderOwner == null || !user.getUserId().equals(folderOwner))) {
                                 String message = "[Formulaire@moveForms] You're not owner of the targeted folder with id " + targetFolderId;
                                 log.error(message);
