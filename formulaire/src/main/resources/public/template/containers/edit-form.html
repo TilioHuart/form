@@ -18,7 +18,7 @@
                     </div>
                     <button class="cell cancel" navigation-trigger="redirectTo('/list/mine')"><i18n>formulaire.return</i18n></button>
                     <button class="cell dontSave" ng-class="{cancel: vm.form.nb_responses <= 0}"
-                            ng-click="vm.organizeQuestions()" ng-disabled="vm.form.nb_responses > 0">
+                            ng-click="vm.organizeFormElements()" ng-disabled="vm.form.nb_responses > 0">
                         <i18n>formulaire.organize</i18n>
                     </button>
                     <button class="cell cancel dontSave" ng-click="vm.goPreview()" ng-show="vm.formElements.all.length >= 1"><i18n>formulaire.preview</i18n></button>

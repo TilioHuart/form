@@ -60,9 +60,9 @@ interface ViewModel {
     return() : Promise<void>;
     createNewElement(parentSection?: Section) : Promise<void>;
     doCreateNewElement(code?: number, parentSection?: Section) : void;
-    organizeQuestions() : Promise<void>;
-    doOrganizeQuestions() : Promise<void>;
-    cancelOrganizeQuestions() : Promise<void>;
+    organizeFormElements() : Promise<void>;
+    doOrganizeFormElements() : Promise<void>;
+    cancelOrganizeFormElements() : Promise<void>;
     duplicateQuestion(question: Question) : Promise<void>;
     deleteFormElement() : Promise<void>;
     doDeleteFormElement() : Promise<void>;
@@ -208,14 +208,14 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             $scope.safeApply();
         };
 
-        vm.organizeQuestions = async () : Promise<void> => {
+        vm.organizeFormElements = async () : Promise<void> => {
             await template.open('lightbox', 'lightbox/questions-reorganization');
             vm.display.lightbox.reorganization = true;
             $scope.safeApply();
             initOrgaNestedSortables();
         };
 
-        vm.doOrganizeQuestions = async () : Promise<void> => {
+        vm.doOrganizeFormElements = async () : Promise<void> => {
             for (let question of vm.formElements.getAllQuestions().all) {
                 if ((question.section_id || question.section_position) && question.position) {
                     if (question.position > 0) {
@@ -228,13 +228,14 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 }
             }
 
-            await formElementService.update(vm.formElements.getAllQuestions().all);
+            await questionService.update(vm.formElements.getAllQuestions().all);
+            await sectionService.update(vm.formElements.getSections().all);
             vm.display.lightbox.reorganization = false;
             template.close('lightbox');
             $scope.safeApply();
         };
 
-        vm.cancelOrganizeQuestions = async () : Promise<void> => {
+        vm.cancelOrganizeFormElements = async () : Promise<void> => {
             await vm.formElements.sync(vm.form.id);
             vm.closeLightbox('reorganization');
         };
@@ -674,7 +675,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                             $scope.safeApply();
                             if (refresh) {
                                 await vm.formElements.sync(vm.form.id);
-                                vm.organizeQuestions();
+                                vm.organizeFormElements();
                             }
                         }
                     });

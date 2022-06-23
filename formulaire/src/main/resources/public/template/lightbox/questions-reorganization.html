@@ -1,4 +1,4 @@
-<lightbox class="dontSave" show="vm.display.lightbox.reorganization" on-close="vm.cancelOrganizeQuestions()">
+<lightbox class="dontSave" show="vm.display.lightbox.reorganization" on-close="vm.cancelOrganizeFormElements()">
     <h2><i18n>formulaire.organize</i18n></h2>
     <div class="drag">
         <ul id="orga-container-0" class="orga-nested-container">
@@ -30,7 +30,7 @@
         </ul>
     </div>
     <div class="action-buttons">
-        <button class="cell cancel" ng-click="vm.cancelOrganizeQuestions()"><i18n>formulaire.cancel</i18n></button>
-        <button class="cell" ng-click="vm.doOrganizeQuestions()"><i18n>formulaire.confirm</i18n></button>
+        <button class="cell cancel" ng-click="vm.cancelOrganizeFormElements()"><i18n>formulaire.cancel</i18n></button>
+        <button class="cell" ng-click="vm.doOrganizeFormElements()"><i18n>formulaire.confirm</i18n></button>
     </div>
 </lightbox>
