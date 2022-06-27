@@ -1,19 +1,14 @@
 {
     "formulaire": "Formulaire",
+    "formulaire_public": "Formulaire-public",
 
-    "formulaire.response_notification": "Notification de réponse à un formulaire",
-    "formulaire.new_form_notification": "Notification de nouveau formulaire à répondre",
+    "formulaire_public.response_notification": "Notification de réponse à un formulaire",
 
-    "push.notif.formulaire.response": "Nouvelle notification Formulaire",
-    "push.notif.formulaire.newForm": "Nouvelle notification Formulaire",
+    "push.notif.formulaire.public.response": "Nouvelle notification Formulaire",
 
     "timeline.formulaire.new.notification": "Nouvelle notification Formulaire ",
-    "timeline.formulaire.from": "de ",
-    "timeline.formulaire.unknown.sender": "Utilisateur INCONNU",
     "timeline.formulaire.lambda.sender": "Un utilisateur ",
     "timeline.formulaire.responded": " a répondu au formulaire ",
-    "timeline.formulaire.sent": " vous a envoyé un formulaire. ",
     "timeline.formulaire.see": ". Voir les ",
-    "timeline.formulaire.results": "résultats",
-    "timeline.formulaire.access": "Accéder au formulaire "
+    "timeline.formulaire.results": "résultats"
 }

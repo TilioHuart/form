@@ -1,9 +1,10 @@
 import {idiom, ng, notify, template} from "entcore";
-import {DistributionStatus, Question, Response, Responses} from "@common/models";
+import {DistributionStatus, Form, Question, Response, Responses} from "@common/models";
 import {captchaService, responseService} from "../services";
 import {Mix} from "entcore-toolkit";
 
 interface ViewModel {
+    form: Form;
     formKey: string;
     distributionKey: string;
     distributionCaptcha: string;
@@ -84,6 +85,7 @@ export const captchaController = ng.controller('CaptchaController', ['$scope',
     // Utils
 
     const syncWithStorageData = () : void => {
+        vm.form = Mix.castAs(Form, JSON.parse(sessionStorage.getItem('form')));
         vm.formKey = JSON.parse(sessionStorage.getItem('formKey'));
         vm.distributionKey = JSON.parse(sessionStorage.getItem('distributionKey'));
         vm.distributionCaptcha = JSON.parse(sessionStorage.getItem('distributionCaptcha'));
