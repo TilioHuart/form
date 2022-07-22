@@ -1,21 +1,17 @@
 <lightbox show="vm.display.lightbox.sharing" on-close="vm.closeShareFormLightbox()">
-    <share-panel ng-if="!vm.forms.selected[0].is_public" app-prefix="formulaire" resources="vm.forms.selected[0]" auto-close="true"></share-panel>
+    <share-panel app-prefix="formulaire" resources="vm.forms.selected" auto-close="true"></share-panel>
 
     <div ng-if="vm.forms.selected[0].is_public">
-        <h2><i18n>formulaire.share</i18n></h2>
-
-        <div>
-            <div><i18n>formulaire.share.link.access</i18n></div>
-            <div class="public_link">
-                [[vm.forms.selected[0].getPublicLink()]]
-                <a class="clipboard-link-field" data-clipboard-text="[[vm.forms.selected[0].getPublicLink()]]">
-                    <i class="i-duplicate md-icon"></i>
-                </a>
-            </div>
+        <h2><i18n>formulaire.share.link.access</i18n></h2>
+        <div class="public_link">
+            [[vm.forms.selected[0].getPublicLink()]]
+            <a class="clipboard-link-field" data-clipboard-text="[[vm.forms.selected[0].getPublicLink()]]">
+                <i class="i-duplicate md-icon"></i>
+            </a>
         </div>
+    </div>
 
-        <div class="action-buttons alone">
-            <button class="cell cancel" ng-click="vm.closeShareFormLightbox()"><i18n>formulaire.close</i18n></button>
-        </div>
+    <div class="action-buttons alone">
+        <button class="cell cancel" ng-click="vm.closeShareFormLightbox()"><i18n>formulaire.close</i18n></button>
     </div>
 </lightbox>

@@ -97,7 +97,7 @@
   "formulaire.prop.rgpd.description.intro": "Vos informations à caractère personnel sont recueillies pour : <b>{0}</b>. Elles seront conservées dans nos fichiers jusqu'au <b>{1}</b>. Elles seront détruites à cette date. En application du Règlement Général de Protection des données (RGPD), vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation au traitement de vos données. Pour exercer ce droit ou pour toute question concernant le traitement de vos données personnelles, vous pouvez contacter :",
   "formulaire.prop.rgpd.description.delegates": "<div><b>Le délégué à la protection des données {0}</b> ({1})</div><div class='left-spacing'>{2}</br>{3} {4}</div>",
 
-  "formulaire.share.link.access": "Lien d'accès au formulaire : ",
+  "formulaire.share.link.access": "Lien à communiquer pour répondre au formulaire : ",
   "formulaire.link.copy.success": "Le lien est copié dans le presse-papier.",
   "formulaire.link.copy.error": "Une erreur est survenue lors de la copie du lien.",
 
