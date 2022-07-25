@@ -25,6 +25,11 @@
         "zimbra-max-recipients": {{ formZimbraMaxRecipients|default('50') }},
 		"max-responses-export-PDF": {{ formMaxResponses|default('100') }},
 		"max-users-sharing": {{ formMaxUsers|default('65000') }},
+        "node-pdf-generator" : {
+            "pdf-connector-id": "exportpdf",
+            "auth": "{{ nodePdfToken }}",
+            "url" : "{{ nodePdfUrl }}"
+        },
         "publicConf": {
             "xiti": {
                 "ID_SERVICE": {

@@ -1,12 +1,13 @@
 {
-    "name": "{{formulaireVersion}}",
+    "name": "{{formulairePublicVersion}}",
     "config": {
         "sql": true,
-        "main" : "fr.openent.formulaire.Formulaire",
-        "port" : 8067,
-        "app-name" : "Formulaire",
-        "app-address" : "/formulaire",
-        "app-icon" : "Formulaire-large",
+        "main" : "fr.openent.formulaire_public.FormulairePublic",
+        "port" : 8077,
+		"app-name" : "Formulaire-public",
+		"app-address" : "/formulaire-public",
+		"path-prefix" : "formulaire-public",
+		"app-icon" : "{{host}}/formulaire-public/public/img/logo.svg",
         "host": "https://{{ host }}",
         "ssl" : false,
         "auto-redeploy": false,
@@ -16,15 +17,6 @@
         "app-registry.port" : 8012,
         "mode" : "prod",
         "entcore.port" : 8009, 
-        "test": false,
-        {% if ha and item != 'jobs' %}
-        "rgpd-cron" : "0 0 1 * * ? 2099",
-        {% else %}
-        "rgpd-cron" : "{{ formRgpdCron|default('0 0 0 */1 * ? *') }}",
-        {% endif %}
-        "zimbra-max-recipients": {{ formZimbraMaxRecipients|default('50') }},
-		"max-responses-export-PDF": {{ formMaxResponses|default('100') }},
-		"max-users-sharing": {{ formMaxUsers|default('65000') }},
         "publicConf": {
             "xiti": {
                 "ID_SERVICE": {
