@@ -5,7 +5,7 @@
 * Financeur(s) : Ville de Paris, Région Nouvelle Aquitaine, Région Hauts de France
 * Description : Application de création et de gestion de formulaires dans l'OPEN ENT.
 
-## Configuration
+## Configuration du sous-module Formulaire
 
 <pre>
 {
@@ -42,3 +42,10 @@ Il y aura aussi à ajouter des variables d'environnement dans votre ent-core.jso
   }
 }
 </pre>
+
+
+## Configuration du sous-module Formulaire-public
+
+Le "db-schema" doit être identique à celui du sous-module Formulaire (utilisation de la même base de donnée).
+
+Aucune autre configuration particulière.
