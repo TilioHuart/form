@@ -9,13 +9,18 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
+import org.entcore.common.events.EventStore;
 import org.entcore.common.user.UserUtils;
+
+import static fr.openent.form.core.Events.ACCESS;
 
 public class FormulairePublicController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(FormulairePublicController.class);
+    private EventStore eventStore;
 
     public FormulairePublicController() {
         super();
+        this.eventStore = eventStore;
     }
 
     @SecuredAction(ConsoleRights.ACCESS_RIGHT)
@@ -28,6 +33,7 @@ public class FormulairePublicController extends ControllerHelper {
         UserUtils.getUserInfos(eb, request, user -> {
             JsonObject context = new JsonObject().put("notLoggedIn", user == null);
             renderView(request, context, "formulaire_public.html", null);
+            eventStore.createAndStoreEvent(ACCESS.name(), request);
         });
     }
 }
