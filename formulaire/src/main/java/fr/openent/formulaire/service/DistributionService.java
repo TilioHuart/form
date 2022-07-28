@@ -48,6 +48,16 @@ public interface DistributionService {
     void listByFormAndStatus(String formId, String status, String nbLines, Handler<Either<String, JsonArray>> handler);
 
     /**
+     * List all the distributions of a specific question of a specific form with specific status
+     * @param formId form identifier
+     * @param status status
+     * @param questionId question identifier
+     * @param nbLines number of lines already loaded
+     * @param handler function handler returning JsonArray data
+     */
+    void listByFormAndStatusAndQuestion(String formId, String status, String questionId, String nbLines, Handler<Either<String, JsonArray>> handler);
+
+    /**
      * Get the number of distributions for a specific form
      * @param formId form identifier
      * @param handler function handler returning JsonObject data

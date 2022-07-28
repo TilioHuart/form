@@ -1,5 +1,6 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.core.constants.Field;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.security.ResponseRight;
@@ -114,6 +115,18 @@ public class DistributionController extends ControllerHelper {
         String status = request.getParam("status");
         String nbLines = request.params().get("nbLines");
         distributionService.listByFormAndStatus(formId, status, nbLines, arrayResponseHandler(request));
+    }
+
+    @Get("/distributions/forms/:formId/questions/:questionId/list/:status")
+    @ApiDoc("List all the distributions of a specific question of a specific form with a specific status")
+    @ResourceFilter(CreationRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void listByFormAndStatusAndQuestion(HttpServerRequest request) {
+        String formId = request.getParam(Field.PARAM_FORM_ID);
+        String status = request.getParam(Field.STATUS);
+        String questionId = request.getParam(Field.PARAM_QUESTION_ID);
+        String nbLines = request.params().get(Field.PARAM_NB_LINES);
+        distributionService.listByFormAndStatusAndQuestion(formId, status, questionId, nbLines, arrayResponseHandler(request));
     }
 
     @Get("/distributions/forms/:formId/count")

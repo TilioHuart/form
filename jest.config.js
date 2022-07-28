@@ -12,7 +12,9 @@ module.exports = {
         "/node_modules/",
         "<rootDir>/common/build/",
         "<rootDir>/formulaire/build/",
-        "<rootDir>/formulaire/out/"
+        "<rootDir>/formulaire/out/",
+        "<rootDir>/formulaire-public/build/",
+        "<rootDir>/formulaire-public/out/"
     ],
     "verbose": true,
     "testURL": "http://localhost/",

@@ -67,6 +67,23 @@ public class DefaultDistributionService implements DistributionService {
     }
 
     @Override
+    public void listByFormAndStatusAndQuestion(String formId, String status, String questionId, String nbLines, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT d.* FROM " + Tables.DISTRIBUTION + " d " +
+                "JOIN " + Tables.RESPONSE + " r ON r.distribution_id = d.id " +
+                "WHERE form_id = ? AND status = ? AND question_id = ? " +
+                "ORDER BY date_response DESC";
+        JsonArray params = new JsonArray().add(formId).add(status).add(questionId);
+
+        if (nbLines != null && !nbLines.equals("null")) {
+            query += " LIMIT ? OFFSET ?";
+            params.add(NB_NEW_LINES).add(nbLines);
+        }
+
+        query += ";";
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
     public void countFinished(String formId, Handler<Either<String, JsonObject>> handler) {
         String query = "SELECT COUNT(*) FROM " + Tables.DISTRIBUTION + " WHERE form_id = ? AND status = ?;";
         JsonArray params = new JsonArray().add(formId).add(FINISHED);

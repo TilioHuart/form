@@ -15,8 +15,8 @@ interface IService {
     contents: any
 }
 
-const controllers: Array<IController> = []
-const directives: Array<IDirective> = []
+const controllers: Array<IController> = [];
+const directives: Array<IDirective> = [];
 const services: Array<IService> = [];
 
 export const ng = {

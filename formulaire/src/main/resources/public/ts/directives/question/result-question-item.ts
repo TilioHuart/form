@@ -161,7 +161,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                 if (vm.question.question_type != Types.FREETEXT) {
                     await vm.question.choices.sync(vm.question.id);
                     await vm.responses.sync(vm.question, vm.question.question_type == Types.FILE);
-                    await vm.distributions.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, vm.isGraphQuestion ? null : 0);
+                    await vm.distributions.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, vm.question.id, vm.isGraphQuestion ? null : 0);
                     vm.nbResponses = new Set(vm.responses.all.map(r => r.distribution_id)).size;
 
                     if (vm.isGraphQuestion) {
@@ -265,7 +265,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
 
             vm.loadMoreResults = async () : Promise<void> => {
                 if (!vm.isGraphQuestion) {
-                    await vm.distributions.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, vm.distributions.all.length);
+                    await vm.distributions.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, vm.question.id, vm.distributions.all.length);
                     vm.syncResultsMap();
                     UtilsUtils.safeApply($scope);
                 }

@@ -162,7 +162,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
                 await results.syncForForm(vm.form.id);
                 // Sync form distributions
                 let distribs = new Distributions();
-                await distribs.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, null);
+                await distribs.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, null, null);
                 // Sync questions choices
                 let questionIds = questions.map(q => q.id);
                 let listChoices = Mix.castArrayAs(QuestionChoice, await questionChoiceService.listChoices(questionIds));

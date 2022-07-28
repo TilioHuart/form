@@ -16,7 +16,7 @@ public class DefaultResponseService implements ResponseService {
 
     @Override
     public void list(String questionId, String nbLines, JsonArray distribs, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT * FROM " + Tables.RESPONSE + " r ";
+        String query = "SELECT r.* FROM " + Tables.RESPONSE + " r ";
         JsonArray params = new JsonArray().add(questionId);
 
         if (nbLines != null && !nbLines.equals("null")) {
