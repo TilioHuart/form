@@ -21,6 +21,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
+import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 
 import java.text.ParseException;
@@ -28,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
 import static fr.openent.form.core.constants.DistributionStatus.FINISHED;
+import static fr.openent.form.core.constants.Field.*;
 import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_RIGHT;
 import static fr.openent.form.core.constants.ShareRights.RESPONDER_RESOURCE_RIGHT;
 import static fr.openent.form.helpers.RenderHelper.*;
@@ -202,7 +204,7 @@ public class ResponseController extends ControllerHelper {
                                 badRequest(request, message);
                                 return;
                             }
-                            responseService.create(response, user, questionId, defaultResponseHandler(request));
+                            createResponse(request, response, user, questionId);
                         });
                     }
                     else {
@@ -214,10 +216,47 @@ public class ResponseController extends ControllerHelper {
                             try { timeFormatter.parse(response.getString("answer")); }
                             catch (ParseException e) { e.printStackTrace(); }
                         }
-                        responseService.create(response, user, questionId, defaultResponseHandler(request));
+                        createResponse(request, response, user, questionId);
                     }
                 });
             });
+        });
+    }
+
+    private void createResponse(HttpServerRequest request, JsonObject response, UserInfos user, String questionId) {
+        Integer distributionId = response.getInteger(DISTRIBUTION_ID, null);
+        Integer choiceId = response.getInteger(CHOICE_ID, null);
+        String answer = response.getString(ANSWER, null);
+
+        responseService.listMineByDistribution(questionId, distributionId.toString(), user, listEvt -> {
+            if (listEvt.isLeft()) {
+                log.error("[Formulaire@createResponse] Fail to list responses : " + listEvt.left().getValue());
+                renderInternalError(request, listEvt);
+                return;
+            }
+
+            JsonArray responses = listEvt.right().getValue();
+            boolean found = false;
+            int i = 0;
+            while (!found && i < responses.size()) {
+                JsonObject r = responses.getJsonObject(i);
+                boolean checkQuestionId = r.getInteger(QUESTION_ID).toString().equals(questionId);
+                boolean checkResponderId = r.getString(RESPONDER_ID).equals(user.getUserId());
+                boolean checkDistributionId = r.getInteger(DISTRIBUTION_ID).equals(distributionId);
+                boolean checkAnswerId = r.getString(ANSWER).equals(answer);
+                boolean checkChoiceId = r.getInteger(CHOICE_ID) == choiceId;
+                found = checkQuestionId && checkResponderId && checkDistributionId && checkAnswerId && checkChoiceId;
+                i++;
+            }
+
+            if (found) {
+                String message = "[Formulaire@createResponse] An identical response already exists " + responses.getJsonObject(i-1);
+                log.error(message);
+                conflict(request, message);
+                return;
+            }
+
+            responseService.create(response, user, questionId, defaultResponseHandler(request));
         });
     }
 
