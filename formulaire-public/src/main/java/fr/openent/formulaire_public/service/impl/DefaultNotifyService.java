@@ -21,6 +21,6 @@ public class DefaultNotifyService implements NotifyService {
                 .put("formResultsUri", "/formulaire#/form/" + form.getInteger("id") + "/results/1")
                 .put("pushNotif", new JsonObject().put("title", "push.notif.formulaire.public.response").put("body", ""));
 
-        timelineHelper.notifyTimeline(request, "formulaire_public.response_notification", null, managers.getList(), params);
+        timelineHelper.notifyTimeline(request, "formulaire-public.response_notification", null, managers.getList(), params);
     }
 }
