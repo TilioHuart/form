@@ -48,10 +48,14 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
                         <!-- Interaction buttons-->
                         <div class="question-bottom" ng-if="vm.question.selected">
                             <div class="mandatory" ng-if="vm.question.question_type != vm.Types.FREETEXT" title="[[vm.getTitle('mandatory.explanation')]]">
-                                <switch ng-model="vm.question.mandatory" ng-change="vm.onSwitchMandatory(vm.question.mandatory)"></switch><i18n>formulaire.mandatory</i18n>
+                                <switch ng-model="vm.question.mandatory" ng-class="{switchoff: vm.hasFormResponses}"
+                                        ng-change="vm.onSwitchMandatory(vm.question.mandatory)"></switch>
+                                <i18n>formulaire.mandatory</i18n>
                             </div>
                             <div class="conditional" ng-if="vm.showConditionalSwitch()">
-                                <switch ng-model="vm.question.conditional" ng-change="vm.onSwitchConditional(vm.question.conditional)"></switch><i18n>formulaire.conditional</i18n>
+                                <switch ng-model="vm.question.conditional" ng-class="{switchoff: vm.hasFormResponses}"
+                                        ng-change="vm.onSwitchConditional(vm.question.conditional)"></switch>
+                                <i18n>formulaire.conditional</i18n>
                             </div>
                             <i class="i-duplicate lg-icon spaced-right" ng-click="vm.duplicateQuestion()"
                                 ng-class="{disabled: vm.hasFormResponses}"  title="[[vm.getTitle('duplicate')]]"></i>
@@ -120,7 +124,10 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
             };
 
             vm.onSwitchConditional = (isConditional: boolean) : void => {
-                vm.question.mandatory = isConditional;
+                if (vm.hasFormResponses) {
+                    vm.question.conditional = !isConditional;
+                }
+                vm.question.mandatory = vm.question.conditional;
                 $scope.$apply();
             };
         }

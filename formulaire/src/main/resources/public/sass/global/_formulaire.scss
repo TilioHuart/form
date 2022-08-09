@@ -156,6 +156,14 @@ body.formulaire section.main {
     align-items: baseline;
   }
 
+  switch.switchoff span {
+    background: $formulaire-grey-light !important;
+
+    &:before {
+      background: $formulaire-grey !important;
+    }
+  }
+
 
   // Forms-list
 
