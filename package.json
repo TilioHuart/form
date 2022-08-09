@@ -4,8 +4,8 @@
   "description": "Formulaire",
   "main": "gulpfile.js",
   "scripts": {
-    "coverage" : "./node_modules/.bin/jest --config jest.config.js --coverage",
-    "test" : "npm run coverage",
+    "coverage": "./node_modules/.bin/jest --config jest.config.js --coverage",
+    "test": "npm run coverage",
     "coverage:dev": "./node_modules/.bin/jest --config jest.config.js --coverage --watch --verbose false",
     "test:dev": "npm run coverage:dev"
   },
