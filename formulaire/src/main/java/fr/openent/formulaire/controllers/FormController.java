@@ -754,6 +754,7 @@ public class FormController extends ControllerHelper {
                         // Check case if form shared with me and doesn't have rel_form_folder
                         if (relFormFolderEvt.right().getValue().isEmpty() && targetFolderId == ID_ARCHIVED_FOLDER) {
                             relFormFolderService.create(user, formIds, targetFolderId, arrayResponseHandler(request));
+                            return;
                         }
                         else if (relFormFolderEvt.right().getValue().isEmpty()) {
                             String message = "[Formulaire@moveForms] No relation form-folders found for forms with ids " + formIds;
