@@ -111,15 +111,19 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 			let question = questions[i];
 			let response = responses[i];
 
-			let questionType = (question as Question).question_type;
-			if (questionType === Types.TIME) {
-				if (typeof response.answer != "string") {
-					response.answer = moment(response.answer).format("HH:mm");
-				}
+			if (!response.answer) {
+				response.answer = "";
 			}
-			else if (questionType === Types.DATE) {
-				if (typeof response.answer != "string") {
-					response.answer = moment(response.answer).format("DD/MM/YYYY");
+			else {
+				let questionType = (question as Question).question_type;
+				if (questionType === Types.TIME) {
+					if (typeof response.answer != "string") {
+						response.answer = moment(response.answer).format("HH:mm");
+					}
+				} else if (questionType === Types.DATE) {
+					if (typeof response.answer != "string") {
+						response.answer = moment(response.answer).format("DD/MM/YYYY");
+					}
 				}
 			}
 		}
