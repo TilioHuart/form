@@ -308,12 +308,13 @@ body.formulaire section.main {
   }
 
   .public_link {
-    font-size: 14px;
-    font-style: italic;
-    margin-top: 1%;
+    display: flex;
+    align-items: center;
 
-    a {
-      margin-left: 1%;
+    .text {
+      font-size: 14px;
+      font-style: italic;
+      margin-right: 1%;
     }
   }
 

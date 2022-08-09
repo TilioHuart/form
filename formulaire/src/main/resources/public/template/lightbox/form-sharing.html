@@ -4,7 +4,7 @@
     <div ng-if="vm.forms.selected[0].is_public">
         <h2><i18n>formulaire.share.link.access</i18n></h2>
         <div class="public_link">
-            [[vm.forms.selected[0].getPublicLink()]]
+            <div class="text ellipsis">[[vm.forms.selected[0].getPublicLink()]]</div>
             <a class="clipboard-link-field" data-clipboard-text="[[vm.forms.selected[0].getPublicLink()]]">
                 <i class="i-duplicate md-icon"></i>
             </a>
