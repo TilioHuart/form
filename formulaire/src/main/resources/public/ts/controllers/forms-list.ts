@@ -264,6 +264,13 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         template.open('lightbox', 'lightbox/form-sharing');
         vm.display.lightbox.sharing = true;
         window.setTimeout(async function () {
+            if (vm.forms.selected[0].is_public) {
+                let responses = document.querySelectorAll('th:nth-child(4), td:nth-child(4)');
+                for (let i = 0; i < responses.length; i++) {
+                    responses[i].remove();
+                }
+            }
+
             let contribs = document.querySelectorAll('[data-label="Contribuer"]');
             let gestions = document.querySelectorAll('[data-label="Gérer"]');
             for (let i = 1; i < contribs.length; i++) {
@@ -284,7 +291,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
                     $scope.safeApply();
                 });
             }
-        }, 500);
+        }, 100);
 
     };
 
