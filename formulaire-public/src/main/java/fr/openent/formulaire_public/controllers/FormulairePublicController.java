@@ -3,6 +3,7 @@ package fr.openent.formulaire_public.controllers;
 import fr.openent.form.core.constants.ConsoleRights;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
+import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
@@ -10,6 +11,8 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.events.EventStore;
+import org.entcore.common.http.filter.AdminFilter;
+import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserUtils;
 
 public class FormulairePublicController extends ControllerHelper {
@@ -31,5 +34,12 @@ public class FormulairePublicController extends ControllerHelper {
             JsonObject context = new JsonObject().put("notLoggedIn", user == null);
             renderView(request, context, "formulaire_public.html", null);
         });
+    }
+
+    @Get("/config")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdminFilter.class)
+    public void getConfig(final HttpServerRequest request) {
+        renderJson(request, config);
     }
 }

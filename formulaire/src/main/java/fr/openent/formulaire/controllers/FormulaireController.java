@@ -2,6 +2,7 @@ package fr.openent.formulaire.controllers;
 
 import fr.wseduc.rs.Get;
 import fr.wseduc.rs.ApiDoc;
+import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
@@ -10,6 +11,8 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.events.EventStore;
+import org.entcore.common.http.filter.ResourceFilter;
+import org.entcore.common.http.filter.SuperAdminFilter;
 import org.vertx.java.core.http.RouteMatcher;
 
 import java.util.Map;
@@ -37,5 +40,19 @@ public class FormulaireController extends ControllerHelper {
     public void render(HttpServerRequest request) {
         renderView(request);
         eventStore.createAndStoreEvent(ACCESS.name(), request);
+    }
+
+    @Get("/config")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(SuperAdminFilter.class)
+    public void getConfig(final HttpServerRequest request) {
+        JsonObject safeConfig = config.copy();
+
+        JsonObject nodePdfGenerator = safeConfig.getJsonObject("node-pdf-generator", null);
+        if (nodePdfGenerator != null) {
+            if (nodePdfGenerator.getString("auth", null) != null) nodePdfGenerator.put("auth", "**********");
+        }
+
+        renderJson(request, safeConfig);
     }
 }
