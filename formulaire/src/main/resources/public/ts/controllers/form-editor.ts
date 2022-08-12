@@ -317,7 +317,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     if (formElement instanceof Question && formElement.section_id) {
                         let section = vm.formElements.all.filter(e => e instanceof Section && e.id === (formElement as Question).section_id)[0] as Section;
                         for (let i = formElement.section_position; i < section.questions.all.length; i++) {
-                            section.questions.all[i].position--;
+                            section.questions.all[i].section_position--;
                         }
                         await formElementService.update(section.questions.all.slice(formElement.section_position));
                     }

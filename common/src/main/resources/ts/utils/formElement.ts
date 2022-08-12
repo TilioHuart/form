@@ -134,7 +134,9 @@ export class FormElementUtils {
                 item.position = newIndex + 1;
                 item.section_id = null;
                 item.section_position = null;
+                oldSection.questions.all = oldSection.questions.all.filter(q => q.id != item.id);
                 await questionService.update(oldSection.questions.all);
+                formElements.all.push(item);
                 await formElementService.update(formElements.all);
                 cleanResidue = true;
             }
@@ -173,6 +175,7 @@ export class FormElementUtils {
                 item.section_position = newIndex + 1;
                 newSection.questions.all.push(item);
                 await questionService.update(newSection.questions.all);
+                formElements.all = formElements.all.filter(e => e.id != item.id);
                 await formElementService.update(formElements.all);
             }
         }
