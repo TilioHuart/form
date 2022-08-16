@@ -29,7 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
 import static fr.openent.form.core.constants.DistributionStatus.FINISHED;
-import static fr.openent.form.core.constants.Field.*;
+import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_RIGHT;
 import static fr.openent.form.core.constants.ShareRights.RESPONDER_RESOURCE_RIGHT;
 import static fr.openent.form.helpers.RenderHelper.*;

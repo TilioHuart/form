@@ -1,6 +1,5 @@
 package fr.openent.formulaire.controllers;
 
-import fr.openent.form.core.constants.Field;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.security.ResponseRight;
@@ -28,6 +27,7 @@ import org.entcore.common.notification.TimelineHelper;
 import org.entcore.common.user.UserUtils;
 
 import static fr.openent.form.core.constants.DistributionStatus.FINISHED;
+import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.*;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
@@ -122,10 +122,10 @@ public class DistributionController extends ControllerHelper {
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listByFormAndStatusAndQuestion(HttpServerRequest request) {
-        String formId = request.getParam(Field.PARAM_FORM_ID);
-        String status = request.getParam(Field.STATUS);
-        String questionId = request.getParam(Field.PARAM_QUESTION_ID);
-        String nbLines = request.params().get(Field.PARAM_NB_LINES);
+        String formId = request.getParam(PARAM_FORM_ID);
+        String status = request.getParam(STATUS);
+        String questionId = request.getParam(PARAM_QUESTION_ID);
+        String nbLines = request.params().get(PARAM_NB_LINES);
         distributionService.listByFormAndStatusAndQuestion(formId, status, questionId, nbLines, arrayResponseHandler(request));
     }
 
