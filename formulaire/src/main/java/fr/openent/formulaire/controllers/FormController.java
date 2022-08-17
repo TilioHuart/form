@@ -12,6 +12,7 @@ import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.Either;
+import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.*;
@@ -35,6 +36,7 @@ import static fr.openent.form.core.Events.CREATE;
 import static fr.openent.form.core.constants.ConsoleRights.*;
 import static fr.openent.form.core.constants.Constants.MAX_USERS_SHARING;
 import static fr.openent.form.core.constants.Constants.RGPD_LIFETIME_VALUES;
+import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.FolderIds.*;
 import static fr.openent.form.core.constants.ShareRights.*;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
@@ -1068,7 +1070,53 @@ public class FormController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void shareJson(final HttpServerRequest request) {
-        super.shareJson(request, false);
+        final String id = request.params().get(ID);
+        if (id != null && !id.trim().isEmpty()) {
+            UserUtils.getUserInfos(this.eb, request, user -> {
+                if (user == null) {
+                    String message = "[Formulaire@shareJson] User not found in session.";
+                    log.error(message);
+                    unauthorized(request, message);
+                    return;
+                }
+
+                super.shareService.shareInfos(user.getUserId(), id, I18n.acceptLanguage(request), request.params().get(SEARCH), shareInfosEvt -> {
+                    if (shareInfosEvt.isLeft()) {
+                        log.error("[Formulaire@shareJson] Fail to get sharing infos : " + shareInfosEvt.left().getValue());
+                        renderInternalError(request, shareInfosEvt);
+                        return;
+                    }
+
+                    JsonObject shareInfos = shareInfosEvt.right().getValue().copy();
+                    formService.get(id, user, formEvt -> {
+                        if (formEvt.isLeft()) {
+                            log.error("[Formulaire@shareJson] Fail to get form with id " + id + " : " + formEvt.left().getValue());
+                            renderInternalError(request, formEvt);
+                            return;
+                        }
+
+                        JsonObject form = formEvt.right().getValue();
+                        if (form.getBoolean(IS_PUBLIC, false)) {
+                            JsonArray actions = shareInfos.getJsonArray(ACTIONS);
+
+                            for (int i = actions.size() - 1; i >= 0; i--) {
+                                JsonObject action = actions.getJsonObject(i);
+                                if (action.getString(PARAM_DISPLAY_NAME).equals(RESPONDER_RESOURCE_RIGHT)) {
+                                    actions.remove(i);
+                                }
+                            }
+                        }
+
+                        renderJson(request, shareInfos);
+                    });
+                });
+            });
+        }
+        else {
+            String message = "[Formulaire@shareJson] ID parameter must not be null or empty.";
+            log.error(message);
+            badRequest(request, message);
+        }
     }
 
     @Put("/share/json/:id")

@@ -3,6 +3,7 @@ package fr.openent.form.core.constants;
 public class Fields {
     // SQL columns
     public static final String ACTION = "action";
+    public static final String ACTIONS = "actions";
     public static final String ACTIVE = "active";
     public static final String ADDRESS = "address";
     public static final String ANONYMOUS = "anonymous";
@@ -59,6 +60,7 @@ public class Fields {
     public static final String RGPD = "rgpd";
     public static final String RGPD_GOAL = "rgpd_goal";
     public static final String RGPD_LIFETIME = "rgpd_lifetime";
+    public static final String SEARCH = "search";
     public static final String SECTION_ID = "section_id";
     public static final String SECTION_POSITION = "section_position";
     public static final String SENDER_ID = "sender_id";
@@ -78,6 +80,7 @@ public class Fields {
     public static final String PARAM_FORM_ID = "formId";
     public static final String PARAM_NB_LINES = "nbLines";
     public static final String PARAM_QUESTION_ID = "questionId";
+    public static final String PARAM_DISPLAY_NAME = "displayName";
 
 
     private Fields() {
