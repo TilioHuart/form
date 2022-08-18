@@ -447,22 +447,22 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     if (target instanceof Question) { // Switch question with question target
                         FormElementUtils.switchPositions(vm.formElements, index, direction);
                     }
-                    else if (target instanceof Section) { // Put question into section target (start or end)
+                    else if (target instanceof Section) {
                         switch (direction) {
-                            case Direction.UP: {
+                            case Direction.UP: { // Put question at the end of the section target
                                 question.position = null;
                                 question.section_id = target.id;
                                 question.section_position = target.questions.all.length + 1;
-                                FormElementUtils.updateSiblingsPositions(vm.formElements, false, null, index);
+                                FormElementUtils.updateSiblingsPositions(vm.formElements, false, null, index + 1);
                                 target.questions.all.push(question);
                                 vm.formElements.all = vm.formElements.all.filter(e => e.id != question.id);
                                 break;
                             }
-                            case Direction.DOWN: {
+                            case Direction.DOWN: { // Put question at the start of the section target
                                 question.position = null;
                                 question.section_id = target.id;
                                 question.section_position = 1;
-                                FormElementUtils.updateSiblingsPositions(vm.formElements, false, null, index);
+                                FormElementUtils.updateSiblingsPositions(vm.formElements, false, null, index + 1);
                                 FormElementUtils.updateSiblingsPositions(target.questions, true, null, 0);
                                 target.questions.all.push(question);
                                 vm.formElements.all = vm.formElements.all.filter(e => e.id != question.id);
@@ -491,7 +491,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         question.section_id = null;
                         question.section_position = null;
                         FormElementUtils.updateSiblingsPositions(parentSection.questions, false, null, parentSection.questions.all.length - 1);
-                        FormElementUtils.updateSiblingsPositions(vm.formElements, true, null, parentSection.position - 1);
+                        FormElementUtils.updateSiblingsPositions(vm.formElements, true, null, parentSection.position);
                         parentSection.questions.all = parentSection.questions.all.filter(q => q.id != question.id);
                         vm.formElements.all.push(question);
                     }

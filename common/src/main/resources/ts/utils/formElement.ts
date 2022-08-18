@@ -242,8 +242,8 @@ export class FormElementUtils {
                     oldSection.questions.all = oldSection.questions.all.filter(q => q.id != item.id);
                     newSection.questions.all.push(item);
                     oldSection.questions.all.sort((a, b) => a.section_position - b.section_position);
-                    newSection.questions.all.sort((a, b) => a.section_position - b.section_position);
                 }
+                newSection.questions.all.sort((a, b) => a.section_position - b.section_position);
             }
             else { // Item moved FROM vm.formElements TO section with id 'newNestedSectionId'
                 FormElementUtils.updateSiblingsPositions(formElements, false, null, oldIndex);
