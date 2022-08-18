@@ -10,8 +10,9 @@ var fs = require('fs');
 
 var apps = ['formulaire', 'formulaire-public'];
 
-if (argv.module) {
-    apps = [argv.module];
+if (argv.targetModule) {
+    console.log("using arg:", argv.targetModule);
+    apps = [argv.targetModule];
 }
 
 gulp.task('drop-cache', function(){
