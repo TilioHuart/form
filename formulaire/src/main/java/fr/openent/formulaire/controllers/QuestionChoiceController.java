@@ -62,15 +62,6 @@ public class QuestionChoiceController extends ControllerHelper {
         questionChoiceService.listChoices(questionIds, arrayResponseHandler(request));
     }
 
-    @Get("/choices/:choiceId")
-    @ApiDoc("Get a specific by id")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
-    public void get(HttpServerRequest request) {
-        String choiceId = request.getParam("choiceId");
-        questionChoiceService.get(choiceId, defaultResponseHandler(request));
-    }
-
     @Post("/questions/:questionId/choices")
     @ApiDoc("Create a choice for a specific question")
     @ResourceFilter(ShareAndOwner.class)

@@ -99,22 +99,6 @@ public class DefaultQuestionServiceTest {
     }
 
     @Test
-    public void get(TestContext ctx) {
-        Async async = ctx.async();
-        String expectedQuery = "SELECT * FROM " + Tables.QUESTION + " WHERE id = ?;";
-        JsonArray expectedParams = new JsonArray().add("form_id");
-
-        vertx.eventBus().consumer("fr.openent.formulaire", message -> {
-            JsonObject body = (JsonObject) message.body();
-            ctx.assertEquals("prepared", body.getString("action"));
-            ctx.assertEquals(expectedQuery, body.getString("statement"));
-            ctx.assertEquals(expectedParams.toString(), body.getJsonArray("values").toString());
-            async.complete();
-        });
-        defaultQuestionService.get("form_id", null);
-    }
-
-    @Test
     public void create(TestContext ctx) {
         Async async = ctx.async();
         String expectedQuery = "INSERT INTO " + Tables.QUESTION + " (form_id, title, position, question_type, statement, " +

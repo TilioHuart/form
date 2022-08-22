@@ -9,7 +9,6 @@ export interface ResponseService {
     listMineByDistribution(questionId: number, distributionId: number) : Promise<any>;
     listByDistribution(distributionId: number) : Promise<any>;
     countByFormElement(formElement: FormElement) : Promise<any>;
-    get(responseId: number) : Promise<any>;
     save(response: Response, questionType?: number) : Promise<any>;
     create(response: Response) : Promise<any>;
     update(response: Response) : Promise<any>;
@@ -66,15 +65,6 @@ export const responseService: ResponseService = {
             }
             return DataUtils.getData(await http.get(`/formulaire/responses/count`, { params: questionIds }));
         } catch(err) {
-            notify.error(idiom.translate('formulaire.error.responseService.get'));
-            throw err;
-        }
-    },
-
-    async get(responseId: number) : Promise<any> {
-        try {
-            return DataUtils.getData(await http.get(`/formulaire/responses/${responseId}`));
-        } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.get'));
             throw err;
         }

@@ -139,22 +139,6 @@ public class ResponseController extends ControllerHelper {
         responseService.countByQuestions(questionIds, defaultResponseHandler(request));
     }
 
-    @Get("/responses/:responseId")
-    @ApiDoc("Get a specific response by id")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
-    public void get(HttpServerRequest request) {
-        String responseId = request.getParam("responseId");
-
-        // TODO get user infos
-        // TODO get response
-        // TODO get formId (via distrib ?)
-        // TODO getMyFormRights
-        // TODO if connected user neither responder nor has rights then unauthorized()
-
-        responseService.get(responseId, defaultResponseHandler(request));
-    }
-
     @Post("/questions/:questionId/responses")
     @ApiDoc("Create a response")
     @ResourceFilter(ShareAndOwner.class)
