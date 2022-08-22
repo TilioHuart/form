@@ -1,6 +1,5 @@
 package fr.openent.formulaire_public.service.impl;
 
-import fr.openent.form.core.constants.Tables;
 import fr.openent.formulaire_public.service.ResponseService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
@@ -11,6 +10,9 @@ import org.entcore.common.sql.SqlResult;
 import org.entcore.common.sql.SqlStatementsBuilder;
 
 import java.util.ArrayList;
+
+import static fr.openent.form.core.constants.Fields.*;
+import static fr.openent.form.core.constants.Tables.RESPONSE_TABLE;
 
 public class DefaultResponseService implements ResponseService {
 
@@ -26,17 +28,17 @@ public class DefaultResponseService implements ResponseService {
 
         if (!responsesList.isEmpty()) {
             SqlStatementsBuilder s = new SqlStatementsBuilder();
-            String query = "INSERT INTO " + Tables.RESPONSE + " (question_id, choice_id, answer, responder_id, distribution_id) " +
+            String query = "INSERT INTO " + RESPONSE_TABLE + " (question_id, choice_id, answer, responder_id, distribution_id) " +
                     "VALUES (?, ?, ?, ?, ?);";
 
             s.raw("BEGIN;");
             for (JsonObject response : responsesList) {
                 JsonArray params = new JsonArray()
-                        .add(response.getInteger("question_id", null))
-                        .add(response.getInteger("choice_id", null))
-                        .add(response.getString("answer", ""))
+                        .add(response.getInteger(QUESTION_ID, null))
+                        .add(response.getInteger(CHOICE_ID, null))
+                        .add(response.getString(ANSWER, ""))
                         .add("")
-                        .add(distribution.getInteger("id", null));
+                        .add(distribution.getInteger(ID, null));
                 s.prepared(query, params);
             }
             s.raw("COMMIT;");

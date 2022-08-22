@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.zip.Deflater;
 
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.utils.Zip;
 
@@ -15,7 +17,11 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 
+import static fr.openent.form.core.constants.Fields.*;
+
 public class FolderExporterZip extends FolderExporter {
+    public static final Logger log = LoggerFactory.getLogger(FolderExporterZip.class);
+
     public static class ZipContext extends FolderExporterContext {
         final public String zipFullPath;
         final String zipName;
@@ -35,10 +41,11 @@ public class FolderExporterZip extends FolderExporter {
     private Future<JsonObject> createZip(ZipContext context) {
         Future<JsonObject> future = Future.future();
         Zip.getInstance().zipFolder(context.basePath, context.zipFullPath, true, Deflater.NO_COMPRESSION, res -> {
-            if ("ok".equals(res.body().getString("status"))) {
+            if (OK.equals(res.body().getString(STATUS))) {
                 future.complete(res.body());
-            } else {
-                future.fail(res.body().getString("message"));
+            }
+            else {
+                future.fail(res.body().getString(MESSAGE));
             }
         });
         return future;
@@ -50,27 +57,26 @@ public class FolderExporterZip extends FolderExporter {
 
     public Future<ZipContext> exportToZip(Optional<JsonObject> root, List<JsonObject> rows) {
         UUID uuid = UUID.randomUUID();
-        String baseName = root.isPresent() ? root.get().getString("name", "archive") : "archive";
+        String baseName = root.isPresent() ? root.get().getString(NAME, ARCHIVE) : ARCHIVE;
         String rootBase = Paths.get(System.getProperty("java.io.tmpdir"), uuid.toString()).normalize().toString();
         String basePath = Paths.get(System.getProperty("java.io.tmpdir"), uuid.toString(), baseName).normalize()
                 .toString();
         ZipContext context = new ZipContext(rootBase, basePath, baseName);
-        return this.export(context, rows).compose(res -> {
-            return this.createZip(context);
-        }).map(res -> context);
+        return this.export(context, rows).compose(res -> this.createZip(context)).map(res -> context);
     }
 
     public Future<Void> sendZip(HttpServerRequest req, ZipContext context) {
         Future<Void> future = Future.future();
         try {
             final HttpServerResponse resp = req.response();
-            System.out.println("sending  ");
+            log.info("Sending zip file...");
             resp.putHeader("Content-Disposition", "attachment; filename=\"" + context.zipName + "\"");
             resp.putHeader("Content-Type", "application/octet-stream");
             resp.putHeader("Content-Description", "File Transfer");
             resp.putHeader("Content-Transfer-Encoding", "binary");
             resp.sendFile(context.zipFullPath, future.completer());
-        }catch (java.lang.IllegalStateException e){
+        }
+        catch (java.lang.IllegalStateException e) {
             future.complete();
         }
 
@@ -78,12 +84,11 @@ public class FolderExporterZip extends FolderExporter {
     }
 
     public Future<ZipContext> exportAndSendZip(JsonObject root, List<JsonObject> rows, HttpServerRequest req, boolean clean) {
-        return this.exportToZip(Optional.ofNullable(root), rows).compose(res -> {
-            return this.sendZip(req, res).map((r)->res);
-        }).compose(res->{
-            if(clean){
+        return this.exportToZip(Optional.ofNullable(root), rows).compose(res -> this.sendZip(req, res).map((r)->res)).compose(res -> {
+            if (clean) {
                 return removeZip(res);
-            }else{
+            }
+            else {
                 return Future.succeededFuture(res);
             }
         });
@@ -91,9 +96,7 @@ public class FolderExporterZip extends FolderExporter {
 
     public Future<ZipContext> removeZip(ZipContext context){
         Future<ZipContext> future = Future.future();
-        this.fs.deleteRecursive(context.rootBase,true, resRmDir->{
-            future.complete();
-        });
+        this.fs.deleteRecursive(context.rootBase,true, resRmDir -> future.complete());
         return future;
     }
 }

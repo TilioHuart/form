@@ -7,6 +7,8 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import static fr.openent.form.core.constants.Fields.*;
+
 public class MessageResponseHelper {
 
     private MessageResponseHelper() {
@@ -14,28 +16,28 @@ public class MessageResponseHelper {
 
     public static Handler<AsyncResult<Message<JsonObject>>> messageJsonArrayHandler(Handler<Either<String, JsonArray>> handler) {
         return event -> {
-            if (event.succeeded() && event.result().body().getString("status").equals("ok")) {
-                handler.handle(new Either.Right<>(event.result().body().getJsonArray("result")));
+            if (event.succeeded() && event.result().body().getString(STATUS).equals(OK)) {
+                handler.handle(new Either.Right<>(event.result().body().getJsonArray(RESULT)));
             } else {
                 if (event.failed()) {
                     handler.handle(new Either.Left<>(event.cause().getMessage()));
                     return;
                 }
-                handler.handle(new Either.Left<>(event.result().body().getString("message")));
+                handler.handle(new Either.Left<>(event.result().body().getString(MESSAGE)));
             }
         };
     }
 
     public static Handler<AsyncResult<Message<JsonObject>>> messageJsonObjectHandler(Handler<Either<String, JsonObject>> handler) {
         return event -> {
-            if (event.succeeded() && event.result().body().getString("status").equals("ok")) {
-                handler.handle(new Either.Right<>(event.result().body().getJsonObject("result")));
+            if (event.succeeded() && event.result().body().getString(STATUS).equals(OK)) {
+                handler.handle(new Either.Right<>(event.result().body().getJsonObject(RESULT)));
             } else {
                 if (event.failed()) {
                     handler.handle(new Either.Left<>(event.cause().getMessage()));
                     return;
                 }
-                handler.handle(new Either.Left<>(event.result().body().getString("message")));
+                handler.handle(new Either.Left<>(event.result().body().getString(MESSAGE)));
             }
         };
     }

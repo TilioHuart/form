@@ -30,6 +30,7 @@ import org.entcore.common.user.UserUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.FolderIds.*;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
 import static fr.openent.form.helpers.UtilsHelper.getIds;
@@ -70,7 +71,7 @@ public class FolderController extends ControllerHelper {
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(final HttpServerRequest request) {
-        String folderId = request.getParam("folderId");
+        String folderId = request.getParam(PARAM_FOLDER_ID);
         folderService.get(folderId, defaultResponseHandler(request));
     }
 
@@ -95,7 +96,7 @@ public class FolderController extends ControllerHelper {
                 }
 
                 // Check if parent id is valid
-                Integer parentId = folder.getInteger("parent_id");
+                Integer parentId = folder.getInteger(PARENT_ID);
                 if (parentId == null || parentId == ID_SHARED_FOLDER || parentId == ID_ARCHIVED_FOLDER) {
                     String message = "[Formulaire@createFolder] Wrong parent folder id: " + parentId;
                     log.error(message);
@@ -117,7 +118,7 @@ public class FolderController extends ControllerHelper {
                     }
 
                     // Check if parent folder is owned by the user
-                    String ownerOfParentFolder = folderEvt.right().getValue().getString("user_id");
+                    String ownerOfParentFolder = folderEvt.right().getValue().getString(USER_ID);
                     if (parentId != ID_ROOT_FOLDER && !user.getUserId().equals(ownerOfParentFolder)) {
                         String message = "[Formulaire@createFolder] Your not owner of the folder with id " + parentId;
                         log.error(message);
@@ -144,7 +145,7 @@ public class FolderController extends ControllerHelper {
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void update(final HttpServerRequest request) {
-        String folderId = request.getParam("folderId");
+        String folderId = request.getParam(PARAM_FOLDER_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 String message = "[Formulaire@updateFolder] User not found in session.";
@@ -175,7 +176,7 @@ public class FolderController extends ControllerHelper {
 
                     // Check if connected user is owner of the folder
                     JsonObject baseFolder = folderEvt.right().getValue();
-                    if (baseFolder.isEmpty() || !baseFolder.getString("user_id").equals(user.getUserId())) {
+                    if (baseFolder.isEmpty() || !baseFolder.getString(USER_ID).equals(user.getUserId())) {
                         String message = "[Formulaire@updateFolder] Your not owner of the folder with id " + folderId;
                         log.error(message);
                         unauthorized(request, message);
@@ -183,7 +184,7 @@ public class FolderController extends ControllerHelper {
                     }
 
                     // Check if parent id is valid
-                    Integer parentId = folder.getInteger("parent_id");
+                    Integer parentId = folder.getInteger(PARENT_ID);
                     if (parentId == null || parentId == ID_SHARED_FOLDER || parentId == ID_ARCHIVED_FOLDER) {
                         String message = "[Formulaire@updateFolder] Wrong parent folder id: " + parentId;
                         log.error(message);
@@ -205,7 +206,7 @@ public class FolderController extends ControllerHelper {
                         }
 
                         // Check if parent folder is owned by the user
-                        String ownerOfParentFolder = parentFolderEvt.right().getValue().getString("user_id");
+                        String ownerOfParentFolder = parentFolderEvt.right().getValue().getString(USER_ID);
                         if (parentId != ID_ROOT_FOLDER && !user.getUserId().equals(ownerOfParentFolder)) {
                             String message = "[Formulaire@updateFolder] Your not owner of the folder with id " + parentId;
                             log.error(message);
@@ -283,15 +284,15 @@ public class FolderController extends ControllerHelper {
 
 
                         JsonArray forms = childrenEvt.right().getValue();
-                        Integer parentId = folders.getJsonObject(0).getInteger("parent_id");
+                        Integer parentId = folders.getJsonObject(0).getInteger(PARENT_ID);
                         if (!forms.isEmpty()) {
                             // Change status all children forms to "archived"
                             List<Future> syncFutures = new ArrayList<>();
                             for (int j = 0; j < forms.size(); j++) {
                                 JsonObject form = forms.getJsonObject(j);
-                                String formId = form.getInteger("id").toString();
-                                form.remove("archived");
-                                form.put("archived", true);
+                                String formId = form.getInteger(ID).toString();
+                                form.remove(ARCHIVED);
+                                form.put(ARCHIVED, true);
                                 Promise<JsonObject> promise = Promise.promise();
                                 syncFutures.add(promise.future());
                                 formService.update(formId, form, FutureHelper.handlerJsonObject(promise));
@@ -337,7 +338,7 @@ public class FolderController extends ControllerHelper {
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void move(HttpServerRequest request) {
-        Integer targetFolderId = Integer.parseInt(request.getParam("folderId"));
+        Integer targetFolderId = Integer.parseInt(request.getParam(PARAM_FOLDER_ID));
 
         // Check if target folder is Archive or Share folders
         if (targetFolderId == ID_SHARED_FOLDER || targetFolderId == ID_ARCHIVED_FOLDER) {
@@ -376,7 +377,7 @@ public class FolderController extends ControllerHelper {
                     }
 
                     // Check if targeted folder is owned by the connected user
-                    if (targetFolderId != ID_ROOT_FOLDER && !folderEvt.right().getValue().getString("user_id").equals(user.getUserId())) {
+                    if (targetFolderId != ID_ROOT_FOLDER && !folderEvt.right().getValue().getString(USER_ID).equals(user.getUserId())) {
                         String message = "[Formulaire@moveFolders] You cannot move folders into a folder you don't own : " + targetFolderId;
                         log.error(message);
                         badRequest(request, message);
@@ -418,8 +419,8 @@ public class FolderController extends ControllerHelper {
                             folderIdsToSync.add(targetFolderId);
                             for (int j = 0; j < folders.size(); j++) {
                                 JsonObject folder = folders.getJsonObject(j);
-                                if (folder.getInteger("parent_id") != ID_ROOT_FOLDER) {
-                                    folderIdsToSync.add(folder.getInteger("parent_id"));
+                                if (folder.getInteger(PARENT_ID) != ID_ROOT_FOLDER) {
+                                    folderIdsToSync.add(folder.getInteger(PARENT_ID));
                                 }
                             }
 

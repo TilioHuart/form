@@ -85,7 +85,7 @@ public class DistributionController extends ControllerHelper {
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listByForm(HttpServerRequest request) {
-        String formId = request.getParam("formId");
+        String formId = request.getParam(PARAM_FORM_ID);
         distributionService.listByForm(formId, arrayResponseHandler(request));
     }
 
@@ -94,7 +94,7 @@ public class DistributionController extends ControllerHelper {
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listByFormAndResponder(HttpServerRequest request) {
-        String formId = request.getParam("formId");
+        String formId = request.getParam(PARAM_FORM_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 String message = "[Formulaire@listByFormAndResponder] User not found in session.";
@@ -111,9 +111,9 @@ public class DistributionController extends ControllerHelper {
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listByFormAndStatus(HttpServerRequest request) {
-        String formId = request.getParam("formId");
-        String status = request.getParam("status");
-        String nbLines = request.params().get("nbLines");
+        String formId = request.getParam(PARAM_FORM_ID);
+        String status = request.getParam(STATUS);
+        String nbLines = request.params().get(PARAM_NB_LINES);
         distributionService.listByFormAndStatus(formId, status, nbLines, arrayResponseHandler(request));
     }
 
@@ -134,7 +134,7 @@ public class DistributionController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void count(HttpServerRequest request) {
-        String formId = request.getParam("formId");
+        String formId = request.getParam(PARAM_FORM_ID);
         distributionService.countFinished(formId, defaultResponseHandler(request));
     }
 
@@ -143,7 +143,7 @@ public class DistributionController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
-        String distributionId = request.getParam("distributionId");
+        String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 String message = "[Formulaire@getDistribution] User not found in session.";
@@ -160,7 +160,7 @@ public class DistributionController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void getByFormResponderAndStatus(HttpServerRequest request) {
-        String formId = request.getParam("formId");
+        String formId = request.getParam(PARAM_FORM_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 String message = "[Formulaire@getByFormResponderAndStatus] User not found in session.";
@@ -177,7 +177,7 @@ public class DistributionController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void add(HttpServerRequest request) {
-        String distributionId = request.getParam("distributionId");
+        String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 String message = "[Formulaire@addDistribution] User not found in session.";
@@ -200,8 +200,8 @@ public class DistributionController extends ControllerHelper {
                 }
 
                 JsonObject distribution = distributionEvt.right().getValue();
-                String formId = distribution.getInteger("form_id").toString();
-                String ownerDistribution = distribution.getString("responder_id");
+                String formId = distribution.getInteger(FORM_ID).toString();
+                String ownerDistribution = distribution.getString(RESPONDER_ID);
 
                 // Check that distribution is owned by the connected user
                 if (ownerDistribution == null || !ownerDistribution.equals(user.getUserId())) {
@@ -218,7 +218,7 @@ public class DistributionController extends ControllerHelper {
                         return;
                     }
 
-                    if (countEvt.right().getValue().getInteger("count") > 0) {
+                    if (countEvt.right().getValue().getInteger(COUNT) > 0) {
                         log.error("[Formulaire@addDistribution] A not finished distribution already exists for this responder for formId " + formId);
                         conflict(request);
                         return;
@@ -235,7 +235,7 @@ public class DistributionController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void duplicateWithResponses(HttpServerRequest request) {
-        String distributionId = request.getParam("distributionId");
+        String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 String message = "[Formulaire@duplicateWithResponses] User not found in session.";
@@ -257,7 +257,7 @@ public class DistributionController extends ControllerHelper {
                     return;
                 }
 
-                String ownerDistribution = distributionEvt.right().getValue().getString("responder_id");
+                String ownerDistribution = distributionEvt.right().getValue().getString(RESPONDER_ID);
 
                 // Check that distribution is owned by the connected user
                 if (ownerDistribution == null || !ownerDistribution.equals(user.getUserId())) {
@@ -277,7 +277,7 @@ public class DistributionController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
-        String distributionId = request.getParam("distributionId");
+        String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 String message = "[Formulaire@updateDistribution] User not found in session.";
@@ -294,9 +294,9 @@ public class DistributionController extends ControllerHelper {
                 }
 
                 // Check that distribution ids are corresponding
-                if (!distribution.getInteger("id").toString().equals(distributionId)) {
+                if (!distribution.getInteger(ID).toString().equals(distributionId)) {
                     String message = "[Formulaire@updateDistribution] Distribution ids in URL and payload don't match : " +
-                            distributionId + " and " + distribution.getInteger("id");
+                            distributionId + " and " + distribution.getInteger(ID);
                     log.error(message);
                     badRequest(request, message);
                     return;
@@ -315,7 +315,7 @@ public class DistributionController extends ControllerHelper {
                         return;
                     }
 
-                    String ownerDistribution = distributionEvt.right().getValue().getString("responder_id");
+                    String ownerDistribution = distributionEvt.right().getValue().getString(RESPONDER_ID);
 
                     // Check that distribution is owned by the connected user
                     if (ownerDistribution == null || !ownerDistribution.equals(user.getUserId())) {
@@ -334,8 +334,8 @@ public class DistributionController extends ControllerHelper {
 
                         JsonObject finalDistribution = updateDistributionEvt.right().getValue();
 
-                        if (finalDistribution.getString("status").equals(FINISHED)) {
-                            String formId = finalDistribution.getInteger("form_id").toString();
+                        if (finalDistribution.getString(STATUS).equals(FINISHED)) {
+                            String formId = finalDistribution.getInteger(FORM_ID).toString();
                             formService.get(formId, user, formEvt -> {
                                 if (formEvt.isLeft()) {
                                     log.error("[Formulaire@updateDistribution] Error in getting form with id " + formId);
@@ -350,8 +350,8 @@ public class DistributionController extends ControllerHelper {
                                 }
 
                                 JsonObject form = formEvt.right().getValue();
-                                if (form.getBoolean("response_notified")) {
-                                    formService.listManagers(form.getInteger("id").toString(), listManagersEvt -> {
+                                if (form.getBoolean(RESPONSE_NOTIFIED)) {
+                                    formService.listManagers(form.getInteger(ID).toString(), listManagersEvt -> {
                                         if (listManagersEvt.isLeft()) {
                                             log.error("[Formulaire@updateDistribution] Error in listing managers for form with id " + formId);
                                             renderInternalError(request, listManagersEvt);
@@ -361,7 +361,7 @@ public class DistributionController extends ControllerHelper {
                                         JsonArray managers = listManagersEvt.right().getValue();
                                         JsonArray managerIds = new JsonArray();
                                         for (int i = 0; i < managers.size(); i++) {
-                                            managerIds.add(managers.getJsonObject(i).getString("id"));
+                                            managerIds.add(managers.getJsonObject(i).getString(ID));
                                         }
 
                                         notifyService.notifyResponse(request, form, managerIds);
@@ -388,8 +388,8 @@ public class DistributionController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void replace(HttpServerRequest request) {
-        String distributionId = request.getParam("distributionId");
-        String originalDistributionId = request.getParam("originalDistributionId");
+        String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);
+        String originalDistributionId = request.getParam(PARAM_ORIGINAL_DISTRIBUTION_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 String message = "[Formulaire@replaceDistribution] User not found in session.";
@@ -414,7 +414,7 @@ public class DistributionController extends ControllerHelper {
                 JsonObject originalDistribution = originalDistributionEvt.right().getValue();
 
                 // Check that distribution is owned by the connected user
-                if (!originalDistribution.getString("responder_id").equals(user.getUserId())) {
+                if (!originalDistribution.getString(RESPONDER_ID).equals(user.getUserId())) {
                     String message = "[Formulaire@replaceDistribution] You're not owner of the distribution with id " + originalDistributionId;
                     log.error(message);
                     unauthorized(request, message);
@@ -437,7 +437,7 @@ public class DistributionController extends ControllerHelper {
                     JsonObject distribution = distributionEvt.right().getValue();
 
                     // Check that distribution is owned by the connected user
-                    if (!distribution.getString("responder_id").equals(user.getUserId())) {
+                    if (!distribution.getString(RESPONDER_ID).equals(user.getUserId())) {
                         String message = "[Formulaire@replaceDistribution] You're not owner of the distribution with id " + distributionId;
                         log.error(message);
                         unauthorized(request, message);
@@ -458,7 +458,7 @@ public class DistributionController extends ControllerHelper {
                                 return;
                             }
 
-                            distribution.put("status", FINISHED);
+                            distribution.put(STATUS, FINISHED);
                             distributionService.update(distributionId, distribution, defaultResponseHandler(request));
                         });
                     });
@@ -472,7 +472,7 @@ public class DistributionController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
-        String distributionId = request.getParam("distributionId");
+        String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);
         distributionService.delete(distributionId, defaultResponseHandler(request));
     }
 }

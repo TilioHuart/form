@@ -7,6 +7,8 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import static fr.openent.form.core.constants.Fields.*;
+
 public class BusResultHelper {
 
     private BusResultHelper() {
@@ -16,9 +18,9 @@ public class BusResultHelper {
     public static Handler<Either<String, JsonObject>> busResponseHandlerEitherObject(final Message message) {
         return event -> {
             if (event.isRight()) {
-                message.reply((new JsonObject()).put("status", "ok").put("result", event.right().getValue()));
+                message.reply((new JsonObject()).put(STATUS, OK).put(RESULT, event.right().getValue()));
             } else {
-                JsonObject error = (new JsonObject()).put("status", "error").put("message", event.left().getValue());
+                JsonObject error = (new JsonObject()).put(STATUS, ERROR).put(MESSAGE, event.left().getValue());
                 message.reply(error);
             }
         };
@@ -27,9 +29,9 @@ public class BusResultHelper {
     public static Handler<Either<String, JsonArray>> busResponseHandlerEitherArray(final Message message) {
         return event -> {
             if (event.isRight()) {
-                message.reply((new JsonObject()).put("status", "ok").put("result", event.right().getValue()));
+                message.reply((new JsonObject()).put(STATUS, OK).put(RESULT, event.right().getValue()));
             } else {
-                JsonObject error = (new JsonObject()).put("status", "error").put("message", event.left().getValue());
+                JsonObject error = (new JsonObject()).put(STATUS, ERROR).put(MESSAGE, event.left().getValue());
                 message.reply(error);
             }
         };
@@ -38,9 +40,9 @@ public class BusResultHelper {
     public static <T>Handler<AsyncResult<T>> busResponseHandlerAsync(final Message<T> message) {
         return event -> {
             if (event.succeeded()) {
-                message.reply((new JsonObject()).put("status", "ok").put("result", event.result()));
+                message.reply((new JsonObject()).put(STATUS, OK).put(RESULT, event.result()));
             } else {
-                JsonObject error = (new JsonObject()).put("status", "error").put("message", event.cause().getMessage());
+                JsonObject error = (new JsonObject()).put(STATUS, ERROR).put(MESSAGE, event.cause().getMessage());
                 message.reply(error);
             }
         };

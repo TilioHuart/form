@@ -31,7 +31,9 @@ import org.entcore.common.pdf.Pdf;
 import org.entcore.common.pdf.PdfFactory;
 import org.entcore.common.pdf.PdfGenerator;
 
+import static fr.openent.form.core.constants.ConfigFields.NODE_PDF_GENERATOR;
 import static fr.openent.form.core.constants.Constants.MAX_RESPONSES_EXPORT_PDF;
+import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
 import static fr.wseduc.webutils.http.Renders.*;
 
@@ -61,12 +63,11 @@ public class FormResponsesExportPDF {
         this.renders = new Renders(this.vertx, config);
         this.form = form;
         dateFormatter.setTimeZone(TimeZone.getTimeZone("Europe/Paris")); // TODO to adapt for not France timezone
-        pdfFactory = new PdfFactory(vertx, new JsonObject().put("node-pdf-generator",
-                config.getJsonObject("node-pdf-generator", new JsonObject())));
+        pdfFactory = new PdfFactory(vertx, new JsonObject().put(NODE_PDF_GENERATOR, config.getJsonObject(NODE_PDF_GENERATOR, new JsonObject())));
     }
 
     public void launch() {
-        String formId = form.getInteger("id").toString();
+        String formId = form.getInteger(ID).toString();
         questionService.export(formId, true, getQuestionsEvt -> {
             if (getQuestionsEvt.isLeft()) {
                 log.error("[Formulaire@FormExportPDF] Failed to retrieve all questions for the form with id " + formId);
@@ -89,7 +90,7 @@ public class FormResponsesExportPDF {
                 }
 
                 JsonArray sectionsInfos = getSectionsEvt.right().getValue();
-                distributionService.countFinished(form.getInteger("id").toString(), countRepEvt -> {
+                distributionService.countFinished(form.getInteger(ID).toString(), countRepEvt -> {
                     if (countRepEvt.isLeft()) {
                         log.error("[Formulaire@FormExportPDF] Failed to count nb responses for the form with id " + formId);
                         renderInternalError(request, countRepEvt);
@@ -102,7 +103,7 @@ public class FormResponsesExportPDF {
                         return;
                     }
 
-                    int nbResponseTot = countRepEvt.right().getValue().getInteger("count");
+                    int nbResponseTot = countRepEvt.right().getValue().getInteger(COUNT);
                     boolean hasTooManyResponses = nbResponseTot > MAX_RESPONSES_EXPORT_PDF;
 
                     responseService.exportPDFResponses(formId, getResponsesEvt -> {
@@ -126,12 +127,12 @@ public class FormResponsesExportPDF {
                             }
 
                             JsonObject results = formatDataEvt.right().getValue();
-                            results.put("nbResponseTot", nbResponseTot);
+                            results.put(PARAM_NB_RESPONSE_TOT, nbResponseTot);
 
                             generatePDF(request, results,"results.xhtml", pdf ->
                                 request.response()
                                         .putHeader("Content-Type", "application/pdf; charset=utf-8")
-                                        .putHeader("Content-Disposition", "attachment; filename=Réponses_" + form.getString("title") + ".pdf")
+                                        .putHeader("Content-Disposition", "attachment; filename=Réponses_" + form.getString(TITLE) + ".pdf")
                                         .end(pdf)
                             );
                         });
@@ -151,33 +152,33 @@ public class FormResponsesExportPDF {
         for (int i = 0; i < nbQuestions; i++) {
             JsonObject questionInfo = questionsInfo.getJsonObject(i);
 
-            int question_type = questionInfo.getInteger("question_type");
+            int question_type = questionInfo.getInteger(QUESTION_TYPE);
             boolean isGraph = Arrays.asList(4,5,9).contains(question_type);
 
             if (!hasTooManyResponses || isGraph) {
                 questions.add(new JsonObject()
-                        .put("id", questionInfo.getInteger("id"))
-                        .put("title", questionInfo.getString("title"))
-                        .put("question_type", new JsonObject())
-                        .put("statement",
-                                "<div>" + questionInfo.getString("statement", "")
+                        .put(ID, questionInfo.getInteger(ID))
+                        .put(TITLE, questionInfo.getString(TITLE))
+                        .put(QUESTION_TYPE, new JsonObject())
+                        .put(STATEMENT,
+                                "<div>" + questionInfo.getString(STATEMENT, "")
                                 .replace("\"","'")
                                 .replace("<o:p></o:p>", " ")
                                 + "</div>"
                         )
-                        .put("mandatory", questionInfo.getBoolean("mandatory"))
-                        .put("section_id", questionInfo.getInteger("section_id"))
-                        .put("position", questionInfo.getInteger("position"))
-                        .put("responses", new JsonArray())
+                        .put(MANDATORY, questionInfo.getBoolean(MANDATORY))
+                        .put(SECTION_ID, questionInfo.getInteger(SECTION_ID))
+                        .put(POSITION, questionInfo.getInteger(POSITION))
+                        .put(RESPONSES, new JsonArray())
                 );
 
                 // Affect boolean to each type of answer (freetext, simple text, graph)
                 // type_freetext (FREETEXT), type_text (SHORTANSWER, LONGANSWER, DATE, TIME, FILE), type_graph (SINGLEANSWER, MULTIPLEANSWER)
-                questions.getJsonObject(questions.size() - 1).getJsonObject("question_type")
-                    .put("question_type_id", question_type)
-                    .put("type_freetext", question_type == 1)
-                    .put("type_text", Arrays.asList(2,3,6,7,8).contains(question_type))
-                    .put("type_graph", isGraph);
+                questions.getJsonObject(questions.size() - 1).getJsonObject(QUESTION_TYPE)
+                    .put(QUESTION_TYPE_ID, question_type)
+                    .put(TYPE_FREETEXT, question_type == 1)
+                    .put(TYPE_TEXT, Arrays.asList(2,3,6,7,8).contains(question_type))
+                    .put(TYPE_GRAPH, isGraph);
 
 
                 // Prepare futures to get graph images
@@ -192,7 +193,7 @@ public class FormResponsesExportPDF {
         HashMap<Integer, JsonObject> mapQuestions = new HashMap<>();
         for (Object q : questions) {
             JsonObject question = (JsonObject)q;
-            mapQuestions.put(question.getInteger("id"), question);
+            mapQuestions.put(question.getInteger(ID), question);
         }
 
         if (!hasTooManyResponses) {
@@ -201,31 +202,31 @@ public class FormResponsesExportPDF {
                 JsonObject response = data.getJsonObject(i);
 
                 // Format answer (empty string, simple text, html)
-                int questionType = mapQuestions.get(response.getInteger("question_id")).getJsonObject("question_type").getInteger("question_type_id");
-                if (response.getString("answer").isEmpty()) {
-                    response.put("answer", "-");
+                int questionType = mapQuestions.get(response.getInteger(QUESTION_ID)).getJsonObject(QUESTION_TYPE).getInteger(QUESTION_TYPE_ID);
+                if (response.getString(ANSWER).isEmpty()) {
+                    response.put(ANSWER, "-");
                 }
                 if (questionType == 1) {
-                    response.put("answer",
-                            "<div>" + response.getString("answer", "")
+                    response.put(ANSWER,
+                            "<div>" + response.getString(ANSWER, "")
                                     .replace("<o:p></o:p>", " ")
                             + "</div>");
                 }
                 if (questionType == 2) {
-                    response.put("answer", "<div>" + response.getString("answer") + "</div>");
+                    response.put(ANSWER, "<div>" + response.getString(ANSWER) + "</div>");
                 }
                 else if (questionType == 3) {
-                    response.put("answer", response.getString("answer", "").replace("\"","'"));
+                    response.put(ANSWER, response.getString(ANSWER, "").replace("\"","'"));
                 }
 
                 // Format date_response
                 try {
-                    Date displayDate = dateGetter.parse(response.getString("date_response"));
-                    response.put("date_response", dateFormatter.format(displayDate));
+                    Date displayDate = dateGetter.parse(response.getString(DATE_RESPONSE));
+                    response.put(DATE_RESPONSE, dateFormatter.format(displayDate));
                 }
                 catch (ParseException e) { e.printStackTrace(); }
 
-                mapQuestions.get(response.getInteger("question_id")).getJsonArray("responses").add(response);
+                mapQuestions.get(response.getInteger(QUESTION_ID)).getJsonArray(RESPONSES).add(response);
             }
         }
 
@@ -241,9 +242,9 @@ public class FormResponsesExportPDF {
             int j = 0;
             for (int i = 0; i < questions.size(); i++) {
                 JsonObject question = questions.getJsonObject(i);
-                if (question.getJsonObject("question_type").getBoolean("type_graph")) {
+                if (question.getJsonObject(QUESTION_TYPE).getBoolean(TYPE_GRAPH)) {
                     String graphData = questionsGraphs.get(j).result().toString();
-                    question.put("graphData", graphData);
+                    question.put(PARAM_GRAPH_DATA, graphData);
                     j++;
                 }
             }
@@ -251,9 +252,9 @@ public class FormResponsesExportPDF {
             JsonArray form_elements = fillFormElements(sectionsInfos, questions);
 
             // Finish to fill final object with useful form's data
-            results.put("form_title", form.getString("title"));
-            results.put("anonymous", form.getBoolean("anonymous"));
-            results.put("form_elements", form_elements);
+            results.put(FORM_TILE, form.getString(TITLE));
+            results.put(ANONYMOUS, form.getBoolean(ANONYMOUS));
+            results.put(FORM_ELEMENTS, form_elements);
             handler.handle(new Either.Right<>(results));
         });
     }
@@ -263,28 +264,28 @@ public class FormResponsesExportPDF {
         HashMap<Integer, JsonObject> mapSectionsPosition = new HashMap<>();
         for (Object s : sections) {
             JsonObject section = (JsonObject)s;
-            section.put("description",
-                    "<div>" + section.getString("description")
+            section.put(DESCRIPTION,
+                    "<div>" + section.getString(DESCRIPTION)
                     .replace("\"","'")
                     .replace("<o:p></o:p>", " ")
                     + "</div>"
             );
-            section.put("questions", new JsonArray());
-            mapSectionsId.put(section.getInteger("id"), section);
-            mapSectionsPosition.put(section.getInteger("position"), section);
+            section.put(QUESTIONS, new JsonArray());
+            mapSectionsId.put(section.getInteger(ID), section);
+            mapSectionsPosition.put(section.getInteger(POSITION), section);
         }
 
         SortedMap<Integer, JsonObject> form_elements = new TreeMap<>();
         int i = 0;
         while (i < questions.size()) {
             JsonObject question = questions.getJsonObject(i);
-            if (question.getInteger("section_id") != null) {
-                JsonObject section = mapSectionsId.get(question.getInteger("section_id"));
-                section.getJsonArray("questions").add(question);
+            if (question.getInteger(SECTION_ID) != null) {
+                JsonObject section = mapSectionsId.get(question.getInteger(SECTION_ID));
+                section.getJsonArray(QUESTIONS).add(question);
             }
             else {
-                question.put("is_question", true);
-                form_elements.put(question.getInteger("position"), question);
+                question.put(IS_QUESTION, true);
+                form_elements.put(question.getInteger(POSITION), question);
             }
             i++;
         }
@@ -294,7 +295,7 @@ public class FormResponsesExportPDF {
     }
 
     private void getGraphData(JsonObject question, Handler<AsyncResult<String>> handler) {
-        String idFile = form.getJsonObject("images").getJsonObject("idImagesPerQuestion").getString(question.getLong("id").toString());
+        String idFile = form.getJsonObject(IMAGES).getJsonObject(PARAM_ID_IMAGES_PER_QUESTION).getString(question.getLong(ID).toString());
 
         if (idFile != null) {
             storage.readFile(idFile, readFileEvt -> {
@@ -338,12 +339,12 @@ public class FormResponsesExportPDF {
                 }
 
                 actionObject.put("content", bytes).put("baseUrl", baseUrl);
-                generatePDF("title", processedTemplate)
+                generatePDF(TITLE, processedTemplate)
                     .onSuccess(res -> {
                         handler.handle(res.getContent());
 
                         // Remove image files generated for graph display on PDF
-                        JsonArray removesFiles = templateProps.getJsonArray("idImagesFiles");
+                        JsonArray removesFiles = templateProps.getJsonArray(PARAM_ID_IMAGES_FILES);
                         if (removesFiles != null) {
                             storage.removeFiles(removesFiles, removeEvt -> {
                                 log.info(" [Formulaire@generatePDF] " + removeEvt.encode());

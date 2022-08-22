@@ -13,32 +13,35 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
 
+import static fr.openent.form.core.constants.EbFields.*;
+import static fr.openent.form.core.constants.Fields.*;
+
 public class EventBusController extends ControllerHelper {
     private SectionService sectionService = new DefaultSectionService();
     private QuestionService questionService = new DefaultQuestionService();
     private QuestionChoiceService questionChoiceService = new DefaultQuestionChoiceService();
 
-    @BusAddress("fr.openent.formulaire")
+    @BusAddress(FORMULAIRE_ADDRESS)
     public void bus(final Message<JsonObject> message) {
         JsonObject body = message.body();
-        String action = body.getString("action");
+        String action = body.getString(ACTION);
         switch (action) {
-            case "list-sections":
-                String formId = body.getString("formId");
+            case LIST_SECTIONS:
+                String formId = body.getString(PARAM_FORM_ID);
                 sectionService.list(formId, BusResultHelper.busResponseHandlerEitherArray(message));
                 break;
-            case "list-question-for-form-and-section":
-                formId = body.getString("formId");
+            case LIST_QUESTION_FOR_FORM_AND_SECTION:
+                formId = body.getString(PARAM_FORM_ID);
                 questionService.listForFormAndSection(formId, BusResultHelper.busResponseHandlerEitherArray(message));
                 break;
-            case "list-question-choices":
-                JsonArray questionIds = body.getJsonArray("questionIds");
+            case LIST_QUESTION_CHOICES:
+                JsonArray questionIds = body.getJsonArray(PARAM_QUESTION_IDS);
                 questionChoiceService.listChoices(questionIds, BusResultHelper.busResponseHandlerEitherArray(message));
                 break;
             default:
                 message.reply(new JsonObject()
-                        .put("status", "error")
-                        .put("message", "Invalid action."));
+                        .put(STATUS, ERROR)
+                        .put(MESSAGE, "Invalid action."));
         }
     }
 }

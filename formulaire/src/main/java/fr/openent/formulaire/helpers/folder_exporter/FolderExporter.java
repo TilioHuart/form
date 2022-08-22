@@ -22,6 +22,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
+import static fr.openent.form.core.constants.Fields.*;
+
 
 public class FolderExporter {
     public static final Logger log = LoggerFactory.getLogger(FolderExporter.class);
@@ -55,7 +57,7 @@ public class FolderExporter {
     }
 
     public static String getParent(JsonObject doc) {
-        return doc.getString("parent");
+        return doc.getString(PARENT);
     }
 
     private void buildPath(List<JsonObject> rows, JsonObject current, List<String> paths) {
@@ -75,7 +77,7 @@ public class FolderExporter {
     //
     private void buildMapping(List<JsonObject> rows, FolderExporterContext context) {
         for (JsonObject row : rows) {
-            context.namesByIds.put(row.getString("id"), cleanName(row));
+            context.namesByIds.put(row.getString(ID), cleanName(row));
         }
 
         for (JsonObject row : rows) {
@@ -89,7 +91,7 @@ public class FolderExporter {
                 context.docByFolders.get(fullFolderPath).add(row);
             }
         }
-        log.info("folders Size : " + context.folders.size());
+        log.info("Folders size : " + context.folders.size());
     }
 
     private Future<Void> mkdirs(FolderExporterContext context) {
@@ -126,23 +128,23 @@ public class FolderExporter {
     }
 
     public static String getId(JsonObject doc) {
-        return doc.getString("id");
+        return doc.getString(ID);
     }
 
     public static boolean isFile(JsonObject doc) {
-        return getType(doc).equals("file");
+        return getType(doc).equals(FILE);
     }
     public static String getType(JsonObject doc) {
-        return doc.getString("type", "");
+        return doc.getString(TYPE, "");
     }
 
     private static String cleanName(JsonObject doc) {
-        String name = getName(doc, "undefined");
+        String name = getName(doc, UNDEFINED);
         return name.replaceAll("/", "_").replaceAll("\\\\", "_").trim();
     }
 
     public static String getName(JsonObject doc, String def) {
-        return doc.getString("name", def);
+        return doc.getString(NAME, def);
     }
     private CompositeFuture copyFiles(FolderExporterContext context) {
         @SuppressWarnings("rawtypes")
@@ -173,10 +175,10 @@ public class FolderExporter {
 //
             String[] ids = nameByFileId.fieldNames().stream().toArray(String[]::new);
             storage.writeToFileSystem(ids, folderPath, nameByFileId, res -> {
-                if ("ok".equals(res.getString("status"))) {
+                if (OK.equals(res.getString(STATUS))) {
                     future.complete(res);
                 } else if (throwErrors) {
-                    future.fail(res.getString("error"));
+                    future.fail(res.getString(ERROR));
                 } else {
                     context.errors.addAll(res.getJsonArray("errors"));
                     future.complete();
@@ -192,14 +194,12 @@ public class FolderExporter {
         return s.replaceAll("(\\\\|\\/|\\*|\\\"|\\<|\\>|:|\\?|\\|)","_");
     }
     public static String getFileId(JsonObject doc) {
-        return doc.getString("file", "");
+        return doc.getString(FILE, "");
     }
 
     //
     public Future<FolderExporterContext> export(FolderExporterContext context, List<JsonObject> rows) {
         this.buildMapping(rows, context);
-        return this.mkdirs(context).compose(res -> {
-            return this.copyFiles(context);
-        }).map(context);
+        return this.mkdirs(context).compose(res -> this.copyFiles(context)).map(context);
     }
 }

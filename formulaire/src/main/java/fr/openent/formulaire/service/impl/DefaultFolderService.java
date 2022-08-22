@@ -10,10 +10,14 @@ import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
 
+import static fr.openent.form.core.constants.Fields.NAME;
+import static fr.openent.form.core.constants.Fields.PARENT_ID;
+import static fr.openent.form.core.constants.Tables.FOLDER_TABLE;
+
 public class DefaultFolderService implements FolderService {
     @Override
     public void list(UserInfos user, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT * FROM " + Tables.FOLDER + " WHERE user_id = ?;";
+        String query = "SELECT * FROM " + FOLDER_TABLE + " WHERE user_id = ?;";
         JsonArray params = new JsonArray().add(user.getUserId());
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
@@ -21,7 +25,7 @@ public class DefaultFolderService implements FolderService {
 
     @Override
     public void listByIds(JsonArray folderIds, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT * FROM " + Tables.FOLDER + " WHERE id IN " + Sql.listPrepared(folderIds);
+        String query = "SELECT * FROM " + FOLDER_TABLE + " WHERE id IN " + Sql.listPrepared(folderIds);
         JsonArray params = new JsonArray().addAll(folderIds);
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
@@ -29,7 +33,7 @@ public class DefaultFolderService implements FolderService {
 
     @Override
     public void get(String folderId, Handler<Either<String, JsonObject>> handler) {
-        String query = "SELECT * FROM " + Tables.FOLDER + " WHERE id = ?;";
+        String query = "SELECT * FROM " + FOLDER_TABLE + " WHERE id = ?;";
         JsonArray params = new JsonArray().add(folderId);
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
@@ -37,10 +41,10 @@ public class DefaultFolderService implements FolderService {
 
     @Override
     public void create(JsonObject folder, UserInfos user, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO " + Tables.FOLDER + " (parent_id, name, user_id) VALUES (?, ?, ?) RETURNING *;";
+        String query = "INSERT INTO " + FOLDER_TABLE + " (parent_id, name, user_id) VALUES (?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
-                .add(folder.getInteger("parent_id",1))
-                .add(folder.getString("name"))
+                .add(folder.getInteger(PARENT_ID,1))
+                .add(folder.getString(NAME))
                 .add(user.getUserId());
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
@@ -48,10 +52,10 @@ public class DefaultFolderService implements FolderService {
 
     @Override
     public void update(String folderId, JsonObject folder, Handler<Either<String, JsonObject>> handler) {
-        String query = "UPDATE " + Tables.FOLDER + " SET parent_id = ?, name = ? WHERE id = ? RETURNING *;";
+        String query = "UPDATE " + FOLDER_TABLE + " SET parent_id = ?, name = ? WHERE id = ? RETURNING *;";
         JsonArray params = new JsonArray()
-                .add(folder.getInteger("parent_id",1))
-                .add(folder.getString("name"))
+                .add(folder.getInteger(PARENT_ID,1))
+                .add(folder.getString(NAME))
                 .add(folderId);
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
@@ -59,7 +63,7 @@ public class DefaultFolderService implements FolderService {
 
     @Override
     public void delete(JsonArray folderIds, Handler<Either<String, JsonArray>> handler) {
-        String query = "DELETE FROM " + Tables.FOLDER + " WHERE id IN " + Sql.listPrepared(folderIds) +
+        String query = "DELETE FROM " + FOLDER_TABLE + " WHERE id IN " + Sql.listPrepared(folderIds) +
                 " RETURNING parent_id";
         JsonArray params = new JsonArray().addAll(folderIds);
 
@@ -68,7 +72,7 @@ public class DefaultFolderService implements FolderService {
 
     @Override
     public void move(JsonArray folderIds, String parentId, Handler<Either<String, JsonArray>> handler) {
-        String query = "UPDATE " + Tables.FOLDER + " SET parent_id = ? WHERE id IN " + Sql.listPrepared(folderIds);
+        String query = "UPDATE " + FOLDER_TABLE + " SET parent_id = ? WHERE id IN " + Sql.listPrepared(folderIds);
         JsonArray params = new JsonArray().add(parentId).addAll(folderIds);
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
@@ -78,16 +82,16 @@ public class DefaultFolderService implements FolderService {
     public void syncNbChildren(UserInfos user, JsonArray newFolderIds, Handler<Either<String, JsonArray>> handler) {
         String query =
                 "WITH updated_ids AS (" +
-                    "UPDATE " + Tables.FOLDER + " folder " +
+                    "UPDATE " + FOLDER_TABLE + " folder " +
                     "SET nb_folder_children = CASE WHEN counts.nb_folders IS NULL THEN 0 ELSE counts.nb_folders END, " +
                     "nb_form_children = CASE WHEN counts.nb_forms IS NULL THEN 0 ELSE counts.nb_forms END " +
                     "FROM ( " +
                         "SELECT * FROM ( " +
-                            "SELECT COUNT(*) AS nb_folders, parent_id FROM " + Tables.FOLDER +
+                            "SELECT COUNT(*) AS nb_folders, parent_id FROM " + FOLDER_TABLE +
                             " WHERE user_id = ? GROUP BY parent_id " +
                         ") AS f " +
                         "FULL JOIN ( " +
-                            "SELECT COUNT(*) AS nb_forms, folder_id FROM " + Tables.REL_FORM_FOLDER +
+                            "SELECT COUNT(*) AS nb_forms, folder_id FROM " + Tables.REL_FORM_FOLDER_TABLE +
                             " WHERE user_id = ? GROUP BY folder_id " +
                         ") AS rff ON rff.folder_id = f.parent_id " +
                     ") AS counts " +
@@ -96,7 +100,7 @@ public class DefaultFolderService implements FolderService {
                     "RETURNING id, folder.parent_id, name, user_id, nb_folder_children, nb_form_children" +
                 ")," +
                 "other_updated_ids AS (" +
-                    "UPDATE " + Tables.FOLDER +
+                    "UPDATE " + FOLDER_TABLE +
                     " SET nb_folder_children = 0, nb_form_children = 0 " +
                     "WHERE folder.id IN " + Sql.listPrepared(newFolderIds) +
                     " AND folder.id NOT IN (SELECT id FROM updated_ids) " +

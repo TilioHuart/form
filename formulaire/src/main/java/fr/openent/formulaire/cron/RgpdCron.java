@@ -16,6 +16,8 @@ import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.storage.Storage;
 
+import static fr.openent.form.core.constants.Fields.FORM_ID;
+import static fr.openent.form.core.constants.Fields.RESPONDER_ID;
 import static fr.openent.form.helpers.UtilsHelper.getIds;
 import static fr.openent.form.helpers.UtilsHelper.mapByProps;
 
@@ -93,7 +95,7 @@ public class RgpdCron extends ControllerHelper implements Handler<Long> {
     }
 
     private void logDeletedDistribInfos(JsonArray deletedDistribs) {
-        JsonArray distribInfos = mapByProps(deletedDistribs, new JsonArray().add("form_id").add("responder_id"));
+        JsonArray distribInfos = mapByProps(deletedDistribs, new JsonArray().add(FORM_ID).add(RESPONDER_ID));
         log.info("[Formulaire@deleteOldDataForRgpd] Distributions and response successfully deleted for : " + distribInfos);
     }
 }

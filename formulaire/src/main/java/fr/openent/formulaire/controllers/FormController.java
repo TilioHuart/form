@@ -1,5 +1,6 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.core.constants.EbFields;
 import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.export.FormResponsesExportCSV;
 import fr.openent.formulaire.export.FormResponsesExportPDF;
@@ -33,9 +34,11 @@ import org.entcore.common.user.UserUtils;
 import java.util.*;
 
 import static fr.openent.form.core.Events.CREATE;
+import static fr.openent.form.core.constants.ConfigFields.ZIMBRA_MAX_RECIPIENTS;
 import static fr.openent.form.core.constants.ConsoleRights.*;
 import static fr.openent.form.core.constants.Constants.MAX_USERS_SHARING;
 import static fr.openent.form.core.constants.Constants.RGPD_LIFETIME_VALUES;
+import static fr.openent.form.core.constants.EbFields.CONVERSATION_ADDRESS;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.FolderIds.*;
 import static fr.openent.form.core.constants.ShareRights.*;
@@ -170,7 +173,7 @@ public class FormController extends ControllerHelper {
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
-        String formId = request.getParam("formId");
+        String formId = request.getParam(PARAM_FORM_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 String message = "[Formulaire@getForm] User not found in session.";
@@ -204,7 +207,7 @@ public class FormController extends ControllerHelper {
                 }
 
                 // Check if the user has right to create a public form
-                boolean isFormPublic = form.getBoolean("is_public");
+                boolean isFormPublic = form.getBoolean(IS_PUBLIC);
                 if (isFormPublic && !WorkflowActionUtils.hasRight(user, WorkflowActions.CREATION_RIGHT.toString())) {
                     String message = "[Formulaire@createForm] You are not authorized to create a public form.";
                     log.error(message);
@@ -224,14 +227,14 @@ public class FormController extends ControllerHelper {
                 // RGPD lifetime should be in [3, 6, 9, 12]
                 boolean isRGPDLifetimeOk = DataChecker.checkRGPDLifetimeValidity(new JsonArray().add(form));
                 if (!isRGPDLifetimeOk) {
-                    String message = "[Formulaire@createForm] Wrong RGPD lifetime value : " + form.getInteger("rgpd_lifetime");
+                    String message = "[Formulaire@createForm] Wrong RGPD lifetime value : " + form.getInteger(RGPD_LIFETIME);
                     log.error(message);
                     badRequest(request, message);
                     return;
                 }
 
                 // Check if parent folder is Archive or Share folders
-                Integer folderId = form.getInteger("folder_id") != null ? form.getInteger("folder_id") : ID_ROOT_FOLDER;
+                Integer folderId = form.getInteger(FOLDER_ID) != null ? form.getInteger(FOLDER_ID) : ID_ROOT_FOLDER;
                 if (folderId == ID_SHARED_FOLDER || folderId == ID_ARCHIVED_FOLDER) {
                     String message = "[Formulaire@createForm] You cannot create a folder into the folder with id : " + folderId;
                     log.error(message);
@@ -254,7 +257,7 @@ public class FormController extends ControllerHelper {
 
                     // Check if the folder is owned by the connected user (if custom folder)
                     JsonObject folder = folderEvt.right().getValue();
-                    if (folderId != ID_ROOT_FOLDER && !folder.getString("user_id").equals(user.getUserId())) {
+                    if (folderId != ID_ROOT_FOLDER && !folder.getString(USER_ID).equals(user.getUserId())) {
                         String message = "[Formulaire@createForm] Your not owner of the folder with id " + folderId;
                         log.error(message);
                         unauthorized(request, message);
@@ -269,7 +272,7 @@ public class FormController extends ControllerHelper {
                         }
 
                         eventStore.createAndStoreEvent(CREATE.name(), request);
-                        String formId = createEvt.right().getValue().getInteger("id").toString();
+                        String formId = createEvt.right().getValue().getInteger(ID).toString();
                         relFormFolderService.create(user, new JsonArray().add(formId), folderId, createRelEvt -> {
                             if (createRelEvt.isLeft() || createEvt.right().getValue().isEmpty()) {
                                 log.error("[Formulaire@createForm] Failed to create relation form-folder for form : " + form);
@@ -343,7 +346,7 @@ public class FormController extends ControllerHelper {
                     return;
                 }
 
-                JsonArray folderIds = getByProp(forms, "folder_id");
+                JsonArray folderIds = getByProp(forms, FOLDER_ID);
                 folderService.listByIds(folderIds, foldersEvt -> {
                     if (foldersEvt.isLeft()) {
                         log.error("[Formulaire@createMultipleForm] Fail to list folders for ids " + folderIds);
@@ -383,7 +386,7 @@ public class FormController extends ControllerHelper {
                         }
 
                         JsonArray formIds = getIds(createdForms, false);
-                        JsonArray finalFolderIds = getByProp(forms, "folder_id");
+                        JsonArray finalFolderIds = getByProp(forms, FOLDER_ID);
                         relFormFolderService.createMultiple(user, formIds, finalFolderIds, createRelEvt -> {
                             if (createRelEvt.isLeft()) {
                                 log.error("[Formulaire@createMultipleForm] Failed to create relations form-folder for forms : " + formIds);
@@ -423,7 +426,7 @@ public class FormController extends ControllerHelper {
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void duplicate(HttpServerRequest request) {
-        Integer folderId = Integer.parseInt(request.getParam("folderId"));
+        Integer folderId = Integer.parseInt(request.getParam(PARAM_FOLDER_ID));
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 String message = "[Formulaire@duplicateForms] User not found in session.";
@@ -459,7 +462,7 @@ public class FormController extends ControllerHelper {
                     }
 
                     // Check if user is owner or contributor to all the forms
-                    Long count = hasRightsEvt.right().getValue().getLong("count");
+                    Long count = hasRightsEvt.right().getValue().getLong(COUNT);
                     if (count == null || count != formIds.size()) {
                         String message = "[Formulaire@duplicateForms] You're missing rights on one form or more.";
                         log.error(message);
@@ -482,7 +485,7 @@ public class FormController extends ControllerHelper {
 
                         // Check if the folder is not owned by the connected user
                         JsonObject folder = folderEvt.right().getValue();
-                        if (folderId != ID_ROOT_FOLDER && !folder.getString("user_id").equals(user.getUserId())) {
+                        if (folderId != ID_ROOT_FOLDER && !folder.getString(USER_ID).equals(user.getUserId())) {
                             String message = "[Formulaire@duplicateForms] You're not owner of the folder with id " + folderId;
                             log.error(message);
                             unauthorized(request, message);
@@ -520,14 +523,14 @@ public class FormController extends ControllerHelper {
 
         for (Object questions : questionsEvt.result().list()) {
             JsonArray questionsInfos = ((JsonArray) questions);
-            if (questionsInfos.getJsonObject(0).getInteger("id") != null
-            && questionsInfos.getJsonObject(0).getInteger("form_id") != null) {
+            if (questionsInfos.getJsonObject(0).getInteger(ID) != null
+            && questionsInfos.getJsonObject(0).getInteger(FORM_ID) != null) {
                 for (int i = 0; i < questionsInfos.size(); i++) {
                     JsonObject questionInfo = questionsInfos.getJsonObject(i);
-                    int formId = questionInfo.getInteger("form_id");
-                    int questionId = questionInfo.getInteger("id");
-                    int originalQuestionId = questionInfo.getInteger("original_question_id");
-                    int question_type = questionInfo.getInteger("question_type");
+                    int formId = questionInfo.getInteger(FORM_ID);
+                    int questionId = questionInfo.getInteger(ID);
+                    int originalQuestionId = questionInfo.getInteger(ORIGINAL_QUESTION_ID);
+                    int question_type = questionInfo.getInteger(QUESTION_TYPE);
                     if (question_type == 4 || question_type == 5 || question_type == 9) {
                         Promise<JsonObject> promise = Promise.promise();
                         questionsInfosFutures.add(promise.future());
@@ -551,7 +554,7 @@ public class FormController extends ControllerHelper {
         eventStore.createAndStoreEvent(CREATE.name(), request);
         JsonArray newFormIds = new JsonArray();
         for (Object question : questionsEvt.result().list()) {
-            newFormIds.add(((JsonArray) question).getJsonObject(0).getInteger("form_id"));
+            newFormIds.add(((JsonArray) question).getJsonObject(0).getInteger(FORM_ID));
         }
         relFormFolderService.create(user, newFormIds, folderId, createRelEvt -> {
             if (createRelEvt.isLeft()) {
@@ -574,7 +577,7 @@ public class FormController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
-        String formId = request.getParam("formId");
+        String formId = request.getParam(PARAM_FORM_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 String message = "[Formulaire@updateForm] User not found in session.";
@@ -591,7 +594,7 @@ public class FormController extends ControllerHelper {
                 }
 
                 // Check if the user has right to update a public form
-                boolean isFormPublic = form.getBoolean("is_public");
+                boolean isFormPublic = form.getBoolean(IS_PUBLIC);
                 if (isFormPublic && !WorkflowActionUtils.hasRight(user, WorkflowActions.CREATION_RIGHT.toString())) {
                     String message = "[Formulaire@updateForm] You are not authorized to create a public form.";
                     log.error(message);
@@ -611,7 +614,7 @@ public class FormController extends ControllerHelper {
                 // RGPD lifetime should be in [3, 6, 9, 12]
                 boolean isRGPDLifetimeOk = DataChecker.checkRGPDLifetimeValidity(new JsonArray().add(form));
                 if (!isRGPDLifetimeOk) {
-                    String message = "[Formulaire@updateForm] Wrong RGPD lifetime value : " + form.getInteger("rgpd_lifetime");
+                    String message = "[Formulaire@updateForm] Wrong RGPD lifetime value : " + form.getInteger(RGPD_LIFETIME);
                     log.error(message);
                     badRequest(request, message);
                     return;
@@ -641,9 +644,9 @@ public class FormController extends ControllerHelper {
 
                             // Reset props ''multiple', 'anonymous' and 'rgpd' to their current values
                             JsonObject formRef = formEvt.right().getValue();
-                            form.put("multiple", formRef.getBoolean("multiple"));
-                            form.put("anonymous", formRef.getBoolean("anonymous"));
-                            form.put("rgpd", formRef.getBoolean("rgpd"));
+                            form.put(MULTIPLE, formRef.getBoolean(MULTIPLE));
+                            form.put(ANONYMOUS, formRef.getBoolean(ANONYMOUS));
+                            form.put(RGPD, formRef.getBoolean(RGPD));
 
                             formService.update(formId, form, defaultResponseHandler(request));
                         });
@@ -661,7 +664,7 @@ public class FormController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
-        String formId = request.getParam("formId");
+        String formId = request.getParam(PARAM_FORM_ID);
         responseFileService.listByForm(formId, responseFileIdsEvt -> {
             if (responseFileIdsEvt.isLeft()) {
                 log.error("[Formulaire@deleteForm] Failed to retrieve files' ids for form : " + formId);
@@ -702,7 +705,7 @@ public class FormController extends ControllerHelper {
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void move(HttpServerRequest request) {
-        Integer targetFolderId = Integer.parseInt(request.getParam("folderId"));
+        Integer targetFolderId = Integer.parseInt(request.getParam(PARAM_FOLDER_ID));
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 String message = "[Formulaire@moveForms] User not found in session.";
@@ -738,7 +741,7 @@ public class FormController extends ControllerHelper {
                     }
 
                     // Check if user is owner or contributor to all the forms
-                    Long count = hasRightsEvt.right().getValue().getLong("count");
+                    Long count = hasRightsEvt.right().getValue().getLong(COUNT);
                     if (count == null || count != formIds.size()) {
                         String message = "[Formulaire@moveForms] You're missing rights on one form or more.";
                         log.error(message);
@@ -767,7 +770,7 @@ public class FormController extends ControllerHelper {
 
                         // Check if one of the folders is not owned by the connected user
                         JsonArray relFormFolders = relFormFolderEvt.right().getValue();
-                        List<Integer> checker = new ArrayList<Integer>(UtilsHelper.getByProp(relFormFolders, "folder_id").getList());
+                        List<Integer> checker = new ArrayList<Integer>(UtilsHelper.getByProp(relFormFolders, FOLDER_ID).getList());
                         checker.retainAll(BASE_FOLDER_IDS);
                         if (relFormFolders.size() != (formIds.size() - checker.size())) {
                             String message = "[Formulaire@moveForms] You're not owner of all the folders containing forms with ids " + formIds;
@@ -790,7 +793,7 @@ public class FormController extends ControllerHelper {
                             }
 
                             // Check if targetFolderId is not owned by the connected user
-                            String folderOwner = targetedFolderEvt.right().getValue().getString("user_id");
+                            String folderOwner = targetedFolderEvt.right().getValue().getString(USER_ID);
                             if (!BASE_FOLDER_IDS.contains(targetFolderId) &&
                                 (folderOwner == null || !user.getUserId().equals(folderOwner))) {
                                 String message = "[Formulaire@moveForms] You're not owner of the targeted folder with id " + targetFolderId;
@@ -806,7 +809,7 @@ public class FormController extends ControllerHelper {
                                     return;
                                 }
 
-                                JsonArray folderIds = getByProp(relFormFolders, "folder_id").add(targetFolderId);
+                                JsonArray folderIds = getByProp(relFormFolders, FOLDER_ID).add(targetFolderId);
                                 JsonArray folderIdsToSync = new JsonArray();
                                 for (int j = 0; j < folderIds.size(); j++) {
                                     if (folderIds.getInteger(j) != ID_ROOT_FOLDER) {
@@ -833,7 +836,7 @@ public class FormController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void sendReminder(HttpServerRequest request) {
-        String formId = request.getParam("formId");
+        String formId = request.getParam(PARAM_FORM_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 String message = "[Formulaire@sendReminder] User not found in session.";
@@ -864,7 +867,7 @@ public class FormController extends ControllerHelper {
 
                     // Should not send reminder if form is not sent
                     JsonObject form = formEvt.right().getValue();
-                    if (!form.getBoolean("sent")) {
+                    if (!form.getBoolean(SENT)) {
                         String message = "[Formulaire@sendReminder] You cannot send a reminder for a form which is not already send for response.";
                         log.error(message);
                         badRequest(request, message);
@@ -890,27 +893,27 @@ public class FormController extends ControllerHelper {
 
                         // Generate list of mails to send
                         for (int i = 0; i < distributions.size(); i++) {
-                            String id = distributions.getJsonObject(i).getString("responder_id");
+                            String id = distributions.getJsonObject(i).getString(RESPONDER_ID);
                             if (!localRespondersIds.contains(id)) {
-                                if (form.getBoolean("multiple") || form.getBoolean("anonymous") ||
-                                    distributions.getJsonObject(i).getString("date_response") == null) {
+                                if (form.getBoolean(MULTIPLE) || form.getBoolean(ANONYMOUS) ||
+                                    distributions.getJsonObject(i).getString(DATE_RESPONSE) == null) {
                                     localRespondersIds.add(id);
                                 }
                             }
 
                             // Generate new mail object if limit or end loop are reached
-                            if (i == distributions.size() - 1 || localRespondersIds.size() == config.getInteger("zimbra-max-recipients", 50)) {
+                            if (i == distributions.size() - 1 || localRespondersIds.size() == config.getInteger(ZIMBRA_MAX_RECIPIENTS, 50)) {
                                 JsonObject message = new JsonObject()
-                                        .put("subject", mail.getString("subject", ""))
-                                        .put("body", mail.getString("body", ""))
-                                        .put("to", new JsonArray())
-                                        .put("cci", localRespondersIds);
+                                        .put(SUBJECT, mail.getString(SUBJECT, ""))
+                                        .put(BODY, mail.getString(BODY, ""))
+                                        .put(TO, new JsonArray())
+                                        .put(CCI, localRespondersIds);
 
                                 JsonObject action = new JsonObject()
-                                        .put("action", "send")
-                                        .put("userId", user.getUserId())
-                                        .put("username", user.getUsername())
-                                        .put("message", message);
+                                        .put(ACTION, SEND)
+                                        .put(PARAM_USER_ID, user.getUserId())
+                                        .put(USERNAME, user.getUsername())
+                                        .put(MESSAGE, message);
 
                                 listMails.add(action);
                                 localRespondersIds = new JsonArray();
@@ -927,8 +930,8 @@ public class FormController extends ControllerHelper {
                             mails.add(future);
 
                             // Send mail via Conversation app if it exists or else with Zimbra
-                            eb.request("org.entcore.conversation", listMails.getJsonObject(i), (Handler<AsyncResult<Message<JsonObject>>>) messageEvt -> {
-                                if (!messageEvt.result().body().getString("status").equals("ok")) {
+                            eb.request(CONVERSATION_ADDRESS, listMails.getJsonObject(i), (Handler<AsyncResult<Message<JsonObject>>>) messageEvt -> {
+                                if (!messageEvt.result().body().getString(STATUS).equals(OK)) {
                                     log.error("[Formulaire@sendReminder] Failed to send reminder : " + messageEvt.cause());
                                     future.handle(Future.failedFuture(messageEvt.cause()));
                                 }
@@ -947,7 +950,7 @@ public class FormController extends ControllerHelper {
                             }
 
                             // Update 'reminded' prop of the form
-                            form.put("reminded", true);
+                            form.put(REMINDED, true);
                             formService.update(formId, form, updateEvt -> {
                                 if (updateEvt.isLeft()) {
                                     log.error("[Formulaire@sendReminder] Fail to update form " + formId + " : " + updateEvt.left().getValue());
@@ -968,7 +971,7 @@ public class FormController extends ControllerHelper {
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void getMyFormRights(HttpServerRequest request) {
-        String formId = request.getParam("formId");
+        String formId = request.getParam(PARAM_FORM_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 String message = "[Formulaire@getMyFormRights] User not found in session.";
@@ -1015,8 +1018,8 @@ public class FormController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void export(final HttpServerRequest request) {
-        String fileType = request.getParam("fileType");
-        String formId = request.getParam("formId");
+        String fileType = request.getParam(PARAM_FILE_TYPE);
+        String formId = request.getParam(PARAM_FORM_ID);
         RequestUtils.bodyToJson(request, images -> {
             UserUtils.getUserInfos(eb, request, user -> {
                 if (user == null) {
@@ -1040,12 +1043,12 @@ public class FormController extends ControllerHelper {
                     }
 
                     switch (fileType) {
-                        case "csv":
+                        case CSV:
                             new FormResponsesExportCSV(request, formEvt.right().getValue()).launch();
                             break;
-                        case "pdf":
+                        case PDF:
                             JsonObject form = formEvt.right().getValue();
-                            form.put("images", images);
+                            form.put(IMAGES, images);
                             new FormResponsesExportPDF(request, vertx, config, storage, form).launch();
                             break;
                         default:
@@ -1157,10 +1160,10 @@ public class FormController extends ControllerHelper {
                 }
 
                 // Get all ids, filter the one about sending (response right)
-                final String formId = request.params().get("id");
-                Map<String, Object> idUsers = shareFormObject.getJsonObject("users").getMap();
-                Map<String, Object> idGroups = shareFormObject.getJsonObject("groups").getMap();
-                Map<String, Object> idBookmarks = shareFormObject.getJsonObject("bookmarks").getMap();
+                final String formId = request.params().get(ID);
+                Map<String, Object> idUsers = shareFormObject.getJsonObject(USERS).getMap();
+                Map<String, Object> idGroups = shareFormObject.getJsonObject(GROUPS).getMap();
+                Map<String, Object> idBookmarks = shareFormObject.getJsonObject(BOOKMARKS).getMap();
 
                 JsonArray usersIds = new JsonArray(new ArrayList<>(filterIdsForSending(idUsers).keySet()));
                 JsonArray groupsIds = new JsonArray(new ArrayList<>(filterIdsForSending(idGroups).keySet()));
@@ -1174,11 +1177,11 @@ public class FormController extends ControllerHelper {
                         return;
                     }
 
-                    JsonArray ids = bookmarksEvt.right().getValue().getJsonObject(0).getJsonArray("ids").getJsonObject(0).getJsonArray("ids");
+                    JsonArray ids = bookmarksEvt.right().getValue().getJsonObject(0).getJsonArray(IDS).getJsonObject(0).getJsonArray(IDS);
                     for (int i = 0; i < ids.size(); i++) {
                         JsonObject id = ids.getJsonObject(i);
-                        boolean isGroup = id.getString("name") != null;
-                        (isGroup ? groupsIds : usersIds).add(id.getString("id"));
+                        boolean isGroup = id.getString(NAME) != null;
+                        (isGroup ? groupsIds : usersIds).add(id.getString(ID));
                     }
 
                     // Get all users ids from usersIds & groupsIds
@@ -1193,7 +1196,7 @@ public class FormController extends ControllerHelper {
                         JsonArray infos = usersEvt.right().getValue();
                         JsonArray responders = new JsonArray();
                         for (int i = 0; i < infos.size(); i++) {
-                            JsonArray users = infos.getJsonObject(i).getJsonArray("users");
+                            JsonArray users = infos.getJsonObject(i).getJsonArray(USERS);
                             responders.addAll(users);
                         }
 
@@ -1269,7 +1272,7 @@ public class FormController extends ControllerHelper {
             List<JsonObject> newResponders = new ArrayList<>();
             for (int i = 0; i < responders.size(); i++) {
                 JsonObject responder = responders.getJsonObject(i);
-                if (!respondersFromBDD.contains(responder.getString("id"))) {
+                if (!respondersFromBDD.contains(responder.getString(ID))) {
                     newResponders.add(responder);
                 }
             }
@@ -1384,7 +1387,7 @@ public class FormController extends ControllerHelper {
                 }
 
                 JsonObject form = formEvt.right().getValue();
-                form.put("sent", hasDistributions);
+                form.put(SENT, hasDistributions);
                 formService.update(formId, form, updateEvt -> {
                     if (updateEvt.isLeft()) {
                         log.error("[Formulaire@updateFormSentProp] Fail to update form");
@@ -1437,11 +1440,11 @@ public class FormController extends ControllerHelper {
                 i++;
             }
 
-            if (!isShared && !form.getString("owner_id").equals(user.getUserId())) {
+            if (!isShared && !form.getString(OWNER_ID).equals(user.getUserId())) {
                 isShared = true;
             }
 
-            form.put("collab", isShared);
+            form.put(COLLAB, isShared);
             formService.update(formId, form, updateEvt -> {
                 if (updateEvt.isLeft()) {
                     log.error("[Formulaire@updateFormCollabProp] Fail to update form : " + updateEvt.left().getValue());
@@ -1465,11 +1468,11 @@ public class FormController extends ControllerHelper {
 
             JsonArray rights = formSharedEvt.right().getValue();
             String id = user.getUserId();
-            shareFormObject.getJsonObject("users").put(id, new JsonArray());
+            shareFormObject.getJsonObject(USERS).put(id, new JsonArray());
 
             for (int i = 0; i < rights.size(); i++) {
                 JsonObject right = rights.getJsonObject(i);
-                shareFormObject.getJsonObject("users").getJsonArray(id).add(right.getString("action"));
+                shareFormObject.getJsonObject(USERS).getJsonArray(id).add(right.getString(ACTION));
             }
 
             // Classic sharing stuff (putting or removing ids from form_shares table accordingly)
@@ -1477,7 +1480,7 @@ public class FormController extends ControllerHelper {
                 if (r.isRight()) {
                     this.doShareSucceed(request, formId, user, shareFormObject, r.right().getValue(), false);
                 } else {
-                    JsonObject error = (new JsonObject()).put("error", r.left().getValue());
+                    JsonObject error = (new JsonObject()).put(ERROR, r.left().getValue());
                     Renders.renderJson(request, error, 400);
                 }
             });

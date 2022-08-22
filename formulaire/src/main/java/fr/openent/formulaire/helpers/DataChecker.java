@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static fr.openent.form.core.constants.Constants.RGPD_LIFETIME_VALUES;
+import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.helpers.UtilsHelper.getByProp;
 
 public class DataChecker {
@@ -22,8 +23,8 @@ public class DataChecker {
         boolean areDateValid = true;
         int i = 0;
         while (areDateValid && i < forms.size()) {
-            String openingDate = forms.getJsonObject(i).getString("date_opening", null);
-            String endingDate = forms.getJsonObject(i).getString("date_ending", null);
+            String openingDate = forms.getJsonObject(i).getString(DATE_OPENING, null);
+            String endingDate = forms.getJsonObject(i).getString(DATE_ENDING, null);
             if (endingDate != null) {
                 try {
                     Date finalOpeningDate = openingDate != null ? formDateFormatter.parse(openingDate) : new Date();
@@ -43,7 +44,7 @@ public class DataChecker {
         boolean areRGPDLifeTimeValid = true;
         int i = 0;
         while (areRGPDLifeTimeValid && i < forms.size()) {
-            Integer rgpdLifetime = forms.getJsonObject(i).getInteger("rgpd_lifetime");
+            Integer rgpdLifetime = forms.getJsonObject(i).getInteger(RGPD_LIFETIME);
             areRGPDLifeTimeValid = rgpdLifetime != null && RGPD_LIFETIME_VALUES.contains(rgpdLifetime);
             i++;
         }
@@ -53,7 +54,7 @@ public class DataChecker {
 
     // Check if one of the folders is not owned by the connected user
     public static boolean checkFolderIdsValidity(JsonArray folders, String userId) {
-        JsonArray userIds = getByProp(folders, "user_id");
+        JsonArray userIds = getByProp(folders, USER_ID);
         boolean areUserIdsOk = true;
         int i = 0;
         while (areUserIdsOk && i < userIds.size()) {
@@ -67,7 +68,7 @@ public class DataChecker {
 
     // Check if one of the sections has a wrong position value
     public static boolean checkSectionPositionsValidity(JsonArray sections) {
-        JsonArray positions = getByProp(sections, "position");
+        JsonArray positions = getByProp(sections, POSITION);
         boolean arePositionsOk = true;
         int i = 0;
         while (arePositionsOk && i < positions.size()) {
@@ -82,7 +83,7 @@ public class DataChecker {
 
     // Check if one of the forms is public
     public static boolean hasPublicForm(JsonArray forms) {
-        JsonArray publicProps = getByProp(forms, "is_public");
+        JsonArray publicProps = getByProp(forms, IS_PUBLIC);
         int i = 0;
         while (i < publicProps.size()) {
             boolean publicProp = publicProps.getBoolean(i);

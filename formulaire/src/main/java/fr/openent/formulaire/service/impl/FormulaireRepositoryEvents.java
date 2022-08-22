@@ -13,7 +13,9 @@ import io.vertx.core.logging.LoggerFactory;
 
 import static fr.openent.form.core.constants.Constants.DELETED_USER;
 import static fr.openent.form.core.constants.Constants.DELETED_USER_FILE;
+import static fr.openent.form.core.constants.Fields.ID;
 import static fr.openent.form.core.constants.ShareRights.MANAGER_RESOURCE_BEHAVIOUR;
+import static fr.openent.form.core.constants.Tables.*;
 
 public class FormulaireRepositoryEvents implements RepositoryEvents {
     private static final Logger log = LoggerFactory.getLogger(FormulaireRepositoryEvents.class);
@@ -40,7 +42,7 @@ public class FormulaireRepositoryEvents implements RepositoryEvents {
             for (Object o : groups) {
                 if (o instanceof JsonObject) {
                     final JsonObject j = (JsonObject) o;
-                    groupsIds.add(j.getString("id"));
+                    groupsIds.add(j.getString(ID));
                 }
             }
 
@@ -48,7 +50,7 @@ public class FormulaireRepositoryEvents implements RepositoryEvents {
                 SqlStatementsBuilder statementsBuilder = new SqlStatementsBuilder();
 
                 // Delete groups from groups table (will delete their sharing rights by cascade)
-                statementsBuilder.prepared("DELETE FROM " + Tables.GROUPS + " WHERE id IN " + Sql.listPrepared(groupsIds), groupsIds);
+                statementsBuilder.prepared("DELETE FROM " + GROUPS_TABLE + " WHERE id IN " + Sql.listPrepared(groupsIds), groupsIds);
 
                 Sql.getInstance().transaction(statementsBuilder.build(), SqlResult.validRowsResultHandler(deleteEvent -> {
                     if (deleteEvent.isRight()) {
@@ -81,7 +83,7 @@ public class FormulaireRepositoryEvents implements RepositoryEvents {
             for (Object o : users) {
                 if (o instanceof JsonObject) {
                     final JsonObject j = (JsonObject) o;
-                    userIds.add(j.getString("id"));
+                    userIds.add(j.getString(ID));
                 }
             }
 
@@ -90,17 +92,17 @@ public class FormulaireRepositoryEvents implements RepositoryEvents {
 
                 // Delete forms on which no one else has manager rights (or is owner)
                 String query =
-                        "DELETE FROM " + Tables.FORM + " WHERE id IN (" +
-                            "SELECT id FROM " + Tables.FORM + " f " +
-                            "JOIN " + Tables.FORM_SHARES + " fs ON fs.resource_id = f.id " +
+                        "DELETE FROM " + FORM_TABLE + " WHERE id IN (" +
+                            "SELECT id FROM " + FORM_TABLE + " f " +
+                            "JOIN " + FORM_SHARES_TABLE + " fs ON fs.resource_id = f.id " +
                             "WHERE resource_id IN (" +
-                                "SELECT id FROM " + Tables.FORM +" f " +
-                                "JOIN " + Tables.FORM_SHARES + " fs ON fs.resource_id = f.id " +
+                                "SELECT id FROM " + FORM_TABLE +" f " +
+                                "JOIN " + FORM_SHARES_TABLE + " fs ON fs.resource_id = f.id " +
                                 "WHERE owner_id IN " + Sql.listPrepared(userIds) + " OR " +
                                 "(action = ? AND member_id IN " + Sql.listPrepared(userIds) + ") " +
                                 "GROUP BY id" +
                             ") AND resource_id NOT IN ( " +
-                                "SELECT resource_id FROM " + Tables.FORM_SHARES + " " +
+                                "SELECT resource_id FROM " + FORM_SHARES_TABLE + " " +
                                 "WHERE action = ? AND member_id NOT IN " + Sql.listPrepared(userIds) +
                             ") " +
                             "GROUP BY id" +
@@ -110,20 +112,20 @@ public class FormulaireRepositoryEvents implements RepositoryEvents {
                 statementsBuilder.prepared(query, params);
 
                 // Delete users from members table (will delete their sharing rights by cascade)
-                statementsBuilder.prepared("DELETE FROM " + Tables.MEMBERS + " WHERE user_id IN " + Sql.listPrepared(userIds), userIds);
+                statementsBuilder.prepared("DELETE FROM " + MEMBERS_TABLE + " WHERE user_id IN " + Sql.listPrepared(userIds), userIds);
 
                 // Set active distributions to false
-                statementsBuilder.prepared("UPDATE " + Tables.DISTRIBUTION + " SET active = ?" +
+                statementsBuilder.prepared("UPDATE " + DISTRIBUTION_TABLE + " SET active = ?" +
                         " WHERE responder_id IN " + Sql.listPrepared(userIds), new JsonArray().add(false).addAll(userIds));
 
                 // Change responder_name to a fixed common default value in all his responses
-                statementsBuilder.prepared("UPDATE " + Tables.DISTRIBUTION + " SET responder_name = ? " +
+                statementsBuilder.prepared("UPDATE " + DISTRIBUTION_TABLE + " SET responder_name = ? " +
                         "WHERE responder_id IN " + Sql.listPrepared(userIds), new JsonArray().add(DELETED_USER).addAll(userIds));
 
                 // Change filename to a fixed common default value in all the response files' names of the users
-                statementsBuilder.prepared("UPDATE " + Tables.RESPONSE_FILE + " SET filename = ? " +
+                statementsBuilder.prepared("UPDATE " + RESPONSE_FILE_TABLE + " SET filename = ? " +
                         "WHERE response_id IN (" +
-                            "SELECT id FROM " + Tables.RESPONSE + " " +
+                            "SELECT id FROM " + RESPONSE_TABLE + " " +
                             "WHERE responder_id IN " + Sql.listPrepared(userIds) +
                         ")", new JsonArray().add(DELETED_USER_FILE).addAll(userIds));
 

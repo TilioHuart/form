@@ -5,6 +5,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
+import static fr.openent.form.core.constants.Fields.ID;
+
 public class UtilsHelper {
     private static final Logger log = LoggerFactory.getLogger(UtilsHelper.class);
 
@@ -13,7 +15,7 @@ public class UtilsHelper {
     public static JsonArray getIds(JsonArray items, boolean toString) {
         JsonArray ids = new JsonArray();
         for (int i = 0; i < items.size(); i++) {
-            Integer id = items.getJsonObject(i).getInteger("id");
+            Integer id = items.getJsonObject(i).getInteger(ID);
             ids.add(toString && id != null ? id.toString() : id);
         }
         return ids;
@@ -26,7 +28,7 @@ public class UtilsHelper {
     public static JsonArray getStringIds(JsonArray users) {
         JsonArray userIds = new JsonArray();
         for (int i = 0; i < users.size(); i++) {
-            userIds.add(users.getJsonObject(i).getString("id"));
+            userIds.add(users.getJsonObject(i).getString(ID));
         }
         return userIds;
     }

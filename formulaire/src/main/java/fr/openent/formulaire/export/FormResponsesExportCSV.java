@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
 import static fr.wseduc.webutils.http.Renders.notFound;
 
@@ -35,13 +36,13 @@ public class FormResponsesExportCSV {
 
   public FormResponsesExportCSV(HttpServerRequest request, JsonObject form) {
     this.request = request;
-    this.anonymous = form.getBoolean("anonymous");
-    this.formName = form.getString("title");
+    this.anonymous = form.getBoolean(ANONYMOUS);
+    this.formName = form.getString(TITLE);
     dateFormatter.setTimeZone(TimeZone.getTimeZone("Europe/Paris")); // TODO to adapt for not France timezone
   }
 
   public void launch() {
-    String formId = request.getParam("formId");
+    String formId = request.getParam(PARAM_FORM_ID);
     questionService.export(formId, false, getQuestionsEvt -> {
       if (getQuestionsEvt.isLeft()) {
         log.error("[Formulaire@FormExportCSV] Failed to retrieve all questions of the form " + formId);
@@ -95,22 +96,22 @@ public class FormResponsesExportCSV {
             // Get responses of this responder
             ArrayList<JsonObject> responses = new ArrayList<>();
             boolean allFound = false;
-            int previousDistribId = allResponses.get(0).getInteger("id");
+            int previousDistribId = allResponses.get(0).getInteger(ID);
             int firstIndexToDelete = -1;
             int lastIndexToDelete = -1;
             int i = 0;
 
             while (!allFound && i < allResponses.size()) {
               JsonObject response = allResponses.get(i);
-              if (!responses.isEmpty() && !response.getInteger("id").equals(previousDistribId)) {
+              if (!responses.isEmpty() && !response.getInteger(ID).equals(previousDistribId)) {
                 allFound = true;
                 lastIndexToDelete = i;
               }
-              else if (response.getInteger("id").equals(previousDistribId)) {
+              else if (response.getInteger(ID).equals(previousDistribId)) {
                 if (responses.isEmpty()) { firstIndexToDelete = i; }
                 responses.add(response);
               }
-              previousDistribId = response.getInteger("id");
+              previousDistribId = response.getInteger(ID);
               i++;
             }
 
@@ -123,7 +124,7 @@ public class FormResponsesExportCSV {
             HashMap<Integer, JsonArray> mapResponses = new HashMap<>();
             for (Object rep : responses) {
               JsonObject response = (JsonObject)rep;
-              int questionId = response.getInteger("question_id");
+              int questionId = response.getInteger(QUESTION_ID);
               if (mapResponses.get(questionId) == null) {
                 mapResponses.put(questionId, new JsonArray());
               }
@@ -133,12 +134,12 @@ public class FormResponsesExportCSV {
             // Add responses of this responder
             List<JsonObject> allQuestions = questions.getList();
             for (JsonObject question : allQuestions) {
-              JsonArray questionResponses = mapResponses.get(question.getInteger("id"));
+              JsonArray questionResponses = mapResponses.get(question.getInteger(ID));
               if (questionResponses != null && questionResponses.size() > 0) {
                 String answer = "";
                 for (int rep = 0; rep < questionResponses.size(); rep++) {
                   JsonObject response = questionResponses.getJsonObject(rep);
-                  answer += response.getString("answer") + (rep < questionResponses.size() - 1 ? ";" : "");
+                  answer += response.getString(ANSWER) + (rep < questionResponses.size() - 1 ? ";" : "");
                 }
                 content.append(addResponse(answer, allQuestions.lastIndexOf(question) == nbQuestions - 1));
               }
@@ -165,10 +166,10 @@ public class FormResponsesExportCSV {
 
     for (int i = 0; i < questions.size(); i++) {
       JsonObject question = questions.getJsonObject(i);
-      Integer element_position = question.getInteger("element_position");
-      Integer section_position = question.getInteger("section_position");
+      Integer element_position = question.getInteger(ELEMENT_POSITION);
+      Integer section_position = question.getInteger(SECTION_POSITION);
       String displayedPosition = element_position + "." + (section_position != null ? section_position + "." : "");
-      headers.add(displayedPosition + questions.getJsonObject(i).getString("title"));
+      headers.add(displayedPosition + questions.getJsonObject(i).getString(TITLE));
     }
 
     StringBuilder builder = new StringBuilder();
@@ -181,10 +182,10 @@ public class FormResponsesExportCSV {
   }
 
   private String getUserInfos(JsonObject responder) {
-    String userId = responder.getString("responder_id");
-    String displayName = responder.getString("responder_name");
-    String sqlDate = responder.getString("date_response");
-    String structure = responder.getString("structure");
+    String userId = responder.getString(RESPONDER_ID);
+    String displayName = responder.getString(RESPONDER_NAME);
+    String sqlDate = responder.getString(DATE_RESPONSE);
+    String structure = responder.getString(STRUCTURE);
 
     StringBuilder builder = new StringBuilder();
     Date date = null;

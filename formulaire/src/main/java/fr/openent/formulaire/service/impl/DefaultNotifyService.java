@@ -11,6 +11,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.user.UserUtils;
 
+import static fr.openent.form.core.constants.Fields.*;
 import static fr.wseduc.webutils.http.Renders.unauthorized;
 
 public class DefaultNotifyService implements NotifyService {
@@ -34,13 +35,13 @@ public class DefaultNotifyService implements NotifyService {
                 return;
             }
 
-            String endPath = form.getBoolean("rgpd") ? "rgpd" : "new";
+            String endPath = form.getBoolean(RGPD) ? RGPD : NEW;
             JsonObject params = new JsonObject()
-                    .put("userUri", "/userbook/annuaire#" + user.getUserId())
-                    .put("username", user.getUsername())
-                    .put("formUri", "/formulaire#/form/" + form.getInteger("id") + "/" + endPath)
-                    .put("formName", form.getString("title"))
-                    .put("pushNotif", new JsonObject().put("title", "push.notif.formulaire.newForm").put("body", ""));
+                    .put(PARAM_USER_ID, "/userbook/annuaire#" + user.getUserId())
+                    .put(USERNAME, user.getUsername())
+                    .put(PARAM_FORM_URI, "/formulaire#/form/" + form.getInteger(ID) + "/" + endPath)
+                    .put(PARAM_FORM_NAME, form.getString(TITLE))
+                    .put(PARAM_PUSH_NOTIF, new JsonObject().put(TITLE, "push.notif.formulaire.newForm").put(BODY, ""));
 
             timelineHelper.notifyTimeline(request, "formulaire.new_form_notification", user, responders.getList(), params);
         });
@@ -57,13 +58,13 @@ public class DefaultNotifyService implements NotifyService {
             }
 
             JsonObject params = new JsonObject()
-                    .put("anonymous", form.getBoolean("anonymous"))
-                    .put("userUri", "/userbook/annuaire#" + user.getUserId())
-                    .put("username", user.getUsername())
-                    .put("formUri", "/formulaire#/form/" + form.getInteger("id") + "/edit")
-                    .put("formName", form.getString("title"))
-                    .put("formResultsUri", "/formulaire#/form/" + form.getInteger("id") + "/results/1")
-                    .put("pushNotif", new JsonObject().put("title", "push.notif.formulaire.response").put("body", ""));
+                    .put(ANONYMOUS, form.getBoolean(ANONYMOUS))
+                    .put(PARAM_USER_ID, "/userbook/annuaire#" + user.getUserId())
+                    .put(USERNAME, user.getUsername())
+                    .put(PARAM_FORM_URI, "/formulaire#/form/" + form.getInteger(ID) + "/edit")
+                    .put(PARAM_FORM_NAME, form.getString(TITLE))
+                    .put(PARAM_FORM_RESULTS_URI, "/formulaire#/form/" + form.getInteger(ID) + "/results/1")
+                    .put(PARAM_PUSH_NOTIF, new JsonObject().put(TITLE, "push.notif.formulaire.response").put(BODY, ""));
 
             timelineHelper.notifyTimeline(request, "formulaire.response_notification", user, managers.getList(), params);
         });

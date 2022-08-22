@@ -27,6 +27,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 
+import static fr.openent.form.core.constants.EbFields.*;
+import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.helpers.RenderHelper.renderBadRequest;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
 
@@ -54,8 +56,8 @@ public class FormController extends ControllerHelper {
     @Get("/forms/key/:formKey")
     @ApiDoc("Create a distribution and get a specific form by key")
     public void getPublicFormByKey(HttpServerRequest request) {
-        String formKey = request.getParam("formKey");
-        Cookie distributionKeyCookie = request.getCookie("distribution_key_" + formKey);
+        String formKey = request.getParam(PARAM_FORM_KEY);
+        Cookie distributionKeyCookie = request.getCookie(DISTRIBUTION_KEY_ + formKey);
 
         if (distributionKeyCookie != null) {
             String message = "[FormulairePublic@createPublicResponses] The form has already been answered for distributionKey " + distributionKeyCookie.getValue();
@@ -74,7 +76,7 @@ public class FormController extends ControllerHelper {
             JsonObject form = formEvt.right().getValue();
 
             // Check date_ending validity
-            if (form.getString("date_ending") == null || form.getString("date_ending") == null) {
+            if (form.getString(DATE_ENDING) == null || form.getString(DATE_ENDING) == null) {
                 String message = "[FormulairePublic@getPublicFormByKey] A public form must have an opening and ending date.";
                 log.error(message);
                 badRequest(request, message);
@@ -82,8 +84,8 @@ public class FormController extends ControllerHelper {
             }
             else {
                 try {
-                    Date startDate = formDateFormatter.parse(form.getString("date_opening"));
-                    Date endDate = formDateFormatter.parse(form.getString("date_ending"));
+                    Date startDate = formDateFormatter.parse(form.getString(DATE_OPENING));
+                    Date endDate = formDateFormatter.parse(form.getString(DATE_ENDING));
                     if (endDate.before(new Date())) {
                         log.error("[FormulairePublic@getPublicFormByKey] This form is closed, you cannot access it anymore.");
                         forbidden(request);
@@ -102,10 +104,10 @@ public class FormController extends ControllerHelper {
             }
 
             // Get all form data (sections, questions, question_choices)
-            String formId = form.getInteger("id").toString();
+            String formId = form.getInteger(ID).toString();
 
-            JsonObject sectionsMessage = new JsonObject().put("action", "list-sections").put("formId", formId);
-            eb.request("fr.openent.formulaire", sectionsMessage, MessageResponseHelper.messageJsonArrayHandler(sectionsEvt -> {
+            JsonObject sectionsMessage = new JsonObject().put(ACTION, LIST_SECTIONS).put(PARAM_FORM_ID, formId);
+            eb.request(FORMULAIRE_ADDRESS, sectionsMessage, MessageResponseHelper.messageJsonArrayHandler(sectionsEvt -> {
                 if (sectionsEvt.isLeft()) {
                     log.error("[FormulairePublic@getPublicFormByKey] Fail to get sections for form with key : " + formKey);
                     renderInternalError(request, sectionsEvt);
@@ -113,10 +115,10 @@ public class FormController extends ControllerHelper {
                 }
 
                 JsonArray sections = sectionsEvt.right().getValue();
-                form.put("form_elements", sections);
+                form.put(FORM_ELEMENTS, sections);
 
-                JsonObject questionsMessage = new JsonObject().put("action", "list-question-for-form-and-section").put("formId", formId);
-                eb.request("fr.openent.formulaire", questionsMessage, MessageResponseHelper.messageJsonArrayHandler(questionsEvt -> {
+                JsonObject questionsMessage = new JsonObject().put(ACTION, LIST_QUESTION_FOR_FORM_AND_SECTION).put(PARAM_FORM_ID, formId);
+                eb.request(FORMULAIRE_ADDRESS, questionsMessage, MessageResponseHelper.messageJsonArrayHandler(questionsEvt -> {
                     if (questionsEvt.isLeft()) {
                         log.error("[FormulairePublic@getPublicFormByKey] Fail to get questions for form with key : " + formKey);
                         renderInternalError(request, questionsEvt);
@@ -126,8 +128,8 @@ public class FormController extends ControllerHelper {
                     JsonArray questions = questionsEvt.right().getValue();
                     JsonArray questionIds = UtilsHelper.getIds(questions);
 
-                    JsonObject questionChoicesMessage = new JsonObject().put("action", "list-question-choices").put("questionIds", questionIds);
-                    eb.request("fr.openent.formulaire", questionChoicesMessage, MessageResponseHelper.messageJsonArrayHandler(questionChoicesEvt -> {
+                    JsonObject questionChoicesMessage = new JsonObject().put(ACTION, LIST_QUESTION_CHOICES).put(PARAM_QUESTION_IDS, questionIds);
+                    eb.request(FORMULAIRE_ADDRESS, questionChoicesMessage, MessageResponseHelper.messageJsonArrayHandler(questionChoicesEvt -> {
                         if (questionChoicesEvt.isLeft()) {
                             log.error("[FormulairePublic@getPublicFormByKey] Fail to get choices for questions with ids : " + questionIds);
                             renderInternalError(request, questionChoicesEvt);
@@ -141,7 +143,7 @@ public class FormController extends ControllerHelper {
                         // Group questionChoices by questionId
                         for (Object qc : questionsChoices) {
                             JsonObject questionChoice = (JsonObject)qc;
-                            int questionId = questionChoice.getInteger("question_id");
+                            int questionId = questionChoice.getInteger(QUESTION_ID);
                             if (questionsChoicesMapped.get(questionId) == null) {
                                 questionsChoicesMapped.put(questionId, new JsonArray());
                                 questionsChoicesMapped.get(questionId).add(questionChoice);
@@ -154,26 +156,26 @@ public class FormController extends ControllerHelper {
                         // Map sections by id
                         for (Object s : sections) {
                             JsonObject section = (JsonObject)s;
-                            section.put("questions", new JsonArray());
-                            sectionsMapped.put(section.getInteger("id"), section);
+                            section.put(QUESTIONS, new JsonArray());
+                            sectionsMapped.put(section.getInteger(ID), section);
                         }
 
                         // Fill questions and add it where necessary
                         for (Object q : questions) {
                             JsonObject question = (JsonObject)q;
-                            question.put("choices", new JsonArray());
+                            question.put(CHOICES, new JsonArray());
 
                             // Fill question with questionChoices
-                            JsonArray questionChoices = questionsChoicesMapped.get(question.getInteger("id"));
-                            if (questionChoices != null) question.put("choices", questionChoices);
+                            JsonArray questionChoices = questionsChoicesMapped.get(question.getInteger(ID));
+                            if (questionChoices != null) question.put(CHOICES, questionChoices);
 
                             // Add question to its section or directly to form_elements
-                            Integer sectionId = question.getInteger("section_id", null);
+                            Integer sectionId = question.getInteger(SECTION_ID, null);
                             if (sectionId == null) {
-                                form.getJsonArray("form_elements").add(question);
+                                form.getJsonArray(FORM_ELEMENTS).add(question);
                             }
                             else {
-                                sectionsMapped.get(sectionId).getJsonArray("questions").add(question);
+                                sectionsMapped.get(sectionId).getJsonArray(QUESTIONS).add(question);
                             }
                         }
 
@@ -186,8 +188,8 @@ public class FormController extends ControllerHelper {
                             }
 
                             JsonObject distribution = distributionEvt.right().getValue();
-                            form.put("distribution_key", distribution.getString("public_key"));
-                            form.put("distribution_captcha", distribution.getInteger("captcha_id"));
+                            form.put(DISTRIBUTION_KEY, distribution.getString(PUBLIC_KEY));
+                            form.put(DISTRIBUTION_CAPTCHA, distribution.getInteger(CAPTCHA_ID));
                             renderJson(request, form);
                         });
                     }));
@@ -199,9 +201,9 @@ public class FormController extends ControllerHelper {
     @Post("/responses/:formKey/:distributionKey")
     @ApiDoc("Create multiple responses")
     public void createResponses(HttpServerRequest request) {
-        String formKey = request.getParam("formKey");
-        String distributionKey = request.getParam("distributionKey");
-        Cookie distributionKeyCookie = request.getCookie("distribution_key_" + formKey);
+        String formKey = request.getParam(PARAM_FORM_KEY);
+        String distributionKey = request.getParam(PARAM_DISTRIBUTION_KEY);
+        Cookie distributionKeyCookie = request.getCookie(DISTRIBUTION_KEY_ + formKey);
 
         if (distributionKeyCookie != null) {
             String message = "[FormulairePublic@createPublicResponses] The form has already been answered for distributionKey " + distributionKeyCookie.getValue();
@@ -228,7 +230,7 @@ public class FormController extends ControllerHelper {
             }
 
             JsonObject form = formEvt.right().getValue();
-            Integer formId = form.getInteger("id");
+            Integer formId = form.getInteger(ID);
             publicDistributionService.getDistributionByKey(distributionKey, distributionEvt -> {
                 if (distributionEvt.isLeft() || distributionEvt.right().getValue().isEmpty()) {
                     log.error("[FormulairePublic@createPublicResponses] Fail to get distribution for key : " + distributionKey);
@@ -238,7 +240,7 @@ public class FormController extends ControllerHelper {
 
                 JsonObject distribution = distributionEvt.right().getValue();
                 // Check if the distribution matches the formKey received
-                if (!distribution.getInteger("form_id").equals(formId)) {
+                if (!distribution.getInteger(FORM_ID).equals(formId)) {
                     String message = "[FormulairePublic@createPublicResponses] The distributionKey provided is not matching the formKey " + formKey;
                     log.error(message);
                     badRequest(request, message);
@@ -246,7 +248,7 @@ public class FormController extends ControllerHelper {
                 }
 
                 // Check if the found distribution is not already with status FINISHED
-                if (!distribution.getString("status").equals(DistributionStatus.TO_DO)) {
+                if (!distribution.getString(STATUS).equals(DistributionStatus.TO_DO)) {
                     String message = "[FormulairePublic@createPublicResponses] The form has already been answered for distributionKey " + distributionKey;
                     log.error(message);
                     forbidden(request, message);
@@ -255,7 +257,7 @@ public class FormController extends ControllerHelper {
 
                 // Check if the response time was too fast (to detect potential robot attacks)
                 try {
-                    Date sendingDate = formDateFormatter.parse(distribution.getString("date_sending"));
+                    Date sendingDate = formDateFormatter.parse(distribution.getString(DATE_SENDING));
                     Date now = new Date();
                     long diff = now.getTime() - sendingDate.getTime();
 
@@ -278,9 +280,9 @@ public class FormController extends ControllerHelper {
                 RequestUtils.bodyToJson(request, data -> {
 
                     // Check CAPTCHA response
-                    String captchaResponse = data.getJsonObject("captcha").getString("answer");
+                    String captchaResponse = data.getJsonObject(CAPTCHA).getString(ANSWER);
                     String captchaAnswer = CaptchaHelper.formatCaptchaAnswer(captchaResponse);
-                    String captchaId = distribution.getInteger("captcha_id").toString();
+                    String captchaId = distribution.getInteger(CAPTCHA_ID).toString();
                     publicCaptchaService.get(captchaId, captchaEvt -> {
                         if (captchaEvt.isLeft()) {
                             log.error("[FormulairePublic@createPublicResponses] Fail to get captcha with id : " + captchaId);
@@ -288,7 +290,7 @@ public class FormController extends ControllerHelper {
                             return;
                         }
 
-                        String captchaSolution = captchaEvt.right().getValue().getString("answer");
+                        String captchaSolution = captchaEvt.right().getValue().getString(ANSWER);
                         if (captchaAnswer == null || !captchaAnswer.equals(captchaSolution)) {
                             String message = "[FormulairePublic@createPublicResponses] Wrong response for CAPTCHA with id " + captchaId + " : " + captchaResponse;
                             log.error(message);
@@ -296,11 +298,11 @@ public class FormController extends ControllerHelper {
                             return;
                         }
 
-                        JsonArray responses = data.getJsonArray("responses");
+                        JsonArray responses = data.getJsonArray(RESPONSES);
 
                         // Get question and question_choices information
-                        JsonObject questionsMessage = new JsonObject().put("action", "list-question-for-form-and-section").put("formId", formId.toString());
-                        eb.request("fr.openent.formulaire", questionsMessage, MessageResponseHelper.messageJsonArrayHandler(questionsEvt -> {
+                        JsonObject questionsMessage = new JsonObject().put(ACTION, LIST_QUESTION_FOR_FORM_AND_SECTION).put(PARAM_FORM_ID, formId.toString());
+                        eb.request(FORMULAIRE_ADDRESS, questionsMessage, MessageResponseHelper.messageJsonArrayHandler(questionsEvt -> {
                             if (questionsEvt.isLeft()) {
                                 log.error("[FormulairePublic@createPublicResponses] Fail to get questions corresponding to form with id : " + formId);
                                 renderInternalError(request, questionsEvt);
@@ -310,8 +312,8 @@ public class FormController extends ControllerHelper {
                             JsonArray questions = questionsEvt.right().getValue();
                             JsonArray questionIds = UtilsHelper.getIds(questions);
 
-                            JsonObject questionChoicesMessage = new JsonObject().put("action", "list-question-choices").put("questionIds", questionIds);
-                            eb.request("fr.openent.formulaire", questionChoicesMessage, MessageResponseHelper.messageJsonArrayHandler(questionChoicesEvt -> {
+                            JsonObject questionChoicesMessage = new JsonObject().put(ACTION, LIST_QUESTION_CHOICES).put(PARAM_QUESTION_IDS, questionIds);
+                            eb.request(FORMULAIRE_ADDRESS, questionChoicesMessage, MessageResponseHelper.messageJsonArrayHandler(questionChoicesEvt -> {
                                 if (questionChoicesEvt.isLeft()) {
                                     log.error("[FormulairePublic@createPublicResponses] Fail to get choices for questions with ids : " + questionIds);
                                     renderInternalError(request, questionChoicesEvt);
@@ -325,7 +327,7 @@ public class FormController extends ControllerHelper {
                                 // Group questionChoices by questionId
                                 for (Object qc : questionsChoices) {
                                     JsonObject questionChoice = (JsonObject) qc;
-                                    int questionId = questionChoice.getInteger("question_id");
+                                    int questionId = questionChoice.getInteger(QUESTION_ID);
                                     if (questionsChoicesMapped.get(questionId) == null) {
                                         questionsChoicesMapped.put(questionId, new JsonArray());
                                         questionsChoicesMapped.get(questionId).add(questionChoice);
@@ -337,12 +339,12 @@ public class FormController extends ControllerHelper {
                                 // Fill questions and add it where necessary
                                 for (Object q : questions) {
                                     JsonObject question = (JsonObject)q;
-                                    questionsMapped.put(question.getInteger("id"), question);
+                                    questionsMapped.put(question.getInteger(ID), question);
 
                                     // Fill question with questionChoices
-                                    question.put("choices", new JsonArray());
-                                    JsonArray questionChoices = questionsChoicesMapped.get(question.getInteger("id"));
-                                    if (questionChoices != null) question.put("choices", questionChoices);
+                                    question.put(CHOICES, new JsonArray());
+                                    JsonArray questionChoices = questionsChoicesMapped.get(question.getInteger(ID));
+                                    if (questionChoices != null) question.put(CHOICES, questionChoices);
                                 }
 
                                 // Check if all the question_ids from the responses match existing questions from the form
@@ -350,24 +352,24 @@ public class FormController extends ControllerHelper {
                                 int i = 0;
                                 while (wrongQuestionId == null && i < responses.size()) {
                                     JsonObject response = responses.getJsonObject(i);
-                                    Integer questionId = response.getInteger("question_id");
+                                    Integer questionId = response.getInteger(QUESTION_ID);
 
                                     if (!questionIds.contains(questionId.toString())) {
                                         wrongQuestionId = questionId;
                                     }
                                     else {
                                         JsonObject question = questionsMapped.get(questionId);
-                                        int questionType = question.getInteger("question_type");
-                                        Integer choiceId = response.getInteger("choice_id");
+                                        int questionType = question.getInteger(QUESTION_TYPE);
+                                        Integer choiceId = response.getInteger(CHOICE_ID);
 
                                         // If there is a choice it should match an existing QuestionChoice for this question
                                         if (choiceId != null && Arrays.asList(4,5,9).contains(questionType)) {
-                                            JsonArray choices = question.getJsonArray("choices");
+                                            JsonArray choices = question.getJsonArray(CHOICES);
                                             boolean isChoiceValid = false;
                                             int j = 0;
                                             while (!isChoiceValid && j < choices.size()) {
                                                 JsonObject choice = choices.getJsonObject(j);
-                                                if (choice.getInteger("id").equals(choiceId) && choice.getString("value").equals(response.getString("answer"))) {
+                                                if (choice.getInteger(ID).equals(choiceId) && choice.getString(VALUE).equals(response.getString(ANSWER))) {
                                                     isChoiceValid = true;
                                                 }
                                                 j++;
@@ -381,19 +383,19 @@ public class FormController extends ControllerHelper {
                                             }
                                         }
                                         else { // If it's a type 6 or 7 check parsing into Date or Time
-                                            if (questionType == 6 && response.getString("answer") != null && !response.getString("answer").isEmpty()) {
-                                                try { dateFormatter.parse(response.getString("answer")); }
+                                            if (questionType == 6 && response.getString(ANSWER) != null && !response.getString(ANSWER).isEmpty()) {
+                                                try { dateFormatter.parse(response.getString(ANSWER)); }
                                                 catch (ParseException e) {
-                                                    String message = "[FormulairePublic@createPublicResponses] Fail to parse as date the answer " + response.getString("answer");
+                                                    String message = "[FormulairePublic@createPublicResponses] Fail to parse as date the answer " + response.getString(ANSWER);
                                                     log.error(message);
                                                     renderInternalError(request, message);
                                                     return;
                                                 }
                                             }
-                                            if (questionType == 7 && response.getString("answer") != null && !response.getString("answer").isEmpty()) {
-                                                try { timeFormatter.parse(response.getString("answer")); }
+                                            if (questionType == 7 && response.getString(ANSWER) != null && !response.getString(ANSWER).isEmpty()) {
+                                                try { timeFormatter.parse(response.getString(ANSWER)); }
                                                 catch (ParseException e) {
-                                                    String message = "[FormulairePublic@createPublicResponses] Fail to parse as time the answer " + response.getString("answer");
+                                                    String message = "[FormulairePublic@createPublicResponses] Fail to parse as time the answer " + response.getString(ANSWER);
                                                     log.error(message);
                                                     renderInternalError(request, message);
                                                     return;
@@ -420,7 +422,7 @@ public class FormController extends ControllerHelper {
                                     }
 
                                     // Set cookie
-                                    Cookie cookie = new CookieImpl("distribution_key_" + formKey, distributionKey);
+                                    Cookie cookie = new CookieImpl(DISTRIBUTION_KEY_ + formKey, distributionKey);
                                     cookie.setPath("/formulaire-public");
                                     cookie.setSameSite(CookieSameSite.STRICT);
                                     request.response().addCookie(cookie);
@@ -433,8 +435,8 @@ public class FormController extends ControllerHelper {
                                         }
 
                                         JsonObject finalDistribution = finalDistributionEvt.right().getValue();
-                                        if (form.getBoolean("response_notified")) {
-                                            publicFormService.listManagers(form.getInteger("id").toString(), listManagersEvt -> {
+                                        if (form.getBoolean(RESPONSE_NOTIFIED)) {
+                                            publicFormService.listManagers(form.getInteger(ID).toString(), listManagersEvt -> {
                                                 if (listManagersEvt.isLeft()) {
                                                     log.error("[FormulairePublic@createPublicResponses] Error in listing managers for form with id " + formId);
                                                     renderInternalError(request, listManagersEvt);
@@ -444,7 +446,7 @@ public class FormController extends ControllerHelper {
                                                 JsonArray managers = listManagersEvt.right().getValue();
                                                 JsonArray managerIds = new JsonArray();
                                                 for (int j = 0; j < managers.size(); j++) {
-                                                    managerIds.add(managers.getJsonObject(j).getString("id"));
+                                                    managerIds.add(managers.getJsonObject(j).getString(ID));
                                                 }
 
                                                 publicNotifyService.notifyResponse(request, form, managerIds);

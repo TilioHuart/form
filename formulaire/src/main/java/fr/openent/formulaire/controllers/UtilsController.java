@@ -1,5 +1,6 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.core.constants.EbFields;
 import fr.openent.formulaire.helpers.upload_file.Attachment;
 import fr.openent.formulaire.helpers.upload_file.FileHelper;
 import fr.openent.formulaire.security.CreationRight;
@@ -18,6 +19,8 @@ import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.storage.Storage;
 
+import static fr.openent.form.core.constants.EbFields.WORKSPACE_ADDRESS;
+import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
 import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 
@@ -35,7 +38,7 @@ public class UtilsController extends ControllerHelper {
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void getInfoImg(final HttpServerRequest request) {
-        String idImage = request.getParam("idImage");
+        String idImage = request.getParam(PARAM_ID_IMAGE);
 
         if (idImage == null || idImage.equals("")) {
             String message = "[Formulaire@getInfoImg] The image id must not be empty.";
@@ -44,15 +47,15 @@ public class UtilsController extends ControllerHelper {
             return;
         }
 
-        JsonObject action = new JsonObject().put("action", "getDocument").put("id", idImage);
-        eb.request("org.entcore.workspace", action, handlerToAsyncHandler(infos -> {
-            if (!infos.body().getString("status").equals("ok")) {
+        JsonObject action = new JsonObject().put(ACTION, "getDocument").put(ID, idImage);
+        eb.request(WORKSPACE_ADDRESS, action, handlerToAsyncHandler(infos -> {
+            if (!infos.body().getString(STATUS).equals(OK)) {
                 String message = "[Formulaire@getInfoImg] Failed to get info for image with id : " + idImage;
                 log.error(message);
-                renderInternalError(request, infos.body().getJsonObject("result").toString());
+                renderInternalError(request, infos.body().getJsonObject(RESULT).toString());
             }
             else {
-                Renders.renderJson(request, infos.body().getJsonObject("result"), 200);
+                Renders.renderJson(request, infos.body().getJsonObject(RESULT), 200);
             }
         }));
     }

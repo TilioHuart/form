@@ -12,6 +12,7 @@ import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 
+import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
 
@@ -29,7 +30,7 @@ public class FormElementController extends ControllerHelper {
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void countFormElements(HttpServerRequest request) {
-        String formId = request.getParam("formId");
+        String formId = request.getParam(PARAM_FORM_ID);
         formElementService.countFormElements(formId, defaultResponseHandler(request));
     }
 
@@ -38,8 +39,8 @@ public class FormElementController extends ControllerHelper {
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void getByPosition(HttpServerRequest request) {
-        String formId = request.getParam("formId");
-        String position = request.getParam("position");
+        String formId = request.getParam(PARAM_FORM_ID);
+        String position = request.getParam(POSITION);
         formElementService.getTypeAndIdByPosition(formId, position, formElementEvt -> {
             if (formElementEvt.isLeft()) {
                 log.error("[Formulaire@getFormElement] Error in getting form element id of position " + position + " in form " + formId);
@@ -53,8 +54,8 @@ public class FormElementController extends ControllerHelper {
                 return;
             }
 
-            String elementId = formElementEvt.right().getValue().getLong("id").toString();
-            String elementType = formElementEvt.right().getValue().getString("element_type");
+            String elementId = formElementEvt.right().getValue().getLong(ID).toString();
+            String elementType = formElementEvt.right().getValue().getString(ELEMENT_TYPE);
             formElementService.getByTypeAndId(elementId, elementType, defaultResponseHandler(request));
         });
     }

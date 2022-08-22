@@ -1,6 +1,7 @@
 package fr.openent.formulaire;
 
 import fr.openent.form.core.constants.Constants;
+import fr.openent.form.core.constants.Tables;
 import fr.openent.formulaire.controllers.*;
 import fr.openent.formulaire.cron.RgpdCron;
 import fr.openent.formulaire.service.impl.FormulaireRepositoryEvents;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import fr.wseduc.cron.CronTrigger;
 
+import static fr.openent.form.core.constants.ConfigFields.*;
 import static fr.openent.form.core.constants.Tables.DB_SCHEMA;
 
 public class Formulaire extends BaseServer {
@@ -31,8 +33,8 @@ public class Formulaire extends BaseServer {
 	public void start() throws Exception {
 		super.start();
 
-		Constants.MAX_RESPONSES_EXPORT_PDF = config.getInteger("max-responses-export-PDF", 100);
-		Constants.MAX_USERS_SHARING = config.getInteger("max-users-sharing", 65000);
+		Constants.MAX_RESPONSES_EXPORT_PDF = config.getInteger(MAX_RESPONSE_EXPORT_PDF, 100);
+		Constants.MAX_USERS_SHARING = config.getInteger(MAX_USERS_SHARING, 65000);
 
 		final EventBus eb = getEventBus(vertx);
 		final TimelineHelper timelineHelper = new TimelineHelper(vertx, eb, config);
@@ -63,15 +65,15 @@ public class Formulaire extends BaseServer {
 		confs.add(sectionConf);
 
 		for (SqlConf conf : confs) {
-			conf.setSchema("formulaire");
-			conf.setTable("form");
-			conf.setShareTable("form_shares");
+			conf.setSchema(DB_SCHEMA);
+			conf.setTable(Tables.FORM);
+			conf.setShareTable(Tables.FORM_SHARES);
 		}
 
 		// Set sharing services to formController
 		FormController formController = new FormController(eventStore, storage, timelineHelper);
-		formController.setShareService(new SqlShareService(DB_SCHEMA, "form_shares", eb, securedActions, null));
-		formController.setCrudService(new SqlCrudService(DB_SCHEMA, "form", "form_shares"));
+		formController.setShareService(new SqlShareService(DB_SCHEMA, Tables.FORM_SHARES, eb, securedActions, null));
+		formController.setCrudService(new SqlCrudService(DB_SCHEMA, Tables.FORM, Tables.FORM_SHARES));
 
 
 		// Init controllers
@@ -92,6 +94,6 @@ public class Formulaire extends BaseServer {
 
 		// CRON
 		RgpdCron rgpdCron = new RgpdCron(storage);
-		new CronTrigger(vertx, config.getString("rgpd-cron", "0 0 0 */1 * ? *")).schedule(rgpdCron);
+		new CronTrigger(vertx, config.getString(RGPD_CRON, "0 0 0 */1 * ? *")).schedule(rgpdCron);
 	}
 }

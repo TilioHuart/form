@@ -15,6 +15,9 @@ import org.entcore.common.user.UserInfos;
 import java.util.ArrayList;
 import java.util.List;
 
+import static fr.openent.form.core.constants.Fields.*;
+import static fr.openent.form.core.constants.Tables.*;
+
 
 public class ShareAndOwner implements ResourcesProvider {
     public void authorize(final HttpServerRequest request, Binding binding, UserInfos user, final Handler<Boolean> handler) {
@@ -38,31 +41,31 @@ public class ShareAndOwner implements ResourcesProvider {
             JsonArray values = (new fr.wseduc.webutils.collections.JsonArray(gu)).add(sharedMethod).add(user.getUserId());
 
             switch (key) {
-                case "id":
-                case "formId":
+                case ID:
+                case PARAM_FORM_ID:
                     query += "?";
                     break;
-                case "distributionId":
-                    query += "(SELECT form_id FROM " + Tables.DISTRIBUTION + " WHERE id = ?)";
+                case PARAM_DISTRIBUTION_ID:
+                    query += "(SELECT form_id FROM " + DISTRIBUTION_TABLE + " WHERE id = ?)";
                     break;
-                case "sectionId":
-                    query += "(SELECT form_id FROM " + Tables.SECTION + " WHERE id = ?)";
+                case PARAM_SECTION_ID:
+                    query += "(SELECT form_id FROM " + SECTION_TABLE + " WHERE id = ?)";
                     break;
-                case "questionId":
-                    query += "(SELECT form_id FROM " + Tables.QUESTION + " WHERE id = ?)";
+                case PARAM_QUESTION_ID:
+                    query += "(SELECT form_id FROM " + QUESTION_TABLE + " WHERE id = ?)";
                     break;
-                case "choiceId":
-                    query += "(SELECT form_id FROM " + Tables.QUESTION + " WHERE id =" +
-                            "(SELECT question_id FROM " + Tables.QUESTION_CHOICE + " WHERE id = ?))";
+                case PARAM_CHOICE_ID:
+                    query += "(SELECT form_id FROM " + QUESTION_TABLE + " WHERE id =" +
+                            "(SELECT question_id FROM " + QUESTION_CHOICE_TABLE + " WHERE id = ?))";
                     break;
-                case "responseId":
-                    query += "(SELECT form_id FROM " + Tables.QUESTION + " WHERE id =" +
-                            "(SELECT question_id FROM " + Tables.RESPONSE + " WHERE id = ?))";
+                case PARAM_RESPONSE_ID:
+                    query += "(SELECT form_id FROM " + QUESTION_TABLE + " WHERE id =" +
+                            "(SELECT question_id FROM " + RESPONSE_TABLE + " WHERE id = ?))";
                     break;
-                case "fileId":
-                    query += "(SELECT form_id FROM " + Tables.QUESTION + " WHERE id =" +
-                            "(SELECT question_id FROM " + Tables.RESPONSE + " WHERE id = " +
-                            "(SELECT response_id FROM " + Tables.RESPONSE_FILE + " WHERE id = ?)))";
+                case PARAM_FILE_ID:
+                    query += "(SELECT form_id FROM " + QUESTION_TABLE + " WHERE id =" +
+                            "(SELECT question_id FROM " + RESPONSE_TABLE + " WHERE id = " +
+                            "(SELECT response_id FROM " + RESPONSE_FILE_TABLE + " WHERE id = ?)))";
                     break;
                 default: break;
             }
@@ -86,32 +89,32 @@ public class ShareAndOwner implements ResourcesProvider {
                 isUpdateForm(binding) || isDeleteForm(binding) || isExportForm(binding) || isSendReminderForm(binding) ||
                 isCreateQuestion(binding) || isListByFormResponse(binding) || isDeleteResponse(binding) ||
                 isCreateSection(binding) || isUpdateSection(binding) || isUpdateQuestion(binding)) {
-            return "formId";
+            return PARAM_FORM_ID;
         }
         else if (isGetDistribution(binding) || isAddDistribution(binding) || isUpdateDistribution(binding) ||
                 isDuplicateWithResponsesDistribution(binding) || isReplaceDistribution(binding) ||
                 isDeleteDistribution(binding) || isListByDistributionResponse(binding)) {
-            return "distributionId";
+            return PARAM_DISTRIBUTION_ID;
         }
         else if (isGetSection(binding) || isDeleteSection(binding)) {
-            return "sectionId";
+            return PARAM_SECTION_ID;
         }
         else if (isListMineByDistributionResponse(binding) || isCreateQuestionChoice(binding) || isGetQuestion(binding) ||
                 isDeleteQuestion(binding) || isListResponse(binding) || isCreateResponse(binding) ||
                 isZipAndDownloadResponseFile(binding)) {
-            return "questionId";
+            return PARAM_QUESTION_ID;
         }
         else if (isUpdateQuestionChoice(binding) || isDeleteQuestionChoice(binding)) {
-            return "choiceId";
+            return PARAM_CHOICE_ID;
         }
         else if (isUpdateResponse(binding) || isUploadResponseFile(binding) || isDeleteAllResponseFile(binding)) {
-            return "responseId";
+            return PARAM_RESPONSE_ID;
         }
         else if (isGetResponseFile(binding) || isDownloadResponseFile(binding)) {
-            return "fileId";
+            return PARAM_FILE_ID;
         }
         else {
-            return "id";
+            return ID;
         }
     }
 

@@ -59,9 +59,9 @@ public class ResponseController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
-        String questionId = request.getParam("questionId");
-        String nbLines = request.params().get("nbLines");
-        String formId = request.params().get("formId");
+        String questionId = request.getParam(PARAM_QUESTION_ID);
+        String nbLines = request.params().get(PARAM_NB_LINES);
+        String formId = request.params().get(PARAM_FORM_ID);
 
         distributionService.listByFormAndStatus(formId, FINISHED, nbLines, getDistribsEvent -> {
             if (getDistribsEvent.isLeft()) {
@@ -85,8 +85,8 @@ public class ResponseController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void listMineByDistribution(HttpServerRequest request) {
-        String questionId = request.getParam("questionId");
-        String distributionId = request.getParam("distributionId");
+        String questionId = request.getParam(PARAM_QUESTION_ID);
+        String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 String message = "[Formulaire@listMineByDistribution] User not found in session.";
@@ -103,7 +103,7 @@ public class ResponseController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void listByDistribution(HttpServerRequest request) {
-        String distributionId = request.getParam("distributionId");
+        String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 String message = "[Formulaire@listByDistribution] User not found in session.";
@@ -120,7 +120,7 @@ public class ResponseController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void listByForm(HttpServerRequest request) {
-        String formId = request.params().get("formId");
+        String formId = request.params().get(PARAM_FORM_ID);
         responseService.listByForm(formId, arrayResponseHandler(request));
     }
 
@@ -146,7 +146,7 @@ public class ResponseController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
-        String questionId = request.getParam("questionId");
+        String questionId = request.getParam(PARAM_QUESTION_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 String message = "[Formulaire@createResponse] User not found in session.";
@@ -176,8 +176,8 @@ public class ResponseController extends ControllerHelper {
                     }
 
                     JsonObject question = questionEvt.right().getValue();
-                    int question_type = question.getInteger("question_type");
-                    Integer choice_id = response.getInteger("choice_id");
+                    int question_type = question.getInteger(QUESTION_TYPE);
+                    Integer choice_id = response.getInteger(CHOICE_ID);
 
                     // If there is a choice it should match an existing QuestionChoice for this question
                     if (choice_id != null && Arrays.asList(4,5,9).contains(question_type)) {
@@ -197,8 +197,8 @@ public class ResponseController extends ControllerHelper {
                             JsonObject choice = choiceEvt.right().getValue();
 
                             // Check choice validity
-                            if (!choice.getInteger("question_id").toString().equals(questionId) ||
-                                    !choice.getString("value").equals(response.getString("answer"))) {
+                            if (!choice.getInteger(QUESTION_ID).toString().equals(questionId) ||
+                                    !choice.getString(VALUE).equals(response.getString(ANSWER))) {
                                 String message ="[Formulaire@updateResponse] Wrong choice for response " + response;
                                 log.error(message);
                                 badRequest(request, message);
@@ -209,11 +209,11 @@ public class ResponseController extends ControllerHelper {
                     }
                     else {
                         if (question_type == 6) {
-                            try { dateFormatter.parse(response.getString("answer")); }
+                            try { dateFormatter.parse(response.getString(ANSWER)); }
                             catch (ParseException e) { e.printStackTrace(); }
                         }
                         if (question_type == 7) {
-                            try { timeFormatter.parse(response.getString("answer")); }
+                            try { timeFormatter.parse(response.getString(ANSWER)); }
                             catch (ParseException e) { e.printStackTrace(); }
                         }
                         createResponse(request, response, user, questionId);
@@ -265,7 +265,7 @@ public class ResponseController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
-        String responseId = request.getParam("responseId");
+        String responseId = request.getParam(PARAM_RESPONSE_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 String message = "[Formulaire@updateResponse] User not found in session.";
@@ -281,7 +281,7 @@ public class ResponseController extends ControllerHelper {
                     return;
                 }
 
-                Integer questionId = response.getInteger("question_id");
+                Integer questionId = response.getInteger(PARAM_QUESTION_ID);
                 questionService.get(questionId.toString(), questionEvt -> {
                     if (questionEvt.isLeft()) {
                         log.error("[Formulaire@updateResponse] Fail to get question corresponding to id : " + questionId);
@@ -296,8 +296,8 @@ public class ResponseController extends ControllerHelper {
                     }
 
                     JsonObject question = questionEvt.right().getValue();
-                    int question_type = question.getInteger("question_type");
-                    Integer choice_id = response.getInteger("choice_id");
+                    int question_type = question.getInteger(QUESTION_TYPE);
+                    Integer choice_id = response.getInteger(CHOICE_ID);
 
                     // If there is a choice it should match an existing QuestionChoice for this question
                     if (choice_id != null && Arrays.asList(4,5,9).contains(question_type)) {
@@ -317,8 +317,8 @@ public class ResponseController extends ControllerHelper {
                             JsonObject choice = choiceEvt.right().getValue();
 
                             // Check choice validity
-                            if (!choice.getInteger("question_id").equals(questionId) ||
-                                    !choice.getString("value").equals(response.getString("answer"))) {
+                            if (!choice.getInteger(QUESTION_ID).equals(questionId) ||
+                                    !choice.getString(VALUE).equals(response.getString(ANSWER))) {
                                 log.error("[Formulaire@updateResponse] Wrong choice for response " + response);
                                 renderError(request);
                                 return;
@@ -329,11 +329,11 @@ public class ResponseController extends ControllerHelper {
                     }
                     else {
                         if (question_type == 6) {
-                            try { dateFormatter.parse(response.getString("answer")); }
+                            try { dateFormatter.parse(response.getString(ANSWER)); }
                             catch (ParseException e) { e.printStackTrace(); }
                         }
                         if (question_type == 7) {
-                            try { timeFormatter.parse(response.getString("answer")); }
+                            try { timeFormatter.parse(response.getString(ANSWER)); }
                             catch (ParseException e) { e.printStackTrace(); }
                         }
                         responseService.update(user, responseId, response, defaultResponseHandler(request));
@@ -348,7 +348,7 @@ public class ResponseController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
-        String formId = request.getParam("formId");
+        String formId = request.getParam(PARAM_FORM_ID);
         RequestUtils.bodyToJsonArray(request, responses -> {
             if (responses == null || responses.isEmpty()) {
                 log.error("[Formulaire@deleteResponses] No responses to delete.");

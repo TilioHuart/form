@@ -24,6 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static fr.openent.form.core.constants.Constants.ARCHIVE_ZIP_NAME;
+import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_RIGHT;
 import static fr.openent.form.core.constants.ShareRights.RESPONDER_RESOURCE_RIGHT;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
@@ -49,7 +50,7 @@ public class ResponseFileController extends ControllerHelper {
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
-        String responseId = request.getParam("responseId");
+        String responseId = request.getParam(PARAM_RESPONSE_ID);
         responseFileService.list(responseId, arrayResponseHandler(request));
     }
 
@@ -58,7 +59,7 @@ public class ResponseFileController extends ControllerHelper {
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listByQuestion(HttpServerRequest request) {
-        String questionId = request.getParam("questionId");
+        String questionId = request.getParam(PARAM_QUESTION_ID);
         responseFileService.listByQuestion(questionId, arrayResponseHandler(request));
     }
 
@@ -67,7 +68,7 @@ public class ResponseFileController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
-        String fileId = request.getParam("fileId");
+        String fileId = request.getParam(PARAM_FILE_ID);
         responseFileService.get(fileId, defaultResponseHandler(request));
     }
 
@@ -76,7 +77,7 @@ public class ResponseFileController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void download(HttpServerRequest request) {
-        String fileId = request.getParam("fileId");
+        String fileId = request.getParam(PARAM_FILE_ID);
         responseFileService.get(fileId, fileEvt -> {
             if (fileEvt.isLeft()) {
                 log.error("[Formulaire@downloadFile] Error in getting responseFile with id : " + fileId);
@@ -91,7 +92,7 @@ public class ResponseFileController extends ControllerHelper {
             }
 
             JsonObject file = fileEvt.right().getValue();
-            storage.sendFile(file.getString("id"), file.getString("filename"), request, false, new JsonObject());
+            storage.sendFile(file.getString(ID), file.getString(FILENAME), request, false, new JsonObject());
         });
     }
 
@@ -100,7 +101,7 @@ public class ResponseFileController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void zipAndDownload(HttpServerRequest request) {
-        String questionId = request.getParam("questionId");
+        String questionId = request.getParam(PARAM_QUESTION_ID);
         responseFileService.listByQuestion(questionId, responseFilesEvt -> {
             if (responseFilesEvt.isLeft()) {
                 log.error("[Formulaire@zipAndDownload] Error in getting responseFiles for question with id : " + questionId);
@@ -116,29 +117,29 @@ public class ResponseFileController extends ControllerHelper {
 
             List<JsonObject> listFiles = responseFilesEvt.right().getValue().getList();
             JsonObject root = new JsonObject()
-                    .put("id", UUID.randomUUID().toString())
-                    .put("type", "folder")
-                    .put("name", ARCHIVE_ZIP_NAME)
-                    .put("folders", new JsonArray());
+                    .put(ID, UUID.randomUUID().toString())
+                    .put(TYPE, FOLDER)
+                    .put(NAME, ARCHIVE_ZIP_NAME)
+                    .put(FOLDERS, new JsonArray());
             JsonObject groupFiles = new JsonObject();
 
             // Adapt properties for exportAndSendZip functions
             List<JsonObject> listFilesValid = new ArrayList<>();
             for (JsonObject file : listFiles) {
-                if (file.getString("date_response") != null) {
+                if (file.getString(DATE_RESPONSE) != null) {
                     String displayDate = "";
                     try {
-                        displayDate = dateFormatter.format(dateGetter.parse(file.getString("date_response")));
+                        displayDate = dateFormatter.format(dateGetter.parse(file.getString(DATE_RESPONSE)));
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
 
-                    file.put("name", displayDate + file.getString("filename"));
-                    file.put("file", file.getString("id"));
-                    file.put("type", "file");
+                    file.put(NAME, displayDate + file.getString(FILENAME));
+                    file.put(FILE, file.getString(ID));
+                    file.put(TYPE, FILE);
 
                     // Sort files by response_id in the groupFiles array (to add folder parents after)
-                    String responseId = file.getInteger("response_id").toString();
+                    String responseId = file.getInteger(RESPONSE_ID).toString();
                     if (!groupFiles.containsKey(responseId)) {
                         groupFiles.put(responseId, new JsonArray());
                     }
@@ -153,15 +154,15 @@ public class ResponseFileController extends ControllerHelper {
                 int nbFilesInGroup = groupFile.size();
                 if (nbFilesInGroup > 1) {
                     JsonObject folder = new JsonObject()
-                            .put("id", UUID.randomUUID().toString())
-                            .put("type", "folder")
-                            .put("parent", root.getString("id"))
-                            .put("name", getFolderName(groupFile.getJsonObject(0)));
-                    root.getJsonArray("folders").add(folder);
+                            .put(ID, UUID.randomUUID().toString())
+                            .put(TYPE, FOLDER)
+                            .put(PARENT, root.getString(ID))
+                            .put(NAME, getFolderName(groupFile.getJsonObject(0)));
+                    root.getJsonArray(FOLDERS).add(folder);
                     listFilesValid.add(folder);
 
                     for (int i = 0; i < nbFilesInGroup; i++) {
-                        groupFile.getJsonObject(i).put("parent", folder.getString("id"));
+                        groupFile.getJsonObject(i).put(PARENT, folder.getString(ID));
                     }
                 }
             }
@@ -187,17 +188,17 @@ public class ResponseFileController extends ControllerHelper {
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void upload(HttpServerRequest request) {
         storage.writeUploadFile(request, entries -> {
-            if (!"ok".equals(entries.getString("status"))) {
+            if (!OK.equals(entries.getString(STATUS))) {
                 log.error("[Formulaire@uploadFile] Fail to create file in storage");
-                renderInternalError(request, entries.getString("message"));
+                renderInternalError(request, entries.getString(MESSAGE));
                 return;
             }
 
             try {
-                String responseId = request.getParam("responseId");
-                String fileId = entries.getString("_id");
-                String name = entries.getJsonObject("metadata").getString("filename");
-                String type = entries.getJsonObject("metadata").getString("content-type");
+                String responseId = request.getParam(PARAM_RESPONSE_ID);
+                String fileId = entries.getString(_ID);
+                String name = entries.getJsonObject(METADATA).getString(FILENAME);
+                String type = entries.getJsonObject(METADATA).getString(CONTENT_TYPE);
 
                 responseFileService.create(responseId, fileId, name, type, createEvt -> {
                     if (createEvt.isLeft()) {
@@ -214,7 +215,7 @@ public class ResponseFileController extends ControllerHelper {
                         });
                     }
 
-                    JsonObject response = new JsonObject().put("id", fileId).put("filename", name);
+                    JsonObject response = new JsonObject().put(ID, fileId).put(FILENAME, name);
                     request.response().setStatusCode(201).putHeader("Content-Type", type).end(response.toString());
                 });
             }
@@ -229,7 +230,7 @@ public class ResponseFileController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void deleteAll(HttpServerRequest request) {
-        String responseId = request.getParam("responseId");
+        String responseId = request.getParam(PARAM_RESPONSE_ID);
         if (responseId == null) {
             log.error("[Formulaire@deleteAllFile] No responseId for deleting files.");
             noContent(request);
@@ -260,9 +261,9 @@ public class ResponseFileController extends ControllerHelper {
 
     public static void deleteFiles(Storage storage, JsonArray fileIds, Handler<Either<String, JsonObject>> handler) {
         storage.removeFiles(fileIds, deleteFilesEvt -> {
-            if (!"ok".equals(deleteFilesEvt.getString("status"))) {
+            if (!OK.equals(deleteFilesEvt.getString(STATUS))) {
                 log.error("[Formulaire@deleteFiles] An error occurred while removing files " + fileIds);
-                handler.handle(new Either.Left<>(deleteFilesEvt.getString("message")));
+                handler.handle(new Either.Left<>(deleteFilesEvt.getString(MESSAGE)));
             }
             else {
                 handler.handle(new Either.Right<>(new JsonObject()));
@@ -271,17 +272,17 @@ public class ResponseFileController extends ControllerHelper {
     }
 
     private String getFolderName(JsonObject file) {
-        String completeName = file.getString("name");
-        String filename = file.getString("filename");
+        String completeName = file.getString(NAME);
+        String filename = file.getString(FILENAME);
         int indexOfUnderscore = filename.contains("_") ? filename.indexOf("_") : 0;
 
         // Check if responder_name and name get from filename are equals
-        char[] first = String.join("", file.getString("responder_name").split(" ")).toCharArray();
+        char[] first = String.join("", file.getString(RESPONDER_NAME).split(" ")).toCharArray();
         char[] second = filename.substring(0, indexOfUnderscore).toCharArray();
         Arrays.sort(first);
         Arrays.sort(second);
         boolean isAnonymous = !Arrays.equals(first, second);
 
-        return isAnonymous ? completeName.substring(0, 14) : completeName.substring(0, 15) + file.getString("responder_name");
+        return isAnonymous ? completeName.substring(0, 14) : completeName.substring(0, 15) + file.getString(RESPONDER_NAME);
     }
 }

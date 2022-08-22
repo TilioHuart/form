@@ -9,24 +9,18 @@ import fr.openent.formulaire.service.SectionService;
 import fr.openent.formulaire.service.impl.DefaultDistributionService;
 import fr.openent.formulaire.service.impl.DefaultFormElementService;
 import fr.openent.formulaire.service.impl.DefaultSectionService;
-import fr.wseduc.bus.BusAddress;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
-import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.entcore.common.bus.BusResponseHandler;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
-import org.entcore.common.http.request.JsonHttpServerRequest;
 
-import java.util.List;
-
+import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_RIGHT;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
@@ -50,7 +44,7 @@ public class SectionController extends ControllerHelper {
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
-        String formId = request.getParam("formId");
+        String formId = request.getParam(PARAM_FORM_ID);
         sectionService.list(formId, arrayResponseHandler(request));
     }
 
@@ -59,7 +53,7 @@ public class SectionController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
-        String sectionId = request.getParam("sectionId");
+        String sectionId = request.getParam(PARAM_SECTION_ID);
         sectionService.get(sectionId, defaultResponseHandler(request));
     }
 
@@ -68,7 +62,7 @@ public class SectionController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
-        String formId = request.getParam("formId");
+        String formId = request.getParam(PARAM_FORM_ID);
         RequestUtils.bodyToJson(request, section -> {
             if (section == null || section.isEmpty()) {
                 log.error("[Formulaire@createSection] No section to create.");
@@ -84,7 +78,7 @@ public class SectionController extends ControllerHelper {
                     return;
                 }
 
-                int nbResponseTot = countRepEvt.right().getValue().getInteger("count", 0);
+                int nbResponseTot = countRepEvt.right().getValue().getInteger(COUNT, 0);
                 if (nbResponseTot > 0) {
                     String message = "[Formulaire@createQuestion] You cannot create a question for a form already responded";
                     log.error(message);
@@ -93,15 +87,15 @@ public class SectionController extends ControllerHelper {
                 }
 
                 // Check position value validity
-                if (section.getLong("position", 0L) < 1) {
-                    String message = "[Formulaire@createSection] You cannot create a section with a position null or under 1 : " + section.getLong("position");
+                if (section.getLong(POSITION, 0L) < 1) {
+                    String message = "[Formulaire@createSection] You cannot create a section with a position null or under 1 : " + section.getLong(POSITION);
                     log.error(message);
                     badRequest(request, message);
                     return;
                 }
 
                 // Check if position is not already used
-                Long position = section.getLong("position");
+                Long position = section.getLong(POSITION);
                 formElementService.getTypeAndIdByPosition(formId, position.toString(), formElementEvt -> {
                     if (formElementEvt.isLeft()) {
                         log.error("[Formulaire@createSection] Error in getting form element id of position " + position + " for form " + formId);
@@ -127,7 +121,7 @@ public class SectionController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
-        String formId = request.getParam("formId");
+        String formId = request.getParam(PARAM_FORM_ID);
         RequestUtils.bodyToJsonArray(request, sections -> {
             if (sections == null || sections.isEmpty()) {
                 log.error("[Formulaire@updateSection] No section to update.");
@@ -166,7 +160,7 @@ public class SectionController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
-        String sectionId = request.getParam("sectionId");
+        String sectionId = request.getParam(PARAM_SECTION_ID);
         sectionService.get(sectionId, getEvt -> {
             if (getEvt.isLeft() || getEvt.right().getValue().isEmpty()) {
                 log.error("[Formulaire@deleteSection] Failed to get section with id : " + sectionId);

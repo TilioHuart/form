@@ -23,6 +23,7 @@ import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserUtils;
 
 import static fr.openent.form.core.constants.Constants.CONDITIONAL_QUESTIONS;
+import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_RIGHT;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
 import static fr.openent.form.helpers.UtilsHelper.getByProp;
@@ -47,7 +48,7 @@ public class QuestionController extends ControllerHelper {
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listForForm(HttpServerRequest request) {
-        String formId = request.getParam("formId");
+        String formId = request.getParam(PARAM_FORM_ID);
         questionService.listForForm(formId, arrayResponseHandler(request));
     }
 
@@ -56,7 +57,7 @@ public class QuestionController extends ControllerHelper {
     @ResourceFilter(AccessRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listForSection(HttpServerRequest request) {
-        String sectionId = request.getParam("sectionId");
+        String sectionId = request.getParam(PARAM_SECTION_ID);
         questionService.listForSection(sectionId, arrayResponseHandler(request));
     }
 
@@ -65,7 +66,7 @@ public class QuestionController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
-        String questionId = request.getParam("questionId");
+        String questionId = request.getParam(PARAM_QUESTION_ID);
         questionService.get(questionId, defaultResponseHandler(request));
     }
 
@@ -74,7 +75,7 @@ public class QuestionController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
-        String formId = request.getParam("formId");
+        String formId = request.getParam(PARAM_FORM_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 String message = "[Formulaire@createQuestion] User not found in session.";
@@ -90,8 +91,8 @@ public class QuestionController extends ControllerHelper {
                     return;
                 }
 
-                Long sectionId = question.getLong("section_id");
-                Long sectionPosition = question.getLong("section_position");
+                Long sectionId = question.getLong(PARAM_SECTION_ID);
+                Long sectionPosition = question.getLong(SECTION_POSITION);
 
                 // Check section infos validity
                 if (sectionId == null ^ sectionPosition == null) {
@@ -104,12 +105,12 @@ public class QuestionController extends ControllerHelper {
                     log.error(message);
                     badRequest(request, message);
                     return;
-                } else if (sectionPosition != null && question.getInteger("position") != null) {
+                } else if (sectionPosition != null && question.getInteger(POSITION) != null) {
                     String message = "[Formulaire@createQuestion] A question is either in or out of a section, it cannot have a position and a section_position.";
                     log.error(message);
                     badRequest(request, message);
                     return;
-                } else if (question.getBoolean("conditional") && !CONDITIONAL_QUESTIONS.contains(question.getInteger("question_type"))) {
+                } else if (question.getBoolean(CONDITIONAL) && !CONDITIONAL_QUESTIONS.contains(question.getInteger(QUESTION_TYPE))) {
                     String message = "[Formulaire@createQuestion] A question conditional question must be of type : " + CONDITIONAL_QUESTIONS;
                     log.error(message);
                     badRequest(request, message);
@@ -139,7 +140,7 @@ public class QuestionController extends ControllerHelper {
                             return;
                         }
 
-                        int nbResponseTot = countRepEvt.right().getValue().getInteger("count", 0);
+                        int nbResponseTot = countRepEvt.right().getValue().getInteger(COUNT, 0);
                         if (nbResponseTot > 0) {
                             String message = "[Formulaire@createQuestion] You cannot create a question for a form already responded";
                             log.error(message);
@@ -148,7 +149,7 @@ public class QuestionController extends ControllerHelper {
                         }
 
                         // Check if the type of question if it's for a public form (type FILE is forbidden)
-                        if (form.getBoolean("is_public") && question.getInteger("question_type") != null && question.getInteger("question_type") == 8) {
+                        if (form.getBoolean(IS_PUBLIC) && question.getInteger(QUESTION_TYPE) != null && question.getInteger(QUESTION_TYPE) == 8) {
                             String message = "[Formulaire@createQuestion] You cannot create a question type FILE for the public form with id " + formId;
                             log.error(message);
                             badRequest(request, message);
@@ -156,7 +157,7 @@ public class QuestionController extends ControllerHelper {
                         }
 
                         // If it's a conditional question in a section, check if another one already exists
-                        if (question.getBoolean("conditional") && sectionId != null) {
+                        if (question.getBoolean(CONDITIONAL) && sectionId != null) {
                             questionService.getSectionIdsWithConditionalQuestions(formId, new JsonArray(), sectionIdsEvt -> {
                                 if (sectionIdsEvt.isLeft()) {
                                     log.error("[Formulaire@createQuestion] Failed to get section ids for form with id : " + formId);
@@ -164,7 +165,7 @@ public class QuestionController extends ControllerHelper {
                                     return;
                                 }
 
-                                JsonArray sectionIds = getByProp(sectionIdsEvt.right().getValue(), "section_id");
+                                JsonArray sectionIds = getByProp(sectionIdsEvt.right().getValue(), SECTION_ID);
                                 if (sectionIds.contains(sectionId)) {
                                     String message = "[Formulaire@createQuestion] A conditional question is already existing for the section with id : " + sectionId;
                                     log.error(message);
@@ -189,7 +190,7 @@ public class QuestionController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
-        String formId = request.getParam("formId");
+        String formId = request.getParam(PARAM_FORM_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
                 String message = "[Formulaire@updateQuestions] User not found in session.";
@@ -209,8 +210,8 @@ public class QuestionController extends ControllerHelper {
                 int i = 0;
                 while (i < questions.size()) {
                     JsonObject question = questions.getJsonObject(i);
-                    Long sectionId = question.getLong("section_id");
-                    Long sectionPosition = question.getLong("section_position");
+                    Long sectionId = question.getLong(SECTION_ID);
+                    Long sectionPosition = question.getLong(SECTION_POSITION);
 
                     if (sectionId == null ^ sectionPosition == null) {
                         String message = "[Formulaire@updateQuestions] sectionId and sectionPosition must be both null or both not null : " + question;
@@ -222,12 +223,12 @@ public class QuestionController extends ControllerHelper {
                         log.error(message);
                         badRequest(request, message);
                         return;
-                    } else if (sectionPosition != null && question.getInteger("position") != null) {
+                    } else if (sectionPosition != null && question.getInteger(POSITION) != null) {
                         String message = "[Formulaire@updateQuestions] A question is either in or out of a section, it cannot have a position and a section_position : " + question;
                         log.error(message);
                         badRequest(request, message);
                         return;
-                    } else if (question.getBoolean("conditional") && !CONDITIONAL_QUESTIONS.contains(question.getInteger("question_type"))) {
+                    } else if (question.getBoolean(CONDITIONAL) && !CONDITIONAL_QUESTIONS.contains(question.getInteger(QUESTION_TYPE))) {
                         String message = "[Formulaire@updateQuestions] A question conditional question must be of type : " + CONDITIONAL_QUESTIONS;
                         log.error(message);
                         badRequest(request, message);
@@ -252,8 +253,8 @@ public class QuestionController extends ControllerHelper {
                     JsonObject form = formEvt.right().getValue();
 
                     // Check if the type of question if it's for a public form (type FILE is forbidden)
-                    JsonArray questionTypes = getByProp(questions, "question_type");
-                    if (form.getBoolean("is_public") && questionTypes.contains(8)) {
+                    JsonArray questionTypes = getByProp(questions, QUESTION_TYPE);
+                    if (form.getBoolean(IS_PUBLIC) && questionTypes.contains(8)) {
                         String message = "[Formulaire@updateQuestions] You cannot create a question type FILE for the public form with id " + formId;
                         log.error(message);
                         badRequest(request, message);
@@ -269,13 +270,13 @@ public class QuestionController extends ControllerHelper {
                             return;
                         }
 
-                        JsonArray sectionIds = getByProp(sectionIdsEvt.right().getValue(), "section_id");
+                        JsonArray sectionIds = getByProp(sectionIdsEvt.right().getValue(), SECTION_ID);
                         Long conflictingSectionId = null;
                         int j = 0;
                         while (conflictingSectionId == null && j < questions.size()) {
                             JsonObject question = questions.getJsonObject(j);
-                            if (question.getBoolean("conditional") && sectionIds.contains(question.getLong("section_id"))) {
-                                conflictingSectionId = question.getLong("section_id");
+                            if (question.getBoolean(CONDITIONAL) && sectionIds.contains(question.getLong(SECTION_ID))) {
+                                conflictingSectionId = question.getLong(SECTION_ID);
                             }
                             j++;
                         }
@@ -313,7 +314,7 @@ public class QuestionController extends ControllerHelper {
     @ResourceFilter(ShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
-        String questionId = request.getParam("questionId");
+        String questionId = request.getParam(PARAM_QUESTION_ID);
         questionService.get(questionId, questionsEvt -> {
             if (questionsEvt.isLeft()) {
                 log.error("[Formulaire@deleteQuestion] Failed to get question with id : " + questionId);

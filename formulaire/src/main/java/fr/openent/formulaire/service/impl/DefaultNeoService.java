@@ -8,11 +8,13 @@ import io.vertx.core.json.JsonObject;
 import org.entcore.common.neo4j.Neo4j;
 import org.entcore.common.neo4j.Neo4jResult;
 
+import static fr.openent.form.core.constants.Fields.*;
+
 public class DefaultNeoService implements NeoService {
 
     @Override
     public void getUsers(final JsonArray usersIds, Handler<Either<String, JsonArray>> handler) {
-        JsonObject params = new JsonObject().put("usersIds", usersIds);
+        JsonObject params = new JsonObject().put(PARAM_USERS_IDS, usersIds);
 
         String queryUsersNeo4j = "MATCH (u:User) WHERE  u.id IN {usersIds} " +
                 "RETURN u.id AS id, u.id as username, u.email AS email, u.firstName AS firstname, u.lastName AS lastname";
@@ -22,7 +24,7 @@ public class DefaultNeoService implements NeoService {
 
     @Override
     public void getGroups(final JsonArray groupsIds, Handler<Either<String, JsonArray>> handler) {
-        JsonObject params = new JsonObject().put("groupsIds", groupsIds);
+        JsonObject params = new JsonObject().put(PARAM_GROUPS_IDS, groupsIds);
 
         String queryGroupsNeo4j = "MATCH(g:Group)-[:IN]-(ug:User) WHERE g.id  IN {groupsIds} " +
                         "WITH g, collect({id: ug.id, username: ug.id, email: ug.email, firstname: ug.firstName, lastname: ug.lastName}) AS users " +
@@ -34,7 +36,7 @@ public class DefaultNeoService implements NeoService {
     @Override
     public void getSharedBookMark(final JsonArray bookmarksIds, Handler<Either<String, JsonArray>> handler) {
         JsonObject params = new JsonObject()
-                .put("bookmarksIds", bookmarksIds);
+                .put(PARAM_BOOKMARKS_IDS, bookmarksIds);
 
         String queryNeo4j = "WITH {bookmarksIds} AS shareBookmarkIds " +
                 "UNWIND shareBookmarkIds AS shareBookmarkId MATCH (u:User)-[:HAS_SB]->(sb:ShareBookmark) " +
@@ -49,7 +51,7 @@ public class DefaultNeoService implements NeoService {
     @Override
     public void getSharedBookMarkUsers(final JsonArray bookmarksIds, Handler<Either<String, JsonArray>> handler) {
         JsonObject params = new JsonObject()
-                .put("bookmarksIds", bookmarksIds);
+                .put(PARAM_BOOKMARKS_IDS, bookmarksIds);
 
         String queryNeo4j = "WITH {bookmarksIds} AS shareBookmarkIds UNWIND shareBookmarkIds AS shareBookmarkId MATCH (u:User)-[:HAS_SB]->(sb:ShareBookmark) UNWIND TAIL(sb[shareBookmarkId]) as vid " +
                 "MATCH (v:Visible {id : vid})<-[:IN]-(us:User) WHERE not(has(v.deleteDate)) and v:ProfileGroup WITH {id: shareBookmarkId, name: HEAD(sb[shareBookmarkId]), users: COLLECT(DISTINCT{id: us.id, email: us.email, lastname: us.lastName, firstname: us.firstName, username: us.id})} as sharedBookMark " +
@@ -66,7 +68,7 @@ public class DefaultNeoService implements NeoService {
 
     @Override
     public void getIdsFromBookMarks(final JsonArray bookmarksIds, Handler<Either<String, JsonArray>> handler) {
-        JsonObject params = new JsonObject().put("bookmarksIds", bookmarksIds);
+        JsonObject params = new JsonObject().put(PARAM_BOOKMARKS_IDS, bookmarksIds);
 
         String queryNeo4j = "WITH {bookmarksIds} AS shareBookmarkIds " +
                 "UNWIND shareBookmarkIds AS shareBookmarkId " +
@@ -81,8 +83,8 @@ public class DefaultNeoService implements NeoService {
     @Override
     public void getUsersInfosFromIds(JsonArray userIds, JsonArray groupIds, Handler<Either<String, JsonArray>> handler) {
         JsonObject params = new JsonObject()
-                .put("userIds", userIds)
-                .put("groupIds", groupIds);
+                .put(PARAM_USERS_IDS, userIds)
+                .put(PARAM_GROUPS_IDS, groupIds);
 
         String queryUsersNeo4j = "MATCH(ug:User) WHERE ug.id IN {userIds} WITH ug, " +
                 "collect({id: ug.id, username: ug.displayName}) AS users return users ";

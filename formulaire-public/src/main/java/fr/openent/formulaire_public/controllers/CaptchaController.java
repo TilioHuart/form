@@ -14,6 +14,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 
+import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
 
 public class CaptchaController extends ControllerHelper {
@@ -30,8 +31,8 @@ public class CaptchaController extends ControllerHelper {
     @Get("/captcha/:distributionKey")
     @ApiDoc("Get a captcha by id or send a new one")
     public void get(HttpServerRequest request) {
-        String distributionKey = request.getParam("distributionKey");
-        String captchaId = request.getParam("captcha_id");
+        String distributionKey = request.getParam(PARAM_DISTRIBUTION_KEY);
+        String captchaId = request.getParam(CAPTCHA_ID);
 
         if (distributionKey == null || distributionKey.isEmpty()) {
             String message = "[FormulairePublic@getCaptcha] DistributionKey must be not null.";
@@ -40,7 +41,7 @@ public class CaptchaController extends ControllerHelper {
             return;
         }
 
-        if (captchaId != null && !captchaId.isEmpty() && !captchaId.equals("undefined")) {
+        if (captchaId != null && !captchaId.isEmpty() && !captchaId.equals(UNDEFINED)) {
             publicCaptchaService.get(captchaId, captchaHandler(request, captchaId));
         }
         else {
@@ -51,7 +52,7 @@ public class CaptchaController extends ControllerHelper {
                     return;
                 }
 
-                String newCaptchaId = distributionEvt.right().getValue().getInteger("captcha_id").toString();
+                String newCaptchaId = distributionEvt.right().getValue().getInteger(CAPTCHA_ID).toString();
                 publicCaptchaService.get(newCaptchaId, captchaHandler(request, newCaptchaId));
             });
         }
@@ -66,9 +67,9 @@ public class CaptchaController extends ControllerHelper {
             }
 
             JsonObject captcha = new JsonObject()
-                    .put("captcha_id", captchaEvt.right().getValue().getInteger("id"))
-                    .put("title", captchaEvt.right().getValue().getString("question"))
-                    .put("question_type", 2);
+                    .put(CAPTCHA_ID, captchaEvt.right().getValue().getInteger(ID))
+                    .put(TITLE, captchaEvt.right().getValue().getString(QUESTION))
+                    .put(QUESTION_TYPE, 2);
             renderJson(request, captcha);
         };
     }

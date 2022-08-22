@@ -18,6 +18,8 @@ import org.vertx.java.core.http.RouteMatcher;
 import java.util.Map;
 
 import static fr.openent.form.core.Events.ACCESS;
+import static fr.openent.form.core.constants.ConfigFields.AUTH;
+import static fr.openent.form.core.constants.ConfigFields.NODE_PDF_GENERATOR;
 import static fr.openent.form.core.constants.ConsoleRights.ACCESS_RIGHT;
 
 public class FormulaireController extends ControllerHelper {
@@ -48,9 +50,9 @@ public class FormulaireController extends ControllerHelper {
     public void getConfig(final HttpServerRequest request) {
         JsonObject safeConfig = config.copy();
 
-        JsonObject nodePdfGenerator = safeConfig.getJsonObject("node-pdf-generator", null);
+        JsonObject nodePdfGenerator = safeConfig.getJsonObject(NODE_PDF_GENERATOR, null);
         if (nodePdfGenerator != null) {
-            if (nodePdfGenerator.getString("auth", null) != null) nodePdfGenerator.put("auth", "**********");
+            if (nodePdfGenerator.getString(AUTH, null) != null) nodePdfGenerator.put(AUTH, "**********");
         }
 
         renderJson(request, safeConfig);
