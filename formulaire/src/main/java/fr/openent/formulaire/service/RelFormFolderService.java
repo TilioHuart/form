@@ -70,4 +70,11 @@ public interface RelFormFolderService {
      * @param handler       function handler returning JsonArray data
      */
     void update(UserInfos user, JsonArray formIds, int newFolderId, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * Update multiple relations form-folder for restoration purpose
+     * @param formIds       form identifiers
+     * @param handler       function handler returning JsonArray data
+     */
+    void updateForRestoration(JsonArray formIds, Handler<Either<String, JsonArray>> handler);
 }

@@ -56,6 +56,13 @@ public class DefaultFormService implements FormService {
     }
 
     @Override
+    public void listByIds(JsonArray formIds, Handler<Either<String, JsonArray>> handler) {
+        String query = "SELECT * FROM " + FORM_TABLE + " WHERE id IN " + Sql.listPrepared(formIds) + ";";
+        JsonArray params = new JsonArray().addAll(formIds);
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
     public void listSentForms(UserInfos user, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT f.* FROM " + FORM_TABLE + " f " +
                 "LEFT JOIN " + DISTRIBUTION_TABLE + " d ON f.id = d.form_id " +
@@ -319,6 +326,60 @@ public class DefaultFormService implements FormService {
                 .add(formId);
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    @Override
+    public void updateMultiple(JsonArray forms, Handler<Either<String, JsonArray>> handler) {
+        if (!forms.isEmpty()) {
+            SqlStatementsBuilder s = new SqlStatementsBuilder();
+
+            s.raw("BEGIN;");
+            for (int i = 0; i < forms.size(); i++) {
+                JsonObject form = forms.getJsonObject(i);
+                int formId = form.getInteger(ID, null);
+
+                String query = "WITH nbResponses AS (SELECT COUNT(*) FROM " + DISTRIBUTION_TABLE +
+                        " WHERE form_id = ? AND status = ?) " +
+                        "UPDATE " + FORM_TABLE + " SET title = ?, description = ?, picture = ?, date_modification = ?, " +
+                        "date_opening = ?, date_ending = ?, sent = ?, collab = ?, reminded = ?, archived = ?, " +
+                        "multiple = CASE (SELECT count > 0 FROM nbResponses) " +
+                        "WHEN false THEN ? WHEN true THEN (SELECT multiple FROM " + FORM_TABLE +" WHERE id = ?) END, " +
+                        "anonymous = CASE (SELECT count > 0 FROM nbResponses) " +
+                        "WHEN false THEN ? WHEN true THEN (SELECT anonymous FROM " + FORM_TABLE +" WHERE id = ?) END, " +
+                        "response_notified = ?, editable = ?, rgpd = ?, rgpd_goal = ?, rgpd_lifetime = ?" +
+                        "WHERE id = ? RETURNING *;";
+
+                JsonArray params = new JsonArray()
+                        .add(formId)
+                        .add(FINISHED)
+                        .add(form.getString(TITLE, ""))
+                        .add(form.getString(DESCRIPTION, ""))
+                        .add(form.getString(PICTURE, ""))
+                        .add("NOW()")
+                        .add(form.getString(DATE_OPENING, "NOW()"))
+                        .add(form.getString(DATE_ENDING, null))
+                        .add(form.getBoolean(SENT, false))
+                        .add(form.getBoolean(COLLAB, false))
+                        .add(form.getBoolean(REMINDED, false))
+                        .add(form.getBoolean(ARCHIVED, false))
+                        .add(form.getBoolean(MULTIPLE, false)).add(formId)
+                        .add(form.getBoolean(ANONYMOUS, false)).add(formId)
+                        .add(form.getBoolean(RESPONSE_NOTIFIED, false))
+                        .add(form.getBoolean(EDITABLE, false))
+                        .add(form.getBoolean(RGPD, false))
+                        .add(form.getString(RGPD_GOAL, ""))
+                        .add(form.getInteger(RGPD_LIFETIME, 12))
+                        .add(formId);
+
+                s.prepared(query, params);
+            }
+            s.raw("COMMIT;");
+
+            sql.transaction(s.build(), SqlResult.validResultsHandler(handler));
+        }
+        else {
+            handler.handle(new Either.Right<>(new JsonArray()));
+        }
     }
 
     @Override

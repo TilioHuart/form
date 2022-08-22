@@ -10,6 +10,7 @@ import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
 
 import static fr.openent.form.core.constants.Tables.*;
+import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_BEHAVIOUR;
 
 public class DefaultRelFormFolderService implements RelFormFolderService {
     @Override
@@ -102,6 +103,24 @@ public class DefaultRelFormFolderService implements RelFormFolderService {
         String query = "UPDATE " + REL_FORM_FOLDER_TABLE + " SET folder_id = ? " +
                 "WHERE user_id = ? AND form_id IN " + Sql.listPrepared(formIds) + " RETURNING *;";
         JsonArray params = new JsonArray().add(newFolderId).add(user.getUserId()).addAll(formIds);
+
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public void updateForRestoration(JsonArray formIds, Handler<Either<String, JsonArray>> handler) {
+        String query = "UPDATE " + REL_FORM_FOLDER_TABLE + " rff SET folder_id = folder_target " +
+                "FROM (" +
+                    "SELECT owner_id AS member_id, id AS form_id, 1 AS folder_target FROM " + FORM_TABLE + " " +
+                    "WHERE id IN " + Sql.listPrepared(formIds) +
+                    "UNION " +
+                    "SELECT DISTINCT fs.member_id, fs.resource_id, 2 AS folder_target FROM " + FORM_TABLE + " f " +
+                    "JOIN " + FORM_SHARES_TABLE + " fs ON fs.resource_id = f.id " +
+                    "WHERE f.id IN " + Sql.listPrepared(formIds) + " AND fs.action = ? " +
+                ") AS contributors " +
+                "WHERE rff.user_id = contributors.member_id AND rff.form_id = contributors.form_id " +
+                "RETURNING *;";
+        JsonArray params = new JsonArray().addAll(formIds).addAll(formIds).add(CONTRIB_RESOURCE_BEHAVIOUR);
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }

@@ -18,6 +18,13 @@ public interface FormService {
     void list(List<String> groupsAndUserIds, UserInfos user, Handler<Either<String, JsonArray>> handler);
 
     /**
+     * List all forms by ids
+     * @param formIds list of form ids
+     * @param handler function handler returning JsonArray data
+     */
+    void listByIds(JsonArray formIds, Handler<Either<String, JsonArray>> handler);
+
+    /**
      * List all the forms sent to me
      * @param user user connected
      * @param handler function handler returning JsonArray data
@@ -85,6 +92,13 @@ public interface FormService {
      * @param handler function handler returning JsonObject data
      */
     void update(String formId, JsonObject form, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Update multiple forms
+     * @param forms JsonArray data
+     * @param handler function handler returning JsonArray data
+     */
+    void updateMultiple(JsonArray forms, Handler<Either<String, JsonArray>> handler);
 
     /**
      * Delete a scpecific form

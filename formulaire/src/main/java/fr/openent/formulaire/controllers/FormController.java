@@ -729,7 +729,7 @@ public class FormController extends ControllerHelper {
 
                 formService.checkFormsRights(groupsAndUserIds, user, CONTRIB_RESOURCE_BEHAVIOUR, formIds, hasRightsEvt -> {
                     if (hasRightsEvt.isLeft()) {
-                        log.error("[Formulaire@moveForms] Fail to check rights for method " + hasRightsEvt);
+                        log.error("[Formulaire@moveForms] Fail to check rights for method : " + hasRightsEvt.left().getValue());
                         renderInternalError(request, hasRightsEvt);
                         return;
                     }
@@ -824,6 +824,81 @@ public class FormController extends ControllerHelper {
                                     renderJson(request, updateEvt.right().getValue());
                                 }
                             });
+                        });
+                    });
+                });
+            });
+        });
+    }
+
+    @Put("/forms/restore")
+    @ApiDoc("Restore specific forms to a specific folder")
+    @ResourceFilter(CreationRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void restore(HttpServerRequest request) {
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user == null) {
+                String message = "[Formulaire@restoreForms] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
+            }
+
+            RequestUtils.bodyToJsonArray(request, formIds -> {
+                if (formIds == null || formIds.isEmpty()) {
+                    log.error("[Formulaire@restoreForms] No forms to move.");
+                    noContent(request);
+                    return;
+                }
+
+                final List<String> groupsAndUserIds = new ArrayList<>();
+                groupsAndUserIds.add(user.getUserId());
+                if (user.getGroupsIds() != null) {
+                    groupsAndUserIds.addAll(user.getGroupsIds());
+                }
+
+                formService.checkFormsRights(groupsAndUserIds, user, CONTRIB_RESOURCE_BEHAVIOUR, formIds, hasRightsEvt -> {
+                    if (hasRightsEvt.isLeft()) {
+                        log.error("[Formulaire@restoreForms] Fail to check rights for method : " + hasRightsEvt.left().getValue());
+                        renderInternalError(request, hasRightsEvt);
+                        return;
+                    }
+                    if (hasRightsEvt.right().getValue().isEmpty()) {
+                        String message = "[Formulaire@restoreForms] No rights found for forms with ids " + formIds;
+                        log.error(message);
+                        notFound(request, message);
+                        return;
+                    }
+
+                    // Check if user is owner or contributor to all the forms
+                    Long count = hasRightsEvt.right().getValue().getLong(COUNT);
+                    if (count == null || count != formIds.size()) {
+                        String message = "[Formulaire@restoreForms] You're missing rights on one form or more.";
+                        log.error(message);
+                        unauthorized(request, message);
+                        return;
+                    }
+
+                    relFormFolderService.updateForRestoration(formIds, relFormFolderEvt -> {
+                        if (relFormFolderEvt.isLeft()) {
+                            log.error("[Formulaire@restoreForms] Failed to update relation form-folders for forms with id " + formIds + " : " + relFormFolderEvt.left().getValue());
+                            renderInternalError(request, relFormFolderEvt);
+                            return;
+                        }
+
+                        formService.listByIds(formIds, formsEvt -> {
+                            if (formsEvt.isLeft()) {
+                                log.error("[Formulaire@restoreForms] Failed to list forms with ids " + formIds + " : " + formsEvt.left().getValue());
+                                renderInternalError(request, formsEvt);
+                                return;
+                            }
+
+                            JsonArray forms = formsEvt.right().getValue();
+                            for (int i = 0; i < forms.size(); i++) {
+                                forms.getJsonObject(i).put(ARCHIVED, false);
+                            }
+
+                            formService.updateMultiple(forms, arrayResponseHandler(request));
                         });
                     });
                 });

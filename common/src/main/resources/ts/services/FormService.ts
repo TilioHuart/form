@@ -15,7 +15,7 @@ export interface FormService {
     duplicate(formIds: number[], folderId: number) : Promise<any>;
     update(form: Form) : Promise<any>;
     archive(form: Form, destinationFolderId: number) : Promise<any>;
-    restore(form: Form, destinationFolderId: number) : Promise<any>;
+    restore(forms: Form[]) : Promise<any>;
     delete(formId: number) : Promise<any>;
     move(formIds : number[], parentId: number) : Promise<any>;
     sendReminder(formId: number, mail: {}) : Promise<any>;
@@ -119,11 +119,9 @@ export const formService: FormService = {
         }
     },
 
-    async restore(form: Form, destinationFolderId: number) : Promise<any> {
+    async restore(forms: Form[]) : Promise<any> {
         try {
-            form.archived = false;
-            await this.move([form.id], destinationFolderId);
-            return await this.update(form);
+            return DataUtils.getData(await http.put(`/formulaire/forms/restore`, forms.map(f => f.id)));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.restore'));
             throw err;
