@@ -120,6 +120,7 @@ interface ViewModel {
     getTitle(title: string) : string;
     infiniteScroll() : void;
     seeMore() : void;
+    isCloseConfirmationOpen() : boolean;
     $onDestroy() : Promise<void>;
 }
 
@@ -765,6 +766,18 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.seeMore = () :void =>{
         vm.limitTable += vm.tableSize;
     };
+
+    vm.isCloseConfirmationOpen = () : boolean => {
+        let elems = document.getElementsByTagName('share-panel');
+        if (elems && elems.length > 0 && elems[0].firstElementChild) {
+            let elem: ElementTraversal = elems[0].firstElementChild;
+            let sharePanelScope = angular.element(elem).scope();
+            if (sharePanelScope && sharePanelScope.display) {
+                return sharePanelScope.display.showCloseConfirmation;
+            }
+        }
+        return false;
+    }
 
     const initMail = () : void => {
         let endPath = vm.forms.selected[0].rgpd ? 'rgpd' : 'new';

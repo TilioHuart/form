@@ -1,7 +1,7 @@
 <lightbox show="vm.display.lightbox.sharing" on-close="vm.closeShareFormLightbox()">
     <share-panel app-prefix="formulaire" resources="vm.forms.selected" auto-close="true"></share-panel>
 
-    <div ng-if="vm.forms.selected[0].is_public">
+    <div ng-if="!vm.isCloseConfirmationOpen() && vm.forms.selected[0].is_public">
         <h2><i18n>formulaire.share.link.access</i18n></h2>
         <div class="public_link">
             <div class="text ellipsis">[[vm.forms.selected[0].getPublicLink()]]</div>
@@ -11,7 +11,7 @@
         </div>
     </div>
 
-    <div class="action-buttons alone">
+    <div class="action-buttons alone" ng-if="!vm.isCloseConfirmationOpen()">
         <button class="cell cancel" ng-click="vm.closeShareFormLightbox()"><i18n>formulaire.close</i18n></button>
     </div>
 </lightbox>
