@@ -83,8 +83,8 @@ public class DefaultNeoService implements NeoService {
     @Override
     public void getUsersInfosFromIds(JsonArray userIds, JsonArray groupIds, Handler<Either<String, JsonArray>> handler) {
         JsonObject params = new JsonObject()
-                .put(PARAM_USERS_IDS, userIds)
-                .put(PARAM_GROUPS_IDS, groupIds);
+                .put(PARAM_USER_IDS, userIds)
+                .put(PARAM_GROUP_IDS, groupIds);
 
         String queryUsersNeo4j = "MATCH(ug:User) WHERE ug.id IN {userIds} WITH ug, " +
                 "collect({id: ug.id, username: ug.displayName}) AS users return users ";

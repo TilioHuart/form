@@ -94,6 +94,7 @@ public class Fields {
     public static final String PARAM_FORM_RESULTS_URI = "formResultsUri";
     public static final String PARAM_FORM_URI = "formUri";
     public static final String PARAM_GRAPH_DATA = "graphData";
+    public static final String PARAM_GROUP_IDS = "groupIds";
     public static final String PARAM_GROUPS_IDS = "groupsIds";
     public static final String PARAM_ID_IMAGE = "idImage";
     public static final String PARAM_ID_IMAGES_FILES = "idImagesFiles";
@@ -107,6 +108,7 @@ public class Fields {
     public static final String PARAM_RESPONSE_ID = "responseId";
     public static final String PARAM_SECTION_ID = "sectionId";
     public static final String PARAM_USER_ID = "userId";
+    public static final String PARAM_USER_IDS = "userIds";
     public static final String PARAM_USERS_IDS = "usersIds";
 
 
