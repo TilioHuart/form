@@ -91,7 +91,7 @@ public class QuestionController extends ControllerHelper {
                     return;
                 }
 
-                Long sectionId = question.getLong(PARAM_SECTION_ID);
+                Long sectionId = question.getLong(SECTION_ID);
                 Long sectionPosition = question.getLong(SECTION_POSITION);
 
                 // Check section infos validity
