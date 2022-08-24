@@ -638,15 +638,11 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         document.querySelector('header').style.pointerEvents = 'none';
                     },
                     onEnd: async function (evt) {
-                        let cleanResidue = await FormElementUtils.onEndDragAndDrop(evt, vm.formElements);
+                        await FormElementUtils.onEndDragAndDrop(evt, vm.formElements);
                         document.querySelector('header').style.removeProperty('pointer-events');
                         $scope.safeApply();
 
                         await vm.$onInit();
-                        if (cleanResidue) {
-                            document.getElementById('container-0').lastElementChild.remove();
-                            $scope.safeApply();
-                        }
                     }
                 }));
             }

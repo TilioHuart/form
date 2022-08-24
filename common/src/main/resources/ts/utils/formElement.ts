@@ -104,27 +104,27 @@ export class FormElementUtils {
 
     // Drag and drop
 
-    static onEndDragAndDrop = async (evt: any, formElements: FormElements) : Promise<boolean> => {
-        let scopElem = angular.element(evt.item.firstElementChild.firstElementChild).scope().vm;
-        let itemId = scopElem.question ? scopElem.question.id : scopElem.section.id;
-        let newNestedSectionId = evt.to.id.split("-")[1] != "0" ? parseInt(evt.to.id.split("-")[1]) : null;
-        let oldNestedContainerId = evt.from.id.split("-")[1] != "0" ? parseInt(evt.from.id.split("-")[1]) : null;
-        let oldSection = oldNestedContainerId ? (formElements.all.filter(e => e instanceof Section && e.id === oldNestedContainerId)[0]) as Section: null;
-        let item = null;
-        if (scopElem.section) {
-            item = formElements.all.filter(q => q.id === itemId)[0] as Section;
+    static onEndDragAndDrop = async (evt: any, formElements: FormElements) : Promise<void> => {
+        let scopeElem: any = angular.element(evt.item.firstElementChild.firstElementChild).scope().vm;
+        let itemId: number = scopeElem.question ? scopeElem.question.id : scopeElem.section.id;
+        let newNestedSectionId: number = evt.to.id.split("-")[1] != "0" ? parseInt(evt.to.id.split("-")[1]) : null;
+        let oldNestedContainerId: number = evt.from.id.split("-")[1] != "0" ? parseInt(evt.from.id.split("-")[1]) : null;
+        let oldSection: Section = oldNestedContainerId ? (formElements.all.filter(e => e instanceof Section && e.id === oldNestedContainerId)[0]) as Section : null;
+        let item: any = null;
+        if (scopeElem.section) {
+            item = formElements.all.filter(e => e.id === itemId)[0] as Section;
         }
         else {
-            let oldSiblings = oldSection ? oldSection.questions : formElements;
-            item = (oldSiblings as any).all.filter(q => q.id === itemId)[0] as Question;
+            let oldSiblings: any = oldSection ? oldSection.questions : formElements;
+            item = oldSiblings.all.filter(e => e.id === itemId)[0] as Question;
         }
-        let oldIndex = evt.oldIndex;
-        let newIndex = evt.newIndex;
-        let indexes = FormElementUtils.getStartEndIndexes(newIndex, oldIndex);
-        let cleanResidue = false;
+        let oldIndex: number = evt.oldIndex;
+        let newIndex: number = evt.newIndex;
+        let indexes: any = FormElementUtils.getStartEndIndexes(newIndex, oldIndex);
 
+        // We cannot move a section into another section
         if (newNestedSectionId && item instanceof Section) {
-            return false;
+            return;
         }
 
         if (!newNestedSectionId) {
@@ -138,7 +138,6 @@ export class FormElementUtils {
                 await questionService.update(oldSection.questions.all);
                 formElements.all.push(item);
                 await formElementService.update(formElements.all);
-                cleanResidue = true;
             }
             else { // Item moved FROM vm.formElements TO vm.formElements
                 FormElementUtils.updateSiblingsPositions(formElements, true, indexes.goUp, indexes.startIndex, indexes.endIndex);
@@ -149,7 +148,7 @@ export class FormElementUtils {
             }
         }
         else {
-            let newSection = (formElements.all.filter(e => e instanceof Section && e.id === newNestedSectionId)[0]) as Section;
+            let newSection: Section = (formElements.all.filter(e => e instanceof Section && e.id === newNestedSectionId)[0]) as Section;
             if (oldSection) { // Item moved FROM oldSection TO section with id 'newNestedSectionId'
                 if (newSection.id != oldSection.id) {
                     FormElementUtils.updateSiblingsPositions(oldSection.questions, false, null, oldIndex);
@@ -179,8 +178,6 @@ export class FormElementUtils {
                 await formElementService.update(formElements.all);
             }
         }
-
-        return cleanResidue;
     };
 
     static onEndOrgaDragAndDrop = async (evt: any, formElements: FormElements) : Promise<boolean> => {
@@ -203,6 +200,7 @@ export class FormElementUtils {
         let newIndex = evt.newIndex;
         let indexes = FormElementUtils.getStartEndIndexes(newIndex, oldIndex);
 
+        // We cannot move a section into another section
         if (newNestedSectionId && item instanceof Section) {
             return true;
         }
