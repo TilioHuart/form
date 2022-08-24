@@ -3,7 +3,7 @@ package fr.openent.formulaire.controllers;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.security.ResponseRight;
-import fr.openent.formulaire.security.ShareAndOwner;
+import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.FormService;
 import fr.openent.formulaire.service.NotifyService;
@@ -131,7 +131,7 @@ public class DistributionController extends ControllerHelper {
 
     @Get("/distributions/forms/:formId/count")
     @ApiDoc("Get the number of distributions for a specific form")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void count(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
@@ -140,7 +140,7 @@ public class DistributionController extends ControllerHelper {
 
     @Get("/distributions/:distributionId")
     @ApiDoc("Get a specific distribution by id")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);
@@ -157,7 +157,7 @@ public class DistributionController extends ControllerHelper {
 
     @Get("/distributions/forms/:formId")
     @ApiDoc("Get a specific distribution by form, responder and status")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void getByFormResponderAndStatus(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
@@ -174,7 +174,7 @@ public class DistributionController extends ControllerHelper {
 
     @Post("/distributions/:distributionId/add")
     @ApiDoc("Create a new distribution based on an already existing one")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void add(HttpServerRequest request) {
         String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);
@@ -232,7 +232,7 @@ public class DistributionController extends ControllerHelper {
 
     @Post("/distributions/:distributionId/duplicate")
     @ApiDoc("Duplicate a distribution and its responses based on distributionId")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void duplicateWithResponses(HttpServerRequest request) {
         String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);
@@ -274,7 +274,7 @@ public class DistributionController extends ControllerHelper {
 
     @Put("/distributions/:distributionId")
     @ApiDoc("Update a specific distribution")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
         String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);
@@ -385,7 +385,7 @@ public class DistributionController extends ControllerHelper {
 
     @Delete("/distributions/:distributionId/replace/:originalDistributionId")
     @ApiDoc("Delete a specific distribution and update the new one")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void replace(HttpServerRequest request) {
         String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);
@@ -469,7 +469,7 @@ public class DistributionController extends ControllerHelper {
 
     @Delete("/distributions/:distributionId")
     @ApiDoc("Delete a specific distribution")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);

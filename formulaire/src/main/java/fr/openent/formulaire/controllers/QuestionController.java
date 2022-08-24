@@ -2,7 +2,7 @@ package fr.openent.formulaire.controllers;
 
 import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.security.AccessRight;
-import fr.openent.formulaire.security.ShareAndOwner;
+import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.FormService;
 import fr.openent.formulaire.service.QuestionService;
@@ -63,7 +63,7 @@ public class QuestionController extends ControllerHelper {
 
     @Get("/questions/:questionId")
     @ApiDoc("Get a specific question by id")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String questionId = request.getParam(PARAM_QUESTION_ID);
@@ -72,7 +72,7 @@ public class QuestionController extends ControllerHelper {
 
     @Post("/forms/:formId/questions")
     @ApiDoc("Create a question in a specific form")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
@@ -187,7 +187,7 @@ public class QuestionController extends ControllerHelper {
 
     @Put("/forms/:formId/questions")
     @ApiDoc("Update specific questions")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
@@ -311,7 +311,7 @@ public class QuestionController extends ControllerHelper {
 
     @Delete("/questions/:questionId")
     @ApiDoc("Delete a specific question")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String questionId = request.getParam(PARAM_QUESTION_ID);

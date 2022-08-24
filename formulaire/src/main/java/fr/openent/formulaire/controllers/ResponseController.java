@@ -1,7 +1,7 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.security.AccessRight;
-import fr.openent.formulaire.security.ShareAndOwner;
+import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.QuestionChoiceService;
 import fr.openent.formulaire.service.QuestionService;
@@ -56,7 +56,7 @@ public class ResponseController extends ControllerHelper {
 
     @Get("/questions/:questionId/responses")
     @ApiDoc("List all the responses to a specific question")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
         String questionId = request.getParam(PARAM_QUESTION_ID);
@@ -82,7 +82,7 @@ public class ResponseController extends ControllerHelper {
 
     @Get("/questions/:questionId/distributions/:distributionId/responses")
     @ApiDoc("List all my responses to a specific question for a specific distribution")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void listMineByDistribution(HttpServerRequest request) {
         String questionId = request.getParam(PARAM_QUESTION_ID);
@@ -100,7 +100,7 @@ public class ResponseController extends ControllerHelper {
 
     @Get("/distributions/:distributionId/responses")
     @ApiDoc("List all responses for a specific distribution")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void listByDistribution(HttpServerRequest request) {
         String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);
@@ -117,7 +117,7 @@ public class ResponseController extends ControllerHelper {
 
     @Get("/forms/:formId/responses")
     @ApiDoc("List all the responses to a specific form")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void listByForm(HttpServerRequest request) {
         String formId = request.params().get(PARAM_FORM_ID);
@@ -143,7 +143,7 @@ public class ResponseController extends ControllerHelper {
 
     @Post("/questions/:questionId/responses")
     @ApiDoc("Create a response")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
         String questionId = request.getParam(PARAM_QUESTION_ID);
@@ -262,7 +262,7 @@ public class ResponseController extends ControllerHelper {
 
     @Put("/responses/:responseId")
     @ApiDoc("Update a specific response")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
         String responseId = request.getParam(PARAM_RESPONSE_ID);
@@ -345,7 +345,7 @@ public class ResponseController extends ControllerHelper {
 
     @Delete("/responses/:formId")
     @ApiDoc("Delete specific responses")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);

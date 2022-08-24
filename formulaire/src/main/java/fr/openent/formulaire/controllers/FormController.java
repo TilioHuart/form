@@ -1,6 +1,5 @@
 package fr.openent.formulaire.controllers;
 
-import fr.openent.form.core.constants.EbFields;
 import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.export.FormResponsesExportCSV;
 import fr.openent.formulaire.export.FormResponsesExportPDF;
@@ -574,7 +573,7 @@ public class FormController extends ControllerHelper {
 
     @Put("/forms/:formId")
     @ApiDoc("Update a specific form")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
@@ -661,7 +660,7 @@ public class FormController extends ControllerHelper {
 
     @Delete("/forms/:formId")
     @ApiDoc("Delete a specific form")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
@@ -908,7 +907,7 @@ public class FormController extends ControllerHelper {
 
     @Post("/forms/:formId/remind")
     @ApiDoc("Send a reminder by mail to all the necessary responders")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void sendReminder(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
@@ -1090,7 +1089,7 @@ public class FormController extends ControllerHelper {
 
     @Post("/forms/:formId/export/:fileType")
     @ApiDoc("Export a specific form's responses into a file (CSV or PDF)")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void export(final HttpServerRequest request) {
         String fileType = request.getParam(PARAM_FILE_TYPE);
@@ -1145,7 +1144,7 @@ public class FormController extends ControllerHelper {
     @Override
     @Get("/share/json/:id")
     @ApiDoc("List rights for a given form")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void shareJson(final HttpServerRequest request) {
         final String id = request.params().get(ID);
@@ -1199,7 +1198,7 @@ public class FormController extends ControllerHelper {
 
     @Put("/share/json/:id")
     @ApiDoc("Add rights for a given form")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void shareSubmit(final HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> {
@@ -1216,7 +1215,7 @@ public class FormController extends ControllerHelper {
 
     @Put("/share/resource/:id")
     @ApiDoc("Add rights for a given form")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void shareResource(final HttpServerRequest request) {
         RequestUtils.bodyToJson(request, pathPrefix + "share", shareFormObject -> {

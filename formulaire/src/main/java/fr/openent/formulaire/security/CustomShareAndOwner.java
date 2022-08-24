@@ -18,7 +18,7 @@ import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.Tables.*;
 
 
-public class ShareAndOwner implements ResourcesProvider {
+public class CustomShareAndOwner implements ResourcesProvider {
     public void authorize(final HttpServerRequest request, Binding binding, UserInfos user, final Handler<Boolean> handler) {
         SqlConf conf = SqlConfs.getConf(binding.getServiceMethod().substring(0, binding.getServiceMethod().indexOf(124)));
         String key = getKeyByBinding(binding);

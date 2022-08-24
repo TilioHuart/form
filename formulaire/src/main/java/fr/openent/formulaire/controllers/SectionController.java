@@ -2,7 +2,7 @@ package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.helpers.DataChecker;
 import fr.openent.formulaire.security.AccessRight;
-import fr.openent.formulaire.security.ShareAndOwner;
+import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.FormElementService;
 import fr.openent.formulaire.service.SectionService;
@@ -50,7 +50,7 @@ public class SectionController extends ControllerHelper {
 
     @Get("/sections/:sectionId")
     @ApiDoc("Get a specific section by id")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String sectionId = request.getParam(PARAM_SECTION_ID);
@@ -59,7 +59,7 @@ public class SectionController extends ControllerHelper {
 
     @Post("/forms/:formId/sections")
     @ApiDoc("Create a section in a specific form")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
@@ -118,7 +118,7 @@ public class SectionController extends ControllerHelper {
 
     @Put("/forms/:formId/sections")
     @ApiDoc("Update a specific section")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
@@ -157,7 +157,7 @@ public class SectionController extends ControllerHelper {
 
     @Delete("/sections/:sectionId")
     @ApiDoc("Delete a specific section")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String sectionId = request.getParam(PARAM_SECTION_ID);

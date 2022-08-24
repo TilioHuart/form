@@ -2,7 +2,7 @@ package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.ChoiceTypes;
 import fr.openent.formulaire.security.AccessRight;
-import fr.openent.formulaire.security.ShareAndOwner;
+import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.QuestionChoiceService;
 import fr.openent.formulaire.service.QuestionService;
 import fr.openent.formulaire.service.impl.DefaultQuestionChoiceService;
@@ -65,7 +65,7 @@ public class QuestionChoiceController extends ControllerHelper {
 
     @Post("/questions/:questionId/choices")
     @ApiDoc("Create a choice for a specific question")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
         String questionId = request.getParam(PARAM_QUESTION_ID);
@@ -153,7 +153,7 @@ public class QuestionChoiceController extends ControllerHelper {
 
     @Put("/choices/:choiceId")
     @ApiDoc("Update a specific choice")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
         String choiceId = request.getParam(PARAM_CHOICE_ID);
@@ -242,7 +242,7 @@ public class QuestionChoiceController extends ControllerHelper {
 
     @Delete("/choices/:choiceId")
     @ApiDoc("Delete a specific choice")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String choiceId = request.getParam(PARAM_CHOICE_ID);

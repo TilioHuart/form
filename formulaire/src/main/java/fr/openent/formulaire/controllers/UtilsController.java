@@ -1,6 +1,5 @@
 package fr.openent.formulaire.controllers;
 
-import fr.openent.form.core.constants.EbFields;
 import fr.openent.formulaire.helpers.upload_file.Attachment;
 import fr.openent.formulaire.helpers.upload_file.FileHelper;
 import fr.openent.formulaire.security.CreationRight;

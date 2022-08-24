@@ -2,7 +2,7 @@ package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.helpers.folder_exporter.FolderExporterZip;
 import fr.openent.formulaire.security.AccessRight;
-import fr.openent.formulaire.security.ShareAndOwner;
+import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.ResponseFileService;
 import fr.openent.formulaire.service.impl.DefaultResponseFileService;
 import fr.wseduc.rs.*;
@@ -65,7 +65,7 @@ public class ResponseFileController extends ControllerHelper {
 
     @Get("/responses/files/:fileId")
     @ApiDoc("Get a specific file by id")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String fileId = request.getParam(PARAM_FILE_ID);
@@ -74,7 +74,7 @@ public class ResponseFileController extends ControllerHelper {
 
     @Get("/responses/files/:fileId/download")
     @ApiDoc("Download a specific file")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void download(HttpServerRequest request) {
         String fileId = request.getParam(PARAM_FILE_ID);
@@ -98,7 +98,7 @@ public class ResponseFileController extends ControllerHelper {
 
     @Get("/responses/:questionId/files/download/zip")
     @ApiDoc("Download all files of a specific question")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void zipAndDownload(HttpServerRequest request) {
         String questionId = request.getParam(PARAM_QUESTION_ID);
@@ -184,7 +184,7 @@ public class ResponseFileController extends ControllerHelper {
 
     @Post("/responses/:responseId/files")
     @ApiDoc("Upload files of a specific response")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void upload(HttpServerRequest request) {
         storage.writeUploadFile(request, entries -> {
@@ -227,7 +227,7 @@ public class ResponseFileController extends ControllerHelper {
 
     @Delete("/responses/:responseId/files")
     @ApiDoc("Delete all files of a specific response")
-    @ResourceFilter(ShareAndOwner.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void deleteAll(HttpServerRequest request) {
         String responseId = request.getParam(PARAM_RESPONSE_ID);
