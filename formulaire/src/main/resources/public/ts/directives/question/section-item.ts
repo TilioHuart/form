@@ -12,6 +12,7 @@ interface IViewModel {
     getTitle(title: string): string;
     editSection(): void;
     deleteSection(): void;
+    isOtherElementSelected(): boolean;
     undoSectionChanges(): void;
     validateSection(): void;
     deleteQuestion(): void;
@@ -36,7 +37,7 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
         template: `
             <div class="ten section-item">
                 <div class="domino" ng-class="{'sectionError': !vm.section.title || vm.verifConditional()}">
-                    <div class="section-top" ng-class="{disabled: vm.hasFormResponses || vm.section.selected}">
+                    <div class="section-top" ng-class="{'disabled & dontSave': vm.hasFormResponses || vm.section.selected}">
                         <!-- Drag and drop icon -->
                         <div class="section-top-dots grab">
                             <div class="dots" ng-if="vm.reorder || !vm.hasFormResponses">
@@ -47,16 +48,17 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                         <div class="section-top-container">
                             <!-- Title component -->
                             <div class="title twelve" guard-root="formTitle">
-                                <div class="dontSave flex-spaced" ng-if="!vm.section.selected">
+                                <div class="flex-spaced" ng-if="!vm.section.selected">
                                     <h4 ng-if="vm.section.title" class="ellipsis">
                                         [[vm.section.title]]
                                     </h4>
                                     <h4 ng-if="!vm.section.title" class="empty">
                                         <i18n>formulaire.section.title.empty</i18n>
                                     </h4>
-                                    <i class="i-edit md-icon" ng-click="vm.editSection()" title="[[vm.getTitle('edit')]]"></i>
+                                    <i class="i-edit md-icon dontSave" ng-click="vm.editSection()" title="[[vm.getTitle('edit')]]"
+                                        ng-if="!vm.isOtherElementSelected()"></i>
                                 </div>
-                                <div class="top-spacing-twice dontSave" ng-if="vm.section.selected">
+                                <div class="top-spacing-twice" ng-if="vm.section.selected">
                                     <input type="text" class="twelve" i18n-placeholder="formulaire.section.title.empty"
                                            ng-model="vm.section.title" ng-keydown="$event.keyCode === 13 && vm.validateSection()" input-guard>
                                 </div>
@@ -133,6 +135,12 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                 if (!vm.hasFormResponses) {
                     $scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DELETE_ELEMENT);
                 }
+            };
+
+            vm.isOtherElementSelected = () : boolean => {
+                let hasSelectedChild: boolean = vm.section.questions.all.filter(q => q.selected).length > 0;
+                let hasSiblingChild: boolean = vm.formElements.hasSelectedElement() && vm.formElements.getSelectedElement().id != vm.section.id;
+                return hasSelectedChild || hasSiblingChild;
             };
 
             vm.undoSectionChanges = () : void => {
