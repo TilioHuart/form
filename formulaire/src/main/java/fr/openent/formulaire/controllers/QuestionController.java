@@ -95,7 +95,7 @@ public class QuestionController extends ControllerHelper {
                 Long sectionPosition = question.getLong(SECTION_POSITION);
 
                 // Check section infos validity
-                if (sectionId == null ^ sectionPosition == null) {
+                if (sectionId == null ^ sectionPosition == null) { // ^ = XOR -> return true if they have different value, return false if they both have same value
                     String message = "[Formulaire@createQuestion] sectionId and sectionPosition must be both null or both not null.";
                     log.error(message);
                     badRequest(request, message);
@@ -213,7 +213,7 @@ public class QuestionController extends ControllerHelper {
                     Long sectionId = question.getLong(SECTION_ID);
                     Long sectionPosition = question.getLong(SECTION_POSITION);
 
-                    if (sectionId == null ^ sectionPosition == null) {
+                    if (sectionId == null ^ sectionPosition == null) { // ^ = XOR -> return true if they have different value, return false if they both have same value
                         String message = "[Formulaire@updateQuestions] sectionId and sectionPosition must be both null or both not null : " + question;
                         log.error(message);
                         badRequest(request, message);
