@@ -1,6 +1,5 @@
 package fr.openent.formulaire.security;
 
-import fr.openent.form.core.constants.Tables;
 import fr.wseduc.webutils.http.Binding;
 import fr.wseduc.webutils.http.HttpMethod;
 import io.vertx.core.Handler;

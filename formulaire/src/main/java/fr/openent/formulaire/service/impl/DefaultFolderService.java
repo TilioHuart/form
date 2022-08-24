@@ -1,6 +1,5 @@
 package fr.openent.formulaire.service.impl;
 
-import fr.openent.form.core.constants.Tables;
 import fr.openent.formulaire.service.FolderService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
@@ -13,6 +12,7 @@ import org.entcore.common.user.UserInfos;
 import static fr.openent.form.core.constants.Fields.NAME;
 import static fr.openent.form.core.constants.Fields.PARENT_ID;
 import static fr.openent.form.core.constants.Tables.FOLDER_TABLE;
+import static fr.openent.form.core.constants.Tables.REL_FORM_FOLDER_TABLE;
 
 public class DefaultFolderService implements FolderService {
     @Override
@@ -91,7 +91,7 @@ public class DefaultFolderService implements FolderService {
                             " WHERE user_id = ? GROUP BY parent_id " +
                         ") AS f " +
                         "FULL JOIN ( " +
-                            "SELECT COUNT(*) AS nb_forms, folder_id FROM " + Tables.REL_FORM_FOLDER_TABLE +
+                            "SELECT COUNT(*) AS nb_forms, folder_id FROM " + REL_FORM_FOLDER_TABLE +
                             " WHERE user_id = ? GROUP BY folder_id " +
                         ") AS rff ON rff.folder_id = f.parent_id " +
                     ") AS counts " +

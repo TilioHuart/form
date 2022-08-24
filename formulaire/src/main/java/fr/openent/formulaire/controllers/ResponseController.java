@@ -281,7 +281,7 @@ public class ResponseController extends ControllerHelper {
                     return;
                 }
 
-                Integer questionId = response.getInteger(PARAM_QUESTION_ID);
+                Integer questionId = response.getInteger(QUESTION_ID);
                 questionService.get(questionId.toString(), questionEvt -> {
                     if (questionEvt.isLeft()) {
                         log.error("[Formulaire@updateResponse] Fail to get question corresponding to id : " + questionId);

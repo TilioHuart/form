@@ -1,6 +1,5 @@
 package fr.openent.formulaire.service.impl;
 
-import fr.openent.form.core.constants.Tables;
 import fr.openent.formulaire.service.DistributionService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
@@ -16,7 +15,7 @@ import java.util.List;
 import static fr.openent.form.core.constants.Constants.NB_NEW_LINES;
 import static fr.openent.form.core.constants.DistributionStatus.*;
 import static fr.openent.form.core.constants.Fields.*;
-import static fr.openent.form.core.constants.Tables.DISTRIBUTION_TABLE;
+import static fr.openent.form.core.constants.Tables.*;
 
 public class DefaultDistributionService implements DistributionService {
     private final Sql sql = Sql.getInstance();
@@ -71,7 +70,7 @@ public class DefaultDistributionService implements DistributionService {
     @Override
     public void listByFormAndStatusAndQuestion(String formId, String status, String questionId, String nbLines, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT d.* FROM " + DISTRIBUTION_TABLE + " d " +
-                "JOIN " + Tables.RESPONSE_TABLE + " r ON r.distribution_id = d.id " +
+                "JOIN " + RESPONSE_TABLE + " r ON r.distribution_id = d.id " +
                 "WHERE form_id = ? AND status = ? AND question_id = ? " +
                 "ORDER BY date_response DESC";
         JsonArray params = new JsonArray().add(formId).add(status).add(questionId);
@@ -142,14 +141,14 @@ public class DefaultDistributionService implements DistributionService {
                     "date_sending, date_response, active, id FROM " + DISTRIBUTION_TABLE + " WHERE id = ? RETURNING *" +
                 "), " +
                 "newResponses AS (" +
-                    "INSERT INTO " + Tables.RESPONSE_TABLE + " (question_id, answer, responder_id, choice_id, distribution_id, original_id) " +
+                    "INSERT INTO " + RESPONSE_TABLE + " (question_id, answer, responder_id, choice_id, distribution_id, original_id) " +
                     "SELECT question_id, answer, responder_id, choice_id, (SELECT id FROM newDistrib), id " +
-                    "FROM " + Tables.RESPONSE_TABLE + " WHERE distribution_id = ? RETURNING *" +
+                    "FROM " + RESPONSE_TABLE + " WHERE distribution_id = ? RETURNING *" +
                 ")," +
                 "newResponseFiles AS (" +
-                    "INSERT INTO " + Tables.RESPONSE_FILE_TABLE + " (id, response_id, filename, type) " +
+                    "INSERT INTO " + RESPONSE_FILE_TABLE + " (id, response_id, filename, type) " +
                     "SELECT id, (SELECT id FROM newResponses WHERE original_id = response_id), filename, type " +
-                    "FROM " + Tables.RESPONSE_FILE_TABLE + " WHERE response_id IN (SELECT original_id FROM newResponses)" +
+                    "FROM " + RESPONSE_FILE_TABLE + " WHERE response_id IN (SELECT original_id FROM newResponses)" +
                 ")" +
                 "SELECT * FROM newDistrib;";
 
@@ -263,7 +262,7 @@ public class DefaultDistributionService implements DistributionService {
                 "DELETE FROM " + DISTRIBUTION_TABLE + " " +
                 "WHERE id IN (" +
                     "SELECT d.id FROM " + DISTRIBUTION_TABLE + " d " +
-                    "JOIN " + Tables.FORM_TABLE + " f ON f.id = d.form_id " +
+                    "JOIN " + FORM_TABLE + " f ON f.id = d.form_id " +
                     "WHERE f.rgpd = ? AND d.date_response IS NOT NULL " +
                     "AND (SELECT " +
                         "EXTRACT(year FROM AGE(NOW(), d.date_response::timestamp)) * 12 + " +
