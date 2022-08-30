@@ -51,6 +51,7 @@ public class Fields {
     public static final String QUESTION_ID = "question_id";
     public static final String QUESTION_TYPE = "question_type";
     public static final String PARENT_ID = "parent_id";
+    public static final String PLACEHOLDER = "placeholder";
     public static final String POSITION = "position";
     public static final String PUBLIC_KEY = "public_key";
     public static final String REMINDED = "reminded";

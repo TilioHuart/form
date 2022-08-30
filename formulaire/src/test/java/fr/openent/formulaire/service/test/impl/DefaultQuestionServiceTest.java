@@ -105,7 +105,7 @@ public class DefaultQuestionServiceTest {
     public void create(TestContext ctx) {
         Async async = ctx.async();
         String expectedQuery = "INSERT INTO " + QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
-                "mandatory, section_id, section_position, conditional) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+                "mandatory, section_id, section_position, conditional, placeholder) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
 
         JsonObject question = new JsonObject();
         JsonArray expectedParams = new JsonArray().add(FORM_ID)
@@ -116,7 +116,8 @@ public class DefaultQuestionServiceTest {
                 .add(question.getBoolean(CONDITIONAL, false) || question.getBoolean(MANDATORY, false))
                 .add(question.getInteger(SECTION_ID, null))
                 .add(question.getInteger(SECTION_POSITION, null))
-                .add(question.getBoolean(CONDITIONAL, false));
+                .add(question.getBoolean(CONDITIONAL, false))
+                .add(question.getString(PLACEHOLDER, ""));
 
         String expectedQueryResult = expectedQuery + getUpdateDateModifFormRequest();
         expectedParams.addAll(getParamsForUpdateDateModifFormRequest(FORM_ID));
@@ -143,6 +144,7 @@ public class DefaultQuestionServiceTest {
                 .put(SECTION_ID, 1)
                 .put(SECTION_POSITION,1)
                 .put(CONDITIONAL, false)
+                .put(PLACEHOLDER, PLACEHOLDER)
                 .put(ID, 1);
         JsonObject tabQuestionNew = new JsonObject();
         tabQuestionNew.put(TITLE, "titled")
@@ -153,14 +155,15 @@ public class DefaultQuestionServiceTest {
                 .put(SECTION_ID, 2)
                 .put(SECTION_POSITION, 2)
                 .put(CONDITIONAL, true)
+                .put(PLACEHOLDER, "placeholdered")
                 .put(ID, 2);
         JsonArray questions = new JsonArray();
         questions.add(tabQuestion)
                 .add(tabQuestionNew);
 
         String expectedQuery = "[{\"action\":\"raw\",\"command\":\"BEGIN;\"}," +
-                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, statement = ?, mandatory = ?, section_id = ?, section_position = ?, conditional = ?  WHERE id = ? RETURNING *;\",\"values\":[\"title\",null,1,\"statement\",false,1,1,false,1]}," +
-                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, statement = ?, mandatory = ?, section_id = ?, section_position = ?, conditional = ?  WHERE id = ? RETURNING *;\",\"values\":[\"titled\",null,2,\"statemented\",true,2,2,true,2]}," +
+                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, statement = ?, mandatory = ?, section_id = ?, section_position = ?, conditional = ?, placeholder = ?  WHERE id = ? RETURNING *;\",\"values\":[\"title\",null,1,\"statement\",false,1,1,false,\"placeholder\",1]}," +
+                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, statement = ?, mandatory = ?, section_id = ?, section_position = ?, conditional = ?, placeholder = ?  WHERE id = ? RETURNING *;\",\"values\":[\"titled\",null,2,\"statemented\",true,2,2,true,\"placeholdered\",2]}," +
                 "{\"action\":\"prepared\",\"statement\":\"UPDATE " + FORM_TABLE + " SET date_modification = ? WHERE id = ?; \",\"values\":[\"NOW()\",\"form_id\"]}," +
                 "{\"action\":\"raw\",\"command\":\"COMMIT;\"}]";
 

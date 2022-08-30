@@ -95,7 +95,7 @@ public class DefaultQuestionService implements QuestionService {
     @Override
     public void create(JsonObject question, String formId, Handler<Either<String, JsonObject>> handler) {
         String query = "INSERT INTO " + QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
-                "mandatory, section_id, section_position, conditional) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+                "mandatory, section_id, section_position, conditional, placeholder) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(formId)
                 .add(question.getString(TITLE, ""))
@@ -105,7 +105,8 @@ public class DefaultQuestionService implements QuestionService {
                 .add(question.getBoolean(CONDITIONAL, false) || question.getBoolean(MANDATORY, false))
                 .add(question.getInteger(SECTION_ID, null))
                 .add(question.getInteger(SECTION_POSITION, null))
-                .add(question.getBoolean(CONDITIONAL, false));
+                .add(question.getBoolean(CONDITIONAL, false))
+                .add(question.getString(PLACEHOLDER, ""));
 
         query += getUpdateDateModifFormRequest();
         params.addAll(getParamsForUpdateDateModifFormRequest(formId));
@@ -118,7 +119,8 @@ public class DefaultQuestionService implements QuestionService {
         if (!questions.isEmpty()) {
             SqlStatementsBuilder s = new SqlStatementsBuilder();
             String query = "UPDATE " + QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, " +
-                    "statement = ?, mandatory = ?, section_id = ?, section_position = ?, conditional = ?  WHERE id = ? RETURNING *;";
+                    "statement = ?, mandatory = ?, section_id = ?, section_position = ?, conditional = ?, placeholder = ?" +
+                    "  WHERE id = ? RETURNING *;";
 
             s.raw("BEGIN;");
             for (int i = 0; i < questions.size(); i++) {
@@ -132,6 +134,7 @@ public class DefaultQuestionService implements QuestionService {
                         .add(question.getInteger(SECTION_ID, null))
                         .add(question.getInteger(SECTION_POSITION, null))
                         .add(question.getBoolean(CONDITIONAL, false))
+                        .add(question.getString(PLACEHOLDER, ""))
                         .add(question.getInteger(ID, null));
                 s.prepared(query, params);
             }

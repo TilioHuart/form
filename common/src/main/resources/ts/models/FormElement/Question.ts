@@ -15,6 +15,7 @@ export class Question extends FormElement {
     section_position: number;
     conditional: boolean;
     choices: QuestionChoices;
+    placeholder: string;
 
     constructor() {
         super();
@@ -32,6 +33,7 @@ export class Question extends FormElement {
             id: this.id,
             form_id: this.form_id,
             title: this.title,
+            placeholder: this.placeholder,
             position: this.position,
             selected: this.selected,
             question_type: this.question_type,
