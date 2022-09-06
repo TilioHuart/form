@@ -89,6 +89,10 @@
               margin-top: 7px;
             }
 
+            .flex-spaced {
+              flex-wrap: wrap-reverse;
+            }
+
             .empty {
               font-weight: normal;
               font-style: italic;
