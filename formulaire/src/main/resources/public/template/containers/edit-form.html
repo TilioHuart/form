@@ -1,8 +1,8 @@
 <div ng-controller="FormEditorController as vm">
-    <div ng-if="currentPage == Pages.EDIT_FORM" >
-        <div class="row">
+    <div ng-if="currentPage == Pages.EDIT_FORM">
+        <div class="row header-fixed">
             <section class="cell">
-                <div>
+                <div class="header-title">
                     <h1>
                         <a navigation-trigger="redirectTo('/list/mine')" ><i18n>formulaire.title</i18n></a>
                         <span ng-if="vm.form.folder_id != 1"><i18n>formulaire.separator</i18n><i18n>formulaire.dots</i18n></span>
