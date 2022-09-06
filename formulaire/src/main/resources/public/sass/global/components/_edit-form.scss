@@ -13,6 +13,7 @@
     position: sticky;
     background: linear-gradient(to bottom right, $formulaire-grey-lighter, $formulaire-grey-very-light) fixed;
     top: 64px;
+    z-index: 10003;
   }
 
   &-title {

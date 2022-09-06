@@ -329,3 +329,7 @@ body.formulaire section.main {
     color: $formulaire-red;
   }
 }
+
+body.formulaire section.lightbox {
+  z-index: 10003;
+}
