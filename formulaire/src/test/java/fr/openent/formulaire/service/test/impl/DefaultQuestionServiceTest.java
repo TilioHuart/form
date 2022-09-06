@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static fr.openent.form.core.constants.Constants.CONDITIONAL_QUESTIONS;
 import static fr.openent.form.core.constants.EbFields.FORMULAIRE_ADDRESS;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.Fields.QUESTION_TYPE;
@@ -34,7 +35,7 @@ public class DefaultQuestionServiceTest {
     @Test
     public void testListForForm(TestContext ctx) {
         Async async = ctx.async();
-        String expectedQuery = "SELECT * FROM " + QUESTION_TABLE + " WHERE form_id = ? AND section_id IS NULL ORDER BY position;";
+        String expectedQuery = "SELECT * FROM " + QUESTION_TABLE + " WHERE form_id = ? AND section_id IS NULL AND matrix_id IS NULL ORDER BY position;";
         JsonArray expectedParams = new JsonArray().add(FORM_ID);
 
         vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
@@ -50,7 +51,8 @@ public class DefaultQuestionServiceTest {
     @Test
     public void testListForSection(TestContext ctx) {
         Async async = ctx.async();
-        String expectedQuery = "SELECT * FROM " + QUESTION_TABLE + " WHERE section_id = ? ORDER BY section_position;";
+        String expectedQuery = "SELECT * FROM " + QUESTION_TABLE + " WHERE section_id = ? AND matrix_id IS NULL " +
+                "ORDER BY section_position;";
         JsonArray expectedParams = new JsonArray().add(SECTION_ID);
 
         vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
@@ -66,7 +68,8 @@ public class DefaultQuestionServiceTest {
     @Test
     public void testListForFormAndSection(TestContext ctx) {
         Async async = ctx.async();
-        String expectedQuery = "SELECT * FROM " + QUESTION_TABLE + " WHERE form_id = ? ORDER BY position, section_id, section_position;";
+        String expectedQuery = "SELECT * FROM " + QUESTION_TABLE + " WHERE form_id = ? AND matrix_id IS NULL " +
+                "ORDER BY position, section_id, section_position;";
         JsonArray expectedParams = new JsonArray().add(FORM_ID);
 
         vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
@@ -77,6 +80,23 @@ public class DefaultQuestionServiceTest {
             async.complete();
         });
         defaultQuestionService.listForFormAndSection(FORM_ID, null);
+    }
+
+    @Test
+    public void testLisChildren(TestContext ctx) {
+        Async async = ctx.async();
+        JsonArray questionIds = new JsonArray().add("1").add("2").add("3");
+        String expectedQuery = "SELECT * FROM " + QUESTION_TABLE + " WHERE matrix_id IN " + Sql.listPrepared(questionIds);
+        JsonArray expectedParams = new JsonArray().addAll(questionIds);
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getString(STATEMENT));
+            ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
+            async.complete();
+        });
+        defaultQuestionService.listChildren(questionIds, null);
     }
 
     @Test
@@ -105,19 +125,23 @@ public class DefaultQuestionServiceTest {
     public void create(TestContext ctx) {
         Async async = ctx.async();
         String expectedQuery = "INSERT INTO " + QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
-                "mandatory, section_id, section_position, conditional, placeholder) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+                "mandatory, section_id, section_position, conditional, placeholder, matrix_id) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
 
         JsonObject question = new JsonObject();
-        JsonArray expectedParams = new JsonArray().add(FORM_ID)
+        boolean isConditional = CONDITIONAL_QUESTIONS.contains(question.getInteger(QUESTION_TYPE)) ? question.getBoolean(CONDITIONAL, false) : false;
+        JsonArray expectedParams = new JsonArray()
+                .add(FORM_ID)
                 .add(question.getString(TITLE, ""))
                 .add(question.getInteger(SECTION_POSITION, null) != null ? null : question.getInteger(POSITION, null))
                 .add(question.getInteger(QUESTION_TYPE, 1))
                 .add(question.getString(STATEMENT, ""))
-                .add(question.getBoolean(CONDITIONAL, false) || question.getBoolean(MANDATORY, false))
+                .add(question.getBoolean(MANDATORY, false) || isConditional)
                 .add(question.getInteger(SECTION_ID, null))
                 .add(question.getInteger(SECTION_POSITION, null))
-                .add(question.getBoolean(CONDITIONAL, false))
-                .add(question.getString(PLACEHOLDER, ""));
+                .add(isConditional)
+                .add(question.getString(PLACEHOLDER, ""))
+                .add(question.getInteger(MATRIX_ID, null));
 
         String expectedQueryResult = expectedQuery + getUpdateDateModifFormRequest();
         expectedParams.addAll(getParamsForUpdateDateModifFormRequest(FORM_ID));
@@ -145,6 +169,7 @@ public class DefaultQuestionServiceTest {
                 .put(SECTION_POSITION,1)
                 .put(CONDITIONAL, false)
                 .put(PLACEHOLDER, PLACEHOLDER)
+                .put(MATRIX_ID, 1)
                 .put(ID, 1);
         JsonObject tabQuestionNew = new JsonObject();
         tabQuestionNew.put(TITLE, "titled")
@@ -156,14 +181,15 @@ public class DefaultQuestionServiceTest {
                 .put(SECTION_POSITION, 2)
                 .put(CONDITIONAL, true)
                 .put(PLACEHOLDER, "placeholdered")
+                .put(MATRIX_ID, 2)
                 .put(ID, 2);
         JsonArray questions = new JsonArray();
         questions.add(tabQuestion)
                 .add(tabQuestionNew);
 
         String expectedQuery = "[{\"action\":\"raw\",\"command\":\"BEGIN;\"}," +
-                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, statement = ?, mandatory = ?, section_id = ?, section_position = ?, conditional = ?, placeholder = ?  WHERE id = ? RETURNING *;\",\"values\":[\"title\",null,1,\"statement\",false,1,1,false,\"placeholder\",1]}," +
-                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, statement = ?, mandatory = ?, section_id = ?, section_position = ?, conditional = ?, placeholder = ?  WHERE id = ? RETURNING *;\",\"values\":[\"titled\",null,2,\"statemented\",true,2,2,true,\"placeholdered\",2]}," +
+                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, statement = ?, mandatory = ?, section_id = ?, section_position = ?, conditional = ?, placeholder = ?, matrix_id = ? WHERE id = ? RETURNING *;\",\"values\":[\"title\",null,1,\"statement\",false,1,1,false,\"placeholder\",1,1]}," +
+                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, statement = ?, mandatory = ?, section_id = ?, section_position = ?, conditional = ?, placeholder = ?, matrix_id = ? WHERE id = ? RETURNING *;\",\"values\":[\"titled\",null,2,\"statemented\",true,2,2,true,\"placeholdered\",2,2]}," +
                 "{\"action\":\"prepared\",\"statement\":\"UPDATE " + FORM_TABLE + " SET date_modification = ? WHERE id = ?; \",\"values\":[\"NOW()\",\"form_id\"]}," +
                 "{\"action\":\"raw\",\"command\":\"COMMIT;\"}]";
 
@@ -189,7 +215,8 @@ public class DefaultQuestionServiceTest {
                 .put(SECTION_ID, 1)
                 .put(SECTION_POSITION,1)
                 .put(CONDITIONAL, false)
-                .put(FORM_ID, 1);
+                .put(FORM_ID, 1)
+                .put(ID, 1);
         String expectedQuery = "DELETE FROM " + QUESTION_TABLE + " WHERE id = ?;";
 
         JsonArray expectedParams = new JsonArray().add(tabQuestion.getInteger(ID));

@@ -6,6 +6,7 @@ import {Types} from "../QuestionType";
 import {FormElement} from "./FormElement";
 import {Distributions} from "../Distribution";
 import {Response} from "../Response";
+import {Constants} from "@common/core/constants";
 
 export class Question extends FormElement {
     question_type: any;
@@ -14,18 +15,23 @@ export class Question extends FormElement {
     section_id: number;
     section_position: number;
     conditional: boolean;
+    matrix_id: number;
     choices: QuestionChoices;
     placeholder: string;
+    children: Questions;
 
-    constructor() {
+    constructor(matrixId?: number, questionType?: number) {
         super();
-        this.question_type = null;
+        this.question_type = questionType ? questionType : null;
         this.statement = null;
         this.mandatory = false;
         this.section_id = null;
         this.section_position = null;
         this.conditional = false;
+        this.matrix_id = matrixId ? matrixId : null;
         this.choices = new QuestionChoices();
+        this.children = new Questions();
+        this.placeholder = null;
     }
 
     toJson() : Object {
@@ -42,7 +48,9 @@ export class Question extends FormElement {
             section_id: this.section_id,
             section_position: this.section_position,
             conditional: this.conditional,
-            choices: this.choices
+            matrix_id: this.matrix_id,
+            choices: this.choices,
+            children: this.children
         }
     }
 
@@ -65,8 +73,15 @@ export class Question extends FormElement {
         this.choices.all.push(noResponseChoice);
     }
 
-    isGraphQuestion = () : boolean => {
+    isTypeGraphQuestion = () : boolean => {
         return this.question_type == Types.SINGLEANSWER || this.question_type == Types.MULTIPLEANSWER || this.question_type == Types.SINGLEANSWERRADIO;
+    }
+
+    isTypeChoicesQuestion = () : boolean => {
+        return this.question_type == Types.SINGLEANSWER
+            || this.question_type == Types.MULTIPLEANSWER
+            || this.question_type == Types.SINGLEANSWERRADIO
+            || this.question_type == Types.MATRIX;
     }
 }
 
@@ -83,6 +98,7 @@ export class Questions extends Selection<Question> {
             this.all = Mix.castArrayAs(Question, data);
             if (this.all.length > 0) {
                 await this.syncChoices();
+                await this.syncChildren();
             }
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.question.sync'));
@@ -91,20 +107,33 @@ export class Questions extends Selection<Question> {
     }
 
     syncChoices = async () : Promise<void> => {
-        let data = await questionChoiceService.listChoices(this.all.map(q => q.id));
-        if (data.length > 0) {
-            let listChoices = Mix.castArrayAs(QuestionChoice, data);
+        let choicesQuestions: Question[] = this.all.filter((q: Question) => q.isTypeChoicesQuestion());
+        if (choicesQuestions.length > 0) {
+            let data = await questionChoiceService.listChoices(this.all.map((q: Question) => q.id));
+            let listChoices: QuestionChoice[] = Mix.castArrayAs(QuestionChoice, data);
             for (let question of this.all) {
-                if (question.question_type === Types.SINGLEANSWER
-                    || question.question_type === Types.MULTIPLEANSWER
-                    || question.question_type === Types.SINGLEANSWERRADIO) {
+                question.choices.all = listChoices.filter(c => c.question_id === question.id);
+                let nbChoices: number = question.choices.all.length;
+                if (nbChoices <= 0) {
+                    for (let j = 0; j < Constants.DEFAULT_NB_CHOICES; j++) {
+                        question.choices.all.push(new QuestionChoice(question.id));
+                    }
+                }
+            }
+        }
+    }
 
-                    question.choices.all = listChoices.filter(c => c.question_id === question.id);
-                    let nbChoices = question.choices.all.length;
-                    if (nbChoices <= 0) {
-                        for (let j = 0; j < 3; j++) {
-                            question.choices.all.push(new QuestionChoice(question.id));
-                        }
+    syncChildren = async () : Promise<void> => {
+        let matrixQuestions: Question[] = this.all.filter((q: Question) => q.question_type == Types.MATRIX);
+        if (matrixQuestions.length > 0) {
+            let data = await questionService.listChildren(matrixQuestions);
+            let listChildrenQuestions: Question[] = Mix.castArrayAs(Question, data);
+            for (let question of this.all) {
+                question.children.all = listChildrenQuestions.filter((q: Question) => q.matrix_id === question.id);
+                let nbChildren: number = question.children.all.length;
+                if (nbChildren <= 0) {
+                    for (let j = 0; j < Constants.DEFAULT_NB_CHILDREN; j++) {
+                        question.children.all.push(new Question(question.id));
                     }
                 }
             }

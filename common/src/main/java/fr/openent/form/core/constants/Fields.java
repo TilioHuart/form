@@ -35,6 +35,7 @@ public class Fields {
     public static final String IS_PUBLIC = "is_public";
     public static final String MAIL = "mail";
     public static final String MANDATORY = "mandatory";
+    public static final String MATRIX_ID = "matrix_id";
     public static final String MULTIPLE = "multiple";
     public static final String MEMBER_ID = "member_id";
     public static final String NAME = "name";

@@ -28,6 +28,13 @@ public interface QuestionService {
     void listForFormAndSection(String formId, Handler<Either<String, JsonArray>> handler);
 
     /**
+     * List all the children questions of a list of questions
+     * @param questionIds question identifiers
+     * @param handler function handler returning JsonArray data
+     */
+    void listChildren(JsonArray questionIds, Handler<Either<String, JsonArray>> handler);
+
+    /**
      * List all the questions of a specific form without freetext questions
      * @param formId form identifier
      * @param isPdf is export for PDF

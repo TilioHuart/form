@@ -33,6 +33,7 @@
   "formulaire.conditional": "Conditionnelle",
   "formulaire.mandatory": "Obligatoire",
   "formulaire.mandatory.explanation": "Impossible de rendre non obligatoire une question conditionnelle",
+  "formulaire.mandatory.explanation.matrix": "Le répondant doit répondre à chaque ligne",
   "formulaire.access.section": "Accéder à la section : ",
   "formulaire.access.recap": "Accéder au récapitulatif des réponses (fin du formulaire)",
   "formulaire.sent": "Envoyé",
@@ -188,6 +189,11 @@
   "formulaire.element.delete.response.fill.warning": "Vous ne pouvez pas supprimer cet élément, des utilisateurs y ont déjà répondu",
   "formulaire.element.block.sharing.multiple.conditional" : "Un ou plusieurs éléments de votre formulaire ne sont pas valides. Veuillez corriger ces éléments avant d'effectuer le partage.",
 
+  "formulaire.section.title.empty": "Nom de la section",
+  "formulaire.section.missing.field.title": "Attention, la section ci-dessus nécessite un titre pour être valide.",
+  "formulaire.section.missing.field.choice": "Attention, la section ci-dessus nécessite au moins un choix pour être valide.",
+  "formulaire.section.save.missing.field": "Attention, certaines sections manquent d'informations pour être valides !",
+  "formulaire.element.block.multiple.conditional" : "Attention, la section ci-dessus ne doit comporter qu'une question conditionnelle pour être valide",
   "formulaire.section.no.description": "Pas de description",
   "formulaire.section.new.question": "+ Ajouter une question",
 
@@ -200,6 +206,7 @@
   "formulaire.question.type.TIME": "Heure",
   "formulaire.question.type.FILE": "Dépôt de fichier",
   "formulaire.question.type.SINGLEANSWERRADIO": "Radio bouton",
+  "formulaire.question.type.MATRIX": "Matrice",
   "formulaire.question.type.description.FREETEXT": "Saisie d'un texte à afficher au répondant (ex : introduction d'une partie, ...)",
   "formulaire.question.type.description.SHORTANSWER":" Question permettant une réponse texte courte sans mise en page",
   "formulaire.question.type.description.LONGANSWER": "Question permettant une réponse plus longue avec une mise en page",
@@ -209,6 +216,7 @@
   "formulaire.question.type.description.TIME": "Question permettant au répondant de saisir une heure",
   "formulaire.question.type.description.FILE": "Question permettant au répondant de déposer un ou plusieurs fichiers",
   "formulaire.question.type.description.SINGLEANSWERRADIO": "Question permettant au répondant de choisir une réponse parmi une liste en bouton radio",
+  "formulaire.question.type.description.MATRIX": "Question qui, pour une liste de plusieurs éléments, permet au répondant de choisir une valeur pour chacun d'entre eux. Deux types de matrices sont disponibles :\n- à choix unique (une seule réponse par élément)\n- cases à cocher (plusieurs réponses par élément)",
   "formulaire.question.title.free.empty": "Titre de ma zone de texte",
   "formulaire.question.title.empty": "Énoncé de ma question",
   "formulaire.question.date.empty": "Date au format : jj/mm/aaaa",
@@ -219,11 +227,10 @@
   "formulaire.question.save.missing.field": "Attention, certaines questions manquent d'informations pour être valides !",
   "formulaire.question.rgpd.title": "Collecte de données à caractère personnel",
 
-  "formulaire.section.title.empty": "Nom de la section",
-  "formulaire.section.missing.field.title": "Attention, la section ci-dessus nécessite un titre pour être valide.",
-  "formulaire.section.missing.field.choice": "Attention, la section ci-dessus nécessite au moins un choix pour être valide.",
-  "formulaire.section.save.missing.field": "Attention, certaines sections manquent d'informations pour être valides !",
-  "formulaire.element.block.multiple.conditional" : "Attention, la section ci-dessus ne doit comporter qu'une question conditionnelle pour être valide",
+  "formulaire.matrix.type.SINGLEANSWERRADIO": "Matrice à choix unique",
+  "formulaire.matrix.type.MULTIPLEANSWER": "Matrice avec cases à cocher",
+  "formulaire.matrix.columns": "Colonnes (Options de réponses)",
+  "formulaire.matrix.lines": "Lignes",
 
 
   "formulaire.response": "réponse",

@@ -152,7 +152,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
             const vm: IViewModel = <IViewModel> this;
 
             vm.$onInit = async () : Promise<void> => {
-                vm.isGraphQuestion = vm.question.isGraphQuestion();
+                vm.isGraphQuestion = vm.question.isTypeGraphQuestion();
                 vm.responses = new Responses();
                 vm.distributions = new Distributions();
                 vm.results = new Map();

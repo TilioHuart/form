@@ -1,6 +1,6 @@
 import {Directive, ng} from "entcore";
-import {Question, QuestionChoice} from "../../../models";
-import {questionChoiceService} from "../../../services";
+import {Question, QuestionChoice} from "@common/models";
+import {questionChoiceService} from "@common/services";
 
 interface IViewModel {
     question: Question,

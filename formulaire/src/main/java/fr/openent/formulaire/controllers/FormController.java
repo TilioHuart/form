@@ -35,8 +35,7 @@ import java.util.*;
 import static fr.openent.form.core.Events.CREATE;
 import static fr.openent.form.core.constants.ConfigFields.ZIMBRA_MAX_RECIPIENTS;
 import static fr.openent.form.core.constants.ConsoleRights.*;
-import static fr.openent.form.core.constants.Constants.MAX_USERS_SHARING;
-import static fr.openent.form.core.constants.Constants.RGPD_LIFETIME_VALUES;
+import static fr.openent.form.core.constants.Constants.*;
 import static fr.openent.form.core.constants.EbFields.CONVERSATION_ADDRESS;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.FolderIds.*;
@@ -522,15 +521,16 @@ public class FormController extends ControllerHelper {
 
         for (Object questions : questionsEvt.result().list()) {
             JsonArray questionsInfos = ((JsonArray) questions);
-            if (questionsInfos.getJsonObject(0).getInteger(ID) != null
-            && questionsInfos.getJsonObject(0).getInteger(FORM_ID) != null) {
+            if (questionsInfos.size() > 0
+                && questionsInfos.getJsonObject(0).getInteger(ID) != null
+                && questionsInfos.getJsonObject(0).getInteger(FORM_ID) != null) {
                 for (int i = 0; i < questionsInfos.size(); i++) {
                     JsonObject questionInfo = questionsInfos.getJsonObject(i);
                     int formId = questionInfo.getInteger(FORM_ID);
                     int questionId = questionInfo.getInteger(ID);
                     int originalQuestionId = questionInfo.getInteger(ORIGINAL_QUESTION_ID);
                     int question_type = questionInfo.getInteger(QUESTION_TYPE);
-                    if (question_type == 4 || question_type == 5 || question_type == 9) {
+                    if (CHOICES_TYPE_QUESTIONS.contains(question_type)) {
                         Promise<JsonObject> promise = Promise.promise();
                         questionsInfosFutures.add(promise.future());
                         questionChoiceService.duplicate(formId, questionId, originalQuestionId, FutureHelper.handlerJsonObject(promise));

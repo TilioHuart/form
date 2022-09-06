@@ -21,6 +21,7 @@ import {
 } from "@common/core/enums";
 import * as Sortable from "sortablejs";
 import {FormElementUtils} from "@common/utils";
+import {Constants} from "@common/core/constants";
 
 enum PreviewPage { RGPD = 'rgpd', QUESTION = 'question', RECAP = 'recap'}
 
@@ -178,17 +179,21 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             vm.newElement = code ? new Question() : new Section();
             if (vm.newElement instanceof Question) {
                 vm.newElement.question_type = code;
-                if (vm.newElement.question_type === Types.MULTIPLEANSWER
-                    || vm.newElement.question_type === Types.SINGLEANSWER
-                    || vm.newElement.question_type === Types.SINGLEANSWERRADIO) {
-                    for (let i = 0; i < 3; i++) {
+                if (vm.newElement.isTypeChoicesQuestion()) {
+                    for (let i = 0; i < Constants.DEFAULT_NB_CHOICES; i++) {
                         vm.newElement.choices.all.push(new QuestionChoice());
+                    }
+
+                    if (vm.newElement.question_type === Types.MATRIX) {
+                        for (let i = 0; i < Constants.DEFAULT_NB_CHILDREN; i++) {
+                            vm.newElement.children.all.push(new Question(vm.newElement.id, Types.SINGLEANSWERRADIO));
+                        }
                     }
                 }
                 if (parentSection) {
                     vm.newElement.section_id = parentSection.id;
                     vm.newElement.section_position = parentSection.questions.all.length + 1;
-                    let elementSection = vm.formElements.all.filter(e => e.id === parentSection.id)[0] as Section;
+                    let elementSection: Section = vm.formElements.all.filter(e => e.id === parentSection.id)[0] as Section;
                     elementSection.questions.all.push(vm.newElement);
                 }
             }
@@ -245,10 +250,10 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.duplicateQuestion = async (question: Question) : Promise<void> => {
             try {
                 vm.dontSave = true;
-                let questionId = (await questionService.save(question)).id;
-                let duplicata = question;
+                let questionId: number = (await questionService.save(question)).id;
+                let duplicata: Question = question;
                 if (question.section_id) {
-                    let section = vm.formElements.all.filter(e => e instanceof Section && e.id === question.section_id)[0] as Section;
+                    let section: Section = vm.formElements.all.filter(e => e instanceof Section && e.id === question.section_id)[0] as Section;
                     for (let i = question.section_position; i < section.questions.all.length; i++) {
                         section.questions.all[i].section_position++;
                     }
@@ -263,15 +268,25 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     duplicata.position++;
                 }
                 let newQuestion = await questionService.create(duplicata);
-                if (question.question_type === Types.SINGLEANSWER
-                    || question.question_type === Types.MULTIPLEANSWER
-                    || question.question_type === Types.SINGLEANSWERRADIO) {
+                if (question.isTypeChoicesQuestion()) {
                     question.choices.all.sort((a, b) => a.id - b.id);
                     for (let choice of question.choices.all) {
                         if (!choice.question_id) choice.question_id = questionId;
                         if (choice.value) {
                             await questionChoiceService.save(choice);
                             await questionChoiceService.create(new QuestionChoice(newQuestion.id, choice.value));
+                        }
+                    }
+                    if (question.question_type == Types.MATRIX) {
+                        for (let child of question.children.all) {
+                            if (!child.form_id) child.form_id = question.form_id;
+                            if (child.title) {
+                                await questionService.save(child);
+                                let duplicateChild: Question = new Question(newQuestion.id, child.question_type);
+                                duplicateChild.form_id = question.form_id;
+                                duplicateChild.title = child.title;
+                                await questionService.create(duplicateChild);
+                            }
                         }
                     }
                 }
@@ -430,6 +445,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     return "/formulaire/public/img/question_type/file.svg";
                 case 9:
                     return "/formulaire/public/img/question_type/singleanswer_radio.svg";
+                case 10:
+                    return "/formulaire/public/img/question_type/matrix.svg";
             }
         };
 
@@ -692,13 +709,14 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             try {
                 switchDragAndDropTo(true);
                 rePositionFormElements(vm.formElements);
-                let formElement = vm.formElements.getSelectedElement();
+                let formElement: FormElement = vm.formElements.getSelectedElement();
                 if (formElement) {
-                    let savedElement = await formElementService.save(formElement);
+                    let savedElement: FormElement = await formElementService.save(formElement);
                     let newId: number = savedElement.id;
                     formElement.id = newId;
 
                     if (formElement instanceof Question) {
+                        // Create choices
                         let registeredChoiceValues: string[] = [];
                         formElement.choices.replaceSpace();
                         for (let choice of formElement.choices.all) {
@@ -706,6 +724,18 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                                 choice.question_id = newId;
                                 choice.id = (await questionChoiceService.save(choice)).id;
                                 registeredChoiceValues.push(choice.value);
+                            }
+                        }
+                        // Create children (for MATRIX questions)
+                        if (formElement.question_type === Types.MATRIX) {
+                            let registeredChildrenTitles: string[] = [];
+                            for (let child of formElement.children.all) {
+                                if (child.title && !registeredChildrenTitles.find((t: string) => t === child.title)) {
+                                    child.matrix_id = newId;
+                                    child.form_id = formElement.form_id;
+                                    child.id = (await questionService.save(child)).id;
+                                    registeredChildrenTitles.push(child.title);
+                                }
                             }
                         }
                     }

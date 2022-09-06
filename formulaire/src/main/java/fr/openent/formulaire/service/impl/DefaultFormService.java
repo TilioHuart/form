@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import static fr.openent.form.core.constants.Constants.COPY;
 import static fr.openent.form.core.constants.DistributionStatus.FINISHED;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.*;
@@ -250,8 +251,9 @@ public class DefaultFormService implements FormService {
                 "WITH new_form_id AS (" +
                     "INSERT INTO  " + FORM_TABLE + " (owner_id, owner_name, title, description, picture, " +
                     "date_opening, date_ending, multiple, anonymous, response_notified, editable, rgpd, rgpd_goal, rgpd_lifetime, is_public, public_key) " +
-                    "SELECT ?, ?, concat(title, ' - Copie'), description, picture, date_opening, date_ending, multiple, " +
-                    "anonymous, response_notified, editable, rgpd, rgpd_goal, rgpd_lifetime, is_public, CASE is_public WHEN TRUE THEN '" + UUID.randomUUID() + "' END " +
+                    "SELECT ?, ?, concat(title, ' - " + COPY + "'), description, picture, date_opening, date_ending, multiple, " +
+                    "anonymous, response_notified, editable, rgpd, rgpd_goal, rgpd_lifetime, is_public, " +
+                    "CASE is_public WHEN TRUE THEN '" + UUID.randomUUID() + "' END " +
                     "FROM " + FORM_TABLE + " WHERE id = ? RETURNING id" +
                 "), " +
                 "new_sections AS (" +
@@ -264,25 +266,37 @@ public class DefaultFormService implements FormService {
                     "SELECT ns.id, ns.original_section_id, q.id AS question_id, q.section_position FROM new_sections ns " +
                     "JOIN " + QUESTION_TABLE + " q ON ns.original_section_id = q.section_id" +
                 "), " +
-                "rows AS (" +
+                "new_questions AS (" +
                     "INSERT INTO " + QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
                     "mandatory, original_question_id, section_id, section_position, conditional) " +
                     "SELECT (SELECT id from new_form_id), title, position, question_type, statement, mandatory, id, " +
                     "(SELECT id FROM new_sections_linked WHERE original_section_id = q.section_id LIMIT 1), " +
                     "(SELECT section_position FROM new_sections_linked WHERE question_id = q.id), conditional " +
-                    "FROM " + QUESTION_TABLE + " q WHERE form_id = ? " +
+                    "FROM " + QUESTION_TABLE + " q WHERE form_id = ? AND matrix_id IS NULL " +
+                    "ORDER BY q.id " +
+                    "RETURNING id, form_id, original_question_id, question_type" +
+                "), " +
+                "new_children_questions AS (" +
+                    "INSERT INTO " + QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
+                    "mandatory, original_question_id, section_id, section_position, conditional, matrix_id) " +
+                    "SELECT (SELECT id from new_form_id), title, position, question_type, statement, mandatory, id, null, " +
+                    "null, conditional, (SELECT id FROM new_questions WHERE original_question_id = q.matrix_id LIMIT 1) " +
+                    "FROM " + QUESTION_TABLE + " q WHERE form_id = ? AND matrix_id IS NOT NULL " +
                     "ORDER BY q.id " +
                     "RETURNING id, form_id, original_question_id, question_type" +
                 ") " +
-                "SELECT * FROM rows " +
+                "SELECT * FROM new_questions " +
+                "UNION ALL " +
+                "SELECT * FROM new_children_questions " +
                 "UNION ALL " +
                 "SELECT null, (SELECT id FROM new_form_id), null, null " +
-                "WHERE NOT EXISTS (SELECT * FROM rows)" +
+                "WHERE NOT EXISTS (SELECT * FROM new_questions)" +
                 "ORDER BY id;";
 
         JsonArray params = new JsonArray()
                 .add(user.getUserId())
                 .add(user.getUsername())
+                .add(formId)
                 .add(formId)
                 .add(formId)
                 .add(formId);

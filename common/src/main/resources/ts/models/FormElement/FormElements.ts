@@ -15,16 +15,14 @@ export class FormElements extends Selection<FormElement> {
     sync = async (formId: number) : Promise<void> => {
         try {
             // Add all questions
-            let dataQuestions = await questionService.list(formId, false);
-            let questions = new Questions();
-            questions.all = Mix.castArrayAs(Question, dataQuestions);
-            await questions.syncChoices();
+            let questions: Questions = new Questions();
+            await questions.sync(formId, false);
             this.all = questions.all;
 
             // Add all sections
-            let dataSections = await sectionService.list(formId);
-            this.all = this.all.concat(Mix.castArrayAs(Section, dataSections));
-            await this.syncSectionQuestions();
+            let sections: Sections = new Sections();
+            await sections.sync(formId);
+            this.all = this.all.concat(sections.all);
 
             this.all.sort((a, b) => a.position - b.position);
         } catch (e) {

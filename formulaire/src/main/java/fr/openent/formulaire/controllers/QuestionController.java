@@ -61,6 +61,23 @@ public class QuestionController extends ControllerHelper {
         questionService.listForSection(sectionId, arrayResponseHandler(request));
     }
 
+    @Get("/questions/children")
+    @ApiDoc("List all the children questions of a list of questions")
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void listChildren(HttpServerRequest request) {
+        JsonArray questionIds = new JsonArray();
+        for (Integer i = 0; i < request.params().size(); i++) {
+            questionIds.add(request.getParam(i.toString()));
+        }
+        if (questionIds.size() <= 0) {
+            log.error("[Formulaire@listChildren] No questionIds to get children.");
+            noContent(request);
+            return;
+        }
+        questionService.listChildren(questionIds, arrayResponseHandler(request));
+    }
+
     @Get("/questions/:questionId")
     @ApiDoc("Get a specific question by id")
     @ResourceFilter(CustomShareAndOwner.class)

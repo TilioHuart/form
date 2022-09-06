@@ -6,8 +6,10 @@ interface IViewModel {
     question: Question;
     reorder: boolean;
     hasFormResponses: boolean;
-    Types: typeof Types;
     formElements: FormElements;
+
+    Types: typeof Types;
+    matrixType: number;
 
     getTitle(title: string): string;
     duplicateQuestion(): void;
@@ -42,9 +44,16 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
                     </div>
                     <div class="question-main focusable">
                         <!-- Title component -->
-                        <question-title question="vm.question"></question-title>
+                        <question-title question="vm.question"
+                                        has-form-responses="vm.hasFormResponses"
+                                        matrix-type="vm.matrixType">
+                        </question-title>
                         <!-- Main component -->
-                        <question-type question="vm.question" has-form-responses="vm.hasFormResponses" form-elements="vm.formElements"></question-type>
+                        <question-type question="vm.question"
+                                       has-form-responses="vm.hasFormResponses"
+                                       form-elements="vm.formElements"
+                                       matrix-type="vm.matrixType">
+                        </question-type>
                         <!-- Interaction buttons-->
                         <div class="question-bottom" ng-if="vm.question.selected">
                             <div class="mandatory" ng-if="vm.question.question_type != vm.Types.FREETEXT" title="[[vm.getTitle('mandatory.explanation')]]">
@@ -58,9 +67,9 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
                                 <i18n>formulaire.conditional</i18n>
                             </div>
                             <i class="i-duplicate lg-icon spaced-right" ng-click="vm.duplicateQuestion()"
-                                ng-class="{disabled: vm.hasFormResponses}"  title="[[vm.getTitle('duplicate')]]"></i>
+                               ng-class="{disabled: vm.hasFormResponses}" title="[[vm.getTitle('duplicate')]]"></i>
                             <i class="i-delete lg-icon spaced-right" ng-class="{disabled: vm.hasFormResponses}" 
-                                ng-click="vm.deleteQuestion()" title="[[vm.getTitle('delete')]]"></i>
+                               ng-click="vm.deleteQuestion()" title="[[vm.getTitle('delete')]]"></i>
                             <i class="i-undo lg-icon spaced-right" ng-click="vm.undoQuestionChanges()" title="[[vm.getTitle('cancel')]]"></i>
                         </div>
                     </div>
@@ -77,8 +86,13 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
         link: function ($scope, $element) {
             const vm: IViewModel = $scope.vm;
             vm.Types = Types;
+            vm.matrixType = vm.question.children.all.length > 0 && vm.question.children.all[0].question_type ?
+                            vm.question.children.all[0].question_type : vm.Types.SINGLEANSWERRADIO;
 
             vm.getTitle = (title: string) : string => {
+                if (title == 'mandatory.explanation' && vm.question.question_type == vm.Types.MATRIX) {
+                    return idiom.translate('formulaire.' + title + '.matrix');
+                }
                 return idiom.translate('formulaire.' + title);
             };
 

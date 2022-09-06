@@ -6,6 +6,7 @@ import {Mix} from "entcore-toolkit";
 
 export interface QuestionService {
     list(id: number, isForSection?: boolean) : Promise<any>;
+    listChildren(questions: Question[]) : Promise<any>;
     get(questionId: number) : Promise<any>;
     save(question: Question) : Promise<any>;
     create(question: Question) : Promise<any>;
@@ -19,6 +20,16 @@ export const questionService: QuestionService = {
         try {
             let parentEntity = isForSection ? 'sections' : 'forms';
             return DataUtils.getData(await http.get(`/formulaire/${parentEntity}/${id}/questions`));
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.questionService.list'));
+            throw err;
+        }
+    },
+
+    async listChildren (questions: Question[]) : Promise<any> {
+        try {
+            let questionIds: number[] = questions.map((q: Question) => q.id);
+            return DataUtils.getData(await http.get(`/formulaire/questions/children`, { params: questionIds }));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.list'));
             throw err;
