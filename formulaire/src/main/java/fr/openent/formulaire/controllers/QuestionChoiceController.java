@@ -1,6 +1,6 @@
 package fr.openent.formulaire.controllers;
 
-import fr.openent.form.core.ChoiceTypes;
+import fr.openent.form.core.enums.ChoiceTypes;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.QuestionChoiceService;

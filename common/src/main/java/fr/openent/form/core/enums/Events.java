@@ -1,4 +1,4 @@
-package fr.openent.form.core;
+package fr.openent.form.core.enums;
 
 public enum Events {
   ACCESS("ACCESS"),

@@ -9,9 +9,9 @@ import {
     Types
 } from "../../models";
 import {responseService} from "../../services";
-import { FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
 import {Mix} from "entcore-toolkit";
 import {I18nUtils} from "@common/utils";
+import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
 
 interface IViewModel {
     question: Question;

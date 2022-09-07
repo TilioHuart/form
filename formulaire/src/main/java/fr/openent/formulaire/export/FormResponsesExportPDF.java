@@ -1,5 +1,6 @@
 package fr.openent.formulaire.export;
 
+import fr.openent.form.core.enums.QuestionTypes;
 import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.QuestionService;
 import fr.openent.formulaire.service.ResponseService;
@@ -32,6 +33,7 @@ import org.entcore.common.pdf.PdfFactory;
 import org.entcore.common.pdf.PdfGenerator;
 
 import static fr.openent.form.core.constants.ConfigFields.NODE_PDF_GENERATOR;
+import static fr.openent.form.core.constants.Constants.GRAPH_QUESTIONS;
 import static fr.openent.form.core.constants.Constants.MAX_RESPONSES_EXPORT_PDF;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
@@ -153,7 +155,7 @@ public class FormResponsesExportPDF {
             JsonObject questionInfo = questionsInfo.getJsonObject(i);
 
             int question_type = questionInfo.getInteger(QUESTION_TYPE);
-            boolean isGraph = Arrays.asList(4,5,9).contains(question_type);
+            boolean isGraph = GRAPH_QUESTIONS.contains(question_type);
 
             if (!hasTooManyResponses || isGraph) {
                 questions.add(new JsonObject()
@@ -173,16 +175,16 @@ public class FormResponsesExportPDF {
                 );
 
                 // Affect boolean to each type of answer (freetext, simple text, graph)
-                // type_freetext (FREETEXT), type_text (SHORTANSWER, LONGANSWER, DATE, TIME, FILE), type_graph (SINGLEANSWER, MULTIPLEANSWER)
+                // type_freetext (FREETEXT), type_text (SHORTANSWER, LONGANSWER, DATE, TIME, FILE), type_graph (SINGLEANSWER, MULTIPLEANSWER, MATRIX)
                 questions.getJsonObject(questions.size() - 1).getJsonObject(QUESTION_TYPE)
                     .put(QUESTION_TYPE_ID, question_type)
                     .put(TYPE_FREETEXT, question_type == 1)
-                    .put(TYPE_TEXT, Arrays.asList(2,3,6,7,8).contains(question_type))
+                    .put(TYPE_TEXT, question_type != 1 && !isGraph)
                     .put(TYPE_GRAPH, isGraph);
 
 
                 // Prepare futures to get graph images
-                if (Arrays.asList(4,5,9).contains(question_type)) {
+                if (GRAPH_QUESTIONS.contains(question_type)) {
                     questionsGraphs.add(Future.future());
                     getGraphData(questionInfo, questionsGraphs.get(questionsGraphs.size() - 1));
                 }
@@ -202,21 +204,24 @@ public class FormResponsesExportPDF {
                 JsonObject response = data.getJsonObject(i);
 
                 // Format answer (empty string, simple text, html)
-                int questionType = mapQuestions.get(response.getInteger(QUESTION_ID)).getJsonObject(QUESTION_TYPE).getInteger(QUESTION_TYPE_ID);
+                JsonObject question = mapQuestions.get(response.getInteger(QUESTION_ID));
+                Integer questionType = question != null ? question.getJsonObject(QUESTION_TYPE).getInteger(QUESTION_TYPE_ID) : null;
                 if (response.getString(ANSWER).isEmpty()) {
                     response.put(ANSWER, "-");
                 }
-                if (questionType == 1) {
-                    response.put(ANSWER,
-                            "<div>" + response.getString(ANSWER, "")
-                                    .replace("<o:p></o:p>", " ")
-                            + "</div>");
-                }
-                if (questionType == 2) {
-                    response.put(ANSWER, "<div>" + response.getString(ANSWER) + "</div>");
-                }
-                else if (questionType == 3) {
-                    response.put(ANSWER, response.getString(ANSWER, "").replace("\"","'"));
+                if (questionType != null) {
+                    if (questionType == QuestionTypes.FREETEXT.getCode()) {
+                        response.put(ANSWER,
+                                "<div>" + response.getString(ANSWER, "")
+                                        .replace("<o:p></o:p>", " ")
+                                        + "</div>");
+                    }
+                    else if (questionType == QuestionTypes.SHORTANSWER.getCode()) {
+                        response.put(ANSWER, "<div>" + response.getString(ANSWER) + "</div>");
+                    }
+                    else if (questionType == QuestionTypes.LONGANSWER.getCode()) {
+                        response.put(ANSWER, response.getString(ANSWER, "").replace("\"","'"));
+                    }
                 }
 
                 // Format date_response
@@ -226,7 +231,9 @@ public class FormResponsesExportPDF {
                 }
                 catch (ParseException e) { e.printStackTrace(); }
 
-                mapQuestions.get(response.getInteger(QUESTION_ID)).getJsonArray(RESPONSES).add(response);
+                if (question != null) {
+                    question.getJsonArray(RESPONSES).add(response);
+                }
             }
         }
 

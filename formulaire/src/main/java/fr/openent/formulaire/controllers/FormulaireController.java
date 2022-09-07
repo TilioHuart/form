@@ -17,7 +17,7 @@ import org.vertx.java.core.http.RouteMatcher;
 
 import java.util.Map;
 
-import static fr.openent.form.core.Events.ACCESS;
+import static fr.openent.form.core.enums.Events.ACCESS;
 import static fr.openent.form.core.constants.ConfigFields.AUTH;
 import static fr.openent.form.core.constants.ConfigFields.NODE_PDF_GENERATOR;
 import static fr.openent.form.core.constants.ConsoleRights.ACCESS_RIGHT;

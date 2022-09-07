@@ -55,6 +55,10 @@ export class Question extends FormElement {
     }
 
     fillChoicesInfo = (distribs: Distributions, results: Response[]) : void => {
+        if (this.question_type === Types.MATRIX) {
+            return this.fillChoicesInfoForMatrix(results);
+        }
+
         // Count responses for each choice
         for (let result of results) {
             for (let choice of this.choices.all) {
@@ -66,15 +70,43 @@ export class Question extends FormElement {
 
         // Deal with no choice responses
         let finishedDistribIds : any = distribs.all.map(d => d.id);
-        let noResponseChoice = new QuestionChoice();
+        let noResponseChoice: QuestionChoice = new QuestionChoice();
         noResponseChoice.value = idiom.translate('formulaire.response.empty');
         noResponseChoice.nbResponses = results.filter(r => !r.choice_id && finishedDistribIds.includes(r.distribution_id)).length;
 
         this.choices.all.push(noResponseChoice);
     }
 
+    fillChoicesInfoForMatrix = (results: Response[]) : void => {
+        if (this.question_type != Types.MATRIX) {
+            return this.fillChoicesInfo(null, results);
+        }
+
+        // Count responses for each choice
+        for (let child of this.children.all) {
+
+            // Create child choices based on copy of parent choices
+            child.choices.all = [];
+            for (let choice of this.choices.all) {
+                child.choices.all.push(new QuestionChoice(this.id, choice.value));
+            }
+
+            let matchingResults: Response[] = results.filter((r: Response) => r.question_id === child.id);
+            for (let result of matchingResults) {
+                for (let choice of this.choices.all) {
+                    if (result.choice_id === choice.id) {
+                        child.choices.all.filter(c => c.value === choice.value)[0].nbResponses++;
+                    }
+                }
+            }
+        }
+    }
+
     isTypeGraphQuestion = () : boolean => {
-        return this.question_type == Types.SINGLEANSWER || this.question_type == Types.MULTIPLEANSWER || this.question_type == Types.SINGLEANSWERRADIO;
+        return this.question_type == Types.SINGLEANSWER
+            || this.question_type == Types.MULTIPLEANSWER
+            || this.question_type == Types.SINGLEANSWERRADIO
+            || this.question_type == Types.MATRIX;
     }
 
     isTypeChoicesQuestion = () : boolean => {

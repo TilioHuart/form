@@ -4,23 +4,25 @@ import {
     DistributionStatus,
     Form,
     Question,
+    Response,
     Responses,
     Types
 } from "../../models";
 import {ColorUtils, DateUtils, UtilsUtils} from "@common/utils";
-import * as ApexCharts from 'apexcharts';
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
+import {Constants} from "@common/core/constants";
+import {GraphUtils} from "@common/utils/graph";
 
 interface IViewModel {
     question: Question;
     form: Form;
-    paletteColors: string[];
 
     responses: Responses;
     distributions: Distributions;
     isGraphQuestion: boolean;
     colors: string[];
     singleAnswerResponseChart: any;
+    matrixResponseChart: any;
     results: Map<number, Response[]>;
     hasFiles: boolean;
     nbResponses;
@@ -46,8 +48,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
         transclude: true,
         scope: {
             question: '=',
-            form: '=',
-            paletteColors: '='
+            form: '='
         },
         controllerAs: 'vm',
         bindToController: true,
@@ -75,8 +76,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
             <div class="choices" ng-if="vm.question.question_type == vm.Types.SINGLEANSWER ||
                                         vm.question.question_type == vm.Types.MULTIPLEANSWER ||
                                         vm.question.question_type == vm.Types.SINGLEANSWERRADIO">
-                
-                <!-- Data and graph for MULTIPLEANSWER -->
+                <!-- Data -->
                 <div class="twelve-mobile" ng-class="vm.question.question_type == vm.Types.MULTIPLEANSWER ? 'twelve' : 'five'">
                     <div ng-repeat="choice in vm.question.choices.all" class="choice">
                         <!-- Data for MULTIPLEANSWER -->
@@ -110,11 +110,15 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                 </div>
             </div>
 
+            <!-- Graph for MATRIX -->
+            <div class="graph-histogram twelve" ng-if="vm.question.question_type == vm.Types.MATRIX">
+                <div class="eight" style="height: 400px">
+                    <div id="chart-[[vm.question.id]]"></div>
+                </div>
+            </div>
+
             <!-- List of results SHORTANSWER, LONGANSWER, DATE, TIME, FILE -->
-            <div ng-if="vm.question.question_type != vm.Types.SINGLEANSWER &&
-                        vm.question.question_type != vm.Types.MULTIPLEANSWER &&
-                        vm.question.question_type != vm.Types.SINGLEANSWERRADIO &&
-                        vm.question.question_type != vm.Types.FREETEXT">
+            <div ng-if="!vm.question.question_type.isTypeGraphQuestion() && vm.question.question_type != vm.Types.FREETEXT">
                 <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':true" class="distrib" ng-if="vm.results.get(distrib.id).length > 0">
                     <div class="infos four twelve-mobile">
                         <div class="four twelve-mobile">[[vm.DateUtils.displayDate(distrib.date_response)]]</div>
@@ -162,58 +166,30 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                     await vm.question.choices.sync(vm.question.id);
                     await vm.responses.sync(vm.question, vm.question.question_type == Types.FILE);
                     await vm.distributions.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, vm.question.id, vm.isGraphQuestion ? null : 0);
-                    vm.nbResponses = new Set(vm.responses.all.map(r => r.distribution_id)).size;
+                    vm.nbResponses = new Set(vm.responses.all.map((r: Response) => r.distribution_id)).size;
 
                     if (vm.isGraphQuestion) {
                         vm.question.fillChoicesInfo(vm.distributions, vm.responses.all);
-                        let choices = vm.question.choices.all.filter(c => c.nbResponses > 0);
-                        vm.colors = ColorUtils.interpolateColors(vm.paletteColors, choices.length);
-
-                        // Init charts
-                        if (vm.question.question_type == Types.SINGLEANSWER || vm.question.question_type == Types.SINGLEANSWERRADIO) {
-                            initSingleAnswerChart();
-                        }
+                        vm.colors = ColorUtils.interpolateColors(Constants.GRAPH_COLORS, vm.question.choices.all.length);
+                        generateChart();
                     }
                     else {
                         vm.syncResultsMap();
-                        vm.hasFiles = (vm.responses.all.map(r => r.files.all) as any).flat().length > 0;
+                        vm.hasFiles = (vm.responses.all.map((r: Response) => r.files.all) as any).flat().length > 0;
                     }
                 }
                 UtilsUtils.safeApply($scope);
             };
 
-            const initSingleAnswerChart = () : void => {
-                let choices = vm.question.choices.all.filter(c => c.nbResponses > 0);
-
-                let series = [];
-                let labels = [];
-                let i18nValue = idiom.translate('formulaire.response');
-                i18nValue = i18nValue.charAt(0).toUpperCase() + i18nValue.slice(1);
-
-                for (let choice of choices) {
-                    series.push(choice.nbResponses); // Fill data
-                    let i = vm.question.choices.all.indexOf(choice) + 1;
-                    !choice.id ? labels.push(idiom.translate('formulaire.response.empty')) : labels.push(i18nValue + " " + i); // Fill labels
+            const generateChart = () : void => {
+                if (vm.question.question_type == Types.SINGLEANSWER || vm.question.question_type == Types.SINGLEANSWERRADIO) {
+                    if (vm.singleAnswerResponseChart) { vm.singleAnswerResponseChart.destroy(); }
+                    GraphUtils.generateGraphForResult(vm.question, vm.singleAnswerResponseChart);
                 }
-
-                // Generate options with labels and colors
-                let baseHeight = 40 * vm.question.choices.all.length;
-                let options = {
-                    chart: {
-                        type: 'pie',
-                        height: baseHeight < 200 ? 200 : (baseHeight > 500 ? 500 : baseHeight)
-                    },
-                    colors: vm.colors,
-                    labels: labels
+                else if (vm.question.question_type == Types.MATRIX) {
+                    if (vm.matrixResponseChart) { vm.matrixResponseChart.destroy(); }
+                    GraphUtils.generateGraphForResult(vm.question, vm.matrixResponseChart);
                 }
-
-                // Generate chart with options and data
-                if (vm.singleAnswerResponseChart) { vm.singleAnswerResponseChart.destroy(); }
-
-                let newOptions = JSON.parse(JSON.stringify(options));
-                newOptions.series = series;
-                vm.singleAnswerResponseChart = new ApexCharts(document.querySelector(`#chart-${vm.question.id}`), newOptions);
-                vm.singleAnswerResponseChart.render();
             };
         },
         link: function ($scope, $element) {

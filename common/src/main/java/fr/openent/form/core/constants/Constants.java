@@ -1,5 +1,7 @@
 package fr.openent.form.core.constants;
 
+import fr.openent.form.core.enums.QuestionTypes;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,11 +15,11 @@ public class Constants {
     public static final String UNKNOW_STRUCTURE = "Structure inconnue";
     public static final String COPY = "Copie";
     public static final List<Integer> RGPD_LIFETIME_VALUES = Arrays.asList(3,6,9,12);
-    public static final List<Integer> GRAPH_QUESTIONS = Arrays.asList(4,5,9);
-    public static final List<Integer> CONDITIONAL_QUESTIONS = Arrays.asList(4,5,9);
-    public static final List<Integer> CHOICES_TYPE_QUESTIONS = Arrays.asList(4,5,9,10);
-    public static final List<Integer> QUESTIONS_WITHOUT_RESPONSES = Arrays.asList(1,10);
-    public static final List<Integer> MATRIX_CHILD_QUESTIONS = Arrays.asList(5,9);
+    public static final List<Integer> GRAPH_QUESTIONS = QuestionTypes.getGraphQuestions();
+    public static final List<Integer> CONDITIONAL_QUESTIONS = QuestionTypes.getConditionalQuestions();
+    public static final List<Integer> CHOICES_TYPE_QUESTIONS = QuestionTypes.getChoicesTypeQuestions();
+    public static final List<Integer> QUESTIONS_WITHOUT_RESPONSES = QuestionTypes.getQuestionsWithoutResponses();
+    public static final List<Integer> MATRIX_CHILD_QUESTIONS = QuestionTypes.getMatrixChildQuestions();
 
     private Constants() {
         throw new IllegalStateException("Utility class");

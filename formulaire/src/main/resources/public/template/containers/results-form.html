@@ -23,8 +23,7 @@
         <!-- Display question -->
         <result-question-item ng-if="FormElementUtils.isQuestion(vm.formElement) && (!vm.loading || vm.display.lightbox.export)"
                               question="vm.formElement"
-                              form="vm.form"
-                              palette-colors="vm.paletteColors">
+                              form="vm.form">
         </result-question-item>
 
         <!-- Display section -->
@@ -38,8 +37,7 @@
             <div class="section-main">
                 <div ng-repeat="question in vm.formElement.questions.all | orderBy:'section_position'">
                     <result-question-item question="question"
-                                          form="vm.form"
-                                          palette-colors="vm.paletteColors">
+                                          form="vm.form">
                     </result-question-item>
                 </div>
             </div>

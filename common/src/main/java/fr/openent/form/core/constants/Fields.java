@@ -36,6 +36,7 @@ public class Fields {
     public static final String MAIL = "mail";
     public static final String MANDATORY = "mandatory";
     public static final String MATRIX_ID = "matrix_id";
+    public static final String MATRIX_POSITION = "matrix_position";
     public static final String MULTIPLE = "multiple";
     public static final String MEMBER_ID = "member_id";
     public static final String NAME = "name";

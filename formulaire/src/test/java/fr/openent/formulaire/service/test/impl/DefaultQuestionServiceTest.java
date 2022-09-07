@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static fr.openent.form.core.constants.Constants.CONDITIONAL_QUESTIONS;
+import static fr.openent.form.core.constants.Constants.QUESTIONS_WITHOUT_RESPONSES;
 import static fr.openent.form.core.constants.EbFields.FORMULAIRE_ADDRESS;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.Fields.QUESTION_TYPE;
@@ -100,14 +101,50 @@ public class DefaultQuestionServiceTest {
     }
 
     @Test
-    public void testExport(TestContext ctx) {
+    public void testExportCSV(TestContext ctx) {
         Async async = ctx.async();
-        String expectedQuery =
-                "SELECT q.*, (CASE WHEN q.position ISNULL THEN s.position WHEN s.position ISNULL THEN q.position END) AS element_position " +
+        String getElementPosition = "CASE " +
+                "WHEN q.position ISNULL AND s.position IS NOT NULL THEN s.position " +
+                "WHEN s.position ISNULL AND q.position IS NOT NULL THEN q.position " +
+                "WHEN q.position ISNULL AND s.position ISNULL THEN parent.position " +
+                "END";
+        String getMatrixPosition = "CASE WHEN q.matrix_id IS NOT NULL THEN RANK() OVER (PARTITION BY q.matrix_id ORDER BY q.id) END";
+
+        String expectedQuery = "SELECT q.*, " + getElementPosition + " AS element_position, " + getMatrixPosition + " AS matrix_position " +
                 "FROM " + QUESTION_TABLE + " q " +
+                "LEFT JOIN " + QUESTION_TABLE + " parent ON parent.id = q.matrix_id " +
                 "LEFT JOIN " + SECTION_TABLE + " s ON q.section_id = s.id " +
-                "WHERE q.form_id = ? " +
-                "ORDER BY element_position, q.section_position;";
+                "WHERE q.form_id = ? AND q.question_type NOT IN " + Sql.listPrepared(QUESTIONS_WITHOUT_RESPONSES) +
+                "ORDER BY element_position, q.section_position, q.id;";
+
+        JsonArray expectedParams = new JsonArray().add(FORM_ID).addAll(new JsonArray(QUESTIONS_WITHOUT_RESPONSES));
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getString(STATEMENT));
+            ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
+            async.complete();
+        });
+        defaultQuestionService.export(FORM_ID,false, null);
+    }
+
+    @Test
+    public void testExportPDF(TestContext ctx) {
+        Async async = ctx.async();
+        String getElementPosition = "CASE " +
+                "WHEN q.position ISNULL AND s.position IS NOT NULL THEN s.position " +
+                "WHEN s.position ISNULL AND q.position IS NOT NULL THEN q.position " +
+                "WHEN q.position ISNULL AND s.position ISNULL THEN parent.position " +
+                "END";
+        String getMatrixPosition = "CASE WHEN q.matrix_id IS NOT NULL THEN RANK() OVER (PARTITION BY q.matrix_id ORDER BY q.id) END";
+
+        String expectedQuery = "SELECT q.*, " + getElementPosition + " AS element_position, " + getMatrixPosition + " AS matrix_position " +
+                "FROM " + QUESTION_TABLE + " q " +
+                "LEFT JOIN " + QUESTION_TABLE + " parent ON parent.id = q.matrix_id " +
+                "LEFT JOIN " + SECTION_TABLE + " s ON q.section_id = s.id " +
+                "WHERE q.form_id = ? AND q.matrix_id IS NULL " +
+                "ORDER BY element_position, q.section_position, q.id;";
 
         JsonArray expectedParams = new JsonArray().add(FORM_ID);
 

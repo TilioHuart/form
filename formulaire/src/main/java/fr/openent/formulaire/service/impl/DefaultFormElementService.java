@@ -16,7 +16,7 @@ public class DefaultFormElementService implements FormElementService {
 
     @Override
     public void countFormElements(String formId, Handler<Either<String, JsonObject>> handler) {
-        String countQuestions = "SELECT COUNT(*) FROM " + QUESTION_TABLE + " WHERE form_id = ? AND section_id IS NULL";
+        String countQuestions = "SELECT COUNT(*) FROM " + QUESTION_TABLE + " WHERE form_id = ? AND section_id IS NULL AND matrix_id IS NULL";
         String countSections = "SELECT COUNT(*) FROM " + SECTION_TABLE + " WHERE form_id = ?";
         String query = "SELECT ((" + countQuestions + ") + (" + countSections + ")) AS count;";
         JsonArray params = new JsonArray().add(formId).add(formId);
@@ -25,7 +25,7 @@ public class DefaultFormElementService implements FormElementService {
 
     @Override
     public void getTypeAndIdByPosition(String formId, String position, Handler<Either<String, JsonObject>> handler) {
-        String getQuestions = "SELECT id, 'question' AS element_type FROM " + QUESTION_TABLE + " WHERE form_id = ? AND position = ?";
+        String getQuestions = "SELECT id, 'question' AS element_type FROM " + QUESTION_TABLE + " WHERE form_id = ? AND position = ? AND matrix_id IS NULL";
         String getSections = "SELECT id, 'section' AS element_type FROM " + SECTION_TABLE + " WHERE form_id = ? AND position = ?";
         String query = getQuestions + " UNION " + getSections + ";";
         JsonArray params = new JsonArray().add(formId).add(position).add(formId).add(position);

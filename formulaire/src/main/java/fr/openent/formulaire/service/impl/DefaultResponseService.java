@@ -9,6 +9,7 @@ import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
 
+import static fr.openent.form.core.constants.Constants.QUESTIONS_WITHOUT_RESPONSES;
 import static fr.openent.form.core.constants.DistributionStatus.FINISHED;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.Tables.*;
@@ -28,8 +29,10 @@ public class DefaultResponseService implements ResponseService {
         }
         else {
             query += "JOIN " + DISTRIBUTION_TABLE + " d ON d.id = r.distribution_id " +
-                    "WHERE question_id = ? AND status = ? ";
-            params.add(FINISHED);
+                    "WHERE (question_id = ? OR question_id IN (" +
+                        "SELECT id FROM " + QUESTION_TABLE + " WHERE matrix_id = ?" +
+                    ")) AND status = ?";
+            params.add(questionId).add(FINISHED);
         }
 
         query += ";";
@@ -148,10 +151,10 @@ public class DefaultResponseService implements ResponseService {
                 "FROM " + DISTRIBUTION_TABLE + " d " +
                 "JOIN " + RESPONSE_TABLE + " r ON r.distribution_id = d.id " +
                 "JOIN " + QUESTION_TABLE + " q ON r.question_id = q.id " +
-                "WHERE d.form_id = ? AND d.status = ? AND q.question_type != 1" +
-                "ORDER BY d.date_response DESC, d.responder_id, d.id, position;";
+                "WHERE d.form_id = ? AND d.status = ? AND q.question_type NOT IN " + Sql.listPrepared(QUESTIONS_WITHOUT_RESPONSES) +
+                "ORDER BY d.date_response DESC, d.responder_id, d.id, position, q.id;";
 
-        JsonArray params = new JsonArray().add(formId).add(FINISHED);
+        JsonArray params = new JsonArray().add(formId).add(FINISHED).addAll(new JsonArray(QUESTIONS_WITHOUT_RESPONSES));
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 

@@ -45,8 +45,8 @@ public class FormResponsesExportCSV {
     String formId = request.getParam(PARAM_FORM_ID);
     questionService.export(formId, false, getQuestionsEvt -> {
       if (getQuestionsEvt.isLeft()) {
-        log.error("[Formulaire@FormExportCSV] Failed to retrieve all questions of the form " + formId);
-        renderInternalError(request, getQuestionsEvt);
+        String message = "[Formulaire@FormExportCSV] Failed to retrieve all questions of the form " + formId;
+        renderInternalError(request, getQuestionsEvt, message);
         return;
       }
       if (getQuestionsEvt.right().getValue().isEmpty()) {
@@ -62,8 +62,8 @@ public class FormResponsesExportCSV {
 
       responseService.getExportCSVResponders(formId, getRespondersEvt -> {
         if (getRespondersEvt.isLeft()) {
-          log.error("[Formulaire@FormExportCSV] Failed to retrieve responders infos of the form " + formId);
-          renderInternalError(request, getRespondersEvt);
+          String message = "[Formulaire@FormExportCSV] Failed to retrieve responders infos of the form " + formId;
+          renderInternalError(request, getRespondersEvt, message);
           return;
         }
         if (getRespondersEvt.right().getValue().isEmpty()) {
@@ -77,8 +77,8 @@ public class FormResponsesExportCSV {
 
         responseService.exportCSVResponses(formId, getResponsesEvt -> {
           if (getResponsesEvt.isLeft()) {
-            log.error("[Formulaire@FormExportCSV] Failed to retrieve all responses of the form " + formId);
-            renderInternalError(request, getResponsesEvt);
+            String message = "[Formulaire@FormExportCSV] Failed to retrieve all responses of the form " + formId;
+            renderInternalError(request, getResponsesEvt, message);
             return;
           }
           if (getResponsesEvt.right().getValue().isEmpty()) {
@@ -168,7 +168,9 @@ public class FormResponsesExportCSV {
       JsonObject question = questions.getJsonObject(i);
       Integer element_position = question.getInteger(ELEMENT_POSITION);
       Integer section_position = question.getInteger(SECTION_POSITION);
+      Integer matrix_position = question.getInteger(MATRIX_POSITION);
       String displayedPosition = element_position + "." + (section_position != null ? section_position + "." : "");
+      displayedPosition += matrix_position != null ? matrix_position + "." : "";
       headers.add(displayedPosition + questions.getJsonObject(i).getString(TITLE));
     }
 

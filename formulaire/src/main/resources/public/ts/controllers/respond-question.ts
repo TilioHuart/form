@@ -71,7 +71,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         let nbQuestions: number = vm.formElement instanceof Question ? 1 : (vm.formElement as Section).questions.all.length;
         for (let i = 0; i < nbQuestions; i++) {
             let question: Question = vm.formElement instanceof Question ? vm.formElement : (vm.formElement as Section).questions.all[i];
-            vm.responses.push(question.question_type === Types.MATRIX ? new Responses() : new Response());
+            vm.responses.push(question.question_type === Types.MATRIX ? new Responses() : new Response(question.id, null, null, vm.distribution.id));
             vm.selectedIndexList.push(new Array<boolean>(question.choices.all.length));
             vm.responsesChoicesList.push(new Responses());
             vm.filesList.push(new Array<File>());

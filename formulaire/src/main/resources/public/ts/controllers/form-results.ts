@@ -1,21 +1,20 @@
-import {idiom, ng, template} from 'entcore';
+import {ng, template} from 'entcore';
 import * as ApexCharts from 'apexcharts';
 import {
     Distributions,
     DistributionStatus,
     Form, FormElement, FormElements,
     Question,
-    QuestionChoice,
-    Responses,
-    Types
+    QuestionChoice, QuestionChoices,
+    Responses
 } from "../models";
 import {Mix} from "entcore-toolkit";
-import {ColorUtils} from "@common/utils";
 import {
     Exports,
     FORMULAIRE_BROADCAST_EVENT
 } from "@common/core/enums";
 import {formService, questionChoiceService, utilsService} from "../services";
+import {GraphUtils} from "@common/utils/graph";
 
 interface ViewModel {
     formElement: FormElement;
@@ -32,7 +31,6 @@ interface ViewModel {
         }
     }
     loading: boolean;
-    paletteColors: string[];
 
     $onInit() : Promise<void>;
     export(typeExport: Exports) : void;
@@ -60,17 +58,20 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
                 export: false
             }
         };
-        vm.paletteColors = ['#0F2497','#2A9BC7','#77C4E1','#C0E5F2']; // Dark blue to light blue
 
         vm.$onInit = async () : Promise<void> => {
             vm.loading = true;
             vm.form = $scope.form;
-            vm.formElement = $scope.formElement;
+
+            let formElementId: number = $scope.formElement.id;
+            await vm.formElements.sync(vm.form.id);
+            vm.formElement = vm.formElements.all.filter(e => e.id === formElementId)[0];
+
             vm.navigatorValue = vm.formElement.position;
             vm.nbFormElements = $scope.form.nbFormElements;
             vm.last = vm.formElement.position === vm.nbFormElements;
-            await vm.formElements.sync(vm.form.id);
             vm.loading = false;
+
             $scope.safeApply();
         };
 
@@ -122,6 +123,12 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             $scope.safeApply();
         };
 
+        vm.getGraphQuestions = () : Question[] => {
+            return vm.formElements.getAllQuestions().all.filter((q: Question) => q.isTypeGraphQuestion());
+        };
+
+        // Navigation
+
         vm.prev = async () : Promise<void> => {
             let prevPosition: number = vm.formElement.position - 1;
             if (prevPosition > 0) {
@@ -141,122 +148,41 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
             $scope.safeApply();
         };
 
-        vm.getGraphQuestions = () : Question[] => {
-            return vm.formElements.getAllQuestions().all.filter(q => q.question_type === Types.SINGLEANSWER ||
-                q.question_type === Types.MULTIPLEANSWER || q.question_type ===Types.SINGLEANSWERRADIO);
-        };
-
         // PDF
 
         const prepareDataForPDF = async () : Promise<any> => {
             vm.pdfResponseCharts = [];
-            let images = {
+            let images: any = {
                 idImagesPerQuestion : {}, // id image for each id question of Type QCM or QCU
                 idImagesForRemove : [] // all id images (to remove from storage after export PDF)
             };
-            let questions = vm.getGraphQuestions();
+            let questions: Question[] = vm.getGraphQuestions();
 
             if (questions.length > 0) {
                 // Sync form responses
-                let results = new Responses();
+                let results: Responses = new Responses();
                 await results.syncForForm(vm.form.id);
                 // Sync form distributions
-                let distribs = new Distributions();
+                let distribs: Distributions = new Distributions();
                 await distribs.syncByFormAndStatus(vm.form.id, DistributionStatus.FINISHED, null, null);
                 // Sync questions choices
-                let questionIds = questions.map(q => q.id);
-                let listChoices = Mix.castArrayAs(QuestionChoice, await questionChoiceService.listChoices(questionIds));
+                let questionIds: number[] = questions.map((q: Question) => q.id);
+                let listChoices: QuestionChoice[] = Mix.castArrayAs(QuestionChoice, await questionChoiceService.listChoices(questionIds));
 
                 for (let question of questions) {
                     // Format question choices
                     question.choices.all = [];
-                    question.choices.all = listChoices.filter(c => c.question_id === question.id);
+                    question.choices.all = listChoices.filter((c: QuestionChoice) => c.question_id === question.id);
                     question.choices.replaceSpace();
-                    let questionResults = results.all.filter(r => r.question_id === question.id);
-                    question.fillChoicesInfo(distribs, questionResults);
+                    question.fillChoicesInfo(distribs, results.all);
                     // Generate graphs
-                    let dataOptions = initChartsForPDF(question);
-                    let options = generateOptions(dataOptions, question.question_type);
-                    await renderGraphForPDF(options);
+                    await GraphUtils.generateGraphForPDF(question, vm.pdfResponseCharts);
                 }
 
                 await storeAllCharts(questions, vm.pdfResponseCharts, images);
             }
             $scope.safeApply();
             return images;
-        }
-
-        const initChartsForPDF = (question: Question) : any => {
-            let choices = question.question_type === Types.SINGLEANSWER || question.question_type === Types.SINGLEANSWERRADIO ?
-                question.choices.all.filter(c => c.nbResponses > 0) :
-                question.choices.all;
-
-            let series = [];
-            let labels = [];
-
-            for (let choice of choices) {
-                series.push(choice.nbResponses); // Fill data
-                // Fill labels
-                !choice.id ?
-                    labels.push(idiom.translate('formulaire.response.empty')) :
-                    labels.push(choice.value.substring(0, 40) + (choice.value.length > 40 ? "..." : ""));
-            }
-
-            return {
-                series: series,
-                labels: labels,
-                colors: ColorUtils.interpolateColors(vm.paletteColors, labels.length)
-            };
-        }
-
-        const generateOptions = (dataOptions: any, type: Types) : any => {
-            let newOptions;
-            if (type === Types.SINGLEANSWER || type === Types.SINGLEANSWERRADIO) {
-                let options = {
-                    chart: {
-                        type: 'pie',
-                        height: 400,
-                        width: 600,
-                        animations: {
-                            enabled: false
-                        }
-                    },
-                    colors: dataOptions.colors,
-                    labels: dataOptions.labels
-                }
-                newOptions = JSON.parse(JSON.stringify(options));
-                newOptions.series = dataOptions.series;
-            }
-            else {
-                let options = {
-                    chart: {
-                        type: 'bar',
-                        height: 400,
-                        width: 600,
-                        animations: {
-                            enabled: false
-                        }
-                    },
-                    plotOptions: {
-                        bar: {
-                            borderRadius: 4,
-                            horizontal: true,
-                        }
-                    },
-                    colors: ColorUtils.interpolateColors(vm.paletteColors, 1),
-                    xaxis: {
-                        categories: dataOptions.labels,
-                    }
-                }
-                newOptions = JSON.parse(JSON.stringify(options));
-                newOptions.series = [{ data: dataOptions.series }];
-            }
-            return newOptions;
-        }
-
-        const renderGraphForPDF = async (options: any) : Promise<void> => {
-            vm.pdfResponseCharts.push(new ApexCharts(document.querySelector('#pdf-response-chart-' + (vm.pdfResponseCharts.length)), options));
-            await vm.pdfResponseCharts[vm.pdfResponseCharts.length - 1].render();
         }
 
         const storeAllCharts = async (questions: Question[], charts: ApexCharts[], images: any) : Promise<any> => {

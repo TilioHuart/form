@@ -32,7 +32,7 @@ import org.entcore.common.user.UserUtils;
 
 import java.util.*;
 
-import static fr.openent.form.core.Events.CREATE;
+import static fr.openent.form.core.enums.Events.CREATE;
 import static fr.openent.form.core.constants.ConfigFields.ZIMBRA_MAX_RECIPIENTS;
 import static fr.openent.form.core.constants.ConsoleRights.*;
 import static fr.openent.form.core.constants.Constants.*;
