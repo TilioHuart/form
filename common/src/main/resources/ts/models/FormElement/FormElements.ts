@@ -4,6 +4,7 @@ import {questionService, sectionService} from "../../services";
 import {Question, Questions} from "./Question";
 import {FormElement} from "./FormElement";
 import {Section, Sections} from "./Section";
+import {Types} from "@common/models";
 
 export class FormElements extends Selection<FormElement> {
     all: FormElement[];
@@ -53,9 +54,19 @@ export class FormElements extends Selection<FormElement> {
     }
 
     getAllQuestions = () : Questions => {
-        let questions = this.getQuestions();
-        let sectionQuestions = this.getSections().all.map(s => s.questions.all) as any;
+        let questions: Questions = this.getQuestions();
+        let sectionQuestions: any = this.getSections().all.map((s: Section) => s.questions.all);
         questions.all = questions.all.concat(sectionQuestions.flat());
+        return questions;
+    }
+
+    getAllQuestionsAndChildren = () : Questions => {
+        let questions: Questions = this.getAllQuestions();
+
+        let matrixQuestions: Question[] = questions.all.filter((q: Question) => q.question_type === Types.MATRIX);
+        let children: any = matrixQuestions.map((q: Question) => q.children.all);
+        questions.all = questions.all.concat(children.flat());
+
         return questions;
     }
 

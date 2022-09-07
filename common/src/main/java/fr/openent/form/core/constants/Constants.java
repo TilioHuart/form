@@ -16,6 +16,7 @@ public class Constants {
     public static final List<Integer> GRAPH_QUESTIONS = Arrays.asList(4,5,9);
     public static final List<Integer> CONDITIONAL_QUESTIONS = Arrays.asList(4,5,9);
     public static final List<Integer> CHOICES_TYPE_QUESTIONS = Arrays.asList(4,5,9,10);
+    public static final List<Integer> QUESTIONS_WITHOUT_RESPONSES = Arrays.asList(1,10);
     public static final List<Integer> MATRIX_CHILD_QUESTIONS = Arrays.asList(5,9);
 
     private Constants() {

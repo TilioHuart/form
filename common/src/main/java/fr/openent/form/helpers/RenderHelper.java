@@ -15,11 +15,28 @@ public class RenderHelper {
 
     private RenderHelper() {}
 
+
+    // Bad Request (400)
+
     public static void renderBadRequest(HttpServerRequest request, Either event) {
         String message = event.isLeft() ? event.left().getValue().toString() : "Empty result";
         JsonObject error = (new JsonObject()).put(ERROR, message);
         renderJson(request, error, 400);
     }
+
+    public static void renderBadRequest(HttpServerRequest request, Either event, String message) {
+        log.error(message + " : " + event.left().getValue());
+        renderBadRequest(request, event);
+    }
+
+    public static void renderBadRequest(HttpServerRequest request, String message) {
+        log.error(message);
+        JsonObject error = (new JsonObject()).put(ERROR, message);
+        renderJson(request, error, 400);
+    }
+
+
+    // Internal Error (500)
 
     public static void renderInternalError(HttpServerRequest request, Either event) {
         String message = event.isLeft() ? event.left().getValue().toString() : "Empty result";
@@ -27,10 +44,20 @@ public class RenderHelper {
         renderJson(request, error, 500);
     }
 
+    public static void renderInternalError(HttpServerRequest request, Either event, String message) {
+        log.error(message + " : " + event.left().getValue());
+        renderInternalError(request, event);
+    }
+
     public static void renderInternalError(HttpServerRequest request, AsyncResult event) {
         String message = event.failed() ? event.cause().getMessage() : "Empty result";
         JsonObject error = (new JsonObject()).put(ERROR, message);
         renderJson(request, error, 500);
+    }
+
+    public static void renderInternalError(HttpServerRequest request, AsyncResult event, String message) {
+        log.error(message + " : " + event.cause().getMessage());
+        renderInternalError(request, event);
     }
 
     public static void renderInternalError(HttpServerRequest request, String message) {

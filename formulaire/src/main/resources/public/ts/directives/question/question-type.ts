@@ -1,5 +1,5 @@
 import {Directive, ng} from "entcore";
-import {FormElements, Question, Types} from "../../models";
+import {FormElements, Question, Types} from "@common/models";
 
 interface IViewModel {
     question: Question;

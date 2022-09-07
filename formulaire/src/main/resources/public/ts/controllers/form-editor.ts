@@ -44,8 +44,8 @@ interface ViewModel {
     };
     preview: {
         formElement: FormElement, // Question for preview
-        formResponses: Responses[], // Responses list for preview
-        elementResponses: Responses, // Response for preview
+        formResponses: any, // Responses list for preview
+        elementResponses: any, // Response for preview
         files: File[],
         choices: Responses,
         historicPosition: number[],
@@ -106,7 +106,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.preview = {
             formElement: new Question(),
             formResponses: [],
-            elementResponses: new Responses(),
+            elementResponses: [],
             files: [],
             choices: new Responses(),
             historicPosition: [],
@@ -529,13 +529,19 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             await vm.saveAll(false);
             vm.preview.formResponses = [];
             for (let formElement of vm.formElements.all) {
-                let responses = new Responses();
+                let responses = [];
                 if (formElement instanceof Question) {
-                    let response = new Response();
-                    if (formElement.question_type === Types.MULTIPLEANSWER || formElement.question_type === Types.SINGLEANSWERRADIO) {
-                        response.selectedIndex = new Array<boolean>(formElement.choices.all.length);
+                    let questionResponse: any = new Response();
+                    if (formElement.question_type === Types.MATRIX) {
+                        questionResponse = new Responses();
+                        for (let child of formElement.children.all) {
+                            questionResponse.all.push(new Response());
+                        }
                     }
-                    responses.all.push(response);
+                    else if (formElement.question_type === Types.MULTIPLEANSWER) {
+                        questionResponse.selectedIndex = new Array<boolean>(formElement.choices.all.length);
+                    }
+                    responses.push(questionResponse);
                 }
                 vm.preview.formResponses.push(responses);
             }
@@ -583,18 +589,19 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         vm.next = () : void => {
             let nextPosition: number = vm.preview.formElement.position + 1;
-            let conditionalQuestion = null;
-            let response = null;
+            let conditionalQuestion: Question = null;
+            let response: Response = null;
 
+            // Check if there are valid conditional questions and find next element position accordingly
             if (vm.preview.formElement instanceof Question && vm.preview.formElement.conditional) {
                 conditionalQuestion = vm.preview.formElement;
-                response = vm.preview.elementResponses.all[0];
+                response = vm.preview.elementResponses[0];
             }
             else if (vm.preview.formElement instanceof Section) {
-                let conditionalQuestions = vm.preview.formElement.questions.all.filter(q => q.conditional);
+                let conditionalQuestions = vm.preview.formElement.questions.all.filter((q: Question) => q.conditional);
                 if (conditionalQuestions.length === 1) {
                     conditionalQuestion = conditionalQuestions[0];
-                    response = vm.preview.elementResponses.all[conditionalQuestion.section_position - 1];
+                    response = vm.preview.elementResponses[conditionalQuestion.section_position - 1];
                 }
             }
 
@@ -603,13 +610,14 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 nextPosition = null;
             }
             else if (conditionalQuestion && response) {
-                let choices = conditionalQuestion.choices.all.filter(c => c.id === response.choice_id);
-                let sectionId = choices.length === 1 ? choices[0].next_section_id : null;
-                let filteredSections = vm.formElements.getSections().all.filter(s => s.id === sectionId);
-                let targetSection = filteredSections.length === 1 ? filteredSections[0] : null;
+                let choices: QuestionChoice[] = conditionalQuestion.choices.all.filter((c: QuestionChoice) => c.id === response.choice_id);
+                let sectionId: number = choices.length === 1 ? choices[0].next_section_id : null;
+                let filteredSections: Section[] = vm.formElements.getSections().all.filter((s: Section) => s.id === sectionId);
+                let targetSection: Section = filteredSections.length === 1 ? filteredSections[0] : null;
                 nextPosition = targetSection ? targetSection.position : null;
             }
 
+            // Update data to display next element
             if (nextPosition && nextPosition <= vm.nbFormElements) {
                 vm.preview.formElement = vm.formElements.all[nextPosition - 1];
                 vm.preview.historicPosition.push(vm.preview.formElement.position);

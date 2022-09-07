@@ -6,6 +6,7 @@ import {
     FormElements,
     Question,
     QuestionChoice,
+    Response,
     Responses,
     Types
 } from "../../models";
@@ -22,7 +23,7 @@ interface IViewModel {
     DistributionStatus: typeof DistributionStatus;
 
     getStringResponse(): string;
-    isSelectedChoice(choice: QuestionChoice) : boolean;
+    isSelectedChoice(choice: QuestionChoice, child?: Question) : boolean;
     getResponseFileNames() : string[];
     openQuestion(): void;
 }
@@ -90,6 +91,26 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
                                 </label>
                             </div>
                         </div>
+                        <table ng-if="vm.question.question_type == vm.Types.MATRIX" class="twelve matrix-table">
+                            <thead>
+                                <tr>
+                                    <th class="two"></th>
+                                    <th ng-repeat="choice in vm.question.choices.all | orderBy:'id'">[[choice.value]]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="child in vm.question.children.all" ng-init="childIndex = $index">
+                                    <td>[[child.title]]</td>
+                                    <td ng-repeat ="choice in vm.question.choices.all | orderBy:'id'">
+                                        <label>
+                                            <input type="radio" disabled checked ng-if="vm.isSelectedChoice(choice, child)">
+                                            <input type="radio" disabled ng-if="!vm.isSelectedChoice(choice, child)">
+                                            <span style="cursor: default"></span>
+                                        </label>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                     <div class="question-edit" ng-if="(vm.form.editable || vm.distribution.status != vm.DistributionStatus.FINISHED) && vm.question.question_type != vm.Types.FREETEXT">
                         <a ng-click="vm.openQuestion()"><i18n>formulaire.edit</i18n></a>
@@ -117,8 +138,10 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
                 return missingResponse;
             };
 
-            vm.isSelectedChoice = (choice) : boolean => {
-                let selectedChoices: any = vm.responses.all.filter(r => r.question_id === vm.question.id).map(r => r.choice_id);
+            vm.isSelectedChoice = (choice, child?) : boolean => {
+                let selectedChoices: any = vm.responses.all
+                    .filter((r: Response) => r.question_id === vm.question.id || (child && r.question_id === child.id))
+                    .map((r: Response) => r.choice_id);
                 return selectedChoices.includes(choice.id);
             };
 

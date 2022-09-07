@@ -1,5 +1,5 @@
 import {Directive, ng} from "entcore";
-import {FormElement, FormElements, Question, QuestionChoice, Section} from "@common/models";
+import {FormElements, Question, QuestionChoice} from "@common/models";
 import {questionChoiceService, questionService} from "@common/services";
 import {I18nUtils} from "@common/utils";
 

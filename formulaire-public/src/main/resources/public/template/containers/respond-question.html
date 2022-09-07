@@ -15,12 +15,15 @@
         <div class="nine twelve-mobile">
 
             <!-- Display question -->
-            <public-question-item ng-if="FormElementUtils.isQuestion(vm.formElement)"
+            <public-question-item ng-if="FormElementUtils.isQuestion(vm.formElement) && vm.formElement.question_type != Types.MATRIX"
                                   question="vm.formElement"
-                                  response="vm.allResponsesInfos.get(vm.formElement).responses.all[0]"
-                                  selected-indexes="vm.allResponsesInfos.get(vm.formElement).selectedIndexList[0]"
-                                  is-captcha="false">
+                                  response="vm.allResponsesInfos.get(vm.formElement).responses[0]"
+                                  selected-indexes="vm.allResponsesInfos.get(vm.formElement).selectedIndexList[0]">
             </public-question-item>
+            <public-matrix ng-if="FormElementUtils.isQuestion(vm.formElement) && vm.formElement.question_type == Types.MATRIX"
+                           question="vm.formElement"
+                           responses="vm.allResponsesInfos.get(vm.formElement).responses[0]">
+            </public-matrix>
 
             <!-- Display section -->
             <div class="section" ng-if="!FormElementUtils.isQuestion(vm.formElement)">
@@ -32,11 +35,15 @@
                 </div>
                 <div class="section-main">
                     <div ng-repeat="question in vm.formElement.questions.all | orderBy:'section_position'">
-                        <public-question-item question="question"
-                                              response="vm.allResponsesInfos.get(vm.formElement).responses.all[question.section_position - 1]"
-                                              selected-indexes="vm.allResponsesInfos.get(vm.formElement).selectedIndexList[question.section_position - 1]"
-                                              is-captcha="false">
+                        <public-question-item ng-if="question.question_type != Types.MATRIX"
+                                              question="question"
+                                              response="vm.allResponsesInfos.get(vm.formElement).responses[question.section_position - 1]"
+                                              selected-indexes="vm.allResponsesInfos.get(vm.formElement).selectedIndexList[question.section_position - 1]">
                         </public-question-item>
+                        <public-matrix ng-if="question.question_type == Types.MATRIX"
+                                       question="question"
+                                       responses="vm.allResponsesInfos.get(vm.formElement).responses[question.section_position - 1]">
+                        </public-matrix>
                     </div>
                 </div>
             </div>

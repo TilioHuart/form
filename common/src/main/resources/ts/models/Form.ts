@@ -5,6 +5,7 @@ import {Distribution, Distributions, DistributionStatus} from "./Distribution";
 import {FiltersFilters, FiltersOrders} from "../core/enums";
 import {FormElement, FormElements, Question, Questions, Section} from "./FormElement";
 import {QuestionChoice, QuestionChoices} from "./QuestionChoice";
+import {Fields} from "@common/core/constants";
 
 export class Form implements Selectable, Shareable  {
     shared: any;
@@ -145,26 +146,32 @@ export class Form implements Selectable, Shareable  {
     };
 
     formatIntoQuestion = (e: FormElement) : Question => {
-        let questionChoices = new QuestionChoices();
-        if (e['choices']) {
-            questionChoices.all = Mix.castArrayAs(QuestionChoice, e['choices']);
+        let choices: QuestionChoices = new QuestionChoices();
+        let children: Questions = new Questions();
+        if (e[Fields.CHOICES]) {
+            choices.all = Mix.castArrayAs(QuestionChoice, e[Fields.CHOICES]);
+            choices.all.sort((a, b) => a.id - b.id);
         }
-        questionChoices.all.sort((a, b) => a.id - b.id);
+        if (e[Fields.CHILDREN]) {
+            children.all = Mix.castArrayAs(Question, e[Fields.CHILDREN]);    // Ok because matrix children cannot not have choices or children themselves
+            children.all.sort((a, b) => a.id - b.id);
+        }
 
-        let question = Mix.castAs(Question, e);
-        question.choices = questionChoices;
+        let question: Question = Mix.castAs(Question, e);
+        question.choices = choices;
+        question.children = children;
         return question;
     };
 
     getDistributionKey = () : string => {
-        let distributionKey = this['distribution_key'].toString();
-        delete this['distribution_key'];
+        let distributionKey = this[Fields.DISTRIBUTION_KEY].toString();
+        delete this[Fields.DISTRIBUTION_KEY];
         return distributionKey;
     };
 
     getDistributionCaptcha = () : string => {
-        let distributionCaptcha = this['distribution_captcha'].toString();
-        delete this['distribution_captcha'];
+        let distributionCaptcha = this[Fields.DISTRIBUTION_CAPTCHA].toString();
+        delete this[Fields.DISTRIBUTION_CAPTCHA];
         return distributionCaptcha;
     };
 

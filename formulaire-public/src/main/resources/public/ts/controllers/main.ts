@@ -1,5 +1,6 @@
 import {idiom, ng, template} from 'entcore';
 import {FormElementUtils} from "@common/utils";
+import {Types} from "@common/models";
 
 export const mainController = ng.controller('MainController', ['$scope', 'route',
 	($scope, route) => {
@@ -7,6 +8,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		$scope.template = template;
 
 		// Init variables
+		$scope.Types = Types;
 		$scope.FormElementUtils = FormElementUtils;
 		$scope.formKey = "";
 

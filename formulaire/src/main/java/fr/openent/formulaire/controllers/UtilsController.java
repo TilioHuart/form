@@ -75,7 +75,7 @@ public class UtilsController extends ControllerHelper {
                 renderJson(request, jsonFiles);
             })
             .onFailure(err -> {
-                log.error("[Formulaire@postMultipleImages] An error has occurred during upload files: " + err.getMessage());
+                log.error("[Formulaire@postMultipleImages] An error has occurred during upload files : " + err.getMessage());
                 renderInternalError(request, err.getMessage());
             });
     }

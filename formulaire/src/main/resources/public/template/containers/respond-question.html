@@ -21,14 +21,19 @@
         <div class="nine twelve-mobile">
 
             <!-- Display question -->
-            <respond-question-item ng-if="FormElementUtils.isQuestion(vm.formElement)"
+            <respond-question-item ng-if="FormElementUtils.isQuestion(vm.formElement) && vm.formElement.question_type != Types.MATRIX"
                                    question="vm.formElement"
-                                   response="vm.responses.all[0]"
+                                   response="vm.responses[0]"
                                    distribution="vm.distribution"
                                    selected-index="vm.selectedIndexList[0]"
                                    responses-choices="vm.responsesChoicesList[0]"
                                    files="vm.filesList[0]">
             </respond-question-item>
+            <respond-matrix ng-if="FormElementUtils.isQuestion(vm.formElement) && vm.formElement.question_type == Types.MATRIX"
+                            question="vm.formElement"
+                            responses="vm.responses[0]"
+                            distribution="vm.distribution">
+            </respond-matrix>
 
             <!-- Display section -->
             <div class="section" ng-if="!FormElementUtils.isQuestion(vm.formElement)">
@@ -40,13 +45,19 @@
                 </div>
                 <div class="section-main">
                     <div ng-repeat="question in vm.formElement.questions.all | orderBy:'section_position'">
-                        <respond-question-item question="question"
-                                               response="vm.responses.all[question.section_position - 1]"
+                        <respond-question-item ng-if="question.question_type != Types.MATRIX"
+                                               question="question"
+                                               response="vm.responses[question.section_position - 1]"
                                                distribution="vm.distribution"
                                                selected-index="vm.selectedIndexList[question.section_position - 1]"
                                                responses-choices="vm.responsesChoicesList[question.section_position - 1]"
                                                files="vm.filesList[question.section_position - 1]">
                         </respond-question-item>
+                        <respond-matrix ng-if="question.question_type == Types.MATRIX"
+                                        question="question"
+                                        responses="vm.responses[question.section_position - 1]"
+                                        distribution="vm.distribution">
+                        </respond-matrix>
                     </div>
                 </div>
             </div>

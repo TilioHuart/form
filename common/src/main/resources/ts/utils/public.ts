@@ -7,12 +7,13 @@ import {
     Questions,
     Response, Responses,
     Section
-} from "../models";
+} from "@common/models";
 import {Mix} from "entcore-toolkit";
+import {Fields} from "@common/core/constants";
 
 export class PublicUtils {
     /**
-     * Returns an array of colors interpolated between a list of given colors
+     * Format storage data
      * @param dataFormElements sessionStorage data transformed into JSON
      * @param formElements formElements to fill
      * @param dataResponsesInfos sessionStorage data transformed into JSON
@@ -25,11 +26,22 @@ export class PublicUtils {
         // Format mapping
         allResponsesInfos.clear();
         for (let responseInfo of dataResponsesInfos) {
-            let isSection = responseInfo[0].description !== undefined;
-            let key = formElements.filter(e => e instanceof (isSection ? Section : Question) && e.id === responseInfo[0].id)[0];
+            let isSection: boolean = responseInfo[0].description !== undefined;
+            let key: FormElement = formElements.all.find((e: FormElement) => e instanceof (isSection ? Section : Question) && e.id === responseInfo[0].id);
 
-            let responses = new Responses();
-            responses.all = Mix.castArrayAs(Response, responseInfo[1].responses.all);
+            let responses: any = [];
+            for (let questionResponse of responseInfo[1].responses) {
+                if (questionResponse.all) { // If it's a matrix we cast each child as Response and wa cast the parent as Responses
+                    let rep: Responses = new Responses();
+                    for (let r of questionResponse.all) {
+                        rep.all.push(Mix.castAs(Response, r));
+                    }
+                    responses.push(rep);
+                }
+                else {
+                    responses.push(Mix.castAs(Response, questionResponse));
+                }
+            }
             let selectedIndexList = responseInfo[1].selectedIndexList;
             let responsesChoicesList = responseInfo[1].responsesChoicesList;
             let value = {
@@ -38,7 +50,7 @@ export class PublicUtils {
                 responsesChoicesList: responsesChoicesList
             };
 
-            allResponsesInfos.set(key, value);
+            if (key && value) allResponsesInfos.set(key, value);
         }
     }
 
@@ -46,7 +58,7 @@ export class PublicUtils {
         formElements.all = [];
 
         for (let e of dataFormElements.arr) {
-            if (e['description'] !== undefined) {
+            if (e[Fields.DESCRIPTION] !== undefined) {
                 formElements.all.push(PublicUtils.formatIntoSection(e));
             }
             else {
@@ -57,27 +69,27 @@ export class PublicUtils {
     };
 
     static formatIntoSection = (e: FormElement) : Section => {
-        let questions = new Questions();
-        if (e['questions'] && e['questions'].arr.length > 0) {
-            for (let q of e['questions'].arr) {
+        let questions: Questions = new Questions();
+        if (e[Fields.QUESTIONS] && e[Fields.QUESTIONS].arr.length > 0) {
+            for (let q of e[Fields.QUESTIONS].arr) {
                 questions.all.push(PublicUtils.formatIntoQuestion(q));
             }
         }
         questions.all.sort((a, b) => a.section_position - b.section_position);
 
-        let section = Mix.castAs(Section, e);
+        let section: Section = Mix.castAs(Section, e);
         section.questions = questions;
         return section;
     };
 
     static formatIntoQuestion = (e: FormElement) : Question => {
-        let questionChoices = new QuestionChoices();
-        if (e['choices'] && e['choices'].all.length > 0) {
-            questionChoices.all = Mix.castArrayAs(QuestionChoice, e['choices'].all);
+        let questionChoices: QuestionChoices = new QuestionChoices();
+        if (e[Fields.CHOICES] && e[Fields.CHOICES].all.length > 0) {
+            questionChoices.all = Mix.castArrayAs(QuestionChoice, e[Fields.CHOICES].all);
         }
         questionChoices.all.sort((a, b) => a.id - b.id);
 
-        let question = Mix.castAs(Question, e);
+        let question: Question = Mix.castAs(Question, e);
         question.choices = questionChoices;
         return question;
     };
@@ -101,11 +113,11 @@ export class PublicUtils {
 
     static setCookie = (name: string, value: string, expires?: Date, path= '/', domain?: string, secure = false, sameSite = 'strict') : void => {
         let cookie = `${name} = ${value}`;
-        if (expires) { cookie += `; expires = ${expires.toUTCString()}` }
-        if (path) { cookie += `; path = ${path}` }
-        if (domain) { cookie += `; domain = ${domain}` }
-        if (secure) { cookie += `; secure = ${secure}` }
-        if (sameSite) { cookie += `; samesite = ${sameSite}` }
+        if (expires) { cookie += `; ${Fields.EXPIRES} = ${expires.toUTCString()}` }
+        if (path) { cookie += `; ${Fields.PATH} = ${path}` }
+        if (domain) { cookie += `; ${Fields.DOMAIN} = ${domain}` }
+        if (secure) { cookie += `; ${Fields.SECURE} = ${secure}` }
+        if (sameSite) { cookie += `; ${Fields.SAMESITE} = ${sameSite}` }
         document.cookie = cookie;
     };
 }

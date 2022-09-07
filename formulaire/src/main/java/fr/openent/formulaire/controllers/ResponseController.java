@@ -1,5 +1,6 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.core.constants.Constants;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.DistributionService;
@@ -28,6 +29,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
+import static fr.openent.form.core.constants.Constants.CHOICES_TYPE_QUESTIONS;
+import static fr.openent.form.core.constants.Constants.QUESTIONS_WITHOUT_RESPONSES;
 import static fr.openent.form.core.constants.DistributionStatus.FINISHED;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_RIGHT;
@@ -179,8 +182,16 @@ public class ResponseController extends ControllerHelper {
                     int question_type = question.getInteger(QUESTION_TYPE);
                     Integer choice_id = response.getInteger(CHOICE_ID);
 
+                    // Check if it's a question type you can respond to
+                    if (QUESTIONS_WITHOUT_RESPONSES.contains(question_type)) {
+                        String message = "[Formulaire@createResponse] You cannot create a response for a question of type " + question_type;
+                        log.error(message);
+                        badRequest(request, message);
+                        return;
+                    }
+
                     // If there is a choice it should match an existing QuestionChoice for this question
-                    if (choice_id != null && Arrays.asList(4,5,9).contains(question_type)) {
+                    if (choice_id != null && CHOICES_TYPE_QUESTIONS.contains(question_type)) {
                         questionChoiceService.get(choice_id.toString(), choiceEvt -> {
                             if (choiceEvt.isLeft()) {
                                 log.error("[Formulaire@createResponse] Fail to get question choice corresponding to id : " + choice_id);
@@ -197,9 +208,19 @@ public class ResponseController extends ControllerHelper {
                             JsonObject choice = choiceEvt.right().getValue();
 
                             // Check choice validity
-                            if (!choice.getInteger(QUESTION_ID).toString().equals(questionId) ||
-                                    !choice.getString(VALUE).equals(response.getString(ANSWER))) {
-                                String message ="[Formulaire@updateResponse] Wrong choice for response " + response;
+                            if (question.getInteger(MATRIX_ID) != null &&
+                                (!choice.getInteger(QUESTION_ID).equals(question.getInteger(MATRIX_ID)) ||
+                                !choice.getString(VALUE).equals(response.getString(ANSWER)))) {
+                                String message ="[Formulaire@createResponse] Wrong choice for response " + response;
+                                log.error(message);
+                                badRequest(request, message);
+                                return;
+
+                            }
+                            else if (question.getInteger(MATRIX_ID) == null &&
+                                    (!choice.getInteger(QUESTION_ID).toString().equals(questionId) ||
+                                    !choice.getString(VALUE).equals(response.getString(ANSWER)))) {
+                                String message ="[Formulaire@createResponse] Wrong choice for response " + response;
                                 log.error(message);
                                 badRequest(request, message);
                                 return;
@@ -299,8 +320,16 @@ public class ResponseController extends ControllerHelper {
                     int question_type = question.getInteger(QUESTION_TYPE);
                     Integer choice_id = response.getInteger(CHOICE_ID);
 
+                    // Check if it's a question type you can respond to
+                    if (QUESTIONS_WITHOUT_RESPONSES.contains(question_type)) {
+                        String message = "[Formulaire@updateResponse] You cannot create a response for a question of type " + question_type;
+                        log.error(message);
+                        badRequest(request, message);
+                        return;
+                    }
+
                     // If there is a choice it should match an existing QuestionChoice for this question
-                    if (choice_id != null && Arrays.asList(4,5,9).contains(question_type)) {
+                    if (choice_id != null && CHOICES_TYPE_QUESTIONS.contains(question_type)) {
                         questionChoiceService.get(choice_id.toString(), choiceEvt -> {
                             if (choiceEvt.isLeft()) {
                                 log.error("[Formulaire@updateResponse] Fail to get question choice corresponding to id : " + choice_id);
@@ -317,10 +346,21 @@ public class ResponseController extends ControllerHelper {
                             JsonObject choice = choiceEvt.right().getValue();
 
                             // Check choice validity
-                            if (!choice.getInteger(QUESTION_ID).equals(questionId) ||
-                                    !choice.getString(VALUE).equals(response.getString(ANSWER))) {
-                                log.error("[Formulaire@updateResponse] Wrong choice for response " + response);
-                                renderError(request);
+                            if (question.getInteger(MATRIX_ID) != null &&
+                                (!choice.getInteger(QUESTION_ID).equals(question.getInteger(MATRIX_ID)) ||
+                                !choice.getString(VALUE).equals(response.getString(ANSWER)))) {
+                                String message ="[Formulaire@updateResponse] Wrong choice for response " + response;
+                                log.error(message);
+                                badRequest(request, message);
+                                return;
+
+                            }
+                            else if (question.getInteger(MATRIX_ID) == null &&
+                                (!choice.getInteger(QUESTION_ID).equals(questionId) ||
+                                !choice.getString(VALUE).equals(response.getString(ANSWER)))) {
+                                String message = "[Formulaire@updateResponse] Wrong choice for response " + response;
+                                log.error(message);
+                                badRequest(request, message);
                                 return;
                             }
 

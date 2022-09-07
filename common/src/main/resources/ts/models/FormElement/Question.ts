@@ -9,7 +9,7 @@ import {Response} from "../Response";
 import {Constants} from "@common/core/constants";
 
 export class Question extends FormElement {
-    question_type: any;
+    question_type: number;
     statement: string;
     mandatory: boolean;
     section_id: number;

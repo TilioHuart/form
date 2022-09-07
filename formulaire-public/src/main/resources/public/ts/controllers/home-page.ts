@@ -2,7 +2,7 @@ import {ng, template} from "entcore";
 import {Delegates, Form, FormElements} from "@common/models";
 import {formService} from "../services";
 import {Mix} from "entcore-toolkit";
-import {PublicUtils} from "../utils";
+import {PublicUtils} from "@common/utils";
 
 interface ViewModel {
     formKey: string;

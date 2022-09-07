@@ -34,8 +34,12 @@ public class EventBusController extends ControllerHelper {
                 formId = body.getString(PARAM_FORM_ID);
                 questionService.listForFormAndSection(formId, BusResultHelper.busResponseHandlerEitherArray(message));
                 break;
-            case LIST_QUESTION_CHOICES:
+            case LIST_QUESTION_CHILDREN:
                 JsonArray questionIds = body.getJsonArray(PARAM_QUESTION_IDS);
+                questionService.listChildren(questionIds, BusResultHelper.busResponseHandlerEitherArray(message));
+                break;
+            case LIST_QUESTION_CHOICES:
+                questionIds = body.getJsonArray(PARAM_QUESTION_IDS);
                 questionChoiceService.listChoices(questionIds, BusResultHelper.busResponseHandlerEitherArray(message));
                 break;
             default:

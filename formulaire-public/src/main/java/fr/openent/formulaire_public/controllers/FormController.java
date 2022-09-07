@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 
+import static fr.openent.form.core.constants.Constants.CHOICES_TYPE_QUESTIONS;
 import static fr.openent.form.core.constants.EbFields.*;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.helpers.RenderHelper.renderBadRequest;
@@ -67,9 +68,14 @@ public class FormController extends ControllerHelper {
         }
 
         publicFormService.getFormByKey(formKey, formEvt -> {
-            if (formEvt.isLeft() || formEvt.right().getValue().isEmpty()) {
-                log.error("[FormulairePublic@getPublicFormByKey] Fail to get form with key : " + formKey);
-                renderInternalError(request, formEvt);
+            if (formEvt.isLeft()) {
+                String message = "[FormulairePublic@getPublicFormByKey] Fail to get form with key " + formKey;
+                renderInternalError(request, formEvt, message);
+                return;
+            }
+            if (formEvt.right().getValue().isEmpty()) {
+                log.error("[FormulairePublic@getPublicFormByKey] No form found for key " + formKey);
+                notFound(request);
                 return;
             }
 
@@ -103,95 +109,119 @@ public class FormController extends ControllerHelper {
                 }
             }
 
-            // Get all form data (sections, questions, question_choices)
+            // Get all form data (sections, questions, question_choices, children)
             String formId = form.getInteger(ID).toString();
 
             JsonObject sectionsMessage = new JsonObject().put(ACTION, LIST_SECTIONS).put(PARAM_FORM_ID, formId);
             eb.request(FORMULAIRE_ADDRESS, sectionsMessage, MessageResponseHelper.messageJsonArrayHandler(sectionsEvt -> {
                 if (sectionsEvt.isLeft()) {
-                    log.error("[FormulairePublic@getPublicFormByKey] Fail to get sections for form with key : " + formKey);
-                    renderInternalError(request, sectionsEvt);
+                    String message = "[FormulairePublic@getPublicFormByKey] Fail to get sections for form with key " + formKey;
+                    renderInternalError(request, sectionsEvt, message);
                     return;
                 }
 
                 JsonArray sections = sectionsEvt.right().getValue();
                 form.put(FORM_ELEMENTS, sections);
 
+                // Map sections by id
+                HashMap<Integer, JsonObject> sectionsMapped = new HashMap<>();
+                for (Object s : sections) {
+                    JsonObject section = (JsonObject)s;
+                    section.put(QUESTIONS, new JsonArray());
+                    sectionsMapped.put(section.getInteger(ID), section);
+                }
+
                 JsonObject questionsMessage = new JsonObject().put(ACTION, LIST_QUESTION_FOR_FORM_AND_SECTION).put(PARAM_FORM_ID, formId);
                 eb.request(FORMULAIRE_ADDRESS, questionsMessage, MessageResponseHelper.messageJsonArrayHandler(questionsEvt -> {
                     if (questionsEvt.isLeft()) {
-                        log.error("[FormulairePublic@getPublicFormByKey] Fail to get questions for form with key : " + formKey);
-                        renderInternalError(request, questionsEvt);
+                        String message = "[FormulairePublic@getPublicFormByKey] Fail to get questions for form with key " + formKey;
+                        renderInternalError(request, questionsEvt, message);
                         return;
                     }
 
                     JsonArray questions = questionsEvt.right().getValue();
                     JsonArray questionIds = UtilsHelper.getIds(questions);
 
-                    JsonObject questionChoicesMessage = new JsonObject().put(ACTION, LIST_QUESTION_CHOICES).put(PARAM_QUESTION_IDS, questionIds);
-                    eb.request(FORMULAIRE_ADDRESS, questionChoicesMessage, MessageResponseHelper.messageJsonArrayHandler(questionChoicesEvt -> {
-                        if (questionChoicesEvt.isLeft()) {
-                            log.error("[FormulairePublic@getPublicFormByKey] Fail to get choices for questions with ids : " + questionIds);
-                            renderInternalError(request, questionChoicesEvt);
+                    JsonObject childrenMessage = new JsonObject().put(ACTION, LIST_QUESTION_CHILDREN).put(PARAM_QUESTION_IDS, questionIds);
+                    eb.request(FORMULAIRE_ADDRESS, childrenMessage, MessageResponseHelper.messageJsonArrayHandler(childrenEvt -> {
+                        if (childrenEvt.isLeft()) {
+                            String message = "[FormulairePublic@getPublicFormByKey] Fail to get children questions for form with key " + formKey;
+                            renderInternalError(request, childrenEvt, message);
                             return;
                         }
 
-                        JsonArray questionsChoices = questionChoicesEvt.right().getValue();
-                        HashMap<Integer, JsonArray> questionsChoicesMapped = new HashMap<>();
-                        HashMap<Integer, JsonObject> sectionsMapped = new HashMap<>();
+                        JsonArray children = childrenEvt.right().getValue();
 
-                        // Group questionChoices by questionId
-                        for (Object qc : questionsChoices) {
-                            JsonObject questionChoice = (JsonObject)qc;
-                            int questionId = questionChoice.getInteger(QUESTION_ID);
-                            if (questionsChoicesMapped.get(questionId) == null) {
-                                questionsChoicesMapped.put(questionId, new JsonArray());
-                                questionsChoicesMapped.get(questionId).add(questionChoice);
+                        // Group children by questionId
+                        HashMap<Integer, JsonArray> childrenMapped = new HashMap<>();
+                        for (Object c : children) {
+                            JsonObject child = (JsonObject)c;
+                            int matrixId = child.getInteger(MATRIX_ID);
+                            if (childrenMapped.get(matrixId) == null) {
+                                childrenMapped.put(matrixId, new JsonArray());
                             }
-                            else {
-                                questionsChoicesMapped.get(questionId).add(questionChoice);
-                            }
+                            childrenMapped.get(matrixId).add(child);
                         }
 
-                        // Map sections by id
-                        for (Object s : sections) {
-                            JsonObject section = (JsonObject)s;
-                            section.put(QUESTIONS, new JsonArray());
-                            sectionsMapped.put(section.getInteger(ID), section);
-                        }
-
-                        // Fill questions and add it where necessary
-                        for (Object q : questions) {
-                            JsonObject question = (JsonObject)q;
-                            question.put(CHOICES, new JsonArray());
-
-                            // Fill question with questionChoices
-                            JsonArray questionChoices = questionsChoicesMapped.get(question.getInteger(ID));
-                            if (questionChoices != null) question.put(CHOICES, questionChoices);
-
-                            // Add question to its section or directly to form_elements
-                            Integer sectionId = question.getInteger(SECTION_ID, null);
-                            if (sectionId == null) {
-                                form.getJsonArray(FORM_ELEMENTS).add(question);
-                            }
-                            else {
-                                sectionsMapped.get(sectionId).getJsonArray(QUESTIONS).add(question);
-                            }
-                        }
-
-                        // Create a new distribution, get the generated key and return the form data with it
-                        publicDistributionService.createDistribution(form, distributionEvt -> {
-                            if (distributionEvt.isLeft()) {
-                                log.error("[FormulairePublic@createPublicDistribution] Fail to create a distribution for form with key : " + formKey);
-                                renderInternalError(request, distributionEvt);
+                        JsonObject questionChoicesMessage = new JsonObject().put(ACTION, LIST_QUESTION_CHOICES).put(PARAM_QUESTION_IDS, questionIds);
+                        eb.request(FORMULAIRE_ADDRESS, questionChoicesMessage, MessageResponseHelper.messageJsonArrayHandler(questionChoicesEvt -> {
+                            if (questionChoicesEvt.isLeft()) {
+                                String message = "[FormulairePublic@getPublicFormByKey] Fail to get choices for questions with ids " + questionIds;
+                                renderInternalError(request, questionChoicesEvt, message);
                                 return;
                             }
 
-                            JsonObject distribution = distributionEvt.right().getValue();
-                            form.put(DISTRIBUTION_KEY, distribution.getString(PUBLIC_KEY));
-                            form.put(DISTRIBUTION_CAPTCHA, distribution.getInteger(CAPTCHA_ID));
-                            renderJson(request, form);
-                        });
+                            JsonArray questionsChoices = questionChoicesEvt.right().getValue();
+
+                            // Group questionChoices by questionId
+                            HashMap<Integer, JsonArray> questionsChoicesMapped = new HashMap<>();
+                            for (Object qc : questionsChoices) {
+                                JsonObject questionChoice = (JsonObject)qc;
+                                int questionId = questionChoice.getInteger(QUESTION_ID);
+                                if (questionsChoicesMapped.get(questionId) == null) {
+                                    questionsChoicesMapped.put(questionId, new JsonArray());
+                                }
+                                questionsChoicesMapped.get(questionId).add(questionChoice);
+                            }
+
+                            // Fill questions and add it where necessary
+                            for (Object q : questions) {
+                                JsonObject question = (JsonObject)q;
+                                question.put(CHILDREN, new JsonArray());
+                                question.put(CHOICES, new JsonArray());
+
+                                // Fill question with questionChildren
+                                JsonArray questionChildren = childrenMapped.get(question.getInteger(ID));
+                                if (questionChildren != null) question.put(CHILDREN, questionChildren);
+
+                                // Fill question with questionChoices
+                                JsonArray questionChoices = questionsChoicesMapped.get(question.getInteger(ID));
+                                if (questionChoices != null) question.put(CHOICES, questionChoices);
+
+                                // Add question to its section or directly to form_elements
+                                Integer sectionId = question.getInteger(SECTION_ID, null);
+                                if (sectionId == null) {
+                                    form.getJsonArray(FORM_ELEMENTS).add(question);
+                                }
+                                else {
+                                    sectionsMapped.get(sectionId).getJsonArray(QUESTIONS).add(question);
+                                }
+                            }
+
+                            // Create a new distribution, get the generated key and return the form data with it
+                            publicDistributionService.createDistribution(form, distributionEvt -> {
+                                if (distributionEvt.isLeft()) {
+                                    String message = "[FormulairePublic@createPublicDistribution] Fail to create a distribution for form with key " + formKey;
+                                    renderInternalError(request, distributionEvt, message);
+                                    return;
+                                }
+
+                                JsonObject distribution = distributionEvt.right().getValue();
+                                form.put(DISTRIBUTION_KEY, distribution.getString(PUBLIC_KEY));
+                                form.put(DISTRIBUTION_CAPTCHA, distribution.getInteger(CAPTCHA_ID));
+                                renderJson(request, form);
+                            });
+                        }));
                     }));
                 }));
             }));
@@ -223,18 +253,28 @@ public class FormController extends ControllerHelper {
 
         // Check if 'formKey' and 'distributionKey' are existing and matching
         publicFormService.getFormByKey(formKey, formEvt -> {
-            if (formEvt.isLeft() || formEvt.right().getValue().isEmpty()) {
-                log.error("[FormulairePublic@createPublicResponses] Fail to get form for key : " + formKey);
-                renderInternalError(request, formEvt);
+            if (formEvt.isLeft()) {
+                String message = "[FormulairePublic@createPublicResponses] Fail to get form for key " + formKey;
+                renderInternalError(request, formEvt, message);
+                return;
+            }
+            if (formEvt.right().getValue().isEmpty()) {
+                log.error("[FormulairePublic@createPublicResponses] No form found for key " + formKey);
+                notFound(request);
                 return;
             }
 
             JsonObject form = formEvt.right().getValue();
             Integer formId = form.getInteger(ID);
             publicDistributionService.getDistributionByKey(distributionKey, distributionEvt -> {
-                if (distributionEvt.isLeft() || distributionEvt.right().getValue().isEmpty()) {
-                    log.error("[FormulairePublic@createPublicResponses] Fail to get distribution for key : " + distributionKey);
-                    renderInternalError(request, distributionEvt);
+                if (distributionEvt.isLeft()) {
+                    String message = "[FormulairePublic@createPublicResponses] Fail to get distribution for key " + distributionKey;
+                    renderInternalError(request, distributionEvt, message);
+                    return;
+                }
+                if (distributionEvt.right().getValue().isEmpty()) {
+                    log.error("[FormulairePublic@createPublicResponses] No distribution found for key " + distributionKey);
+                    notFound(request);
                     return;
                 }
 
@@ -285,8 +325,8 @@ public class FormController extends ControllerHelper {
                     String captchaId = distribution.getInteger(CAPTCHA_ID).toString();
                     publicCaptchaService.get(captchaId, captchaEvt -> {
                         if (captchaEvt.isLeft()) {
-                            log.error("[FormulairePublic@createPublicResponses] Fail to get captcha with id : " + captchaId);
-                            renderInternalError(request, captchaEvt);
+                            String message = "[FormulairePublic@createPublicResponses] Fail to get captcha with id " + captchaId;
+                            renderInternalError(request, captchaEvt, message);
                             return;
                         }
 
@@ -304,165 +344,189 @@ public class FormController extends ControllerHelper {
                         JsonObject questionsMessage = new JsonObject().put(ACTION, LIST_QUESTION_FOR_FORM_AND_SECTION).put(PARAM_FORM_ID, formId.toString());
                         eb.request(FORMULAIRE_ADDRESS, questionsMessage, MessageResponseHelper.messageJsonArrayHandler(questionsEvt -> {
                             if (questionsEvt.isLeft()) {
-                                log.error("[FormulairePublic@createPublicResponses] Fail to get questions corresponding to form with id : " + formId);
-                                renderInternalError(request, questionsEvt);
+                                String message = "[FormulairePublic@createPublicResponses] Fail to get questions corresponding to form with id " + formId;
+                                renderInternalError(request, questionsEvt, message);
                                 return;
                             }
 
                             JsonArray questions = questionsEvt.right().getValue();
                             JsonArray questionIds = UtilsHelper.getIds(questions);
 
-                            JsonObject questionChoicesMessage = new JsonObject().put(ACTION, LIST_QUESTION_CHOICES).put(PARAM_QUESTION_IDS, questionIds);
-                            eb.request(FORMULAIRE_ADDRESS, questionChoicesMessage, MessageResponseHelper.messageJsonArrayHandler(questionChoicesEvt -> {
-                                if (questionChoicesEvt.isLeft()) {
-                                    log.error("[FormulairePublic@createPublicResponses] Fail to get choices for questions with ids : " + questionIds);
-                                    renderInternalError(request, questionChoicesEvt);
+                            JsonObject childrenMessage = new JsonObject().put(ACTION, LIST_QUESTION_CHILDREN).put(PARAM_QUESTION_IDS, questionIds);
+                            eb.request(FORMULAIRE_ADDRESS, childrenMessage, MessageResponseHelper.messageJsonArrayHandler(childrenEvt -> {
+                                if (childrenEvt.isLeft()) {
+                                    String message = "[FormulairePublic@createPublicResponses] Fail to get children questions for form with key " + formKey;
+                                    renderInternalError(request, childrenEvt, message);
                                     return;
                                 }
 
-                                JsonArray questionsChoices = questionChoicesEvt.right().getValue();
-                                HashMap<Integer, JsonArray> questionsChoicesMapped = new HashMap<>();
-                                HashMap<Integer, JsonObject> questionsMapped = new HashMap<>();
+                                JsonArray children = childrenEvt.right().getValue();
+                                JsonArray childrenIds = UtilsHelper.getIds(children);
 
-                                // Group questionChoices by questionId
-                                for (Object qc : questionsChoices) {
-                                    JsonObject questionChoice = (JsonObject) qc;
-                                    int questionId = questionChoice.getInteger(QUESTION_ID);
-                                    if (questionsChoicesMapped.get(questionId) == null) {
-                                        questionsChoicesMapped.put(questionId, new JsonArray());
-                                        questionsChoicesMapped.get(questionId).add(questionChoice);
-                                    } else {
-                                        questionsChoicesMapped.get(questionId).add(questionChoice);
-                                    }
-                                }
-
-                                // Fill questions and add it where necessary
-                                for (Object q : questions) {
-                                    JsonObject question = (JsonObject)q;
-                                    questionsMapped.put(question.getInteger(ID), question);
-
-                                    // Fill question with questionChoices
-                                    question.put(CHOICES, new JsonArray());
-                                    JsonArray questionChoices = questionsChoicesMapped.get(question.getInteger(ID));
-                                    if (questionChoices != null) question.put(CHOICES, questionChoices);
-                                }
-
-                                // Check if all the question_ids from the responses match existing questions from the form
-                                Integer wrongQuestionId = null;
-                                int i = 0;
-                                while (wrongQuestionId == null && i < responses.size()) {
-                                    JsonObject response = responses.getJsonObject(i);
-                                    Integer questionId = response.getInteger(QUESTION_ID);
-
-                                    if (!questionIds.contains(questionId.toString())) {
-                                        wrongQuestionId = questionId;
-                                    }
-                                    else {
-                                        JsonObject question = questionsMapped.get(questionId);
-                                        int questionType = question.getInteger(QUESTION_TYPE);
-                                        Integer choiceId = response.getInteger(CHOICE_ID);
-
-                                        // If there is a choice it should match an existing QuestionChoice for this question
-                                        if (choiceId != null && Arrays.asList(4,5,9).contains(questionType)) {
-                                            JsonArray choices = question.getJsonArray(CHOICES);
-                                            boolean isChoiceValid = false;
-                                            int j = 0;
-                                            while (!isChoiceValid && j < choices.size()) {
-                                                JsonObject choice = choices.getJsonObject(j);
-                                                if (choice.getInteger(ID).equals(choiceId) && choice.getString(VALUE).equals(response.getString(ANSWER))) {
-                                                    isChoiceValid = true;
-                                                }
-                                                j++;
-                                            }
-
-                                            if (!isChoiceValid) {
-                                                String message = "[FormulairePublic@createPublicResponses] Wrong choice for response : " + response;
-                                                log.error(message);
-                                                badRequest(request, message);
-                                                return;
-                                            }
-                                        }
-                                        else { // If it's a type 6 or 7 check parsing into Date or Time
-                                            if (questionType == 6 && response.getString(ANSWER) != null && !response.getString(ANSWER).isEmpty()) {
-                                                try { dateFormatter.parse(response.getString(ANSWER)); }
-                                                catch (ParseException e) {
-                                                    String message = "[FormulairePublic@createPublicResponses] Fail to parse as date the answer " + response.getString(ANSWER);
-                                                    log.error(message);
-                                                    renderInternalError(request, message);
-                                                    return;
-                                                }
-                                            }
-                                            if (questionType == 7 && response.getString(ANSWER) != null && !response.getString(ANSWER).isEmpty()) {
-                                                try { timeFormatter.parse(response.getString(ANSWER)); }
-                                                catch (ParseException e) {
-                                                    String message = "[FormulairePublic@createPublicResponses] Fail to parse as time the answer " + response.getString(ANSWER);
-                                                    log.error(message);
-                                                    renderInternalError(request, message);
-                                                    return;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    i++;
-                                }
-
-                                if (wrongQuestionId != null) {
-                                    String message = "[FormulairePublic@createPublicResponses] Wrong value for the question_id, there's no question in this form with id : " + wrongQuestionId;
-                                    log.error(message);
-                                    badRequest(request, message);
-                                    return;
-                                }
-
-                                // Save responses and change the status of the distribution
-                                publicResponseService.createResponses(responses, distribution, responsesEvt -> {
-                                    if (responsesEvt.isLeft()) {
-                                        log.error("[FormulairePublic@createPublicResponses] Fail to create responses : " + responses);
-                                        renderInternalError(request, responsesEvt);
+                                JsonObject questionChoicesMessage = new JsonObject().put(ACTION, LIST_QUESTION_CHOICES).put(PARAM_QUESTION_IDS, questionIds);
+                                eb.request(FORMULAIRE_ADDRESS, questionChoicesMessage, MessageResponseHelper.messageJsonArrayHandler(questionChoicesEvt -> {
+                                    if (questionChoicesEvt.isLeft()) {
+                                        String message = "[FormulairePublic@createPublicResponses] Fail to get choices for questions with ids " + questionIds;
+                                        renderInternalError(request, questionChoicesEvt, message);
                                         return;
                                     }
 
-                                    // Set cookie
-                                    Cookie cookie = new CookieImpl(DISTRIBUTION_KEY_ + formKey, distributionKey);
-                                    cookie.setPath("/formulaire-public");
-                                    cookie.setSameSite(CookieSameSite.STRICT);
-                                    request.response().addCookie(cookie);
+                                    JsonArray questionsChoices = questionChoicesEvt.right().getValue();
+                                    HashMap<Integer, JsonArray> questionsChoicesMapped = new HashMap<>();
+                                    HashMap<Integer, JsonObject> questionsMapped = new HashMap<>();
 
-                                    publicDistributionService.finishDistribution(distributionKey, finalDistributionEvt -> {
-                                        if (finalDistributionEvt.isLeft()) {
-                                            log.error("[FormulairePublic@createPublicResponses] Fail to finish distribution with key : " + distributionKey);
-                                            renderInternalError(request, finalDistributionEvt);
+                                    // Group questionChoices by questionId
+                                    for (Object qc : questionsChoices) {
+                                        JsonObject questionChoice = (JsonObject) qc;
+                                        int questionId = questionChoice.getInteger(QUESTION_ID);
+                                        if (questionsChoicesMapped.get(questionId) == null) {
+                                            questionsChoicesMapped.put(questionId, new JsonArray());
+                                            questionsChoicesMapped.get(questionId).add(questionChoice);
+                                        } else {
+                                            questionsChoicesMapped.get(questionId).add(questionChoice);
+                                        }
+                                    }
+
+                                    // Fill question choices and add it in mapping where necessary
+                                    questions.addAll(children);
+                                    for (Object q : questions) {
+                                        JsonObject question = (JsonObject)q;
+                                        questionsMapped.put(question.getInteger(ID), question);
+
+                                        // Fill question with questionChoices
+                                        question.put(CHOICES, new JsonArray());
+                                        JsonArray questionChoices = questionsChoicesMapped.get(question.getInteger(ID));
+                                        if (questionChoices != null) question.put(CHOICES, questionChoices);
+                                    }
+
+                                    // Check if all the question_ids from the responses match existing questions from the form
+                                    Integer wrongQuestionId = null;
+                                    int i = 0;
+                                    while (wrongQuestionId == null && i < responses.size()) {
+                                        JsonObject response = responses.getJsonObject(i);
+                                        Integer questionId = response.getInteger(QUESTION_ID);
+
+                                        if (!questionIds.contains(questionId.toString()) && !childrenIds.contains(questionId.toString())) {
+                                            wrongQuestionId = questionId;
+                                        }
+                                        else {
+                                            JsonObject question = questionsMapped.get(questionId);
+                                            int questionType = question.getInteger(QUESTION_TYPE);
+                                            Integer choiceId = response.getInteger(CHOICE_ID);
+
+                                            // If there is a choice it should match an existing QuestionChoice for this question
+                                            if (choiceId != null && CHOICES_TYPE_QUESTIONS.contains(questionType)) {
+                                                JsonArray choices = question.getJsonArray(CHOICES);
+
+                                                // If matrix child, it's the parent which contains the choices
+                                                Integer matrixId = question.getInteger(MATRIX_ID);
+                                                if (matrixId != null) {
+                                                    choices = questionsMapped.get(matrixId).getJsonArray(CHOICES);
+                                                }
+
+                                                boolean isChoiceValid = false;
+                                                int j = 0;
+                                                while (!isChoiceValid && j < choices.size()) {
+                                                    JsonObject choice = choices.getJsonObject(j);
+                                                    if (choice.getInteger(ID).equals(choiceId) && choice.getString(VALUE).equals(response.getString(ANSWER))) {
+                                                        isChoiceValid = true;
+                                                    }
+                                                    j++;
+                                                }
+
+                                                if (!isChoiceValid) {
+                                                    String message = "[FormulairePublic@createPublicResponses] Wrong choice for response " + response;
+                                                    log.error(message);
+                                                    badRequest(request, message);
+                                                    return;
+                                                }
+                                            }
+                                            else { // If it's a type 6 or 7 check parsing into Date or Time
+                                                if (questionType == 6 && response.getString(ANSWER) != null && !response.getString(ANSWER).isEmpty()) {
+                                                    try { dateFormatter.parse(response.getString(ANSWER)); }
+                                                    catch (ParseException e) {
+                                                        String message = "[FormulairePublic@createPublicResponses] Fail to parse as date the answer " + response.getString(ANSWER);
+                                                        log.error(message);
+                                                        renderInternalError(request, message);
+                                                        return;
+                                                    }
+                                                }
+                                                if (questionType == 7 && response.getString(ANSWER) != null && !response.getString(ANSWER).isEmpty()) {
+                                                    try { timeFormatter.parse(response.getString(ANSWER)); }
+                                                    catch (ParseException e) {
+                                                        String message = "[FormulairePublic@createPublicResponses] Fail to parse as time the answer " + response.getString(ANSWER);
+                                                        log.error(message);
+                                                        renderInternalError(request, message);
+                                                        return;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        i++;
+                                    }
+
+                                    if (wrongQuestionId != null) {
+                                        String message = "[FormulairePublic@createPublicResponses] Wrong value for the question_id, there's no question in this form with id : " + wrongQuestionId;
+                                        log.error(message);
+                                        badRequest(request, message);
+                                        return;
+                                    }
+
+                                    // Save responses and change the status of the distribution
+                                    publicResponseService.createResponses(responses, distribution, responsesEvt -> {
+                                        if (responsesEvt.isLeft()) {
+                                            String message = "[FormulairePublic@createPublicResponses] Fail to create responses " + responses;
+                                            renderInternalError(request, responsesEvt, message);
                                             return;
                                         }
 
-                                        JsonObject finalDistribution = finalDistributionEvt.right().getValue();
-                                        if (form.getBoolean(RESPONSE_NOTIFIED)) {
-                                            publicFormService.listManagers(form.getInteger(ID).toString(), listManagersEvt -> {
-                                                if (listManagersEvt.isLeft()) {
-                                                    log.error("[FormulairePublic@createPublicResponses] Error in listing managers for form with id " + formId);
-                                                    renderInternalError(request, listManagersEvt);
-                                                    return;
-                                                }
+                                        // Set cookie
+                                        Cookie cookie = new CookieImpl(DISTRIBUTION_KEY_ + formKey, distributionKey);
+                                        cookie.setPath("/formulaire-public");
+                                        cookie.setSameSite(CookieSameSite.STRICT);
+                                        request.response().addCookie(cookie);
 
-                                                JsonArray managers = listManagersEvt.right().getValue();
-                                                JsonArray managerIds = new JsonArray();
-                                                for (int j = 0; j < managers.size(); j++) {
-                                                    managerIds.add(managers.getJsonObject(j).getString(ID));
-                                                }
-
-                                                publicNotifyService.notifyResponse(request, form, managerIds);
-                                                renderJson(request, finalDistribution, 200);
-                                            });
-                                        }
-                                        else {
-                                            renderJson(request, finalDistribution, 200);
-                                        }
+                                        finishDistribution(request, distributionKey, formId, form);
                                     });
-                                });
+                                }));
                             }));
                         }));
                     });
                 });
             });
+        });
+    }
+
+    private void finishDistribution(HttpServerRequest request, String distributionKey, Integer formId, JsonObject form) {
+        publicDistributionService.finishDistribution(distributionKey, finalDistributionEvt -> {
+            if (finalDistributionEvt.isLeft()) {
+                String message = "[FormulairePublic@createPublicResponses] Fail to finish distribution with key " + distributionKey;
+                renderInternalError(request, finalDistributionEvt, message);
+                return;
+            }
+
+            JsonObject finalDistribution = finalDistributionEvt.right().getValue();
+            if (form.getBoolean(RESPONSE_NOTIFIED)) {
+                publicFormService.listManagers(formId.toString(), listManagersEvt -> {
+                    if (listManagersEvt.isLeft()) {
+                        String message = "[FormulairePublic@createPublicResponses] Error in listing managers for form with id " + formId;
+                        renderInternalError(request, listManagersEvt, message);
+                        return;
+                    }
+
+                    JsonArray managers = listManagersEvt.right().getValue();
+                    JsonArray managerIds = new JsonArray();
+                    for (int j = 0; j < managers.size(); j++) {
+                        managerIds.add(managers.getJsonObject(j).getString(ID));
+                    }
+
+                    publicNotifyService.notifyResponse(request, form, managerIds);
+                    renderJson(request, finalDistribution, 200);
+                });
+            }
+            else {
+                renderJson(request, finalDistribution, 200);
+            }
         });
     }
 }

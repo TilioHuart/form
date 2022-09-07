@@ -1,13 +1,23 @@
 import {moment, ng, notify, template} from 'entcore';
-import {Form, FormElement, FormElements, Question, Response, Responses, Section, Types} from "@common/models";
+import {
+	Form,
+	FormElement,
+	FormElements,
+	Question,
+	QuestionChoice, Questions,
+	Response,
+	Responses,
+	Section,
+	Types
+} from "@common/models";
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
 import {Mix} from "entcore-toolkit";
-import {PublicUtils} from "../utils";
+import {PublicUtils} from "@common/utils";
 
 interface ViewModel {
 	formKey: string;
 	formElements: FormElements;
-	allResponsesInfos: Map<FormElement, { responses: Responses, selectedIndexList: any, responsesChoicesList: any }>;
+	allResponsesInfos: Map<FormElement, { responses: any, selectedIndexList: any, responsesChoicesList: any }>;
 
 	formElement: FormElement;
 
@@ -73,18 +83,18 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
 	const getNextPositionIfValid = () : number => {
 		let nextPosition: number = vm.formElement.position + 1;
-		let conditionalQuestion = null;
-		let response = null;
+		let conditionalQuestion: Question = null;
+		let response: Response = null;
 
 		if (vm.formElement instanceof Question && vm.formElement.conditional) {
 			conditionalQuestion = vm.formElement;
-			response = vm.allResponsesInfos.get(vm.formElement).responses.all[0];
+			response = vm.allResponsesInfos.get(vm.formElement).responses[0];
 		}
 		else if (vm.formElement instanceof Section) {
-			let conditionalQuestions = vm.formElement.questions.all.filter(q => q.conditional);
+			let conditionalQuestions = vm.formElement.questions.all.filter((q: Question) => q.conditional);
 			if (conditionalQuestions.length === 1) {
 				conditionalQuestion = conditionalQuestions[0];
-				response = vm.allResponsesInfos.get(vm.formElement).responses.all[conditionalQuestion.section_position - 1];
+				response = vm.allResponsesInfos.get(vm.formElement).responses[conditionalQuestion.section_position - 1];
 			}
 		}
 
@@ -93,10 +103,10 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 			nextPosition = undefined;
 		}
 		else if (conditionalQuestion && response) {
-			let choices = conditionalQuestion.choices.all.filter(c => c.id === response.choice_id);
-			let sectionId = choices.length === 1 ? choices[0].next_section_id : null;
-			let filteredSections = vm.formElements.getSections().all.filter(s => s.id === sectionId);
-			let targetSection = filteredSections.length === 1 ? filteredSections[0] : null;
+			let choices: QuestionChoice[] = conditionalQuestion.choices.all.filter((c: QuestionChoice) => c.id === response.choice_id);
+			let sectionId: number = choices.length === 1 ? choices[0].next_section_id : null;
+			let filteredSections: Section[] = vm.formElements.getSections().all.filter((s: Section) => s.id === sectionId);
+			let targetSection: Section = filteredSections.length === 1 ? filteredSections[0] : null;
 			nextPosition = targetSection ? targetSection.position : null;
 		}
 
@@ -104,24 +114,22 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 	};
 
 	const formatResponses = () : void => {
-		let questions = vm.formElement instanceof Section ? vm.formElement.questions.all : [vm.formElement];
-		let responses = vm.allResponsesInfos.get(vm.formElement).responses.all;
+		let questions: Question[] = vm.formElement instanceof Section ? vm.formElement.questions.all : [vm.formElement as Question];
+		let responses = vm.allResponsesInfos.get(vm.formElement).responses;
 
 		for (let i = 0; i < questions.length; i++) {
-			let question = questions[i];
-			let response = responses[i];
+			let question: Question = questions[i];
+			let questionResponses: Response[] = responses[i] instanceof Response ? [responses[i]] : responses[i].all;
 
-			if (!response.answer) {
-				response.answer = "";
-			}
-			else {
-				let questionType = (question as Question).question_type;
-				if (questionType === Types.TIME) {
-					if (typeof response.answer != "string") {
+			for (let response of questionResponses) {
+				if (!response.answer) {
+					response.answer = "";
+				}
+				else {
+					let questionType: number = question.question_type;
+					if (questionType === Types.TIME && typeof response.answer != "string") {
 						response.answer = moment(response.answer).format("HH:mm");
-					}
-				} else if (questionType === Types.DATE) {
-					if (typeof response.answer != "string") {
+					} else if (questionType === Types.DATE && typeof response.answer != "string") {
 						response.answer = moment(response.answer).format("DD/MM/YYYY");
 					}
 				}
@@ -131,14 +139,25 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
 	const initFormElementResponses = () : void => {
 		if (!vm.allResponsesInfos.has(vm.formElement)) {
-			let responses = new Responses();
+			let responses = [];
 			let selectedIndexList = [];
 			let responsesChoicesList = [];
 
 			let nbQuestions = vm.formElement instanceof Question ? 1 : (vm.formElement as Section).questions.all.length;
 			for (let i = 0; i < nbQuestions; i++) {
-				responses.all.push(new Response());
-				let question = vm.formElement instanceof Question ? vm.formElement : (vm.formElement as Section).questions.all[i];
+				let question: Question = vm.formElement instanceof Question ? vm.formElement : (vm.formElement as Section).questions.all[i];
+
+				if (question.question_type === Types.MATRIX) {
+					let questionResponse: Responses = new Responses();
+					for (let child of question.children.all) {
+						questionResponse.all.push(new Response());
+					}
+					responses.push(questionResponse);
+				}
+				else {
+					responses.push(new Response());
+				}
+
 				selectedIndexList.push(new Array<boolean>(question.choices.all.length));
 				responsesChoicesList.push(new Responses());
 			}

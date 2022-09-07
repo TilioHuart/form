@@ -1,7 +1,19 @@
 import {idiom, model, ng, notify, template} from "entcore";
-import {Distribution, DistributionStatus, Form, FormElements, Question, Responses, Section, Types} from "../models";
+import {
+    Distribution,
+    DistributionStatus,
+    Form,
+    FormElements,
+    Question,
+    Responses,
+    Section,
+    Types,
+    FormElement,
+    Response, QuestionChoice
+} from "../models";
 import {distributionService, formElementService, responseFileService, responseService} from "../services";
 import {FORMULAIRE_BROADCAST_EVENT} from "@common/core/enums";
+import {Res} from "awesome-typescript-loader/dist/checker/protocol";
 
 interface ViewModel {
     formElements: FormElements;
@@ -46,22 +58,19 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
 
         // Get right elements to display
         if (vm.historicPosition.length > 0) {
-            vm.formElements.all = vm.formElements.all.filter(e => vm.historicPosition.indexOf(e.position) >= 0);
+            vm.formElements.all = vm.formElements.all.filter((e: FormElement) => vm.historicPosition.indexOf(e.position) >= 0);
         }
         else {
-            let responseQuestionIds = vm.responses.all.map(r => r.question_id);
-            vm.formElements.all = vm.formElements.all.filter(e =>
-                (responseQuestionIds.indexOf(e.id) >= 0) ||
-                (e instanceof Section && e.questions.all.map(q => q.id).filter(id => responseQuestionIds.indexOf(id) >= 0).length > 0)
-            );
-            vm.historicPosition = vm.formElements.all.map(e => e.position);
+            let responseQuestionIds: any = vm.responses.all.map((r: Response) => r.question_id);
+            vm.formElements.all = vm.formElements.all.filter((e: FormElement) => shouldDisplayElement(e, responseQuestionIds));
+            vm.historicPosition = vm.formElements.all.map((e: FormElement) => e.position);
             vm.historicPosition.sort( (a, b) => a - b);
         }
 
         // Get files responses for files question
-        let fileQuestions = vm.formElements.getAllQuestions().all.filter(q => q.question_type === Types.FILE);
+        let fileQuestions: Question[] = vm.formElements.getAllQuestions().all.filter((q: Question) => q.question_type === Types.FILE);
         for (let fileQuestion of fileQuestions) {
-            let response = vm.responses.all.filter(r => r.question_id === fileQuestion.id)[0];
+            let response: Response = vm.responses.all.filter((r: Response) => r.question_id === fileQuestion.id)[0];
             if (response) {
                 await response.files.sync(response.id);
             }
@@ -115,10 +124,16 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
     };
 
     const checkMandatoryQuestions = async () : Promise<boolean> => {
-        let mandatoryQuestions = vm.formElements.getAllQuestions().all.filter(q => q.mandatory);
+        let mandatoryQuestions: Question[] = vm.formElements.getAllQuestions().all.filter((q: Question) => q.mandatory);
         for (let question of mandatoryQuestions) {
-            let responses = vm.responses.all.filter(r => r.question_id === question.id && r.answer);
-            if (responses.length <= 0) {
+            if (question.question_type === Types.MATRIX) {
+                for (let child of question.children.all) {
+                    if (vm.responses.all.filter((r: Response) => r.question_id === child.id && r.answer).length <= 0) {
+                        return false;
+                    }
+                }
+            }
+            else if (vm.responses.all.filter((r: Response) => r.question_id === question.id && r.answer).length <= 0) {
                 return false;
             }
         }
@@ -126,13 +141,27 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
     };
 
     const cleanResponses = async () : Promise<void> => {
-        let responsesToClean = new Responses();
-        let validatedElements = new FormElements();
-        validatedElements.all = vm.formElements.all.filter(e => vm.historicPosition.indexOf(e.position) >= 0);
-        let validatedQuestionIds = validatedElements.getAllQuestions().all.map(q => q.id);
-        responsesToClean.all = vm.responses.all.filter(r => validatedQuestionIds.indexOf(r.question_id) < 0);
+        let responsesToClean: Responses = new Responses();
+        let validatedElements: FormElements = new FormElements();
+        validatedElements.all = vm.formElements.all.filter((e: FormElement) => vm.historicPosition.indexOf(e.position) >= 0);
+        let validatedQuestionIds: number[] = validatedElements.getAllQuestionsAndChildren().all.map((q: Question) => q.id);
+        responsesToClean.all = vm.responses.all.filter((r: Response) => validatedQuestionIds.indexOf(r.question_id) < 0);
         await responseService.delete(vm.form.id, responsesToClean.all);
-    }
+    };
+
+    const shouldDisplayElement = (e: FormElement, responseQuestionIds: any) : boolean => {
+        if (responseQuestionIds.includes(e.id)) {
+            return true;
+        }
+
+        if (e instanceof Question) {
+            let childrenIds: any = e.children.all.map((q: Question) => q.id);
+            return responseQuestionIds.some((id: number) => childrenIds.includes(id));
+        }
+        else if (e instanceof Section) {
+            return e.questions.all.filter((q: Question) => shouldDisplayElement(q, responseQuestionIds)).length > 0;
+        }
+    };
 
     $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_RECAP_QUESTIONS, () => { vm.$onInit() });
 }]);

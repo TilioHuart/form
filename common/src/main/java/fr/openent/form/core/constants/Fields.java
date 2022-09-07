@@ -122,6 +122,7 @@ public class Fields {
     public static final String CAPTCHA = "captcha";
     public static final String CCI = "cci";
     public static final String CHARSET = "charset";
+    public static final String CHILDREN = "children";
     public static final String CHOICES = "choices";
     public static final String CONTENT_TRANSFER_ENCODING = "content_transfer_encoding";
     public static final String CONTENT_TYPE = "content-type";

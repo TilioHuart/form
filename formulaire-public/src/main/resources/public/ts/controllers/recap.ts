@@ -2,13 +2,13 @@ import {idiom, ng, notify, template} from "entcore";
 import {
     Form,
     FormElement,
-    FormElements,
+    FormElements, Question, QuestionChoice,
     Response,
     Responses,
     Types
 } from "@common/models";
 import {Mix} from "entcore-toolkit";
-import {PublicUtils} from "../utils";
+import {PublicUtils} from "@common/utils";
 
 interface ViewModel {
     formKey: string;
@@ -16,7 +16,7 @@ interface ViewModel {
     formElement: FormElement;
     form: Form;
     formElements: FormElements;
-    allResponsesInfos: Map<FormElement, { responses: Responses, selectedIndexList: any, responsesChoicesList: any }>;
+    allResponsesInfos: Map<FormElement, { responses: any, selectedIndexList: any, responsesChoicesList: any }>;
     responses: Responses;
     nbFormElements: number;
     loading : boolean;
@@ -37,18 +37,21 @@ export const recapController = ng.controller('RecapController', ['$scope',
 
     vm.$onInit = async () : Promise<void> => {
         syncWithStorageData();
-        vm.formElements.all = vm.formElements.all.filter(e => vm.historicPosition.indexOf(e.position) >= 0);
-        let allQuestions = vm.formElements.getAllQuestions().all;
-        let questionIdsToDisplay = allQuestions.map(q => q.id);
+        vm.formElements.all = vm.formElements.all.filter((e: FormElement) => vm.historicPosition.indexOf(e.position) >= 0);
+        let allQuestions: Question[] = vm.formElements.getAllQuestionsAndChildren().all;
+        let questionIdsToDisplay: number[] = allQuestions.map((q: Question) => q.id).concat(allQuestions.map((q: Question) => q.matrix_id));
         vm.allResponsesInfos.forEach((value) => {
-            for (let i = 0; i < value.responses.all.length; i++) {
-                let response = value.responses.all[i];
+            for (let i = 0; i < value.responses.length; i++) {
+                let response = value.responses[i];
 
-                if (questionIdsToDisplay.indexOf(response.question_id) >= 0) {
-                    let correspondingQuestion = allQuestions.filter(q => q.id === response.question_id)[0];
+                if (response instanceof Responses && questionIdsToDisplay.some(id => response.all.map((r: Response) => r.id).includes(id))) { // MATRIX response
+                    vm.responses.all = vm.responses.all.concat(response.all);
+                }
+                else if (response instanceof Response && questionIdsToDisplay.indexOf(response.question_id) >= 0) { // Classic response
+                    let correspondingQuestion: Question = allQuestions.filter((q: Question) => q.id === response.question_id)[0];
 
                     if (correspondingQuestion.question_type === Types.MULTIPLEANSWER) {
-                        let questionChoices = correspondingQuestion.choices.all.sort((a, b) => a.id - b.id);
+                        let questionChoices: QuestionChoice[] = correspondingQuestion.choices.all.sort((a, b) => a.id - b.id);
 
                         for (let j = 0; j < value.selectedIndexList[i].length; j++) {
                             if (value.selectedIndexList[i][j]) {
@@ -105,16 +108,22 @@ export const recapController = ng.controller('RecapController', ['$scope',
     };
 
     const getQuestionIdsFromPositionHistoric = () : number[] => {
-        let validatedElements = new FormElements();
-        validatedElements.all = vm.formElements.all.filter(e => vm.historicPosition.indexOf(e.position) >= 0);
-        return validatedElements.getAllQuestions().all.map(q => q.id);
+        let validatedElements: FormElements = new FormElements();
+        validatedElements.all = vm.formElements.all.filter((e: FormElement) => vm.historicPosition.indexOf(e.position) >= 0);
+        return validatedElements.getAllQuestionsAndChildren().all.map(q => q.id);
     }
 
     const checkMandatoryQuestions = async (validatedQuestionIds: number[]) : Promise<boolean> => {
-        let mandatoryQuestions = vm.formElements.getAllQuestions().all.filter(q => q.mandatory && validatedQuestionIds.indexOf(q.id) >= 0);
+        let mandatoryQuestions: Question[] = vm.formElements.getAllQuestions().all.filter((q: Question) => q.mandatory && validatedQuestionIds.indexOf(q.id) >= 0);
         for (let question of mandatoryQuestions) {
-            let responses = vm.responses.all.filter(r => r.question_id === question.id && r.answer);
-            if (responses.length <= 0) {
+            if (question.question_type === Types.MATRIX) {
+                for (let child of question.children.all) {
+                    if (vm.responses.all.filter((r: Response) => r.question_id === child.id && r.answer).length <= 0) {
+                        return false;
+                    }
+                }
+            }
+            else if (vm.responses.all.filter((r: Response) => r.question_id === question.id && r.answer).length <= 0) {
                 return false;
             }
         }
