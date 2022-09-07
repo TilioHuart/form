@@ -1,4 +1,4 @@
-import {Directive, idiom, ng} from "entcore";
+import {Directive, ng} from "entcore";
 import {
     Distributions,
     DistributionStatus,
@@ -170,7 +170,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
 
                     if (vm.isGraphQuestion) {
                         vm.question.fillChoicesInfo(vm.distributions, vm.responses.all);
-                        vm.colors = ColorUtils.interpolateColors(Constants.GRAPH_COLORS, vm.question.choices.all.length);
+                        vm.colors = ColorUtils.generateColorList(vm.question.choices.all.length);
                         generateChart();
                     }
                     else {

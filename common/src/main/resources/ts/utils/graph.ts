@@ -1,7 +1,6 @@
 import {idiom} from 'entcore';
 import {Question, QuestionChoice, Types} from "@common/models";
 import {ColorUtils} from "@common/utils/color";
-import {Constants} from "@common/core/constants";
 import * as ApexCharts from 'apexcharts';
 
 export class GraphUtils {
@@ -49,7 +48,7 @@ export class GraphUtils {
         let baseHeight: number = 40 * question.choices.all.length;
         let height: number = baseHeight < 200 ? 200 : (baseHeight > 500 ? 500 : baseHeight);
 
-        let colors: string[] = ColorUtils.interpolateColors(Constants.GRAPH_COLORS, question.choices.all.length)
+        let colors: string[] = ColorUtils.generateColorList(labels.length);
         let newOptions: any = GraphUtils.generateOptions(question.question_type, colors, labels, height, '100%');
         newOptions.series = series;
 
@@ -83,7 +82,7 @@ export class GraphUtils {
         }
 
         // Generate options with labels and colors
-        let colors: string[] = ColorUtils.interpolateColors(Constants.GRAPH_COLORS, series.length);
+        let colors: string[] = ColorUtils.generateColorList(series.length);
         let newOptions: any = GraphUtils.generateOptions(question.question_type, colors, labels, '100%', '100%');
         newOptions.series = series;
 
@@ -149,7 +148,7 @@ export class GraphUtils {
                 labels.push(choice.value.substring(0, 40) + (choice.value.length > 40 ? "..." : ""));
         }
 
-        let colors: string[] = ColorUtils.interpolateColors(Constants.GRAPH_COLORS, labels.length);
+        let colors: string[] = ColorUtils.generateColorList(labels.length);
         let newOptions: any = GraphUtils.generateOptions(question.question_type, colors, labels);
         newOptions.series = series;
 
@@ -179,7 +178,7 @@ export class GraphUtils {
                 labels.push(choice.value.substring(0, 40) + (choice.value.length > 40 ? "..." : ""));
         }
 
-        let colors: string[] = ColorUtils.interpolateColors(Constants.GRAPH_COLORS, labels.length);
+        let colors: string[] = ColorUtils.generateColorList(labels.length);
         let newOptions: any = GraphUtils.generateOptions(question.question_type, colors, labels);
         newOptions.series = [{ data: series }];
 
@@ -216,7 +215,7 @@ export class GraphUtils {
             series.push(serie); // Fill series
         }
 
-        let colors: string[] = ColorUtils.interpolateColors(Constants.GRAPH_COLORS, series.length);
+        let colors: string[] = ColorUtils.generateColorList(series.length);
         let newOptions: any = GraphUtils.generateOptions(question.question_type, colors, labels);
         newOptions.series = series;
 

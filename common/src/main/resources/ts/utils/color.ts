@@ -1,3 +1,6 @@
+import {Constants} from "@common/core/constants";
+import {UtilsUtils} from "@common/utils/utils";
+
 export class ColorUtils {
     /**
      * Check if a given string is valid hexadecimal color
@@ -90,7 +93,7 @@ export class ColorUtils {
     /**
      * Returns a single rgb color interpolation between a list of given colors
      * @param paletteColors List of colors
-     * @param factor Factor of interpolation
+     * @param factor        Factor of interpolation
      */
     static interpolateColor = (paletteColors: string[], factor: number = 0.5) : number[] => {
         factor = factor < 0 ? 0 : (factor > 1 ? 1 : factor);
@@ -112,7 +115,7 @@ export class ColorUtils {
     /**
      * Returns an array of colors interpolated between a list of given colors
      * @param paletteColors List of colors
-     * @param nbColors Number of colors wanted between the two given colors (included)
+     * @param nbColors      Number of colors wanted between the two given colors (included)
      */
     static interpolateColors = (paletteColors: string[], nbColors: number) : string[] => {
         if (nbColors <= 1) {
@@ -130,5 +133,25 @@ export class ColorUtils {
 
             return interpolatedColorArray;
         }
+    }
+
+    /**
+     * Generate a list of colors randomly with the Constants colors lists
+     * @param nbColors Number of colors we want to pick
+     */
+    static generateColorList = (nbColors: number) : string[] => {
+        let colorsGroups: Array<string[]> = [Constants.BLUE_COLORS, Constants.YELLOW_COLORS, Constants.PURPLE_COLORS, Constants.ORANGE_COLORS];
+        let colorsToDisplay: string[] = [Constants.BLUE_COLORS[Math.floor(Math.random() * Constants.BLUE_COLORS.length)]];
+        let lastUsedGroup: string[] = Constants.BLUE_COLORS;
+
+        while (colorsToDisplay.length < nbColors) {
+            let newColorGroup: string[] = UtilsUtils.getRandomValueInList(colorsGroups, [lastUsedGroup]);
+            let newColor: string = UtilsUtils.getRandomValueInList(newColorGroup, colorsToDisplay);
+
+            colorsToDisplay.push(newColor);
+            lastUsedGroup = newColorGroup;
+        }
+
+        return colorsToDisplay;
     }
 }
