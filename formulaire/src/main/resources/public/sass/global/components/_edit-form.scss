@@ -243,10 +243,6 @@
     height: auto;
     padding: 0;
 
-    .hidden {
-      visibility: hidden;
-    }
-
     // This one is for DragAndDrop ghost preview in pop-up
     ul {
       .sortable-ghost {
@@ -306,13 +302,18 @@
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-
-      .container-arrow {
-        display: flex;
-        justify-content: space-around;
-      }
     }
   }
+}
+
+
+.hidden {
+  visibility: hidden;
+}
+
+.container-arrow {
+  display: flex;
+  justify-content: space-around;
 }
 
 .preview-recap {

@@ -32,13 +32,13 @@ export const publicMatrix: Directive = ng.directive('publicMatrix', () => {
                         <thead>
                             <tr>
                                 <th class="two"></th>
-                                <th ng-repeat="choice in vm.question.choices.all | orderBy:'id'">[[choice.value]]</th>
+                                <th ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">[[choice.value]]</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr ng-repeat="child in vm.question.children.all" ng-init="childIndex = $index">
                                 <td>[[child.title]]</td>
-                                <td ng-repeat ="choice in vm.question.choices.all | orderBy:'id'">
+                                <td ng-repeat ="choice in vm.question.choices.all | orderBy:['position', 'id']">
                                     <label>
                                         <input type="radio" ng-model="vm.responses.all[childIndex].choice_id" ng-value="[[choice.id]]" input-guard>
                                     </label>

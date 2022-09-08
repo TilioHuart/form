@@ -278,9 +278,9 @@ public class DefaultFormService implements FormService {
                 "), " +
                 "new_children_questions AS (" +
                     "INSERT INTO " + QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
-                    "mandatory, original_question_id, section_id, section_position, conditional, matrix_id) " +
+                    "mandatory, original_question_id, section_id, section_position, conditional, matrix_id, matrix_position) " +
                     "SELECT (SELECT id from new_form_id), title, position, question_type, statement, mandatory, id, null, " +
-                    "null, conditional, (SELECT id FROM new_questions WHERE original_question_id = q.matrix_id LIMIT 1) " +
+                    "null, conditional, (SELECT id FROM new_questions WHERE original_question_id = q.matrix_id LIMIT 1), matrix_position " +
                     "FROM " + QUESTION_TABLE + " q WHERE form_id = ? AND matrix_id IS NOT NULL " +
                     "ORDER BY q.id " +
                     "RETURNING id, form_id, original_question_id, question_type" +

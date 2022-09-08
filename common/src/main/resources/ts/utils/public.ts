@@ -87,7 +87,7 @@ export class PublicUtils {
         if (e[Fields.CHOICES] && e[Fields.CHOICES].all.length > 0) {
             questionChoices.all = Mix.castArrayAs(QuestionChoice, e[Fields.CHOICES].all);
         }
-        questionChoices.all.sort((a, b) => a.id - b.id);
+        questionChoices.all.sort((a, b) => a.position - b.position);
 
         let question: Question = Mix.castAs(Question, e);
         question.choices = questionChoices;

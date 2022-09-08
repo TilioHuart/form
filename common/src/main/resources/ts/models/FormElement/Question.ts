@@ -4,7 +4,7 @@ import {questionChoiceService, questionService} from "../../services";
 import {QuestionChoice, QuestionChoices} from "../QuestionChoice";
 import {Types} from "../QuestionType";
 import {FormElement} from "./FormElement";
-import {Distributions} from "../Distribution";
+import {Distribution, Distributions} from "../Distribution";
 import {Response} from "../Response";
 import {Constants} from "@common/core/constants";
 
@@ -16,11 +16,12 @@ export class Question extends FormElement {
     section_position: number;
     conditional: boolean;
     matrix_id: number;
+    matrix_position: number;
     choices: QuestionChoices;
     placeholder: string;
     children: Questions;
 
-    constructor(matrixId?: number, questionType?: number) {
+    constructor(matrixId?: number, questionType?: number, matrixPosition?: number) {
         super();
         this.question_type = questionType ? questionType : null;
         this.statement = null;
@@ -29,6 +30,7 @@ export class Question extends FormElement {
         this.section_position = null;
         this.conditional = false;
         this.matrix_id = matrixId ? matrixId : null;
+        this.matrix_position = matrixPosition ? matrixPosition : null;
         this.choices = new QuestionChoices();
         this.children = new Questions();
         this.placeholder = null;
@@ -49,6 +51,7 @@ export class Question extends FormElement {
             section_position: this.section_position,
             conditional: this.conditional,
             matrix_id: this.matrix_id,
+            matrix_position: this.matrix_position,
             choices: this.choices,
             children: this.children
         }
@@ -69,10 +72,10 @@ export class Question extends FormElement {
         }
 
         // Deal with no choice responses
-        let finishedDistribIds : any = distribs.all.map(d => d.id);
-        let noResponseChoice: QuestionChoice = new QuestionChoice();
+        let finishedDistribIds : number[] = distribs.all.map((d: Distribution) => d.id);
+        let noResponseChoice: QuestionChoice = new QuestionChoice(this.id, this.choices.all.length + 1);
         noResponseChoice.value = idiom.translate('formulaire.response.empty');
-        noResponseChoice.nbResponses = results.filter(r => !r.choice_id && finishedDistribIds.includes(r.distribution_id)).length;
+        noResponseChoice.nbResponses = results.filter(r => !r.choice_id && (<any>finishedDistribIds).includes(r.distribution_id)).length;
 
         this.choices.all.push(noResponseChoice);
     }
@@ -88,14 +91,14 @@ export class Question extends FormElement {
             // Create child choices based on copy of parent choices
             child.choices.all = [];
             for (let choice of this.choices.all) {
-                child.choices.all.push(new QuestionChoice(this.id, choice.value));
+                child.choices.all.push(new QuestionChoice(this.id, choice.position, choice.value));
             }
 
             let matchingResults: Response[] = results.filter((r: Response) => r.question_id === child.id);
             for (let result of matchingResults) {
                 for (let choice of this.choices.all) {
                     if (result.choice_id === choice.id) {
-                        child.choices.all.filter(c => c.value === choice.value)[0].nbResponses++;
+                        child.choices.all.filter((c: QuestionChoice) => c.value === choice.value)[0].nbResponses++;
                     }
                 }
             }
@@ -144,11 +147,11 @@ export class Questions extends Selection<Question> {
             let data = await questionChoiceService.listChoices(this.all.map((q: Question) => q.id));
             let listChoices: QuestionChoice[] = Mix.castArrayAs(QuestionChoice, data);
             for (let question of this.all) {
-                question.choices.all = listChoices.filter(c => c.question_id === question.id);
+                question.choices.all = listChoices.filter((c: QuestionChoice) => c.question_id === question.id);
                 let nbChoices: number = question.choices.all.length;
                 if (nbChoices <= 0) {
                     for (let j = 0; j < Constants.DEFAULT_NB_CHOICES; j++) {
-                        question.choices.all.push(new QuestionChoice(question.id));
+                        question.choices.all.push(new QuestionChoice(question.id, j+1));
                     }
                 }
             }
@@ -165,7 +168,7 @@ export class Questions extends Selection<Question> {
                 let nbChildren: number = question.children.all.length;
                 if (nbChildren <= 0) {
                     for (let j = 0; j < Constants.DEFAULT_NB_CHILDREN; j++) {
-                        question.children.all.push(new Question(question.id));
+                        question.children.all.push(new Question(question.id, Types.SINGLEANSWERRADIO, j+1));
                     }
                 }
             }

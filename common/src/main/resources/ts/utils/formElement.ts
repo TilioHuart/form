@@ -1,15 +1,19 @@
 import {
+    Distribution,
     Form,
-    FormElement, FormElements,
+    FormElement,
+    FormElements,
     Question,
-    Response, Responses,
-    Section,
-    Distribution, Questions
+    Questions,
+    Response,
+    Responses,
+    Section
 } from "../models";
 import {Mix} from "entcore-toolkit";
 import {Direction} from "../core/enums";
 import {angular, idiom, notify} from "entcore";
 import {formElementService, questionService} from "../services";
+import {PropPosition} from "@common/core/enums/prop-position";
 
 export class FormElementUtils {
     static castFormElement = (formElement: any) : Question|Section => {
@@ -25,28 +29,16 @@ export class FormElementUtils {
         return formElement instanceof Question;
     };
 
-    static switchPositions = (formElements: FormElements|Questions, index: number, direction: string) : void => {
+    static switchPositions = (elements: any, index: number, direction: string, propPosition: PropPosition) : void => {
         switch (direction) {
             case Direction.UP: {
-                if (formElements instanceof Questions) {
-                    formElements.all[index].section_position--;
-                    formElements.all[index - 1].section_position++;
-                }
-                else {
-                    formElements.all[index].position--;
-                    formElements.all[index - 1].position++;
-                }
+                elements.all[index][propPosition]--;
+                elements.all[index - 1][propPosition]++;
                 break;
             }
             case Direction.DOWN: {
-                if (formElements instanceof Questions) {
-                    formElements.all[index].section_position++;
-                    formElements.all[index + 1].section_position--;
-                }
-                else {
-                    formElements.all[index].position++;
-                    formElements.all[index + 1].position--;
-                }
+                elements.all[index][propPosition]++;
+                elements.all[index + 1][propPosition]--;
                 break;
             }
             default:

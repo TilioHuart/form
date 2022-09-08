@@ -50,7 +50,7 @@ export const publicQuestionItem: Directive = ng.directive('publicQuestionItem', 
                         </select>
                     </div>
                     <div ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER">
-                        <div ng-repeat="choice in vm.question.choices.all | orderBy:'id'">
+                        <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
                             <label for="check-[[choice.id]]">
                                 <input type="checkbox" id="check-[[choice.id]]" ng-model="vm.selectedIndexes[$index]" input-guard>
                                 <span>[[choice.value]]</span>
@@ -64,7 +64,7 @@ export const publicQuestionItem: Directive = ng.directive('publicQuestionItem', 
                         <input type="time" ng-model="vm.response.answer" input-guard/>
                     </div>
                     <div ng-if ="vm.question.question_type == vm.Types.SINGLEANSWERRADIO">
-                        <div ng-repeat ="choice in vm.question.choices.all | orderBy:'id'">
+                        <div ng-repeat ="choice in vm.question.choices.all | orderBy:['position', 'id']">
                             <label>
                                 <input type="radio" ng-model="vm.response.choice_id" ng-value="[[choice.id]]" input-guard>[[choice.value]]
                             </label>

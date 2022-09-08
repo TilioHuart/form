@@ -1,15 +1,19 @@
 import {Directive, ng} from "entcore";
 import {FormElement, FormElements, Question, QuestionChoice, Section} from "@common/models";
 import {questionChoiceService} from "@common/services";
-import {I18nUtils} from "@common/utils";
+import {FormElementUtils, I18nUtils} from "@common/utils";
+import {Direction} from "@common/core/enums";
+import {PropPosition} from "@common/core/enums/prop-position";
 
 interface IViewModel {
     question: Question;
     hasFormResponses: boolean;
     formElements: FormElements;
     I18n: I18nUtils;
+    Direction: typeof Direction;
 
     createNewChoice(): void;
+    moveChoice(choice: QuestionChoice, direction: string): void;
     deleteChoice(index: number): Promise<void>;
     isSectionsAfter(formElement: FormElement): boolean;
 }
@@ -28,8 +32,16 @@ export const questionTypeSingleanswerRadio: Directive = ng.directive('questionTy
         bindToController: true,
         template: `
             <div class="twelve">
-                <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:'id'" guard-root="formTitle">
-                    <label for="radio-[[choice.id]]" ng-class="vm.question.conditional ? 'five four-mobile' : 'nine'">
+                <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']" guard-root="formTitle">
+                    <div class="container-arrow" ng-if="vm.question.selected">
+                        <div ng-class="{hidden' : $first}" ng-click="vm.moveChoice(choice, vm.Direction.UP)">
+                            <i class="i-chevron-up lg-icon"></i>
+                        </div>
+                        <div ng-class="{hidden : $last}" ng-click="vm.moveChoice(choice, vm.Direction.DOWN)">
+                            <i class="i-chevron-down lg-icon"></i>
+                        </div>
+                    </div>
+                    <label class="left-spacing-twice" ng-class="vm.question.conditional ? 'five four-mobile' : 'nine'">
                         <input type="radio" id="radio-[[choice.id]]" disabled>
                         <span style="cursor: default"></span>
                         <input type="text" ng-model="choice.value" ng-if="!vm.question.selected" disabled
@@ -57,9 +69,16 @@ export const questionTypeSingleanswerRadio: Directive = ng.directive('questionTy
         link: ($scope, $element) => {
             const vm: IViewModel = $scope.vm;
             vm.I18n = I18nUtils;
+            vm.Direction = Direction;
 
             vm.createNewChoice = () : void => {
-                vm.question.choices.all.push(new QuestionChoice(vm.question.id));
+                vm.question.choices.all.push(new QuestionChoice(vm.question.id, vm.question.choices.all.length + 1));
+                $scope.$apply();
+            };
+
+            vm.moveChoice = (choice: QuestionChoice, direction: string) : void => {
+                FormElementUtils.switchPositions(vm.question.choices, choice.position - 1, direction, PropPosition.POSITION);
+                vm.question.choices.all.sort((a, b) => a.position - b.position);
                 $scope.$apply();
             };
 

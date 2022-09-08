@@ -1,4 +1,4 @@
-import {idiom, ng, notify, template, angular} from 'entcore';
+import {angular, idiom, ng, notify, template} from 'entcore';
 import {
     Form,
     FormElement,
@@ -11,7 +11,16 @@ import {
     Section,
     Types
 } from "../models";
-import {distributionService, formElementService, formService, questionChoiceService, questionService, responseService, sectionService, folderService} from "../services";
+import {
+    distributionService,
+    folderService,
+    formElementService,
+    formService,
+    questionChoiceService,
+    questionService,
+    responseService,
+    sectionService
+} from "../services";
 import {
     Direction,
     FORMULAIRE_BROADCAST_EVENT,
@@ -22,6 +31,7 @@ import {
 import * as Sortable from "sortablejs";
 import {FormElementUtils} from "@common/utils";
 import {Constants} from "@common/core/constants";
+import {PropPosition} from "@common/core/enums/prop-position";
 
 enum PreviewPage { RGPD = 'rgpd', QUESTION = 'question', RECAP = 'recap'}
 
@@ -181,19 +191,19 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 vm.newElement.question_type = code;
                 if (vm.newElement.isTypeChoicesQuestion()) {
                     for (let i = 0; i < Constants.DEFAULT_NB_CHOICES; i++) {
-                        vm.newElement.choices.all.push(new QuestionChoice());
+                        vm.newElement.choices.all.push(new QuestionChoice(vm.newElement.id, i+1));
                     }
 
                     if (vm.newElement.question_type === Types.MATRIX) {
                         for (let i = 0; i < Constants.DEFAULT_NB_CHILDREN; i++) {
-                            vm.newElement.children.all.push(new Question(vm.newElement.id, Types.SINGLEANSWERRADIO));
+                            vm.newElement.children.all.push(new Question(vm.newElement.id, Types.SINGLEANSWERRADIO, i+1));
                         }
                     }
                 }
                 if (parentSection) {
                     vm.newElement.section_id = parentSection.id;
                     vm.newElement.section_position = parentSection.questions.all.length + 1;
-                    let elementSection: Section = vm.formElements.all.filter(e => e.id === parentSection.id)[0] as Section;
+                    let elementSection: Section = vm.formElements.all.filter((e: FormElement) => e.id === parentSection.id)[0] as Section;
                     elementSection.questions.all.push(vm.newElement);
                 }
             }
@@ -269,12 +279,12 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 }
                 let newQuestion = await questionService.create(duplicata);
                 if (question.isTypeChoicesQuestion()) {
-                    question.choices.all.sort((a, b) => a.id - b.id);
+                    question.choices.all.sort((a, b) => a.position - b.position);
                     for (let choice of question.choices.all) {
                         if (!choice.question_id) choice.question_id = questionId;
                         if (choice.value) {
                             await questionChoiceService.save(choice);
-                            await questionChoiceService.create(new QuestionChoice(newQuestion.id, choice.value));
+                            await questionChoiceService.create(new QuestionChoice(newQuestion.id, choice.position, choice.value));
                         }
                     }
                     if (question.question_type == Types.MATRIX) {
@@ -451,18 +461,18 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         };
 
         vm.moveQuestion = (formElement: FormElement, direction: string) : void => {
-            let index = formElement.position - 1;
-            let section_index = formElement instanceof Question ? formElement.section_position - 1 : null;
+            let index: number = formElement.position - 1;
+            let section_index: number = formElement instanceof Question ? formElement.section_position - 1 : null;
 
             if (formElement instanceof Section) {
-                FormElementUtils.switchPositions(vm.formElements, index, direction);
+                FormElementUtils.switchPositions(vm.formElements, index, direction, PropPosition.POSITION);
             }
             else if (formElement instanceof Question) {
-                let question = formElement as Question;
+                let question: Question = formElement as Question;
                 if (!question.section_id) {
-                    let target = direction === Direction.UP ? vm.formElements.all[index - 1] : vm.formElements.all[index + 1];
+                    let target: FormElement = direction === Direction.UP ? vm.formElements.all[index - 1] : vm.formElements.all[index + 1];
                     if (target instanceof Question) { // Switch question with question target
-                        FormElementUtils.switchPositions(vm.formElements, index, direction);
+                        FormElementUtils.switchPositions(vm.formElements, index, direction, PropPosition.POSITION);
                     }
                     else if (target instanceof Section) {
                         switch (direction) {
@@ -493,14 +503,14 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     }
                 }
                 else {
-                    let parentSection = vm.formElements.all.filter(e => e.id === question.section_id)[0] as Section;
+                    let parentSection: Section = vm.formElements.all.filter((e: FormElement) => e.id === question.section_id)[0] as Section;
                     if (question.section_position === 1 && direction === Direction.UP) { // Take question out (before) of the parentSection
                         question.position = parentSection.position;
                         question.section_id = null;
                         question.section_position = null;
                         FormElementUtils.updateSiblingsPositions(parentSection.questions, false, null, 0);
                         FormElementUtils.updateSiblingsPositions(vm.formElements, true, null, parentSection.position - 1);
-                        parentSection.questions.all = parentSection.questions.all.filter(q => q.id != question.id);
+                        parentSection.questions.all = parentSection.questions.all.filter((q: Question) => q.id != question.id);
                         vm.formElements.all.push(question);
                     }
                     else if (question.section_position === parentSection.questions.all.length && direction === Direction.DOWN) { // Take question out (after) of the parentSection
@@ -509,11 +519,11 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         question.section_position = null;
                         FormElementUtils.updateSiblingsPositions(parentSection.questions, false, null, parentSection.questions.all.length - 1);
                         FormElementUtils.updateSiblingsPositions(vm.formElements, true, null, parentSection.position);
-                        parentSection.questions.all = parentSection.questions.all.filter(q => q.id != question.id);
+                        parentSection.questions.all = parentSection.questions.all.filter((q: Question) => q.id != question.id);
                         vm.formElements.all.push(question);
                     }
                     else { // Switch two questions into the parentSection
-                        FormElementUtils.switchPositions(parentSection.questions, section_index, direction);
+                        FormElementUtils.switchPositions(parentSection.questions, section_index, direction, PropPosition.SECTION_POSITION);
                     }
                     parentSection.questions.all.sort((a, b) => a.section_position - b.section_position);
                 }

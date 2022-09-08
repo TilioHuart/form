@@ -61,7 +61,7 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
                             <div ng-bind-html="vm.getStringResponse(vm.question)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER">
-                            <div ng-repeat="choice in vm.question.choices.all | orderBy:'id'">
+                            <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
                                 <label>
                                     <input type="checkbox" disabled checked ng-if="vm.isSelectedChoice(choice)">
                                     <input type="checkbox" disabled ng-if="!vm.isSelectedChoice(choice)">
@@ -82,7 +82,7 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
                             </div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.SINGLEANSWERRADIO">
-                            <div ng-repeat="choice in vm.question.choices.all | orderBy:'id'">
+                            <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
                                 <label>
                                     <input type="radio" disabled checked ng-if="vm.isSelectedChoice(choice)">
                                     <input type="radio" disabled ng-if="!vm.isSelectedChoice(choice)">
@@ -95,13 +95,13 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
                             <thead>
                                 <tr>
                                     <th class="two"></th>
-                                    <th ng-repeat="choice in vm.question.choices.all | orderBy:'id'">[[choice.value]]</th>
+                                    <th ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">[[choice.value]]</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr ng-repeat="child in vm.question.children.all" ng-init="childIndex = $index">
                                     <td>[[child.title]]</td>
-                                    <td ng-repeat ="choice in vm.question.choices.all | orderBy:'id'">
+                                    <td ng-repeat ="choice in vm.question.choices.all | orderBy:['position', 'id']">
                                         <label>
                                             <input type="radio" disabled checked ng-if="vm.isSelectedChoice(choice, child)">
                                             <input type="radio" disabled ng-if="!vm.isSelectedChoice(choice, child)">

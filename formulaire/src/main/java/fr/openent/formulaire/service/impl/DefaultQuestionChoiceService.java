@@ -50,8 +50,8 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
 
     @Override
     public void duplicate(int formId, int questionId, int originalQuestionId, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO " + QUESTION_CHOICE_TABLE + " (question_id, value, type, next_section_id) " +
-                "SELECT ?, value, type, (SELECT id FROM " + SECTION_TABLE + " WHERE original_section_id = qc.next_section_id AND form_id = ?) " +
+        String query = "INSERT INTO " + QUESTION_CHOICE_TABLE + " (question_id, value, position, type, next_section_id) " +
+                "SELECT ?, value, position, type, (SELECT id FROM " + SECTION_TABLE + " WHERE original_section_id = qc.next_section_id AND form_id = ?) " +
                 "FROM " + QUESTION_CHOICE_TABLE + " qc " +
                 "WHERE question_id = ? ORDER BY qc.id;";
         JsonArray params = new JsonArray().add(questionId).add(formId).add(originalQuestionId);

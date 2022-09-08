@@ -51,7 +51,7 @@ export const recapController = ng.controller('RecapController', ['$scope',
                     let correspondingQuestion: Question = allQuestions.filter((q: Question) => q.id === response.question_id)[0];
 
                     if (correspondingQuestion.question_type === Types.MULTIPLEANSWER) {
-                        let questionChoices: QuestionChoice[] = correspondingQuestion.choices.all.sort((a, b) => a.id - b.id);
+                        let questionChoices: QuestionChoice[] = correspondingQuestion.choices.all.sort((a, b) => a.position - b.position);
 
                         for (let j = 0; j < value.selectedIndexList[i].length; j++) {
                             if (value.selectedIndexList[i][j]) {

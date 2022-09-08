@@ -1,5 +1,6 @@
 package fr.openent.formulaire.service.impl;
 
+import fr.openent.form.core.enums.QuestionTypes;
 import fr.openent.formulaire.service.QuestionService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
@@ -9,8 +10,7 @@ import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.sql.SqlStatementsBuilder;
 
-import static fr.openent.form.core.constants.Constants.CONDITIONAL_QUESTIONS;
-import static fr.openent.form.core.constants.Constants.QUESTIONS_WITHOUT_RESPONSES;
+import static fr.openent.form.core.constants.Constants.*;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.Tables.QUESTION_TABLE;
 import static fr.openent.form.core.constants.Tables.SECTION_TABLE;
@@ -116,22 +116,28 @@ public class DefaultQuestionService implements QuestionService {
     @Override
     public void create(JsonObject question, String formId, Handler<Either<String, JsonObject>> handler) {
         String query = "INSERT INTO " + QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
-                "mandatory, section_id, section_position, conditional, placeholder, matrix_id) VALUES " +
-                "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+                "mandatory, section_id, section_position, conditional, placeholder, matrix_id, matrix_position) VALUES " +
+                "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
 
+        int questionType = question.getInteger(MATRIX_ID, null) != null &&
+                !MATRIX_CHILD_QUESTIONS.contains(question.getInteger(QUESTION_TYPE, 1)) ?
+                QuestionTypes.SINGLEANSWERRADIO.getCode() :
+                question.getInteger(QUESTION_TYPE, 1);
         boolean isConditional = CONDITIONAL_QUESTIONS.contains(question.getInteger(QUESTION_TYPE)) && question.getBoolean(CONDITIONAL, false);
+
         JsonArray params = new JsonArray()
                 .add(formId)
                 .add(question.getString(TITLE, ""))
                 .add(question.getInteger(SECTION_POSITION, null) != null ? null : question.getInteger(POSITION, null))
-                .add(question.getInteger(QUESTION_TYPE, 1))
+                .add(questionType)
                 .add(question.getString(STATEMENT, ""))
                 .add(question.getBoolean(MANDATORY, false) || isConditional)
                 .add(question.getInteger(SECTION_ID, null))
                 .add(question.getInteger(SECTION_POSITION, null))
                 .add(isConditional)
                 .add(question.getString(PLACEHOLDER, ""))
-                .add(question.getInteger(MATRIX_ID, null));
+                .add(question.getInteger(MATRIX_ID, null))
+                .add(question.getInteger(MATRIX_POSITION, null));
 
         query += getUpdateDateModifFormRequest();
         params.addAll(getParamsForUpdateDateModifFormRequest(formId));
@@ -145,22 +151,28 @@ public class DefaultQuestionService implements QuestionService {
             SqlStatementsBuilder s = new SqlStatementsBuilder();
             String query = "UPDATE " + QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, " +
                     "statement = ?, mandatory = ?, section_id = ?, section_position = ?, conditional = ?, placeholder = ?, " +
-                    "matrix_id = ? WHERE id = ? RETURNING *;";
+                    "matrix_id = ?, matrix_position = ? WHERE id = ? RETURNING *;";
 
             s.raw("BEGIN;");
             for (int i = 0; i < questions.size(); i++) {
                 JsonObject question = questions.getJsonObject(i);
+                int questionType = question.getInteger(MATRIX_ID, null) != null &&
+                        !MATRIX_CHILD_QUESTIONS.contains(question.getInteger(QUESTION_TYPE, 1)) ?
+                        QuestionTypes.SINGLEANSWERRADIO.getCode() :
+                        question.getInteger(QUESTION_TYPE, 1);
+                boolean isConditional = CONDITIONAL_QUESTIONS.contains(question.getInteger(QUESTION_TYPE)) && question.getBoolean(CONDITIONAL, false);
                 JsonArray params = new JsonArray()
                         .add(question.getString(TITLE, ""))
                         .add(question.getInteger(SECTION_POSITION, null) != null ? null : question.getInteger(POSITION, null))
-                        .add(question.getInteger(QUESTION_TYPE, 1))
+                        .add(questionType)
                         .add(question.getString(STATEMENT, ""))
-                        .add(question.getBoolean(CONDITIONAL, false) || question.getBoolean(MANDATORY, false))
+                        .add(question.getBoolean(MANDATORY, false) || isConditional)
                         .add(question.getInteger(SECTION_ID, null))
                         .add(question.getInteger(SECTION_POSITION, null))
-                        .add(question.getBoolean(CONDITIONAL, false))
-                        .add(question.getInteger(MATRIX_ID, null))
+                        .add(isConditional)
                         .add(question.getString(PLACEHOLDER, ""))
+                        .add(question.getInteger(MATRIX_ID, null))
+                        .add(question.getInteger(MATRIX_POSITION, null))
                         .add(question.getInteger(ID, null));
                 s.prepared(query, params);
             }

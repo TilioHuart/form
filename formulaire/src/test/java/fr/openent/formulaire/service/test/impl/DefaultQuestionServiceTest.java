@@ -1,5 +1,6 @@
 package fr.openent.formulaire.service.test.impl;
 
+import fr.openent.form.core.enums.QuestionTypes;
 import fr.openent.formulaire.service.impl.DefaultQuestionService;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -12,8 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static fr.openent.form.core.constants.Constants.CONDITIONAL_QUESTIONS;
-import static fr.openent.form.core.constants.Constants.QUESTIONS_WITHOUT_RESPONSES;
+import static fr.openent.form.core.constants.Constants.*;
 import static fr.openent.form.core.constants.EbFields.FORMULAIRE_ADDRESS;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.Fields.QUESTION_TYPE;
@@ -162,23 +162,30 @@ public class DefaultQuestionServiceTest {
     public void create(TestContext ctx) {
         Async async = ctx.async();
         String expectedQuery = "INSERT INTO " + QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
-                "mandatory, section_id, section_position, conditional, placeholder, matrix_id) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+                "mandatory, section_id, section_position, conditional, placeholder, matrix_id, matrix_position) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
 
         JsonObject question = new JsonObject();
-        boolean isConditional = CONDITIONAL_QUESTIONS.contains(question.getInteger(QUESTION_TYPE)) ? question.getBoolean(CONDITIONAL, false) : false;
+
+        int questionType = question.getInteger(MATRIX_ID, null) != null &&
+                !MATRIX_CHILD_QUESTIONS.contains(question.getInteger(QUESTION_TYPE, 1)) ?
+                QuestionTypes.SINGLEANSWERRADIO.getCode() :
+                question.getInteger(QUESTION_TYPE, 1);
+        boolean isConditional = CONDITIONAL_QUESTIONS.contains(question.getInteger(QUESTION_TYPE)) && question.getBoolean(CONDITIONAL, false);
+
         JsonArray expectedParams = new JsonArray()
                 .add(FORM_ID)
                 .add(question.getString(TITLE, ""))
                 .add(question.getInteger(SECTION_POSITION, null) != null ? null : question.getInteger(POSITION, null))
-                .add(question.getInteger(QUESTION_TYPE, 1))
+                .add(questionType)
                 .add(question.getString(STATEMENT, ""))
                 .add(question.getBoolean(MANDATORY, false) || isConditional)
                 .add(question.getInteger(SECTION_ID, null))
                 .add(question.getInteger(SECTION_POSITION, null))
                 .add(isConditional)
                 .add(question.getString(PLACEHOLDER, ""))
-                .add(question.getInteger(MATRIX_ID, null));
+                .add(question.getInteger(MATRIX_ID, null))
+                .add(question.getInteger(MATRIX_POSITION, null));
 
         String expectedQueryResult = expectedQuery + getUpdateDateModifFormRequest();
         expectedParams.addAll(getParamsForUpdateDateModifFormRequest(FORM_ID));
@@ -199,7 +206,7 @@ public class DefaultQuestionServiceTest {
         JsonObject tabQuestion = new JsonObject();
         tabQuestion.put(TITLE, TITLE)
                 .put(POSITION, 1)
-                .put(QUESTION_TYPE, 1)
+                .put(QUESTION_TYPE, 9)
                 .put(STATEMENT, STATEMENT)
                 .put(MANDATORY, false)
                 .put(SECTION_ID, 1)
@@ -207,11 +214,12 @@ public class DefaultQuestionServiceTest {
                 .put(CONDITIONAL, false)
                 .put(PLACEHOLDER, PLACEHOLDER)
                 .put(MATRIX_ID, 1)
+                .put(MATRIX_POSITION, 1)
                 .put(ID, 1);
         JsonObject tabQuestionNew = new JsonObject();
         tabQuestionNew.put(TITLE, "titled")
                 .put(POSITION, 2)
-                .put(QUESTION_TYPE, 2)
+                .put(QUESTION_TYPE, 4)
                 .put(STATEMENT, "statemented")
                 .put(MANDATORY, true)
                 .put(SECTION_ID, 2)
@@ -219,14 +227,15 @@ public class DefaultQuestionServiceTest {
                 .put(CONDITIONAL, true)
                 .put(PLACEHOLDER, "placeholdered")
                 .put(MATRIX_ID, 2)
+                .put(MATRIX_POSITION, 2)
                 .put(ID, 2);
         JsonArray questions = new JsonArray();
         questions.add(tabQuestion)
                 .add(tabQuestionNew);
 
         String expectedQuery = "[{\"action\":\"raw\",\"command\":\"BEGIN;\"}," +
-                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, statement = ?, mandatory = ?, section_id = ?, section_position = ?, conditional = ?, placeholder = ?, matrix_id = ? WHERE id = ? RETURNING *;\",\"values\":[\"title\",null,1,\"statement\",false,1,1,false,\"placeholder\",1,1]}," +
-                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, statement = ?, mandatory = ?, section_id = ?, section_position = ?, conditional = ?, placeholder = ?, matrix_id = ? WHERE id = ? RETURNING *;\",\"values\":[\"titled\",null,2,\"statemented\",true,2,2,true,\"placeholdered\",2,2]}," +
+                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, statement = ?, mandatory = ?, section_id = ?, section_position = ?, conditional = ?, placeholder = ?, matrix_id = ?, matrix_position = ? WHERE id = ? RETURNING *;\",\"values\":[\"title\",null,9,\"statement\",false,1,1,false,\"placeholder\",1,1,1]}," +
+                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, statement = ?, mandatory = ?, section_id = ?, section_position = ?, conditional = ?, placeholder = ?, matrix_id = ?, matrix_position = ? WHERE id = ? RETURNING *;\",\"values\":[\"titled\",null,4,\"statemented\",true,2,2,true,\"placeholdered\",2,2,2]}," +
                 "{\"action\":\"prepared\",\"statement\":\"UPDATE " + FORM_TABLE + " SET date_modification = ? WHERE id = ?; \",\"values\":[\"NOW()\",\"form_id\"]}," +
                 "{\"action\":\"raw\",\"command\":\"COMMIT;\"}]";
 
@@ -252,6 +261,8 @@ public class DefaultQuestionServiceTest {
                 .put(SECTION_ID, 1)
                 .put(SECTION_POSITION,1)
                 .put(CONDITIONAL, false)
+                .put(MATRIX_ID, 1)
+                .put(MATRIX_POSITION, 1)
                 .put(FORM_ID, 1)
                 .put(ID, 1);
         String expectedQuery = "DELETE FROM " + QUESTION_TABLE + " WHERE id = ?;";

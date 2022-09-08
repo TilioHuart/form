@@ -150,11 +150,11 @@ export class Form implements Selectable, Shareable  {
         let children: Questions = new Questions();
         if (e[Fields.CHOICES]) {
             choices.all = Mix.castArrayAs(QuestionChoice, e[Fields.CHOICES]);
-            choices.all.sort((a, b) => a.id - b.id);
+            choices.all.sort((a, b) => a.position - b.position);
         }
         if (e[Fields.CHILDREN]) {
             children.all = Mix.castArrayAs(Question, e[Fields.CHILDREN]);    // Ok because matrix children cannot not have choices or children themselves
-            children.all.sort((a, b) => a.id - b.id);
+            children.all.sort((a, b) => a.matrix_position - b.matrix_position);
         }
 
         let question: Question = Mix.castAs(Question, e);
