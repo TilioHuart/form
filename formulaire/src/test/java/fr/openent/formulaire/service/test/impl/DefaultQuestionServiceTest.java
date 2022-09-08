@@ -103,19 +103,26 @@ public class DefaultQuestionServiceTest {
     @Test
     public void testExportCSV(TestContext ctx) {
         Async async = ctx.async();
-        String getElementPosition = "CASE " +
-                "WHEN q.position ISNULL AND s.position IS NOT NULL THEN s.position " +
-                "WHEN s.position ISNULL AND q.position IS NOT NULL THEN q.position " +
-                "WHEN q.position ISNULL AND s.position ISNULL THEN parent.position " +
-                "END";
-        String getMatrixPosition = "CASE WHEN q.matrix_id IS NOT NULL THEN RANK() OVER (PARTITION BY q.matrix_id ORDER BY q.id) END";
+        String getElementPosition =
+                "CASE " +
+                    "WHEN q.position ISNULL AND s.position IS NOT NULL THEN s.position " +
+                    "WHEN s.position ISNULL AND q.position IS NOT NULL THEN q.position " +
+                    "WHEN s.position ISNULL AND q.position ISNULL THEN parent.position " +
+                "END AS element_position";
 
-        String expectedQuery = "SELECT q.*, " + getElementPosition + " AS element_position, " + getMatrixPosition + " AS matrix_position " +
+        String getSectionPosition =
+                "CASE " +
+                    "WHEN parent.section_position ISNULL AND q.section_position IS NOT NULL THEN q.section_position " +
+                    "WHEN q.section_position ISNULL AND parent.section_position IS NOT NULL THEN parent.section_position " +
+                "END AS section_position";
+
+        String expectedQuery = "SELECT q.id, q.title, q.position, q.question_type, q.statement, q.mandatory, q.section_id, " +
+                getElementPosition + ", " + getSectionPosition + ", q.matrix_position " +
                 "FROM " + QUESTION_TABLE + " q " +
                 "LEFT JOIN " + QUESTION_TABLE + " parent ON parent.id = q.matrix_id " +
-                "LEFT JOIN " + SECTION_TABLE + " s ON q.section_id = s.id " +
+                "LEFT JOIN " + SECTION_TABLE + " s ON q.section_id = s.id OR parent.section_id = s.id " +
                 "WHERE q.form_id = ? AND q.question_type NOT IN " + Sql.listPrepared(QUESTIONS_WITHOUT_RESPONSES) +
-                "ORDER BY element_position, q.section_position, q.id;";
+                "ORDER BY element_position, section_position, q.matrix_position, q.id;";
 
         JsonArray expectedParams = new JsonArray().add(FORM_ID).addAll(new JsonArray(QUESTIONS_WITHOUT_RESPONSES));
 
@@ -132,19 +139,26 @@ public class DefaultQuestionServiceTest {
     @Test
     public void testExportPDF(TestContext ctx) {
         Async async = ctx.async();
-        String getElementPosition = "CASE " +
-                "WHEN q.position ISNULL AND s.position IS NOT NULL THEN s.position " +
-                "WHEN s.position ISNULL AND q.position IS NOT NULL THEN q.position " +
-                "WHEN q.position ISNULL AND s.position ISNULL THEN parent.position " +
-                "END";
-        String getMatrixPosition = "CASE WHEN q.matrix_id IS NOT NULL THEN RANK() OVER (PARTITION BY q.matrix_id ORDER BY q.id) END";
+        String getElementPosition =
+                "CASE " +
+                    "WHEN q.position ISNULL AND s.position IS NOT NULL THEN s.position " +
+                    "WHEN s.position ISNULL AND q.position IS NOT NULL THEN q.position " +
+                    "WHEN s.position ISNULL AND q.position ISNULL THEN parent.position " +
+                "END AS element_position";
 
-        String expectedQuery = "SELECT q.*, " + getElementPosition + " AS element_position, " + getMatrixPosition + " AS matrix_position " +
+        String getSectionPosition =
+                "CASE " +
+                    "WHEN parent.section_position ISNULL AND q.section_position IS NOT NULL THEN q.section_position " +
+                    "WHEN q.section_position ISNULL AND parent.section_position IS NOT NULL THEN parent.section_position " +
+                "END AS section_position";
+
+        String expectedQuery = "SELECT q.id, q.title, q.position, q.question_type, q.statement, q.mandatory, q.section_id, " +
+                getElementPosition + ", " + getSectionPosition + ", q.matrix_position " +
                 "FROM " + QUESTION_TABLE + " q " +
                 "LEFT JOIN " + QUESTION_TABLE + " parent ON parent.id = q.matrix_id " +
-                "LEFT JOIN " + SECTION_TABLE + " s ON q.section_id = s.id " +
+                "LEFT JOIN " + SECTION_TABLE + " s ON q.section_id = s.id OR parent.section_id = s.id " +
                 "WHERE q.form_id = ? AND q.matrix_id IS NULL " +
-                "ORDER BY element_position, q.section_position, q.id;";
+                "ORDER BY element_position, section_position, q.matrix_position, q.id;";
 
         JsonArray expectedParams = new JsonArray().add(FORM_ID);
 
