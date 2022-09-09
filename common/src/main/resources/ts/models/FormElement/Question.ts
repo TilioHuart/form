@@ -154,6 +154,7 @@ export class Questions extends Selection<Question> {
                         question.choices.all.push(new QuestionChoice(question.id, j+1));
                     }
                 }
+                question.choices.all.sort((a: QuestionChoice, b: QuestionChoice) => a.position - b.position);
             }
         }
     }
@@ -171,6 +172,7 @@ export class Questions extends Selection<Question> {
                         question.children.all.push(new Question(question.id, Types.SINGLEANSWERRADIO, j+1));
                     }
                 }
+                question.children.all.sort((a: Question, b: Question) => a.matrix_position - b.matrix_position);
             }
         }
     }

@@ -112,6 +112,9 @@ export const questionTypeMatrix: Directive = ng.directive('questionTypeMatrix', 
                 if (vm.question.choices.all[index].id) {
                     await questionChoiceService.delete(vm.question.choices.all[index].id);
                 }
+                for (let i = index + 1; i < vm.question.choices.all.length; i++) {
+                    vm.question.choices.all[i].position--;
+                }
                 vm.question.choices.all.splice(index,1);
                 $scope.$apply();
             };
@@ -130,6 +133,9 @@ export const questionTypeMatrix: Directive = ng.directive('questionTypeMatrix', 
             vm.deleteChild = async (index: number) : Promise<void> => {
                 if (vm.question.children.all[index].id) {
                     await questionService.delete(vm.question.children.all[index].id);
+                }
+                for (let i = index + 1; i < vm.question.children.all.length; i++) {
+                    vm.question.children.all[i].matrix_position--;
                 }
                 vm.question.children.all.splice(index,1);
                 $scope.$apply();

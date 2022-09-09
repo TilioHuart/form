@@ -50,6 +50,7 @@ export class QuestionChoices {
         try {
             let data = await questionChoiceService.list(questionId);
             this.all = Mix.castArrayAs(QuestionChoice, data);
+            this.all.sort((a: QuestionChoice, b: QuestionChoice) => a.position - b.position);
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.questionChoice.sync'));
             throw e;

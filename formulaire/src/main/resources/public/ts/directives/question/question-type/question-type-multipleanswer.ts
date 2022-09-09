@@ -75,6 +75,9 @@ export const questionTypeMultipleanswer: Directive = ng.directive('questionTypeM
                 if (vm.question.choices.all[index].id) {
                     await questionChoiceService.delete(vm.question.choices.all[index].id);
                 }
+                for (let i = index + 1; i < vm.question.choices.all.length; i++) {
+                    vm.question.choices.all[i].position--;
+                }
                 vm.question.choices.all.splice(index,1);
                 $scope.$apply();
             };

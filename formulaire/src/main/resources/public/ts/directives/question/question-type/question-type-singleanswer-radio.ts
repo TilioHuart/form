@@ -34,7 +34,7 @@ export const questionTypeSingleanswerRadio: Directive = ng.directive('questionTy
             <div class="twelve">
                 <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']" guard-root="formTitle">
                     <div class="container-arrow" ng-if="vm.question.selected">
-                        <div ng-class="{hidden' : $first}" ng-click="vm.moveChoice(choice, vm.Direction.UP)">
+                        <div ng-class="{hidden : $first}" ng-click="vm.moveChoice(choice, vm.Direction.UP)">
                             <i class="i-chevron-up lg-icon"></i>
                         </div>
                         <div ng-class="{hidden : $last}" ng-click="vm.moveChoice(choice, vm.Direction.DOWN)">
@@ -85,6 +85,9 @@ export const questionTypeSingleanswerRadio: Directive = ng.directive('questionTy
             vm.deleteChoice = async (index: number) : Promise<void> => {
                 if (vm.question.choices.all[index].id) {
                     await questionChoiceService.delete(vm.question.choices.all[index].id);
+                }
+                for (let i = index + 1; i < vm.question.choices.all.length; i++) {
+                    vm.question.choices.all[i].position--;
                 }
                 vm.question.choices.all.splice(index,1);
                 $scope.$apply();
