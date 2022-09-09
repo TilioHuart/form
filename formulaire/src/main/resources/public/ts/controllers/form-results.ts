@@ -5,7 +5,7 @@ import {
     DistributionStatus,
     Form, FormElement, FormElements,
     Question,
-    QuestionChoice, QuestionChoices,
+    QuestionChoice,
     Responses
 } from "../models";
 import {Mix} from "entcore-toolkit";
