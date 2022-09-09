@@ -4,8 +4,7 @@ import fr.openent.form.core.constants.Fields;
 import fr.openent.form.core.enums.QuestionTypes;
 import fr.openent.form.helpers.FutureHelper;
 import fr.openent.form.helpers.UtilsHelper;
-import fr.openent.formulaire.controllers.QuestionController;
-import fr.openent.formulaire.service.QuestionSpecificFieldService;
+import fr.openent.formulaire.service.QuestionSpecificFieldsService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -22,10 +21,10 @@ import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.Tables.*;
 import static fr.openent.form.helpers.UtilsHelper.getIds;
 
-public class DefaultQuestionSpecificFieldService implements QuestionSpecificFieldService {
+public class DefaultQuestionSpecificFieldsService implements QuestionSpecificFieldsService {
     private final Sql sql = Sql.getInstance();
 
-    private static final Logger log = LoggerFactory.getLogger(DefaultQuestionSpecificFieldService.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultQuestionSpecificFieldsService.class);
 
     public Future<JsonArray> syncQuestionSpecs(JsonArray questions) {
         Promise<JsonArray> promise = Promise.promise();
@@ -61,7 +60,7 @@ public class DefaultQuestionSpecificFieldService implements QuestionSpecificFiel
     @Override
     public void create(JsonObject question, String questionId, Handler<Either<String, JsonObject>> handler) {
         String query = "INSERT INTO " + QUESTION_SPECIFIC_FIELDS_TABLE + " (question_id, cursor_min_val, cursor_max_val, cursor_step, " +
-                "cursor_label_min_val, cursor_label_max_val) VALUES (?, ?, ?, ?, ?, ?) RETURNING *;";
+                "cursor_min_label, cursor_max_label) VALUES (?, ?, ?, ?, ?, ?) RETURNING *;";
 
         boolean isCursor = question.getInteger(Fields.QUESTION_TYPE) == QuestionTypes.CURSOR.getCode();
         JsonArray params = new JsonArray()
@@ -69,8 +68,8 @@ public class DefaultQuestionSpecificFieldService implements QuestionSpecificFiel
                 .add(question.getInteger(CURSOR_MIN_VAL, isCursor ? 1 : null))
                 .add(question.getInteger(CURSOR_MAX_VAL, isCursor ? 10 : null))
                 .add(question.getInteger(CURSOR_STEP, isCursor ? 1 : null))
-                .add(question.getString(CURSOR_LABEL_MIN_VAL, ""))
-                .add(question.getString(CURSOR_LABEL_MAX_VAL, ""));
+                .add(question.getString(CURSOR_MIN_LABEL, ""))
+                .add(question.getString(CURSOR_MAX_LABEL, ""));
 
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
@@ -79,7 +78,7 @@ public class DefaultQuestionSpecificFieldService implements QuestionSpecificFiel
         if (!questions.isEmpty()) {
             SqlStatementsBuilder s = new SqlStatementsBuilder();
             String query = "UPDATE " + QUESTION_SPECIFIC_FIELDS_TABLE + " SET cursor_min_val = ?, cursor_max_val = ?, cursor_step = ?, " +
-                    "cursor_label_min_val = ?, cursor_label_max_val = ? WHERE question_id = ? RETURNING *;";
+                    "cursor_min_label = ?, cursor_max_label = ? WHERE question_id = ? RETURNING *;";
 
             s.raw("BEGIN;");
             for (int i = 0; i < questions.size(); i++) {
@@ -89,8 +88,8 @@ public class DefaultQuestionSpecificFieldService implements QuestionSpecificFiel
                         .add(question.getInteger(CURSOR_MIN_VAL, isCursor ? 1 : null))
                         .add(question.getInteger(CURSOR_MAX_VAL, isCursor ? 1 : null))
                         .add(question.getInteger(CURSOR_STEP, isCursor ? 1 : null))
-                        .add(question.getString(CURSOR_LABEL_MIN_VAL, ""))
-                        .add(question.getString(CURSOR_LABEL_MAX_VAL, ""))
+                        .add(question.getString(CURSOR_MIN_LABEL, ""))
+                        .add(question.getString(CURSOR_MAX_LABEL, ""))
                         .add(question.getInteger(ID, null));
                 s.prepared(query, params);
             }

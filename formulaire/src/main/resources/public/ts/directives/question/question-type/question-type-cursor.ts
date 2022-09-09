@@ -36,7 +36,7 @@ export const questionTypeCursor: Directive = ng.directive('questionTypeCursor', 
                     </div>
                     <div class="cursor-label-min-val">
                         <label><i18n>formulaire.question.value.label</i18n></label>
-                        <input type="text" ng-model="vm.question.cursor_label_min_val" 
+                        <input type="text" ng-model="vm.question.cursor_min_label" 
                                i18n-placeholder="formulaire.question.label">
                     </div>
                 </div>
@@ -55,7 +55,7 @@ export const questionTypeCursor: Directive = ng.directive('questionTypeCursor', 
                     </div>   
                     <div class="cursor-label-max-value">
                         <label><i18n>formulaire.question.value.label</i18n></label>
-                        <input type="text" ng-model="vm.question.cursor_label_max_val"
+                        <input type="text" ng-model="vm.question.cursor_max_label"
                                i18n-placeholder="formulaire.question.label">
                     </div> 
                 </div>

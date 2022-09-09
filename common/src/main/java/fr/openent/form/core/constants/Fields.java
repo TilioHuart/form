@@ -15,14 +15,12 @@ public class Fields {
     public static final String CODE = "code";
     public static final String COLLAB = "collab";
     public static final String CONDITIONAL = "conditional";
-    public static final String COUNT = "count";
-
+    public static final String CURSOR_MIN_LABEL = "cursor_min_label";
     public static final String CURSOR_MIN_VAL = "cursor_min_val";
+    public static final String CURSOR_MAX_LABEL = "cursor_max_label";
     public static final String CURSOR_MAX_VAL = "cursor_max_val";
     public static final String CURSOR_STEP = "cursor_step";
-    public static final String CURSOR_LABEL_MIN_VAL = "cursor_label_min_val";
-    public static final String CURSOR_LABEL_MAX_VAL = "cursor_label_max_val";
-
+    public static final String COUNT = "count";
     public static final String DATE_ENDING = "date_ending";
     public static final String DATE_CREATION = "date_creation";
     public static final String DATE_MODIFICATION = "date_modification";

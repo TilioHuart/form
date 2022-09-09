@@ -337,8 +337,8 @@ public class DefaultFormService implements FormService {
                 // Duplicate questions SPECIFICS fields of the QUESTIONS
                 "new_questions_specifics AS (" +
                     "INSERT INTO " + QUESTION_SPECIFIC_FIELDS_TABLE + " (question_id, cursor_min_val, cursor_max_val, " +
-                    "cursor_step, cursor_label_min_val, cursor_label_max_val) " +
-                    "SELECT q.id, cursor_min_val, cursor_max_val, cursor_step, cursor_label_min_val, cursor_label_max_val " +
+                    "cursor_step, cursor_min_label, cursor_max_label) " +
+                    "SELECT q.id, cursor_min_val, cursor_max_val, cursor_step, cursor_min_label, cursor_max_label " +
                     "FROM " + QUESTION_SPECIFIC_FIELDS_TABLE + " qsf " +
                     "JOIN new_questions q ON q.original_question_id = qsf.question_id " +
                     "WHERE question_type IN " + Sql.listPrepared(QUESTIONS_WITH_SPECIFICS) + " " +
@@ -355,7 +355,7 @@ public class DefaultFormService implements FormService {
                     "WHERE NOT EXISTS (SELECT * FROM new_questions)" +
                 ") " +
                 // Join questions specifics fields to these questions infos
-                "SELECT fr.*, qsf.cursor_min_val, qsf.cursor_max_val, qsf.cursor_step, qsf.cursor_label_min_val, qsf.cursor_label_max_val FROM final_results fr " +
+                "SELECT fr.*, qsf.cursor_min_val, qsf.cursor_max_val, qsf.cursor_step, qsf.cursor_min_label, qsf.cursor_max_label FROM final_results fr " +
                 "LEFT JOIN new_questions_specifics qsf ON fr.id = qsf.question_id " +
                 "ORDER BY fr.id;";
 

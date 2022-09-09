@@ -6,7 +6,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-public interface QuestionSpecificFieldService {
+public interface QuestionSpecificFieldsService {
 
     /**
      * Sync all the specifics fields of question

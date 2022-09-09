@@ -3,11 +3,11 @@ package fr.openent.formulaire.controllers;
 import fr.openent.form.helpers.BusResultHelper;
 import fr.openent.formulaire.service.QuestionChoiceService;
 import fr.openent.formulaire.service.QuestionService;
-import fr.openent.formulaire.service.QuestionSpecificFieldService;
+import fr.openent.formulaire.service.QuestionSpecificFieldsService;
 import fr.openent.formulaire.service.SectionService;
 import fr.openent.formulaire.service.impl.DefaultQuestionChoiceService;
 import fr.openent.formulaire.service.impl.DefaultQuestionService;
-import fr.openent.formulaire.service.impl.DefaultQuestionSpecificFieldService;
+import fr.openent.formulaire.service.impl.DefaultQuestionSpecificFieldsService;
 import fr.openent.formulaire.service.impl.DefaultSectionService;
 import fr.wseduc.bus.BusAddress;
 import io.vertx.core.eventbus.Message;
@@ -23,7 +23,7 @@ public class EventBusController extends ControllerHelper {
     private final SectionService sectionService = new DefaultSectionService();
     private final QuestionService questionService = new DefaultQuestionService();
     private final QuestionChoiceService questionChoiceService = new DefaultQuestionChoiceService();
-    private final QuestionSpecificFieldService questionSpecificFieldService = new DefaultQuestionSpecificFieldService();
+    private final QuestionSpecificFieldsService questionSpecificFieldsService = new DefaultQuestionSpecificFieldsService();
 
     @BusAddress(FORMULAIRE_ADDRESS)
     public void bus(final Message<JsonObject> message) {
@@ -38,7 +38,7 @@ public class EventBusController extends ControllerHelper {
                 formId = body.getString(PARAM_FORM_ID);
                 questionService.listForFormAndSection(formId)
                         .onSuccess(listQuestionsEvt -> {
-                            BusResultHelper.busArrayHandler(questionSpecificFieldService.syncQuestionSpecs(listQuestionsEvt), message);
+                            BusResultHelper.busArrayHandler(questionSpecificFieldsService.syncQuestionSpecs(listQuestionsEvt), message);
                         })
                         .onFailure(error -> {
                             String errMessage = String.format("[Formulaire@%s::bus]:  " +

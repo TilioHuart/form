@@ -20,8 +20,6 @@ import static fr.openent.form.core.constants.Constants.*;
 import static fr.openent.form.core.constants.Fields.QUESTION_TYPE;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.FolderIds.ID_ROOT_FOLDER;
-import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_BEHAVIOUR;
-import static fr.openent.form.core.constants.ShareRights.MANAGER_RESOURCE_BEHAVIOUR;
 import static fr.openent.form.core.constants.Tables.*;
 
 public class ImportExportService {
@@ -274,7 +272,7 @@ public class ImportExportService {
 
         SqlStatementsBuilder s = new SqlStatementsBuilder();
         String query = "INSERT INTO " + QUESTION_SPECIFIC_FIELDS_TABLE + " (question_id, cursor_min_val, cursor_max_val, " +
-                "cursor_step, cursor_label_min_val, cursor_label_max_val) " +
+                "cursor_step, cursor_min_label, cursor_max_label) " +
                 "VALUES (?, ?, ?, ?, ?, ?) RETURNING *;";
 
         s.raw(TRANSACTION_BEGIN_QUERY);
@@ -285,8 +283,8 @@ public class ImportExportService {
                     .add(entry.getInteger(fields.indexOf(CURSOR_MIN_VAL)))
                     .add(entry.getInteger(fields.indexOf(CURSOR_MAX_VAL)))
                     .add(entry.getInteger(fields.indexOf(CURSOR_STEP)))
-                    .add(entry.getString(fields.indexOf(CURSOR_LABEL_MIN_VAL)))
-                    .add(entry.getString(fields.indexOf(CURSOR_LABEL_MAX_VAL)));
+                    .add(entry.getString(fields.indexOf(CURSOR_MIN_LABEL)))
+                    .add(entry.getString(fields.indexOf(CURSOR_MAX_LABEL)));
             s.prepared(query, params);
         }
         s.raw(TRANSACTION_COMMIT_QUERY);

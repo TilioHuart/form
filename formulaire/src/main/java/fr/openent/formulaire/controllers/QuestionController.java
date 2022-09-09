@@ -7,11 +7,11 @@ import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.FormService;
 import fr.openent.formulaire.service.QuestionService;
-import fr.openent.formulaire.service.QuestionSpecificFieldService;
+import fr.openent.formulaire.service.QuestionSpecificFieldsService;
 import fr.openent.formulaire.service.impl.DefaultDistributionService;
 import fr.openent.formulaire.service.impl.DefaultFormService;
 import fr.openent.formulaire.service.impl.DefaultQuestionService;
-import fr.openent.formulaire.service.impl.DefaultQuestionSpecificFieldService;
+import fr.openent.formulaire.service.impl.DefaultQuestionSpecificFieldsService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
@@ -36,14 +36,14 @@ import static org.entcore.common.http.response.DefaultResponseHandler.defaultRes
 public class QuestionController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(QuestionController.class);
     private final QuestionService questionService;
-    private final QuestionSpecificFieldService questionSpecificFieldService;
+    private final QuestionSpecificFieldsService questionSpecificFieldsService;
     private final FormService formService;
     private final DistributionService distributionService;
 
     public QuestionController() {
         super();
         this.questionService = new DefaultQuestionService();
-        this.questionSpecificFieldService = new DefaultQuestionSpecificFieldService();
+        this.questionSpecificFieldsService = new DefaultQuestionSpecificFieldsService();
         this.formService = new DefaultFormService();
         this.distributionService = new DefaultDistributionService();
     }
@@ -62,7 +62,7 @@ public class QuestionController extends ControllerHelper {
                 return;
             }
             JsonArray questions = listQuestionsEvt.right().getValue();
-            questionSpecificFieldService.syncQuestionSpecs(questions)
+            questionSpecificFieldsService.syncQuestionSpecs(questions)
                     .onSuccess(result -> renderJson(request, result))
                     .onFailure(error -> renderError(request));
         });
@@ -83,7 +83,7 @@ public class QuestionController extends ControllerHelper {
             }
             JsonArray questions = getQuestionEvt.right().getValue();
 
-            questionSpecificFieldService.syncQuestionSpecs(questions)
+            questionSpecificFieldsService.syncQuestionSpecs(questions)
                     .onSuccess(result -> renderJson(request, result))
                     .onFailure(error -> renderError(request));
         });
@@ -238,7 +238,7 @@ public class QuestionController extends ControllerHelper {
             // If question is cursor type, you insert fields in a specific table
             if (question.getInteger(QUESTION_TYPE) == QuestionTypes.CURSOR.getCode()) {
                 String questionId = questionEvt.right().getValue().getInteger(ID).toString();
-                questionSpecificFieldService.create(question, questionId, defaultResponseHandler(request));
+                questionSpecificFieldsService.create(question, questionId, defaultResponseHandler(request));
                 return;
             }
             renderJson(request, questionEvt.right().getValue());
@@ -362,7 +362,7 @@ public class QuestionController extends ControllerHelper {
                                 updatedQuestions.addAll(updatedQuestionsInfos.getJsonArray(k));
                             }
 
-                            questionSpecificFieldService.update(questions, updateSpecificsEvt -> {
+                            questionSpecificFieldsService.update(questions, updateSpecificsEvt -> {
                                 if (updateSpecificsEvt.isLeft()) {
                                     log.error("[Formulaire@updateQuestions] Failed to update questions specifics : " + updateSpecificsEvt.left().getValue());
                                     renderInternalError(request, updateSpecificsEvt);
