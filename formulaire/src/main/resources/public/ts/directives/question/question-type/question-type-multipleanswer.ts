@@ -37,13 +37,13 @@ export const questionTypeMultipleanswer: Directive = ng.directive('questionTypeM
                             <i class="i-chevron-down lg-icon"></i>
                         </div>
                     </div>
-                    <label class="nine left-spacing-twice">
+                    <label class="twelve left-spacing-twice">
                         <input type="checkbox" id="check-[[choice.id]]" disabled>
                         <span style="cursor: default"></span>
                         <input type="text" ng-model="choice.value" ng-if="!vm.question.selected" disabled
-                                class="eleven ten-mobile" placeholder="Choix [[$index + 1]]">
+                                class="width95 ten-mobile" placeholder="Choix [[$index + 1]]">
                         <input type="text" ng-model="choice.value" ng-if="vm.question.selected" input-guard
-                                class="eleven ten-mobile" placeholder="Choix [[$index + 1]]">
+                                class="width95 ten-mobile" placeholder="Choix [[$index + 1]]">
                     </label>
                     <i class="i-cancel lg-icon dontSave" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
                 </div>

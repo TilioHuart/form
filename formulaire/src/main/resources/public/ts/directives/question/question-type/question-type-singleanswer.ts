@@ -41,15 +41,15 @@ export const questionTypeSingleanswer: Directive = ng.directive('questionTypeSin
                             <i class="i-chevron-down lg-icon"></i>
                         </div>
                     </div>
-                    <label class="nine left-spacing-twice">
-                        <span class="content-line">[[$index + 1]].</span>
+                    <label class="left-spacing-twice" ng-class="vm.question.conditional ? 'five four-mobile' : 'twelve'">
+                        <span style="cursor: default">[[$index + 1]].</span>
                         <input type="text" ng-model="choice.value" ng-if="!vm.question.selected" disabled
-                                ng-class="vm.question.conditional ? 'five four-mobile' : 'nine'" placeholder="Choix [[$index + 1]]">
+                                ng-class="vm.question.conditional ? 'eleven eight-mobile' : 'width95 ten-mobile'" placeholder="Choix [[$index + 1]]">
                         <input type="text" ng-model="choice.value" ng-if="vm.question.selected" input-guard
-                                ng-class="vm.question.conditional ? 'five four-mobile' : 'nine'" placeholder="Choix [[$index + 1]]">
+                                ng-class="vm.question.conditional ? 'eleven eight-mobile' : 'width95 ten-mobile'" placeholder="Choix [[$index + 1]]">
                     </label>
                     <i class="i-cancel lg-icon dontSave" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
-                    <select ng-if="vm.question.conditional" ng-model="choice.next_section_id" ng-disabled="!vm.question.selected" input-guard>
+                    <select class="five" ng-if="vm.question.conditional" ng-model="choice.next_section_id" ng-disabled="!vm.question.selected" input-guard>
                         <option ng-repeat="section in vm.formElements.all | filter:vm.isSectionsAfter" ng-value="section.id">
                             [[vm.I18n.translate('formulaire.access.section') + section.title]]
                         </option>

@@ -115,6 +115,16 @@
                 margin-left: 6%;
               }
 
+              .width95 {
+                @media screen and (min-width: $formulaire-screen-tablet) {
+                  width: 95%;
+                }
+
+                &-always {
+                  width: 95%;
+                }
+              }
+
               i.i-cancel {
                 margin: auto 1%;
               }

@@ -48,11 +48,11 @@ export const questionTypeMatrix: Directive = ng.directive('questionTypeMatrix', 
                                 <i class="i-chevron-down lg-icon"></i>
                             </div>
                         </div>
-                        <label class="nine left-spacing-twice">
+                        <label class="twelve left-spacing-twice">
                             <span style="cursor: default"></span>
-                            <input type="text" class="eleven ten-mobile" ng-if="!vm.question.selected" disabled
+                            <input type="text" class="width95-always" ng-if="!vm.question.selected" disabled
                                    ng-model="choice.value" placeholder="Option [[$index + 1]]">
-                            <input type="text" class="eleven ten-mobile" ng-if="vm.question.selected" input-guard
+                            <input type="text" class="width95-always" ng-if="vm.question.selected" input-guard
                                    ng-model="choice.value" placeholder="Option [[$index + 1]]">
                         </label>
                         <i class="i-cancel lg-icon dontSave" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
@@ -73,11 +73,11 @@ export const questionTypeMatrix: Directive = ng.directive('questionTypeMatrix', 
                                 <i class="i-chevron-down lg-icon"></i>
                             </div>
                         </div>
-                        <label class="nine left-spacing-twice">
+                        <label class="twelve left-spacing-twice">
                             <span style="cursor: default"></span>
-                            <input type="text" class="eleven ten-mobile" ng-if="!vm.question.selected" disabled
+                            <input type="text" class="width95-always" ng-if="!vm.question.selected" disabled
                                    ng-model="child.title" placeholder="Option [[$index + 1]]">
-                            <input type="text" class="eleven ten-mobile" ng-if="vm.question.selected" input-guard
+                            <input type="text" class="width95-always" ng-if="vm.question.selected" input-guard
                                    ng-model="child.title" placeholder="Option [[$index + 1]]">
                         </label>
                         <i class="i-cancel lg-icon dontSave" ng-click="vm.deleteChild($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
