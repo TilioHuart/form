@@ -1,6 +1,7 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.constants.Constants;
+import fr.openent.form.core.model.Question;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.DistributionService;
@@ -178,20 +179,19 @@ public class ResponseController extends ControllerHelper {
                         return;
                     }
 
-                    JsonObject question = questionEvt.right().getValue();
-                    int question_type = question.getInteger(QUESTION_TYPE);
+                    Question question = new Question(questionEvt.right().getValue());
                     Integer choice_id = response.getInteger(CHOICE_ID);
 
                     // Check if it's a question type you can respond to
-                    if (QUESTIONS_WITHOUT_RESPONSES.contains(question_type)) {
-                        String message = "[Formulaire@createResponse] You cannot create a response for a question of type " + question_type;
+                    if (QUESTIONS_WITHOUT_RESPONSES.contains(question.getQuestionType())) {
+                        String message = "[Formulaire@createResponse] You cannot create a response for a question of type " + question.getQuestionType();
                         log.error(message);
                         badRequest(request, message);
                         return;
                     }
 
                     // If there is a choice it should match an existing QuestionChoice for this question
-                    if (choice_id != null && CHOICES_TYPE_QUESTIONS.contains(question_type)) {
+                    if (choice_id != null && CHOICES_TYPE_QUESTIONS.contains(question.getQuestionType())) {
                         questionChoiceService.get(choice_id.toString(), choiceEvt -> {
                             if (choiceEvt.isLeft()) {
                                 log.error("[Formulaire@createResponse] Fail to get question choice corresponding to id : " + choice_id);
@@ -208,8 +208,8 @@ public class ResponseController extends ControllerHelper {
                             JsonObject choice = choiceEvt.right().getValue();
 
                             // Check choice validity
-                            if (question.getInteger(MATRIX_ID) != null &&
-                                (!choice.getInteger(QUESTION_ID).equals(question.getInteger(MATRIX_ID)) ||
+                            if (question.getMatrixId() != null &&
+                                (!choice.getInteger(QUESTION_ID).equals(question.getMatrixId()) ||
                                 !choice.getString(VALUE).equals(response.getString(ANSWER)))) {
                                 String message ="[Formulaire@createResponse] Wrong choice for response " + response;
                                 log.error(message);
@@ -217,7 +217,7 @@ public class ResponseController extends ControllerHelper {
                                 return;
 
                             }
-                            else if (question.getInteger(MATRIX_ID) == null &&
+                            else if (question.getMatrixId() == null &&
                                     (!choice.getInteger(QUESTION_ID).toString().equals(questionId) ||
                                     !choice.getString(VALUE).equals(response.getString(ANSWER)))) {
                                 String message ="[Formulaire@createResponse] Wrong choice for response " + response;
@@ -229,11 +229,11 @@ public class ResponseController extends ControllerHelper {
                         });
                     }
                     else {
-                        if (question_type == 6) {
+                        if (question.getQuestionType() == 6) {
                             try { dateFormatter.parse(response.getString(ANSWER)); }
                             catch (ParseException e) { e.printStackTrace(); }
                         }
-                        if (question_type == 7) {
+                        if (question.getQuestionType() == 7) {
                             try { timeFormatter.parse(response.getString(ANSWER)); }
                             catch (ParseException e) { e.printStackTrace(); }
                         }

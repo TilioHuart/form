@@ -42,6 +42,7 @@ public class Fields {
     public static final String NAME = "name";
     public static final String NB_FOLDER_CHILDREN = "ng_folder_children";
     public static final String NB_FORM_CHILDREN = "ng_form_children";
+    public static final String NB_RESPONSES = "nb_responses";
     public static final String NEXT_SECTION_ID = "next_section_id";
     public static final String ORIGINAL_ID = "original_id";
     public static final String ORIGINAL_QUESTION_ID = "original_question_id";
