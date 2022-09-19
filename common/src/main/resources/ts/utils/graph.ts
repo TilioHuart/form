@@ -1,5 +1,5 @@
 import {idiom} from 'entcore';
-import {Question, QuestionChoice, Types} from "@common/models";
+import {Distributions, Question, QuestionChoice, Types} from "@common/models";
 import {ColorUtils} from "@common/utils/color";
 import * as ApexCharts from 'apexcharts';
 
@@ -108,14 +108,14 @@ export class GraphUtils {
      * @param question  Question object which we want to display the results
      * @param charts    ApexCharts to store and render at the end
      */
-    static generateGraphForPDF = async (question: Question, charts: any) : Promise<void> => {
+    static generateGraphForPDF = async (question: Question, charts: any, distribs: number) : Promise<void> => {
         switch (question.question_type) {
             case Types.SINGLEANSWER:
             case Types.SINGLEANSWERRADIO:
                 await GraphUtils.generateSingleAnswerChartForPDF(question, charts);
                 break;
             case Types.MULTIPLEANSWER:
-                await GraphUtils.generateMultipleAnswerChartForPDF(question, charts);
+                await GraphUtils.generateMultipleAnswerChartForPDF(question, charts, distribs);
                 break;
             case Types.MATRIX:
                 await GraphUtils.generateMatrixChartForPDF(question, charts);
@@ -160,7 +160,7 @@ export class GraphUtils {
      * @param question  Question object which we want to display the results
      * @param charts    ApexCharts to store and render at the end
      */
-    static generateMultipleAnswerChartForPDF = async (question: Question, charts: any) : Promise<void> => {
+    static generateMultipleAnswerChartForPDF = async (question: Question, charts: any, distribs: number) : Promise<void> => {
         if (question.question_type != Types.MULTIPLEANSWER) {
             return null;
         }
@@ -169,17 +169,20 @@ export class GraphUtils {
 
         let series: number[] = [];
         let labels: string[] = [];
+        let seriesPercent: number[] = [];
 
         for (let choice of choices) {
             series.push(choice.nbResponses); // Fill data
             // Fill labels
             !choice.id ?
                 labels.push(idiom.translate('formulaire.response.empty')) :
-                labels.push(choice.value.substring(0, 40) + (choice.value.length > 40 ? "..." : ""));
+                labels.push(choice.value.substring(0, 40) + (choice.value.length > 40 ? "..." : ""))
+            seriesPercent.push((choice.nbResponses/distribs)*100)
         }
 
         let colors: string[] = ColorUtils.generateColorList(labels.length);
-        let newOptions: any = GraphUtils.generateOptions(question.question_type, colors, labels);
+        let newOptions: any = GraphUtils.generateOptions(question.question_type, colors, labels, null, null,
+            seriesPercent);
         newOptions.series = [{ data: series }];
 
         await GraphUtils.renderChartForPDF(newOptions, charts);
@@ -242,8 +245,9 @@ export class GraphUtils {
      * @param labels    Labels to display on the cart
      * @param height    Height of the chart to display (optional)
      * @param width     Width of the chart to display (optional)
+     * @param seriesPercent Percentage to use for the graph
      */
-    static generateOptions = (type: Types, colors: string[], labels: string[], height?: any, width?: any) : any => {
+    static generateOptions = (type: Types, colors: string[], labels: string[], height?: any, width?: any, seriesPercent?: number[]) : any => {
         let options: any;
         if (type === Types.SINGLEANSWER || type === Types.SINGLEANSWERRADIO) {
             options = {
@@ -276,6 +280,12 @@ export class GraphUtils {
                         distributed: true
                     }
                 },
+                dataLabels: {
+                    enable: true,
+                    formatter: function (val: number, opt: any): string {
+                        return (val + " (" + seriesPercent[opt.dataPointIndex] + "%)")
+                    },
+                },
                 colors: colors,
                 xaxis: {
                     categories: labels,
@@ -304,6 +314,6 @@ export class GraphUtils {
                 }
             };
         }
-        return JSON.parse(JSON.stringify(options));
+        return options;
     }
 }

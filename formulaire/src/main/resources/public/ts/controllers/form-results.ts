@@ -176,7 +176,7 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
                     question.choices.replaceSpace();
                     question.fillChoicesInfo(distribs, results.all);
                     // Generate graphs
-                    await GraphUtils.generateGraphForPDF(question, vm.pdfResponseCharts);
+                    await GraphUtils.generateGraphForPDF(question, vm.pdfResponseCharts, distribs.all.length);
                 }
 
                 await storeAllCharts(questions, vm.pdfResponseCharts, images);
