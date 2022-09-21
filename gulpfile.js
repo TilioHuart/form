@@ -31,7 +31,16 @@ gulp.task('copy-mdi-font', ['drop-cache'], () => {
     return merge(streams);
 });
 
-gulp.task('webpack', ['copy-mdi-font'], () => {
+gulp.task('copy-files', ['drop-cache'], () => {
+    var streams = [];
+    apps.forEach(function (app) {
+        streams.push(gulp.src('./node_modules/entcore/src/template/**/*.html').pipe(gulp.dest('./' + app + '/src/main/resources/public/template/entcore')));
+        streams.push(gulp.src('./node_modules/entcore/bundle/*').pipe(gulp.dest('./' + app + '/src/main/resources/public/dist/entcore')));
+    });
+    return merge(streams);
+})
+
+gulp.task('webpack', ['copy-files','copy-mdi-font'], () => {
     var streams = [];
     apps.forEach(function (app) {
         streams.push(gulp.src('./' + app + '/src/main/resources/public/**/*.ts')
