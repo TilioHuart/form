@@ -1,5 +1,5 @@
 import {idiom} from 'entcore';
-import {Distributions, Question, QuestionChoice, Types} from "@common/models";
+import {Question, QuestionChoice, Types} from "@common/models";
 import {ColorUtils} from "@common/utils/color";
 import * as ApexCharts from 'apexcharts';
 
@@ -108,14 +108,14 @@ export class GraphUtils {
      * @param question  Question object which we want to display the results
      * @param charts    ApexCharts to store and render at the end
      */
-    static generateGraphForPDF = async (question: Question, charts: any, distribs: number) : Promise<void> => {
+    static generateGraphForPDF = async (question: Question, charts: any, nbDistribs: number) : Promise<void> => {
         switch (question.question_type) {
             case Types.SINGLEANSWER:
             case Types.SINGLEANSWERRADIO:
                 await GraphUtils.generateSingleAnswerChartForPDF(question, charts);
                 break;
             case Types.MULTIPLEANSWER:
-                await GraphUtils.generateMultipleAnswerChartForPDF(question, charts, distribs);
+                await GraphUtils.generateMultipleAnswerChartForPDF(question, charts, nbDistribs);
                 break;
             case Types.MATRIX:
                 await GraphUtils.generateMatrixChartForPDF(question, charts);

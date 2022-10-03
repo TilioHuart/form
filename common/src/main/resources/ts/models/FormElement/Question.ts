@@ -87,7 +87,8 @@ export class Question extends FormElement {
         }
 
         // Count responses for each choice
-        results = results.filter((r: Response) => r.question_id === this.id);
+        let childrenIds: number[] = this.children.all.map((q:Question) => q.id);
+        results = results.filter((r: Response) => childrenIds.indexOf(r.question_id) >= 0);
         for (let child of this.children.all) {
 
             // Create child choices based on copy of parent choices
