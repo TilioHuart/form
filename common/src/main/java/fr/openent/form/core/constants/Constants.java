@@ -19,6 +19,7 @@ public class Constants {
     public static final List<Integer> CONDITIONAL_QUESTIONS = QuestionTypes.getConditionalQuestions();
     public static final List<Integer> CHOICES_TYPE_QUESTIONS = QuestionTypes.getChoicesTypeQuestions();
     public static final List<Integer> QUESTIONS_WITHOUT_RESPONSES = QuestionTypes.getQuestionsWithoutResponses();
+    public static final List<Integer> FORBIDDEN_QUESTIONS = QuestionTypes.getForbiddenQuestions();
     public static final List<Integer> MATRIX_CHILD_QUESTIONS = QuestionTypes.getMatrixChildQuestions();
 
     private Constants() {

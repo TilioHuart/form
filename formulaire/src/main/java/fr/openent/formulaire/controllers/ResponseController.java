@@ -30,8 +30,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
-import static fr.openent.form.core.constants.Constants.CHOICES_TYPE_QUESTIONS;
-import static fr.openent.form.core.constants.Constants.QUESTIONS_WITHOUT_RESPONSES;
+import static fr.openent.form.core.constants.Constants.*;
 import static fr.openent.form.core.constants.DistributionStatus.FINISHED;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_RIGHT;
@@ -183,7 +182,7 @@ public class ResponseController extends ControllerHelper {
                     Integer choice_id = response.getInteger(CHOICE_ID);
 
                     // Check if it's a question type you can respond to
-                    if (QUESTIONS_WITHOUT_RESPONSES.contains(question.getQuestionType())) {
+                    if (FORBIDDEN_QUESTIONS.contains(question.getQuestionType())) {
                         String message = "[Formulaire@createResponse] You cannot create a response for a question of type " + question.getQuestionType();
                         log.error(message);
                         badRequest(request, message);
@@ -321,7 +320,7 @@ public class ResponseController extends ControllerHelper {
                     Integer choice_id = response.getInteger(CHOICE_ID);
 
                     // Check if it's a question type you can respond to
-                    if (QUESTIONS_WITHOUT_RESPONSES.contains(question_type)) {
+                    if (FORBIDDEN_QUESTIONS.contains(question_type)) {
                         String message = "[Formulaire@updateResponse] You cannot create a response for a question of type " + question_type;
                         log.error(message);
                         badRequest(request, message);
