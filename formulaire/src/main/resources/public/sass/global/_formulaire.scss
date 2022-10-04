@@ -18,12 +18,12 @@ $formulaire-red: #b50000;
 $formulaire-green: green;
 
 @font-face {
-  font-family: 'material-icons';
-  src: url('./public/font/material-design/fonts/materialdesignicons-webfont.eot');
-  src: url('./public/font/material-design/fonts/materialdesignicons-webfont.eot') format('embedded-opentype'),
-  url('./public/font/material-design/fonts/materialdesignicons-webfont.woff2') format('woff2'),
-  url('./public/font/material-design/fonts/materialdesignicons-webfont.woff2') format('woff'),
-  url('./public/font/material-design/fonts/materialdesignicons-webfont.ttf') format('truetype');
+  font-family: 'formulaire-mdi';
+  src: url('/formulaire/public/mdi/materialdesignicons-webfont.eot');
+  src: url('/formulaire/public/mdi/materialdesignicons-webfont.eot') format('embedded-opentype'),
+  url('/formulaire/public/mdi/materialdesignicons-webfont.woff2') format('woff2'),
+  url('/formulaire/public/mdi/materialdesignicons-webfont.woff2') format('woff'),
+  url('/formulaire/public/mdi/materialdesignicons-webfont.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }

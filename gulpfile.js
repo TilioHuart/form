@@ -15,7 +15,7 @@ if (argv.targetModule) {
     apps = [argv.targetModule];
 }
 
-gulp.task('drop-cache', function(){
+gulp.task('drop-cache', () => {
     var streams = [];
     apps.forEach(function (app) {
         streams.push(gulp.src(['./' + app + '/src/main/resources/public/dist'], {read: false}).pipe(clean()))
@@ -33,7 +33,16 @@ gulp.task('copy-files', ['drop-cache'], () => {
     return merge(streams);
 })
 
-gulp.task('webpack', ['copy-files'], () => {
+gulp.task('copy-mdi-font', ['copy-files'], () => {
+    var streams = [];
+    apps.forEach(function (app) {
+        streams.push(gulp.src('./node_modules/@mdi/font/fonts/*')
+            .pipe(gulp.dest('./' + app + '/src/main/resources/public/mdi')))
+    });
+    return merge(streams);
+});
+
+gulp.task('webpack', ['copy-mdi-font'], () => {
     var streams = [];
     apps.forEach(function (app) {
         streams.push(gulp.src('./' + app + '/src/main/resources/public/**/*.ts')
