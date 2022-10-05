@@ -737,22 +737,28 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         // Create choices
                         let registeredChoiceValues: string[] = [];
                         formElement.choices.replaceSpace();
+                        let positionCounter: number = 1;
                         for (let choice of formElement.choices.all) {
                             if (choice.value && !registeredChoiceValues.find(v => v === choice.value)) {
+                                choice.position = positionCounter;
                                 choice.question_id = newId;
                                 choice.id = (await questionChoiceService.save(choice)).id;
                                 registeredChoiceValues.push(choice.value);
+                                positionCounter++;
                             }
                         }
                         // Create children (for MATRIX questions)
+                        positionCounter = 1;
                         if (formElement.question_type === Types.MATRIX) {
                             let registeredChildrenTitles: string[] = [];
                             for (let child of formElement.children.all) {
                                 if (child.title && !registeredChildrenTitles.find((t: string) => t === child.title)) {
+                                    child.matrix_position = positionCounter;
                                     child.matrix_id = newId;
                                     child.form_id = formElement.form_id;
                                     child.id = (await questionService.save(child)).id;
                                     registeredChildrenTitles.push(child.title);
+                                    positionCounter++;
                                 }
                             }
                         }
