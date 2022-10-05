@@ -125,7 +125,7 @@ export const questionTypeMatrix: Directive = ng.directive('questionTypeMatrix', 
             };
 
             vm.moveChild = (child: Question, direction: string) : void => {
-                FormElementUtils.switchPositions(vm.question.children, child.position - 1, direction, PropPosition.MATRIX_POSITION);
+                FormElementUtils.switchPositions(vm.question.children, child.matrix_position - 1, direction, PropPosition.MATRIX_POSITION);
                 vm.question.children.all.sort((a, b) => a.matrix_position - b.matrix_position);
                 $scope.$apply();
             };
