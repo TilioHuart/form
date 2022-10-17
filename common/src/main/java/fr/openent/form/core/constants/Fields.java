@@ -45,6 +45,7 @@ public class Fields {
     public static final String NB_RESPONSES = "nb_responses";
     public static final String NEXT_SECTION_ID = "next_section_id";
     public static final String ORIGINAL_ID = "original_id";
+    public static final String ORIGINAL_FORM_ID = "original_form_id";
     public static final String ORIGINAL_QUESTION_ID = "original_question_id";
     public static final String ORIGINAL_SECTION_ID = "original_section_id";
     public static final String OWNER_ID = "owner_id";
@@ -131,11 +132,13 @@ public class Fields {
     public static final String CONTENT_TRANSFER_ENCODING = "content_transfer_encoding";
     public static final String CONTENT_TYPE = "content-type";
     public static final String CSV = "csv";
+    public static final String DEFAULT = "DEFAULT";
     public static final String DISTRIBUTION_CAPTCHA = "distribution_captcha";
     public static final String DISTRIBUTION_KEY = "distribution_key";
     public static final String DISTRIBUTION_KEY_ = "distribution_key_";
     public static final String ELEMENT_POSITION = "element_position";
     public static final String ERROR = "error";
+    public static final String FIELDS = "fields";
     public static final String FILE = "file";
     public static final String FOLDER = "folder";
     public static final String FOLDERS = "folders";
@@ -161,6 +164,7 @@ public class Fields {
     public static final String RAW = "raw";
     public static final String RESPONSES = "responses";
     public static final String RESULT = "result";
+    public static final String RESULTS = "results";
     public static final String SEND = "send";
     public static final String SIZE = "size";
     public static final String STATEMENTS = "statements";

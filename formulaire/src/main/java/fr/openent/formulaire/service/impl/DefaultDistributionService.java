@@ -18,7 +18,7 @@ import org.entcore.common.user.UserInfos;
 import java.util.ArrayList;
 import java.util.List;
 
-import static fr.openent.form.core.constants.Constants.NB_NEW_LINES;
+import static fr.openent.form.core.constants.Constants.*;
 import static fr.openent.form.core.constants.DistributionStatus.*;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.MANAGER_RESOURCE_BEHAVIOUR;
@@ -264,7 +264,7 @@ public class DefaultDistributionService implements DistributionService {
             String query = "INSERT INTO " + DISTRIBUTION_TABLE + " (form_id, sender_id, sender_name, responder_id, " +
                     "responder_name, status, date_sending, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
 
-            s.raw("BEGIN;");
+            s.raw(TRANSACTION_BEGIN_QUERY);
             for (JsonObject responder : respondersArray) {
                 JsonArray params = new JsonArray()
                         .add(formId)
@@ -277,7 +277,7 @@ public class DefaultDistributionService implements DistributionService {
                         .add(true);
                 s.prepared(query, params);
             }
-            s.raw("COMMIT;");
+            s.raw(TRANSACTION_COMMIT_QUERY);
 
             sql.transaction(s.build(), SqlResult.validUniqueResultHandler(handler));
         }
@@ -292,12 +292,12 @@ public class DefaultDistributionService implements DistributionService {
             SqlStatementsBuilder s = new SqlStatementsBuilder();
             String query = "UPDATE " + DISTRIBUTION_TABLE + " SET active = ? WHERE form_id = ? AND responder_id = ?;";
 
-            s.raw("BEGIN;");
+            s.raw(TRANSACTION_BEGIN_QUERY);
             for (String responder_id : responder_ids) {
                 JsonArray params = new JsonArray().add(active).add(formId).add(responder_id);
                 s.prepared(query, params);
             }
-            s.raw("COMMIT;");
+            s.raw(TRANSACTION_COMMIT_QUERY);
 
             sql.transaction(s.build(), SqlResult.validUniqueResultHandler(handler));
         }

@@ -25,9 +25,8 @@ public class FutureHelper {
                 promise.complete(event.right().getValue());
                 return;
             }
-            if (errorMessage != null) log.error(errorMessage);
-            log.error(event.left().getValue());
-            promise.fail(errorMessage != null ? errorMessage : event.left().getValue());
+            log.error((errorMessage != null ? errorMessage : "") + event.left().getValue());
+            promise.fail(event.left().getValue());
         };
     }
 
@@ -44,9 +43,8 @@ public class FutureHelper {
                 promise.complete(event.result());
                 return;
             }
-            if (errorMessage != null) log.error(errorMessage);
-            log.error(event.cause().getMessage());
-            promise.fail(errorMessage != null ? errorMessage : event.cause().getMessage());
+            log.error((errorMessage != null ? errorMessage : "") + event.cause().getMessage());
+            promise.fail(event.cause().getMessage());
         };
     }
 
@@ -65,9 +63,8 @@ public class FutureHelper {
                 handler.handle(Future.succeededFuture(event.right().getValue()));
                 return;
             }
-            if (errorMessage != null) log.error(errorMessage);
-            log.error(event.left().getValue());
-            handler.handle(Future.failedFuture(errorMessage != null ? errorMessage : event.left().getValue()));
+            log.error((errorMessage != null ? errorMessage : "") + event.left().getValue());
+            handler.handle(Future.failedFuture(event.left().getValue()));
         };
     }
 
@@ -81,9 +78,8 @@ public class FutureHelper {
                 handler.handle(Future.succeededFuture(event.right().getValue()));
                 return;
             }
-            if (errorMessage != null) log.error(errorMessage);
-            log.error(event.left().getValue());
-            handler.handle(Future.failedFuture(errorMessage != null ? errorMessage : event.left().getValue()));
+            log.error((errorMessage != null ? errorMessage : "") + event.left().getValue());
+            handler.handle(Future.failedFuture(event.left().getValue()));
         };
     }
 

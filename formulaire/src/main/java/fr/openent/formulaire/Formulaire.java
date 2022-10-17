@@ -42,7 +42,7 @@ public class Formulaire extends BaseServer {
 		EventStore eventStore = EventStoreFactory.getFactory().getEventStore(Formulaire.class.getSimpleName());
 
 		// Set RepositoryEvents implementation used to process events published for transition
-		setRepositoryEvents(new FormulaireRepositoryEvents());
+		setRepositoryEvents(new FormulaireRepositoryEvents(vertx));
 
 		final Storage storage = new StorageFactory(vertx, config).getStorage();
 

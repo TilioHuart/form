@@ -11,6 +11,8 @@ import org.entcore.common.sql.SqlStatementsBuilder;
 
 import java.util.ArrayList;
 
+import static fr.openent.form.core.constants.Constants.TRANSACTION_BEGIN_QUERY;
+import static fr.openent.form.core.constants.Constants.TRANSACTION_COMMIT_QUERY;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.Tables.RESPONSE_TABLE;
 
@@ -31,7 +33,7 @@ public class DefaultResponseService implements ResponseService {
             String query = "INSERT INTO " + RESPONSE_TABLE + " (question_id, choice_id, answer, responder_id, distribution_id) " +
                     "VALUES (?, ?, ?, ?, ?);";
 
-            s.raw("BEGIN;");
+            s.raw(TRANSACTION_BEGIN_QUERY);
             for (JsonObject response : responsesList) {
                 JsonArray params = new JsonArray()
                         .add(response.getInteger(QUESTION_ID, null))
@@ -41,7 +43,7 @@ public class DefaultResponseService implements ResponseService {
                         .add(distribution.getInteger(ID, null));
                 s.prepared(query, params);
             }
-            s.raw("COMMIT;");
+            s.raw(TRANSACTION_COMMIT_QUERY);
 
             Sql.getInstance().transaction(s.build(), SqlResult.validResultHandler(handler));
         }

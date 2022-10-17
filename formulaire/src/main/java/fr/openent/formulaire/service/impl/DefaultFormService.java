@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import static fr.openent.form.core.constants.Constants.COPY;
+import static fr.openent.form.core.constants.Constants.*;
 import static fr.openent.form.core.constants.DistributionStatus.FINISHED;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.*;
@@ -227,7 +227,7 @@ public class DefaultFormService implements FormService {
         if (!forms.isEmpty()) {
             SqlStatementsBuilder s = new SqlStatementsBuilder();
 
-            s.raw("BEGIN;");
+            s.raw(TRANSACTION_BEGIN_QUERY);
             for (int i = 0; i < forms.size(); i++) {
                 JsonObject form = forms.getJsonObject(i);
                 String public_key = null;
@@ -279,7 +279,7 @@ public class DefaultFormService implements FormService {
 
                 s.prepared(query, params);
             }
-            s.raw("COMMIT;");
+            s.raw(TRANSACTION_COMMIT_QUERY);
 
             sql.transaction(s.build(), SqlResult.validResultsHandler(handler));
         }
@@ -292,11 +292,11 @@ public class DefaultFormService implements FormService {
     public void duplicate(int formId, UserInfos user, Handler<Either<String, JsonArray>> handler) {
         String query =
                 "WITH new_form_id AS (" +
-                    "INSERT INTO  " + FORM_TABLE + " (owner_id, owner_name, title, description, picture, " +
-                    "date_opening, date_ending, multiple, anonymous, response_notified, editable, rgpd, rgpd_goal, rgpd_lifetime, is_public, public_key) " +
+                    "INSERT INTO  " + FORM_TABLE + " (owner_id, owner_name, title, description, picture, date_opening, date_ending, " +
+                    "multiple, anonymous, response_notified, editable, rgpd, rgpd_goal, rgpd_lifetime, is_public, public_key, original_form_id) " +
                     "SELECT ?, ?, concat(title, ' - " + COPY + "'), description, picture, date_opening, date_ending, multiple, " +
                     "anonymous, response_notified, editable, rgpd, rgpd_goal, rgpd_lifetime, is_public, " +
-                    "CASE is_public WHEN TRUE THEN '" + UUID.randomUUID() + "' END " +
+                    "CASE is_public WHEN TRUE THEN '" + UUID.randomUUID() + "' END, id " +
                     "FROM " + FORM_TABLE + " WHERE id = ? RETURNING id" +
                 "), " +
                 "new_sections AS (" +
@@ -390,7 +390,7 @@ public class DefaultFormService implements FormService {
         if (!forms.isEmpty()) {
             SqlStatementsBuilder s = new SqlStatementsBuilder();
 
-            s.raw("BEGIN;");
+            s.raw(TRANSACTION_BEGIN_QUERY);
             for (int i = 0; i < forms.size(); i++) {
                 JsonObject form = forms.getJsonObject(i);
                 int formId = form.getInteger(ID, null);
@@ -430,7 +430,7 @@ public class DefaultFormService implements FormService {
 
                 s.prepared(query, params);
             }
-            s.raw("COMMIT;");
+            s.raw(TRANSACTION_COMMIT_QUERY);
 
             sql.transaction(s.build(), SqlResult.validResultsHandler(handler));
         }

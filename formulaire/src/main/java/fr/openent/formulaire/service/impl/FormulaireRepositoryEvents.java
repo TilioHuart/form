@@ -1,29 +1,224 @@
 package fr.openent.formulaire.service.impl;
 
-import fr.openent.form.core.constants.Tables;
+import fr.openent.formulaire.helpers.FutureHelper;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
+import org.entcore.common.service.impl.SqlRepositoryEvents;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.sql.SqlStatementsBuilder;
-import org.entcore.common.user.RepositoryEvents;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-import static fr.openent.form.core.constants.Constants.DELETED_USER;
-import static fr.openent.form.core.constants.Constants.DELETED_USER_FILE;
-import static fr.openent.form.core.constants.Fields.ID;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static fr.openent.form.core.constants.Constants.*;
+import static fr.openent.form.core.constants.Fields.*;
+import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_BEHAVIOUR;
 import static fr.openent.form.core.constants.ShareRights.MANAGER_RESOURCE_BEHAVIOUR;
 import static fr.openent.form.core.constants.Tables.*;
+import static fr.openent.form.core.constants.Tables.QUESTION;
 
-public class FormulaireRepositoryEvents implements RepositoryEvents {
+public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
     private static final Logger log = LoggerFactory.getLogger(FormulaireRepositoryEvents.class);
+    private ImportExportService importExportService;
 
-    @Override
-    public void exportResources(JsonArray resourcesIds, boolean exportDocuments, boolean exportSharedResources, String exportId, String userId, JsonArray groups, String exportPath, String locale, String host, final Handler<Boolean> handler) {
-        log.info("[Formulaire@FormulaireRepositoryEvents] exportResources event is not implemented");
+    public FormulaireRepositoryEvents(Vertx vertx) {
+        super(vertx);
+        this.importExportService = new ImportExportService(sql, fs);
     }
+
+    // Export/Import events
+
+    /**
+     * Function called by Archive module when the user wants to export his Formulaire data
+     * @param resourcesIds ids of the forms we want to export, by default (null) we export all the available ones for the connected user
+     * @param exportDocuments (??)
+     * @param exportSharedResources (??)
+     * @param exportId id given to the generated folder (= name of the folder)
+     * @param userId id of the connected user
+     * @param groups groups where the connected user belongs
+     * @param exportPath path of the directory generated and exported
+     * @param locale time zone of the user
+     * @param host host
+     * @param handler function handler
+     */
+    @Override
+    public void exportResources(JsonArray resourcesIds, boolean exportDocuments, boolean exportSharedResources, String exportId,
+                                String userId, JsonArray groups, String exportPath, String locale, String host, final Handler<Boolean> handler) {
+
+        HashMap<String,JsonArray> infos = new HashMap<>();
+        HashMap<String, JsonArray> fieldsToNull = new HashMap<>();
+        AtomicBoolean exported = new AtomicBoolean(false);
+
+        JsonArray groupsAndUserIds = new JsonArray();
+        groupsAndUserIds.add(userId);
+        if (groups != null) { groupsAndUserIds.addAll(groups); }
+
+        // Form query
+        Promise<JsonArray> promise = Promise.promise();
+        String formTableQuery = "SELECT f.* FROM " + FORM_TABLE + " f " +
+                "LEFT JOIN " + FORM_SHARES_TABLE + " fs ON f.id = fs.resource_id " +
+                "LEFT JOIN " + MEMBERS_TABLE + " m ON (fs.member_id = m.id AND m.group_id IS NOT NULL) " +
+                "WHERE ((fs.member_id IN " + Sql.listPrepared(groupsAndUserIds) + " AND (fs.action = ? OR fs.action = ?)) OR f.owner_id = ?) " +
+                (resourcesIds != null && !resourcesIds.isEmpty() ? "AND f.id IN " + Sql.listPrepared(resourcesIds) + " " : "") +
+                "GROUP BY f.id " +
+                "ORDER BY f.date_modification DESC;";
+        JsonArray formTableParams = new JsonArray()
+                .addAll(groupsAndUserIds)
+                .add(MANAGER_RESOURCE_BEHAVIOUR)
+                .add(CONTRIB_RESOURCE_BEHAVIOUR)
+                .add(userId)
+                .addAll(resourcesIds != null && !resourcesIds.isEmpty() ? resourcesIds : new JsonArray());
+
+        String errorMessage = "[Formulaire@exportResources] Failed to list user's forms : ";
+        Sql.getInstance().prepared(formTableQuery, formTableParams, SqlResult.validResultHandler(FutureHelper.handlerEither(promise, errorMessage)));
+
+        promise.future()
+            .onFailure(err -> log.error(errorMessage + err.getMessage()))
+            .onSuccess(forms -> {
+                infos.put(FORM_TABLE, new SqlStatementsBuilder().prepared(formTableQuery, formTableParams).build());
+                importExportService.onSuccessGetUserForms(forms, infos);
+
+                // Directory creation and continue the export
+                createExportDirectory(exportPath, locale, path -> {
+                    if (path != null) {
+                        exportTables(infos, new JsonArray(), fieldsToNull, exportDocuments, path, exported, handler);
+                    }
+                    else {
+                        handler.handle(exported.get());
+                    }
+                });
+            });
+    }
+
+    /**
+     * Function called by Archive module when the user wants to import his exported Formulaire data
+     * @param importId id of the folder imported (= name of the folder)
+     * @param userId id of the connected user
+     * @param userLogin login of the connected user
+     * @param userName username of the connected user
+     * @param importPath path of the directory imported
+     * @param locale time zone of the user
+     * @param host host
+     * @param forceImportAsDuplication (useless)
+     * @param handler function handler
+     */
+    @Override
+    public void importResources(String importId, String userId, String userLogin, String userName, String importPath,
+                                String locale, String host, boolean forceImportAsDuplication, Handler<JsonObject> handler) {
+
+        SqlStatementsBuilder builder = new SqlStatementsBuilder();
+
+        // Query Users
+        String usersQuery= "INSERT INTO " + USERS_TABLE + " (id, username) VALUES (?,?) ON CONFLICT DO NOTHING";
+        JsonArray usersParams = new JsonArray().add(userId).add(userName);
+        builder.prepared(usersQuery, usersParams);
+
+        // Query Members
+        String membersQuery= "INSERT INTO " + MEMBERS_TABLE + " (id, user_id) VALUES (?,?) ON CONFLICT DO NOTHING";
+        JsonArray membersParams = new JsonArray().add(userId).add(userId);
+        builder.prepared(membersQuery, membersParams);
+
+        // Continue
+        sql.transaction(builder.build(), message -> {
+            if (OK.equals(message.body().getString(STATUS))) {
+                List<String> tables = new ArrayList<>(Arrays.asList(FORM, SECTION, QUESTION, QUESTION_CHOICE));
+                Map<String,String> tablesWithId = new HashMap<>();
+                tablesWithId.put(FORM, DEFAULT);
+                tablesWithId.put(SECTION, DEFAULT);
+                tablesWithId.put(QUESTION, DEFAULT);
+                tablesWithId.put(QUESTION_CHOICE, DEFAULT);
+
+                // Calls our custom importTables function (cf under)
+                importTables(importPath, DB_SCHEMA, tables, tablesWithId, userId, userName, locale, new SqlStatementsBuilder(), forceImportAsDuplication, handler);
+            }
+            else {
+                String errorMessage = "[Formulaire@importResources] Failed to create users/members for import : ";
+                log.error(errorMessage + message.body().getString(MESSAGE));
+                handler.handle(new JsonObject().put(STATUS, ERROR));
+            }
+        });
+    }
+
+    /**
+     * Import the data contents given by the user
+     * @param importPath path to the imported folder
+     * @param schema schema name of the imported data
+     * @param tables table names of the imported data
+     * @param tablesWithId table names and their default 'id' value of the imported data
+     * @param userId id of the connected user
+     * @param userName username of the connected user
+     * @param locale  time zone of the user
+     * @param builder SqlStatementsBuilder that will contain the queries (unused here in our custom function)
+     * @param forceImportAsDuplication (useless)
+     * @param handler  function handler
+     * @param idsMapByTable map that will contain for each table a map of old id/new id
+     * @param duplicateSuffix (useless)
+     */
+    @Override
+    protected void importTables(String importPath, String schema, List<String> tables, Map<String, String> tablesWithId,
+                                String userId, String userName, String locale, SqlStatementsBuilder builder, boolean forceImportAsDuplication,
+                                Handler<JsonObject> handler, Map<String, JsonObject> idsMapByTable, String duplicateSuffix) {
+
+        // For each table we'll store in 'tableMappings' a map of the old ids with new ids
+        Map<String, Map<Integer, Integer>> tableMappingIds = new HashMap();
+
+        // For each table we'll store in 'tableContents' a map of the name of the table with the table content of the file
+        Map<String, JsonObject> tableContents = new HashMap();
+
+        importExportService.getTableContent(importPath, schema, FORM, tableContents)
+            .compose(forms -> importExportService.getTableContent(importPath, schema, SECTION, tableContents))
+            .compose(sections -> importExportService.getTableContent(importPath, schema, QUESTION, tableContents))
+            .compose(questions -> importExportService.getTableContent(importPath, schema, QUESTION_CHOICE, tableContents))
+            .compose(questionChoices -> importExportService.importForms(tableContents.get(FORM), userId, userName))
+            .compose(oldNewFormIds -> {
+                Map<Integer, Integer> oldNewFormIdsMap = importExportService.generateMapping(oldNewFormIds, ORIGINAL_FORM_ID, ID);
+                tableMappingIds.put(FORM, oldNewFormIdsMap);
+                return importExportService.importSections(tableContents.get(SECTION), oldNewFormIdsMap);
+            })
+            .compose(oldNewSectionIds -> {
+                Map<Integer, Integer> oldNewSectionIdsMap = importExportService.generateMapping(oldNewSectionIds, ORIGINAL_SECTION_ID, ID);
+                tableMappingIds.put(SECTION, oldNewSectionIdsMap);
+                return importExportService.importQuestions(tableContents.get(QUESTION), oldNewSectionIdsMap, tableMappingIds.get(FORM));
+            })
+            .compose(oldNewIdsAndMatrixIds -> {
+                Map<Integer, Integer> oldNewQuestionIdsMap = importExportService.generateMapping(oldNewIdsAndMatrixIds, ORIGINAL_QUESTION_ID, ID);
+                Map<Integer, Integer> newIdOldMatrixIdsMap = importExportService.generateMapping(oldNewIdsAndMatrixIds, ID, MATRIX_ID);
+                tableMappingIds.put(QUESTION, oldNewQuestionIdsMap);
+                return importExportService.updateMatrixChildrenQuestions(oldNewQuestionIdsMap, newIdOldMatrixIdsMap);
+            })
+            .compose(updatedQuestions -> importExportService.importQuestionChoices(tableContents.get(QUESTION_CHOICE), tableMappingIds.get(QUESTION), tableMappingIds.get(SECTION)))
+            .compose(newQuestionChoices -> importExportService.createFolderLinks(tableMappingIds.get(FORM), userId))
+            .onSuccess(result -> {
+                int nbFormsImported = tableMappingIds.get(FORM).size();
+                JsonObject finalResultInfos = new JsonObject().put(STATUS, OK)
+                        .put("resourcesNumber", String.valueOf(nbFormsImported))
+                        .put("errorsNumber", "-")
+                        .put("duplicatesNumber", "-")
+                        .put("mainResourceName", this.mainResourceName);
+
+                log.info(this.title + " : Imported " + nbFormsImported + " forms for user " + userId);
+                handler.handle(finalResultInfos);
+            })
+            .onFailure(err -> {
+                int nbFormsImported = tableMappingIds.get(FORM).size();
+                JsonObject finalResultInfos = new JsonObject().put(STATUS, ERROR)
+                        .put("resourcesNumber", String.valueOf(0))
+                        .put("errorsNumber", String.valueOf(nbFormsImported))
+                        .put("duplicatesNumber", "-")
+                        .put("mainResourceName", this.mainResourceName);
+                log.error("[Formulaire@importTables] Failed to import data from file : " + err.getMessage());
+                handler.handle(finalResultInfos);
+            });
+    }
+
+
+    // Deleted users and groups events
 
     @Override
     public void deleteGroups(JsonArray groups) {

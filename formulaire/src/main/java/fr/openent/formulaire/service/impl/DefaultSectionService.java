@@ -9,6 +9,8 @@ import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.sql.SqlStatementsBuilder;
 
+import static fr.openent.form.core.constants.Constants.TRANSACTION_BEGIN_QUERY;
+import static fr.openent.form.core.constants.Constants.TRANSACTION_COMMIT_QUERY;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.Tables.SECTION_TABLE;
 import static fr.openent.form.helpers.SqlHelper.getParamsForUpdateDateModifFormRequest;
@@ -53,7 +55,7 @@ public class DefaultSectionService implements SectionService {
             SqlStatementsBuilder s = new SqlStatementsBuilder();
             String query = "UPDATE " + SECTION_TABLE + " SET title = ?, description = ?, position = ? WHERE id = ? RETURNING *;";
 
-            s.raw("BEGIN;");
+            s.raw(TRANSACTION_BEGIN_QUERY);
             for (int i = 0; i < sections.size(); i++) {
                 JsonObject section = sections.getJsonObject(i);
                 JsonArray params = new JsonArray()
@@ -65,7 +67,7 @@ public class DefaultSectionService implements SectionService {
             }
 
             s.prepared(getUpdateDateModifFormRequest(), getParamsForUpdateDateModifFormRequest(formId));
-            s.raw("COMMIT;");
+            s.raw(TRANSACTION_COMMIT_QUERY);
 
             sql.transaction(s.build(), SqlResult.validResultsHandler(handler));
         }

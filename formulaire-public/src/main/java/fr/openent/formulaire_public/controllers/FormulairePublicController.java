@@ -24,8 +24,7 @@ public class FormulairePublicController extends ControllerHelper {
     }
 
     @SecuredAction(ConsoleRights.ACCESS_RIGHT)
-    public void initSecuredActions(final HttpServerRequest request) {
-    }
+    public void initSecuredActions(final HttpServerRequest request) {  }
 
     @Get("")
     @ApiDoc("Render view")
