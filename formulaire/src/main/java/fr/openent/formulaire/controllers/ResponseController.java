@@ -1,5 +1,6 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.core.enums.QuestionTypes;
 import fr.openent.form.core.model.Question;
 import fr.openent.formulaire.export.FormResponsesExportCSV;
 import fr.openent.formulaire.export.FormResponsesExportPDF;
@@ -227,13 +228,16 @@ public class ResponseController extends ControllerHelper {
                         });
                     }
                     else {
-                        if (question.getQuestionType() == 6) {
+                        if (question.getQuestionType() == QuestionTypes.DATE.getCode()) {
                             try { dateFormatter.parse(response.getString(ANSWER)); }
                             catch (ParseException e) { e.printStackTrace(); }
                         }
-                        if (question.getQuestionType() == 7) {
+                        if (question.getQuestionType() == QuestionTypes.TIME.getCode()) {
                             try { timeFormatter.parse(response.getString(ANSWER)); }
                             catch (ParseException e) { e.printStackTrace(); }
+                        }
+                        if (question.getQuestionType() == QuestionTypes.CURSOR.getCode()) {
+                            response.getString(ANSWER);
                         }
                         createResponse(request, response, user, questionId);
                     }
@@ -366,13 +370,17 @@ public class ResponseController extends ControllerHelper {
                         });
                     }
                     else {
-                        if (question_type == 6) {
+                        if (question_type == QuestionTypes.DATE.getCode()) {
                             try { dateFormatter.parse(response.getString(ANSWER)); }
                             catch (ParseException e) { e.printStackTrace(); }
                         }
-                        if (question_type == 7) {
+                        if (question_type == QuestionTypes.TIME.getCode()) {
                             try { timeFormatter.parse(response.getString(ANSWER)); }
                             catch (ParseException e) { e.printStackTrace(); }
+                        }
+                        if (question_type == QuestionTypes.CURSOR.getCode()) {
+                            try { (response.getInteger(ANSWER)).toString(); }
+                            catch (Exception e) { e.printStackTrace(); }
                         }
                         responseService.update(user, responseId, response, defaultResponseHandler(request));
                     }

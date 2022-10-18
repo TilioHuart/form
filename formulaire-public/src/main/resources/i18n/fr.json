@@ -17,6 +17,7 @@
   "formulaire.public.responses.send.continue": "Voulez-vous continuer ?",
   "formulaire.public.warning.send.missing.responses.missing": "Vous n'avez pas répondu à toutes les questions obligatoires !",
   "formulaire.public.success.responses.save": "Vos réponses ont bien été enregistrées !",
+  "formulaire.public.question.selected.result": "Résultat sélectionné : ",
   "formulaire.public.question.type.SHORTANSWER": "Réponse courte",
   "formulaire.public.error.formService.get": "Une erreur est survenue lors de la récupération du formulaire",
   "formulaire.public.error.responseService.create": "Une erreur est survenue lors de la création de la nouvelle réponse",

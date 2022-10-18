@@ -236,6 +236,7 @@
   "formulaire.question.step": "Pas",
   "formulaire.question.value.label": "Label de la valeur",
   "formulaire.question.label": "Label",
+  "formulaire.question.selected.result": "Résultat sélectionné : ",
 
   "formulaire.matrix.type.SINGLEANSWERRADIO": "Matrice à choix unique",
   "formulaire.matrix.type.MULTIPLEANSWER": "Matrice avec cases à cocher",

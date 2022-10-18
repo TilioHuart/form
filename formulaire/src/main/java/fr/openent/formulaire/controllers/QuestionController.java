@@ -1,5 +1,6 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.core.enums.QuestionTypes;
 import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
@@ -273,7 +274,7 @@ public class QuestionController extends ControllerHelper {
                 return;
             }
             // If question is cursor type, you insert fields in a specific table
-            if (question.getInteger(QUESTION_TYPE) == 11) {
+            if (question.getInteger(QUESTION_TYPE) == QuestionTypes.CURSOR.getCode()) {
                 String questionId = questionEvt.right().getValue().getInteger(ID).toString();
                 questionSpecificFieldService.create(question, questionId, defaultResponseHandler(request));
                 return;
@@ -398,7 +399,7 @@ public class QuestionController extends ControllerHelper {
                             for (int k = 0; k < updatedQuestionsInfos.size(); k++) {
                                 updatedQuestions.addAll(updatedQuestionsInfos.getJsonArray(k));
 
-                                if (updatedQuestions.size() > 0 && updatedQuestions.getJsonObject(0).getLong(QUESTION_TYPE) == 11) {
+                                if (updatedQuestions.size() > 0 && updatedQuestions.getJsonObject(0).getLong(QUESTION_TYPE) == QuestionTypes.CURSOR.getCode()) {
                                     String questionId = updatedQuestions.getJsonObject(0).getInteger("id").toString();
                                     questionSpecificFieldService.update(questions, questionId, arrayResponseHandler(request));
                                 }

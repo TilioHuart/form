@@ -102,6 +102,36 @@ function directive() {
                             </label>
                         </div>
                     </div>
+                        <div ng-if ="vm.question.question_type == vm.Types.CURSOR">
+                            <div class="formulaire-cursor-input-wrapper">
+                            <div>
+                                <!-- label minimum value (optionnal) -->
+                                <label>[[vm.question.cursor_label_min_val]]</label>
+                            </div>
+                            <div class="formulaire-cursor-input-range">
+                                <!-- input range -->
+                                    <input type="range" min="[[vm.question.cursor_min_val]]" max="[[vm.question.cursor_max_val]]" 
+                                    ng-value="[[vm.question.cursor_min_val]]" value="[[vm.question.cursor_min_val]]" step="[[vm.question.cursor_step]]" 
+                                    ng-model="vm.response.answer" oninput="rangevalue.value=value">
+                               <div class="formulaire-cursor-input-range-values">
+                                    <!-- minimum value -->
+                                    <output>[[vm.question.cursor_min_val]]</output>
+                                     <!-- maximum value -->
+                                    <output>[[vm.question.cursor_max_val]]</output>
+                               </div>
+                        </div>
+                        <div>
+                            <!-- label maximum value (optionnal) -->     
+                            <label>[[vm.question.cursor_label_max_val]]</label>
+                        </div>
+                    </div>
+                    
+                    <!-- choosen value -->
+                        <label>
+                            <i18n>formulaire.public.question.selected.result</i18n>
+                        </label>
+                            <output id="rangevalue">[[vm.question.cursor_min_val]]</output>
+                    </div>
                 </div>
             </div>
         `,

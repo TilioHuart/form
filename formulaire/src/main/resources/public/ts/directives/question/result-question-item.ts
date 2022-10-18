@@ -10,7 +10,6 @@ import {
 } from "../../models";
 import {ColorUtils, DateUtils, UtilsUtils} from "@common/utils";
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
-import {Constants} from "@common/core/constants";
 import {GraphUtils} from "@common/utils/graph";
 
 interface IViewModel {

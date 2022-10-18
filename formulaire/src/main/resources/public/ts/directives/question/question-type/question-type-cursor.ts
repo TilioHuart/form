@@ -16,7 +16,7 @@ export const questionTypeCursor: Directive = ng.directive('questionTypeCursor', 
         controllerAs: 'vm',
         bindToController: true,
         template: `
-            <div class="formulaire-cursor">
+            <div class="formulaire-cursor-form">
                 <div class="cursor-min-value">
                     <label><i18n>formulaire.question.value.minimum</i18n><em>*</em> : </label>
                     <input type="number" ng-model="vm.question.cursor_min_val" value={{1}}>

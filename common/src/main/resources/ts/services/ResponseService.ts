@@ -87,6 +87,11 @@ export const responseService: ResponseService = {
                     response.answer = moment(response.answer).format("DD/MM/YYYY");
                 }
             }
+            else if (questionType === Types.CURSOR) {
+                if (typeof response.answer != "string") {
+                    response.answer = response.answer.toString();
+                }
+            }
         }
         return response.id ? await this.update(response) : await this.create(response);
     },
