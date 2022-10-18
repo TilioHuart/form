@@ -6,9 +6,11 @@ import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.FormService;
 import fr.openent.formulaire.service.QuestionService;
+import fr.openent.formulaire.service.QuestionSpecificFieldService;
 import fr.openent.formulaire.service.impl.DefaultDistributionService;
 import fr.openent.formulaire.service.impl.DefaultFormService;
 import fr.openent.formulaire.service.impl.DefaultQuestionService;
+import fr.openent.formulaire.service.impl.DefaultQuestionSpecificField;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
@@ -33,12 +35,14 @@ import static org.entcore.common.http.response.DefaultResponseHandler.defaultRes
 public class QuestionController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(QuestionController.class);
     private final QuestionService questionService;
+    private final QuestionSpecificFieldService questionSpecificFieldService;
     private final FormService formService;
     private final DistributionService distributionService;
 
     public QuestionController() {
         super();
         this.questionService = new DefaultQuestionService();
+        this.questionSpecificFieldService = new DefaultQuestionSpecificField();
         this.formService = new DefaultFormService();
         this.distributionService = new DefaultDistributionService();
     }
@@ -181,7 +185,6 @@ public class QuestionController extends ControllerHelper {
                                     renderInternalError(request, sectionIdsEvt);
                                     return;
                                 }
-
                                 JsonArray sectionIds = getByProp(sectionIdsEvt.right().getValue(), SECTION_ID);
                                 if (sectionIds.contains(sectionId)) {
                                     String message = "[Formulaire@createQuestion] A conditional question is already existing for the section with id : " + sectionId;
@@ -189,16 +192,32 @@ public class QuestionController extends ControllerHelper {
                                     badRequest(request, message);
                                     return;
                                 }
-
-                                questionService.create(question, formId, defaultResponseHandler(request));
+                                addCursorField(request, question, formId);
                             });
                         }
                         else {
-                            questionService.create(question, formId, defaultResponseHandler(request));
+                            addCursorField(request, question, formId);
                         }
                     });
                 });
             });
+        });
+    }
+
+    private void addCursorField(HttpServerRequest request, JsonObject question, String formId) {
+        questionService.create(question, formId, questionEvt -> {
+            if (questionEvt.isLeft()) {
+                log.error("[Formulaire@addCursorField] Fail to add cursor's field : " + questionEvt.left().getValue());
+                renderInternalError(request, questionEvt);
+                return;
+            }
+            // If question is cursor type, you insert fields in a specific table
+            if (question.getInteger(QUESTION_TYPE) == 11) {
+                String questionId = questionEvt.right().getValue().getInteger(ID).toString();
+                questionSpecificFieldService.create(question, questionId, defaultResponseHandler(request));
+                return;
+            }
+            renderJson(request, questionEvt.right().getValue());
         });
     }
 
@@ -317,6 +336,11 @@ public class QuestionController extends ControllerHelper {
                             JsonArray updatedQuestions = new JsonArray();
                             for (int k = 0; k < updatedQuestionsInfos.size(); k++) {
                                 updatedQuestions.addAll(updatedQuestionsInfos.getJsonArray(k));
+
+                                if (updatedQuestions.size() > 0 && updatedQuestions.getJsonObject(0).getLong(QUESTION_TYPE) == 11) {
+                                    String questionId = updatedQuestions.getJsonObject(0).getInteger("id").toString();
+                                    questionSpecificFieldService.update(questions, questionId, arrayResponseHandler(request));
+                                }
                             }
                             renderJson(request, updatedQuestions);
                         });

@@ -20,6 +20,11 @@ export class Question extends FormElement {
     choices: QuestionChoices;
     placeholder: string;
     children: Questions;
+    cursor_min_val: number;
+    cursor_max_val: number;
+    cursor_step: number;
+    cursor_label_min_val: string;
+    cursor_label_max_val: string;
 
     constructor(matrixId?: number, questionType?: number, matrixPosition?: number) {
         super();
@@ -34,6 +39,11 @@ export class Question extends FormElement {
         this.choices = new QuestionChoices();
         this.children = new Questions();
         this.placeholder = null;
+        this.cursor_min_val = null;
+        this.cursor_max_val = null;
+        this.cursor_step = null;
+        this.cursor_label_min_val = null;
+        this.cursor_label_max_val = null;
     }
 
     toJson() : Object {
@@ -53,7 +63,12 @@ export class Question extends FormElement {
             matrix_id: this.matrix_id,
             matrix_position: this.matrix_position,
             choices: this.choices,
-            children: this.children
+            children: this.children,
+            cursor_min_val: this.cursor_min_val,
+            cursor_max_val: this.cursor_max_val,
+            cursor_step: this.cursor_step,
+            cursor_label_min_val: this.cursor_label_min_val,
+            cursor_label_max_val: this.cursor_label_max_val
         }
     }
 

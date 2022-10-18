@@ -13,7 +13,8 @@ public enum QuestionTypes {
   TIME(7),
   FILE(8),
   SINGLEANSWERRADIO(9),
-  MATRIX(10);
+  MATRIX(10),
+  CURSOR(11);
 
   private final int code;
 
@@ -37,6 +38,7 @@ public enum QuestionTypes {
     graphQuestions.add(QuestionTypes.MULTIPLEANSWER.getCode());
     graphQuestions.add(QuestionTypes.SINGLEANSWERRADIO.getCode());
     graphQuestions.add(QuestionTypes.MATRIX.getCode());
+    graphQuestions.add(QuestionTypes.CURSOR.getCode());
     return graphQuestions;
   }
 

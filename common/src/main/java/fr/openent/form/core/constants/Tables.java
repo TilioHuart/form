@@ -14,6 +14,8 @@ public class Tables {
     public static final String QUESTION_CHOICE_TABLE = DB_SCHEMA + ".question_choice";
     public static final String QUESTION_TABLE = DB_SCHEMA + ".question";
     public static final String QUESTION_TYPE_TABLE = DB_SCHEMA + ".question_type";
+
+    public static final String QUESTION_SPECIFIC_FIELDS = DB_SCHEMA + ".question_specific_fields";
     public static final String REL_FORM_FOLDER_TABLE = DB_SCHEMA + ".rel_form_folder";
     public static final String RESPONSE_TABLE = DB_SCHEMA + ".response";
     public static final String RESPONSE_FILE_TABLE = DB_SCHEMA + ".response_file";
