@@ -1,7 +1,7 @@
 package fr.openent.formulaire.service.impl;
 
 import fr.openent.form.helpers.UtilsHelper;
-import fr.openent.formulaire.helpers.FutureHelper;
+import fr.openent.form.helpers.FutureHelper;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.file.FileSystem;
@@ -211,7 +211,7 @@ public class ImportExportService {
         }
         s.raw(TRANSACTION_COMMIT_QUERY);
 
-        String errorMessage = "[Formulaire@importSections] Failed to import questions from file : ";
+        String errorMessage = "[Formulaire@importQuestions] Failed to import questions from file : ";
         sql.transaction(s.build(), SqlResult.validResultsHandler(FutureHelper.handlerEither(promise, errorMessage)));
 
         return promise.future();

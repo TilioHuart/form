@@ -17,8 +17,9 @@ public class MessageResponseHelper {
     public static Handler<AsyncResult<Message<JsonObject>>> messageJsonArrayHandler(Handler<Either<String, JsonArray>> handler) {
         return event -> {
             if (event.succeeded() && event.result().body().getString(STATUS).equals(OK)) {
-                handler.handle(new Either.Right<>(event.result().body().getJsonArray(RESULT)));
-            } else {
+                handler.handle(new Either.Right<>(event.result().body().getJsonArray(RESULT, event.result().body().getJsonArray(RESULTS))));
+            }
+            else {
                 if (event.failed()) {
                     handler.handle(new Either.Left<>(event.cause().getMessage()));
                     return;
@@ -31,7 +32,12 @@ public class MessageResponseHelper {
     public static Handler<AsyncResult<Message<JsonObject>>> messageJsonObjectHandler(Handler<Either<String, JsonObject>> handler) {
         return event -> {
             if (event.succeeded() && event.result().body().getString(STATUS).equals(OK)) {
-                handler.handle(new Either.Right<>(event.result().body().getJsonObject(RESULT)));
+                if (!event.result().body().containsKey(RESULT)) {
+                    handler.handle(new Either.Right<>(event.result().body()));
+                }
+                else {
+                    handler.handle(new Either.Right<>(event.result().body().getJsonObject(RESULT)));
+                }
             } else {
                 if (event.failed()) {
                     handler.handle(new Either.Left<>(event.cause().getMessage()));

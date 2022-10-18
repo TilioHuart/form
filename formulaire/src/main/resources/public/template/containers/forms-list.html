@@ -12,6 +12,7 @@
         <section class="nine cell zero-mobile">
             <div class="row">
                 <button class="cell right-magnet" ng-click="vm.createForm()"><i18n>formulaire.form.create.button</i18n></button>
+                <button class="cell right-magnet cancel" ng-click="vm.importForms()"><i18n>formulaire.form.import.button</i18n></button>
             </div>
         </section>
 
@@ -178,7 +179,7 @@
         </table>
 
         <!-- Loader -->
-        <div ng-if="vm.loading" class="twelve loader">
+        <div ng-if="vm.loading.list" class="twelve loader">
             <loader min-height="'10px'"/>
         </div>
 

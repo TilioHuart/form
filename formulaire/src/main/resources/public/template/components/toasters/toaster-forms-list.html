@@ -26,6 +26,9 @@
                     ng-show="vm.forms.selected.length === 1 && !!vm.forms.selected[0].nb_elements">
                 <i18n>formulaire.checkremind</i18n>
             </button>
+            <button ng-click="vm.exportForms()" class="cell" ng-show="hasShareRightManager(vm.forms.selected[0])">
+                <i18n>formulaire.export</i18n>
+            </button>
             <button ng-click="vm.archiveForms()" class="cell" ng-show="hasShareRightManager(vm.forms.selected[0])">
                 <i18n>formulaire.archive</i18n>
             </button>

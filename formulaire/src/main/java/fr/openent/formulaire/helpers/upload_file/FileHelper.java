@@ -1,6 +1,6 @@
 package fr.openent.formulaire.helpers.upload_file;
 
-import fr.openent.formulaire.helpers.FutureHelper;
+import fr.openent.form.helpers.FutureHelper;
 import fr.wseduc.swift.utils.FileUtils;
 import fr.wseduc.webutils.DefaultAsyncResult;
 import io.vertx.core.*;

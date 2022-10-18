@@ -1,0 +1,12 @@
+<lightbox show="vm.display.lightbox.export" on-close="vm.closeExportForms()">
+    <h2><i18n>formulaire.export</i18n></h2>
+    <div class="bottom-spacing"><i18n>formulaire.export.explanation</i18n></div>
+
+    <div ng-if="vm.display.loading.export" class="twelve loader">
+        <loader min-height="'10px'"/>
+    </div>
+    <div class="action-buttons">
+        <button class="cell cancel" ng-click="vm.closeExportForms()"><i18n>formulaire.close</i18n></button>
+        <button class="cell" ng-click="vm.doExportForms()"><i18n>formulaire.export</i18n></button>
+    </div>
+</lightbox>

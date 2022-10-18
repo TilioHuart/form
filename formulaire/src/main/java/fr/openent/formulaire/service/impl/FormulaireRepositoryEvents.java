@@ -1,6 +1,6 @@
 package fr.openent.formulaire.service.impl;
 
-import fr.openent.formulaire.helpers.FutureHelper;
+import fr.openent.form.helpers.FutureHelper;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import org.entcore.common.service.impl.SqlRepositoryEvents;
@@ -197,10 +197,10 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
             .onSuccess(result -> {
                 int nbFormsImported = tableMappingIds.get(FORM).size();
                 JsonObject finalResultInfos = new JsonObject().put(STATUS, OK)
-                        .put("resourcesNumber", String.valueOf(nbFormsImported))
-                        .put("errorsNumber", "-")
-                        .put("duplicatesNumber", "-")
-                        .put("mainResourceName", this.mainResourceName);
+                        .put(PARAM_RESOURCES_NUMBER, String.valueOf(nbFormsImported))
+                        .put(PARAM_ERRORS_NUMBER, "-")
+                        .put(PARAM_DUPLICATES_NUMBER, "-")
+                        .put(PARAM_MAIN_RESOURCE_NAME, this.mainResourceName);
 
                 log.info(this.title + " : Imported " + nbFormsImported + " forms for user " + userId);
                 handler.handle(finalResultInfos);
@@ -208,11 +208,12 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
             .onFailure(err -> {
                 int nbFormsImported = tableMappingIds.get(FORM).size();
                 JsonObject finalResultInfos = new JsonObject().put(STATUS, ERROR)
-                        .put("resourcesNumber", String.valueOf(0))
-                        .put("errorsNumber", String.valueOf(nbFormsImported))
-                        .put("duplicatesNumber", "-")
-                        .put("mainResourceName", this.mainResourceName);
+                        .put(PARAM_RESOURCES_NUMBER, String.valueOf(0))
+                        .put(PARAM_ERRORS_NUMBER, String.valueOf(nbFormsImported))
+                        .put(PARAM_DUPLICATES_NUMBER, "-")
+                        .put(PARAM_MAIN_RESOURCE_NAME, this.mainResourceName);
                 log.error("[Formulaire@importTables] Failed to import data from file : " + err.getMessage());
+                err.printStackTrace();
                 handler.handle(finalResultInfos);
             });
     }

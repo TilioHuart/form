@@ -1,7 +1,6 @@
 package fr.openent.formulaire.controllers;
 
-import fr.openent.formulaire.helpers.upload_file.Attachment;
-import fr.openent.formulaire.helpers.upload_file.FileHelper;
+import fr.openent.formulaire.helpers.upload_file.*;
 import fr.openent.formulaire.security.CreationRight;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;

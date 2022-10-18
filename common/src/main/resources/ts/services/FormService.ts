@@ -1,8 +1,9 @@
 import {idiom, ng, notify} from 'entcore';
-import http from 'axios';
+import http, {CancelToken, CancelTokenSource, CancelTokenStatic} from 'axios';
 import {Form} from '../models';
 import {DataUtils} from "../utils";
 import {Exports} from "../core/enums";
+import Axios from "axios";
 
 export interface FormService {
     list() : Promise<any>;
@@ -19,7 +20,9 @@ export interface FormService {
     delete(formId: number) : Promise<any>;
     move(formIds : number[], parentId: number) : Promise<any>;
     sendReminder(formId: number, mail: {}) : Promise<any>;
-    export(formId: number, type: string, images?: any) : Promise<any>;
+    export(formIds: number[]) : Promise<any>;
+    verifyExportAndDownload(exportId: string) : Promise<void>;
+    import(zipFile: FormData) : Promise<any>;
     unshare(formId: number) : Promise<any>;
     getMyFormRights(formId: number) : Promise<any>;
     getAllMyFormRights() : Promise<any>;
@@ -158,19 +161,42 @@ export const formService: FormService = {
         }
     },
 
-    async export(formId: number, type: string, images: any) : Promise<any> {
+    async export(formIds: number[]) : Promise<string> {
         try {
-            if (type === Exports.CSV) {
-                return await http.post(`/formulaire/forms/${formId}/export/csv`, {});
-            }
-            else if (type === Exports.PDF) {
-                return await http.post(`/formulaire/forms/${formId}/export/pdf`, images, {responseType: "arraybuffer"});
-            }
-            else {
-                notify.error(idiom.translate('formulaire.error.formService.export'));
-            }
+            let res = await http.post(`/formulaire/forms/export`, formIds);
+            return res.data.exportId;
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.export'));
+            throw err;
+        }
+    },
+
+    async verifyExportAndDownload(exportId: string) : Promise<void> {
+        try {
+            await http.get(`/archive/export/verify/${exportId}`);
+            window.location.href = `/archive/export/${exportId}`;
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.formService.export'));
+            throw err;
+        }
+    },
+
+    async import(zipFile: FormData) : Promise<any> {
+        try {
+            const CancelToken: CancelTokenStatic = Axios.CancelToken;
+            let source: CancelTokenSource = CancelToken.source();
+            let { data } = await http.post(`/archive/import/upload`, zipFile, { headers: { 'Content-Type': 'multipart/form-data' }, cancelToken: source.token });
+            let importId: string = data.importId;
+
+            try {
+                let analyze = await http.get(`/archive/import/analyze/${importId}`);
+                return await http.post(`/archive/import/${importId}/launch`, { "apps": analyze.data.apps });
+            } catch (err) {
+                notify.error(idiom.translate('formulaire.error.formService.import'));
+                throw err;
+            }
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.formService.import'));
             throw err;
         }
     },

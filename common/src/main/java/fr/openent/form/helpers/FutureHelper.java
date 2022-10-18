@@ -1,4 +1,4 @@
-package fr.openent.formulaire.helpers;
+package fr.openent.form.helpers;
 
 import fr.wseduc.webutils.Either;
 import io.vertx.core.*;

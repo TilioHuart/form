@@ -13,7 +13,7 @@ import {
     Exports,
     FORMULAIRE_BROADCAST_EVENT
 } from "@common/core/enums";
-import {formService, questionChoiceService, utilsService} from "../services";
+import {formService, questionChoiceService, responseService, utilsService} from "../services";
 import {GraphUtils} from "@common/utils/graph";
 
 interface ViewModel {
@@ -92,12 +92,12 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
             // Generate document (CSV or PDF) and store it in a blob
             if (vm.typeExport === Exports.CSV) {
-                doc = await formService.export(vm.formElement.form_id, Exports.CSV);
+                doc = await responseService.export(vm.formElement.form_id, Exports.CSV);
                 blob = new Blob(["\ufeff" + doc.data], {type: 'text/csv; charset=utf-18'});
             }
             else {
                 let images = await prepareDataForPDF();
-                doc = await formService.export(vm.formElement.form_id, Exports.PDF, images);
+                doc = await responseService.export(vm.formElement.form_id, Exports.PDF, images);
                 blob = new Blob([doc.data], {type: 'application/pdf; charset=utf-18'});
             }
 

@@ -72,7 +72,7 @@ public class Formulaire extends BaseServer {
 		}
 
 		// Set sharing services to formController
-		FormController formController = new FormController(eventStore, storage, timelineHelper);
+		FormController formController = new FormController(eventStore, storage, vertx, timelineHelper);
 		formController.setShareService(new SqlShareService(DB_SCHEMA, Tables.FORM_SHARES, eb, securedActions, null));
 		formController.setCrudService(new SqlCrudService(DB_SCHEMA, Tables.FORM, Tables.FORM_SHARES));
 
@@ -88,7 +88,7 @@ public class Formulaire extends BaseServer {
 		addController(new QuestionChoiceController());
 		addController(new QuestionController());
 		addController(new QuestionTypeController());
-		addController(new ResponseController());
+		addController(new ResponseController(storage));
 		addController(new ResponseFileController(storage));
 		addController(new SectionController());
 		addController(new UtilsController(storage));

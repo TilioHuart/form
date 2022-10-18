@@ -2,6 +2,7 @@ import {idiom, ng, notify, moment} from 'entcore';
 import http from 'axios';
 import {FormElement, Question, Response, Section, Types} from "../models";
 import {DataUtils} from "../utils";
+import {Exports} from "@common/core/enums";
 
 export interface ResponseService {
     list(question: Question, nbLines: number) : Promise<any>;
@@ -13,6 +14,7 @@ export interface ResponseService {
     create(response: Response) : Promise<any>;
     update(response: Response) : Promise<any>;
     delete(formId: number, responses: Response[]) : Promise<any>;
+    export(formId: number, type: string, images?: any) : Promise<any>;
 }
 
 export const responseService: ResponseService = {
@@ -115,6 +117,23 @@ export const responseService: ResponseService = {
             throw e;
         }
     },
+
+    async export(formId: number, type: string, images: any) : Promise<any> {
+        try {
+            if (type === Exports.CSV) {
+                return await http.post(`/formulaire/responses/export/${formId}/csv`, {});
+            }
+            else if (type === Exports.PDF) {
+                return await http.post(`/formulaire/responses/export/${formId}/pdf`, images, {responseType: "arraybuffer"});
+            }
+            else {
+                notify.error(idiom.translate('formulaire.error.responseService.export'));
+            }
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.responseService.export'));
+            throw err;
+        }
+    }
 };
 
 export const ResponseService = ng.service('ResponseService', (): ResponseService => responseService);

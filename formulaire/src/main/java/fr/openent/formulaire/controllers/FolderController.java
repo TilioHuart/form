@@ -1,7 +1,7 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.formulaire.helpers.DataChecker;
-import fr.openent.formulaire.helpers.FutureHelper;
+import fr.openent.form.helpers.FutureHelper;
 import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.service.FolderService;
 import fr.openent.formulaire.service.FormService;
@@ -295,7 +295,7 @@ public class FolderController extends ControllerHelper {
                                 form.put(ARCHIVED, true);
                                 Promise<JsonObject> promise = Promise.promise();
                                 syncFutures.add(promise.future());
-                                formService.update(formId, form, FutureHelper.handlerJsonObject(promise));
+                                formService.update(formId, form, FutureHelper.handlerEither(promise));
                             }
 
                             CompositeFuture.all(syncFutures).onComplete(evt -> {

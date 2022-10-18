@@ -1,17 +1,12 @@
 package fr.openent.formulaire.controllers;
 
-import fr.openent.form.core.constants.Constants;
 import fr.openent.form.core.model.Question;
+import fr.openent.formulaire.export.FormResponsesExportCSV;
+import fr.openent.formulaire.export.FormResponsesExportPDF;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
-import fr.openent.formulaire.service.DistributionService;
-import fr.openent.formulaire.service.QuestionChoiceService;
-import fr.openent.formulaire.service.QuestionService;
-import fr.openent.formulaire.service.ResponseService;
-import fr.openent.formulaire.service.impl.DefaultDistributionService;
-import fr.openent.formulaire.service.impl.DefaultQuestionChoiceService;
-import fr.openent.formulaire.service.impl.DefaultQuestionService;
-import fr.openent.formulaire.service.impl.DefaultResponseService;
+import fr.openent.formulaire.service.*;
+import fr.openent.formulaire.service.impl.*;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
@@ -23,12 +18,12 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
+import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 
 import static fr.openent.form.core.constants.Constants.*;
 import static fr.openent.form.core.constants.DistributionStatus.FINISHED;
@@ -42,16 +37,20 @@ import static org.entcore.common.http.response.DefaultResponseHandler.defaultRes
 
 public class ResponseController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(ResponseController.class);
+    private final Storage storage;
     private final ResponseService responseService;
+    private final FormService formService;
     private final QuestionService questionService;
     private final QuestionChoiceService questionChoiceService;
     private final DistributionService distributionService;
     private final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
     private final SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm");
 
-    public ResponseController() {
+    public ResponseController(Storage storage) {
         super();
+        this.storage = storage;
         this.responseService = new DefaultResponseService();
+        this.formService = new DefaultFormService();
         this.questionService = new DefaultQuestionService();
         this.questionChoiceService = new DefaultQuestionChoiceService();
         this.distributionService = new DefaultDistributionService();
@@ -396,6 +395,57 @@ public class ResponseController extends ControllerHelper {
             }
 
             responseService.delete(getIds(responses), formId, arrayResponseHandler(request));
+        });
+    }
+
+    // Exports
+
+    @Post("/responses/export/:formId/:fileType")
+    @ApiDoc("Export a specific form's responses into a file (CSV or PDF)")
+    @ResourceFilter(CustomShareAndOwner.class)
+    @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void export(final HttpServerRequest request) {
+        String fileType = request.getParam(PARAM_FILE_TYPE);
+        String formId = request.getParam(PARAM_FORM_ID);
+        RequestUtils.bodyToJson(request, images -> {
+            UserUtils.getUserInfos(eb, request, user -> {
+                if (user == null) {
+                    String message = "[Formulaire@exportResponses] User not found in session.";
+                    log.error(message);
+                    unauthorized(request, message);
+                    return;
+                }
+
+                formService.get(formId, user, formEvt -> {
+                    if (formEvt.isLeft()) {
+                        log.error("[Formulaire@exportResponses] Error in getting form to export responses of form " + formId);
+                        renderInternalError(request, formEvt);
+                        return;
+                    }
+                    if (formEvt.right().getValue().isEmpty()) {
+                        String message = "[Formulaire@exportResponses] No form found for id " + formId;
+                        log.error(message);
+                        notFound(request, message);
+                        return;
+                    }
+
+                    switch (fileType) {
+                        case CSV:
+                            new FormResponsesExportCSV(request, formEvt.right().getValue()).launch();
+                            break;
+                        case PDF:
+                            JsonObject form = formEvt.right().getValue();
+                            form.put(IMAGES, images);
+                            new FormResponsesExportPDF(request, vertx, config, storage, form).launch();
+                            break;
+                        default:
+                            String message = "[Formulaire@export] Wrong export format type : " + fileType;
+                            log.error(message);
+                            badRequest(request, message);
+                            break;
+                    }
+                });
+            });
         });
     }
 }

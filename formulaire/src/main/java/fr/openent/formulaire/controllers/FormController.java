@@ -1,10 +1,9 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.helpers.EventBusHelper;
 import fr.openent.form.helpers.UtilsHelper;
-import fr.openent.formulaire.export.FormResponsesExportCSV;
-import fr.openent.formulaire.export.FormResponsesExportPDF;
 import fr.openent.formulaire.helpers.DataChecker;
-import fr.openent.formulaire.helpers.FutureHelper;
+import fr.openent.form.helpers.FutureHelper;
 import fr.openent.formulaire.security.*;
 import fr.openent.formulaire.service.*;
 import fr.openent.formulaire.service.impl.*;
@@ -35,11 +34,13 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static fr.openent.form.core.constants.EbFields.*;
+import static fr.openent.form.core.constants.EbFields.ACTION;
+import static fr.openent.form.core.constants.Tables.DB_SCHEMA;
 import static fr.openent.form.core.enums.Events.CREATE;
 import static fr.openent.form.core.constants.ConfigFields.ZIMBRA_MAX_RECIPIENTS;
 import static fr.openent.form.core.constants.ConsoleRights.*;
 import static fr.openent.form.core.constants.Constants.*;
-import static fr.openent.form.core.constants.EbFields.CONVERSATION_ADDRESS;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.FolderIds.*;
 import static fr.openent.form.core.constants.ShareRights.*;
@@ -62,9 +63,10 @@ public class FormController extends ControllerHelper {
     private final RelFormFolderService relFormFolderService;
     private final NeoService neoService;
     private final NotifyService notifyService;
+    private final FormulaireRepositoryEvents formulaireRepositoryEvents;
     private final SimpleDateFormat formDateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
-    public FormController(EventStore eventStore, Storage storage, TimelineHelper timelineHelper) {
+    public FormController(EventStore eventStore, Storage storage, Vertx vertx, TimelineHelper timelineHelper) {
         super();
         this.eventStore = eventStore;
         this.storage = storage;
@@ -78,6 +80,7 @@ public class FormController extends ControllerHelper {
         this.relFormFolderService = new DefaultRelFormFolderService();
         this.neoService = new DefaultNeoService();
         this.notifyService = new DefaultNotifyService(timelineHelper, eb);
+        this.formulaireRepositoryEvents = new FormulaireRepositoryEvents(vertx);
     }
 
     // Init classic rights
@@ -513,7 +516,7 @@ public class FormController extends ControllerHelper {
         for (int i = 0; i < formIds.size(); i++) {
             Promise<JsonArray> promise = Promise.promise();
             formsInfos.add(promise.future());
-            formService.duplicate(formIds.getInteger(i), user, FutureHelper.handlerJsonArray(promise));
+            formService.duplicate(formIds.getInteger(i), user, FutureHelper.handlerEither(promise));
         }
         CompositeFuture.all(formsInfos).onComplete(formsInfosEvt -> {
             if (formsInfosEvt.failed()) {
@@ -543,7 +546,7 @@ public class FormController extends ControllerHelper {
                     if (CHOICES_TYPE_QUESTIONS.contains(question_type)) {
                         Promise<JsonObject> promise = Promise.promise();
                         questionsInfosFutures.add(promise.future());
-                        questionChoiceService.duplicate(formId, questionId, originalQuestionId, FutureHelper.handlerJsonObject(promise));
+                        questionChoiceService.duplicate(formId, questionId, originalQuestionId, FutureHelper.handlerEither(promise));
                     }
                 }
             }
@@ -1103,58 +1106,69 @@ public class FormController extends ControllerHelper {
         });
     }
 
-    // Exports
+    // Export / Import
 
-    @Post("/forms/:formId/export/:fileType")
-    @ApiDoc("Export a specific form's responses into a file (CSV or PDF)")
-    @ResourceFilter(CustomShareAndOwner.class)
-    @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
-    public void export(final HttpServerRequest request) {
-        String fileType = request.getParam(PARAM_FILE_TYPE);
-        String formId = request.getParam(PARAM_FORM_ID);
-        RequestUtils.bodyToJson(request, images -> {
+    @Post("/forms/export")
+    @ApiDoc("Export forms in a ZIP file")
+    @ResourceFilter(CreationRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void exportForm(final HttpServerRequest request) {
+        RequestUtils.bodyToJsonArray(request, formIds -> {
             UserUtils.getUserInfos(eb, request, user -> {
                 if (user == null) {
-                    String message = "[Formulaire@exportForm] User not found in session.";
+                    String message = "[Formulaire@exportForms] User not found in session.";
                     log.error(message);
                     unauthorized(request, message);
                     return;
                 }
 
-                formService.get(formId, user, formEvt -> {
-                    if (formEvt.isLeft()) {
-                        log.error("[Formulaire@export] Error in getting form to export responses of form " + formId);
-                        renderInternalError(request, formEvt);
+                final List<String> groupsAndUserIds = new ArrayList<>();
+                groupsAndUserIds.add(user.getUserId());
+                if (user.getGroupsIds() != null) {
+                    groupsAndUserIds.addAll(user.getGroupsIds());
+                }
+
+                formService.checkFormsRights(groupsAndUserIds, user, MANAGER_RESOURCE_RIGHT, formIds, hasRightsEvt -> {
+                    if (hasRightsEvt.isLeft()) {
+                        log.error("[Formulaire@exportForms] Fail to check rights for method " + hasRightsEvt);
+                        renderInternalError(request, hasRightsEvt);
                         return;
                     }
-                    if (formEvt.right().getValue().isEmpty()) {
-                        String message = "[Formulaire@export] No form found for id " + formId;
+                    if (hasRightsEvt.right().getValue().isEmpty()) {
+                        String message = "[Formulaire@exportForms] No rights found for forms with ids " + formIds;
                         log.error(message);
                         notFound(request, message);
                         return;
                     }
 
-                    switch (fileType) {
-                        case CSV:
-                            new FormResponsesExportCSV(request, formEvt.right().getValue()).launch();
-                            break;
-                        case PDF:
-                            JsonObject form = formEvt.right().getValue();
-                            form.put(IMAGES, images);
-                            new FormResponsesExportPDF(request, vertx, config, storage, form).launch();
-                            break;
-                        default:
-                            String message = "[Formulaire@export] Wrong export format type : " + fileType;
-                            log.error(message);
-                            badRequest(request, message);
-                            break;
+                    // Check if user is owner or manager to all the forms
+                    Long count = hasRightsEvt.right().getValue().getLong(COUNT);
+                    if (count == null || count != formIds.size()) {
+                        String message = "[Formulaire@exportForms] You're missing rights on one form or more.";
+                        log.error(message);
+                        unauthorized(request, message);
+                        return;
                     }
+
+                    // Create the directory in the file system
+                    JsonObject ebMessage = new JsonObject()
+                            .put(ACTION, START)
+                            .put(PARAM_USER_ID, user.getUserId())
+                            .put(LOCALE, I18n.acceptLanguage(request))
+                            .put(APPS, new JsonArray().add(DB_SCHEMA))
+                            .put(PARAM_RESOURCES_IDS, new JsonArray().addAll(formIds));
+
+                    EventBusHelper.requestJsonObject(EXPORT_ADDRESS, eb, ebMessage)
+                        .onSuccess(res -> renderJson(request, res))
+                        .onFailure(err -> {
+                            String message = "[Formulaire@exportForms] Failed to export data : " + err.getMessage();
+                            log.error(message);
+                            renderInternalError(request, message);
+                        });
                 });
             });
         });
     }
-
-
 
 
     // Share/Sending functions

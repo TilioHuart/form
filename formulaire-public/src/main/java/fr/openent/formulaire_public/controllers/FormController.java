@@ -29,6 +29,7 @@ import java.util.HashMap;
 
 import static fr.openent.form.core.constants.Constants.CHOICES_TYPE_QUESTIONS;
 import static fr.openent.form.core.constants.EbFields.*;
+import static fr.openent.form.core.constants.EbFields.ACTION;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.helpers.RenderHelper.renderBadRequest;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;

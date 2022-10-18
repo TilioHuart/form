@@ -1,0 +1,13 @@
+<lightbox show="vm.display.lightbox.import" on-close="vm.closeImportForms()">
+    <h2><i18n>formulaire.import</i18n></h2>
+    <div class="bottom-spacing"><i18n>formulaire.import.explanation</i18n></div>
+    <formulaire-picker-file ng-if="!vm.display.loading.import" files="vm.files" multiple="false"></formulaire-picker-file>
+
+    <div ng-if="vm.display.loading.import" class="twelve loader">
+        <loader min-height="'10px'"/>
+    </div>
+    <div class="action-buttons">
+        <button class="cell cancel" ng-click="vm.closeImportForms()"><i18n>formulaire.close</i18n></button>
+        <button class="cell" ng-click="vm.doImportForms()"><i18n>formulaire.import</i18n></button>
+    </div>
+</lightbox>

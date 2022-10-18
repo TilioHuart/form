@@ -14,6 +14,7 @@ import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
 
 import static fr.openent.form.core.constants.EbFields.*;
+import static fr.openent.form.core.constants.EbFields.ACTION;
 import static fr.openent.form.core.constants.Fields.*;
 
 public class EventBusController extends ControllerHelper {

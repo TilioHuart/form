@@ -85,8 +85,8 @@ public class CustomShareAndOwner implements ResourcesProvider {
 
     private String getKeyByBinding(Binding binding) {
         if (isCountDistribution(binding) || isGetByFormResponderAndStatusDistribution(binding) ||
-                isUpdateForm(binding) || isDeleteForm(binding) || isExportForm(binding) || isSendReminderForm(binding) ||
-                isCreateQuestion(binding) || isListByFormResponse(binding) || isDeleteResponse(binding) ||
+                isUpdateForm(binding) || isDeleteForm(binding) || isSendReminderForm(binding) || isCreateQuestion(binding) ||
+                isListByFormResponse(binding) || isDeleteResponse(binding) || isExportResponse(binding) ||
                 isCreateSection(binding) || isUpdateSection(binding) || isUpdateQuestion(binding)) {
             return PARAM_FORM_ID;
         }
@@ -167,10 +167,6 @@ public class CustomShareAndOwner implements ResourcesProvider {
         return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.FormController|sendReminder");
     }
 
-    private boolean isExportForm(final Binding binding) {
-        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.FormController|export");
-    }
-
     private boolean isShareJson(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.FormController|shareJson");
     }
@@ -240,6 +236,10 @@ public class CustomShareAndOwner implements ResourcesProvider {
 
     private boolean isDeleteResponse(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.ResponseController|delete");
+    }
+
+    private boolean isExportResponse(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.ResponseController|export");
     }
 
     // ResponseFile
