@@ -10,7 +10,7 @@ import fr.openent.formulaire.service.QuestionSpecificFieldService;
 import fr.openent.formulaire.service.impl.DefaultDistributionService;
 import fr.openent.formulaire.service.impl.DefaultFormService;
 import fr.openent.formulaire.service.impl.DefaultQuestionService;
-import fr.openent.formulaire.service.impl.DefaultQuestionSpecificField;
+import fr.openent.formulaire.service.impl.DefaultQuestionSpecificFieldService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
@@ -23,6 +23,12 @@ import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static fr.openent.form.helpers.UtilsHelper.getIds;
 
 import static fr.openent.form.core.constants.Constants.CONDITIONAL_QUESTIONS;
 import static fr.openent.form.core.constants.Fields.*;
@@ -42,9 +48,44 @@ public class QuestionController extends ControllerHelper {
     public QuestionController() {
         super();
         this.questionService = new DefaultQuestionService();
-        this.questionSpecificFieldService = new DefaultQuestionSpecificField();
+        this.questionSpecificFieldService = new DefaultQuestionSpecificFieldService();
         this.formService = new DefaultFormService();
         this.distributionService = new DefaultDistributionService();
+    }
+
+    private void syncQuestionSpecs(JsonArray questions, HttpServerRequest request) {
+        JsonArray questionIds = getIds(questions);
+        if (!questions.isEmpty()) {
+            questionSpecificFieldService.listByIds(questionIds, specEvt -> {
+                if (specEvt.isLeft()) {
+                    log.error("[Formulaire@listQuestions] Fail to list specQuestion : " + specEvt);
+                    renderInternalError(request, specEvt);
+                    return;
+                }
+
+                JsonArray questionSpecs = specEvt.right().getValue();
+                List<String> columnNames = questionSpecs.size() > 0 ?
+                        questionSpecs.getJsonObject(0).fieldNames().stream().collect(Collectors.toList()) : new ArrayList<>();
+
+                List<JsonObject> questionsList = new ArrayList<>();
+                questionsList.addAll(questions.getList());
+
+                for (int k = 0; k < questionSpecs.size(); k++) {
+                    JsonObject questionSpec = questionSpecs.getJsonObject(k);
+                    Integer questionId = questionSpec.getInteger(QUESTION_ID);
+
+                    JsonObject question = questionsList.stream()
+                            .filter(q -> q.getInteger(ID).equals(questionId))
+                            .collect(Collectors.toList()).get(0);
+
+                    for (String columnName: columnNames) {
+                        question.put(columnName, questionSpec.getValue(columnName));
+                    }
+                }
+                renderJson(request, new JsonArray(questionsList));
+            });
+        }
+        else ok(request);
     }
 
     @Get("/forms/:formId/questions")
@@ -53,7 +94,17 @@ public class QuestionController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listForForm(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
-        questionService.listForForm(formId, arrayResponseHandler(request));
+
+        questionService.listForForm(formId, listQuestionsEvt -> {
+            if (listQuestionsEvt.isLeft()) {
+                log.error("[Formulaire@listForFrom] Fail to list questions for form with id : " + formId);
+                renderInternalError(request, listQuestionsEvt);
+                return;
+            }
+            JsonArray questions = listQuestionsEvt.right().getValue();
+
+            syncQuestionSpecs(questions, request);
+        });
     }
 
     @Get("/sections/:sectionId/questions")
@@ -62,7 +113,17 @@ public class QuestionController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listForSection(HttpServerRequest request) {
         String sectionId = request.getParam(PARAM_SECTION_ID);
-        questionService.listForSection(sectionId, arrayResponseHandler(request));
+
+        questionService.listForSection(sectionId, getQuestionEvt -> {
+            if (getQuestionEvt.isLeft()) {
+                log.error("[Formulaire@listForSection] Fail to list questions for section with id : " + sectionId);
+                renderInternalError(request, getQuestionEvt);
+                return;
+            }
+            JsonArray questions = getQuestionEvt.right().getValue();
+
+            syncQuestionSpecs(questions, request);
+        });
     }
 
     @Get("/questions/children")
