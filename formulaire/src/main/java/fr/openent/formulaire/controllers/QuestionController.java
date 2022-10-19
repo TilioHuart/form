@@ -15,7 +15,9 @@ import fr.openent.formulaire.service.impl.DefaultQuestionSpecificFieldService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.request.RequestUtils;
+import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -54,7 +56,7 @@ public class QuestionController extends ControllerHelper {
         this.distributionService = new DefaultDistributionService();
     }
 
-    private void syncQuestionSpecs(JsonArray questions, HttpServerRequest request) {
+    private void syncQuestionSpecs(JsonArray questions, HttpServerRequest request, Handler<Either<String,JsonArray>> handler) {
         JsonArray questionIds = getIds(questions);
         if (!questions.isEmpty()) {
             questionSpecificFieldService.listByIds(questionIds, specEvt -> {
@@ -83,10 +85,10 @@ public class QuestionController extends ControllerHelper {
                         question.put(columnName, questionSpec.getValue(columnName));
                     }
                 }
-                renderJson(request, new JsonArray(questionsList));
+                handler.handle(new Either.Right<>(new JsonArray(questionsList)));
             });
         }
-        else ok(request);
+        else handler.handle(new Either.Right<>(new JsonArray()));
     }
 
     @Get("/forms/:formId/questions")
@@ -104,7 +106,7 @@ public class QuestionController extends ControllerHelper {
             }
             JsonArray questions = listQuestionsEvt.right().getValue();
 
-            syncQuestionSpecs(questions, request);
+            syncQuestionSpecs(questions, request, arrayResponseHandler(request));
         });
     }
 
@@ -123,7 +125,7 @@ public class QuestionController extends ControllerHelper {
             }
             JsonArray questions = getQuestionEvt.right().getValue();
 
-            syncQuestionSpecs(questions, request);
+            syncQuestionSpecs(questions, request, arrayResponseHandler(request));
         });
     }
 
