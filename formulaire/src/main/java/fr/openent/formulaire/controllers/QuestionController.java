@@ -69,6 +69,10 @@ public class QuestionController extends ControllerHelper {
                 JsonArray questionSpecs = specEvt.right().getValue();
                 List<String> columnNames = questionSpecs.size() > 0 ?
                         questionSpecs.getJsonObject(0).fieldNames().stream().collect(Collectors.toList()) : new ArrayList<>();
+                if (columnNames.size() > 0) {
+                    columnNames.remove(ID);
+                    columnNames.remove(QUESTION_ID);
+                }
 
                 List<JsonObject> questionsList = new ArrayList<>();
                 questionsList.addAll(questions.getList());
