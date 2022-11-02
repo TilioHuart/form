@@ -311,19 +311,18 @@ public class DefaultFormService implements FormService {
                 "), " +
                 "new_questions AS (" +
                     "INSERT INTO " + QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
-                    "mandatory, original_question_id, section_id, section_position, conditional) " +
+                    "mandatory, original_question_id, section_id, section_position, conditional, placeholder) " +
                     "SELECT (SELECT id from new_form_id), title, position, question_type, statement, mandatory, id, " +
                     "(SELECT id FROM new_sections_linked WHERE original_section_id = q.section_id LIMIT 1), " +
-                    "(SELECT section_position FROM new_sections_linked WHERE question_id = q.id), conditional " +
+                    "(SELECT section_position FROM new_sections_linked WHERE question_id = q.id), conditional, placeholder " +
                     "FROM " + QUESTION_TABLE + " q WHERE form_id = ? AND matrix_id IS NULL " +
                     "ORDER BY q.id " +
                     "RETURNING id, form_id, original_question_id, question_type" +
                 "), " +
                 "new_children_questions AS (" +
-                    "INSERT INTO " + QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
-                    "mandatory, original_question_id, section_id, section_position, conditional, matrix_id, matrix_position) " +
-                    "SELECT (SELECT id from new_form_id), title, position, question_type, statement, mandatory, id, null, " +
-                    "null, conditional, (SELECT id FROM new_questions WHERE original_question_id = q.matrix_id LIMIT 1), matrix_position " +
+                    "INSERT INTO " + QUESTION_TABLE + " (form_id, title, question_type, mandatory, original_question_id, matrix_id, matrix_position) " +
+                    "SELECT (SELECT id from new_form_id), title, question_type, mandatory, id, " +
+                    "(SELECT id FROM new_questions WHERE original_question_id = q.matrix_id LIMIT 1), matrix_position " +
                     "FROM " + QUESTION_TABLE + " q WHERE form_id = ? AND matrix_id IS NOT NULL " +
                     "ORDER BY q.id " +
                     "RETURNING id, form_id, original_question_id, question_type" +
