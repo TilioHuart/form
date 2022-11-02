@@ -228,6 +228,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         formData.append('file', file);
         await formService.import(formData);
         vm.closeImportForms();
+        if (vm.folder.id == vm.folders.myFormsFolder.id) window.setTimeout(async () => await initFormsList(), 200);
     };
 
     vm.closeImportForms = () : void => {

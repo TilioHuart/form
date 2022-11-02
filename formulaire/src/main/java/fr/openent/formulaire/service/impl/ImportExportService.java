@@ -187,8 +187,8 @@ public class ImportExportService {
 
         SqlStatementsBuilder s = new SqlStatementsBuilder();
         String query = "INSERT INTO " + QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
-                "mandatory, original_question_id, section_id, section_position, conditional, matrix_id, matrix_position) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
+                "mandatory, original_question_id, section_id, section_position, conditional, placeholder, matrix_id, matrix_position) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
                 "RETURNING original_question_id, id, matrix_id;";
 
         s.raw(TRANSACTION_BEGIN_QUERY);
@@ -205,6 +205,7 @@ public class ImportExportService {
                     .add(oldNewSectionIdsMap.get(entry.getInteger(fields.indexOf(SECTION_ID))))
                     .add(entry.getInteger(fields.indexOf(SECTION_POSITION)))
                     .add(entry.getBoolean(fields.indexOf(CONDITIONAL)))
+                    .add(entry.getString(fields.indexOf(PLACEHOLDER)))
                     .add(entry.getInteger(fields.indexOf(MATRIX_ID)))
                     .add(entry.getInteger(fields.indexOf(MATRIX_POSITION)));
             s.prepared(query, params);
