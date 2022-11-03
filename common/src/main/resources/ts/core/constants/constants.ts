@@ -1,4 +1,5 @@
 export abstract class Constants {
+    static readonly DEFAULT_DOMAIN: string = "default-domain";
     static readonly DEFAULT_NB_CHOICES: number = 3;
     static readonly DEFAULT_NB_CHILDREN: number = 3;
     static readonly GRAPH_COLORS: string[] = ['#37A4CD','#1691C0','#056F98','#5AB7DA','#89CEE9'];

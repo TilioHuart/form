@@ -1,5 +1,5 @@
 import {Directive, ng} from "entcore";
-import {FormElements, Question, QuestionChoice, Types} from "@common/models";
+import {FormElements, Question, QuestionChoice} from "@common/models";
 import {questionChoiceService, questionService} from "@common/services";
 import {FormElementUtils, I18nUtils} from "@common/utils";
 import {Direction} from "@common/core/enums";
@@ -50,10 +50,10 @@ export const questionTypeMatrix: Directive = ng.directive('questionTypeMatrix', 
                         </div>
                         <label class="twelve left-spacing-twice">
                             <span style="cursor: default"></span>
-                            <input type="text" class="width95-always" ng-if="!vm.question.selected" disabled
-                                   ng-model="choice.value" placeholder="Option [[$index + 1]]">
-                            <input type="text" class="width95-always" ng-if="vm.question.selected" input-guard
-                                   ng-model="choice.value" placeholder="Option [[$index + 1]]">
+                            <input type="text" class="width95-always" ng-model="choice.value" ng-if="!vm.question.selected" disabled
+                                   placeholder="[[vm.I18n.getWithParam('formulaire.option', choice.position)]]">
+                            <input type="text" class="width95-always" ng-model="choice.value" ng-if="vm.question.selected" input-guard
+                                   placeholder="[[vm.I18n.getWithParam('formulaire.option', choice.position)]]">
                         </label>
                         <i class="i-cancel lg-icon dontSave" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
                     </div>
@@ -75,10 +75,10 @@ export const questionTypeMatrix: Directive = ng.directive('questionTypeMatrix', 
                         </div>
                         <label class="twelve left-spacing-twice">
                             <span style="cursor: default"></span>
-                            <input type="text" class="width95-always" ng-if="!vm.question.selected" disabled
-                                   ng-model="child.title" placeholder="Option [[$index + 1]]">
-                            <input type="text" class="width95-always" ng-if="vm.question.selected" input-guard
-                                   ng-model="child.title" placeholder="Option [[$index + 1]]">
+                            <input type="text" class="width95-always" ng-model="child.title" ng-if="!vm.question.selected" disabled
+                                   placeholder="[[vm.I18n.getWithParam('formulaire.option', child.matrix_position)]]">
+                            <input type="text" class="width95-always" ng-model="child.title" ng-if="vm.question.selected" input-guard
+                                   placeholder="[[vm.I18n.getWithParam('formulaire.option', child.matrix_position)]]">
                         </label>
                         <i class="i-cancel lg-icon dontSave" ng-click="vm.deleteChild($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
                     </div>

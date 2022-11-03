@@ -516,7 +516,7 @@ public class FormController extends ControllerHelper {
         for (int i = 0; i < formIds.size(); i++) {
             Promise<JsonArray> promise = Promise.promise();
             formsInfos.add(promise.future());
-            formService.duplicate(formIds.getInteger(i), user, FutureHelper.handlerEither(promise));
+            formService.duplicate(formIds.getInteger(i), user, I18n.acceptLanguage(request), FutureHelper.handlerEither(promise));
         }
         CompositeFuture.all(formsInfos).onComplete(formsInfosEvt -> {
             if (formsInfosEvt.failed()) {

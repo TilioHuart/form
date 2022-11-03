@@ -1,13 +1,14 @@
 import {Directive, ng} from "entcore";
 import {Question, QuestionChoice} from "@common/models";
 import {questionChoiceService} from "@common/services";
-import {FormElementUtils} from "@common/utils";
+import {FormElementUtils, I18nUtils} from "@common/utils";
 import {Direction} from "@common/core/enums";
 import {PropPosition} from "@common/core/enums/prop-position";
 
 interface IViewModel {
     question: Question,
     hasFormResponses: boolean,
+    I18n: I18nUtils;
     Direction: typeof Direction;
 
     createNewChoice(): void;
@@ -40,10 +41,10 @@ export const questionTypeMultipleanswer: Directive = ng.directive('questionTypeM
                     <label class="twelve left-spacing-twice">
                         <input type="checkbox" id="check-[[choice.id]]" disabled>
                         <span style="cursor: default"></span>
-                        <input type="text" ng-model="choice.value" ng-if="!vm.question.selected" disabled
-                                class="width95 ten-mobile" placeholder="Choix [[$index + 1]]">
-                        <input type="text" ng-model="choice.value" ng-if="vm.question.selected" input-guard
-                                class="width95 ten-mobile" placeholder="Choix [[$index + 1]]">
+                        <input type="text" class="width95 ten-mobile" ng-model="choice.value" ng-if="!vm.question.selected" disabled
+                                placeholder="[[vm.I18n.getWithParam('formulaire.choice', choice.position)]]">
+                        <input type="text" class="width95 ten-mobile" ng-model="choice.value" ng-if="vm.question.selected" input-guard
+                                placeholder="[[vm.I18n.getWithParam('formulaire.choice', choice.position)]]">
                     </label>
                     <i class="i-cancel lg-icon dontSave" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
                 </div>
@@ -58,6 +59,7 @@ export const questionTypeMultipleanswer: Directive = ng.directive('questionTypeM
         },
         link: ($scope, $element) => {
             const vm: IViewModel = $scope.vm;
+            vm.I18n = I18nUtils;
             vm.Direction = Direction;
 
             vm.createNewChoice = () : void => {

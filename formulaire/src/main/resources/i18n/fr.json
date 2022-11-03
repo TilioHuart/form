@@ -16,6 +16,7 @@
   "formulaire.organize": "Organiser",
   "formulaire.preview": "Aperçu",
   "formulaire.preview.end": "Fin de l'aperçu",
+  "formulaire.search": "Rechercher",
   "formulaire.create": "Créer",
   "formulaire.save": "Enregistrer",
   "formulaire.quit": "Quitter",
@@ -72,6 +73,8 @@
   "formulaire.date.ending": "Date de fermeture",
   "formulaire.vote": "vote",
   "formulaire.votes": "votes",
+  "formulaire.choice": "Choix {0}",
+  "formulaire.option": "Option {0}",
   "formulaire.options.select": "-- Sélectionnez une option --",
   "formulaire.archive.title": "Supprimer les formulaires sélectionnés",
   "formulaire.delete.title": "Supprimer définitivement",
@@ -80,6 +83,8 @@
   "formulaire.move.title": "Déplacer la sélection",
   "formulaire.move.folder.tree": "Utilisez l'arbre de navigation suivant pour choisir la cible",
   "formulaire.block.sharing": "Une ou plusieurs questions de votre formulaire ne sont pas valides. Veuillez corriger ces questions avant d'effectuer le partage.",
+  "formulaire.copy": "Copie",
+  "formulaire.archive.zip.name": "Fichiers déposés",
 
   "formulaire.prop.public.label": "Créer un formulaire public",
   "formulaire.prop.public.description": "Un formulaire public est anonyme et doit impérativement comporter une date de fin.",
@@ -350,8 +355,9 @@
   "formulaire.error.sectionService.update": "Une erreur est survenue lors de la sauvegarde de la section",
   "formulaire.error.sectionService.delete": "Une erreur est survenue lors de la suppression des sections",
 
-  "formulaire.error.utilsService.get": "Une erreur est survenue lors de la récupération de l'image",
-  "formulaire.error.utilsService.create": "Une erreur est survenue lors de la création des fichiers",
+  "formulaire.error.utilsService.getInfoImage": "Une erreur est survenue lors de la récupération de l'image",
+  "formulaire.error.utilsService.postMultipleFiles": "Une erreur est survenue lors de la création des fichiers",
+  "formulaire.error.utilsService.getUserPreferences": "Une erreur est survenue lors de la récupération des préférences utilisateur",
 
   "formulaire.error.delegateService.sync": "Une erreur est survenue lors de la synchronisation des délégués",
   "formulaire.error.delegateService.list": "Une erreur est survenue lors de la récupération des délégués",

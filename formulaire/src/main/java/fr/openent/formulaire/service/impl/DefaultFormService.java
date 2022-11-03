@@ -1,8 +1,9 @@
 package fr.openent.formulaire.service.impl;
 
-import fr.openent.formulaire.helpers.FutureHelper;
+import fr.openent.form.helpers.FutureHelper;
 import fr.openent.formulaire.service.FormService;
 import fr.wseduc.webutils.Either;
+import fr.wseduc.webutils.I18n;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -289,7 +290,8 @@ public class DefaultFormService implements FormService {
     }
 
     @Override
-    public void duplicate(int formId, UserInfos user, Handler<Either<String, JsonArray>> handler) {
+    public void duplicate(int formId, UserInfos user, String locale, Handler<Either<String, JsonArray>> handler) {
+        String COPY = I18n.getInstance().translate("formulaire.copy", I18n.DEFAULT_DOMAIN, locale);
         String query =
                 "WITH new_form_id AS (" +
                     "INSERT INTO  " + FORM_TABLE + " (owner_id, owner_name, title, description, picture, date_opening, date_ending, " +

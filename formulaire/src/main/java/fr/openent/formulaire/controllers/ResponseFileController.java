@@ -9,6 +9,7 @@ import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.Either;
+import fr.wseduc.webutils.I18n;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
@@ -23,7 +24,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static fr.openent.form.core.constants.Constants.ARCHIVE_ZIP_NAME;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_RIGHT;
 import static fr.openent.form.core.constants.ShareRights.RESPONDER_RESOURCE_RIGHT;
@@ -119,7 +119,7 @@ public class ResponseFileController extends ControllerHelper {
             JsonObject root = new JsonObject()
                     .put(ID, UUID.randomUUID().toString())
                     .put(TYPE, FOLDER)
-                    .put(NAME, ARCHIVE_ZIP_NAME)
+                    .put(NAME, I18n.getInstance().translate("formulaire.archive.zip.name", I18n.DEFAULT_DOMAIN, I18n.acceptLanguage(request)))
                     .put(FOLDERS, new JsonArray());
             JsonObject groupFiles = new JsonObject();
 

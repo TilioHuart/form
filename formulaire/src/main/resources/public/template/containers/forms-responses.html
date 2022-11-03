@@ -36,7 +36,7 @@
     <!--Search bar and display icons-->
     <section class="cell twelve">
         <div class="folder-info zero-mobile">
-            <div><input type="text" ng-model="vm.searchInput" placeholder="Rechercher"></div>
+            <div><input type="text" ng-model="vm.searchInput" placeholder="[[idiom.translate('formulaire.search')]]"></div>
             <div>
                 <i class="i-view-cards xl-icon" ng-click="vm.display.grid = true" ng-class="{'selected': vm.display.grid}"></i>
                 <i class="i-view-tab xl-icon" ng-click="vm.display.grid = false" ng-class="{'selected': !vm.display.grid}"></i>

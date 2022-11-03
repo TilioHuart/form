@@ -93,9 +93,10 @@ public interface FormService {
      * Duplicate several forms
      * @param formId form identifier
      * @param user user connected
+     * @param locale locale language
      * @param handler function handler returning JsonArray data
      */
-    void duplicate(int formId, UserInfos user, Handler<Either<String, JsonArray>> handler);
+    void duplicate(int formId, UserInfos user, String locale, Handler<Either<String, JsonArray>> handler);
 
     /**
      * Update a specific form

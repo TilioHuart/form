@@ -44,9 +44,11 @@ export const questionTypeSingleanswer: Directive = ng.directive('questionTypeSin
                     <label class="left-spacing-twice" ng-class="vm.question.conditional ? 'five four-mobile' : 'twelve'">
                         <span style="cursor: default">[[$index + 1]].</span>
                         <input type="text" ng-model="choice.value" ng-if="!vm.question.selected" disabled
-                                ng-class="vm.question.conditional ? 'eleven eight-mobile' : 'width95 ten-mobile'" placeholder="Choix [[$index + 1]]">
+                                ng-class="vm.question.conditional ? 'eleven eight-mobile' : 'width95 ten-mobile'"
+                                placeholder="[[vm.I18n.getWithParam('formulaire.choice', choice.position)]]">
                         <input type="text" ng-model="choice.value" ng-if="vm.question.selected" input-guard
-                                ng-class="vm.question.conditional ? 'eleven eight-mobile' : 'width95 ten-mobile'" placeholder="Choix [[$index + 1]]">
+                                ng-class="vm.question.conditional ? 'eleven eight-mobile' : 'width95 ten-mobile'"
+                                placeholder="[[vm.I18n.getWithParam('formulaire.choice', choice.position)]]">
                     </label>
                     <i class="i-cancel lg-icon dontSave" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
                     <select class="five" ng-if="vm.question.conditional" ng-model="choice.next_section_id" ng-disabled="!vm.question.selected" input-guard>

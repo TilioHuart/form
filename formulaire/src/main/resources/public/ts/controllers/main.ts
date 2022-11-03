@@ -8,7 +8,7 @@ import {
 	Types,
 	Folder
 } from "../models";
-import {distributionService, formElementService, formService} from "../services";
+import {distributionService, formElementService, formService, utilsService} from "../services";
 import {
 	Direction,
 	Exports,
@@ -48,6 +48,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 
 		const init = async () : Promise<void> => {
 			await $scope.questionTypes.sync();
+			$scope.userPreferences = await utilsService.getUserPreferences();
 
 			// Clipboard
 			let clipboard = new Clipboard('.clipboard-link-field');
@@ -297,7 +298,8 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 		// Utils
 
 		$scope.displayDate = (dateToFormat: Date) : string => {
-			return new Date(dateToFormat).toLocaleString([], {day: '2-digit', month: '2-digit', year:'numeric', hour: '2-digit', minute:'2-digit'});
+			let locales: string[] = $scope.userPreferences ? [$scope.userPreferences] : [];
+			return new Date(dateToFormat).toLocaleString(locales, {day: '2-digit', month: '2-digit', year:'numeric', hour: '2-digit', minute:'2-digit'});
 		};
 
 		$scope.getTypeNameByCode = (code: number) : string => {

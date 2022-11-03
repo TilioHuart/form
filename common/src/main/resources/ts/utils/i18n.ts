@@ -9,6 +9,10 @@ export class I18nUtils {
         return finalI18n;
     };
 
+    static getWithParam = (key: string, param: string|number) : string => {
+        return I18nUtils.getWithParams(key, [param.toString()]);
+    };
+
     static translate = (key: string) : string => {
         return idiom.translate(key);
     }
