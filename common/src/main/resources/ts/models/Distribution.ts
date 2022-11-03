@@ -4,7 +4,6 @@ import {distributionService} from "../services";
 
 export enum DistributionStatus {
     TO_DO = 'TO_DO',
-    IN_PROGRESS = 'IN_PROGRESS',
     FINISHED = 'FINISHED',
     ON_CHANGE = 'ON_CHANGE'
 }

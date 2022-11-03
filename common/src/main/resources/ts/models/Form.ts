@@ -255,7 +255,6 @@ export class Forms extends Selection<Form> {
         { name: FiltersFilters.SHARED, value: false, display: false },
         { name: FiltersFilters.SENT, value: false, display: false },
         { name: FiltersFilters.TO_DO, value: false, display: false },
-        { name: FiltersFilters.IN_PROGRESS, value: false, display: false },
         { name: FiltersFilters.FINISHED, value: false, display: false }
     ];
 
@@ -378,15 +377,12 @@ export class Forms extends Selection<Form> {
                 }
             }
 
-            if (objectFilters[FiltersFilters.TO_DO].display && objectFilters[FiltersFilters.IN_PROGRESS].display &&  objectFilters[FiltersFilters.FINISHED].display) {
-                if (!objectFilters[FiltersFilters.TO_DO].value && !objectFilters[FiltersFilters.IN_PROGRESS].value && !objectFilters[FiltersFilters.FINISHED].value) {
+            if (objectFilters[FiltersFilters.TO_DO].display &&  objectFilters[FiltersFilters.FINISHED].display) {
+                if (!objectFilters[FiltersFilters.TO_DO].value && !objectFilters[FiltersFilters.FINISHED].value) {
                     form.displayed = true;
                 }
                 else {
                     if (form.getStatus() === DistributionStatus.TO_DO && !objectFilters[FiltersFilters.TO_DO].value) {
-                        form.displayed = false;
-                    }
-                    if (form.getStatus() === DistributionStatus.IN_PROGRESS && !objectFilters[FiltersFilters.IN_PROGRESS].value) {
                         form.displayed = false;
                     }
                     if (form.getStatus() === DistributionStatus.FINISHED && !objectFilters[FiltersFilters.FINISHED].value) {

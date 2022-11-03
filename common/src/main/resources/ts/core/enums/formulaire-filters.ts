@@ -10,6 +10,5 @@ export enum FiltersFilters {
     SHARED = 'SHARED',
     SENT = 'SENT',
     TO_DO = 'TO_DO',
-    IN_PROGRESS = 'IN_PROGRESS',
     FINISHED = 'FINISHED'
 }

@@ -64,7 +64,6 @@ export const formsResponsesController = ng.controller('FormsResponsesController'
         vm.distributions = new Distributions();
 
         vm.forms.filters.find(f => f.name === FiltersFilters.TO_DO).display = true;
-        vm.forms.filters.find(f => f.name === FiltersFilters.IN_PROGRESS).display = true;
         vm.forms.filters.find(f => f.name === FiltersFilters.FINISHED).display = true;
         vm.forms.orders.find(o => o.name === FiltersOrders.SENDING_DATE).display = true;
         vm.forms.orders.find(o => o.name === FiltersOrders.TITLE).display = true;
