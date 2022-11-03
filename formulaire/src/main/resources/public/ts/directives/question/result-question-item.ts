@@ -78,7 +78,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                                         vm.question.question_type == vm.Types.SINGLEANSWERRADIO">
                 <!-- Data -->
                 <div class="twelve-mobile" ng-class="vm.question.question_type == vm.Types.MULTIPLEANSWER ? 'twelve' : 'five'">
-                    <div ng-repeat="choice in vm.question.choices.all" class="choice">
+                    <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']" class="choice">
                         <!-- Data for MULTIPLEANSWER -->
                         <div class="infos twelve-mobile" ng-class="vm.question.question_type == vm.Types.MULTIPLEANSWER  ? 'five' : 'twelve'">
                             <div class="choice-value eight twelve-mobile ellipsis">

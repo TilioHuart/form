@@ -38,7 +38,7 @@ export const publicMatrix: Directive = ng.directive('publicMatrix', () => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="child in vm.question.children.all" ng-init="childIndex = $index">
+                            <tr ng-repeat="child in vm.question.children.all | orderBy:matrix_position" ng-init="childIndex = $index">
                                 <td>[[child.title]]</td>
                                 <td ng-repeat ="choice in vm.question.choices.all | orderBy:['position', 'id']">
                                     <label>

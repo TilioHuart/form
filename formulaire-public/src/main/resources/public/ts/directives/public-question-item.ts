@@ -85,7 +85,7 @@ function directive() {
                     <div ng-if="vm.question.question_type == vm.Types.SINGLEANSWER">
                         <select ng-model="vm.responses.all[0].choice_id" input-guard>
                             <option ng-value="">[[vm.I18n.translate('formulaire.public.options.select')]]</option>
-                            <option ng-repeat="choice in vm.question.choices.all" ng-value="choice.id">[[choice.value]]</option>
+                            <option ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']" ng-value="choice.id">[[choice.value]]</option>
                         </select>
                     </div>
                     <div ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER">
