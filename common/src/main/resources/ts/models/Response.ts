@@ -1,10 +1,11 @@
 import {idiom, notify} from "entcore";
 import {responseFileService, responseService} from "../services";
-import {Mix} from "entcore-toolkit";
+import {Mix, Selectable, Selection} from "entcore-toolkit";
 import {ResponseFile, ResponseFiles} from "./ResponseFile";
 import {Question} from "./FormElement";
+import {Form} from "@common/models/Form";
 
-export class Response {
+export class Response implements Selectable {
     id: number;
     question_id: number;
     choice_id: number;
@@ -12,6 +13,7 @@ export class Response {
     distribution_id: number;
     original_id: number;
     files: ResponseFiles;
+    selected: boolean;
     selectedIndex: boolean[]; // For multiple answer in preview
 
     constructor(question_id?: number, choice_id?: number, answer?: string|Date, distribution_id?: number) {
@@ -22,6 +24,7 @@ export class Response {
         this.distribution_id = distribution_id ? distribution_id : null;
         this.original_id = null;
         this.files = new ResponseFiles();
+        this.selected = false;
     }
 
     toJson() : Object {
@@ -32,16 +35,17 @@ export class Response {
             answer: this.answer,
             distribution_id: this.distribution_id,
             original_id: this.original_id,
-            files: this.files
+            files: this.files,
+            selected: this.selected
         }
     }
 }
 
-export class Responses {
+export class Responses extends Selection<Response> {
     all: Response[];
 
     constructor() {
-        this.all = [];
+        super([]);
     }
 
     sync = async (question: Question, isFileQuestion: boolean, nbLines: number = null) : Promise<void> => {

@@ -1,14 +1,11 @@
 import {Directive, ng} from "entcore";
 import {
     Distribution,
-    Question,
-    QuestionChoices,
+    Question, QuestionChoice,
     Response,
     Responses,
     Types
 } from "../../models";
-import {responseService} from "../../services";
-import {Mix} from "entcore-toolkit";
 import {I18nUtils} from "@common/utils";
 
 interface IViewModel {
@@ -17,8 +14,11 @@ interface IViewModel {
     distribution: Distribution;
     Types: typeof Types;
     I18n: I18nUtils;
+    mapChildChoicesResponseIndex: Map<Question, Map<QuestionChoice, number>>;
 
-    $onInit() : Promise<void>;
+    $onInit(): Promise<void>;
+    $onChanges(changes: any): Promise<void>;
+    switchValue(child: Question, choice: QuestionChoice): void;
 }
 
 export const respondMatrix: Directive = ng.directive('respondMatrix', () => {
@@ -26,7 +26,7 @@ export const respondMatrix: Directive = ng.directive('respondMatrix', () => {
         restrict: 'E',
         transclude: true,
         scope: {
-            question: '=',
+            question: '<',
             responses: '=',
             distribution: '=',
         },
@@ -50,7 +50,8 @@ export const respondMatrix: Directive = ng.directive('respondMatrix', () => {
                                 <td>[[child.title]]</td>
                                 <td ng-repeat ="choice in vm.question.choices.all | orderBy:['position', 'id']">
                                     <label>
-                                        <input type="radio" ng-model="vm.responses.all[childIndex].choice_id" ng-value="[[choice.id]]" input-guard>
+                                        <input type="radio" name="child-[[child.id]]" ng-change="vm.switchValue(child, choice)" ng-value="true" input-guard
+                                               ng-model="vm.responses.all[vm.mapChildChoicesResponseIndex.get(child).get(choice)].selected">
                                     </label>
                                 </td>
                             </tr>
@@ -64,30 +65,59 @@ export const respondMatrix: Directive = ng.directive('respondMatrix', () => {
             const vm: IViewModel = <IViewModel> this;
 
             vm.$onInit = async () : Promise<void> => {
-                vm.question.choices = new QuestionChoices();
-                await vm.question.choices.sync(vm.question.id);
+                await initRespondMatrix();
+            };
 
-                if (vm.distribution) {
-                    for (let child of vm.question.children.all) {
-                        vm.responses.all.push(new Response());
-                        let childIndex: number = vm.question.children.all.map((q: Question) => q.id).indexOf(child.id);
+            vm.$onChanges = async (changes: any) : Promise<void> => {
+                vm.question = changes.question.currentValue;
+                await initRespondMatrix();
+            };
 
-                        let responses: Response[] = await responseService.listMineByDistribution(child.id, vm.distribution.id);
-                        if (responses.length > 0) {
-                            vm.responses.all[childIndex] = Mix.castAs(Response, responses[0]);
+            const initRespondMatrix = async () : Promise<void> => {
+                vm.mapChildChoicesResponseIndex = new Map();
+
+                for (let child of vm.question.children.all) {
+                    vm.mapChildChoicesResponseIndex.set(child, new Map());
+                    let existingResponses: Responses = new Responses();
+                    if (vm.distribution) await existingResponses.syncMine(child.id, vm.distribution.id);
+
+                    for (let choice of vm.question.choices.all) {
+                        // Get potential existing response for this choice
+                        let existingMatchingResponses: Response[] = existingResponses.all.filter((r:Response) => r.choice_id == choice.id);
+
+                        // Get default response matching this choice and child and get its index in list
+                        let matchingResponses: Response[] = vm.responses.all.filter((r:Response) => r.choice_id == choice.id && r.question_id == child.id);
+                        if (matchingResponses.length != 1) console.error("Be careful, 'vm.responses' has been badly implemented !!");
+                        let matchingIndex = vm.responses.all.indexOf(matchingResponses[0]);
+
+                        // If there was an existing response we use it to replace the default one
+                        if (existingMatchingResponses.length == 1) {
+                            vm.responses.all[matchingIndex] = existingMatchingResponses[0];
+                            vm.responses.all[matchingIndex].selected = true;
                         }
-                        if (!vm.responses.all[childIndex].question_id) { vm.responses.all[childIndex].question_id = child.id; }
-                        if (!vm.responses.all[childIndex].distribution_id) { vm.responses.all[childIndex].distribution_id = vm.distribution.id; }
+
+                        vm.mapChildChoicesResponseIndex.get(child).set(choice, matchingIndex);
                     }
                 }
 
                 $scope.$apply();
-            };
+            }
         },
         link: function ($scope, $element) {
             const vm: IViewModel = $scope.vm;
             vm.Types = Types;
             vm.I18n = I18nUtils;
+
+            vm.switchValue = (child: Question, choice: QuestionChoice) : void => {
+                if (child.question_type == Types.SINGLEANSWERRADIO) {
+                    for (let response of vm.responses.all) {
+                        if (response.question_id == child.id && response.choice_id != choice.id) {
+                            response.selected = false;
+                        }
+                    }
+                }
+                $scope.$apply();
+            }
         }
     };
 });

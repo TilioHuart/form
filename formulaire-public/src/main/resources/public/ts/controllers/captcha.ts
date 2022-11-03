@@ -89,6 +89,6 @@ export const captchaController = ng.controller('CaptchaController', ['$scope',
         vm.formKey = JSON.parse(sessionStorage.getItem('formKey'));
         vm.distributionKey = JSON.parse(sessionStorage.getItem('distributionKey'));
         vm.distributionCaptcha = JSON.parse(sessionStorage.getItem('distributionCaptcha'));
-        vm.responses = JSON.parse(sessionStorage.getItem('responses'));
+        vm.responses.all = JSON.parse(sessionStorage.getItem('responses')).arr;
     };
 }]);

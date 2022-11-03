@@ -87,6 +87,15 @@ public interface ResponseService {
     void delete(JsonArray responseIds, String formId, Handler<Either<String, JsonArray>> handler);
 
     /**
+     * Delete responses of a specific question of a specific distribution
+     * @param questionId question identifier
+     * @param distributionId distribution identifier
+     * @param user user connected
+     * @param handler function handler returning JsonArray data
+     */
+    void deleteByQuestionAndDistribution(String questionId, String distributionId, UserInfos user, Handler<Either<String, JsonArray>> handler);
+
+    /**
      * Delete responses by distribution id
      * @param String distribution identifier
      * @param handler function handler returning JsonArray data

@@ -14,6 +14,7 @@ export interface ResponseService {
     create(response: Response) : Promise<any>;
     update(response: Response) : Promise<any>;
     delete(formId: number, responses: Response[]) : Promise<any>;
+    deleteByQuestionAndDistribution(questionId: number, distributionId: number) : Promise<any>;
     export(formId: number, type: string, images?: any) : Promise<any>;
 }
 
@@ -77,20 +78,14 @@ export const responseService: ResponseService = {
             response.answer = "";
         }
         else {
-            if (questionType === Types.TIME) {
-                if (typeof response.answer != "string") {
-                    response.answer = moment(response.answer).format("HH:mm");
-                }
+            if (questionType === Types.TIME && typeof response.answer != "string") {
+                response.answer = moment(response.answer).format("HH:mm");
             }
-            else if (questionType === Types.DATE) {
-                if (typeof response.answer != "string") {
-                    response.answer = moment(response.answer).format("DD/MM/YYYY");
-                }
+            else if (questionType === Types.DATE && typeof response.answer != "string") {
+                response.answer = moment(response.answer).format("DD/MM/YYYY");
             }
-            else if (questionType === Types.CURSOR) {
-                if (typeof response.answer != "string") {
-                    response.answer = response.answer.toString();
-                }
+            else if (questionType === Types.CURSOR && typeof response.answer != "string") {
+                response.answer = response.answer.toString();
             }
         }
         return response.id ? await this.update(response) : await this.create(response);
@@ -117,6 +112,15 @@ export const responseService: ResponseService = {
     async delete(formId, responses) : Promise<any> {
         try {
             return DataUtils.getData(await http.delete(`/formulaire/responses/${formId}`, { data: responses } ));
+        } catch (e) {
+            notify.error(idiom.translate('formulaire.error.responseService.delete'));
+            throw e;
+        }
+    },
+
+    async deleteByQuestionAndDistribution(questionId: number, distributionId: number) : Promise<any> {
+        try {
+            return DataUtils.getData(await http.delete(`/formulaire/responses/${distributionId}/questions/${questionId}`));
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.responseService.delete'));
             throw e;

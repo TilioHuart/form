@@ -17,12 +17,11 @@
             <!-- Display question -->
             <public-question-item ng-if="FormElementUtils.isQuestion(vm.formElement) && vm.formElement.question_type != Types.MATRIX"
                                   question="vm.formElement"
-                                  response="vm.allResponsesInfos.get(vm.formElement).responses[0]"
-                                  selected-indexes="vm.allResponsesInfos.get(vm.formElement).selectedIndexList[0]">
+                                  responses="vm.allResponsesInfos.get(vm.formElement).get(vm.formElement)">
             </public-question-item>
             <public-matrix ng-if="FormElementUtils.isQuestion(vm.formElement) && vm.formElement.question_type == Types.MATRIX"
                            question="vm.formElement"
-                           responses="vm.allResponsesInfos.get(vm.formElement).responses[0]">
+                           responses="vm.allResponsesInfos.get(vm.formElement).get(vm.formElement)">
             </public-matrix>
 
             <!-- Display section -->
@@ -37,12 +36,11 @@
                     <div ng-repeat="question in vm.formElement.questions.all | orderBy:'section_position'">
                         <public-question-item ng-if="question.question_type != Types.MATRIX"
                                               question="question"
-                                              response="vm.allResponsesInfos.get(vm.formElement).responses[question.section_position - 1]"
-                                              selected-indexes="vm.allResponsesInfos.get(vm.formElement).selectedIndexList[question.section_position - 1]">
+                                              responses="vm.allResponsesInfos.get(vm.formElement).get(question)">
                         </public-question-item>
                         <public-matrix ng-if="question.question_type == Types.MATRIX"
                                        question="question"
-                                       responses="vm.allResponsesInfos.get(vm.formElement).responses[question.section_position - 1]">
+                                       responses="vm.allResponsesInfos.get(vm.formElement).get(question)">
                         </public-matrix>
                     </div>
                 </div>

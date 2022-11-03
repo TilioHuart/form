@@ -92,7 +92,7 @@ public class CustomShareAndOwner implements ResourcesProvider {
         }
         else if (isGetDistribution(binding) || isAddDistribution(binding) || isUpdateDistribution(binding) ||
                 isDuplicateWithResponsesDistribution(binding) || isReplaceDistribution(binding) ||
-                isDeleteDistribution(binding) || isListByDistributionResponse(binding)) {
+                isDeleteDistribution(binding) || isListByDistributionResponse(binding) || isDeleteByQuestionResponse(binding)) {
             return PARAM_DISTRIBUTION_ID;
         }
         else if (isGetSection(binding) || isDeleteSection(binding)) {
@@ -236,6 +236,10 @@ public class CustomShareAndOwner implements ResourcesProvider {
 
     private boolean isDeleteResponse(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.ResponseController|delete");
+    }
+
+    private boolean isDeleteByQuestionResponse(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.ResponseController|deleteByQuestionAndDistribution");
     }
 
     private boolean isExportResponse(final Binding binding) {

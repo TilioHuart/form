@@ -17,7 +17,7 @@ import {PublicUtils} from "@common/utils";
 interface ViewModel {
 	formKey: string;
 	formElements: FormElements;
-	allResponsesInfos: Map<FormElement, { responses: any, selectedIndexList: any, responsesChoicesList: any }>;
+	allResponsesInfos: Map<FormElement, Map<Question, Responses>>;
 
 	formElement: FormElement;
 
@@ -41,13 +41,17 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 	vm.allResponsesInfos = new Map();
 
 	vm.$onInit = async () : Promise<void> => {
+		await initRespondQuestionController();
+	};
+
+	const initRespondQuestionController = async () : Promise<void> => {
 		syncWithStorageData();
 		let formElementPosition = vm.historicPosition[vm.historicPosition.length - 1];
 		vm.formElement = vm.formElements.all[formElementPosition - 1];
 		initFormElementResponses();
 
 		$scope.safeApply();
-	};
+	}
 
 	vm.prev = () : void => {
 		formatResponses();
@@ -93,13 +97,13 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
 		if (vm.formElement instanceof Question && vm.formElement.conditional) {
 			conditionalQuestion = vm.formElement;
-			response = vm.allResponsesInfos.get(vm.formElement).responses[0];
+			response = vm.allResponsesInfos.get(vm.formElement).get(vm.formElement)[0];
 		}
 		else if (vm.formElement instanceof Section) {
 			let conditionalQuestions = vm.formElement.questions.all.filter((q: Question) => q.conditional);
 			if (conditionalQuestions.length === 1) {
 				conditionalQuestion = conditionalQuestions[0];
-				response = vm.allResponsesInfos.get(vm.formElement).responses[conditionalQuestion.section_position - 1];
+				response = vm.allResponsesInfos.get(vm.formElement).get(conditionalQuestion)[0];
 			}
 		}
 
@@ -120,13 +124,14 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
 	const formatResponses = () : void => {
 		let questions: Question[] = vm.formElement instanceof Section ? vm.formElement.questions.all : [vm.formElement as Question];
-		let responses = vm.allResponsesInfos.get(vm.formElement).responses;
 
 		for (let i = 0; i < questions.length; i++) {
 			let question: Question = questions[i];
-			let questionResponses: Response[] = responses[i] instanceof Response ? [responses[i]] : responses[i].all;
+			let questionResponses: Responses = vm.allResponsesInfos.get(vm.formElement).get(question);
 
-			for (let response of questionResponses) {
+
+			// for (let response of questionResponses) {
+			for (let response of questionResponses.all) {
 				if (!response.answer) {
 					response.answer = "";
 				}
@@ -136,6 +141,8 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 						response.answer = moment(response.answer).format("HH:mm");
 					} else if (questionType === Types.DATE && typeof response.answer != "string") {
 						response.answer = moment(response.answer).format("DD/MM/YYYY");
+					} else if (questionType === Types.CURSOR && typeof response.answer != "string") {
+						response.answer = response.answer.toString();
 					}
 				}
 			}
@@ -144,35 +151,31 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
 	const initFormElementResponses = () : void => {
 		if (!vm.allResponsesInfos.has(vm.formElement)) {
-			let responses = [];
-			let selectedIndexList = [];
-			let responsesChoicesList = [];
+			vm.allResponsesInfos.set(vm.formElement, new Map());
 
 			let nbQuestions = vm.formElement instanceof Question ? 1 : (vm.formElement as Section).questions.all.length;
 			for (let i = 0; i < nbQuestions; i++) {
 				let question: Question = vm.formElement instanceof Question ? vm.formElement : (vm.formElement as Section).questions.all[i];
+				let questionResponses: Responses = new Responses();
 
-				if (question.question_type === Types.MATRIX) {
-					let questionResponse: Responses = new Responses();
-					for (let child of question.children.all) {
-						questionResponse.all.push(new Response());
+				if (question.isTypeMultipleRep()) {
+					for (let choice of question.choices.all) {
+						if (question.children.all.length > 0) {
+							for (let child of question.children.all) {
+								questionResponses.all.push(new Response(child.id, choice.id, choice.value));
+							}
+						}
+						else {
+							questionResponses.all.push(new Response(question.id, choice.id, choice.value));
+						}
 					}
-					responses.push(questionResponse);
 				}
 				else {
-					responses.push(new Response());
+					questionResponses.all.push(new Response(question.id));
 				}
 
-				selectedIndexList.push(new Array<boolean>(question.choices.all.length));
-				responsesChoicesList.push(new Responses());
+				vm.allResponsesInfos.get(vm.formElement).set(question, questionResponses);
 			}
-
-			let responseInfos = {
-				responses: responses,
-				selectedIndexList: selectedIndexList,
-				responsesChoicesList: responsesChoicesList
-			};
-			vm.allResponsesInfos.set(vm.formElement, responseInfos);
 		}
 
 		$scope.safeApply();

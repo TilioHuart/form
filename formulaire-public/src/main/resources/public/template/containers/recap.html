@@ -18,7 +18,6 @@
                 <public-recap-question-item ng-if="FormElementUtils.isQuestion(formElement)"
                                             question="formElement"
                                             responses="vm.responses"
-                                            form="vm.form"
                                             form-elements="vm.formElements"
                                             historic-position="vm.historicPosition">
                 </public-recap-question-item>
@@ -35,7 +34,6 @@
                         <div ng-repeat="question in formElement.questions.all | orderBy:'section_position'">
                             <public-recap-question-item question="question"
                                                         responses="vm.responses"
-                                                        form="vm.form"
                                                         form-elements="vm.formElements"
                                                         historic-position="vm.historicPosition">
                             </public-recap-question-item>

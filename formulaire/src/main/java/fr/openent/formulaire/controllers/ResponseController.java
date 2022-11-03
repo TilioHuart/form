@@ -406,6 +406,25 @@ public class ResponseController extends ControllerHelper {
         });
     }
 
+    @Delete("/responses/:distributionId/questions/:questionId")
+    @ApiDoc("Delete responses of a specific question")
+    @ResourceFilter(CustomShareAndOwner.class)
+    @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void deleteByQuestionAndDistribution(HttpServerRequest request) {
+        String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);
+        String questionId = request.getParam(PARAM_QUESTION_ID);
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user == null) {
+                String message = "[Formulaire@deleteByQuestionAndDistribution] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
+            }
+
+            responseService.deleteByQuestionAndDistribution(questionId, distributionId, user, arrayResponseHandler(request));
+        });
+    }
+
     // Exports
 
     @Post("/responses/export/:formId/:fileType")

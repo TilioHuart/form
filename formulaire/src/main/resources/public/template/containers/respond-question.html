@@ -23,15 +23,13 @@
             <!-- Display question -->
             <respond-question-item ng-if="FormElementUtils.isQuestion(vm.formElement) && vm.formElement.question_type != Types.MATRIX"
                                    question="vm.formElement"
-                                   response="vm.responses[0]"
+                                   responses="vm.currentResponses.get(vm.formElement)"
                                    distribution="vm.distribution"
-                                   selected-index="vm.selectedIndexList[0]"
-                                   responses-choices="vm.responsesChoicesList[0]"
-                                   files="vm.filesList[0]">
+                                   files="vm.currentFiles.get(vm.formElement)">
             </respond-question-item>
             <respond-matrix ng-if="FormElementUtils.isQuestion(vm.formElement) && vm.formElement.question_type == Types.MATRIX"
                             question="vm.formElement"
-                            responses="vm.responses[0]"
+                            responses="vm.currentResponses.get(vm.formElement)"
                             distribution="vm.distribution">
             </respond-matrix>
 
@@ -47,15 +45,13 @@
                     <div ng-repeat="question in vm.formElement.questions.all | orderBy:'section_position'">
                         <respond-question-item ng-if="question.question_type != Types.MATRIX"
                                                question="question"
-                                               response="vm.responses[question.section_position - 1]"
+                                               responses="vm.currentResponses.get(question)"
                                                distribution="vm.distribution"
-                                               selected-index="vm.selectedIndexList[question.section_position - 1]"
-                                               responses-choices="vm.responsesChoicesList[question.section_position - 1]"
-                                               files="vm.filesList[question.section_position - 1]">
+                                               files="vm.currentFiles.get(question)">
                         </respond-question-item>
                         <respond-matrix ng-if="question.question_type == Types.MATRIX"
                                         question="question"
-                                        responses="vm.responses[question.section_position - 1]"
+                                        responses="vm.currentResponses.get(question)"
                                         distribution="vm.distribution">
                         </respond-matrix>
                     </div>

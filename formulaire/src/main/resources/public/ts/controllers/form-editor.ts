@@ -42,7 +42,6 @@ interface ViewModel {
     parentSection: Section;
     dontSave: boolean;
     nbFormElements: number;
-    last: boolean;
     questionTypes: QuestionTypes;
     display: {
         lightbox: {
@@ -54,12 +53,11 @@ interface ViewModel {
     };
     preview: {
         formElement: FormElement, // Question for preview
-        formResponses: any, // Responses list for preview
-        elementResponses: any, // Response for preview
-        files: File[],
-        choices: Responses,
+        responses: Map<Question, Responses>, // Responses list for preview
+        files: Map<Question, Array<File>>,
         historicPosition: number[],
-        page: string
+        page: string,
+        last: boolean
     };
     PreviewPage: typeof PreviewPage;
     nestedSortables: any[];
@@ -104,7 +102,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.parentSection = null;
         vm.dontSave = false;
         vm.nbFormElements = 0;
-        vm.last = false;
         vm.questionTypes = new QuestionTypes();
         vm.display = {
             lightbox: {
@@ -113,15 +110,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 delete: false,
                 undo: false
             }
-        };
-        vm.preview = {
-            formElement: new Question(),
-            formResponses: [],
-            elementResponses: [],
-            files: [],
-            choices: new Responses(),
-            historicPosition: [],
-            page: PreviewPage.QUESTION
         };
         vm.PreviewPage = PreviewPage;
         vm.nestedSortables = [];
@@ -540,32 +528,48 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         vm.goPreview = async () : Promise<void> => {
             await vm.saveAll(false);
-            vm.preview.formResponses = [];
+            vm.preview = {
+                formElement: new Question(),
+                responses: new Map(),
+                files: new Map(),
+                historicPosition: [],
+                page: PreviewPage.QUESTION,
+                last: false
+            };
+
             for (let formElement of vm.formElements.all) {
-                let responses = [];
-                if (formElement instanceof Question) {
-                    let questionResponse: any = new Response();
-                    if (formElement.question_type === Types.MATRIX) {
-                        questionResponse = new Responses();
-                        for (let child of formElement.children.all) {
-                            questionResponse.all.push(new Response());
+                let nbQuestions: number = formElement instanceof Question ? 1 : (formElement as Section).questions.all.length;
+                for (let i = 0; i < nbQuestions; i++) {
+                    let question: Question = formElement instanceof Question ? formElement : (formElement as Section).questions.all[i];
+                    let questionResponses: Responses = new Responses();
+
+                    if (question.isTypeMultipleRep()) {
+                        for (let choice of question.choices.all) {
+                            if (question.children.all.length > 0) {
+                                for (let child of question.children.all) {
+                                    questionResponses.all.push(new Response(child.id, choice.id, choice.value));
+                                }
+                            }
+                            else {
+                                questionResponses.all.push(new Response(question.id, choice.id, choice.value));
+                            }
                         }
                     }
-                    else if (formElement.question_type === Types.MULTIPLEANSWER) {
-                        questionResponse.selectedIndex = new Array<boolean>(formElement.choices.all.length);
+                    else {
+                        questionResponses.all.push(new Response(question.id));
                     }
-                    responses.push(questionResponse);
+
+                    vm.preview.responses.set(question, questionResponses);
+                    vm.preview.files.set(question, new Array<File>());
                 }
-                vm.preview.formResponses.push(responses);
             }
             if (vm.form.rgpd) {
                 vm.preview.page = PreviewPage.RGPD;
             }
             else {
                 vm.preview.formElement = vm.formElements.all[0];
-                vm.preview.elementResponses = vm.preview.formResponses[0];
                 vm.preview.historicPosition = [1];
-                vm.last = vm.preview.formElement.position === vm.nbFormElements;
+                vm.preview.last = vm.preview.formElement.position === vm.nbFormElements;
                 vm.preview.page = PreviewPage.QUESTION;
             }
             $scope.currentPage = Pages.PREVIEW;
@@ -581,9 +585,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             let prevPosition = vm.preview.historicPosition[vm.preview.historicPosition.length - 2];
             if (prevPosition > 0) {
                 vm.preview.formElement = vm.formElements.all[prevPosition - 1];
-                vm.preview.elementResponses = vm.preview.formResponses[prevPosition - 1];
                 vm.preview.historicPosition.pop();
-                vm.last = prevPosition === vm.nbFormElements;
+                vm.preview.last = prevPosition === vm.nbFormElements;
+                window.scrollTo(0, 0);
                 $scope.safeApply();
                 // if (vm.preview.page === PreviewPage.RECAP) {
                 //     vm.preview.formElement = vm.formElements.all[vm.nbFormElements - 1];
@@ -594,13 +598,35 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
             else if (vm.form.rgpd) {
                 vm.preview.formElement = null;
-                vm.preview.elementResponses = null;
                 vm.preview.page = PreviewPage.RGPD;
+                $scope.safeApply();
             }
-            $scope.safeApply();
         };
 
         vm.next = () : void => {
+            let nextPosition: number = getNextPositionIfValid();
+
+            // Update data to display next element
+            if (nextPosition && nextPosition <= vm.nbFormElements) {
+                vm.preview.formElement = vm.formElements.all[nextPosition - 1];
+                vm.preview.historicPosition.push(vm.preview.formElement.position);
+                vm.preview.last = nextPosition === vm.nbFormElements;
+                if (vm.preview.page == PreviewPage.RGPD) vm.preview.page = PreviewPage.QUESTION;
+                window.scrollTo(0, 0);
+                $scope.safeApply();
+                // if (vm.preview.page === PreviewPage.RECAP) {
+                //     vm.preview.formElement = null;
+                //     vm.preview.elementResponses = null;
+                //     vm.preview.page = PreviewPage.RECAP;
+                // }
+            }
+            else if (nextPosition != undefined) {
+                vm.preview.page = PreviewPage.RECAP;
+                $scope.safeApply();
+            }
+        };
+
+        const getNextPositionIfValid = () : number => {
             let nextPosition: number = vm.preview.formElement.position + 1;
             let conditionalQuestion: Question = null;
             let response: Response = null;
@@ -608,13 +634,13 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             // Check if there are valid conditional questions and find next element position accordingly
             if (vm.preview.formElement instanceof Question && vm.preview.formElement.conditional) {
                 conditionalQuestion = vm.preview.formElement;
-                response = vm.preview.elementResponses[0];
+                response = vm.preview.responses.get(conditionalQuestion)[0];
             }
             else if (vm.preview.formElement instanceof Section) {
                 let conditionalQuestions = vm.preview.formElement.questions.all.filter((q: Question) => q.conditional);
                 if (conditionalQuestions.length === 1) {
                     conditionalQuestion = conditionalQuestions[0];
-                    response = vm.preview.elementResponses[conditionalQuestion.section_position - 1];
+                    response = vm.preview.responses.get(conditionalQuestion)[0];
                 }
             }
 
@@ -630,29 +656,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 nextPosition = targetSection ? targetSection.position : null;
             }
 
-            // Update data to display next element
-            if (nextPosition && nextPosition <= vm.nbFormElements) {
-                vm.preview.formElement = vm.formElements.all[nextPosition - 1];
-                vm.preview.historicPosition.push(vm.preview.formElement.position);
-                vm.preview.elementResponses = vm.preview.formResponses[nextPosition - 1];
-                vm.last = nextPosition === vm.nbFormElements;
-                if (vm.preview.page == PreviewPage.RGPD) {
-                    vm.preview.historicPosition = [1];
-                    vm.preview.page = PreviewPage.QUESTION;
-                }
-                // if (vm.preview.page === PreviewPage.RECAP) {
-                //     vm.preview.formElement = null;
-                //     vm.preview.elementResponses = null;
-                //     vm.preview.page = PreviewPage.RECAP;
-                // }
-            }
-            else if (nextPosition && nextPosition <= vm.nbFormElements) {
-                vm.backToEditor();
-            }
-            else if (nextPosition != undefined) {
-                vm.preview.page = PreviewPage.RECAP;
-            }
-            $scope.safeApply();
+            return nextPosition;
         };
 
         vm.getHtmlDescription = (description: string) : string => {

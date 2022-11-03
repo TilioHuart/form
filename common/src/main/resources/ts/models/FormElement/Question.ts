@@ -136,6 +136,23 @@ export class Question extends FormElement {
             || this.question_type == Types.SINGLEANSWERRADIO
             || this.question_type == Types.MATRIX;
     }
+
+    isTypeMultipleRep = () : boolean => {
+        return this.question_type == Types.MULTIPLEANSWER
+            || this.question_type == Types.MATRIX;
+    }
+
+    isMatrixSingle = () : boolean => {
+        return this.question_type == Types.MATRIX
+            && this.children.all.length > 0 &&
+            this.children.all[0].question_type == Types.SINGLEANSWER;
+    }
+
+    isMatrixMultiple = () : boolean => {
+        return this.question_type == Types.MATRIX
+            && this.children.all.length > 0 &&
+            this.children.all[0].question_type == Types.MULTIPLEANSWER;
+    }
 }
 
 export class Questions extends Selection<Question> {
@@ -164,7 +181,7 @@ export class Questions extends Selection<Question> {
         if (choicesQuestions.length > 0) {
             let data = await questionChoiceService.listChoices(this.all.map((q: Question) => q.id));
             let listChoices: QuestionChoice[] = Mix.castArrayAs(QuestionChoice, data);
-            for (let question of this.all) {
+            for (let question of choicesQuestions) {
                 question.choices.all = listChoices.filter((c: QuestionChoice) => c.question_id === question.id);
                 let nbChoices: number = question.choices.all.length;
                 if (nbChoices <= 0) {
@@ -182,7 +199,7 @@ export class Questions extends Selection<Question> {
         if (matrixQuestions.length > 0) {
             let data = await questionService.listChildren(matrixQuestions);
             let listChildrenQuestions: Question[] = Mix.castArrayAs(Question, data);
-            for (let question of this.all) {
+            for (let question of matrixQuestions) {
                 question.children.all = listChildrenQuestions.filter((q: Question) => q.matrix_id === question.id);
                 let nbChildren: number = question.children.all.length;
                 if (nbChildren <= 0) {

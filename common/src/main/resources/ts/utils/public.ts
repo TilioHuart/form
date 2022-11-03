@@ -19,38 +19,26 @@ export class PublicUtils {
      * @param dataResponsesInfos sessionStorage data transformed into JSON
      * @param allResponsesInfos allResponsesInfos to fill
      */
-    static formatStorageData = (dataFormElements: any, formElements: FormElements, dataResponsesInfos: any, allResponsesInfos: any) : void => {
+    static formatStorageData = (dataFormElements: any, formElements: FormElements, dataResponsesInfos: any, allResponsesInfos: Map<FormElement, Map<Question, Responses>>) : void => {
         // Format form elements
         PublicUtils.formatFormElements(dataFormElements, formElements);
 
         // Format mapping
         allResponsesInfos.clear();
-        for (let responseInfo of dataResponsesInfos) {
-            let isSection: boolean = responseInfo[0].description !== undefined;
-            let key: FormElement = formElements.all.find((e: FormElement) => e instanceof (isSection ? Section : Question) && e.id === responseInfo[0].id);
+        for (let formElementMap of dataResponsesInfos) {
+            let key: any = formElementMap[0];
+            let isSection: boolean = key.description !== undefined;
+            let formElement: FormElement = formElements.all.find((e: FormElement) => e instanceof (isSection ? Section : Question) && e.id === key.id);
+            allResponsesInfos.set(formElement, new Map());
 
-            let responses: any = [];
-            for (let questionResponse of responseInfo[1].responses) {
-                if (questionResponse.all) { // If it's a matrix we cast each child as Response and wa cast the parent as Responses
-                    let rep: Responses = new Responses();
-                    for (let r of questionResponse.all) {
-                        rep.all.push(Mix.castAs(Response, r));
-                    }
-                    responses.push(rep);
-                }
-                else {
-                    responses.push(Mix.castAs(Response, questionResponse));
-                }
+            for (let questionMap of formElementMap[1]) {
+                let question: Question = isSection
+                    ? (formElement as Section).questions.all.filter((q:Question) => q.id == questionMap[0].id)[0]
+                    : (formElement as Question);
+                let questionResponses: Responses = new Responses();
+                questionResponses.all = Mix.castArrayAs(Response, questionMap[1].arr);
+                allResponsesInfos.get(formElement).set(question, questionResponses);
             }
-            let selectedIndexList = responseInfo[1].selectedIndexList;
-            let responsesChoicesList = responseInfo[1].responsesChoicesList;
-            let value = {
-                responses: responses,
-                selectedIndexList: selectedIndexList,
-                responsesChoicesList: responsesChoicesList
-            };
-
-            if (key && value) allResponsesInfos.set(key, value);
         }
     }
 

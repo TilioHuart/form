@@ -37,15 +37,13 @@
         <!-- Display question -->
         <respond-question-item ng-if="FormElementUtils.isQuestion(vm.preview.formElement) && vm.preview.formElement.question_type != Types.MATRIX"
                                question="vm.preview.formElement"
-                               response="vm.preview.elementResponses[0]"
+                               responses="vm.preview.responses.get(vm.preview.formElement)"
                                distribution="null"
-                               selected-index="vm.preview.elementResponses[0].selectedIndex"
-                               responses-choices="vm.preview.choices"
                                files="vm.preview.files">
         </respond-question-item>
         <respond-matrix ng-if="FormElementUtils.isQuestion(vm.preview.formElement) && vm.preview.formElement.question_type == Types.MATRIX"
                         question="vm.preview.formElement"
-                        responses="vm.preview.elementResponses[0]"
+                        responses="vm.preview.responses.get(vm.preview.formElement)"
                         distribution="null">
         </respond-matrix>
 
@@ -61,15 +59,13 @@
                 <div ng-repeat="question in vm.preview.formElement.questions.all | orderBy:'section_position'">
                     <respond-question-item ng-if="question.question_type != Types.MATRIX"
                                            question="question"
-                                           response="vm.preview.elementResponses[question.section_position - 1]"
+                                           responses="vm.preview.responses.get(question)"
                                            distribution="null"
-                                           selected-index="vm.preview.elementResponses[question.section_position - 1].selectedIndex"
-                                           responses-choices="vm.preview.choices"
                                            files="vm.preview.files">
                     </respond-question-item>
                     <respond-matrix ng-if="question.question_type == Types.MATRIX"
                                     question="question"
-                                    responses="vm.preview.elementResponses[question.section_position - 1]"
+                                    responses="vm.preview.responses.get(question)"
                                     distribution="null">
                     </respond-matrix>
                 </div>

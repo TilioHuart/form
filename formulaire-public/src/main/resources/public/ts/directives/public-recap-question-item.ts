@@ -1,6 +1,5 @@
 import {Directive, idiom, ng, template} from "entcore";
 import {
-    Form,
     FormElements,
     Question,
     QuestionChoice,
@@ -12,7 +11,6 @@ import {
 interface IViewModel {
     question: Question;
     responses: Responses;
-    form: Form;
     formElements: FormElements;
     historicPosition: number[];
     Types: typeof Types;
@@ -30,7 +28,6 @@ export const publicRecapQuestionItem: Directive = ng.directive('publicRecapQuest
         scope: {
             question: '=',
             responses: '=',
-            form: '=',
             formElements: '<',
             historicPosition: '='
         },
@@ -134,10 +131,10 @@ export const publicRecapQuestionItem: Directive = ng.directive('publicRecapQuest
             };
 
             vm.isSelectedChoice = (choice, child?) : boolean => {
-                let selectedChoices: any = vm.responses.all
+                let selectedChoices: number[] = vm.responses.all
                     .filter((r: Response) => r.question_id === vm.question.id || (child && r.question_id === child.id))
                     .map((r: Response) => r.choice_id);
-                return selectedChoices.includes(choice.id);
+                return (selectedChoices as any).includes(choice.id);
             };
 
             vm.openQuestion = () : void => {
