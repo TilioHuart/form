@@ -45,7 +45,7 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                         <div ng-if="vm.question.statement" data-ng-bind-html="vm.getHtmlDescription(vm.question.statement)"></div>
                     </div>
                     <div ng-if="vm.question.question_type == vm.Types.SHORTANSWER">
-                        <textarea ng-model="vm.responses.all[0].answer" i18n-placeholder="[[vm.question.placeholder]]" input-guard></textarea>
+                        <textarea ng-model="vm.responses.all[0].answer" i18n-placeholder="[[vm.question.placeholder || 'formulaire.question.type.SHORTANSWER']]" input-guard></textarea>
                     </div>
                     <div ng-if="vm.question.question_type == vm.Types.LONGANSWER">
                         <editor ng-model="vm.responses.all[0].answer" input-guard></editor>
