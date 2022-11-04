@@ -634,13 +634,13 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             // Check if there are valid conditional questions and find next element position accordingly
             if (vm.preview.formElement instanceof Question && vm.preview.formElement.conditional) {
                 conditionalQuestion = vm.preview.formElement;
-                response = vm.preview.responses.get(conditionalQuestion)[0];
+                response = vm.preview.responses.get(conditionalQuestion).all[0];
             }
             else if (vm.preview.formElement instanceof Section) {
                 let conditionalQuestions = vm.preview.formElement.questions.all.filter((q: Question) => q.conditional);
                 if (conditionalQuestions.length === 1) {
                     conditionalQuestion = conditionalQuestions[0];
-                    response = vm.preview.responses.get(conditionalQuestion)[0];
+                    response = vm.preview.responses.get(conditionalQuestion).all[0];
                 }
             }
 

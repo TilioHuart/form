@@ -97,13 +97,13 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
 		if (vm.formElement instanceof Question && vm.formElement.conditional) {
 			conditionalQuestion = vm.formElement;
-			response = vm.allResponsesInfos.get(vm.formElement).get(vm.formElement)[0];
+			response = vm.allResponsesInfos.get(vm.formElement).get(vm.formElement).all[0];
 		}
 		else if (vm.formElement instanceof Section) {
 			let conditionalQuestions = vm.formElement.questions.all.filter((q: Question) => q.conditional);
 			if (conditionalQuestions.length === 1) {
 				conditionalQuestion = conditionalQuestions[0];
-				response = vm.allResponsesInfos.get(vm.formElement).get(conditionalQuestion)[0];
+				response = vm.allResponsesInfos.get(vm.formElement).get(conditionalQuestion).all[0];
 			}
 		}
 
