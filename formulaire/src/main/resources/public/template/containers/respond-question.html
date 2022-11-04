@@ -1,14 +1,14 @@
 <div ng-controller="RespondQuestionController as vm">
-    <div class="row">
-        <section class="cell six">
-            <div>
+    <div class="row header-fixed">
+        <section class="cell">
+            <div class="header-title">
                 <h1>
                     <a href="#/list/responses"><i18n>formulaire.title</i18n></a><i18n>formulaire.separator</i18n>[[form.title]]
                 </h1>
             </div>
         </section>
 
-        <section class="cell six">
+        <section class="cell" style="float:right;">
             <div class="main-button">
                 <button class="cell cancel" reset-guard="vm.saveAndQuitGuard()"><i18n>formulaire.saveAndQuit</i18n></button>
             </div>
