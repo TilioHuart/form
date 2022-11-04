@@ -75,7 +75,7 @@ public class DefaultDistributionServiceTest {
     @Test
     public void testListByFormAndStatusAndQuestion_NbLinesNull(TestContext ctx) {
         Async async = ctx.async();
-        String expectedQuery = "SELECT d.* FROM " + DISTRIBUTION_TABLE + " d " +
+        String expectedQuery = "SELECT DISTINCT d.* FROM " + DISTRIBUTION_TABLE + " d " +
                 "JOIN " + RESPONSE_TABLE + " r ON r.distribution_id = d.id " +
                 "WHERE form_id = ? AND status = ? AND question_id = ? " +
                 "ORDER BY date_response DESC;";
@@ -94,7 +94,7 @@ public class DefaultDistributionServiceTest {
     @Test
     public void testListByFormAndStatusAndQuestion_NbLinesNotNull(TestContext ctx) {
         Async async = ctx.async();
-        String expectedQuery = "SELECT d.* FROM " + DISTRIBUTION_TABLE + " d " +
+        String expectedQuery = "SELECT DISTINCT d.* FROM " + DISTRIBUTION_TABLE + " d " +
                 "JOIN " + RESPONSE_TABLE + " r ON r.distribution_id = d.id " +
                 "WHERE form_id = ? AND status = ? AND question_id = ? " +
                 "ORDER BY date_response DESC " +

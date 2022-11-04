@@ -96,7 +96,7 @@ public class DefaultDistributionService implements DistributionService {
 
     @Override
     public void listByFormAndStatusAndQuestion(String formId, String status, String questionId, String nbLines, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT d.* FROM " + DISTRIBUTION_TABLE + " d " +
+        String query = "SELECT DISTINCT d.* FROM " + DISTRIBUTION_TABLE + " d " +
                 "JOIN " + RESPONSE_TABLE + " r ON r.distribution_id = d.id " +
                 "WHERE form_id = ? AND status = ? AND question_id = ? " +
                 "ORDER BY date_response DESC";
