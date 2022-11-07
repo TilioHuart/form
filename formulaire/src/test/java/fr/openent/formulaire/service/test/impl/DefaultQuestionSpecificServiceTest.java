@@ -81,7 +81,6 @@ public class DefaultQuestionSpecificServiceTest {
     @Test
     public void update(TestContext ctx) {
         Async async = ctx.async();
-        String questionId = "1";
 
         JsonObject question1 = new JsonObject();
         question1.put(Fields.QUESTION_TYPE, 11)
@@ -90,7 +89,7 @@ public class DefaultQuestionSpecificServiceTest {
                 .put(CURSOR_STEP, 1)
                 .put(CURSOR_LABEL_MIN_VAL, "label_min_val")
                 .put(CURSOR_LABEL_MAX_VAL, "label_max_val")
-                .put(QUESTION_ID, 1);
+                .put(ID, 1);
 
         JsonObject question2 = new JsonObject();
         question2.put(Fields.QUESTION_TYPE, 11)
@@ -99,7 +98,7 @@ public class DefaultQuestionSpecificServiceTest {
                 .put(CURSOR_STEP, 2)
                 .put(CURSOR_LABEL_MIN_VAL, "label_mined_val")
                 .put(CURSOR_LABEL_MAX_VAL, "label_maxed_val")
-                .put(QUESTION_ID, 1);
+                .put(ID, 2);
 
         JsonArray questions = new JsonArray();
         questions.add(question1)
@@ -107,7 +106,7 @@ public class DefaultQuestionSpecificServiceTest {
 
         String expectedQuery = "[{\"action\":\"raw\",\"command\":\"BEGIN;\"}," +
                 "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_SPECIFIC_FIELDS + " SET cursor_min_val = ?, cursor_max_val = ?, cursor_step = ?, cursor_label_min_val = ?, cursor_label_max_val = ? WHERE question_id = ? RETURNING *;\",\"values\":[1,10,1,\"label_min_val\",\"label_max_val\",1]}," +
-                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_SPECIFIC_FIELDS + " SET cursor_min_val = ?, cursor_max_val = ?, cursor_step = ?, cursor_label_min_val = ?, cursor_label_max_val = ? WHERE question_id = ? RETURNING *;\",\"values\":[2,12,2,\"label_mined_val\",\"label_maxed_val\",1]}," +
+                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_SPECIFIC_FIELDS + " SET cursor_min_val = ?, cursor_max_val = ?, cursor_step = ?, cursor_label_min_val = ?, cursor_label_max_val = ? WHERE question_id = ? RETURNING *;\",\"values\":[2,12,2,\"label_mined_val\",\"label_maxed_val\",2]}," +
                 "{\"action\":\"raw\",\"command\":\"COMMIT;\"}]";
 
         vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
@@ -116,6 +115,6 @@ public class DefaultQuestionSpecificServiceTest {
             ctx.assertEquals(expectedQuery, body.getJsonArray(STATEMENTS).toString());
             async.complete();
         });
-        defaultQuestionSpecificFieldService.update(questions, questionId,null);
+        defaultQuestionSpecificFieldService.update(questions, null);
     }
 }

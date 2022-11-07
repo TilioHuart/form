@@ -1,8 +1,26 @@
 .formulaire-cursor {
 
   &-form  {
-    display: grid;
-    grid-template-columns: auto auto;
+    display: flex;
+    flex-direction: column;
+
+    .cursor-line {
+      display: flex;
+
+      @media screen and (max-width: $formulaire-screen-tablet) {
+        flex-direction: column;
+        margin-top: 3%;
+      }
+
+      .cursor-value-min, .cursor-value-max, .cursor-value-step {
+        display: flex;
+
+        @media screen and (min-width: $formulaire-screen-tablet) {
+          width: 20%;
+        }
+      }
+    }
+
     em {
       color: $formulaire-red;
     }
@@ -12,6 +30,7 @@
       height: 20px;
       text-align: center;
       -moz-appearance: textfield;
+      margin-left: 10px;
     }
 
     input::-webkit-outer-spin-button,

@@ -67,29 +67,8 @@ public class QuestionController extends ControllerHelper {
                 }
 
                 JsonArray questionSpecs = specEvt.right().getValue();
-                List<String> columnNames = questionSpecs.size() > 0 ?
-                        questionSpecs.getJsonObject(0).fieldNames().stream().collect(Collectors.toList()) : new ArrayList<>();
-                if (columnNames.size() > 0) {
-                    columnNames.remove(ID);
-                    columnNames.remove(QUESTION_ID);
-                }
-
-                List<JsonObject> questionsList = new ArrayList<>();
-                questionsList.addAll(questions.getList());
-
-                for (int k = 0; k < questionSpecs.size(); k++) {
-                    JsonObject questionSpec = questionSpecs.getJsonObject(k);
-                    Integer questionId = questionSpec.getInteger(QUESTION_ID);
-
-                    JsonObject question = questionsList.stream()
-                            .filter(q -> q.getInteger(ID).equals(questionId))
-                            .collect(Collectors.toList()).get(0);
-
-                    for (String columnName: columnNames) {
-                        question.put(columnName, questionSpec.getValue(columnName));
-                    }
-                }
-                handler.handle(new Either.Right<>(new JsonArray(questionsList)));
+                JsonArray questionsWithSpecs = UtilsHelper.mergeQuestionsAndSpecifics(questions, questionSpecs);
+                handler.handle(new Either.Right<>(questionsWithSpecs));
             });
         }
         else handler.handle(new Either.Right<>(new JsonArray()));
@@ -395,7 +374,7 @@ public class QuestionController extends ControllerHelper {
                         // If no conditional question conflict, we update
                         questionService.update(formId, questions, updatedQuestionsEvt -> {
                             if (updatedQuestionsEvt.isLeft()) {
-                                log.error("[Formulaire@updateQuestions] Failed to update questions : " + questions);
+                                log.error("[Formulaire@updateQuestions] Failed to update questions : " + updatedQuestionsEvt.left().getValue());
                                 renderInternalError(request, updatedQuestionsEvt);
                                 return;
                             }
@@ -404,13 +383,19 @@ public class QuestionController extends ControllerHelper {
                             JsonArray updatedQuestions = new JsonArray();
                             for (int k = 0; k < updatedQuestionsInfos.size(); k++) {
                                 updatedQuestions.addAll(updatedQuestionsInfos.getJsonArray(k));
-
-                                if (updatedQuestions.size() > 0 && updatedQuestions.getJsonObject(0).getLong(QUESTION_TYPE) == QuestionTypes.CURSOR.getCode()) {
-                                    String questionId = updatedQuestions.getJsonObject(0).getInteger("id").toString();
-                                    questionSpecificFieldService.update(questions, questionId, arrayResponseHandler(request));
-                                }
                             }
-                            renderJson(request, updatedQuestions);
+
+                            questionSpecificFieldService.update(questions, updateSpecificsEvt -> {
+                                if (updateSpecificsEvt.isLeft()) {
+                                    log.error("[Formulaire@updateQuestions] Failed to update questions specifics : " + updateSpecificsEvt.left().getValue());
+                                    renderInternalError(request, updateSpecificsEvt);
+                                    return;
+                                }
+
+                                JsonArray updateSpecifics = updateSpecificsEvt.right().getValue();
+                                JsonArray updatedQuestionsAndSpecifics = UtilsHelper.mergeQuestionsAndSpecifics(updatedQuestions, updateSpecifics);
+                                renderJson(request, updatedQuestionsAndSpecifics);
+                            });
                         });
                     });
                 });

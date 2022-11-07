@@ -22,10 +22,9 @@ public interface QuestionSpecificFieldService {
     void create(JsonObject question, String questionId, Handler<Either<String, JsonObject>> handler);
 
     /**
-     * Update question to specific field
-     * @param questions question identifier
-     * @param questionId JsonArray data
+     * Update specific fields of questions
+     * @param questions JsonArray data
      * @param handler function handler returning JsonArray data
      */
-    void update(JsonArray questions, String questionId, Handler<Either<String, JsonArray>> handler);
+    void update(JsonArray questions, Handler<Either<String, JsonArray>> handler);
 }

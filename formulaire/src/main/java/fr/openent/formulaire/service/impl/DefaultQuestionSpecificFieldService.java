@@ -43,7 +43,7 @@ public class DefaultQuestionSpecificFieldService implements QuestionSpecificFiel
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
-    public void update(JsonArray questions, String questionId, Handler<Either<String, JsonArray>> handler) {
+    public void update(JsonArray questions, Handler<Either<String, JsonArray>> handler) {
         if (!questions.isEmpty()) {
             SqlStatementsBuilder s = new SqlStatementsBuilder();
             String query = "UPDATE " + QUESTION_SPECIFIC_FIELDS + " SET cursor_min_val = ?, cursor_max_val = ?, cursor_step = ?, " +
@@ -59,7 +59,7 @@ public class DefaultQuestionSpecificFieldService implements QuestionSpecificFiel
                         .add(question.getInteger(CURSOR_STEP, isCursor ? 1 : null))
                         .add(question.getString(CURSOR_LABEL_MIN_VAL, ""))
                         .add(question.getString(CURSOR_LABEL_MAX_VAL, ""))
-                        .add(question.getInteger(QUESTION_ID, null));
+                        .add(question.getInteger(ID, null));
                 s.prepared(query, params);
             }
             s.raw("COMMIT;");

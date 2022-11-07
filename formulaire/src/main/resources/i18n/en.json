@@ -237,6 +237,7 @@
   "formulaire.question.rgpd.title": "Collecte de données à caractère personnel",
   "formulaire.question.value.minimum": "Valeur minimum",
   "formulaire.question.value.maximum": "Valeur maximum",
+  "formulaire.question.value.step": "Valeur du pas",
   "formulaire.question.step": "Pas",
   "formulaire.question.value.label": "Label de la valeur",
   "formulaire.question.label": "Label",
