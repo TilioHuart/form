@@ -1,11 +1,12 @@
 import {ng, template} from 'entcore';
 import * as ApexCharts from 'apexcharts';
 import {
+    Distribution,
     Distributions,
     DistributionStatus,
     Form, FormElement, FormElements,
     Question,
-    QuestionChoice,
+    QuestionChoice, Response,
     Responses
 } from "../models";
 import {Mix} from "entcore-toolkit";
@@ -179,9 +180,12 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
                     question.choices.all = [];
                     question.choices.all = listChoices.filter((c: QuestionChoice) => c.question_id === question.id);
                     question.choices.replaceSpace();
-                    question.fillChoicesInfo(distribs, results.all);
+                    let resultsQuestionDistribId: number[] = results.all.filter((r: Response) => r.question_id === question.id).map((r:Response) => r.distribution_id);
+                    let distribsQuestion: Distributions = new Distributions();
+                    distribsQuestion.all = distribs.all.filter((d: Distribution) => (resultsQuestionDistribId as any).includes(d.id));
+                    question.fillChoicesInfo(distribsQuestion, results.all);
                     // Generate graphs
-                    await GraphUtils.generateGraphForPDF(question, vm.pdfResponseCharts, distribs.all.length);
+                    await GraphUtils.generateGraphForPDF(question, vm.pdfResponseCharts, distribsQuestion.all.length);
                 }
 
                 await storeAllCharts(questions, vm.pdfResponseCharts, images);
