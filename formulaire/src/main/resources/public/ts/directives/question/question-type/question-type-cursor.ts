@@ -20,6 +20,7 @@ export const questionTypeCursor: Directive = ng.directive('questionTypeCursor', 
         bindToController: true,
         template: `
             <div class="formulaire-cursor-form">
+                <!-- Line about MIN value and label -->
                 <div class="cursor-line">
                     <div class="cursor-value-min twelve-mobile">
                         <div class="six four-mobile"><label><i18n>formulaire.question.value.minimum</i18n><em>*</em> : </label></div>
@@ -27,11 +28,12 @@ export const questionTypeCursor: Directive = ng.directive('questionTypeCursor', 
                                max="[[vm.question.cursor_max_val - vm.question.cursor_step]]"></div>
                     </div>
                     <div class="cursor-label-min-val">
-                        <label><i18n>formulaire.question.value.label</i18n> : </label>
+                        <label><i18n>formulaire.question.value.label</i18n></label>
                         <input type="text" ng-model="vm.question.cursor_label_min_val" 
                                i18n-placeholder="formulaire.question.label">
                     </div>
                 </div>
+                <!-- Line about MAX value and label -->
                 <div class="cursor-line">
                     <div class="cursor-value-max twelve-mobile">
                         <div class="six four-mobile"><label><i18n>formulaire.question.value.maximum</i18n><em>*</em> : </label></div>
@@ -39,11 +41,12 @@ export const questionTypeCursor: Directive = ng.directive('questionTypeCursor', 
                                min="[[vm.question.cursor_min_val + vm.question.cursor_step]]"></div>
                     </div>   
                     <div class="cursor-label-max-value">
-                        <label><i18n>formulaire.question.value.label</i18n> : </label>
+                        <label><i18n>formulaire.question.value.label</i18n></label>
                         <input type="text" ng-model="vm.question.cursor_label_max_val"
                                i18n-placeholder="formulaire.question.label">
                     </div> 
                 </div>
+                <!-- Line about STEP value -->
                 <div class="cursor-line">
                     <div class="cursor-value-step">
                         <div class="six four-mobile"><label><i18n>formulaire.question.value.step</i18n><em>*</em> : </label></div>

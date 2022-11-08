@@ -20,6 +20,7 @@ public class Constants {
     public static final List<Integer> QUESTIONS_WITHOUT_RESPONSES = QuestionTypes.getQuestionsWithoutResponses();
     public static final List<Integer> FORBIDDEN_QUESTIONS = QuestionTypes.getForbiddenQuestions();
     public static final List<Integer> MATRIX_CHILD_QUESTIONS = QuestionTypes.getMatrixChildQuestions();
+    public static final List<Integer> QUESTIONS_WITH_SPECIFICS = QuestionTypes.getQuestionsWithSpecificsFields();
 
     private Constants() {
         throw new IllegalStateException("Utility class");

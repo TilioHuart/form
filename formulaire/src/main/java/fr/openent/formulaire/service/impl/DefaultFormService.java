@@ -293,24 +293,28 @@ public class DefaultFormService implements FormService {
     public void duplicate(int formId, UserInfos user, String locale, Handler<Either<String, JsonArray>> handler) {
         String COPY = I18n.getInstance().translate("formulaire.copy", I18n.DEFAULT_DOMAIN, locale);
         String query =
+                // Duplicate FORM
                 "WITH new_form_id AS (" +
-                    "INSERT INTO  " + FORM_TABLE + " (owner_id, owner_name, title, description, picture, date_opening, date_ending, " +
+                    "INSERT INTO " + FORM_TABLE + " (owner_id, owner_name, title, description, picture, date_opening, date_ending, " +
                     "multiple, anonymous, response_notified, editable, rgpd, rgpd_goal, rgpd_lifetime, is_public, public_key, original_form_id) " +
                     "SELECT ?, ?, concat(title, ' - " + COPY + "'), description, picture, date_opening, date_ending, multiple, " +
                     "anonymous, response_notified, editable, rgpd, rgpd_goal, rgpd_lifetime, is_public, " +
                     "CASE is_public WHEN TRUE THEN '" + UUID.randomUUID() + "' END, id " +
                     "FROM " + FORM_TABLE + " WHERE id = ? RETURNING id" +
                 "), " +
+                // Duplicate SECTIONS of the form
                 "new_sections AS (" +
                     "INSERT INTO " + SECTION_TABLE + " (form_id, title, description, position, original_section_id) " +
                     "SELECT (SELECT id from new_form_id), title, description, position, id " +
                     "FROM " + SECTION_TABLE + " WHERE form_id = ? " +
                     "RETURNING id, form_id, original_section_id" +
                 "), " +
+                // Create mapping between old questions and sections infos
                 "new_sections_linked AS (" +
                     "SELECT ns.id, ns.original_section_id, q.id AS question_id, q.section_position FROM new_sections ns " +
                     "JOIN " + QUESTION_TABLE + " q ON ns.original_section_id = q.section_id" +
                 "), " +
+                // Duplicate QUESTIONS of the form
                 "new_questions AS (" +
                     "INSERT INTO " + QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
                     "mandatory, original_question_id, section_id, section_position, conditional, placeholder) " +
@@ -321,6 +325,7 @@ public class DefaultFormService implements FormService {
                     "ORDER BY q.id " +
                     "RETURNING id, form_id, original_question_id, question_type" +
                 "), " +
+                // Duplicate CHILDREN questions of the MATRIX questions
                 "new_children_questions AS (" +
                     "INSERT INTO " + QUESTION_TABLE + " (form_id, title, question_type, mandatory, original_question_id, matrix_id, matrix_position) " +
                     "SELECT (SELECT id from new_form_id), title, question_type, mandatory, id, " +
@@ -328,14 +333,31 @@ public class DefaultFormService implements FormService {
                     "FROM " + QUESTION_TABLE + " q WHERE form_id = ? AND matrix_id IS NOT NULL " +
                     "ORDER BY q.id " +
                     "RETURNING id, form_id, original_question_id, question_type" +
+                "), " +
+                // Duplicate questions SPECIFICS fields of the QUESTIONS
+                "new_questions_specifics AS (" +
+                    "INSERT INTO " + QUESTION_SPECIFIC_FIELDS_TABLE + " (question_id, cursor_min_val, cursor_max_val, " +
+                    "cursor_step, cursor_label_min_val, cursor_label_max_val) " +
+                    "SELECT q.id, cursor_min_val, cursor_max_val, cursor_step, cursor_label_min_val, cursor_label_max_val " +
+                    "FROM " + QUESTION_SPECIFIC_FIELDS_TABLE + " qsf " +
+                    "JOIN new_questions q ON q.original_question_id = qsf.question_id " +
+                    "WHERE question_type IN " + Sql.listPrepared(QUESTIONS_WITH_SPECIFICS) + " " +
+                    "ORDER BY qsf.id " +
+                    "RETURNING *" +
+                "), " +
+                // Aggregate all questions infos in a final result object
+                "final_results AS ( " +
+                    "SELECT * FROM new_questions " +
+                    "UNION ALL " +
+                    "SELECT * FROM new_children_questions " +
+                    "UNION ALL " +
+                    "SELECT null, (SELECT id FROM new_form_id), null, null " +
+                    "WHERE NOT EXISTS (SELECT * FROM new_questions)" +
                 ") " +
-                "SELECT * FROM new_questions " +
-                "UNION ALL " +
-                "SELECT * FROM new_children_questions " +
-                "UNION ALL " +
-                "SELECT null, (SELECT id FROM new_form_id), null, null " +
-                "WHERE NOT EXISTS (SELECT * FROM new_questions)" +
-                "ORDER BY id;";
+                // Join questions specifics fields to these questions infos
+                "SELECT * FROM final_results fr " +
+                "JOIN new_questions_specifics qsf ON fr.id = qsf.question_id " +
+                "ORDER BY fr.id;";
 
         JsonArray params = new JsonArray()
                 .add(user.getUserId())
@@ -343,7 +365,8 @@ public class DefaultFormService implements FormService {
                 .add(formId)
                 .add(formId)
                 .add(formId)
-                .add(formId);
+                .add(formId)
+                .addAll(new JsonArray(QUESTIONS_WITH_SPECIFICS));
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }

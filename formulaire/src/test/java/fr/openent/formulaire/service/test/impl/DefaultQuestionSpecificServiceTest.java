@@ -1,9 +1,6 @@
 package fr.openent.formulaire.service.test.impl;
 
 import fr.openent.form.core.constants.Fields;
-import fr.openent.form.core.constants.Tables;
-import fr.openent.form.core.enums.QuestionTypes;
-import fr.openent.formulaire.service.impl.DefaultQuestionService;
 import fr.openent.formulaire.service.impl.DefaultQuestionSpecificFieldService;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -19,8 +16,6 @@ import org.junit.runner.RunWith;
 import static fr.openent.form.core.constants.EbFields.FORMULAIRE_ADDRESS;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.Tables.*;
-import static fr.openent.form.helpers.SqlHelper.getParamsForUpdateDateModifFormRequest;
-import static fr.openent.form.helpers.SqlHelper.getUpdateDateModifFormRequest;
 
 @RunWith(VertxUnitRunner.class)
 public class DefaultQuestionSpecificServiceTest {
@@ -38,7 +33,7 @@ public class DefaultQuestionSpecificServiceTest {
     public void testListSpecificField(TestContext ctx) {
         Async async = ctx.async();
         JsonArray questionIds = new JsonArray().add("1").add("2").add("3");
-        String expectedQuery = "SELECT * FROM " + QUESTION_SPECIFIC_FIELDS + " WHERE question_id IN " + Sql.listPrepared(questionIds);
+        String expectedQuery = "SELECT * FROM " + QUESTION_SPECIFIC_FIELDS_TABLE + " WHERE question_id IN " + Sql.listPrepared(questionIds);
         JsonArray expectedParams = new JsonArray().addAll(questionIds);
 
         vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
@@ -54,7 +49,7 @@ public class DefaultQuestionSpecificServiceTest {
     @Test
     public void create(TestContext ctx) {
         Async async = ctx.async();
-        String expectedQuery = "INSERT INTO " + QUESTION_SPECIFIC_FIELDS + " (question_id, cursor_min_val, cursor_max_val, " +
+        String expectedQuery = "INSERT INTO " + QUESTION_SPECIFIC_FIELDS_TABLE + " (question_id, cursor_min_val, cursor_max_val, " +
                 "cursor_step, cursor_label_min_val, cursor_label_max_val) VALUES (?, ?, ?, ?, ?, ?) RETURNING *;";
 
         String questionId = "1";
@@ -105,8 +100,8 @@ public class DefaultQuestionSpecificServiceTest {
                 .add(question2);
 
         String expectedQuery = "[{\"action\":\"raw\",\"command\":\"BEGIN;\"}," +
-                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_SPECIFIC_FIELDS + " SET cursor_min_val = ?, cursor_max_val = ?, cursor_step = ?, cursor_label_min_val = ?, cursor_label_max_val = ? WHERE question_id = ? RETURNING *;\",\"values\":[1,10,1,\"label_min_val\",\"label_max_val\",1]}," +
-                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_SPECIFIC_FIELDS + " SET cursor_min_val = ?, cursor_max_val = ?, cursor_step = ?, cursor_label_min_val = ?, cursor_label_max_val = ? WHERE question_id = ? RETURNING *;\",\"values\":[2,12,2,\"label_mined_val\",\"label_maxed_val\",2]}," +
+                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_SPECIFIC_FIELDS_TABLE + " SET cursor_min_val = ?, cursor_max_val = ?, cursor_step = ?, cursor_label_min_val = ?, cursor_label_max_val = ? WHERE question_id = ? RETURNING *;\",\"values\":[1,10,1,\"label_min_val\",\"label_max_val\",1]}," +
+                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_SPECIFIC_FIELDS_TABLE + " SET cursor_min_val = ?, cursor_max_val = ?, cursor_step = ?, cursor_label_min_val = ?, cursor_label_max_val = ? WHERE question_id = ? RETURNING *;\",\"values\":[2,12,2,\"label_mined_val\",\"label_maxed_val\",2]}," +
                 "{\"action\":\"raw\",\"command\":\"COMMIT;\"}]";
 
         vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {

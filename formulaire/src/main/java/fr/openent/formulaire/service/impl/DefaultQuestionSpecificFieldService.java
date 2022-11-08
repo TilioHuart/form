@@ -20,7 +20,7 @@ public class DefaultQuestionSpecificFieldService implements QuestionSpecificFiel
 
     @Override
     public void listByIds(JsonArray questionIds, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT * FROM " + QUESTION_SPECIFIC_FIELDS + " WHERE question_id IN " + Sql.listPrepared(questionIds);
+        String query = "SELECT * FROM " + QUESTION_SPECIFIC_FIELDS_TABLE + " WHERE question_id IN " + Sql.listPrepared(questionIds);
         JsonArray params = new JsonArray().addAll(questionIds);
 
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
@@ -28,7 +28,7 @@ public class DefaultQuestionSpecificFieldService implements QuestionSpecificFiel
 
     @Override
     public void create(JsonObject question, String questionId, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO " + QUESTION_SPECIFIC_FIELDS + " (question_id, cursor_min_val, cursor_max_val, cursor_step, " +
+        String query = "INSERT INTO " + QUESTION_SPECIFIC_FIELDS_TABLE + " (question_id, cursor_min_val, cursor_max_val, cursor_step, " +
                 "cursor_label_min_val, cursor_label_max_val) VALUES (?, ?, ?, ?, ?, ?) RETURNING *;";
 
         boolean isCursor = question.getInteger(Fields.QUESTION_TYPE) == QuestionTypes.CURSOR.getCode();
@@ -46,7 +46,7 @@ public class DefaultQuestionSpecificFieldService implements QuestionSpecificFiel
     public void update(JsonArray questions, Handler<Either<String, JsonArray>> handler) {
         if (!questions.isEmpty()) {
             SqlStatementsBuilder s = new SqlStatementsBuilder();
-            String query = "UPDATE " + QUESTION_SPECIFIC_FIELDS + " SET cursor_min_val = ?, cursor_max_val = ?, cursor_step = ?, " +
+            String query = "UPDATE " + QUESTION_SPECIFIC_FIELDS_TABLE + " SET cursor_min_val = ?, cursor_max_val = ?, cursor_step = ?, " +
                     "cursor_label_min_val = ?, cursor_label_max_val = ? WHERE question_id = ? RETURNING *;";
 
             s.raw("BEGIN;");

@@ -88,12 +88,11 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                             <div class="formulaire-cursor-input-range">
                                 <!-- input range -->
                                     <input type="range" ng-model="vm.responses.all[0].answer"
-                                           ng-value="[[vm.question.cursor_min_val]]" value="[[vm.question.cursor_min_val]]"
                                            min="[[vm.question.cursor_min_val]]" max="[[vm.question.cursor_max_val]]" 
-                                           step="[[vm.question.cursor_step]]" oninput="rangevalue.value = value">
+                                           step="[[vm.question.cursor_step]]">
                                    <div class="formulaire-cursor-input-range-values">
-                                        <output>[[vm.question.cursor_min_val]]</output> <!-- minimum value -->
-                                        <output>[[vm.question.cursor_max_val]]</output> <!-- maximum value -->
+                                        <div>[[vm.question.cursor_min_val]]</div> <!-- minimum value -->
+                                        <div>[[vm.question.cursor_max_val]]</div> <!-- maximum value -->
                                    </div>
                             </div>
                             <div>
@@ -102,8 +101,7 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                         </div>
                         
                         <!-- chosen value -->
-                        <label><i18n>formulaire.question.selected.result</i18n></label>
-                        <output id="rangevalue">[[vm.question.cursor_min_val]]</output>
+                        <i18n>formulaire.question.selected.result</i18n>[[vm.responses.all[0].answer]]
                     </div>
                 </div>
             </div>
