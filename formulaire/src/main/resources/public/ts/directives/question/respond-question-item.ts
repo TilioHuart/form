@@ -86,22 +86,34 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                                 <label>[[vm.question.cursor_label_min_val]]</label> <!-- label minimum value (optional) -->
                             </div>
                             <div class="formulaire-cursor-input-range">
-                                <!-- input range -->
-                                    <input type="range" ng-model="vm.responses.all[0].answer"
+                                <div class="range-slider"
+                                     style="--min:[[vm.question.cursor_min_val]];
+                                            --max:[[vm.question.cursor_max_val]];
+                                            --step:[[vm.question.cursor_step]];
+                                            --value:[[vm.responses.all[0].answer]];">
+                                    <!-- native cursor -->
+                                    <input type="range" class="twelve" ng-model="vm.responses.all[0].answer"
                                            min="[[vm.question.cursor_min_val]]" max="[[vm.question.cursor_max_val]]" 
                                            step="[[vm.question.cursor_step]]">
-                                   <div class="formulaire-cursor-input-range-values">
-                                        <div>[[vm.question.cursor_min_val]]</div> <!-- minimum value -->
-                                        <div>[[vm.question.cursor_max_val]]</div> <!-- maximum value -->
-                                   </div>
+                                   <!-- pin cursor -->
+                                    <output class="pin">
+                                        <div class="pin-content">[[vm.responses.all[0].answer]]</div>
+                                    </output>
+                                    <!-- progress bar -->
+                                    <div class="filler"></div>
+                                </div>
+                                
+                            
+                                <!-- Display MIN and MAX -->
+                                <div class="formulaire-cursor-input-range-values">
+                                    <div>[[vm.question.cursor_min_val]]</div> <!-- minimum value -->
+                                    <div>[[vm.question.cursor_max_val]]</div> <!-- maximum value -->
+                                </div>
                             </div>
                             <div>
                                 <label>[[vm.question.cursor_label_max_val]]</label> <!-- label maximum value (optional) -->
                             </div>
                         </div>
-                        
-                        <!-- chosen value -->
-                        <i18n>formulaire.question.selected.result</i18n>[[vm.responses.all[0].answer]]
                     </div>
                 </div>
             </div>
