@@ -7,6 +7,34 @@ body.formulaire {
 
     section.main {
         padding-top: 10px !important;
+
+        .header-fixed {
+            top: 0;
+        }
+
+        .formulaire-cursor-form .cursor-line {
+            .cursor-value-min, .cursor-value-max, .cursor-value-step {
+                @media screen and (min-width: $formulaire-screen-tablet) {
+                    width: 30%;
+                }
+            }
+        }
+
+        .formulaire-cursor-input-range {
+            .filler {
+                &::before {
+                    bottom: 6px;
+                }
+
+                &::after {
+                    bottom: 5px;
+                }
+            }
+
+            .pin-content {
+                padding-top: 5px;
+            }
+        }
     }
 
     label.chip,
