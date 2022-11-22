@@ -22,6 +22,7 @@ interface IViewModel {
     colors: string[];
     singleAnswerResponseChart: any;
     matrixResponseChart: any;
+    cursorResponseChart: any;
     results: Map<number, Response[]>;
     hasFiles: boolean;
     nbResponses;
@@ -142,6 +143,13 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                     </div>
                 </div>
             </div>
+            
+            <!-- Graph for CURSOR -->
+            <div ng-if="vm.question.question_type == vm.Types.CURSOR">
+                 <div>
+                    <div id="chart-[[vm.question.id]]"></div>
+                </div>
+            </div>
 
             <!-- See more button -->
             <div ng-if="vm.showMoreButton()" style="margin: 1%;">
@@ -184,11 +192,18 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
             const generateChart = () : void => {
                 if (vm.question.question_type == Types.SINGLEANSWER || vm.question.question_type == Types.SINGLEANSWERRADIO) {
                     if (vm.singleAnswerResponseChart) { vm.singleAnswerResponseChart.destroy(); }
-                    GraphUtils.generateGraphForResult(vm.question, vm.singleAnswerResponseChart);
+                    GraphUtils.generateGraphForResult(vm.question, [vm.singleAnswerResponseChart], null,
+                        null, false);
                 }
                 else if (vm.question.question_type == Types.MATRIX) {
                     if (vm.matrixResponseChart) { vm.matrixResponseChart.destroy(); }
-                    GraphUtils.generateGraphForResult(vm.question, vm.matrixResponseChart);
+                    GraphUtils.generateGraphForResult(vm.question, [vm.matrixResponseChart], null,
+                        null,false);
+                }
+                else if (vm.question.question_type == Types.CURSOR) {
+                    if (vm.cursorResponseChart) { vm.cursorResponseChart.destroy(); }
+                    GraphUtils.generateGraphForResult(vm.question, [vm.cursorResponseChart], vm.responses,
+                        null, false);
                 }
             };
         },
