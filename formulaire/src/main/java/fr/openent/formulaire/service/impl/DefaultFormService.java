@@ -346,7 +346,7 @@ public class DefaultFormService implements FormService {
                     "RETURNING *" +
                 "), " +
                 // Aggregate all questions infos in a final result object
-                "final_results AS ( " +
+                "final_results AS (" +
                     "SELECT * FROM new_questions " +
                     "UNION ALL " +
                     "SELECT * FROM new_children_questions " +
@@ -355,8 +355,8 @@ public class DefaultFormService implements FormService {
                     "WHERE NOT EXISTS (SELECT * FROM new_questions)" +
                 ") " +
                 // Join questions specifics fields to these questions infos
-                "SELECT * FROM final_results fr " +
-                "JOIN new_questions_specifics qsf ON fr.id = qsf.question_id " +
+                "SELECT fr.*, qsf.cursor_min_val, qsf.cursor_max_val, qsf.cursor_step, qsf.cursor_label_min_val, qsf.cursor_label_max_val FROM final_results fr " +
+                "LEFT JOIN new_questions_specifics qsf ON fr.id = qsf.question_id " +
                 "ORDER BY fr.id;";
 
         JsonArray params = new JsonArray()
