@@ -115,6 +115,13 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                             </div>
                         </div>
                     </div>
+                    <div ng-if ="vm.question.question_type == vm.Types.RANKING">
+                        <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
+                            <label>
+                                <span>[[choice.value]]</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
         `,

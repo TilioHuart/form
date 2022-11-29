@@ -466,6 +466,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     return "/formulaire/public/img/question_type/matrix.svg";
                 case 11:
                     return "/formulaire/public/img/question_type/cursor.svg";
+                case 12:
+                    return "/formulaire/public/img/question_type/ranking.svg";
             }
         };
 

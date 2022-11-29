@@ -13,7 +13,8 @@ export enum Types {
     FILE = 8,
     SINGLEANSWERRADIO = 9,
     MATRIX = 10,
-    CURSOR = 11
+    CURSOR = 11,
+    RANKING = 12
 }
 
 export class QuestionType {

@@ -143,8 +143,6 @@ function directive() {
                                     <!-- progress bar -->
                                     <div class="filler"></div>
                                 </div>
-                                
-                            
                                 <!-- Display MIN and MAX -->
                                 <div class="formulaire-cursor-input-range-values">
                                     <div>[[vm.question.cursor_min_val]]</div> <!-- minimum value -->
@@ -155,6 +153,13 @@ function directive() {
                                 <label>[[vm.question.cursor_max_label]]</label> <!-- label maximum value (optional) -->
                             </div>
                         </div>
+                    </div>
+                    <div ng-if="vm.question.question_type == vm.Types.RANKING">
+                       <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
+                           <label>
+                               <span>[[choice.value]]</span>
+                           </label>
+                       </div>
                     </div>
                 </div>
             </div>

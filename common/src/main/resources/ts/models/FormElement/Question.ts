@@ -138,7 +138,8 @@ export class Question extends FormElement {
         return this.question_type == Types.SINGLEANSWER
             || this.question_type == Types.MULTIPLEANSWER
             || this.question_type == Types.SINGLEANSWERRADIO
-            || this.question_type == Types.MATRIX;
+            || this.question_type == Types.MATRIX
+            || this.question_type == Types.RANKING
     }
 
     isTypeMultipleRep = () : boolean => {
@@ -156,6 +157,10 @@ export class Question extends FormElement {
         return this.question_type == Types.MATRIX
             && this.children.all.length > 0 &&
             this.children.all[0].question_type == Types.MULTIPLEANSWER;
+    }
+
+    isRanking = () : boolean => {
+        return this.question_type == Types.RANKING;
     }
 
     isSameQuestionType = (formElement: FormElement) : boolean => {

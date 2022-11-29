@@ -77,6 +77,10 @@ export const questionType: Directive = ng.directive('questionType', () => {
                                       question="vm.question"
                                       has-form-responses="vm.hasFormResponses">
                 </question-type-cursor>
+                <!-- RANKING -->
+                <question-type-ranking ng-if="vm.question.question_type == vm.types.RANKING"
+                                      question="vm.question">
+                </question-type-ranking>
             </div>
         `,
 
