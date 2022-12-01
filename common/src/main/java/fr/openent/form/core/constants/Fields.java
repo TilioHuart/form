@@ -77,6 +77,7 @@ public class Fields {
     public static final String STRUCTURE = "structure";
     public static final String TITLE = "title";
     public static final String TYPE = "type";
+    public static final String URI = "uri";
     public static final String USERNAME = "username";
     public static final String USER_ID = "user_id";
     public static final String VALUE = "value";

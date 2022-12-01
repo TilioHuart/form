@@ -36,14 +36,21 @@ public class DefaultNotifyService implements NotifyService {
             }
 
             String endPath = form.getBoolean(RGPD) ? RGPD : NEW;
+            String formUri = "/formulaire#/form/" + form.getInteger(ID) + "/" + endPath;
+
             JsonObject params = new JsonObject()
                     .put(PARAM_USER_ID, "/userbook/annuaire#" + user.getUserId())
                     .put(USERNAME, user.getUsername())
-                    .put(PARAM_FORM_URI, "/formulaire#/form/" + form.getInteger(ID) + "/" + endPath)
+                    .put(PARAM_FORM_URI, formUri)
                     .put(PARAM_FORM_NAME, form.getString(TITLE))
                     .put(PARAM_PUSH_NOTIF, new JsonObject().put(TITLE, "push.notif.formulaire.newForm").put(BODY, ""));
 
-            timelineHelper.notifyTimeline(request, "formulaire.new_form_notification", user, responders.getList(), form.getInteger(ID).toString(), params);
+            JsonObject mobileResource = new JsonObject()
+                    .put(ID, form.getInteger(ID).toString())
+                    .put(URI, formUri);
+
+            timelineHelper.notifyTimeline(request, "formulaire.new_form_notification", user,
+                    responders.getList(), mobileResource.toString(), params);
         });
     }
 
@@ -57,16 +64,23 @@ public class DefaultNotifyService implements NotifyService {
                 return;
             }
 
+            String formUri = "/formulaire#/form/" + form.getInteger(ID) + "/edit";
+
             JsonObject params = new JsonObject()
                     .put(ANONYMOUS, form.getBoolean(ANONYMOUS))
                     .put(PARAM_USER_ID, "/userbook/annuaire#" + user.getUserId())
                     .put(USERNAME, user.getUsername())
-                    .put(PARAM_FORM_URI, "/formulaire#/form/" + form.getInteger(ID) + "/edit")
+                    .put(PARAM_FORM_URI, formUri)
                     .put(PARAM_FORM_NAME, form.getString(TITLE))
                     .put(PARAM_FORM_RESULTS_URI, "/formulaire#/form/" + form.getInteger(ID) + "/results/1")
                     .put(PARAM_PUSH_NOTIF, new JsonObject().put(TITLE, "push.notif.formulaire.response").put(BODY, ""));
 
-            timelineHelper.notifyTimeline(request, "formulaire.response_notification", user, managers.getList(), form.getInteger(ID).toString(), params);
+            JsonObject mobileResource = new JsonObject()
+                    .put(ID, form.getInteger(ID).toString())
+                    .put(URI, formUri);
+
+            timelineHelper.notifyTimeline(request, "formulaire.response_notification", user,
+                    managers.getList(), mobileResource.toString(), params);
         });
     }
 }
