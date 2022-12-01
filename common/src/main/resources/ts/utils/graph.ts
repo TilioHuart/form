@@ -148,7 +148,7 @@ export class GraphUtils {
             GraphUtils.generateOptions(question.question_type, colors, labels,
             '100%', '100%', null, cursorAverage);
 
-        newPDFOptions.series = [{ name: 'formulaire.response.modality', data: Array.from(map.values()) }];
+        newPDFOptions.series = [{ name: 'formulaire.response.average', data: Array.from(map.values()) }];
 
         await GraphUtils.renderChartForResult(newPDFOptions, charts, question, isExportPDF);
     }
@@ -305,7 +305,7 @@ export class GraphUtils {
                 xaxis: {
                     categories: labels,
                     title: {
-                        text: lang.translate('formulaire.response.modality') + ' (' + cursorAverage + ')'
+                        text: lang.translate('formulaire.response.average') + ' (' + cursorAverage + ')'
                     }
                 },
                 yaxis: {

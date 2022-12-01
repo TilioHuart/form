@@ -85,6 +85,7 @@
   "formulaire.block.sharing": "Une ou plusieurs questions de votre formulaire ne sont pas valides. Veuillez corriger ces questions avant d'effectuer le partage.",
   "formulaire.copy": "Copie",
   "formulaire.archive.zip.name": "Fichiers déposés",
+  "formulaire.response.average": "Average response",
 
   "formulaire.prop.public.label": "Créer un formulaire public",
   "formulaire.prop.public.description": "Un formulaire public est anonyme et doit impérativement comporter une date de fin.",
