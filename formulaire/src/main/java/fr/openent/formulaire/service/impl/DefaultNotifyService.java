@@ -43,7 +43,8 @@ public class DefaultNotifyService implements NotifyService {
                     .put(USERNAME, user.getUsername())
                     .put(PARAM_FORM_URI, formUri)
                     .put(PARAM_FORM_NAME, form.getString(TITLE))
-                    .put(PARAM_PUSH_NOTIF, new JsonObject().put(TITLE, "push.notif.formulaire.newForm").put(BODY, ""));
+                    .put(PARAM_PUSH_NOTIF, new JsonObject().put(TITLE, "push.notif.formulaire.newForm").put(BODY, ""))
+                    .put(PARAM_RESOURCE_URI, formUri);
 
             JsonObject mobileResource = new JsonObject()
                     .put(ID, form.getInteger(ID).toString())
@@ -73,7 +74,8 @@ public class DefaultNotifyService implements NotifyService {
                     .put(PARAM_FORM_URI, formUri)
                     .put(PARAM_FORM_NAME, form.getString(TITLE))
                     .put(PARAM_FORM_RESULTS_URI, "/formulaire#/form/" + form.getInteger(ID) + "/results/1")
-                    .put(PARAM_PUSH_NOTIF, new JsonObject().put(TITLE, "push.notif.formulaire.response").put(BODY, ""));
+                    .put(PARAM_PUSH_NOTIF, new JsonObject().put(TITLE, "push.notif.formulaire.response").put(BODY, ""))
+                    .put(PARAM_RESOURCE_URI, formUri);
 
             JsonObject mobileResource = new JsonObject()
                     .put(ID, form.getInteger(ID).toString())

@@ -115,6 +115,7 @@ public class Fields {
     public static final String PARAM_USER_ID = "userId";
     public static final String PARAM_USER_IDS = "userIds";
     public static final String PARAM_USERS_IDS = "usersIds";
+    public static final String PARAM_RESOURCE_URI = "resourceUri";
 
 
     // Others
