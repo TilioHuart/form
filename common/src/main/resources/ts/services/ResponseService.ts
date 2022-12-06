@@ -74,7 +74,7 @@ export const responseService: ResponseService = {
     },
 
     async save(response: Response, questionType?: number) : Promise<any> {
-        if (!response.answer) {
+        if (response.answer == undefined || response.answer == null) {
             response.answer = "";
         }
         else {
