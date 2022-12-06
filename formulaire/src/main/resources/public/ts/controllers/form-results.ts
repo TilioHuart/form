@@ -184,8 +184,12 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
                     let distribsQuestion: Distributions = new Distributions();
                     distribsQuestion.all = distribs.all.filter((d: Distribution) => (resultsQuestionDistribId as any).includes(d.id));
                     question.fillChoicesInfo(distribsQuestion, results.all);
+
+                    // Filter result by question
+                    let questionResults: Response[] = results.all.filter((r: Response) => r.question_id === question.id);
+
                     // Generate graphs
-                    await GraphUtils.generateGraphForResult(question, vm.pdfResponseCharts, results, distribs.all.length, true);
+                    await GraphUtils.generateGraphForResult(question, vm.pdfResponseCharts, questionResults, distribs.all.length, true);
                 }
 
                 await storeAllCharts(questions, vm.pdfResponseCharts, images);

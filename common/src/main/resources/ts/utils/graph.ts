@@ -14,7 +14,7 @@ export class GraphUtils {
      * @param charts      ApexCharts to store and render at the end
      * @param distribs  Distrib's number for each question
      */
-    static generateGraphForResult = async (question: Question, charts: ApexChart[], responses: Responses = new Responses(),
+    static generateGraphForResult = async (question: Question, charts: ApexChart[], responses: Response[],
                                            distribs: number, isExportPDF: boolean) : Promise<void> => {
         switch (question.question_type) {
             case Types.SINGLEANSWER:
@@ -118,21 +118,11 @@ export class GraphUtils {
      * @param responses   Array of responses which we want to display the results
      * @param isExportPDF Boolean to determine if we generate a graph for result or for PDF Export
      */
-    private static generateCursorChart = async (question: Question, charts: ApexChart[], responses: Responses = new Responses(),
+    private static generateCursorChart = async (question: Question, charts: ApexChart[], responses: Response[],
                                                 isExportPDF: boolean) : Promise<void> => {
-        let reponses: Response[] = responses.all;
-
-        let resp: number[] = [];
-        let cursorAverage: number;
-
         // build array with all response
-        for (let r of reponses) {
-            resp.sort(function(a: number, b: number) {
-                return a - b
-            })
-            resp.push(Number(r.answer));
-        }
-        cursorAverage = resp.reduce((a: number, b: number) => a + b, 0) / resp.length;
+        let resp: number[] = responses.map((r: Response) => Number(r.answer)).sort((a: number, b: number) => a - b);
+        let cursorAverage: string = (resp.reduce((a: number, b: number) => a + b, 0) / resp.length).toFixed(2);
 
         // map to build object with response and number of each one
         const map: Map<number, number> = resp.reduce((acc: Map<number, number>, e: number) =>
@@ -218,7 +208,7 @@ export class GraphUtils {
      * @param cursorAverage Average of answers
      */
     static generateOptions = (type: Types, colors: string[], labels: (string | number)[], height?: any, width?: any,
-                              seriesPercent?: number[], cursorAverage?: number) : any => {
+                              seriesPercent?: number[], cursorAverage?: string) : any => {
         let options: any;
         if (type === Types.SINGLEANSWER || type === Types.SINGLEANSWERRADIO) {
             options = {

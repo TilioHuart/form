@@ -202,7 +202,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                 }
                 else if (vm.question.question_type == Types.CURSOR) {
                     if (vm.cursorResponseChart) { vm.cursorResponseChart.destroy(); }
-                    GraphUtils.generateGraphForResult(vm.question, [vm.cursorResponseChart], vm.responses,
+                    GraphUtils.generateGraphForResult(vm.question, [vm.cursorResponseChart], vm.responses.all,
                         null, false);
                 }
             };
