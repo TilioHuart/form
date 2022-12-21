@@ -59,7 +59,7 @@
             </div>
             <div class="section-main">
                 <div ng-repeat="question in vm.preview.formElement.questions.all | orderBy:'section_position'">
-                    <respond-question-item ng-if="vm.preview.formElement.question_type != Types.MATRIX"
+                    <respond-question-item ng-if="question.question_type != Types.MATRIX"
                                            question="question"
                                            response="vm.preview.elementResponses[question.section_position - 1]"
                                            distribution="null"
@@ -67,8 +67,8 @@
                                            responses-choices="vm.preview.choices"
                                            files="vm.preview.files">
                     </respond-question-item>
-                    <respond-matrix ng-if="vm.preview.formElement.question_type == Types.MATRIX"
-                                    question="vm.preview.formElement"
+                    <respond-matrix ng-if="question.question_type == Types.MATRIX"
+                                    question="question"
                                     responses="vm.preview.elementResponses[question.section_position - 1]"
                                     distribution="null">
                     </respond-matrix>
