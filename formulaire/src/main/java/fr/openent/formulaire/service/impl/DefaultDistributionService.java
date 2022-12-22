@@ -163,13 +163,13 @@ public class DefaultDistributionService implements DistributionService {
                 .add(distribution.getString(STATUS, TO_DO))
                 .add(distribution.getString(STRUCTURE, null));
 
-        if (distribution.getString(DATE_RESPONSE, null) != null) {
-            query += ", date_response = ?";
-            params.add(distribution.getString(DATE_RESPONSE));
-        }
-        else if (distribution.getString(STATUS).equals(FINISHED)) {
+        if (distribution.getString(STATUS).equals(FINISHED)) {
             query += ", date_response = ?";
             params.add("NOW()");
+        }
+        else if (distribution.getString(DATE_RESPONSE, null) != null) {
+            query += ", date_response = ?";
+            params.add(distribution.getString(DATE_RESPONSE));
         }
 
         query += " WHERE id = ? RETURNING *;";
