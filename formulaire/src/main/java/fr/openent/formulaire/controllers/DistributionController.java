@@ -151,7 +151,33 @@ public class DistributionController extends ControllerHelper {
                 unauthorized(request, message);
                 return;
             }
-            distributionService.get(distributionId, defaultResponseHandler(request));
+
+            distributionService.get(distributionId, distributionEvt -> {
+                if (distributionEvt.isLeft()) {
+                    String message = "[Formulaire@getDistribution] Fail to get distribution with id " + distributionId;
+                    renderInternalError(request, distributionEvt, message);
+                    return;
+                }
+                if (distributionEvt.right().getValue().isEmpty()) {
+                    String message = "[Formulaire@getDistribution] No distribution found for id " + distributionId;
+                    log.error(message);
+                    notFound(request, message);
+                    return;
+                }
+
+                JsonObject distribution = distributionEvt.right().getValue();
+                String ownerDistribution = distribution.getString(RESPONDER_ID);
+
+                // Check that distribution is owned by the connected user
+                if (ownerDistribution == null || !ownerDistribution.equals(user.getUserId())) {
+                    String message = "[Formulaire@getDistribution] You're not owner of the distribution with id " + distributionId;
+                    log.error(message);
+                    unauthorized(request, message);
+                    return;
+                }
+
+                renderJson(request, distribution);
+            });
         });
     }
 

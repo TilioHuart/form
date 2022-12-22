@@ -2,6 +2,7 @@ import {idiom, ng, notify} from 'entcore';
 import http from 'axios';
 import {Distribution} from '../models';
 import {DataUtils} from "../utils";
+import {Mix} from "entcore-toolkit";
 
 export interface DistributionService {
     list() : Promise<any>;
@@ -11,7 +12,7 @@ export interface DistributionService {
     listByFormAndStatusAndQuestion(formId: number, status: string, questionId: number, nbLines: number) : Promise<any>
     listByFormAndResponder(formId: number) : Promise<any>;
     count(formId: number) : Promise<any>;
-    get(distributionId: number) : Promise<any>;
+    get(distributionId: number) : Promise<Distribution>;
     getByFormResponderAndStatus(formId: number) : Promise<any>;
     add(distributionId: number) : Promise<any>;
     duplicateWithResponses(distributionId: number) : Promise<any>;
@@ -84,9 +85,10 @@ export const distributionService: DistributionService = {
         }
     },
 
-    async get(distributionId: number) : Promise<any> {
+    async get(distributionId: number) : Promise<Distribution> {
         try {
-            return DataUtils.getData(await http.get(`/formulaire/distributions/${distributionId}`));
+            let data: any = DataUtils.getData(await http.get(`/formulaire/distributions/${distributionId}`));
+            return Mix.castAs(Distribution, data);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.distributionService.get'));
             throw err;
