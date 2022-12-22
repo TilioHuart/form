@@ -834,8 +834,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.isCloseConfirmationOpen = () : boolean => {
         let elems = document.getElementsByTagName('share-panel');
-        if (elems && elems.length > 0 && elems[0].firstElementChild) {
-            let elem: ElementTraversal = elems[0].firstElementChild;
+        if (elems && elems.length > 0 && elems[0]) {
+            let elem: any = elems[0];
             let sharePanelScope = angular.element(elem).scope();
             if (sharePanelScope && sharePanelScope.display) {
                 return sharePanelScope.display.showCloseConfirmation;
