@@ -135,7 +135,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             let sectionQuestions = sections.all.filter(s => s.id);
             let questionsList = sectionQuestions.map(s => s.questions.all);
 
-            for (let questions of questionsList){
+            for (let questions of questionsList) {
                 let conditionalQuestions = questions.filter(q => q.conditional);
                 if (conditionalQuestions.length >= 2) {
                     notify.error(idiom.translate('formulaire.question.save.missing.field'));
@@ -148,6 +148,17 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 notify.error(idiom.translate('formulaire.question.save.missing.field'));
                 return;
             }
+
+            let questionTypeCursor = vm.formElements.all.filter(fe => fe.question_type == Types.CURSOR);
+            if (questionTypeCursor.length > 0) {
+                let inconsistencyCursorChoice =
+                    vm.formElements.all.filter(fe => ((fe.cursor_max_val - fe.cursor_min_val) % fe.cursor_step) != 0)
+                if (inconsistencyCursorChoice.length > 0) {
+                    notify.error(idiom.translate('formulaire.question.save.missing.field'));
+                    return;
+                }
+            }
+
             await saveFormElements(displaySuccess && wrongElements.length <= 0);
             vm.dontSave = false;
         };

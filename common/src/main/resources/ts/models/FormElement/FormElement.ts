@@ -7,6 +7,10 @@ export abstract class FormElement implements Selectable {
     position: number;
     nb_responses: number;
     selected: boolean;
+    question_type: number;
+    cursor_min_val: number;
+    cursor_max_val: number;
+    cursor_step: number;
 
     protected constructor() {
         this.id = null;
@@ -15,6 +19,10 @@ export abstract class FormElement implements Selectable {
         this.position = null;
         this.nb_responses = 0;
         this.selected = null;
+        this.question_type = 0;
+        this.cursor_min_val = 0;
+        this.cursor_max_val = 0;
+        this.cursor_step = 0;
     }
 
     toJson() : Object {
@@ -24,7 +32,11 @@ export abstract class FormElement implements Selectable {
             title: this.title,
             position: this.position,
             nb_responses: this.nb_responses,
-            selected: this.selected
+            selected: this.selected,
+            types: this.question_type,
+            cursor_min_val: this.cursor_min_val,
+            cursor_max_val: this.cursor_max_val,
+            cursor_step: this.cursor_step
         }
     }
 }

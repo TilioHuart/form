@@ -239,6 +239,7 @@
   "formulaire.question.cursor.default.min.val": "1",
   "formulaire.question.cursor.default.max.val": "10",
   "formulaire.question.cursor.default.step": "1",
+  "formulaire.question.cursor.inconsistency.between.values": "Careful, the step must be a multiple of the difference between the maximum value and the minimum value of the cursor.",
   "formulaire.question.value.minimum": "Valeur minimum",
   "formulaire.question.value.maximum": "Valeur maximum",
   "formulaire.question.value.step": "Valeur du pas",
