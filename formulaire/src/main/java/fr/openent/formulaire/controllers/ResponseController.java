@@ -379,7 +379,7 @@ public class ResponseController extends ControllerHelper {
                             catch (ParseException e) { e.printStackTrace(); }
                         }
                         if (question_type == QuestionTypes.CURSOR.getCode()) {
-                            try { (response.getInteger(ANSWER)).toString(); }
+                            try { response.getString(ANSWER); }
                             catch (Exception e) { e.printStackTrace(); }
                         }
                         responseService.update(user, responseId, response, defaultResponseHandler(request));

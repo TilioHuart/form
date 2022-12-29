@@ -9,14 +9,14 @@ export class Response implements Selectable {
     id: number;
     question_id: number;
     choice_id: number;
-    answer: string|Date;
+    answer: string|Date|number;
     distribution_id: number;
     original_id: number;
     files: ResponseFiles;
     selected: boolean;
     selectedIndex: boolean[]; // For multiple answer in preview
 
-    constructor(question_id?: number, choice_id?: number, answer?: string|Date, distribution_id?: number) {
+    constructor(question_id?: number, choice_id?: number, answer?: string|Date|number, distribution_id?: number) {
         this.id = null;
         this.question_id = question_id ? question_id : null;
         this.choice_id = choice_id ? choice_id : null;
