@@ -227,6 +227,7 @@
   "formulaire.question.type.description.FILE": "Question permettant au répondant de déposer un ou plusieurs fichiers",
   "formulaire.question.type.description.SINGLEANSWERRADIO": "Question permettant au répondant de choisir une réponse parmi une liste en bouton radio",
   "formulaire.question.type.description.MATRIX": "Question qui, pour une liste de plusieurs éléments, permet au répondant de choisir une valeur pour chacun d'entre eux. Deux types de matrices sont disponibles :\n- à choix unique (une seule réponse par élément)\n- cases à cocher (plusieurs réponses par élément)",
+  "formulaire.question.type.description.CURSOR": "Question permettant au répondant d'évaluer sur une échelle définie la question",
   "formulaire.question.title.free.empty": "Titre de ma zone de texte",
   "formulaire.question.title.empty": "Énoncé de ma question",
   "formulaire.question.date.empty": "Date au format : jj/mm/aaaa",
