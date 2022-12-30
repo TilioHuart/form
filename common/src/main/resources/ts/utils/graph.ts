@@ -1,5 +1,5 @@
 import {idiom, idiom as lang} from 'entcore';
-import {Question, QuestionChoice, Response, Responses, Types} from "@common/models";
+import {Question, QuestionChoice, Response, Types} from "@common/models";
 import {ColorUtils} from "@common/utils/color";
 import * as ApexCharts from 'apexcharts';
 
@@ -138,7 +138,7 @@ export class GraphUtils {
             GraphUtils.generateOptions(question.question_type, colors, labels,
             '100%', '100%', null, cursorAverage);
 
-        newPDFOptions.series = [{ name: 'formulaire.response.average', data: Array.from(map.values()) }];
+        newPDFOptions.series = [{ name: lang.translate('formulaire.response.average'), data: Array.from(map.values()) }];
 
         await GraphUtils.renderChartForResult(newPDFOptions, charts, question, isExportPDF);
     }
@@ -284,9 +284,6 @@ export class GraphUtils {
                     animations: {
                         enabled: false
                     },
-                    toolbar: {
-                        show: false
-                    }
                 },
                 colors: colors,
                 dataLabels: {
