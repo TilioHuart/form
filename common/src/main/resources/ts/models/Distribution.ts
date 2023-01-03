@@ -83,12 +83,10 @@ export class Distributions {
 
     syncByFormAndResponder = async (formId: number) : Promise<void> => {
         try {
-            let data = await distributionService.listByFormAndResponder(formId);
-            this.all = Mix.castArrayAs(Distribution, data);
-            for (let i = this.all.length - 1; i >= this.all.length - data.length; i--) {
-                let distrib = this.all[i];
-                distrib.date_response = new Date(distrib.date_response);
-                distrib.date_sending = new Date(distrib.date_sending);
+            this.all = await distributionService.listByFormAndResponder(formId);
+            for (let distribution of this.all) {
+                distribution.date_response = new Date(distribution.date_response);
+                distribution.date_sending = new Date(distribution.date_sending);
             }
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.distribution.sync'));

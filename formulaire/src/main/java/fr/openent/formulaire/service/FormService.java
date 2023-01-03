@@ -1,6 +1,7 @@
 package fr.openent.formulaire.service;
 
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
@@ -52,6 +53,13 @@ public interface FormService {
      * @param handler function handler returning JsonArray data
      */
     void listManagers(String formId, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * Get a specific form by id
+     * @param formId form identifier
+     * @param user user connected
+     */
+    Future<JsonObject> get(String formId, UserInfos user);
 
     /**
      * Get a specific form by id

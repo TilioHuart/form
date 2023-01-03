@@ -1,8 +1,11 @@
 package fr.openent.formulaire.service.impl;
 
+import fr.openent.formulaire.helpers.FutureHelper;
 import fr.openent.formulaire.service.FormService;
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
@@ -115,7 +118,9 @@ public class DefaultFormService implements FormService {
     }
 
     @Override
-    public void get(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler) {
+    public Future<JsonObject> get(String formId, UserInfos user) {
+        Promise<JsonObject> promise = Promise.promise();
+
         String query =
                 "WITH folder_id AS ( " +
                     "SELECT folder_id FROM " + REL_FORM_FOLDER_TABLE + " " +
@@ -124,7 +129,19 @@ public class DefaultFormService implements FormService {
                 "SELECT *, (SELECT * FROM folder_id) " +
                 "FROM " + FORM_TABLE + " WHERE id = ?;";
         JsonArray params = new JsonArray().add(formId).add(user.getUserId()).add(formId);
-        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+
+        String errorMessage = "[Formulaire@DefaultFormService::get] Fail to get form with id " + formId;
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(FutureHelper.handlerEither(promise, errorMessage)));
+
+        return promise.future();
+    }
+
+    @Override
+    @Deprecated
+    public void get(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler) {
+        get(formId, user)
+            .onSuccess(result -> handler.handle(new Either.Right<>(result)))
+            .onFailure(err -> handler.handle(new Either.Left<>(err.getMessage())));
     }
 
     @Override

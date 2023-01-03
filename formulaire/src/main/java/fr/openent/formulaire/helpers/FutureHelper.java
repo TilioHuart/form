@@ -17,52 +17,78 @@ public class FutureHelper {
     private FutureHelper() {
     }
 
-    // Promise
+    // Promise Either
 
-    public static Handler<Either<String, JsonArray>> handlerJsonArray(Promise<JsonArray> future) {
+    public static <R> Handler<Either<String, R>> handlerEither(Promise<R> promise, String errorMessage) {
         return event -> {
             if (event.isRight()) {
-                future.complete(event.right().getValue());
-            } else {
-                log.error(event.left().getValue());
-                future.fail(event.left().getValue());
+                promise.complete(event.right().getValue());
+                return;
             }
+            if (errorMessage != null) log.error(errorMessage);
+            log.error(event.left().getValue());
+            promise.fail(errorMessage != null ? errorMessage : event.left().getValue());
         };
     }
 
-    public static Handler<Either<String, JsonObject>> handlerJsonObject(Promise<JsonObject> future) {
+    public static <R> Handler<Either<String, R>> handlerEither(Promise<R> promise) {
+        return handlerEither(promise, null);
+    }
+
+
+    // Promise AsyncResult
+
+    public static <R> Handler<AsyncResult<R>> handlerAsyncResult(Promise<R> promise, String errorMessage) {
         return event -> {
-            if (event.isRight()) {
-                future.complete(event.right().getValue());
-            } else {
-                log.error(event.left().getValue());
-                future.fail(event.left().getValue());
+            if (event.succeeded()) {
+                promise.complete(event.result());
+                return;
             }
+            if (errorMessage != null) log.error(errorMessage);
+            log.error(event.cause().getMessage());
+            promise.fail(errorMessage != null ? errorMessage : event.cause().getMessage());
         };
     }
+
+    public static <R> Handler<AsyncResult<R>> handlerAsyncResult(Promise<R> promise) {
+        return handlerAsyncResult(promise, null);
+    }
+
+
+
 
     // AsyncResult
 
-    public static Handler<Either<String, JsonArray>> handlerJsonArray(Handler<AsyncResult<JsonArray>> handler) {
+    public static Handler<Either<String, JsonArray>> handlerJsonArray(Handler<AsyncResult<JsonArray>> handler, String errorMessage) {
         return event -> {
             if (event.isRight()) {
                 handler.handle(Future.succeededFuture(event.right().getValue()));
-            } else {
-                log.error(event.left().getValue());
-                handler.handle(Future.failedFuture(event.left().getValue()));
+                return;
             }
+            if (errorMessage != null) log.error(errorMessage);
+            log.error(event.left().getValue());
+            handler.handle(Future.failedFuture(errorMessage != null ? errorMessage : event.left().getValue()));
+        };
+    }
+
+    public static Handler<Either<String, JsonArray>> handlerJsonArray(Handler<AsyncResult<JsonArray>> handler) {
+        return handlerJsonArray(handler, null);
+    }
+
+    public static Handler<Either<String, JsonObject>> handlerJsonObject(Handler<AsyncResult<JsonObject>> handler, String errorMessage) {
+        return event -> {
+            if (event.isRight()) {
+                handler.handle(Future.succeededFuture(event.right().getValue()));
+                return;
+            }
+            if (errorMessage != null) log.error(errorMessage);
+            log.error(event.left().getValue());
+            handler.handle(Future.failedFuture(errorMessage != null ? errorMessage : event.left().getValue()));
         };
     }
 
     public static Handler<Either<String, JsonObject>> handlerJsonObject(Handler<AsyncResult<JsonObject>> handler) {
-        return event -> {
-            if (event.isRight()) {
-                handler.handle(Future.succeededFuture(event.right().getValue()));
-            } else {
-                log.error(event.left().getValue());
-                handler.handle(Future.failedFuture(event.left().getValue()));
-            }
-        };
+        return handlerJsonObject(handler, null);
     }
 
     // Future

@@ -189,23 +189,33 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				await $scope.getFormWithRights(params.formId);
 				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form) && !$scope.form.archived) {
 					if ($scope.form.date_opening < new Date() && ($scope.form.date_ending ? ($scope.form.date_ending > new Date()) : true)) {
+						$scope.distribution = new Distribution();
 						if (!isNaN(params.distributionId)) {
 							$scope.distribution = await distributionService.get(params.distributionId);
 						}
 						else {
-							let distribs = await distributionService.listByFormAndResponder($scope.form.id);
-							let distrib = distribs.filter(d => d.status == DistributionStatus.TO_DO)[0];
-							$scope.distribution = distrib ? distrib : await distributionService.add(distribs[0].id);
+							let distribs: Distribution[] = await distributionService.listByFormAndResponder($scope.form.id);
+							let toDoDistribs: Distribution[] = distribs.filter(d => d.status == DistributionStatus.TO_DO);
+							let finishedDistribs: Distribution[] = distribs.filter(d => d.status == DistributionStatus.FINISHED);
+							if ($scope.form.multiple || finishedDistribs.length == 0) {
+								$scope.distribution = toDoDistribs[0] ? toDoDistribs[0] : await distributionService.add(distribs[0].id);
+							}
 						}
 
-						if ($scope.distribution && $scope.distribution.form_id == params.formId) {
-							let conditionsOk = false;
+						if (!$scope.distribution.id) {
+							$scope.redirectTo('/e409');
+						}
+						else if ($scope.distribution.form_id != params.formId) {
+							$scope.redirectTo('/e403');
+						}
+						else {
+							let conditionsOk: boolean = false;
 							if ($scope.distribution.status && $scope.distribution.status != DistributionStatus.FINISHED) {
 								conditionsOk = true;
 							}
 							else if ($scope.form.editable) {
-								let distribs = await distributionService.listByFormAndResponder($scope.form.id);
-								let distrib = distribs.filter(d => d.status == DistributionStatus.ON_CHANGE)[0];
+								let distribs: Distribution[] = await distributionService.listByFormAndResponder($scope.form.id);
+								let distrib: Distribution = distribs.filter(d => d.status == DistributionStatus.ON_CHANGE)[0];
 								$scope.distribution = distrib ? distrib : await distributionService.duplicateWithResponses($scope.distribution.id);
 								conditionsOk = true;
 							}
@@ -217,7 +227,7 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 								}
 								else {
 									$scope.responsePosition = $scope.responsePosition < 1 ? 1 : $scope.responsePosition;
-									let correctedUrl = window.location.origin + window.location.pathname + `#/form/${$scope.form.id}/${$scope.distribution.id}`;
+									let correctedUrl: string = window.location.origin + window.location.pathname + `#/form/${$scope.form.id}/${$scope.distribution.id}`;
 									window.location.assign(correctedUrl);
 									$scope.safeApply();
 									$scope.$broadcast(FORMULAIRE_BROADCAST_EVENT.INIT_RESPOND_QUESTION);
@@ -227,12 +237,6 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 							else {
 								$scope.redirectTo('/e403');
 							}
-						}
-						else if ($scope.form.multiple) {
-							$scope.redirectTo(`/form/${$scope.form.id}/${$scope.distribution.id}/questions/recap`);
-						}
-						else {
-							$scope.redirectTo('/e403');
 						}
 					}
 					else {
@@ -249,11 +253,11 @@ export const mainController = ng.controller('MainController', ['$scope', 'route'
 				if ($scope.canRespond() && $scope.hasShareRightResponse($scope.form) && !$scope.form.archived) {
 					$scope.distribution = await distributionService.get(params.distributionId);
 					if ($scope.distribution && $scope.distribution.form_id == params.formId) {
-						let hasRespondLastQuestion = await FormElementUtils.hasRespondedLastQuestion($scope.form, $scope.distribution);
+						let hasRespondLastQuestion: boolean = await FormElementUtils.hasRespondedLastQuestion($scope.form, $scope.distribution);
 						if (hasRespondLastQuestion) {
 							if ($scope.distribution.status && $scope.distribution.status === DistributionStatus.FINISHED && $scope.form.editable) {
-								let distribs = await distributionService.listByFormAndResponder($scope.form.id);
-								let distrib = distribs.filter(d => d.status == DistributionStatus.ON_CHANGE && d.original_id === $scope.distribution.id)[0];
+								let distribs: Distribution[] = await distributionService.listByFormAndResponder($scope.form.id);
+								let distrib: Distribution = distribs.filter(d => d.status == DistributionStatus.ON_CHANGE && d.original_id === $scope.distribution.id)[0];
 								if (distrib) {
 									$scope.distribution = distrib;
 								}

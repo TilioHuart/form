@@ -16,6 +16,7 @@ import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
+import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -231,27 +232,43 @@ public class DistributionController extends ControllerHelper {
 
                 // Check that distribution is owned by the connected user
                 if (ownerDistribution == null || !ownerDistribution.equals(user.getUserId())) {
-                    String message = "[Formulaire@addDistribution] You're not owner of the distribution with id " + distributionId;
+                    String message = "[Formulaire@addDistribution] " + user.getUserId() + " is not owner of the distribution with id " + distributionId;
                     log.error(message);
                     unauthorized(request, message);
                     return;
                 }
 
-                distributionService.countMyToDo(formId, user, countEvt -> {
-                    if (countEvt.isLeft()) {
-                        log.error("[Formulaire@addDistribution] Error in counting not finished distributions for formId " + formId);
-                        renderInternalError(request, countEvt);
-                        return;
-                    }
+                JsonObject infos = new JsonObject();
+                formService.get(formId, user)
+                    .compose(form -> {
+                        infos.put("isMultiple", form.getBoolean(MULTIPLE));
+                        return distributionService.countMyFinished(formId, user);
+                    })
+                    .compose(nbMyFinished -> {
+                        // If not multiple and user has already responded then he's not allowed to respond again
+                        if (!infos.getBoolean("isMultiple") && nbMyFinished.getInteger(COUNT) > 0) {
+                            String message = "[Formulaire@addDistribution] A finished distribution already exists for this responder for form with id " + formId;
+                            unauthorized(request, message);
+                            return Future.failedFuture(message);
+                        }
 
-                    if (countEvt.right().getValue().getInteger(COUNT) > 0) {
-                        log.error("[Formulaire@addDistribution] A not finished distribution already exists for this responder for formId " + formId);
-                        conflict(request);
-                        return;
-                    }
+                        return distributionService.countMyToDo(formId, user);
+                    })
+                    .compose(nbMyToDo -> {
+                        // If user has already started a response then he should continue that one
+                        if (nbMyToDo.getInteger(COUNT) > 0) {
+                            String message = "[Formulaire@addDistribution] An unfinished distribution already exists for this responder for form with id " + formId;
+                            conflict(request, message);
+                            return Future.failedFuture(message);
+                        }
 
-                    distributionService.add(distribution, defaultResponseHandler(request));
-                });
+                        return distributionService.add(distribution);
+                    })
+                    .onSuccess(result -> renderJson(request, result))
+                    .onFailure(err -> {
+                        log.error(err.getMessage());
+                        if (!request.isEnded()) renderError(request);
+                    });
             });
         });
     }

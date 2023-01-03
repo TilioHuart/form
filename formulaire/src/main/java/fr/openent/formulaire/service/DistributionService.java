@@ -1,6 +1,7 @@
 package fr.openent.formulaire.service;
 
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -65,12 +66,18 @@ public interface DistributionService {
     void countFinished(String formId, Handler<Either<String, JsonObject>> handler);
 
     /**
-     * Get the number of distributions for a specific form
+     * Get the number of distributions with TO_DO status for a specific form
      * @param formId form identifier
      * @param user user connected
-     * @param handler function handler returning JsonObject data
      */
-    void countMyToDo(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler);
+    Future<JsonObject> countMyToDo(String formId, UserInfos user);
+
+    /**
+     * Get the number of distributions with FINISHED status for a specific form
+     * @param formId form identifier
+     * @param user user connected
+     */
+    Future<JsonObject> countMyFinished(String formId, UserInfos user);
 
     /**
      * Get a specific distribution by id
@@ -90,9 +97,8 @@ public interface DistributionService {
     /**
      * Create a new distribution based on an already existing one
      * @param distribution JsonObject data
-     * @param handler function handler returning JsonObject data
      */
-    void add(JsonObject distribution, Handler<Either<String, JsonObject>> handler);
+    Future<JsonObject> add(JsonObject distribution);
 
     /**
      * Duplicate a distribution by id

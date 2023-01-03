@@ -1,8 +1,11 @@
 package fr.openent.formulaire.service.impl;
 
+import fr.openent.formulaire.helpers.FutureHelper;
 import fr.openent.formulaire.service.DistributionService;
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
@@ -92,10 +95,26 @@ public class DefaultDistributionService implements DistributionService {
     }
 
     @Override
-    public void countMyToDo(String formId, UserInfos user, Handler<Either<String, JsonObject>> handler) {
+    public Future<JsonObject> countMyToDo(String formId, UserInfos user) {
+        return countMineByStatus(formId, user, TO_DO);
+    }
+
+    @Override
+    public Future<JsonObject> countMyFinished(String formId, UserInfos user) {
+        return countMineByStatus(formId, user, FINISHED);
+    }
+
+    private Future<JsonObject> countMineByStatus(String formId, UserInfos user, String status) {
+        Promise<JsonObject> promise = Promise.promise();
+
         String query = "SELECT COUNT(*) FROM " + DISTRIBUTION_TABLE + " WHERE form_id = ? AND responder_id = ? AND status = ?;";
-        JsonArray params = new JsonArray().add(formId).add(user.getUserId()).add(TO_DO);
-        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+        JsonArray params = new JsonArray().add(formId).add(user.getUserId()).add(status);
+
+        String errorMessage = "[Formulaire@DefaultDistributionService::countMineByStatus] " +
+                "Failed to count distribution with status " + status + " for user : " + user.getUserId();
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(FutureHelper.handlerEither(promise, errorMessage)));
+
+        return promise.future();
     }
 
     @Override
@@ -115,7 +134,9 @@ public class DefaultDistributionService implements DistributionService {
     }
 
     @Override
-    public void add(JsonObject distribution, Handler<Either<String, JsonObject>> handler) {
+    public Future<JsonObject> add(JsonObject distribution) {
+        Promise<JsonObject> promise = Promise.promise();
+
         String query = "INSERT INTO " + DISTRIBUTION_TABLE + " (form_id, sender_id, sender_name, " +
                 "responder_id, responder_name, status, date_sending, active) " +
                 " VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
@@ -128,7 +149,11 @@ public class DefaultDistributionService implements DistributionService {
                 .add(TO_DO)
                 .add("NOW()")
                 .add(true);
-        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+
+        String errorMessage = "[Formulaire@addDistribution] Failed to add distribution " + distribution;
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(FutureHelper.handlerEither(promise, errorMessage)));
+
+        return promise.future();
     }
 
     @Override
