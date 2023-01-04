@@ -36,9 +36,8 @@ public interface FormService {
      * List all the forms for the linker
      * @param groupsAndUserIds list of neo ids including the connected user
      * @param user user connected
-     * @param handler function handler returning JsonArray data
      */
-    void listForLinker(List<String> groupsAndUserIds, UserInfos user, Handler<Either<String, JsonArray>> handler);
+    Future<JsonArray> listForLinker(List<String> groupsAndUserIds, UserInfos user);
 
     /**
      * List all the contributors to a form

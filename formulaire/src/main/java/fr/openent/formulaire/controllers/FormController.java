@@ -162,7 +162,13 @@ public class FormController extends ControllerHelper {
             if (user.getGroupsIds() != null) {
                 groupsAndUserIds.addAll(user.getGroupsIds());
             }
-            formService.listForLinker(groupsAndUserIds, user, arrayResponseHandler(request));
+
+            formService.listForLinker(groupsAndUserIds, user)
+                .onSuccess(result -> renderJson(request, result))
+                .onFailure(err -> {
+                    log.error(err.getMessage());
+                    renderError(request);
+                });
         });
     }
 

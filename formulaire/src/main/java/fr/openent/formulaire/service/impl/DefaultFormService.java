@@ -79,22 +79,33 @@ public class DefaultFormService implements FormService {
     }
 
     @Override
-    public void listForLinker(List<String> groupsAndUserIds, UserInfos user, Handler<Either<String, JsonArray>> handler) {
+    public Future<JsonArray> listForLinker(List<String> groupsAndUserIds, UserInfos user) {
+        Promise<JsonArray> promise = Promise.promise();
+
+        JsonArray params = new JsonArray().add(false).add(true).add(true);
+
+        String checkGroupsAndUserIds = "";
+        if (groupsAndUserIds != null && groupsAndUserIds.size() > 0) {
+            checkGroupsAndUserIds =  "(fs.member_id IN " + Sql.listPrepared(groupsAndUserIds.toArray()) + " AND fs.action = ?) OR ";
+            for (String groupOrUser : groupsAndUserIds) {
+                params.add(groupOrUser);
+            }
+            params.add(MANAGER_RESOURCE_BEHAVIOUR);
+        }
+
         String query = "SELECT f.* FROM " + FORM_TABLE + " f " +
                 "LEFT JOIN " + FORM_SHARES_TABLE + " fs ON f.id = fs.resource_id " +
                 "LEFT JOIN " + MEMBERS_TABLE + " m ON (fs.member_id = m.id AND m.group_id IS NOT NULL) " +
-                "WHERE f.archived = ? AND f.sent = ? AND ((fs.member_id IN " + Sql.listPrepared(groupsAndUserIds.toArray()) +
-                " AND fs.action = ?) OR f.owner_id = ? )" +
+                "WHERE f.archived = ? AND (f.sent = ? OR f.is_public = ?) AND (" + checkGroupsAndUserIds + "f.owner_id = ?) " +
                 "GROUP BY f.id " +
                 "ORDER BY f.date_modification DESC;";
 
-        JsonArray params = new JsonArray().add(false).add(true);
-        for (String groupOrUser : groupsAndUserIds) {
-            params.add(groupOrUser);
-        }
-        params.add(MANAGER_RESOURCE_BEHAVIOUR).add(user.getUserId());
+        params.add(user.getUserId());
 
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+        String errorMessage = "[Formulaire@DefaultFormService::listForLinker] Fail to list forms for linker for user with id " + user.getUserId();
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(FutureHelper.handlerEither(promise, errorMessage)));
+
+        return promise.future();
     }
 
     @Override
