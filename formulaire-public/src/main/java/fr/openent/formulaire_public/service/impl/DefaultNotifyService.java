@@ -17,11 +17,13 @@ public class DefaultNotifyService implements NotifyService {
 
     @Override
     public void notifyResponse(HttpServerRequest request, JsonObject form, JsonArray managers) {
+        String formResultsUri = "/formulaire#/form/" + form.getInteger(ID) + "/results/1";
         JsonObject params = new JsonObject()
                 .put(PARAM_FORM_URI, "/formulaire#/form/" + form.getInteger(ID) + "/edit")
                 .put(PARAM_FORM_NAME, form.getString(TITLE))
-                .put(PARAM_FORM_RESULTS_URI, "/formulaire#/form/" + form.getInteger(ID) + "/results/1")
-                .put(PARAM_PUSH_NOTIF, new JsonObject().put(TITLE, "push.notif.formulaire.public.response").put(BODY, ""));
+                .put(PARAM_FORM_RESULTS_URI, formResultsUri)
+                .put(PARAM_PUSH_NOTIF, new JsonObject().put(TITLE, "push.notif.formulaire.public.response").put(BODY, ""))
+                .put(PARAM_RESOURCE_URI, formResultsUri);
 
         timelineHelper.notifyTimeline(request, "formulaire-public.response_notification", null, managers.getList(), params);
     }

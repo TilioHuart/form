@@ -46,12 +46,8 @@ public class DefaultNotifyService implements NotifyService {
                     .put(PARAM_PUSH_NOTIF, new JsonObject().put(TITLE, "push.notif.formulaire.newForm").put(BODY, ""))
                     .put(PARAM_RESOURCE_URI, formUri);
 
-            JsonObject mobileResource = new JsonObject()
-                    .put(ID, form.getInteger(ID).toString())
-                    .put(URI, formUri);
-
             timelineHelper.notifyTimeline(request, "formulaire.new_form_notification", user,
-                    responders.getList(), mobileResource.toString(), params);
+                    responders.getList(), params);
         });
     }
 
@@ -65,24 +61,19 @@ public class DefaultNotifyService implements NotifyService {
                 return;
             }
 
-            String formUri = "/formulaire#/form/" + form.getInteger(ID) + "/edit";
+            String formResultsUri = "/formulaire#/form/" + form.getInteger(ID) + "/results/1";
 
             JsonObject params = new JsonObject()
                     .put(ANONYMOUS, form.getBoolean(ANONYMOUS))
                     .put(PARAM_USER_ID, "/userbook/annuaire#" + user.getUserId())
                     .put(USERNAME, user.getUsername())
-                    .put(PARAM_FORM_URI, formUri)
+                    .put(PARAM_FORM_URI, "/formulaire#/form/" + form.getInteger(ID) + "/edit")
                     .put(PARAM_FORM_NAME, form.getString(TITLE))
-                    .put(PARAM_FORM_RESULTS_URI, "/formulaire#/form/" + form.getInteger(ID) + "/results/1")
+                    .put(PARAM_FORM_RESULTS_URI, formResultsUri)
                     .put(PARAM_PUSH_NOTIF, new JsonObject().put(TITLE, "push.notif.formulaire.response").put(BODY, ""))
-                    .put(PARAM_RESOURCE_URI, formUri);
+                    .put(PARAM_RESOURCE_URI, formResultsUri);
 
-            JsonObject mobileResource = new JsonObject()
-                    .put(ID, form.getInteger(ID).toString())
-                    .put(URI, formUri);
-
-            timelineHelper.notifyTimeline(request, "formulaire.response_notification", user,
-                    managers.getList(), mobileResource.toString(), params);
+            timelineHelper.notifyTimeline(request, "formulaire.response_notification", user, managers.getList(), params);
         });
     }
 }
