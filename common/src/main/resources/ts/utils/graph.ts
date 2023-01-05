@@ -284,6 +284,12 @@ export class GraphUtils {
                     animations: {
                         enabled: false
                     },
+                    toolbar: {
+                        show: false
+                    },
+                    zoom: {
+                        enabled: false
+                    }
                 },
                 colors: colors,
                 dataLabels: {
