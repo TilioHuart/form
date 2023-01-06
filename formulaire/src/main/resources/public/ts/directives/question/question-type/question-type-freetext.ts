@@ -1,12 +1,35 @@
-import {Directive, ng} from "entcore";
+import {ng} from "entcore";
 import {Question} from "@common/models";
+import {IScope} from "angular";
 
-interface IViewModel {
-    question: Question
+interface IQuestionTypeFreetextProps {
+    question: Question;
 }
 
-export const questionTypeFreetext: Directive = ng.directive('questionTypeFreetext', () => {
+interface IViewModel extends ng.IController, IQuestionTypeFreetextProps {
+    getHtmlDescription(description: string) : string;
+}
 
+interface IQuestionTypeFreetextScope extends IScope, IQuestionTypeFreetextProps {
+    vm: IViewModel;
+}
+
+class Controller implements IViewModel {
+    question: Question;
+
+    constructor(private $scope: IQuestionTypeFreetextScope, private $sce: ng.ISCEService) {}
+
+    $onInit = async (): Promise<void> => {}
+
+    $onDestroy = async (): Promise<void> => {}
+
+    getHtmlDescription = (description: string): string => {
+        return !!description ? this.$sce.trustAsHtml(description) : null;
+    }
+
+}
+
+function directive() {
     return {
         restrict: 'E',
         transclude: true,
@@ -18,7 +41,7 @@ export const questionTypeFreetext: Directive = ng.directive('questionTypeFreetex
         template: `
             <div>
                 <div ng-if="!vm.question.selected">
-                    <div ng-if="vm.question.statement" ng-bind-html="vm.question.statement"></div>
+                    <div ng-if="vm.question.statement" data-ng-bind-html="vm.getHtmlDescription(vm.question.statement)"></div>
                     <textarea disabled ng-if="!vm.question.statement" i18n-placeholder="formulaire.question.type.FREETEXT"></textarea>
                 </div>
                 <div ng-if="vm.question.selected">
@@ -26,12 +49,14 @@ export const questionTypeFreetext: Directive = ng.directive('questionTypeFreetex
                 </div>
             </div>
         `,
-
-        controller: async ($scope) => {
-            const vm: IViewModel = <IViewModel> this;
-        },
-        link: ($scope, $element) => {
-            const vm: IViewModel = $scope.vm;
+        controller: ['$scope', '$sce', Controller],
+        /* interaction DOM/element */
+        link: function ($scope: IQuestionTypeFreetextScope,
+                        element: ng.IAugmentedJQuery,
+                        attrs: ng.IAttributes,
+                        vm: IViewModel) {
         }
-    };
-});
+    }
+}
+
+export const questionTypeFreetext = ng.directive('questionTypeFreetext', directive);

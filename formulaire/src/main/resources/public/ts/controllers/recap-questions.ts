@@ -9,11 +9,10 @@ import {
     Section,
     Types,
     FormElement,
-    Response, QuestionChoice
+    Response
 } from "../models";
 import {distributionService, formElementService, responseFileService, responseService} from "../services";
 import {FORMULAIRE_BROADCAST_EVENT} from "@common/core/enums";
-import {Res} from "awesome-typescript-loader/dist/checker/protocol";
 
 interface ViewModel {
     formElements: FormElements;
@@ -27,15 +26,16 @@ interface ViewModel {
         }
     };
 
-    $onInit() : Promise<void>;
-    send() : Promise<void>;
-    doSend() : Promise<void>;
-    checkMultiEtab() : boolean;
-    getStructures() : string[];
+    $onInit(): Promise<void>;
+    send(): Promise<void>;
+    doSend(): Promise<void>;
+    checkMultiEtab(): boolean;
+    getStructures(): string[];
+    getHtmlDescription(statement: string): string;
 }
 
-export const recapQuestionsController = ng.controller('RecapQuestionsController', ['$scope',
-    function ($scope) {
+export const recapQuestionsController = ng.controller('RecapQuestionsController', ['$scope', '$sce',
+    function ($scope, $sce) {
 
     const vm: ViewModel = this;
     vm.formElements = new FormElements();
@@ -122,6 +122,10 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
     vm.getStructures = () : string[] => {
         return model.me.structureNames;
     };
+
+    vm.getHtmlDescription = (description: string) : string => {
+        return !!description ? $sce.trustAsHtml(description) : null;
+    }
 
     const checkMandatoryQuestions = async () : Promise<boolean> => {
         let mandatoryQuestions: Question[] = vm.formElements.getAllQuestions().all.filter((q: Question) => q.mandatory);

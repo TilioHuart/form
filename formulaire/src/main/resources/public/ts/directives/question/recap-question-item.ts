@@ -6,8 +6,8 @@ import {
     FormElements,
     Question,
     QuestionChoice,
-    Response,
-    Responses,
+    Response, ResponseFile,
+    Responses, Section,
     Types
 } from "../../models";
 import {FORMULAIRE_EMIT_EVENT} from "@common/core/enums";
@@ -22,13 +22,14 @@ interface IViewModel {
     Types: typeof Types;
     DistributionStatus: typeof DistributionStatus;
 
+    getHtmlDescription(description: string) : string;
     getStringResponse(): string;
     isSelectedChoice(choice: QuestionChoice, child?: Question) : boolean;
     getResponseFileNames() : string[];
     openQuestion(): void;
 }
 
-export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', () => {
+export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ['$sce', ($sce) => {
     return {
         restrict: 'E',
         transclude: true,
@@ -49,16 +50,16 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
                     </div>
                     <div class="question-main">
                         <div ng-if="vm.question.question_type == vm.Types.FREETEXT">
-                            <div ng-if="vm.question.statement" ng-bind-html="vm.question.statement"></div>
+                            <div ng-if="vm.question.statement" data-ng-bind-html="vm.getHtmlDescription(vm.question.statement)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.SHORTANSWER">
-                            <div ng-bind-html="vm.getStringResponse(vm.question)"></div>
+                            <div data-ng-bind-html="vm.getStringResponse(vm.question)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.LONGANSWER">
-                            <div ng-bind-html="vm.getStringResponse(vm.question)"></div>
+                            <div data-ng-bind-html="vm.getStringResponse(vm.question)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.SINGLEANSWER">
-                            <div ng-bind-html="vm.getStringResponse(vm.question)"></div>
+                            <div data-ng-bind-html="vm.getStringResponse(vm.question)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER">
                             <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
@@ -71,14 +72,14 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
                             </div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.DATE">
-                            <div ng-bind-html="vm.getStringResponse(vm.question)"></div>
+                            <div data-ng-bind-html="vm.getStringResponse(vm.question)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.TIME">
-                            <div ng-bind-html="vm.getStringResponse(vm.question)"></div>
+                            <div data-ng-bind-html="vm.getStringResponse(vm.question)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.FILE">
                             <div ng-repeat="filename in vm.getResponseFileNames()">
-                                <span ng-bind-html="[[filename]]"></span>
+                                <span data-ng-bind-html="vm.getHtmlDescription(filename)"></span>
                             </div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.SINGLEANSWERRADIO">
@@ -121,7 +122,7 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
         controller: function ($scope) {
             const vm: IViewModel = <IViewModel> this;
         },
-        link: function ($scope, $element) {
+        link: function ($scope, $sce) {
             const vm: IViewModel = $scope.vm;
             vm.Types = Types;
             vm.DistributionStatus = DistributionStatus;
@@ -129,13 +130,17 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
 
             // Display helper functions
 
+            vm.getHtmlDescription = (description: string) : string => {
+                return !!description ? $sce.trustAsHtml(description) : null;
+            }
+
             vm.getStringResponse = () : string => {
-                let responses = vm.responses.all.filter(r => r.question_id === vm.question.id);
+                let responses: Response[] = vm.responses.all.filter((r:Response) => r.question_id === vm.question.id);
                 if (responses && responses.length > 0) {
-                    let answer = responses[0].answer.toString();
+                    let answer: string = responses[0].answer.toString();
                     return answer ? answer : missingResponse;
                 }
-                return missingResponse;
+                return vm.getHtmlDescription(missingResponse);
             };
 
             vm.isSelectedChoice = (choice, child?) : boolean => {
@@ -146,9 +151,9 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
             };
 
             vm.getResponseFileNames = () : string[] => {
-                let responses = vm.responses.all.filter(r => r.question_id === vm.question.id);
+                let responses: Response[] = vm.responses.all.filter((r: Response) => r.question_id === vm.question.id);
                 if (responses && responses.length === 1 && responses[0].files.all.length > 0) {
-                    return responses[0].files.all.map(rf => rf.filename.substring(rf.filename.indexOf("_") + 1));
+                    return responses[0].files.all.map((rf: ResponseFile) => rf.filename.substring(rf.filename.indexOf("_") + 1));
                 }
                 else {
                     return [missingResponse];
@@ -156,13 +161,13 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
             };
 
             vm.openQuestion = () : void => {
-                let formElementPosition = vm.question.position;
+                let formElementPosition: number = vm.question.position;
                 if (!vm.question.position) {
-                    let sections = vm.formElements.getSections().all.filter(s => s.id === vm.question.section_id);
+                    let sections: Section[] = vm.formElements.getSections().all.filter((s: Section) => s.id === vm.question.section_id);
                     formElementPosition = sections.length === 1 ? sections[0].position : null;
                 }
-                let newHistoric = vm.historicPosition.slice(0, vm.historicPosition.indexOf(formElementPosition) + 1);
-                let data = {
+                let newHistoric: number[] = vm.historicPosition.slice(0, vm.historicPosition.indexOf(formElementPosition) + 1);
+                let data: any = {
                     path: `/form/${vm.form.id}/${vm.distribution.id}`,
                     position: formElementPosition,
                     historicPosition: newHistoric
@@ -171,4 +176,4 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ()
             };
         }
     };
-});
+}]);

@@ -91,11 +91,12 @@ interface ViewModel {
     backToEditor() : void;
     prev() : void;
     next() : void;
+    getHtmlDescription(description: string) : string;
 }
 
 
-export const formEditorController = ng.controller('FormEditorController', ['$scope',
-    function ($scope) {
+export const formEditorController = ng.controller('FormEditorController', ['$scope', '$sce',
+    function ($scope, $sce) {
 
         const vm: ViewModel = this;
         vm.form = new Form();
@@ -652,6 +653,10 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             $scope.safeApply();
         };
 
+        vm.getHtmlDescription = (description: string) : string => {
+            return !!description ? $sce.trustAsHtml(description) : null;
+        }
+
         // Utils
 
         const initNestedSortables = () : void => {
@@ -815,7 +820,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         const isInDontSave = (el) : boolean => {
             if (!el) { return false; }
-            else if (el.classList && el.classList.contains("dontSave")) { return true; }
+            else if (el.classList && el.classList.contains("dontSave") || el.tagName === "LIGHTBOX") { return true; }
             return isInDontSave(el.parentNode);
         };
 

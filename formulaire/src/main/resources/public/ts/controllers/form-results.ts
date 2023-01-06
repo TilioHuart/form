@@ -39,11 +39,12 @@ interface ViewModel {
     next() : Promise<void>;
     goTo(position: number) : Promise<void>;
     getGraphQuestions() : Question[];
+    getHtmlDescription(description: string): string;
 }
 
 
-export const formResultsController = ng.controller('FormResultsController', ['$scope',
-    function ($scope) {
+export const formResultsController = ng.controller('FormResultsController', ['$scope', '$sce',
+    function ($scope, $sce) {
 
         const vm: ViewModel = this;
         vm.formElements = new FormElements();
@@ -126,6 +127,10 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
         vm.getGraphQuestions = () : Question[] => {
             return vm.formElements.getAllQuestions().all.filter((q: Question) => q.isTypeGraphQuestion());
         };
+
+        vm.getHtmlDescription = (description: string) : string => {
+            return !!description ? $sce.trustAsHtml(description) : null;
+        }
 
         // Navigation
 

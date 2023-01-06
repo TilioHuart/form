@@ -24,9 +24,10 @@ interface IViewModel {
     I18n: I18nUtils;
 
     $onInit() : Promise<void>;
+    getHtmlDescription(description: string) : string;
 }
 
-export const respondQuestionItem: Directive = ng.directive('respondQuestionItem', () => {
+export const respondQuestionItem: Directive = ng.directive('respondQuestionItem', ['$sce', ($sce) => {
     return {
         restrict: 'E',
         transclude: true,
@@ -47,7 +48,7 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                 </div>
                 <div class="question-main">
                     <div ng-if="vm.question.question_type == vm.Types.FREETEXT">
-                        <div ng-if="vm.question.statement" ng-bind-html="vm.question.statement"></div>
+                        <div ng-if="vm.question.statement" data-ng-bind-html="vm.getHtmlDescription(vm.question.statement)"></div>
                     </div>
                     <div ng-if="vm.question.question_type == vm.Types.SHORTANSWER">
                         <textarea ng-model="vm.response.answer" i18n-placeholder="[[vm.question.placeholder]]" input-guard></textarea>
@@ -96,7 +97,7 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                 vm.files = [];
                 vm.responsesChoices = new Responses();
                 vm.question.choices = new QuestionChoices();
-                
+
                 if (vm.question.question_type === Types.MULTIPLEANSWER
                     || vm.question.question_type === Types.SINGLEANSWER
                     || vm.question.question_type === Types.SINGLEANSWERRADIO) {
@@ -107,8 +108,8 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                     await vm.responsesChoices.syncMine(vm.question.id, vm.distribution.id);
                     vm.selectedIndex = new Array<boolean>(vm.question.choices.all.length);
                     for (let i = 0; i < vm.selectedIndex.length; i++) {
-                        let check = false;
-                        let j = 0;
+                        let check: boolean = false;
+                        let j: number = 0;
                         while (!check && j < vm.responsesChoices.all.length) {
                             check = vm.question.choices.all[i].id === vm.responsesChoices.all[j].choice_id;
                             j++;
@@ -118,24 +119,23 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                 }
                 else if (vm.distribution) {
                     vm.response = new Response();
-                    let responses = await responseService.listMineByDistribution(vm.question.id, vm.distribution.id);
+                    let responses: any = await responseService.listMineByDistribution(vm.question.id, vm.distribution.id);
                     if (responses.length > 0) {
                         vm.response = Mix.castAs(Response, responses[0]);
                     }
                     if (!vm.response.question_id) { vm.response.question_id = vm.question.id; }
                     if (!vm.response.distribution_id) { vm.response.distribution_id = vm.distribution.id; }
-                    console.log("response for ", vm.question, " : ", vm.response);
                     $scope.$apply();
                 }
                 if (vm.question.question_type === Types.TIME) { formatTime() }
                 if (vm.question.question_type === Types.FILE) {
                     vm.files = [];
                     if (vm.response.id) {
-                        let responseFiles = new ResponseFiles();
+                        let responseFiles: ResponseFiles = new ResponseFiles();
                         await responseFiles.sync(vm.response.id);
                         for (let repFile of responseFiles.all) {
                             if (repFile.id)  {
-                                let file = new File([repFile.id], repFile.filename);
+                                let file: File = new File([repFile.id], repFile.filename);
                                 vm.files.push(file);
                             }
                         }
@@ -150,12 +150,16 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                 }
             };
         },
-        link: function ($scope, $element) {
+        link: function ($scope) {
             const vm: IViewModel = $scope.vm;
             vm.Types = Types;
             vm.I18n = I18nUtils;
 
+            vm.getHtmlDescription = (description: string) : string => {
+                return !!description ? $sce.trustAsHtml(description) : null;
+            }
+
             $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.REFRESH_QUESTION, () => { vm.$onInit(); });
         }
     };
-});
+}]);

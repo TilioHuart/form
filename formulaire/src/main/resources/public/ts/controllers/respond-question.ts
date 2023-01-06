@@ -5,7 +5,7 @@ import {
     FormElement,
     FormElements,
     Question,
-    QuestionChoice, QuestionChoices,
+    QuestionChoice,
     Response,
     Responses,
     Section,
@@ -34,10 +34,11 @@ interface ViewModel {
     nextGuard() : void;
     saveAndQuit() : Promise<void>;
     saveAndQuitGuard() : void;
+    getHtmlDescription(description: string) : string;
 }
 
-export const respondQuestionController = ng.controller('RespondQuestionController', ['$scope',
-    function ($scope) {
+export const respondQuestionController = ng.controller('RespondQuestionController', ['$scope', '$sce',
+    function ($scope, $sce) {
 
     const vm: ViewModel = this;
     vm.formElements = new FormElements();
@@ -164,6 +165,10 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
     vm.saveAndQuitGuard = () => {
         vm.saveAndQuit().then();
     };
+
+    vm.getHtmlDescription = (description: string) : string => {
+        return !!description ? $sce.trustAsHtml(description) : null;
+    }
 
     const saveResponses = async () : Promise<boolean> => {
         let isSavingOk: boolean = false;

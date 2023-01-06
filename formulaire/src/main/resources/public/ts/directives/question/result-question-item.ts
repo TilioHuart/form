@@ -3,7 +3,7 @@ import {
     Distributions,
     DistributionStatus,
     Form,
-    Question,
+    Question, QuestionChoice,
     Response,
     Responses,
     Types
@@ -32,6 +32,7 @@ interface IViewModel {
     DateUtils: DateUtils;
 
     $onInit() : Promise<void>;
+    getHtmlDescription(description: string) : string;
     syncResultsMap() : void;
     downloadFile(fileId: number) : void;
     zipAndDownload() : void;
@@ -42,7 +43,7 @@ interface IViewModel {
     loadMoreResults() : Promise<void>;
 }
 
-export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', () => {
+export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', ['$sce', ($sce) => {
     return {
         restrict: 'E',
         transclude: true,
@@ -70,7 +71,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
             </div>
 
             <!-- List of results FREETEXT -->
-            <div ng-if="vm.question.question_type == vm.Types.FREETEXT" class="freetext" ng-bind-html="vm.question.statement"></div>
+            <div ng-if="vm.question.question_type == vm.Types.FREETEXT" class="freetext" data-ng-bind-html="vm.getHtmlDescription(vm.question.statement)"></div>
 
             <!-- List of results SINGLEANSWER, MULTIPLEANSWER, SINGLEANSWERRADIO -->
             <div class="choices" ng-if="vm.question.question_type == vm.Types.SINGLEANSWER ||
@@ -132,7 +133,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                                         vm.question.question_type == vm.Types.DATE ||
                                         vm.question.question_type == vm.Types.TIME ||
                                         (vm.question.question_type == vm.Types.FILE && result.files.all.length <= 0)"
-                                 ng-bind-html="result.answer"></div>
+                                 data-ng-bind-html="vm.getHtmlDescription(result.answer)"></div>
                             <div ng-repeat="file in result.files.all" ng-if="vm.question.question_type == vm.Types.FILE">
                                 <a ng-if="file.id" ng-click="vm.downloadFile(file.id)">
                                     <i class="i-download lg-icon spaced-right"></i> [[file.filename]]
@@ -192,11 +193,15 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                 }
             };
         },
-        link: function ($scope, $element) {
+        link: function ($scope) {
             const vm: IViewModel = $scope.vm;
             vm.Types = Types;
             vm.DistributionStatus = DistributionStatus;
             vm.DateUtils = DateUtils;
+
+            vm.getHtmlDescription = (description: string) : string => {
+                return !!description ? $sce.trustAsHtml(description) : null;
+            }
 
             vm.syncResultsMap = () : void => {
                 vm.results = new Map();
@@ -216,17 +221,17 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
             };
 
             vm.getWidth = (nbResponses: number, divisor: number) : number => {
-                let width = nbResponses / (vm.distributions.all.length > 0 ? vm.distributions.all.length : 1) * divisor;
+                let width: number = nbResponses / (vm.distributions.all.length > 0 ? vm.distributions.all.length : 1) * divisor;
                 return width < 0 ? 0 : (width > divisor ? divisor : width);
             }
 
             vm.getColor = (choiceId: number) : string => {
-                let colorIndex = vm.question.choices.all.filter(c => c.nbResponses > 0).findIndex(c => c.id === choiceId);
+                let colorIndex: number = vm.question.choices.all.filter((c: QuestionChoice) => c.nbResponses > 0).findIndex(c => c.id === choiceId);
                 return colorIndex >= 0 ? vm.colors[colorIndex] : '#fff';
             };
 
             vm.formatAnswers = (distribId: number) : any => {
-                let results =  vm.responses.all.filter(r => r.distribution_id === distribId);
+                let results: Response[] =  vm.responses.all.filter((r: Response) => r.distribution_id === distribId);
                 for (let result of results) {
                     if (result.answer == "" || (vm.question.question_type === Types.FILE && result.files.all.length <= 0)) {
                         result.answer = "-";
@@ -250,4 +255,4 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
             $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.REFRESH_QUESTION, () => { vm.$onInit(); });
         }
     };
-});
+}]);

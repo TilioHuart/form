@@ -28,7 +28,7 @@
                     <div class="section-top">
                         <div class="title"><h4>[[formElement.title]]</h4></div>
                         <div class="description" ng-if="formElement.description">
-                            <div ng-bind-html="formElement.description"></div>
+                            <div data-ng-bind-html="vm.getHtmlDescription(formElement.description)"></div>
                         </div>
                     </div>
                     <div class="section-main">

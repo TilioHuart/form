@@ -4,7 +4,7 @@ import {
 	FormElement,
 	FormElements,
 	Question,
-	QuestionChoice, Questions,
+	QuestionChoice,
 	Response,
 	Responses,
 	Section,
@@ -28,10 +28,11 @@ interface ViewModel {
 	$onInit(): Promise<void>;
 	prev() : void;
 	next() : void;
+	getHtmlDescription(description: string) : string;
 }
 
-export const respondQuestionController = ng.controller('RespondQuestionController', ['$scope',
-	function ($scope) {
+export const respondQuestionController = ng.controller('RespondQuestionController', ['$scope', '$sce',
+	function ($scope, $sce) {
 
 	const vm: ViewModel = this;
 	vm.form = new Form();
@@ -71,6 +72,10 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 			template.open('main', 'containers/recap');
 		}
 	};
+
+	vm.getHtmlDescription = (description: string) : string => {
+		return !!description ? $sce.trustAsHtml(description) : null;
+	}
 
 	// Utils
 

@@ -1,5 +1,5 @@
 import {Directive, idiom, ng} from "entcore";
-import {FormElements, Section, Types} from "../../models";
+import {FormElements, Question, Section, Types} from "../../models";
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
 
 interface IViewModel {
@@ -9,6 +9,7 @@ interface IViewModel {
     types: typeof Types;
     formElements: FormElements;
 
+    getHtmlDescription(description: string) : string;
     getTitle(title: string): string;
     editSection(): void;
     deleteSection(): void;
@@ -21,8 +22,7 @@ interface IViewModel {
     hasMultipleConditionals() : boolean;
 }
 
-export const sectionItem: Directive = ng.directive('sectionItem', () => {
-
+export const sectionItem: Directive = ng.directive('sectionItem', ['$sce', ($sce) => {
     return {
         restrict: 'E',
         transclude: true,
@@ -76,7 +76,7 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
                         <!-- Description -->
                         <div class="description row">
                             <div ng-if="!vm.section.selected">
-                                <div ng-if="vm.section.description" ng-bind-html="vm.section.description"></div>
+                                <div ng-if="vm.section.description" data-ng-bind-html="vm.getHtmlDescription(vm.section.description)"></div>
                                 <div ng-if="!vm.section.description" class="nodescription"><i18n>formulaire.section.no.description</i18n></div>
                             </div>
                             <div class="dontSave" ng-if="vm.section.selected">
@@ -119,9 +119,13 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
         controller: function ($scope) {
             const vm: IViewModel = <IViewModel> this;
         },
-        link: function ($scope, $element) {
+        link: function ($scope) {
             const vm: IViewModel = $scope.vm;
             vm.types = Types;
+
+            vm.getHtmlDescription = (description: string) : string => {
+                return !!description ? $sce.trustAsHtml(description) : null;
+            }
 
             vm.getTitle = (title: string) : string => {
                 return idiom.translate('formulaire.' + title);
@@ -138,7 +142,7 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
             };
 
             vm.isOtherElementSelected = () : boolean => {
-                let hasSelectedChild: boolean = vm.section.questions.all.filter(q => q.selected).length > 0;
+                let hasSelectedChild: boolean = vm.section.questions.all.filter((q: Question) => q.selected).length > 0;
                 let hasSiblingChild: boolean = vm.formElements.hasSelectedElement() && vm.formElements.getSelectedElement().id != vm.section.id;
                 return hasSelectedChild || hasSiblingChild;
             };
@@ -162,8 +166,8 @@ export const sectionItem: Directive = ng.directive('sectionItem', () => {
             }
 
             vm.hasMultipleConditionals = (): boolean => {
-                return vm.section.questions.all.filter(q =>q.conditional).length > 1;
+                return vm.section.questions.all.filter((q: Question) =>q.conditional).length > 1;
             }
         }
     };
-});
+}]);

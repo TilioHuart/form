@@ -5,7 +5,7 @@ import {
     Question,
     QuestionChoice,
     Response,
-    Responses,
+    Responses, Section,
     Types
 } from "@common/models";
 
@@ -17,12 +17,13 @@ interface IViewModel {
     historicPosition: number[];
     Types: typeof Types;
 
+    getHtmlDescription(description: string) : string;
     getStringResponse(): string;
     isSelectedChoice(choice: QuestionChoice, child?: Question) : boolean;
     openQuestion(): void;
 }
 
-export const publicRecapQuestionItem: Directive = ng.directive('publicRecapQuestionItem', () => {
+export const publicRecapQuestionItem: Directive = ng.directive('publicRecapQuestionItem', ['$sce', ($sce) => {
     return {
         restrict: 'E',
         transclude: true,
@@ -42,16 +43,16 @@ export const publicRecapQuestionItem: Directive = ng.directive('publicRecapQuest
                     </div>
                     <div class="question-main">
                         <div ng-if="vm.question.question_type == vm.Types.FREETEXT">
-                            <div ng-if="vm.question.statement" ng-bind-html="vm.question.statement"></div>
+                            <div ng-if="vm.question.statement" data-ng-bind-html="vm.getHtmlDescription(vm.question.statement)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.SHORTANSWER">
-                            <div ng-bind-html="vm.getStringResponse(vm.question)"></div>
+                            <div data-ng-bind-html="vm.getStringResponse(vm.question)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.LONGANSWER">
-                            <div ng-bind-html="vm.getStringResponse(vm.question)"></div>
+                            <div data-ng-bind-html="vm.getStringResponse(vm.question)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.SINGLEANSWER">
-                            <div ng-bind-html="vm.getStringResponse(vm.question)"></div>
+                            <div data-ng-bind-html="vm.getStringResponse(vm.question)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER">
                             <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
@@ -64,10 +65,10 @@ export const publicRecapQuestionItem: Directive = ng.directive('publicRecapQuest
                             </div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.DATE">
-                            <div ng-bind-html="vm.getStringResponse(vm.question)"></div>
+                            <div data-ng-bind-html="vm.getStringResponse(vm.question)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.TIME">
-                            <div ng-bind-html="vm.getStringResponse(vm.question)"></div>
+                            <div data-ng-bind-html="vm.getStringResponse(vm.question)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.SINGLEANSWERRADIO">
                             <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
@@ -109,20 +110,24 @@ export const publicRecapQuestionItem: Directive = ng.directive('publicRecapQuest
         controller: function ($scope) {
             const vm: IViewModel = <IViewModel> this;
         },
-        link: function ($scope, $element) {
+        link: function ($scope) {
             const vm: IViewModel = $scope.vm;
             vm.Types = Types;
             let missingResponse = "<em>" + idiom.translate('formulaire.public.response.missing') + "</em>";
 
             // Display helper functions
 
+            vm.getHtmlDescription = (description: string) : string => {
+                return !!description ? $sce.trustAsHtml(description) : null;
+            }
+
             vm.getStringResponse = () : string => {
-                let responses = vm.responses.all.filter(r => r.question_id === vm.question.id);
+                let responses: Response[] = vm.responses.all.filter((r: Response) => r.question_id === vm.question.id);
                 if (responses && responses.length > 0) {
-                    let answer = responses[0].answer.toString();
+                    let answer: string = responses[0].answer.toString();
                     return answer ? answer : missingResponse;
                 }
-                return missingResponse;
+                return vm.getHtmlDescription(missingResponse);
             };
 
             vm.isSelectedChoice = (choice, child?) : boolean => {
@@ -133,9 +138,9 @@ export const publicRecapQuestionItem: Directive = ng.directive('publicRecapQuest
             };
 
             vm.openQuestion = () : void => {
-                let formElementPosition = vm.question.position;
+                let formElementPosition: number = vm.question.position;
                 if (!vm.question.position) {
-                    let sections = vm.formElements.getSections().all.filter(s => s.id === vm.question.section_id);
+                    let sections: Section[] = vm.formElements.getSections().all.filter((s: Section) => s.id === vm.question.section_id);
                     formElementPosition = sections.length === 1 ? sections[0].position : null;
                 }
                 vm.historicPosition = vm.historicPosition.slice(0, vm.historicPosition.indexOf(formElementPosition) + 1);
@@ -144,4 +149,4 @@ export const publicRecapQuestionItem: Directive = ng.directive('publicRecapQuest
             };
         }
     };
-});
+}]);
