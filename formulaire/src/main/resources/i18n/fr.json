@@ -87,6 +87,7 @@
   "formulaire.archive.zip.name": "Fichiers déposés",
   "formulaire.response.average": "Moyenne des réponses",
   "formulaire.nb.responses": "Nombre de réponses",
+  "formulaire.selected.value": "Valeur sélectionnée : ",
 
   "formulaire.prop.public.label": "Créer un formulaire public",
   "formulaire.prop.public.description": "Un formulaire public est anonyme et doit impérativement comporter une date de fin.",

@@ -98,7 +98,8 @@ export const publicRecapQuestionItem: Directive = ng.directive('publicRecapQuest
                             </tbody>
                         </table>
                         <div ng-if="vm.question.question_type == vm.Types.CURSOR">
-                            <div ng-bind-html="vm.getStringResponse(vm.question)"></div>
+                            <span><i18n>formulaire.selected.value</i18n></span>
+                            <span ng-bind-html="vm.getStringResponse(vm.question)"></span>
                         </div>
                     </div>
                     <div class="question-edit" ng-if="vm.question.question_type != vm.Types.FREETEXT">
