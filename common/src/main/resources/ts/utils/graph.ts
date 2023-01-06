@@ -138,7 +138,7 @@ export class GraphUtils {
             GraphUtils.generateOptions(question.question_type, colors, labels,
             '100%', '100%', null, cursorAverage);
 
-        newPDFOptions.series = [{ name: lang.translate('formulaire.response.average'), data: Array.from(map.values()) }];
+        newPDFOptions.series = [{ name: lang.translate('formulaire.nb.responses'), data: Array.from(map.values()) }];
 
         await GraphUtils.renderChartForResult(newPDFOptions, charts, question, isExportPDF);
     }

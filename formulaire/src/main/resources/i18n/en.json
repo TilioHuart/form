@@ -86,6 +86,7 @@
   "formulaire.copy": "Copie",
   "formulaire.archive.zip.name": "Fichiers déposés",
   "formulaire.response.average": "Average response",
+  "formulaire.nb.responses": "Responses' number",
 
   "formulaire.prop.public.label": "Créer un formulaire public",
   "formulaire.prop.public.description": "Un formulaire public est anonyme et doit impérativement comporter une date de fin.",
@@ -113,7 +114,6 @@
   "formulaire.checkremind.name": "Utilisateurs auxquels a été envoyé le formulaire ",
   "formulaire.checkremind.table.name": "Nom",
   "formulaire.checkremind.table.surname": "Prenom",
-  "formulaire.checkremind.table.nbResponses": "Nombre de réponses",
   "formulaire.remind.title": "Envoyer un rappel",
   "formulaire.remind.description.multipleTrue": "Le message de rappel va être transmis à tous les utilisateurs à qui le formulaire a été envoyé.",
   "formulaire.remind.description.multipleFalse": "Le message de rappel va être transmis à tous les utilisateurs qui n'ont pas encore répondu au formulaire.",
