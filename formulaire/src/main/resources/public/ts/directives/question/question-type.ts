@@ -74,7 +74,8 @@ export const questionType: Directive = ng.directive('questionType', () => {
                 </question-type-matrix>
                 <!-- CURSOR -->
                 <question-type-cursor ng-if="vm.question.question_type == vm.types.CURSOR"
-                                      question="vm.question">
+                                      question="vm.question"
+                                      has-form-responses="vm.hasFormResponses">
                 </question-type-cursor>
             </div>
         `,
