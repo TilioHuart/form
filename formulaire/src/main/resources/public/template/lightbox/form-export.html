@@ -5,7 +5,7 @@
     <div ng-if="vm.display.loading.export" class="twelve loader">
         <loader min-height="'10px'"/>
     </div>
-    <div class="action-buttons">
+    <div ng-if="!vm.display.loading.export" class="action-buttons">
         <button class="cell cancel" ng-click="vm.closeExportForms()"><i18n>formulaire.close</i18n></button>
         <button class="cell" ng-click="vm.doExportForms()"><i18n>formulaire.export</i18n></button>
     </div>
