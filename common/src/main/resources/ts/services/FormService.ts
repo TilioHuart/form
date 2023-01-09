@@ -3,6 +3,7 @@ import http from 'axios';
 import {Form} from '../models';
 import {DataUtils} from "../utils";
 import {Exports} from "../core/enums";
+import {DateFormats} from "@common/core/constants";
 
 export interface FormService {
     list() : Promise<any>;
@@ -64,10 +65,10 @@ export const formService: FormService = {
 
     async save(form: Form) : Promise<any> {
         if (form.date_opening != null) {
-            form.date_opening = moment(form.date_opening.setHours(0,0,0,0));
+            form.date_opening = moment(form.date_opening.setHours(0,0,0,0)).format(DateFormats.YYYY_MM_DD_T_HH_mm_ss);
         }
         if (form.date_ending != null) {
-            form.date_ending = moment(form.date_ending.setHours(23,59,59,999));
+            form.date_ending = moment(form.date_ending.setHours(23,59,59,999)).format(DateFormats.YYYY_MM_DD_T_HH_mm_ss);
         }
         return form.id ? await this.update(form) : await this.create(form);
     },
