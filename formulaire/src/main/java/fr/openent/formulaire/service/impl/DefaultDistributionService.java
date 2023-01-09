@@ -1,5 +1,6 @@
 package fr.openent.formulaire.service.impl;
 
+import fr.openent.formulaire.cron.NotifyCron;
 import fr.openent.formulaire.helpers.FutureHelper;
 import fr.openent.formulaire.service.DistributionService;
 import fr.wseduc.webutils.Either;
@@ -8,6 +9,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.sql.SqlStatementsBuilder;
@@ -18,9 +21,11 @@ import java.util.List;
 import static fr.openent.form.core.constants.Constants.NB_NEW_LINES;
 import static fr.openent.form.core.constants.DistributionStatus.*;
 import static fr.openent.form.core.constants.Fields.*;
+import static fr.openent.form.core.constants.ShareRights.MANAGER_RESOURCE_BEHAVIOUR;
 import static fr.openent.form.core.constants.Tables.*;
 
 public class DefaultDistributionService implements DistributionService {
+    private static final Logger log = LoggerFactory.getLogger(DefaultDistributionService.class);
     private final Sql sql = Sql.getInstance();
 
     @Override
@@ -45,6 +50,26 @@ public class DefaultDistributionService implements DistributionService {
                 "ORDER BY date_sending DESC;";
         JsonArray params = new JsonArray().add(formId).add(true);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public Future<JsonArray> listByForms(JsonArray formIds) {
+        Promise<JsonArray> promise = Promise.promise();
+
+        if (formIds == null || formIds.size() <= 0) {
+            String errorMessage = "[Formulaire@DefaultDistributionService::listByForms] formIds is null or empty";
+            log.warn(errorMessage);
+            return Future.succeededFuture(new JsonArray());
+        }
+
+        String query = "SELECT * FROM " + DISTRIBUTION_TABLE + " WHERE form_id IN " + Sql.listPrepared(formIds) + ";";
+        JsonArray params = new JsonArray().addAll(formIds);
+
+        String errorMessage = "[Formulaire@DefaultDistributionService::listByForms] " +
+                "Failed to list distributions with form ids in " + formIds;
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(FutureHelper.handlerEither(promise, errorMessage)));
+
+        return promise.future();
     }
 
     public void listByFormAndResponder(String formId, UserInfos user, Handler<Either<String, JsonArray>> handler) {

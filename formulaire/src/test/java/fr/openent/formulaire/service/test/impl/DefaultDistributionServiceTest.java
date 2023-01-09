@@ -8,15 +8,18 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.entcore.common.sql.Sql;
+import org.entcore.common.user.UserInfos;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static fr.openent.form.core.constants.Constants.NB_NEW_LINES;
 import static fr.openent.form.core.constants.EbFields.FORMULAIRE_ADDRESS;
 import static fr.openent.form.core.constants.Fields.*;
-import static fr.openent.form.core.constants.Tables.DISTRIBUTION_TABLE;
-import static fr.openent.form.core.constants.Tables.RESPONSE_TABLE;
+import static fr.openent.form.core.constants.Tables.*;
 
 @RunWith(VertxUnitRunner.class)
 public class DefaultDistributionServiceTest {
@@ -28,6 +31,45 @@ public class DefaultDistributionServiceTest {
         vertx = Vertx.vertx();
         defaultDistributionService = new DefaultDistributionService();
         Sql.getInstance().init(vertx.eventBus(), FORMULAIRE_ADDRESS);
+    }
+
+    @Test
+    public void testListByForms(TestContext ctx) {
+        Async async = ctx.async();
+        JsonArray formIds = new JsonArray().add(1);
+
+        String expectedQuery = "SELECT * FROM " + DISTRIBUTION_TABLE + " WHERE form_id IN " + Sql.listPrepared(formIds) + ";";
+        JsonArray expectedParams = new JsonArray().addAll(formIds);
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getString(STATEMENT));
+            ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
+            async.complete();
+        });
+
+        defaultDistributionService.listByForms(formIds)
+                .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
+    }
+
+    @Test
+    public void testListByForms_NullOrEmptyFormIds(TestContext ctx) {
+        Async async = ctx.async();
+        JsonArray formIds = new JsonArray();
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            async.complete();
+        });
+
+        defaultDistributionService.listByForms(formIds)
+                .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
     }
 
     @Test

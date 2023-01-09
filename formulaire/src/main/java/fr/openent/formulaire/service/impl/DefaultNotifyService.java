@@ -3,12 +3,14 @@ package fr.openent.formulaire.service.impl;
 import fr.openent.formulaire.service.NotifyService;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
+import org.entcore.common.http.request.JsonHttpServerRequest;
 import org.entcore.common.notification.TimelineHelper;
 
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 
 import static fr.openent.form.core.constants.Fields.*;
@@ -35,20 +37,30 @@ public class DefaultNotifyService implements NotifyService {
                 return;
             }
 
-            String endPath = form.getBoolean(RGPD) ? RGPD : NEW;
-            String formUri = "/formulaire#/form/" + form.getInteger(ID) + "/" + endPath;
-
-            JsonObject params = new JsonObject()
-                    .put(PARAM_USER_ID, "/userbook/annuaire#" + user.getUserId())
-                    .put(USERNAME, user.getUsername())
-                    .put(PARAM_FORM_URI, formUri)
-                    .put(PARAM_FORM_NAME, form.getString(TITLE))
-                    .put(PARAM_PUSH_NOTIF, new JsonObject().put(TITLE, "push.notif.formulaire.newForm").put(BODY, ""))
-                    .put(PARAM_RESOURCE_URI, formUri);
-
-            timelineHelper.notifyTimeline(request, "formulaire.new_form_notification", user,
-                    responders.getList(), params);
+            notifyNewFormMain(request, form, responders, user);
         });
+    }
+
+    @Override
+    public void notifyNewFormFromCRON(JsonObject form, JsonArray responders) {
+        HttpServerRequest request = new JsonHttpServerRequest(new JsonObject());
+        UserInfos user = new UserInfos();
+        notifyNewFormMain(request, form, responders, user);
+    }
+
+    private void notifyNewFormMain(HttpServerRequest request, JsonObject form, JsonArray responders, UserInfos user) {
+        String endPath = form.getBoolean(RGPD) ? RGPD : NEW;
+        String formUri = "/formulaire#/form/" + form.getInteger(ID) + "/" + endPath;
+
+        JsonObject params = new JsonObject()
+                .put(PARAM_USER_ID, "/userbook/annuaire#" + user.getUserId())
+                .put(USERNAME, user.getUsername())
+                .put(PARAM_FORM_URI, formUri)
+                .put(PARAM_FORM_NAME, form.getString(TITLE))
+                .put(PARAM_PUSH_NOTIF, new JsonObject().put(TITLE, "push.notif.formulaire.newForm").put(BODY, ""))
+                .put(PARAM_RESOURCE_URI, formUri);
+
+        timelineHelper.notifyTimeline(request, "formulaire.new_form_notification", user, responders.getList(), params);
     }
 
     @Override

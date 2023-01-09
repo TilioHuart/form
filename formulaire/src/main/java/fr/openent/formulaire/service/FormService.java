@@ -54,6 +54,11 @@ public interface FormService {
     void listManagers(String formId, Handler<Either<String, JsonArray>> handler);
 
     /**
+     * List all sent forms opening today
+     */
+    Future<JsonArray> listSentFormsOpeningToday();
+
+    /**
      * Get a specific form by id
      * @param formId form identifier
      * @param user user connected

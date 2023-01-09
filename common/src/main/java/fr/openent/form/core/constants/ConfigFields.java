@@ -2,6 +2,7 @@ package fr.openent.form.core.constants;
 
 public class ConfigFields {
     public static final String ZIMBRA_MAX_RECIPIENTS = "zimbra-max-recipients";
+    public static final String NOTIFY_CRON = "notify-cron";
     public static final String RGPD_CRON = "rgpd-cron";
     public static final String MAX_RESPONSE_EXPORT_PDF = "max-responses-export-PDF";
     public static final String MAX_USERS_SHARING = "max-users-sharing";

@@ -30,6 +30,8 @@ import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static fr.openent.form.core.enums.Events.CREATE;
@@ -59,6 +61,7 @@ public class FormController extends ControllerHelper {
     private final RelFormFolderService relFormFolderService;
     private final NeoService neoService;
     private final NotifyService notifyService;
+    private final SimpleDateFormat formDateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
     public FormController(EventStore eventStore, Storage storage, TimelineHelper timelineHelper) {
         super();
@@ -1403,44 +1406,43 @@ public class FormController extends ControllerHelper {
                         return;
                     }
 
-                    formService.get(formId, user, formEvt -> {
-                        if (formEvt.isLeft()) {
-                            log.error("[Formulaire@addNewDistributions] Fail to get infos for form with id " + formId);
-                            handler.handle(new Either.Right<>(formEvt.right().getValue()));
-                            return;
-                        }
-                        if (formEvt.right().getValue().isEmpty()) {
-                            String message = "[Formulaire@addNewDistributions] No form found for id " + formId;
-                            log.error(message);
-                            handler.handle(new Either.Left<>(message));
-                            return;
-                        }
-
-                        JsonObject form = formEvt.right().getValue();
-                        notifyService.notifyNewForm(request, form, respondersIds);
-                        handler.handle(new Either.Right<>(formEvt.right().getValue()));
-                    });
+                    sendNotification(request, formId, user, respondersIds, handler);
                 });
             }
             else {
-                formService.get(formId, user, formEvt -> {
-                    if (formEvt.isLeft()) {
-                        log.error("[Formulaire@addNewDistributions] Fail to get infos for form with id " + formId);
-                        handler.handle(new Either.Right<>(formEvt.right().getValue()));
-                        return;
-                    }
-                    if (formEvt.right().getValue().isEmpty()) {
-                        String message = "[Formulaire@addNewDistributions] No form found for id " + formId;
-                        log.error(message);
-                        handler.handle(new Either.Left<>(message));
-                        return;
-                    }
-
-                    JsonObject form = formEvt.right().getValue();
-                    notifyService.notifyNewForm(request, form, respondersIds);
-                    handler.handle(new Either.Right<>(formEvt.right().getValue()));
-                });
+                sendNotification(request, formId, user, respondersIds, handler);
             }
+        });
+    }
+
+    private void sendNotification(HttpServerRequest request, String formId, UserInfos user, JsonArray respondersIds, Handler<Either<String, JsonObject>> handler) {
+        formService.get(formId, user, formEvt -> {
+            if (formEvt.isLeft()) {
+                log.error("[Formulaire@addNewDistributions] Fail to get infos for form with id " + formId);
+                handler.handle(new Either.Right<>(formEvt.right().getValue()));
+                return;
+            }
+            if (formEvt.right().getValue().isEmpty()) {
+                String message = "[Formulaire@addNewDistributions] No form found for id " + formId;
+                log.error(message);
+                handler.handle(new Either.Left<>(message));
+                return;
+            }
+
+            JsonObject form = formEvt.right().getValue();
+
+            // Check openingDate to send notification or not
+            try {
+                Date openingDate = formDateFormatter.parse(form.getString(DATE_OPENING));
+                Date now = new Date();
+                if (openingDate.before(now)) {
+                    notifyService.notifyNewForm(request, form, respondersIds);
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            handler.handle(new Either.Right<>(formEvt.right().getValue()));
         });
     }
 

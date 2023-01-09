@@ -139,6 +139,7 @@ public class Fields {
     public static final String FILE = "file";
     public static final String FOLDER = "folder";
     public static final String FOLDERS = "folders";
+    public static final String FORMS = "forms";
     public static final String FORM_ELEMENTS = "form_elements";
     public static final String FORM_TILE = "form_title";
     public static final String GROUPS = "groups";

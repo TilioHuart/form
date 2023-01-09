@@ -3,6 +3,7 @@ package fr.openent.formulaire;
 import fr.openent.form.core.constants.Constants;
 import fr.openent.form.core.constants.Tables;
 import fr.openent.formulaire.controllers.*;
+import fr.openent.formulaire.cron.NotifyCron;
 import fr.openent.formulaire.cron.RgpdCron;
 import fr.openent.formulaire.service.impl.FormulaireRepositoryEvents;
 import io.vertx.core.eventbus.EventBus;
@@ -95,5 +96,7 @@ public class Formulaire extends BaseServer {
 		// CRON
 		RgpdCron rgpdCron = new RgpdCron(storage);
 		new CronTrigger(vertx, config.getString(RGPD_CRON, "0 0 0 */1 * ? *")).schedule(rgpdCron);
+		NotifyCron notifyCron = new NotifyCron(timelineHelper);
+		new CronTrigger(vertx, config.getString(NOTIFY_CRON, "0 0 0 */1 * ? *")).schedule(notifyCron);
 	}
 }

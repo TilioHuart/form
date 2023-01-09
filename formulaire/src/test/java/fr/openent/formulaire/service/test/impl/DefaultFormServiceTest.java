@@ -116,4 +116,27 @@ public class DefaultFormServiceTest {
 
         async.awaitSuccess(10000);
     }
+
+    @Test
+    public void testListSentFormsOpeningToday(TestContext ctx) {
+        Async async = ctx.async();
+
+        String expectedQuery = "SELECT * FROM " + FORM_TABLE + " WHERE sent = ? " +
+                "AND date_opening >= TO_CHAR(NOW(),'YYYY-MM-DD')::date " +
+                "AND date_opening < TO_CHAR(NOW() + INTERVAL '1 day','YYYY-MM-DD')::date";
+        JsonArray expectedParams = new JsonArray().add(true);
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getString(STATEMENT));
+            ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
+            async.complete();
+        });
+
+        defaultFormService.listSentFormsOpeningToday()
+                .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
+    }
 }

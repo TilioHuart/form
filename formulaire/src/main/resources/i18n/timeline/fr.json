@@ -13,6 +13,7 @@
     "timeline.formulaire.lambda.sender": "Un utilisateur ",
     "timeline.formulaire.responded": " a répondu au formulaire ",
     "timeline.formulaire.sent": " vous a envoyé un formulaire. ",
+    "timeline.formulaire.sent.by.unknow": "Vous avez reçu un nouveau formulaire. ",
     "timeline.formulaire.see": ". Voir les ",
     "timeline.formulaire.results": "résultats",
     "timeline.formulaire.access": "Accéder au formulaire "

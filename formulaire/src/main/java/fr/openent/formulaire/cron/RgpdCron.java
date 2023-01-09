@@ -37,13 +37,13 @@ public class RgpdCron extends ControllerHelper implements Handler<Long> {
 
     @Override
     public void handle(Long event) {
-        log.info("[Formulaire@RgpdCron] Formulaire RGPD cron started");
+        log.info("[Formulaire@RgpdCron::handle] Formulaire RGPD cron started");
         deleteOldDataForRgpd(deleteEvt -> {
             if (deleteEvt.isLeft()) {
-                log.info("[Formulaire@RgpdCron] RGPD cron failed");
+                log.error("[Formulaire@RgpdCron::handle] RGPD cron failed");
             }
             else {
-                log.info("[Formulaire@RgpdCron] RGPD cron launch successful");
+                log.info("[Formulaire@RgpdCron::handle] RGPD cron launch successful");
             }
         });
     }
@@ -51,7 +51,7 @@ public class RgpdCron extends ControllerHelper implements Handler<Long> {
     public void deleteOldDataForRgpd(Handler<Either<String, JsonObject>> handler) {
         distributionService.deleteOldDistributions(deleteDistribsEvt -> {
             if (deleteDistribsEvt.isLeft()) {
-                log.error("[Formulaire@deleteOldDataForRgpd] An error occurred while deleting distributions for old responses");
+                log.error("[Formulaire@RgpdCron::deleteOldDataForRgpd] An error occurred while deleting distributions for old responses");
                 handler.handle(new Either.Left<>(deleteDistribsEvt.left().getValue()));
                 return;
             }
@@ -65,7 +65,7 @@ public class RgpdCron extends ControllerHelper implements Handler<Long> {
             JsonArray deletedDistribIds = getIds(deletedDistrib);
             responseService.deleteOldResponse(deletedDistribIds, deleteResponseEvt -> {
                 if (deleteResponseEvt.isLeft()) {
-                    log.error("[Formulaire@deleteOldDataForRgpd] Failed to delete old responses for RGPD forms");
+                    log.error("[Formulaire@RgpdCron::deleteOldDataForRgpd] Failed to delete old responses for RGPD forms");
                     handler.handle(new Either.Left<>(deleteResponseEvt.left().getValue()));
                     return;
                 }
@@ -80,7 +80,7 @@ public class RgpdCron extends ControllerHelper implements Handler<Long> {
                 JsonArray deletedRepIds = getIds(deleteResponseEvt.right().getValue());
                 responseFileService.deleteAllByResponse(deletedRepIds, deleteFilesEvt -> {
                     if (deleteFilesEvt.isLeft()) {
-                        log.error("[Formulaire@deleteOldDataForRgpd] An error occurred while deleting files for responses " + deletedRepIds);
+                        log.error("[Formulaire@RgpdCron::deleteOldDataForRgpd] An error occurred while deleting files for responses " + deletedRepIds);
                         handler.handle(new Either.Left<>(deleteFilesEvt.left().getValue()));
                         return;
                     }
@@ -96,6 +96,6 @@ public class RgpdCron extends ControllerHelper implements Handler<Long> {
 
     private void logDeletedDistribInfos(JsonArray deletedDistribs) {
         JsonArray distribInfos = mapByProps(deletedDistribs, new JsonArray().add(FORM_ID).add(RESPONDER_ID));
-        log.info("[Formulaire@deleteOldDataForRgpd] Distributions and response successfully deleted for : " + distribInfos);
+        log.info("[Formulaire@RgpdCron::deleteOldDataForRgpd] Distributions and response successfully deleted for : " + distribInfos);
     }
 }

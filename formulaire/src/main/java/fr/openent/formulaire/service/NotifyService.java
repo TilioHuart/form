@@ -7,12 +7,19 @@ import io.vertx.core.json.JsonObject;
 public interface NotifyService {
 
     /**
-     * Send notification when a nwe form is distributed to a responder
+     * Send notification when a new form is distributed to a list of responders
      * @param request request
      * @param form form sent
      * @param responders ids of the responders to the form
      */
     void notifyNewForm(HttpServerRequest request, JsonObject form, JsonArray responders);
+
+    /**
+     * Send notification to a list of responders via a CRON
+     * @param form form sent
+     * @param responders ids of the responders to the form
+     */
+    void notifyNewFormFromCRON(JsonObject form, JsonArray responders);
 
     /**
      * Send notification when a response is send by a responder

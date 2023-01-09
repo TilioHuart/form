@@ -18,6 +18,7 @@
     "db-schema" : "formulaire",
     "zimbra-max-recipients": ${zimbraMaxRecipients},
     "rgpd-cron": "${rgpdCron}",
+    "notify-cron": "${notifyCron}",
     "max-responses-export-PDF": ${maxResponsesExportPDF},
     "max-users-sharing": ${maxUsersSharing},
     "node-pdf-generator" : {

@@ -32,6 +32,12 @@ public interface DistributionService {
     void listByForm(String formId, Handler<Either<String, JsonArray>> handler);
 
     /**
+     * List all the distributions of specific forms
+     * @param formIds form identifiers
+     */
+    Future<JsonArray> listByForms(JsonArray formIds);
+
+    /**
      * List all the distributions for a specific form sent to me
      * @param formId form identifier
      * @param user user connected

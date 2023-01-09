@@ -1,14 +1,14 @@
 <span>{{#i18n}}timeline.formulaire.new.notification{{/i18n}}</span>
-{{#userUri}}<a href="{{#host}}{{userUri}}{{/host}}">{{username}}</a>{{/userUri}}
+{{#userUri}}
+ <span>{{#i18n}}timeline.formulaire.from{{/i18n}}</span><a href="{{#host}}{{userUri}}{{/host}}">{{username}}</a>
+{{/userUri}}
 {{^userUri}}
- {{#username}}{{username}}{{/username}}
- {{^username}}<span>{{#i18n}}timeline.unknown.sender{{/i18n}}</span>{{/username}}
+ {{#username}}<span>{{#i18n}}timeline.formulaire.from{{/i18n}}</span>{{username}}{{/username}}
 {{/userUri}}
  :<br/>
 
-{{#username}}{{username}}{{/username}}
-{{^username}}<span>{{#i18n}}timeline.unknown.sender{{/i18n}}</span>{{/username}}
-<span>{{#i18n}}timeline.formulaire.sent{{/i18n}}</span>
+{{#username}}{{username}}<span>{{#i18n}}timeline.formulaire.sent{{/i18n}}</span>{{/username}}
+{{^username}}<span>{{#i18n}}timeline.formulaire.sent.by.unknow{{/i18n}}</span>{{/username}}
 {{#formUri}}
  {{#formName}}
   <span>{{#i18n}}timeline.formulaire.access{{/i18n}}</span>

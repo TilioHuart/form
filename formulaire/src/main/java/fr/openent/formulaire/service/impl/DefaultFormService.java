@@ -129,6 +129,21 @@ public class DefaultFormService implements FormService {
     }
 
     @Override
+    public Future<JsonArray> listSentFormsOpeningToday() {
+        Promise<JsonArray> promise = Promise.promise();
+
+        String query = "SELECT * FROM " + FORM_TABLE + " WHERE sent = ? " +
+                "AND date_opening >= TO_CHAR(NOW(),'YYYY-MM-DD')::date " +
+                "AND date_opening < TO_CHAR(NOW() + INTERVAL '1 day','YYYY-MM-DD')::date";
+        JsonArray params = new JsonArray().add(true);
+
+        String errorMessage = "[Formulaire@DefaultFormService::listFormsOpeningToday] Fail to list forms opening today";
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(FutureHelper.handlerEither(promise, errorMessage)));
+
+        return promise.future();
+    }
+
+    @Override
     public Future<JsonObject> get(String formId, UserInfos user) {
         Promise<JsonObject> promise = Promise.promise();
 
