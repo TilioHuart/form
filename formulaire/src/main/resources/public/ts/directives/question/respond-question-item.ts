@@ -82,7 +82,7 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                     </div>
                     <div ng-if ="vm.question.question_type == vm.Types.CURSOR">
                         <div class="formulaire-cursor-input-wrapper">
-                            <div>
+                            <div class="formulaire-cursor-input-label">
                                 <label>[[vm.question.cursor_label_min_val]]</label> <!-- label minimum value (optional) -->
                             </div>
                             <div class="formulaire-cursor-input-range">
@@ -110,7 +110,7 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                                     <div>[[vm.question.cursor_max_val]]</div> <!-- maximum value -->
                                 </div>
                             </div>
-                            <div>
+                            <div class="formulaire-cursor-input-label">
                                 <label>[[vm.question.cursor_label_max_val]]</label> <!-- label maximum value (optional) -->
                             </div>
                         </div>
