@@ -75,11 +75,11 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
                 .add(userId)
                 .addAll(resourcesIds != null && !resourcesIds.isEmpty() ? resourcesIds : new JsonArray());
 
-        String errorMessage = "[Formulaire@exportResources] Failed to list user's forms : ";
+        String errorMessage = "[Formulaire@FormulaireRepositoryEvents::exportResources] Failed to list user's forms : ";
         Sql.getInstance().prepared(formTableQuery, formTableParams, SqlResult.validResultHandler(FutureHelper.handlerEither(promise, errorMessage)));
 
         promise.future()
-            .onFailure(err -> log.error(errorMessage + err.getMessage()))
+            .onFailure(err -> log.error(err.getMessage()))
             .onSuccess(forms -> {
                 infos.put(FORM_TABLE, new SqlStatementsBuilder().prepared(formTableQuery, formTableParams).build());
                 importExportService.onSuccessGetUserForms(forms, infos);
@@ -132,13 +132,14 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
                 tablesWithId.put(FORM, DEFAULT);
                 tablesWithId.put(SECTION, DEFAULT);
                 tablesWithId.put(QUESTION, DEFAULT);
+                tablesWithId.put(QUESTION_SPECIFIC_FIELDS, DEFAULT);
                 tablesWithId.put(QUESTION_CHOICE, DEFAULT);
 
                 // Calls our custom importTables function (cf under)
                 importTables(importPath, DB_SCHEMA, tables, tablesWithId, userId, userName, locale, new SqlStatementsBuilder(), forceImportAsDuplication, handler);
             }
             else {
-                String errorMessage = "[Formulaire@importResources] Failed to create users/members for import : ";
+                String errorMessage = "[Formulaire@FormulaireRepositoryEvents::importResources] Failed to create users/members for import : ";
                 log.error(errorMessage + message.body().getString(MESSAGE));
                 handler.handle(new JsonObject().put(STATUS, ERROR));
             }
@@ -175,6 +176,7 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
             .compose(forms -> importExportService.getTableContent(importPath, schema, SECTION, tableContents))
             .compose(sections -> importExportService.getTableContent(importPath, schema, QUESTION, tableContents))
             .compose(questions -> importExportService.getTableContent(importPath, schema, QUESTION_CHOICE, tableContents))
+            .compose(questionSpecifics -> importExportService.getTableContent(importPath, schema, QUESTION_SPECIFIC_FIELDS, tableContents))
             .compose(questionChoices -> importExportService.importForms(tableContents.get(FORM), userId, userName))
             .compose(oldNewFormIds -> {
                 Map<Integer, Integer> oldNewFormIdsMap = importExportService.generateMapping(oldNewFormIds, ORIGINAL_FORM_ID, ID);
@@ -192,7 +194,8 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
                 tableMappingIds.put(QUESTION, oldNewQuestionIdsMap);
                 return importExportService.updateMatrixChildrenQuestions(oldNewQuestionIdsMap, newIdOldMatrixIdsMap);
             })
-            .compose(updatedQuestions -> importExportService.importQuestionChoices(tableContents.get(QUESTION_CHOICE), tableMappingIds.get(QUESTION), tableMappingIds.get(SECTION)))
+            .compose(updatedQuestions -> importExportService.importQuestionSpecifics(tableContents.get(QUESTION_SPECIFIC_FIELDS), tableMappingIds.get(QUESTION)))
+            .compose(newQuestionSpecifics -> importExportService.importQuestionChoices(tableContents.get(QUESTION_CHOICE), tableMappingIds.get(QUESTION), tableMappingIds.get(SECTION)))
             .compose(newQuestionChoices -> importExportService.createFolderLinks(tableMappingIds.get(FORM), userId))
             .onSuccess(result -> {
                 int nbFormsImported = tableMappingIds.get(FORM).size();
@@ -212,7 +215,7 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
                         .put(PARAM_ERRORS_NUMBER, String.valueOf(nbFormsImported))
                         .put(PARAM_DUPLICATES_NUMBER, "-")
                         .put(PARAM_MAIN_RESOURCE_NAME, this.mainResourceName);
-                log.error("[Formulaire@importTables] Failed to import data from file : " + err.getMessage());
+                log.error("[Formulaire@FormulaireRepositoryEvents::importTables] Failed to import data from file : " + err.getMessage());
                 err.printStackTrace();
                 handler.handle(finalResultInfos);
             });
@@ -250,11 +253,11 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
 
                 Sql.getInstance().transaction(statementsBuilder.build(), SqlResult.validRowsResultHandler(deleteEvent -> {
                     if (deleteEvent.isRight()) {
-                        log.info("[Formulaire@FormulaireRepositoryEvents] Sharing rights deleted for groups : " +
+                        log.info("[Formulaire@FormulaireRepositoryEvents::deleteGroups] Sharing rights deleted for groups : " +
                                 groupsIds.getList().toString());
                     }
                     else {
-                        log.error("[Formulaire@FormulaireRepositoryEvents] Failed to remove sharing rights deleted for groups (" +
+                        log.error("[Formulaire@FormulaireRepositoryEvents::deleteGroups] Failed to remove sharing rights deleted for groups (" +
                                 groupsIds.getList().toString() + ") : " + deleteEvent.left().getValue());
                     }
                 }));
@@ -327,11 +330,11 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
 
                 Sql.getInstance().transaction(statementsBuilder.build(), SqlResult.validRowsResultHandler(deleteEvent -> {
                     if (deleteEvent.isRight()) {
-                        log.info("[Formulaire@FormulaireRepositoryEvents] Sharing rights deleted for users : " +
+                        log.info("[Formulaire@FormulaireRepositoryEvents::deleteUsers] Sharing rights deleted for users : " +
                                 userIds.getList().toString());
                     }
                     else {
-                        log.error("[Formulaire@FormulaireRepositoryEvents] Failed to remove sharing rights deleted for users (" +
+                        log.error("[Formulaire@FormulaireRepositoryEvents::deleteUsers] Failed to remove sharing rights deleted for users (" +
                                 userIds.getList().toString() + ") : " + deleteEvent.left().getValue());
                     }
                 }));

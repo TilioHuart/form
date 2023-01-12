@@ -20,6 +20,8 @@ import static fr.openent.form.core.constants.Constants.*;
 import static fr.openent.form.core.constants.Fields.QUESTION_TYPE;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.FolderIds.ID_ROOT_FOLDER;
+import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_BEHAVIOUR;
+import static fr.openent.form.core.constants.ShareRights.MANAGER_RESOURCE_BEHAVIOUR;
 import static fr.openent.form.core.constants.Tables.*;
 
 public class ImportExportService {
@@ -31,6 +33,8 @@ public class ImportExportService {
         this.sql = sql;
         this.fs = fs;
     }
+
+    // Export
 
     /**
      * Write queries for export of data and store them into the 'infos' object
@@ -50,13 +54,22 @@ public class ImportExportService {
         JsonArray questionTableParams = new JsonArray().addAll(formIds);
         infos.put(QUESTION_TABLE, new SqlStatementsBuilder().prepared(questionTableQuery, questionTableParams).build());
 
+        // Question specific query
+        String questionSpecificTableQuery = "SELECT qs.* FROM " + QUESTION_SPECIFIC_FIELDS_TABLE + " qs " +
+                "JOIN " + QUESTION_TABLE + " q ON q.id = qs.question_id " +
+                (!formIds.isEmpty() ? "WHERE form_id IN " + Sql.listPrepared(formIds) + " " : "");
+        JsonArray questionSpecificTableParams = new JsonArray().addAll(formIds);
+        infos.put(QUESTION_SPECIFIC_FIELDS_TABLE, new SqlStatementsBuilder().prepared(questionSpecificTableQuery, questionSpecificTableParams).build());
+
         // QuestionChoice query
         String questionChoiceTableQuery = "SELECT qc.* FROM " + QUESTION_CHOICE_TABLE + " qc " +
                 "JOIN " + QUESTION_TABLE + " q ON q.id = qc.question_id " +
-                "WHERE form_id IN " + Sql.listPrepared(formIds);
+                (!formIds.isEmpty() ? "WHERE form_id IN " + Sql.listPrepared(formIds) + " " : "");
         JsonArray questionChoiceTableParams = new JsonArray().addAll(formIds);
         infos.put(QUESTION_CHOICE_TABLE, new SqlStatementsBuilder().prepared(questionChoiceTableQuery, questionChoiceTableParams).build());
     }
+
+    // Import
 
     /**
      * Read imported file and get content of the given table
@@ -72,11 +85,12 @@ public class ImportExportService {
         String path = importPath + File.separator + schema + "." + table;
         this.fs.readFile(path, (result) -> {
             if (result.failed()) {
-                String errorMessage = "[Formulaire@getTableContent] Failed to read table " + schema + "." + table + " in archive :";
-                promise.fail(errorMessage);
+                String errorMessage = "[Formulaire@ImportExportService::getTableContent] Failed to read table " + schema + "." + table + " in archive : ";
+                log.error(errorMessage + result.cause());
+                promise.fail(result.cause());
             }
             else {
-                log.info("[Formulaire@getTableContent] Succeed to get content for " + schema + "." + table + " in archive.");
+                log.info("[Formulaire@ImportExportService::getTableContent] Succeed to get content for " + schema + "." + table + " in archive.");
                 JsonObject results = result.result().toJsonObject();
                 tableContents.put(table, results);
                 promise.complete(results);
@@ -130,7 +144,7 @@ public class ImportExportService {
         }
         s.raw(TRANSACTION_COMMIT_QUERY);
 
-        String errorMessage = "[Formulaire@importForms] Failed to import forms from file : ";
+        String errorMessage = "[Formulaire@ImportExportService::importForms] Failed to import forms from file : ";
         sql.transaction(s.build(), SqlResult.validResultsHandler(FutureHelper.handlerEither(promise, errorMessage)));
 
         return promise.future();
@@ -166,7 +180,7 @@ public class ImportExportService {
         }
         s.raw(TRANSACTION_COMMIT_QUERY);
 
-        String errorMessage = "[Formulaire@importSections] Failed to import sections from file : ";
+        String errorMessage = "[Formulaire@ImportExportService::importSections] Failed to import sections from file : ";
         sql.transaction(s.build(), SqlResult.validResultsHandler(FutureHelper.handlerEither(promise, errorMessage)));
 
         return promise.future();
@@ -212,7 +226,7 @@ public class ImportExportService {
         }
         s.raw(TRANSACTION_COMMIT_QUERY);
 
-        String errorMessage = "[Formulaire@importQuestions] Failed to import questions from file : ";
+        String errorMessage = "[Formulaire@ImportExportService::importQuestions] Failed to import questions from file : ";
         sql.transaction(s.build(), SqlResult.validResultsHandler(FutureHelper.handlerEither(promise, errorMessage)));
 
         return promise.future();
@@ -240,7 +254,44 @@ public class ImportExportService {
         }
         s.raw(TRANSACTION_COMMIT_QUERY);
 
-        String errorMessage = "[Formulaire@updateMatrixChildrenQuestions] Failed to update matrix_id for questions from file : ";
+        String errorMessage = "[Formulaire@ImportExportService::updateMatrixChildrenQuestions] Failed to update matrix_id for questions from file : ";
+        sql.transaction(s.build(), SqlResult.validResultsHandler(FutureHelper.handlerEither(promise, errorMessage)));
+
+        return promise.future();
+    }
+
+    /**
+     * Insert in BDD the imported question specifics data
+     * @param questionSpecifics content of the imported question specifics to insert
+     * @param oldNewQuestionIdsMap Map containing old and new question ids
+     * @return return a future containing the content the imported question choices
+     */
+    public Future<JsonArray> importQuestionSpecifics(JsonObject questionSpecifics, Map<Integer, Integer> oldNewQuestionIdsMap) {
+        Promise<JsonArray> promise = Promise.promise();
+
+        List<String> fields = questionSpecifics.getJsonArray(FIELDS).getList();
+        JsonArray results = questionSpecifics.getJsonArray(RESULTS);
+
+        SqlStatementsBuilder s = new SqlStatementsBuilder();
+        String query = "INSERT INTO " + QUESTION_SPECIFIC_FIELDS_TABLE + " (question_id, cursor_min_val, cursor_max_val, " +
+                "cursor_step, cursor_label_min_val, cursor_label_max_val) " +
+                "VALUES (?, ?, ?, ?, ?, ?) RETURNING *;";
+
+        s.raw(TRANSACTION_BEGIN_QUERY);
+        for (int i = 0; i < results.size(); ++i) {
+            JsonArray entry = results.getJsonArray(i);
+            JsonArray params = new JsonArray()
+                    .add(oldNewQuestionIdsMap.get(entry.getInteger(fields.indexOf(QUESTION_ID))))
+                    .add(entry.getInteger(fields.indexOf(CURSOR_MIN_VAL)))
+                    .add(entry.getInteger(fields.indexOf(CURSOR_MAX_VAL)))
+                    .add(entry.getInteger(fields.indexOf(CURSOR_STEP)))
+                    .add(entry.getString(fields.indexOf(CURSOR_LABEL_MIN_VAL)))
+                    .add(entry.getString(fields.indexOf(CURSOR_LABEL_MAX_VAL)));
+            s.prepared(query, params);
+        }
+        s.raw(TRANSACTION_COMMIT_QUERY);
+
+        String errorMessage = "[Formulaire@ImportExportService::importQuestionSpecifics] Failed to import question_specific_fields from file : ";
         sql.transaction(s.build(), SqlResult.validResultsHandler(FutureHelper.handlerEither(promise, errorMessage)));
 
         return promise.future();
@@ -276,7 +327,7 @@ public class ImportExportService {
         }
         s.raw(TRANSACTION_COMMIT_QUERY);
 
-        String errorMessage = "[Formulaire@importQuestionChoices] Failed to import question_choices from file : ";
+        String errorMessage = "[Formulaire@ImportExportService::importQuestionChoices] Failed to import question_choices from file : ";
         sql.transaction(s.build(), SqlResult.validResultsHandler(FutureHelper.handlerEither(promise, errorMessage)));
 
         return promise.future();
@@ -303,7 +354,7 @@ public class ImportExportService {
         }
         s.raw(TRANSACTION_COMMIT_QUERY);
 
-        String errorMessage = "[Formulaire@createFolderLinks] Failed to create relations form-folders for forms with id " + formIds + " : ";
+        String errorMessage = "[Formulaire@ImportExportService::createFolderLinks] Failed to create relations form-folders for forms with id " + formIds + " : ";
         sql.transaction(s.build(), SqlResult.validResultsHandler(FutureHelper.handlerEither(promise, errorMessage)));
 
         return promise.future();
