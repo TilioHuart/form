@@ -33,6 +33,7 @@ import org.entcore.common.user.UserUtils;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static fr.openent.form.core.enums.Events.CREATE;
 import static fr.openent.form.core.constants.ConfigFields.ZIMBRA_MAX_RECIPIENTS;
@@ -922,129 +923,137 @@ public class FormController extends ControllerHelper {
         String formId = request.getParam(PARAM_FORM_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
-                String message = "[Formulaire@sendReminder] User not found in session.";
+                String message = "[Formulaire@FormController::sendReminder] User not found in session.";
                 log.error(message);
-                unauthorized(request, message);
+                unauthorized(request);
                 return;
             }
 
             RequestUtils.bodyToJson(request, mail -> {
                 if (mail == null || mail.isEmpty()) {
-                    log.error("[Formulaire@sendReminder] No mail to send.");
+                    log.error("[Formulaire@FormController::sendReminder] No mail to send.");
                     noContent(request);
                     return;
                 }
 
                 formService.get(formId, user, formEvt -> {
                     if (formEvt.isLeft()) {
-                        log.error("[Formulaire@sendReminder] Fail to get form " + formId + " : " + formEvt.left().getValue());
+                        log.error("[Formulaire@FormController::sendReminder] Fail to get form " + formId + " : " + formEvt.left().getValue());
                         renderInternalError(request, formEvt);
                         return;
                     }
                     if (formEvt.right().getValue().isEmpty()) {
-                        String message = "[Formulaire@sendReminder] No form found for id " + formId;
+                        String message = "[Formulaire@FormController::sendReminder] No form found for id " + formId;
                         log.error(message);
-                        notFound(request, message);
+                        notFound(request);
                         return;
                     }
 
-                    // Should not send reminder if form is not sent
                     JsonObject form = formEvt.right().getValue();
-                    if (!form.getBoolean(SENT)) {
-                        String message = "[Formulaire@sendReminder] You cannot send a reminder for a form which is not already send for response.";
-                        log.error(message);
-                        badRequest(request, message);
-                        return;
-                    }
-
                     distributionService.listByForm(formId, distributionsEvt -> {
                         if (distributionsEvt.isLeft()) {
-                            log.error("[Formulaire@sendReminder] Fail to retrieve distributions for form with id : " + formId);
+                            log.error("[Formulaire@FormController::sendReminder] Fail to retrieve distributions for form with id : " + formId);
                             renderInternalError(request, distributionsEvt);
                             return;
                         }
                         if (distributionsEvt.right().getValue().isEmpty()) {
-                            String message = "[Formulaire@sendReminder] No distributions found for form with id " + formId;
+                            String message = "[Formulaire@FormController::sendReminder] No distributions found for form with id " + formId;
                             log.error(message);
-                            notFound(request, message);
+                            notFound(request);
                             return;
                         }
 
                         JsonArray distributions = distributionsEvt.right().getValue();
-                        JsonArray localRespondersIds = new JsonArray();
-                        JsonArray listMails = new JsonArray();
 
-                        // Generate list of mails to send
-                        for (int i = 0; i < distributions.size(); i++) {
-                            String id = distributions.getJsonObject(i).getString(RESPONDER_ID);
-                            if (!localRespondersIds.contains(id)) {
-                                if (form.getBoolean(MULTIPLE) || form.getBoolean(ANONYMOUS) ||
-                                    distributions.getJsonObject(i).getString(DATE_RESPONSE) == null) {
-                                    localRespondersIds.add(id);
-                                }
-                            }
-
-                            // Generate new mail object if limit or end loop are reached
-                            if (i == distributions.size() - 1 || localRespondersIds.size() == config.getInteger(ZIMBRA_MAX_RECIPIENTS, 50)) {
-                                JsonObject message = new JsonObject()
-                                        .put(SUBJECT, mail.getString(SUBJECT, ""))
-                                        .put(BODY, mail.getString(BODY, ""))
-                                        .put(TO, new JsonArray())
-                                        .put(CCI, localRespondersIds);
-
-                                JsonObject action = new JsonObject()
-                                        .put(ACTION, SEND)
-                                        .put(PARAM_USER_ID, user.getUserId())
-                                        .put(USERNAME, user.getUsername())
-                                        .put(MESSAGE, message);
-
-                                listMails.add(action);
-                                localRespondersIds = new JsonArray();
-                            }
-                        }
-
-
-                        // Prepare futures to get message responses
-                        List<Future> mails = new ArrayList<>();
-
-                        // Code to send mails
-                        for (int i = 0; i < listMails.size(); i++) {
-                            Future future = Promise.promise().future();
-                            mails.add(future);
-
-                            // Send mail via Conversation app if it exists or else with Zimbra
-                            eb.request(CONVERSATION_ADDRESS, listMails.getJsonObject(i), (Handler<AsyncResult<Message<JsonObject>>>) messageEvt -> {
-                                if (!messageEvt.result().body().getString(STATUS).equals(OK)) {
-                                    log.error("[Formulaire@sendReminder] Failed to send reminder : " + messageEvt.cause());
-                                    future.handle(Future.failedFuture(messageEvt.cause()));
-                                }
-                                else {
-                                    future.handle(Future.succeededFuture(messageEvt.result().body()));
-                                }
-                            });
-                        }
-
-                        // Try to send effectively mails with code below and get results
-                        CompositeFuture.all(mails).onComplete(sendMailsEvt -> {
-                            if (sendMailsEvt.failed()) {
-                                log.error("[Formulaire@sendReminder] Failed to send reminder : " + sendMailsEvt.cause());
-                                renderInternalError(request, sendMailsEvt);
-                                return;
-                            }
-
-                            // Update 'reminded' prop of the form
-                            form.put(REMINDED, true);
-                            formService.update(formId, form, updateEvt -> {
-                                if (updateEvt.isLeft()) {
-                                    log.error("[Formulaire@sendReminder] Fail to update form " + formId + " : " + updateEvt.left().getValue());
-                                    renderInternalError(request, updateEvt);
+                        // If form prop is not consistent with number of distributions
+                        if (!form.getBoolean(SENT)) {
+                            form.put(SENT, true);
+                            formService.update(formId, form, updatedFormEvt -> {
+                                if (formEvt.isLeft()) {
+                                    log.error("[Formulaire@FormController::sendReminder] Fail to update form " + formId + " : " + formEvt.left().getValue());
+                                    renderInternalError(request, formEvt);
                                     return;
                                 }
-                                renderJson(request, updateEvt.right().getValue());
+
+                                doSendReminder(request, formId, form, distributions, mail, user);
                             });
-                        });
+                        }
+                        else {
+                            doSendReminder(request, formId, form, distributions, mail, user);
+                        }
                     });
                 });
+            });
+        });
+    }
+
+    private void doSendReminder(HttpServerRequest request, String formId, JsonObject form, JsonArray distributions, JsonObject mail, UserInfos user) {
+        JsonArray listMails = new JsonArray();
+        List<JsonObject> distributionsList = new ArrayList<>(distributions.getList());
+
+        // Generate list of mails to send
+        for (int i = 0; i < distributions.size(); i++) {
+            List<String> localRespondersIds = distributionsList.stream()
+                .filter(d -> (form.getBoolean(MULTIPLE) || form.getBoolean(ANONYMOUS) || d.getString(DATE_RESPONSE) == null))
+                .map(d -> d.getString(RESPONDER_ID))
+                .collect(Collectors.toList());
+
+            // Generate new mail object if limit or end loop are reached
+            if (i == distributions.size() - 1 || localRespondersIds.size() == config.getInteger(ZIMBRA_MAX_RECIPIENTS, 50)) {
+                JsonObject message = new JsonObject()
+                        .put(SUBJECT, mail.getString(SUBJECT, ""))
+                        .put(BODY, mail.getString(BODY, ""))
+                        .put(TO, new JsonArray())
+                        .put(CCI, localRespondersIds);
+
+                JsonObject action = new JsonObject()
+                        .put(ACTION, SEND)
+                        .put(PARAM_USER_ID, user.getUserId())
+                        .put(USERNAME, user.getUsername())
+                        .put(MESSAGE, message);
+
+                listMails.add(action);
+            }
+        }
+
+
+        // Prepare futures to get message responses
+        List<Future> mails = new ArrayList<>();
+
+        // Code to send mails
+        for (int i = 0; i < listMails.size(); i++) {
+            Future future = Promise.promise().future();
+            mails.add(future);
+
+            // Send mail via Conversation app if it exists or else with Zimbra
+            eb.request(CONVERSATION_ADDRESS, listMails.getJsonObject(i), (Handler<AsyncResult<Message<JsonObject>>>) messageEvt -> {
+                if (!messageEvt.result().body().getString(STATUS).equals(OK)) {
+                    log.error("[Formulaire@FormController::sendReminder] Failed to send reminder : " + messageEvt.cause());
+                    future.handle(Future.failedFuture(messageEvt.cause()));
+                }
+                else {
+                    future.handle(Future.succeededFuture(messageEvt.result().body()));
+                }
+            });
+        }
+
+        // Try to send effectively mails with code below and get results
+        CompositeFuture.all(mails).onComplete(sendMailsEvt -> {
+            if (sendMailsEvt.failed()) {
+                log.error("[Formulaire@FormController::sendReminder] Failed to send reminder : " + sendMailsEvt.cause());
+                renderInternalError(request, sendMailsEvt);
+                return;
+            }
+
+            // Update 'reminded' prop of the form
+            form.put(REMINDED, true);
+            formService.update(formId, form, updateEvt -> {
+                if (updateEvt.isLeft()) {
+                    log.error("[Formulaire@FormController::sendReminder] Fail to update form " + formId + " : " + updateEvt.left().getValue());
+                    renderInternalError(request, updateEvt);
+                    return;
+                }
+                renderJson(request, updateEvt.right().getValue());
             });
         });
     }
