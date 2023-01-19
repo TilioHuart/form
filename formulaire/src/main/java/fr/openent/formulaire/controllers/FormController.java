@@ -224,7 +224,7 @@ public class FormController extends ControllerHelper {
                 }
 
                 // date_ending should be after date_opening if not null
-                boolean areDateValid = DataChecker.checkFormDatesValidity(new JsonArray().add(form));
+                boolean areDateValid = DataChecker.checkFormDatesValidity(form);
                 if (!areDateValid) {
                     String message = "[Formulaire@createForm] You cannot create a form with a ending date before the opening date.";
                     log.error(message);
@@ -612,7 +612,7 @@ public class FormController extends ControllerHelper {
                 }
 
                 // date_ending should be after date_ending if not null
-                boolean areDateValid = DataChecker.checkFormDatesValidity(new JsonArray().add(form));
+                boolean areDateValid = DataChecker.checkFormDatesValidity(form);
                 if (!areDateValid) {
                     String message = "[Formulaire@updateForm] You cannot update a form with an ending date before the opening date.";
                     log.error(message);

@@ -1,6 +1,7 @@
 package fr.openent.formulaire.helpers;
 
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
@@ -37,6 +38,10 @@ public class DataChecker {
         }
 
         return areDateValid;
+    }
+
+    public static boolean checkFormDatesValidity(JsonObject form) {
+        return checkFormDatesValidity(new JsonArray().add(form));
     }
 
     // Check if RGPD lifetime is in [3, 6, 9, 12]
