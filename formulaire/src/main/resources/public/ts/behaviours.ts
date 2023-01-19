@@ -27,16 +27,16 @@ Behaviours.register('formulaire', {
     dependencies: {},
     loadResources: async function(): Promise<any> {
         const data = await formService.listForLinker();
-        this.resources = data.map(function (f) {
-            if (!f.picture) f.picture = '../../../../formulaire/public/img/logo.svg';
-            let endPath = f.rgpd ? 'rgpd' : 'new';
-
+        this.resources = data.map(form => {
+            if (!form.picture) form.picture = '../../../../formulaire/public/img/logo.svg';
             return {
-                id: f.id,
-                icon: f.picture,
-                title: f.title,
-                ownerName: f.owner_name,
-                path: `/formulaire#/form/${f.id}/${endPath}`
+                id: form.id,
+                icon: form.picture,
+                title: form.title,
+                ownerName: form.owner_name,
+                path: form.is_public ?
+                    `${window.location.origin}/formulaire-public#/form/${form.public_key}` :
+                    `${window.location.origin}/formulaire#/form/${form.id}/${form.rgpd ? 'rgpd' : 'new'}`
             }
         });
     },
