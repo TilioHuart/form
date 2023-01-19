@@ -1,6 +1,7 @@
 package fr.openent.formulaire.service.impl;
 
 import fr.openent.form.core.enums.QuestionTypes;
+import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.service.QuestionService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Handler;
@@ -156,11 +157,14 @@ public class DefaultQuestionService implements QuestionService {
     public void update(String formId, JsonArray questions, Handler<Either<String, JsonArray>> handler) {
         if (!questions.isEmpty()) {
             SqlStatementsBuilder s = new SqlStatementsBuilder();
+            String nullifyerQuery = "UPDATE " + QUESTION_TABLE + " SET position = NULL, section_id = NULL, section_position = NULL, " +
+                    "matrix_id = NULL, matrix_position = NULL WHERE id IN " + Sql.listPrepared(questions) + ";";
             String query = "UPDATE " + QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, " +
                     "statement = ?, mandatory = ?, section_id = ?, section_position = ?, conditional = ?, placeholder = ?, " +
                     "matrix_id = ?, matrix_position = ? WHERE id = ? RETURNING *;";
 
             s.raw("BEGIN;");
+            s.prepared(nullifyerQuery, UtilsHelper.getIds(questions, false));
             for (int i = 0; i < questions.size(); i++) {
                 JsonObject question = questions.getJsonObject(i);
                 int questionType = question.getInteger(MATRIX_ID, null) != null &&

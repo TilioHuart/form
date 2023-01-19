@@ -6,7 +6,8 @@ ALTER TABLE formulaire.question
     CHECK (
         (section_id IS NOT NULL AND section_position IS NOT NULL AND matrix_id IS NULL AND matrix_position IS NULL AND position IS NULL) OR
         (matrix_id IS NOT NULL AND matrix_position IS NOT NULL AND section_id IS NULL AND section_position IS NULL AND position IS NULL) OR
-        (position IS NOT NULL AND section_id IS NULL AND section_position IS NULL AND matrix_id IS NULL AND matrix_position IS NULL)
+        (position IS NOT NULL AND section_id IS NULL AND section_position IS NULL AND matrix_id IS NULL AND matrix_position IS NULL) OR
+        (position IS NULL AND section_id IS NULL AND section_position IS NULL AND matrix_id IS NULL AND matrix_position IS NULL)
     );
 
 ALTER TABLE formulaire.section

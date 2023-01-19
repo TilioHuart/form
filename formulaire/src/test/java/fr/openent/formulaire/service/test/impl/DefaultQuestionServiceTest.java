@@ -247,7 +247,10 @@ public class DefaultQuestionServiceTest {
         questions.add(tabQuestion)
                 .add(tabQuestionNew);
 
+
+
         String expectedQuery = "[{\"action\":\"raw\",\"command\":\"BEGIN;\"}," +
+                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_TABLE + " SET position = NULL, section_id = NULL, section_position = NULL, matrix_id = NULL, matrix_position = NULL WHERE id IN (?,?);\",\"values\":[1,2]}," +
                 "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, statement = ?, mandatory = ?, section_id = ?, section_position = ?, conditional = ?, placeholder = ?, matrix_id = ?, matrix_position = ? WHERE id = ? RETURNING *;\",\"values\":[\"title\",null,9,\"statement\",false,1,1,false,\"placeholder\",1,1,1]}," +
                 "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, statement = ?, mandatory = ?, section_id = ?, section_position = ?, conditional = ?, placeholder = ?, matrix_id = ?, matrix_position = ? WHERE id = ? RETURNING *;\",\"values\":[\"titled\",null,4,\"statemented\",true,2,2,true,\"placeholdered\",2,2,2]}," +
                 "{\"action\":\"prepared\",\"statement\":\"UPDATE " + FORM_TABLE + " SET date_modification = ? WHERE id = ?; \",\"values\":[\"NOW()\",\"form_id\"]}," +
