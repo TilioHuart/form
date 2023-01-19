@@ -1,6 +1,7 @@
 package fr.openent.formulaire.service;
 
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -23,9 +24,8 @@ public interface QuestionService {
     /**
      * List all the questions (in and out of sections) of a specific form
      * @param formId section identifier
-     * @param handler function handler returning JsonArray data
      */
-    void listForFormAndSection(String formId, Handler<Either<String, JsonArray>> handler);
+    Future<JsonArray> listForFormAndSection(String formId);
 
     /**
      * List all the children questions of a list of questions

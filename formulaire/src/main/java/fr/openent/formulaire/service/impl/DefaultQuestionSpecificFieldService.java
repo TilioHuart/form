@@ -2,28 +2,60 @@ package fr.openent.formulaire.service.impl;
 
 import fr.openent.form.core.constants.Fields;
 import fr.openent.form.core.enums.QuestionTypes;
+import fr.openent.form.helpers.FutureHelper;
+import fr.openent.form.helpers.UtilsHelper;
+import fr.openent.formulaire.controllers.QuestionController;
 import fr.openent.formulaire.service.QuestionSpecificFieldService;
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.sql.SqlStatementsBuilder;
 
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.Tables.*;
+import static fr.openent.form.helpers.UtilsHelper.getIds;
 
 public class DefaultQuestionSpecificFieldService implements QuestionSpecificFieldService {
     private final Sql sql = Sql.getInstance();
 
+    private static final Logger log = LoggerFactory.getLogger(DefaultQuestionSpecificFieldService.class);
+
+    public Future<JsonArray> syncQuestionSpecs(JsonArray questions) {
+        Promise<JsonArray> promise = Promise.promise();
+
+        JsonArray questionIds = getIds(questions);
+        if (!questions.isEmpty()) {
+            listByIds(questionIds)
+                    .onSuccess(specEvt -> {
+                        promise.complete(UtilsHelper.mergeQuestionsAndSpecifics(questions, specEvt));
+                    })
+                    .onFailure(error -> {
+                        String message = String.format("[Formulaire@%s::syncQuestionSpecs] An error has occured" +
+                                " when getting specific field: %s", this.getClass().getSimpleName(), error.getMessage());
+                        log.error(message, error.getMessage());
+                        promise.fail(error.getMessage());
+                    });
+        } else promise.complete(new JsonArray());
+        return promise.future();
+    }
 
     @Override
-    public void listByIds(JsonArray questionIds, Handler<Either<String, JsonArray>> handler) {
+    public Future<JsonArray> listByIds(JsonArray questionIds) {
+        Promise<JsonArray> promise = Promise.promise();
+
         String query = "SELECT * FROM " + QUESTION_SPECIFIC_FIELDS_TABLE + " WHERE question_id IN " + Sql.listPrepared(questionIds);
         JsonArray params = new JsonArray().addAll(questionIds);
 
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(FutureHelper.handlerJsonArray(promise)));
+
+        return promise.future();
     }
 
     @Override

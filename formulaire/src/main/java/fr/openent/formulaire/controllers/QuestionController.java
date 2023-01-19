@@ -15,9 +15,7 @@ import fr.openent.formulaire.service.impl.DefaultQuestionSpecificFieldService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
-import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.request.RequestUtils;
-import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -26,12 +24,6 @@ import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static fr.openent.form.helpers.UtilsHelper.getIds;
 
 import static fr.openent.form.core.constants.Constants.CONDITIONAL_QUESTIONS;
 import static fr.openent.form.core.constants.Fields.*;
@@ -56,24 +48,6 @@ public class QuestionController extends ControllerHelper {
         this.distributionService = new DefaultDistributionService();
     }
 
-    private void syncQuestionSpecs(JsonArray questions, HttpServerRequest request, Handler<Either<String,JsonArray>> handler) {
-        JsonArray questionIds = getIds(questions);
-        if (!questions.isEmpty()) {
-            questionSpecificFieldService.listByIds(questionIds, specEvt -> {
-                if (specEvt.isLeft()) {
-                    log.error("[Formulaire@listQuestions] Fail to list specQuestion : " + specEvt);
-                    renderInternalError(request, specEvt);
-                    return;
-                }
-
-                JsonArray questionSpecs = specEvt.right().getValue();
-                JsonArray questionsWithSpecs = UtilsHelper.mergeQuestionsAndSpecifics(questions, questionSpecs);
-                handler.handle(new Either.Right<>(questionsWithSpecs));
-            });
-        }
-        else handler.handle(new Either.Right<>(new JsonArray()));
-    }
-
     @Get("/forms/:formId/questions")
     @ApiDoc("List all the questions of a specific form")
     @ResourceFilter(AccessRight.class)
@@ -88,8 +62,9 @@ public class QuestionController extends ControllerHelper {
                 return;
             }
             JsonArray questions = listQuestionsEvt.right().getValue();
-
-            syncQuestionSpecs(questions, request, arrayResponseHandler(request));
+            questionSpecificFieldService.syncQuestionSpecs(questions)
+                    .onSuccess(result -> renderJson(request, result))
+                    .onFailure(error -> renderError(request));
         });
     }
 
@@ -108,7 +83,9 @@ public class QuestionController extends ControllerHelper {
             }
             JsonArray questions = getQuestionEvt.right().getValue();
 
-            syncQuestionSpecs(questions, request, arrayResponseHandler(request));
+            questionSpecificFieldService.syncQuestionSpecs(questions)
+                    .onSuccess(result -> renderJson(request, result))
+                    .onFailure(error -> renderError(request));
         });
     }
 

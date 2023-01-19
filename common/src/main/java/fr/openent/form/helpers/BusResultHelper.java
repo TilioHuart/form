@@ -2,6 +2,7 @@ package fr.openent.form.helpers;
 
 import fr.wseduc.webutils.Either;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
@@ -46,5 +47,17 @@ public class BusResultHelper {
                 message.reply(error);
             }
         };
+    }
+
+    public static void busArrayHandler(Future<JsonArray> future, Message<JsonObject> message) {
+        future
+                .onSuccess(result -> message.reply((new JsonObject()).put(STATUS, OK).put(RESULT, result)))
+                .onFailure(error -> message.reply((new JsonObject()).put(STATUS, ERROR).put(MESSAGE, error.getMessage())));
+    }
+
+    public static void busObjectHandler(Future<JsonObject> future, Message<JsonObject> message) {
+        future
+                .onSuccess(result -> message.reply((new JsonObject()).put(STATUS, OK).put(RESULT, result)))
+                .onFailure(error -> message.reply((new JsonObject()).put(STATUS, ERROR).put(MESSAGE, error.getMessage())));
     }
 }

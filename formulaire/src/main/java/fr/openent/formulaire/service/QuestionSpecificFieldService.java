@@ -1,17 +1,24 @@
 package fr.openent.formulaire.service;
 
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 public interface QuestionSpecificFieldService {
+
+    /**
+     * Sync all the specifics fields of question
+     * @param questions JsonArray data
+     */
+    Future<JsonArray> syncQuestionSpecs(JsonArray questions);
+
     /**
      * List all the specifics fields of question from a list of ids
      * @param questionIds questions identifiers
-     * @param handler function handler returning JsonArray data
      */
-    void listByIds(JsonArray questionIds, Handler<Either<String, JsonArray>> handler);
+    Future<JsonArray> listByIds(JsonArray questionIds);
 
     /**
      * Add specific fields to a question

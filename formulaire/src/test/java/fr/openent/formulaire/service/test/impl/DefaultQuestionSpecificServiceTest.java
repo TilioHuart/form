@@ -43,7 +43,10 @@ public class DefaultQuestionSpecificServiceTest {
             ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
             async.complete();
         });
-        defaultQuestionSpecificFieldService.listByIds(questionIds, null);
+        defaultQuestionSpecificFieldService.listByIds(questionIds)
+                .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
     }
 
     @Test
