@@ -216,11 +216,11 @@ public class QuestionController extends ControllerHelper {
                                     badRequest(request, message);
                                     return;
                                 }
-                                addCursorField(request, question, formId);
+                                createQuestion(request, question, formId);
                             });
                         }
                         else {
-                            addCursorField(request, question, formId);
+                            createQuestion(request, question, formId);
                         }
                     });
                 });
@@ -228,19 +228,21 @@ public class QuestionController extends ControllerHelper {
         });
     }
 
-    private void addCursorField(HttpServerRequest request, JsonObject question, String formId) {
+    private void createQuestion(HttpServerRequest request, JsonObject question, String formId) {
         questionService.create(question, formId, questionEvt -> {
             if (questionEvt.isLeft()) {
-                log.error("[Formulaire@addCursorField] Fail to add cursor's field : " + questionEvt.left().getValue());
+                log.error("[Formulaire@QuestionController::createQuestion] Fail to create question : " + questionEvt.left().getValue());
                 renderInternalError(request, questionEvt);
                 return;
             }
+
             // If question is cursor type, you insert fields in a specific table
             if (question.getInteger(QUESTION_TYPE) == QuestionTypes.CURSOR.getCode()) {
                 String questionId = questionEvt.right().getValue().getInteger(ID).toString();
                 questionSpecificFieldsService.create(question, questionId, defaultResponseHandler(request));
                 return;
             }
+
             renderJson(request, questionEvt.right().getValue());
         });
     }
