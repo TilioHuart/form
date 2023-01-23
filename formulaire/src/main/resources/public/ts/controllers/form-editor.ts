@@ -340,6 +340,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             try {
                 let formElement = vm.formElements.getSelectedElement();
                 if (formElement.id) {
+                    await formElementService.delete(formElement);
                     if (formElement instanceof Question && formElement.section_id) {
                         let section = vm.formElements.all.filter(e => e instanceof Section && e.id === (formElement as Question).section_id)[0] as Section;
                         for (let i = formElement.section_position; i < section.questions.all.length; i++) {
@@ -353,7 +354,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         }
                         await formElementService.update(vm.formElements.all.slice(formElement.position));
                     }
-                    await formElementService.delete(formElement);
                 }
                 template.close('lightbox');
                 vm.display.lightbox.delete = false;
