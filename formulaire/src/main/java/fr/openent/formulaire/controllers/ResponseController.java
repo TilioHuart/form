@@ -1,7 +1,7 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.enums.QuestionTypes;
-import fr.openent.form.core.model.Question;
+import fr.openent.form.core.models.Question;
 import fr.openent.formulaire.export.FormResponsesExportCSV;
 import fr.openent.formulaire.export.FormResponsesExportPDF;
 import fr.openent.formulaire.security.AccessRight;

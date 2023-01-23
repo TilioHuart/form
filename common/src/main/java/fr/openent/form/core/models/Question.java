@@ -1,4 +1,4 @@
-package fr.openent.form.core.model;
+package fr.openent.form.core.models;
 
 import fr.openent.form.core.enums.ChoiceTypes;
 import io.vertx.core.json.JsonObject;
@@ -18,6 +18,8 @@ public class Question implements Model<Question> {
     private Number matrixId;
     private Number matrixPosition;
 
+    // Constructors
+
     public Question() {
     }
 
@@ -35,6 +37,8 @@ public class Question implements Model<Question> {
         this.matrixId = question.getInteger(Fields.MATRIX_ID,null);
         this.matrixPosition = question.getInteger(Fields.MATRIX_POSITION,null);
     }
+
+    // Getters
 
     public Integer getQuestionType() { return questionType; }
 
@@ -59,6 +63,7 @@ public class Question implements Model<Question> {
 
     public Number getMatrixPosition() { return matrixPosition; }
 
+    // Setters
 
     public Question setCode(Number code) {
         this.code = code;
@@ -109,9 +114,11 @@ public class Question implements Model<Question> {
         return this;
     }
 
+    // Functions
+
     public JsonObject toJson() {
         return new JsonObject()
-                .put(Fields.QUESTION_TYPE, this.questionType )
+                .put(Fields.QUESTION_TYPE, this.questionType)
                 .put(Fields.ID, this.id)
                 .put(Fields.QUESTION_ID, this.questionId)
                 .put(Fields.VALUE, this.value)

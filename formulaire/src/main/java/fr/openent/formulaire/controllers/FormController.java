@@ -1,5 +1,6 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.core.models.ShareObject;
 import fr.openent.form.helpers.EventBusHelper;
 import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.helpers.DataChecker;
@@ -181,7 +182,7 @@ public class FormController extends ControllerHelper {
 
     @Get("/forms/:formId")
     @ApiDoc("Get a specific form by id")
-    @ResourceFilter(AccessRight.class)
+    @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
@@ -1250,16 +1251,18 @@ public class FormController extends ControllerHelper {
     @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void shareResource(final HttpServerRequest request) {
-        RequestUtils.bodyToJson(request, pathPrefix + "share", shareFormObject -> {
-            if (shareFormObject == null || shareFormObject.isEmpty()) {
-                log.error("[Formulaire@shareResource] No forms to share.");
+        RequestUtils.bodyToJson(request, pathPrefix + "share", shareObjectJson -> {
+            if (shareObjectJson == null || shareObjectJson.isEmpty()) {
+                log.error("[Formulaire@FormController::shareResource] No forms to share.");
                 noContent(request);
                 return;
             }
+            ShareObject shareObject = new ShareObject(shareObjectJson);
+            shareObject.addCommonRights();
 
             UserUtils.getUserInfos(eb, request, user -> {
                 if (user == null) {
-                    String message = "[Formulaire@shareResource] User not found in session.";
+                    String message = "[Formulaire@FormController::shareResource] User not found in session.";
                     log.error(message);
                     unauthorized(request, message);
                     return;
@@ -1267,9 +1270,9 @@ public class FormController extends ControllerHelper {
 
                 // Get all ids, filter the one about sending (response right)
                 final String formId = request.params().get(ID);
-                Map<String, Object> idUsers = shareFormObject.getJsonObject(USERS).getMap();
-                Map<String, Object> idGroups = shareFormObject.getJsonObject(GROUPS).getMap();
-                Map<String, Object> idBookmarks = shareFormObject.getJsonObject(BOOKMARKS).getMap();
+                Map<String, Object> idUsers = shareObject.getUsers().getMap();
+                Map<String, Object> idGroups = shareObject.getGroups().getMap();
+                Map<String, Object> idBookmarks = shareObject.getBookmarks().getMap();
 
                 JsonArray usersIds = new JsonArray(new ArrayList<>(filterIdsForSending(idUsers).keySet()));
                 JsonArray groupsIds = new JsonArray(new ArrayList<>(filterIdsForSending(idGroups).keySet()));
@@ -1278,7 +1281,7 @@ public class FormController extends ControllerHelper {
                 // Get group ids and users ids from bookmarks and add them to previous lists
                 neoService.getIdsFromBookMarks(bookmarksIds, bookmarksEvt -> {
                     if (bookmarksEvt.isLeft()) {
-                        log.error("[Formulaire@shareResource] Fail to get ids from bookmarks' ids");
+                        log.error("[Formulaire@FormController::shareResource] Fail to get ids from bookmarks' ids");
                         renderInternalError(request, bookmarksEvt);
                         return;
                     }
@@ -1294,7 +1297,7 @@ public class FormController extends ControllerHelper {
                     // Sync with distribution table
                     neoService.getUsersInfosFromIds(usersIds, groupsIds, usersEvt -> {
                         if (usersEvt.isLeft()) {
-                            log.error("[Formulaire@shareResource] Fail to get users' ids from groups' ids");
+                            log.error("[Formulaire@FormController::shareResource] Fail to get users' ids from groups' ids");
                             renderInternalError(request, usersEvt);
                             return;
                         }
@@ -1309,14 +1312,14 @@ public class FormController extends ControllerHelper {
                         // Check max sharing limit
                         if (responders.size() > MAX_USERS_SHARING) {
                             String message = "You can't share to more than " + MAX_USERS_SHARING + " people.";
-                            log.error("[Formulaire@shareResource] " + message);
+                            log.error("[Formulaire@FormController::shareResource] " + message);
                             badRequest(request, message);
                             return;
                         }
 
                         syncDistributions(request, formId, user, responders, syncEvt -> {
                             if (syncEvt.isLeft()) {
-                                log.error("[Formulaire@shareResource] Fail to sync distributions for form " + formId);
+                                log.error("[Formulaire@FormController::shareResource] Fail to sync distributions for form " + formId);
                                 renderInternalError(request, syncEvt);
                                 return;
                             }
@@ -1328,11 +1331,11 @@ public class FormController extends ControllerHelper {
                             idsObjects.add(idBookmarks);
                             updateFormCollabProp(formId, user, idsObjects, updateEvt -> {
                                 if (updateEvt.isLeft()) {
-                                    log.error("[Formulaire@shareResource] Fail to update collab prop for form " + formId);
+                                    log.error("[Formulaire@FormController::shareResource] Fail to update collab prop for form " + formId);
                                     renderInternalError(request, updateEvt);
                                     return;
                                 }
-                                fixBugAutoUnsharing(request, formId, user, shareFormObject);
+                                fixBugAutoUnsharing(request, formId, user, shareObject);
                             });
                         });
                     });
@@ -1562,7 +1565,7 @@ public class FormController extends ControllerHelper {
         });
     }
 
-    private void fixBugAutoUnsharing(HttpServerRequest request, String formId, UserInfos user, JsonObject shareFormObject) {
+    private void fixBugAutoUnsharing(HttpServerRequest request, String formId, UserInfos user, ShareObject shareObject) {
         formShareService.getSharedWithMe(formId, user, formSharedEvt -> {
             if (formSharedEvt.isLeft()) {
                 String message = "[Formulaire@getSharedWithMe] Fail to get user's shared rights";
@@ -1573,17 +1576,19 @@ public class FormController extends ControllerHelper {
 
             JsonArray rights = formSharedEvt.right().getValue();
             String id = user.getUserId();
-            shareFormObject.getJsonObject(USERS).put(id, new JsonArray());
+            shareObject.getUsers().put(id, new JsonArray());
 
             for (int i = 0; i < rights.size(); i++) {
                 JsonObject right = rights.getJsonObject(i);
-                shareFormObject.getJsonObject(USERS).getJsonArray(id).add(right.getString(ACTION));
+                shareObject.getUsers().getJsonArray(id).add(right.getString(ACTION));
             }
 
+            JsonObject jsonShareObject = shareObject.toJson();
+
             // Classic sharing stuff (putting or removing ids from form_shares table accordingly)
-            this.getShareService().share(user.getUserId(), formId, shareFormObject, (r) -> {
+            this.getShareService().share(user.getUserId(), formId, jsonShareObject, (r) -> {
                 if (r.isRight()) {
-                    this.doShareSucceed(request, formId, user, shareFormObject, r.right().getValue(), false);
+                    this.doShareSucceed(request, formId, user, jsonShareObject, r.right().getValue(), false);
                 } else {
                     JsonObject error = (new JsonObject()).put(ERROR, r.left().getValue());
                     Renders.renderJson(request, error, 400);

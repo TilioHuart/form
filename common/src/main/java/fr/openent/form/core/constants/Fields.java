@@ -179,6 +179,7 @@ public class Fields {
     public static final String RESPONSES = "responses";
     public static final String RESULT = "result";
     public static final String RESULTS = "results";
+    public static final String ROLE = "role";
     public static final String SEND = "send";
     public static final String SIZE = "size";
     public static final String STATEMENTS = "statements";

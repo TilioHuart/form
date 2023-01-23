@@ -37,7 +37,7 @@ public class CustomShareAndOwner implements ResourcesProvider {
             String query = "SELECT count(*) FROM " + conf.getSchema() + conf.getTable() +
                     " LEFT JOIN " + conf.getSchema() + conf.getShareTable() +
                     " ON id = resource_id WHERE ((member_id IN " + Sql.listPrepared(groupsAndUserIds) + " AND action = ?) OR owner_id = ?) AND id = ";
-            JsonArray values = (new fr.wseduc.webutils.collections.JsonArray(gu)).add(sharedMethod).add(user.getUserId());
+            JsonArray values = new JsonArray(gu).add(sharedMethod).add(user.getUserId());
 
             switch (key) {
                 case ID:
@@ -84,7 +84,7 @@ public class CustomShareAndOwner implements ResourcesProvider {
 
 
     private String getKeyByBinding(Binding binding) {
-        if (isCountDistribution(binding) || isGetByFormResponderAndStatusDistribution(binding) ||
+        if (isGetForm(binding) || isCountDistribution(binding) || isGetByFormResponderAndStatusDistribution(binding) ||
                 isUpdateForm(binding) || isDeleteForm(binding) || isSendReminderForm(binding) || isCreateQuestion(binding) ||
                 isListByFormResponse(binding) || isDeleteResponse(binding) || isExportResponse(binding) ||
                 isCreateSection(binding) || isUpdateSection(binding) || isUpdateQuestion(binding)) {
@@ -155,6 +155,10 @@ public class CustomShareAndOwner implements ResourcesProvider {
     }
 
     // Form
+    private boolean isGetForm(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.FormController|get");
+    }
+
     private boolean isUpdateForm(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.PUT, "fr.openent.formulaire.controllers.FormController|update");
     }

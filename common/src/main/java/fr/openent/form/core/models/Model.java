@@ -1,4 +1,4 @@
-package fr.openent.form.core.model;
+package fr.openent.form.core.models;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
