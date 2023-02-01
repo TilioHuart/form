@@ -7,4 +7,6 @@ export abstract class Constants {
     static readonly YELLOW_COLORS: string[] = ['#FFC73C','#F2AE00','#FFBB13','#FFD263','#FFDF91'];
     static readonly PURPLE_COLORS: string[] = ['#475DD5','#1129A6','#2741C9','#687BE0','#93A1EC'];
     static readonly ORANGE_COLORS: string[] = ['#FFA23C','#F27E00','#FF8E13','#FFB463','#FFCA91'];
+    static readonly COLORS_GROUPS: Array<string[]> = [Constants.BLUE_COLORS, Constants.YELLOW_COLORS, Constants.PURPLE_COLORS, Constants.ORANGE_COLORS];
+    static readonly NB_COLORS_AVAILABLE: number = 25;
 }

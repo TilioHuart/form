@@ -16,8 +16,12 @@ export class UtilsUtils {
      * @param excludedValues    List of values to exclude from the random picking (should be same type as 'list')
      */
     static getRandomValueInList = (list: any[], excludedValues: any[]) : any => {
+        if (list.every((item: any) => (<any>excludedValues).includes(item))) {
+            return UtilsUtils.getRandomValueInList(list, []);
+        }
         let randomIndex: number = Math.floor(Math.random() * list.length);
-        return !(<any>excludedValues).includes(list[randomIndex]) ? list[randomIndex] : UtilsUtils.getRandomValueInList(list, excludedValues);
+        let randomColor: string = list[randomIndex];
+        return !(<any>excludedValues).includes(randomColor) ? randomColor : UtilsUtils.getRandomValueInList(list, excludedValues);
     }
 
     /**
