@@ -16,7 +16,7 @@ import {distributionService, formService, questionService, folderService} from "
 import {FiltersFilters, FiltersOrders, FORMULAIRE_EMIT_EVENT} from "@common/core/enums";
 import {Mix} from "entcore-toolkit";
 import {Element} from "entcore/types/src/ts/workspace/model";
-import {I18nUtils} from "@common/utils";
+import {I18nUtils, UtilsUtils} from "@common/utils";
 
 interface ViewModel {
     forms: Forms;
@@ -363,21 +363,22 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     vm.checkRemind = async () : Promise<void> => {
-        let distributions = Mix.castArrayAs(Distribution, await distributionService.listByForm(vm.forms.selected[0].id));
-        let uniqueDistribs : any = [];
-        for (let d of distributions){
-            if (!uniqueDistribs.map(d => d.responder_id).includes(d.responder_id)) {
-                uniqueDistribs.push(d);
+        let distributions: Distribution[] = await distributionService.listByForm(vm.forms.selected[0].id);
+        let uniqueDistributions : any = [];
+        for (let d of distributions) {
+            if (!uniqueDistributions.map(d => d.responder_id).includes(d.responder_id)) {
+                uniqueDistributions.push(d);
             }
         }
         vm.responders = [];
-        for (let uniqueDistribution of uniqueDistribs){
-            let str = uniqueDistribution.responder_name;
-            let seperate = str.split(' ');
-            let responderInfo = {
-                name : seperate[0],
-                surname: seperate[1],
-                nbResponses: distributions.filter(d => d.responder_id === uniqueDistribution.responder_id && d.status==DistributionStatus.FINISHED).length,
+        for (let uniqueDistribution of uniqueDistributions){
+            let responderNames: string[] = UtilsUtils.getNameAndSurname(uniqueDistribution.responder_name);
+            let responderInfo: any = {
+                name : responderNames[0],
+                surname: responderNames[1],
+                nbResponses: distributions.filter((d: Distribution) =>
+                    d.responder_id === uniqueDistribution.responder_id &&
+                    d.status === DistributionStatus.FINISHED).length
             };
             vm.responders.push(responderInfo);
         }
@@ -415,14 +416,14 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.remind = async () : Promise<void> => {
         initMail();
-        vm.distributions.all = Mix.castArrayAs(Distribution, await distributionService.listByForm(vm.forms.selected[0].id));
+        vm.distributions.all = await distributionService.listByForm(vm.forms.selected[0].id);
         await template.open('lightbox', 'lightbox/reminder');
         vm.display.lightbox.reminder = true;
         // Set CSS to show text on editor
         window.setTimeout(async function () {
-            let toolbar = document.getElementsByTagName('editor-toolbar')[0] as HTMLElement;
-            let editor = document.getElementsByTagName('editor')[0] as HTMLElement;
-            let text = document.getElementsByClassName('drawing-zone')[0] as HTMLElement;
+            let toolbar: HTMLElement = document.getElementsByTagName('editor-toolbar')[0] as HTMLElement;
+            let editor: HTMLElement = document.getElementsByTagName('editor')[0] as HTMLElement;
+            let text: HTMLElement = document.getElementsByClassName('drawing-zone')[0] as HTMLElement;
             editor.style.setProperty('padding-top', `${toolbar.offsetHeight.toString()}px`, "important");
             text.style.setProperty('min-height', `150px`, "important");
         }, 500);

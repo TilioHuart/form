@@ -19,4 +19,32 @@ export class UtilsUtils {
         let randomIndex: number = Math.floor(Math.random() * list.length);
         return !(<any>excludedValues).includes(list[randomIndex]) ? list[randomIndex] : UtilsUtils.getRandomValueInList(list, excludedValues);
     }
+
+    /**
+     * Separate name and surname from a formatted full name
+     * @param fullName full name formatted like 'NAME Surname'
+     */
+    static getNameAndSurname = (fullName: string) : string[] => {
+        if (fullName == null || fullName.length == 0) return ["", ""];
+
+        let lastTimeUppercaseTwice: number = -1;
+        let previousLetter: string = fullName[0];
+        for (let i: number = 1; i < fullName.length; i++) {
+            let currentLetter: string = fullName[i];
+            if (previousLetter.toLowerCase() != previousLetter.toUpperCase() &&
+                previousLetter.toUpperCase() === previousLetter &&
+                currentLetter.toLowerCase() != currentLetter.toUpperCase() &&
+                currentLetter.toUpperCase() === currentLetter) {
+                lastTimeUppercaseTwice = i;
+            }
+            previousLetter = fullName[i];
+        }
+
+        if (lastTimeUppercaseTwice < 0) return ["", ""];
+        else {
+            let name: string = fullName.substring(0, lastTimeUppercaseTwice + 1);
+            let surname: string = fullName.substring(lastTimeUppercaseTwice + 2);
+            return [name, surname];
+        }
+    }
 }
