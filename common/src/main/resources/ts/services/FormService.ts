@@ -67,10 +67,12 @@ export const formService: FormService = {
 
     async save(form: Form) : Promise<any> {
         if (form.date_opening != null) {
+            form.date_opening = new Date(form.date_opening);
             let utcTimestamp: number = Date.UTC(form.date_opening.getFullYear(), form.date_opening.getMonth(), form.date_opening.getDate(), 0, 0, 0, 0);
             form.date_opening = new Date(utcTimestamp);
         }
         if (form.date_ending != null) {
+            form.date_ending = new Date(form.date_ending);
             let utcTimestamp: number = Date.UTC(form.date_ending.getFullYear(), form.date_ending.getMonth(), form.date_ending.getDate(), 23, 59, 59, 999);
             form.date_ending = new Date(utcTimestamp);
         }

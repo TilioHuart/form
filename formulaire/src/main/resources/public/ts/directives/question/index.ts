@@ -7,4 +7,4 @@ export * from './recap-question-item';
 export * from './respond-question-item';
 export * from './respond-matrix';
 export * from './result-question-item';
-export * from './section-item';
+export * from '../section-item';

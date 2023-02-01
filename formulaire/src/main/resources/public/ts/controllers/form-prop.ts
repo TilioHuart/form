@@ -15,6 +15,7 @@ interface ViewModel {
     }
 
     $onInit() : Promise<void>;
+    saveGuard(): void;
     save() : Promise<void>;
     checkIntervalDates() : boolean;
     getImage() : void;
@@ -45,6 +46,10 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
         };
 
         // Functions
+
+        vm.saveGuard = () => {
+            vm.save().then();
+        };
 
         vm.save = async () : Promise<void> => {
             if (vm.form.title && vm.checkIntervalDates()) {

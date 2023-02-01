@@ -29,7 +29,7 @@ export const questionTypeMultipleanswer: Directive = ng.directive('questionTypeM
         bindToController: true,
         template: `
             <div class="twelve">
-                <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']" guard-root="formTitle">
+                <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
                     <div class="container-arrow" ng-if="vm.question.selected">
                         <div ng-class="{hidden : $first}" ng-click="vm.moveChoice(choice, vm.Direction.UP)">
                             <i class="i-chevron-up lg-icon"></i>

@@ -15,7 +15,6 @@ interface IViewModel {
 }
 
 export const questionTitle: Directive = ng.directive('questionTitle', () => {
-
     return {
         restrict: 'E',
         transclude: true,
@@ -27,9 +26,9 @@ export const questionTitle: Directive = ng.directive('questionTitle', () => {
         controllerAs: 'vm',
         bindToController: true,
         template: `
-            <div class="question-title focusable" ng-class="{onedition: vm.reorder || !vm.hasFormResponses}" guard-root="formTitle">                
+            <div class="question-title focusable" ng-class="{onedition: vm.reorder || !vm.hasFormResponses}">                
                 <div class="twelve">
-                    <div ng-if="!vm.question.selected" ng-class="{'flex-spaced': vm.question.question_type == vm.Types.MATRIX}" >
+                    <div ng-if="!vm.question.selected" ng-class="{'flex-spaced': vm.question.question_type == vm.Types.MATRIX}">
                         <h4 ng-if="vm.question.title">[[vm.question.title]]<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span></h4>
                         <h4 ng-if="!vm.question.title" class="empty">
                             <i18n ng-if="vm.question.question_type == vm.Types.FREETEXT">formulaire.question.title.free.empty</i18n>

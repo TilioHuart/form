@@ -1,5 +1,5 @@
 import {Directive, idiom, ng} from "entcore";
-import {FormElements, Question, Section, Types} from "../../models";
+import {FormElements, Question, Section, Types} from "../models";
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
 
 interface IViewModel {
@@ -47,7 +47,7 @@ export const sectionItem: Directive = ng.directive('sectionItem', ['$sce', ($sce
                         </div>
                         <div class="section-top-container">
                             <!-- Title component -->
-                            <div class="title twelve" guard-root="formTitle">
+                            <div class="title twelve">
                                 <div class="flex-spaced" ng-if="!vm.section.selected">
                                     <h4 ng-if="vm.section.title" class="ellipsis">
                                         [[vm.section.title]]
@@ -74,7 +74,7 @@ export const sectionItem: Directive = ng.directive('sectionItem', ['$sce', ($sce
                     </div>
                     <div class="nofocusable" id="[[vm.section.position]]">
                         <!-- Description -->
-                        <div class="description row">
+                        <div class="description row" guard-root="formTitle">
                             <div ng-if="!vm.section.selected">
                                 <div ng-if="vm.section.description" data-ng-bind-html="vm.getHtmlDescription(vm.section.description)"></div>
                                 <div ng-if="!vm.section.description" class="nodescription"><i18n>formulaire.section.no.description</i18n></div>
@@ -104,7 +104,7 @@ export const sectionItem: Directive = ng.directive('sectionItem', ['$sce', ($sce
                         </div>
                         <!-- Add question button -->
                         <div class="addQuestion row" ng-if="!vm.section.selected && !vm.hasFormResponses">
-                            <a reset-guard="vm.addQuestionToSectionGuard()" reset-guard-id="formTitle">
+                            <a reset-guard="vm.addQuestionToSectionGuard()">
                                 <i18n>formulaire.section.new.question</i18n>
                             </a>
                         </div>

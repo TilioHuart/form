@@ -70,11 +70,12 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
                                         ng-change="vm.onSwitchConditional(vm.question.conditional)"></switch>
                                 <i18n>formulaire.conditional</i18n>
                             </div>
-                            <i class="i-duplicate lg-icon spaced-right" ng-click="vm.duplicateQuestion()"
+                            <i class="i-duplicate lg-icon spaced-right" reset-guard="vm.duplicateQuestion()"
                                ng-class="{disabled: vm.hasFormResponses}" title="[[vm.getTitle('duplicate')]]"></i>
-                            <i class="i-delete lg-icon spaced-right" ng-class="{disabled: vm.hasFormResponses}" 
-                               ng-click="vm.deleteQuestion()" title="[[vm.getTitle('delete')]]"></i>
-                            <i class="i-undo lg-icon spaced-right" ng-click="vm.undoQuestionChanges()" title="[[vm.getTitle('cancel')]]"></i>
+                            <i class="i-delete lg-icon spaced-right" reset-guard="vm.deleteQuestion()"
+                                ng-class="{disabled: vm.hasFormResponses}" title="[[vm.getTitle('delete')]]"></i>
+                            <i class="i-undo lg-icon spaced-right" reset-guard="vm.undoQuestionChanges()"
+                                title="[[vm.getTitle('cancel')]]"></i>
                         </div>
                     </div>
                 </div>

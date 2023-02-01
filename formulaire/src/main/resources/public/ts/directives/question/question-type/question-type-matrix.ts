@@ -39,7 +39,7 @@ export const questionTypeMatrix: Directive = ng.directive('questionTypeMatrix', 
                 <!-- Define the columns' titles (= choices) -->
                 <div class="matrix-columns">
                     <h4><i18n>formulaire.matrix.columns</i18n></h4>
-                    <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']" guard-root="formTitle">
+                    <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
                         <div class="container-arrow" ng-if="vm.question.selected">
                             <div ng-class="{hidden : $first}" ng-click="vm.moveChoice(choice, vm.Direction.UP)">
                                 <i class="i-chevron-up lg-icon"></i>

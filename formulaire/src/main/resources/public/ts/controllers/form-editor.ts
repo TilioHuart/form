@@ -840,7 +840,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         const isInDontSave = (el) : boolean => {
             if (!el) { return false; }
-            else if (el.classList && el.classList.contains("dontSave") || el.tagName === "LIGHTBOX") { return true; }
+            else if (el.classList && el.classList.contains("dontSave") || el.tagName === "LIGHTBOX" || el.tagName === "HEADER") { return true; }
             return isInDontSave(el.parentNode);
         };
 
