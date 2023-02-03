@@ -49,6 +49,12 @@ class Controller implements IViewModel {
                 this.mapChoiceResponseIndex.set(choice, this.responses.all.indexOf(matchingResponses[0]));
             }
         }
+
+        if (this.question.question_type === Types.CURSOR) {
+            let answer: number = Number.parseInt(this.responses.all[0].answer.toString());
+            this.responses.all[0].answer = Number.isNaN(answer) ? this.question.cursor_min_val : answer;
+        }
+
         this.$scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.REFRESH_QUESTION, () => { this.init(); });
     }
 

@@ -182,7 +182,8 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                 }
 
                 if (vm.question.question_type === Types.CURSOR) {
-                    vm.responses.all[0].answer = vm.question.cursor_min_val;
+                    let answer: number = Number.parseInt(this.responses.all[0].answer.toString());
+                    this.responses.all[0].answer = Number.isNaN(answer) ? this.question.cursor_min_val : answer;
                 }
 
                 $scope.$apply();
