@@ -17,12 +17,15 @@
   "formulaire.public.responses.send.continue": "Voulez-vous continuer ?",
   "formulaire.public.warning.send.missing.responses.missing": "Vous n'avez pas répondu à toutes les questions obligatoires !",
   "formulaire.public.success.responses.save": "Vos réponses ont bien été enregistrées !",
+  "formulaire.public.question.selected.result": "Résultat sélectionné : ",
   "formulaire.public.question.type.SHORTANSWER": "Réponse courte",
+  "formulaire.public.selected.value": "Valeur sélectionnée : ",
   "formulaire.public.error.formService.get": "Une erreur est survenue lors de la récupération du formulaire",
   "formulaire.public.error.responseService.create": "Une erreur est survenue lors de la création de la nouvelle réponse",
+  "formulaire.public.response.next.invalid": "Veuillez répondre à la question obligatoire pour décider de la suite de votre parcours.",
   "formulaire.prop.rgpd.description.intro": "Vos informations à caractère personnel sont recueillies pour : <b>{0}</b>. Elles seront conservées dans nos fichiers jusqu'au <b>{1}</b>. Elles seront détruites à cette date. En application du Règlement Général de Protection des données (RGPD), vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation au traitement de vos données. Pour exercer ce droit ou pour toute question concernant le traitement de vos données personnelles, vous pouvez contacter :",
   "formulaire.prop.rgpd.description.delegates": "<div><b>Le délégué à la protection des données {0}</b> ({1})</div><div class='left-spacing'>{2}</br>{3} {4}</div>",
-
+  "formulaire.prop.rgpd.goal": "Finalité",
 
   "formulaire.public.end.thanks": "Merci pour vos réponses",
   "formulaire.public.end.sorry": "Désolé, vous ne pouvez pas répondre à ce formulaire",

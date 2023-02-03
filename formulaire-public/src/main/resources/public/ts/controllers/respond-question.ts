@@ -108,7 +108,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 		}
 
 		if (conditionalQuestion && response && !response.choice_id) {
-			notify.info('formulaire.response.next.invalid');
+			notify.info('formulaire.public.response.next.invalid');
 			nextPosition = undefined;
 		}
 		else if (conditionalQuestion && response) {

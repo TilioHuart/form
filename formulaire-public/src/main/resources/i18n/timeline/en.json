@@ -1,8 +1,9 @@
 {
   "formulaire": "Formulaire",
+  "formulaire_public": "Formulaire-public",
 
-  "formulaire.response_notification": "Notification de réponse à un formulaire",
-  "formulaire.new_form_notification": "Notification de nouveau formulaire à répondre",
+  "formulaire_public.response_notification": "Notification de réponse à un formulaire",
+  "formulaire_public.new_form_notification": "Notification de nouveau formulaire à répondre",
 
   "push.notif.formulaire.response": "Nouvelle notification Formulaire",
   "push.notif.formulaire.newForm": "Nouvelle notification Formulaire",
