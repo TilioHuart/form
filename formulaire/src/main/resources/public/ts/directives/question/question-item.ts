@@ -152,15 +152,10 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
             };
 
             vm.cursorChoiceIsConsistent = () : boolean => {
-                let minVal = vm.question.cursor_min_val ? vm.question.cursor_min_val : 1;
-                let maxVal = vm.question.cursor_max_val ? vm.question.cursor_max_val : 10;
-                let step = vm.question.cursor_step ? vm.question.cursor_step : 1;
-
-                let consistentChoice = (maxVal - minVal) % step == 0;
-                if (consistentChoice) {
-                    return true;
-                }
-                else return false;
+                const minVal: number = vm.question.cursor_min_val != null ? vm.question.cursor_min_val : 1;
+                const maxVal: number = vm.question.cursor_max_val != null ? vm.question.cursor_max_val : 10;
+                const step: number = vm.question.cursor_step != null ? vm.question.cursor_step : 1;
+                return (maxVal - minVal) % step == 0;
             }
         }
     };

@@ -1,15 +1,51 @@
-import {Directive, ng} from "entcore";
+import {ng} from "entcore";
 import {Question} from "@common/models";
+import {IScope} from "angular";
 
-interface IViewModel {
+interface IQuestionTypeFreetextProps {
     question: Question;
     hasFormResponses: boolean;
-    $onInit(): Promise<void>;
+}
+
+interface IViewModel extends ng.IController, IQuestionTypeFreetextProps {
+    initQuestionTypeCursor(): void;
     onChangeStep(newStep: number): void;
 }
 
-export const questionTypeCursor: Directive = ng.directive('questionTypeCursor', () => {
+interface IQuestionTypeFreetextScope extends IScope, IQuestionTypeFreetextProps {
+    vm: IViewModel;
+}
 
+class Controller implements IViewModel {
+    question: Question;
+    hasFormResponses: boolean;
+
+    constructor(private $scope: IQuestionTypeFreetextScope, private $sce: ng.ISCEService) {}
+
+    $onInit = async () : Promise<void> => {
+        this.initQuestionTypeCursor();
+    }
+
+    $onDestroy = async () : Promise<void> => {}
+
+    initQuestionTypeCursor = () : void => {
+        this.question.cursor_min_val = 1;
+        this.question.cursor_max_val = 10;
+        this.question.cursor_step = 1;
+    }
+
+    getHtmlDescription = (description: string) : string => {
+        return !!description ? this.$sce.trustAsHtml(description) : null;
+    }
+
+    onChangeStep = (newStep: number) : void => {
+        if (this.question.cursor_max_val - newStep < this.question.cursor_min_val) {
+            this.question.cursor_max_val = this.question.cursor_min_val + newStep;
+        }
+    }
+}
+
+function directive() {
     return {
         restrict: 'E',
         transclude: true,
@@ -75,27 +111,14 @@ export const questionTypeCursor: Directive = ng.directive('questionTypeCursor', 
                 </div>
             </div>
         `,
-        controller: async ($scope) => {
-            const vm: IViewModel = <IViewModel> this;
-
-            vm.$onInit = async () : Promise<void> => {
-                await initQuestionTypeCursor();
-            }
-
-            const initQuestionTypeCursor = async () : Promise<void> => {
-                vm.question.cursor_min_val = 1;
-                vm.question.cursor_max_val = 10;
-                vm.question.cursor_step = 1;
-            }
-        },
-        link: ($scope, $element) => {
-            const vm: IViewModel = $scope.vm;
-
-            vm.onChangeStep = (newStep: number) : void => {
-                if (vm.question.cursor_max_val - newStep < vm.question.cursor_min_val) {
-                    vm.question.cursor_max_val = vm.question.cursor_min_val + newStep;
-                }
-            }
+        controller: ['$scope', '$sce', Controller],
+        /* interaction DOM/element */
+        link: function ($scope: IQuestionTypeFreetextScope,
+                        element: ng.IAugmentedJQuery,
+                        attrs: ng.IAttributes,
+                        vm: IViewModel) {
         }
-    };
-});
+    }
+}
+
+export const questionTypeCursor = ng.directive('questionTypeCursor', directive);
