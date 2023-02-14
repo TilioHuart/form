@@ -8,7 +8,6 @@ interface IQuestionTypeFreetextProps {
 }
 
 interface IViewModel extends ng.IController, IQuestionTypeFreetextProps {
-    initQuestionTypeCursor(): void;
     onChangeStep(newStep: number): void;
 }
 
@@ -22,17 +21,9 @@ class Controller implements IViewModel {
 
     constructor(private $scope: IQuestionTypeFreetextScope, private $sce: ng.ISCEService) {}
 
-    $onInit = async () : Promise<void> => {
-        this.initQuestionTypeCursor();
-    }
+    $onInit = async () : Promise<void> => {}
 
     $onDestroy = async () : Promise<void> => {}
-
-    initQuestionTypeCursor = () : void => {
-        this.question.cursor_min_val = 1;
-        this.question.cursor_max_val = 10;
-        this.question.cursor_step = 1;
-    }
 
     getHtmlDescription = (description: string) : string => {
         return !!description ? this.$sce.trustAsHtml(description) : null;

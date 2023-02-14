@@ -132,6 +132,10 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
             };
 
             const initRespondQuestionItem = async () : Promise<void> => {
+                if (vm.question.question_type === Types.CURSOR) {
+                    vm.responses.all[0].answer = vm.question.cursor_min_val;
+                }
+
                 if (vm.question.isTypeMultipleRep()) {
                     let existingResponses: Responses = new Responses();
                     if (vm.distribution) await existingResponses.syncMine(vm.question.id, vm.distribution.id);
@@ -157,10 +161,15 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                 else if (vm.distribution) {
                     let responses: Responses = new Responses();
                     await responses.syncMine(vm.question.id, vm.distribution.id);
-                    if (responses.all.length > 0) vm.responses.all[0] = responses.all[0];
+                    if (responses.all.length > 0) {
+                        vm.responses.all[0] = responses.all[0];
+                        if (vm.question.question_type === Types.CURSOR) {
+                            let answer: number = Number.parseInt(vm.responses.all[0].answer.toString());
+                            vm.responses.all[0].answer = Number.isNaN(answer) ? vm.question.cursor_min_val : answer;
+                        }
+                    }
                     if (!vm.responses.all[0].question_id) vm.responses.all[0].question_id = vm.question.id;
                     if (!vm.responses.all[0].distribution_id) vm.responses.all[0].distribution_id = vm.distribution.id;
-                    console.log("response for ", vm.question, " : ", vm.responses.all[0]);
                 }
 
                 if (vm.question.question_type === Types.TIME && typeof vm.responses.all[0].answer == "string") {
@@ -179,11 +188,6 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                             }
                         }
                     }
-                }
-
-                if (vm.question.question_type === Types.CURSOR) {
-                    let answer: number = Number.parseInt(this.responses.all[0].answer.toString());
-                    this.responses.all[0].answer = Number.isNaN(answer) ? this.question.cursor_min_val : answer;
                 }
 
                 $scope.$apply();

@@ -38,7 +38,7 @@ public class DefaultResponseService implements ResponseService {
                 JsonArray params = new JsonArray()
                         .add(response.getInteger(QUESTION_ID, null))
                         .add(response.getInteger(CHOICE_ID, null))
-                        .add(response.getString(ANSWER, ""))
+                        .add(response.getValue(ANSWER, ""))
                         .add("")
                         .add(distribution.getInteger(ID, null));
                 s.prepared(query, params);

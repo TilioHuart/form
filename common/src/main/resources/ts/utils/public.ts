@@ -20,10 +20,11 @@ export class PublicUtils {
      * @param allResponsesInfos allResponsesInfos to fill
      */
     static formatStorageData = (dataFormElements: any, formElements: FormElements, dataResponsesInfos: any, allResponsesInfos: Map<FormElement, Map<Question, Responses>>) : void => {
-        // Format form elements
-        PublicUtils.formatFormElements(dataFormElements, formElements);
+        PublicUtils.formatFormElements(dataFormElements, formElements); // Format form elements
+        PublicUtils.formatAllResponsesInfos(formElements, dataResponsesInfos, allResponsesInfos); // Format mapping
+    }
 
-        // Format mapping
+    static formatAllResponsesInfos = (formElements: FormElements, dataResponsesInfos: any, allResponsesInfos: Map<FormElement, Map<Question, Responses>>) : void => {
         allResponsesInfos.clear();
         for (let formElementMap of dataResponsesInfos) {
             let key: any = formElementMap[0];

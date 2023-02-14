@@ -32,11 +32,19 @@ class Controller implements IViewModel {
 
     $onInit = async () : Promise<void> => {
         await this.init();
+
+        // used when previous question is same type than this one
+        this.$scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.REFRESH_QUESTION, (event, data) => {
+            this.responses = data.get(this.question);
+            this.init();
+        });
     }
 
     $onDestroy = async (): Promise<void> => {}
 
     init = async () : Promise<void> => {
+        if (this.responses == null) return; // happens when previous question is not same type than this one
+
         if (this.question.question_type === Types.TIME && this.responses.all[0].answer) {
             this.responses.all[0].answer = new Date("January 01 1970 " + this.responses.all[0].answer);
         }
@@ -54,8 +62,6 @@ class Controller implements IViewModel {
             let answer: number = Number.parseInt(this.responses.all[0].answer.toString());
             this.responses.all[0].answer = Number.isNaN(answer) ? this.question.cursor_min_val : answer;
         }
-
-        this.$scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.REFRESH_QUESTION, () => { this.init(); });
     }
 
     getHtmlDescription = (description: string): string => {
@@ -68,7 +74,7 @@ function directive() {
         restrict: 'E',
         transclude: true,
         scope: {
-            question: '=',
+            question: '<',
             responses: '='
         },
         controllerAs: 'vm',

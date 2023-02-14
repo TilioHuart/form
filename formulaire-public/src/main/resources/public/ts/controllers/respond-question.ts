@@ -49,7 +49,6 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 		let formElementPosition = vm.historicPosition[vm.historicPosition.length - 1];
 		vm.formElement = vm.formElements.all[formElementPosition - 1];
 		initFormElementResponses();
-
 		$scope.safeApply();
 	}
 
@@ -57,9 +56,10 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 		formatResponses();
 		let prevPosition = vm.historicPosition[vm.historicPosition.length - 2];
 		if (prevPosition > 0) {
+			let isSameQuestionType: boolean = vm.formElement.question_type === vm.formElements.all[prevPosition - 1].question_type;
 			vm.formElement = vm.formElements.all[prevPosition - 1];
 			vm.historicPosition.pop();
-			goToFormElement();
+			goToFormElement(isSameQuestionType);
 		}
 	};
 
@@ -67,9 +67,10 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 		formatResponses();
 		let nextPosition = getNextPositionIfValid();
 		if (nextPosition && nextPosition <= vm.nbFormElements) {
+			let isSameQuestionType: boolean = vm.formElement.question_type === vm.formElements.all[nextPosition - 1].question_type;
 			vm.formElement = vm.formElements.all[nextPosition - 1];
 			vm.historicPosition.push(vm.formElement.position);
-			goToFormElement();
+			goToFormElement(isSameQuestionType);
 		}
 		else if (nextPosition !== undefined) {
 			updateStorage();
@@ -83,9 +84,10 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
 	// Utils
 
-	const goToFormElement = () : void => {
-		initFormElementResponses();
+	const goToFormElement = (isSameQuestionType: boolean) : void => {
 		updateStorage();
+		if (isSameQuestionType) $scope.safeApply();
+		initFormElementResponses();
 		window.scrollTo(0, 0);
 		$scope.safeApply();
 	};
@@ -129,8 +131,6 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 			let question: Question = questions[i];
 			let questionResponses: Responses = vm.allResponsesInfos.get(vm.formElement).get(question);
 
-
-			// for (let response of questionResponses) {
 			for (let response of questionResponses.all) {
 				if (!response.answer) {
 					response.answer = "";
@@ -141,8 +141,6 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 						response.answer = moment(response.answer).format("HH:mm");
 					} else if (questionType === Types.DATE && typeof response.answer != "string") {
 						response.answer = moment(response.answer).format("DD/MM/YYYY");
-					} else if (questionType === Types.CURSOR && typeof response.answer != "string") {
-						response.answer = response.answer.toString();
 					}
 				}
 			}
@@ -170,6 +168,9 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 						}
 					}
 				}
+				else if (question.question_type === Types.CURSOR) {
+					questionResponses.all.push(new Response(question.id, null, question.cursor_min_val));
+				}
 				else {
 					questionResponses.all.push(new Response(question.id));
 				}
@@ -177,9 +178,13 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 				vm.allResponsesInfos.get(vm.formElement).set(question, questionResponses);
 			}
 		}
+		else {
+			// Resync responses from storage and update only part about the current formElement
+			let dataResponsesInfos: any = JSON.parse(sessionStorage.getItem('allResponsesInfos'));
+			PublicUtils.formatAllResponsesInfos(vm.formElements, dataResponsesInfos, vm.allResponsesInfos);
+		}
 
-		$scope.safeApply();
-		$scope.$broadcast(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.REFRESH_QUESTION);
+		$scope.$broadcast(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.REFRESH_QUESTION, vm.allResponsesInfos.get(vm.formElement));
 	};
 
 	const updateStorage = () : void => {

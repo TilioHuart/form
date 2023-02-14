@@ -36,9 +36,10 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
         bindToController: true,
         template: `
             <div class="question-item" ng-class="vm.question.section_id ? 'twelve' : 'nine'">
-                <div class="domino" ng-class="{'questionError': !vm.question.title || vm.question.choices.length === 0 
-                || (vm.Types.CURSOR && !vm.cursorChoiceIsConsistent()), 
-                                               'disabled': vm.hasFormResponses || vm.question.selected}">
+                <div class="domino" ng-class="{
+                'questionError': !vm.question.title || vm.question.choices.length === 0 || (vm.Types.CURSOR && !vm.cursorChoiceIsConsistent()),
+                'disabled': vm.hasFormResponses || vm.question.selected
+                }">
                     <div class="question-top grab">
                         <div class="dots" ng-if="vm.reorder || !vm.hasFormResponses">
                             <i class="i-drag xl-icon"></i>
