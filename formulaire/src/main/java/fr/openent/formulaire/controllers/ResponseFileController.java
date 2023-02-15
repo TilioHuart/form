@@ -1,5 +1,7 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.core.enums.I18nKeys;
+import fr.openent.form.helpers.I18nHelper;
 import fr.openent.formulaire.helpers.folder_exporter.FolderExporterZip;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
@@ -119,7 +121,7 @@ public class ResponseFileController extends ControllerHelper {
             JsonObject root = new JsonObject()
                     .put(ID, UUID.randomUUID().toString())
                     .put(TYPE, FOLDER)
-                    .put(NAME, I18n.getInstance().translate("formulaire.archive.zip.name", I18n.DEFAULT_DOMAIN, I18n.acceptLanguage(request)))
+                    .put(NAME, I18nHelper.getI18nValue(I18nKeys.ARCHIVE_ZIP_NAME, request))
                     .put(FOLDERS, new JsonArray());
             JsonObject groupFiles = new JsonObject();
 

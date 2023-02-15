@@ -139,7 +139,8 @@ public class FormResponsesExportCSV {
                 String answer = "";
                 for (int rep = 0; rep < questionResponses.size(); rep++) {
                   JsonObject response = questionResponses.getJsonObject(rep);
-                  answer += response.getString(ANSWER) + (rep < questionResponses.size() - 1 ? ";" : "");
+                  String repAnswer = response.getString(CUSTOM_ANSWER, null) != null ? response.getString(CUSTOM_ANSWER) : response.getString(ANSWER);
+                  answer += repAnswer + (rep < questionResponses.size() - 1 ? ";" : "");
                 }
                 content.append(addResponse(answer, allQuestions.lastIndexOf(question) == nbQuestions - 1));
               }

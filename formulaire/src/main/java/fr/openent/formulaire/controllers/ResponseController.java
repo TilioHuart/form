@@ -209,6 +209,7 @@ public class ResponseController extends ControllerHelper {
                             }
 
                             JsonObject choice = choiceEvt.right().getValue();
+                            boolean isCustomChoice = choice.getBoolean(IS_CUSTOM);
 
                             // Check choice validity
                             if (question.getMatrixId() != null &&
@@ -221,7 +222,7 @@ public class ResponseController extends ControllerHelper {
                             }
                             else if (question.getMatrixId() == null &&
                                     (!question.getId().equals(choice.getInteger(QUESTION_ID).longValue()) ||
-                                    !choice.getString(VALUE).equals(response.getString(ANSWER)))) {
+                                    (!isCustomChoice && !choice.getString(VALUE).equals(response.getString(ANSWER))))) {
                                 String message = "[Formulaire@ResponseController::createResponse] Wrong choice for response " + response;
                                 log.error(message);
                                 badRequest(request);
@@ -351,19 +352,19 @@ public class ResponseController extends ControllerHelper {
                             JsonObject choice = choiceEvt.right().getValue();
 
                             // Check choice validity
-                            if (question.getInteger(MATRIX_ID) != null &&
-                                (!choice.getInteger(QUESTION_ID).equals(question.getInteger(MATRIX_ID)) ||
-                                !choice.getString(VALUE).equals(response.getString(ANSWER)))) {
-                                String message ="[Formulaire@updateResponse] Wrong choice for response " + response;
-                                log.error(message);
-                                badRequest(request, message);
-                                return;
+                            boolean isMatrixResponseInvalid = question.getInteger(MATRIX_ID) != null &&
+                                    (!choice.getInteger(QUESTION_ID).equals(question.getInteger(MATRIX_ID)) ||
+                                            !choice.getString(VALUE).equals(response.getString(ANSWER)));
+                            boolean isCustomResponseInvalid = question.getInteger(MATRIX_ID) == null &&
+                                    choice.getBoolean(IS_CUSTOM) &&
+                                    !choice.getInteger(QUESTION_ID).equals(questionId);
+                            boolean isClassicResponseInvalid = question.getInteger(MATRIX_ID) == null &&
+                                    !choice.getBoolean(IS_CUSTOM) &&
+                                    (!choice.getInteger(QUESTION_ID).equals(questionId) ||
+                                            !choice.getString(VALUE).equals(response.getString(ANSWER)));
 
-                            }
-                            else if (question.getInteger(MATRIX_ID) == null &&
-                                (!choice.getInteger(QUESTION_ID).equals(questionId) ||
-                                !choice.getString(VALUE).equals(response.getString(ANSWER)))) {
-                                String message = "[Formulaire@updateResponse] Wrong choice for response " + response;
+                            if (isMatrixResponseInvalid || isCustomResponseInvalid || isClassicResponseInvalid) {
+                                String message ="[Formulaire@updateResponse] Wrong choice for response " + response;
                                 log.error(message);
                                 badRequest(request, message);
                                 return;

@@ -1,9 +1,7 @@
 import {Directive, ng} from "entcore";
-import {Question, QuestionChoice} from "@common/models";
-import {questionChoiceService} from "@common/services";
-import {FormElementUtils, I18nUtils} from "@common/utils";
+import {Question} from "@common/models";
+import {I18nUtils} from "@common/utils";
 import {Direction} from "@common/core/enums";
-import {PropPosition} from "@common/core/enums/prop-position";
 
 interface IViewModel {
     question: Question,
@@ -11,8 +9,6 @@ interface IViewModel {
     I18n: I18nUtils;
     Direction: typeof Direction;
 
-    createNewChoice(): void;
-    moveChoice(choice: QuestionChoice, direction: string): void;
     deleteChoice(index: number): Promise<void>;
 }
 
@@ -31,25 +27,32 @@ export const questionTypeMultipleanswer: Directive = ng.directive('questionTypeM
             <div class="twelve">
                 <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
                     <div class="container-arrow" ng-if="vm.question.selected">
-                        <div ng-class="{hidden : $first}" ng-click="vm.moveChoice(choice, vm.Direction.UP)">
+                        <div ng-class="{hidden : $first || choice.is_custom}" ng-click="vm.question.moveChoice(choice, vm.Direction.UP)">
                             <i class="i-chevron-up lg-icon"></i>
                         </div>
-                        <div ng-class="{hidden : $last}" ng-click="vm.moveChoice(choice, vm.Direction.DOWN)">
+                        <div ng-class="{hidden : $last || vm.question.choices.all[$index+1].is_custom}"
+                             ng-click="vm.question.moveChoice(choice, vm.Direction.DOWN)">
                             <i class="i-chevron-down lg-icon"></i>
                         </div>
                     </div>
                     <label class="twelve left-spacing-twice">
                         <input type="checkbox" id="check-[[choice.id]]" disabled>
                         <span style="cursor: default"></span>
-                        <input type="text" class="width95 ten-mobile" ng-model="choice.value" ng-if="!vm.question.selected" disabled
-                                placeholder="[[vm.I18n.getWithParam('formulaire.choice', choice.position)]]">
-                        <input type="text" class="width95 ten-mobile" ng-model="choice.value" ng-if="vm.question.selected" input-guard
-                                placeholder="[[vm.I18n.getWithParam('formulaire.choice', choice.position)]]">
+                        <input type="text" class="width95 ten-mobile" ng-model="choice.value" ng-if="!vm.question.selected && !choice.is_custom"
+                                placeholder="[[vm.I18n.getWithParam('formulaire.choice', choice.position)]]" disabled>
+                        <input type="text" class="width95 ten-mobile" ng-model="choice.value" ng-if="vm.question.selected && !choice.is_custom"
+                                placeholder="[[vm.I18n.getWithParam('formulaire.choice', choice.position)]]" input-guard>
+                        <input type="text" class="width95 ten-mobile" ng-if="choice.is_custom"
+                                value="[[vm.I18n.translate('formulaire.other')]] : " disabled>
                     </label>
                     <i class="i-cancel lg-icon dontSave" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
                 </div>
-                <div style="display: flex; justify-content: center;" ng-if="vm.question.selected && !vm.hasFormResponses">
-                    <i class="i-plus-circle lg-icon" ng-click="vm.createNewChoice()"></i>
+                <div class="add-choice" ng-if="vm.question.selected && !vm.hasFormResponses">
+                    <i class="i-plus-circle lg-icon" ng-click="vm.question.createNewChoice()"></i>
+                    <div ng-if="!vm.question.choices.all[vm.question.choices.all.length - 1].is_custom">
+                        <i18n>formulaire.question.add.choice.other.text</i18n>
+                        <a class="dontSave" ng-click="vm.question.createNewChoice(true)"><i18n>formulaire.question.add.choice.other.link</i18n></a>
+                    </div>
                 </div>
             </div>
         `,
@@ -62,27 +65,10 @@ export const questionTypeMultipleanswer: Directive = ng.directive('questionTypeM
             vm.I18n = I18nUtils;
             vm.Direction = Direction;
 
-            vm.createNewChoice = () : void => {
-                vm.question.choices.all.push(new QuestionChoice(vm.question.id, vm.question.choices.all.length + 1));
-                $scope.$apply();
-            };
-
-            vm.moveChoice = (choice: QuestionChoice, direction: string) : void => {
-                FormElementUtils.switchPositions(vm.question.choices, choice.position - 1, direction, PropPosition.POSITION);
-                vm.question.choices.all.sort((a, b) => a.position - b.position);
-                $scope.$apply();
-            };
-
             vm.deleteChoice = async (index: number) : Promise<void> => {
-                if (vm.question.choices.all[index].id) {
-                    await questionChoiceService.delete(vm.question.choices.all[index].id);
-                }
-                for (let i = index + 1; i < vm.question.choices.all.length; i++) {
-                    vm.question.choices.all[i].position--;
-                }
-                vm.question.choices.all.splice(index,1);
+                await vm.question.deleteChoice(index);
                 $scope.$apply();
-            };
+            }
         }
     };
 });

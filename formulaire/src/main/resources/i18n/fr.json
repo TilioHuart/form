@@ -68,6 +68,7 @@
   "formulaire.next": "Suivant",
   "formulaire.prev": "Précédent",
   "formulaire.seeMore": "Voir plus...",
+  "formulaire.other": "Autre",
   "formulaire.goTo": "Aller à ",
   "formulaire.date.opening": "Date d'ouverture",
   "formulaire.date.ending": "Date de fermeture",
@@ -80,6 +81,7 @@
   "formulaire.delete.title": "Supprimer définitivement",
   "formulaire.results.empty": "Désolé, ce formulaire n'a pour l'instant reçu aucune réponse.",
   "formulaire.results.reminder": "N'hésitez pas à leur envoyer un rappel.",
+  "formulaire.results.custom.answers": "Détails des réponses 'Autre' :",
   "formulaire.move.title": "Déplacer la sélection",
   "formulaire.move.folder.tree": "Utilisez l'arbre de navigation suivant pour choisir la cible",
   "formulaire.block.sharing": "Une ou plusieurs questions de votre formulaire ne sont pas valides. Veuillez corriger ces questions avant d'effectuer le partage.",
@@ -236,6 +238,8 @@
   "formulaire.question.date.empty": "Date au format : jj/mm/aaaa",
   "formulaire.question.time.empty": "Heure au format : 00:00",
   "formulaire.question.file.empty": "Dépôt de fichier",
+  "formulaire.question.add.choice.other.text": "ou ajouter un ",
+  "formulaire.question.add.choice.other.link": "champ \"Autres\"",
   "formulaire.question.missing.field.title": "Attention, la question ci-dessus nécessite un titre pour être valide.",
   "formulaire.question.missing.field.choice": "Attention, la question ci-dessus nécessite au moins un choix pour être valide.",
   "formulaire.question.save.missing.field": "Attention, certaines questions manquent d'informations pour être valides !",
@@ -273,6 +277,8 @@
   "formulaire.responses.send.continue": "Voulez-vous continuer ?",
   "formulaire.responses.empty": "Vous n'avez aucun formulaire en attente de réponse.",
   "formulaire.responses.empty.notif": "Vous recevrez une notification dès qu'un formulaire vous aura été envoyé.",
+  "formulaire.response.custom.explanation": "Vous avez saisi le choix 'Autre', veuillez indiquez votre réponse dans le champ suivant : ",
+  "formulaire.response.custom.write": "Saisissez votre réponse",
 
 
   "formulaire.error": "Erreur",

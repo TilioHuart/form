@@ -91,25 +91,27 @@ public class DefaultResponseService implements ResponseService {
 
     @Override
     public void create(JsonObject response, UserInfos user, String questionId, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO " + RESPONSE_TABLE + " (question_id, choice_id, answer, responder_id, distribution_id) " +
-                "VALUES (?, ?, ?, ?, ?) RETURNING *;";
+        String query = "INSERT INTO " + RESPONSE_TABLE + " (question_id, choice_id, answer, responder_id, distribution_id, custom_answer) " +
+                "VALUES (?, ?, ?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(questionId)
                 .add(response.getInteger(CHOICE_ID, null))
                 .add(response.getString(ANSWER, ""))
                 .add(user.getUserId())
-                .add(response.getInteger(DISTRIBUTION_ID, null));
+                .add(response.getInteger(DISTRIBUTION_ID, null))
+                .add(response.getString(CUSTOM_ANSWER, null));
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
     @Override
     public void update(UserInfos user, String responseId, JsonObject response, Handler<Either<String, JsonObject>> handler) {
-        String query = "UPDATE " + RESPONSE_TABLE + " SET answer = ?, choice_id = ? " +
+        String query = "UPDATE " + RESPONSE_TABLE + " SET answer = ?, choice_id = ?, custom_answer = ? " +
                 "WHERE responder_id = ? AND id = ? RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(response.getString(ANSWER, ""))
                 .add(response.getInteger(CHOICE_ID, null))
+                .add(response.getString(CUSTOM_ANSWER, null))
                 .add(user.getUserId())
                 .add(responseId);
 
@@ -159,7 +161,7 @@ public class DefaultResponseService implements ResponseService {
 
     @Override
     public void exportCSVResponses(String formId, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT d.id, d.responder_id, date_response, structure, question_id, position, answer " +
+        String query = "SELECT d.id, d.responder_id, date_response, structure, question_id, position, answer, custom_answer " +
                 "FROM " + DISTRIBUTION_TABLE + " d " +
                 "JOIN " + RESPONSE_TABLE + " r ON r.distribution_id = d.id " +
                 "JOIN " + QUESTION_TABLE + " q ON r.question_id = q.id " +

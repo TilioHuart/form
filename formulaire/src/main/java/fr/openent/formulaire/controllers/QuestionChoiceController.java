@@ -10,6 +10,7 @@ import fr.openent.formulaire.service.impl.DefaultQuestionService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
@@ -85,6 +86,7 @@ public class QuestionChoiceController extends ControllerHelper {
             }
 
             Integer nextSectionId = choice.getInteger(NEXT_SECTION_ID, null);
+            String locale = I18n.acceptLanguage(request);
             if (nextSectionId != null) {
                 questionService.getSectionIdsByForm(questionId, sectionsEvt -> {
                     if (sectionsEvt.isLeft()) {
@@ -141,12 +143,12 @@ public class QuestionChoiceController extends ControllerHelper {
                             return;
                         }
 
-                        questionChoiceService.create(questionId, choice, defaultResponseHandler(request));
+                        questionChoiceService.create(questionId, choice, locale, defaultResponseHandler(request));
                     });
                 });
             }
             else {
-                questionChoiceService.create(questionId, choice, defaultResponseHandler(request));
+                questionChoiceService.create(questionId, choice, locale, defaultResponseHandler(request));
             }
         });
     }
@@ -174,6 +176,7 @@ public class QuestionChoiceController extends ControllerHelper {
 
             String questionId = choice.getInteger(QUESTION_ID).toString();
             Integer nextSectionId = choice.getInteger(NEXT_SECTION_ID, null);
+            String locale = I18n.acceptLanguage(request);
             if (nextSectionId != null) {
                 questionService.getSectionIdsByForm(questionId, sectionsEvt -> {
                     if (sectionsEvt.isLeft()) {
@@ -230,12 +233,12 @@ public class QuestionChoiceController extends ControllerHelper {
                             return;
                         }
 
-                        questionChoiceService.update(choiceId, choice, defaultResponseHandler(request));
+                        questionChoiceService.update(choiceId, choice, locale, defaultResponseHandler(request));
                     });
                 });
             }
             else {
-                questionChoiceService.update(choiceId, choice, defaultResponseHandler(request));
+                questionChoiceService.update(choiceId, choice, locale, defaultResponseHandler(request));
             }
         });
     }

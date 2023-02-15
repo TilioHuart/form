@@ -74,39 +74,59 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
             <div ng-if="vm.question.question_type == vm.Types.FREETEXT" class="freetext" data-ng-bind-html="vm.getHtmlDescription(vm.question.statement)"></div>
 
             <!-- List of results SINGLEANSWER, MULTIPLEANSWER, SINGLEANSWERRADIO -->
-            <div class="choices" ng-if="vm.question.question_type == vm.Types.SINGLEANSWER ||
-                                        vm.question.question_type == vm.Types.MULTIPLEANSWER ||
-                                        vm.question.question_type == vm.Types.SINGLEANSWERRADIO">
-                <!-- Data -->
-                <div class="twelve-mobile" ng-class="vm.question.question_type == vm.Types.MULTIPLEANSWER ? 'twelve' : 'five'">
-                    <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']" class="choice">
-                        <!-- Data for MULTIPLEANSWER -->
-                        <div class="infos twelve-mobile" ng-class="vm.question.question_type == vm.Types.MULTIPLEANSWER  ? 'five' : 'twelve'">
-                            <div class="choice-value eight twelve-mobile ellipsis">
-                                <span ng-if="($index+1) != vm.question.choices.all.length">[[$index + 1]]. </span>[[choice.value]]
+            <div>
+                <div class="choices" ng-if="vm.question.canHaveCustomAnswers()">
+                    <!-- Data -->
+                    <div class="twelve-mobile" ng-class="vm.question.question_type == vm.Types.MULTIPLEANSWER ? 'twelve' : 'five'">
+                        <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']" class="choice">
+                            <!-- Data for MULTIPLEANSWER -->
+                            <div class="infos twelve-mobile" ng-class="vm.question.question_type == vm.Types.MULTIPLEANSWER  ? 'five' : 'twelve'">
+                                <div class="choice-value eight twelve-mobile ellipsis">
+                                    <span ng-if="($index+1) != vm.question.choices.all.length">[[$index + 1]]. </span>[[choice.value]]
+                                </div>
+                                <div class="four twelve-mobile ellipsis bold">
+                                    [[choice.nbResponses]]
+                                    <i18n ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER && choice.nbResponses <= 1">formulaire.vote</i18n>
+                                    <i18n ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER && choice.nbResponses > 1">formulaire.votes</i18n>
+                                    <i18n ng-if="vm.question.question_type != vm.Types.MULTIPLEANSWER && choice.nbResponses <= 1">formulaire.response</i18n>
+                                    <i18n ng-if="vm.question.question_type != vm.Types.MULTIPLEANSWER && choice.nbResponses > 1">formulaire.responses</i18n>
+                                    ([[vm.getWidth(choice.nbResponses, 100).toFixed(2)]]%)
+                                </div>
                             </div>
-                            <div class="four twelve-mobile ellipsis bold">
-                                [[choice.nbResponses]]
-                                <i18n ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER && choice.nbResponses <= 1">formulaire.vote</i18n>
-                                <i18n ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER && choice.nbResponses > 1">formulaire.votes</i18n>
-                                <i18n ng-if="vm.question.question_type != vm.Types.MULTIPLEANSWER && choice.nbResponses <= 1">formulaire.response</i18n>
-                                <i18n ng-if="vm.question.question_type != vm.Types.MULTIPLEANSWER && choice.nbResponses > 1">formulaire.responses</i18n>
-                                ([[vm.getWidth(choice.nbResponses, 100).toFixed(2)]]%)
-                            </div>
-                        </div>
-                        <!-- Graph for MULTIPLEANSWER -->
-                        <div ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER" class="seven zero-mobile">
-                            <div class="graph-bar"
-                                 ng-style="{width: (vm.getWidth(choice.nbResponses, 95) + '%'), 'background-color': vm.getColor(choice.id)}">
+                            <!-- Graph for MULTIPLEANSWER -->
+                            <div ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER" class="seven zero-mobile">
+                                <div class="graph-bar"
+                                     ng-style="{width: (vm.getWidth(choice.nbResponses, 95) + '%'), 'background-color': vm.getColor(choice.id)}">
+                                </div>
                             </div>
                         </div>
                     </div>
+    
+                    <!-- Graph for SINGLEANSWER, SINGLEANSWERRADIO -->
+                    <div class="graph-camembert seven zero-mobile"
+                         ng-if="vm.question.question_type == vm.Types.SINGLEANSWER
+                                || vm.question.question_type == vm.Types.SINGLEANSWERRADIO">
+                        <div class="eight">
+                            <div id="chart-[[vm.question.id]]"></div>
+                        </div>
+                    </div>
                 </div>
-
-                <!-- Graph for SINGLEANSWER, SINGLEANSWERRADIO -->
-                <div class="graph-camembert seven zero-mobile" ng-if="vm.question.question_type == vm.Types.SINGLEANSWER || vm.question.question_type == vm.Types.SINGLEANSWERRADIO">
-                    <div class="eight">
-                        <div id="chart-[[vm.question.id]]"></div>
+                
+                <!-- Custom answers -->
+                <div class="custom-answers">
+                    <div class="custom-answers-title"><i18n>formulaire.results.custom.answers</i18n></div>
+                    <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':true" class="distrib"
+                         ng-if="vm.results.get(distrib.id).length > 0 && vm.question.hasCustomChoice()">
+                        <div class="infos four twelve-mobile">
+                            <div class="four twelve-mobile">[[vm.DateUtils.displayDate(distrib.date_response)]]</div>
+                            <div class="eight twelve-mobile ellipsis" ng-if="!vm.form.anonymous">[[distrib.responder_name]]</div>
+                        </div>
+                        <div class="eight twelve-mobile results">
+                            <div ng-repeat="result in vm.results.get(distrib.id) | filter:{custom_answer:'!!'}"
+                                 ng-class="{'notLast' : !$last}">
+                                <div>[[result.custom_answer]]</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -119,7 +139,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
             </div>
 
             <!-- List of results SHORTANSWER, LONGANSWER, DATE, TIME, FILE -->
-            <div ng-if="!vm.question.question_type.isTypeGraphQuestion() && vm.question.question_type != vm.Types.FREETEXT">
+            <div ng-if="!vm.question.isTypeGraphQuestion() && vm.question.question_type != vm.Types.FREETEXT">
                 <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':true" class="distrib" ng-if="vm.results.get(distrib.id).length > 0">
                     <div class="infos four twelve-mobile">
                         <div class="four twelve-mobile">[[vm.DateUtils.displayDate(distrib.date_response)]]</div>
@@ -177,6 +197,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                     vm.nbResponses = new Set(vm.responses.all.map((r: Response) => r.distribution_id)).size;
 
                     if (vm.isGraphQuestion) {
+                        if (vm.question.canHaveCustomAnswers()) vm.syncResultsMap();
                         vm.question.fillChoicesInfo(vm.distributions, vm.responses.all);
                         vm.colors = ColorUtils.generateColorList(vm.question.choices.all.length);
                         generateChart();
@@ -247,7 +268,8 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
             vm.formatAnswers = (distribId: number) : any => {
                 let results: Response[] =  vm.responses.all.filter((r: Response) => r.distribution_id === distribId);
                 for (let result of results) {
-                    if (result.answer == "" || (vm.question.question_type === Types.FILE && result.files.all.length <= 0)) {
+                    if (!result.custom_answer && (result.answer == ""
+                        || (vm.question.question_type === Types.FILE && result.files.all.length <= 0))) {
                         result.answer = "-";
                     }
                 }

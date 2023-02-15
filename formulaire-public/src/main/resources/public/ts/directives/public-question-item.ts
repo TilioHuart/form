@@ -15,6 +15,8 @@ interface IPublicQuestionItemProps {
 interface IViewModel extends ng.IController, IPublicQuestionItemProps {
     init(): Promise<void>;
     getHtmlDescription(description: string): string;
+    isSelectedChoiceCustom(choiceId: number): boolean;
+    deselectIfEmpty(choice: QuestionChoice) : void;
 }
 
 interface IPublicQuestionItemScope extends IScope, IPublicQuestionItemProps {
@@ -67,6 +69,22 @@ class Controller implements IViewModel {
     getHtmlDescription = (description: string): string => {
         return !!description ? this.$sce.trustAsHtml(description) : null;
     }
+
+    isSelectedChoiceCustom = (choiceId: number) : boolean => {
+        let selectedChoice: QuestionChoice = this.question.choices.all.find((c: QuestionChoice) => c.id === choiceId);
+        return selectedChoice && selectedChoice.is_custom;
+    }
+
+    deselectIfEmpty = (choice: QuestionChoice) : void => { // Unselected choice if custom answer is empty
+        if (this.question.question_type === Types.SINGLEANSWERRADIO) {
+            this.responses.all[0].choice_id = this.responses.all[0].custom_answer.length > 0 ? choice.id : null;
+        }
+        else if (this.question.question_type === Types.MULTIPLEANSWER) {
+            let response: Response = this.responses.all[this.mapChoiceResponseIndex.get(choice)];
+            response.selected = response.custom_answer.length > 0;
+        }
+        else return;
+    }
 }
 
 function directive() {
@@ -99,12 +117,21 @@ function directive() {
                             <option ng-value="">[[vm.I18n.translate('formulaire.public.options.select')]]</option>
                             <option ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']" ng-value="choice.id">[[choice.value]]</option>
                         </select>
+                        <div ng-if="vm.isSelectedChoiceCustom(vm.responses.all[0].choice_id)">
+                            <i18n>formulaire.public.response.custom.explanation</i18n>
+                            <input type="text" ng-model="vm.responses.all[0].custom_answer" i18n-placeholder="formulaire.public.response.custom.write">
+                        </div>
                     </div>
                     <div ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER">
                         <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
                             <label>
                                 <input type="checkbox" ng-model="vm.responses.all[vm.mapChoiceResponseIndex.get(choice)].selected" input-guard>
                                 <span>[[choice.value]]</span>
+                                <span ng-if="choice.is_custom"> : 
+                                    <input type="text" ng-model="vm.responses.all[vm.mapChoiceResponseIndex.get(choice)].custom_answer"
+                                           ng-change="vm.deselectIfEmpty(choice)"
+                                           i18n-placeholder="formulaire.public.response.custom.write">
+                                </span>
                             </label>
                         </div>
                     </div>
@@ -117,7 +144,13 @@ function directive() {
                     <div ng-if ="vm.question.question_type == vm.Types.SINGLEANSWERRADIO">
                         <div ng-repeat ="choice in vm.question.choices.all | orderBy:['position', 'id']">
                             <label>
-                                <input type="radio" ng-model="vm.responses.all[0].choice_id" ng-value="choice.id" input-guard>[[choice.value]]
+                                <input type="radio" ng-model="vm.responses.all[0].choice_id" ng-value="choice.id" input-guard>
+                                <span>[[choice.value]]</span>
+                                <span ng-if="choice.is_custom"> : 
+                                    <input type="text" ng-model="vm.responses.all[0].custom_answer"
+                                           ng-change="vm.deselectIfEmpty(choice)"
+                                           i18n-placeholder="formulaire.public.response.custom.write">
+                                </span>
                             </label>
                         </div>
                     </div>

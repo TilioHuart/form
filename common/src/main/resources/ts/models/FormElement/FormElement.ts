@@ -1,5 +1,6 @@
 import {Selectable} from "entcore-toolkit";
 import {FormElementType} from "@common/core/enums/form-element-type";
+import {Question, Types} from "@common/models";
 
 export abstract class FormElement implements Selectable {
     id: number;
@@ -37,5 +38,13 @@ export abstract class FormElement implements Selectable {
 
     isQuestion = () : boolean => {
         return this.form_element_type === FormElementType.QUESTION;
+    }
+
+    isSameQuestionType = (formElement: FormElement) : boolean => {
+        return this instanceof Question && this.isSameQuestionType(formElement);
+    }
+
+    isSameQuestionTypeOfType = (formElement: FormElement, type: Types) : boolean => {
+        return this instanceof Question && this.isSameQuestionTypeOfType(formElement, type);
     }
 }

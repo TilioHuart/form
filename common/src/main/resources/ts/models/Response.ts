@@ -12,6 +12,7 @@ export class Response implements Selectable {
     answer: string|Date|number;
     distribution_id: number;
     original_id: number;
+    custom_answer: string;
     files: ResponseFiles;
     selected: boolean;
     selectedIndex: boolean[]; // For multiple answer in preview
@@ -23,6 +24,7 @@ export class Response implements Selectable {
         this.answer =  answer ? answer : "";
         this.distribution_id = distribution_id ? distribution_id : null;
         this.original_id = null;
+        this.custom_answer = null;
         this.files = new ResponseFiles();
         this.selected = false;
     }
@@ -35,6 +37,7 @@ export class Response implements Selectable {
             answer: this.answer,
             distribution_id: this.distribution_id,
             original_id: this.original_id,
+            custom_answer: this.custom_answer,
             files: this.files,
             selected: this.selected
         }

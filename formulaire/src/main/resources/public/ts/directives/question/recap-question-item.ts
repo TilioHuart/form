@@ -53,13 +53,13 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ['
                             <div ng-if="vm.question.statement" data-ng-bind-html="vm.getHtmlDescription(vm.question.statement)"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.SHORTANSWER">
-                            <div data-ng-bind-html="vm.getStringResponse(vm.question)"></div>
+                            <div data-ng-bind-html="vm.getStringResponse()"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.LONGANSWER">
-                            <div data-ng-bind-html="vm.getStringResponse(vm.question)"></div>
+                            <div data-ng-bind-html="vm.getStringResponse()"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.SINGLEANSWER">
-                            <div data-ng-bind-html="vm.getStringResponse(vm.question)"></div>
+                            <div data-ng-bind-html="vm.getStringResponse()"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER">
                             <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
@@ -67,15 +67,16 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ['
                                     <input type="checkbox" disabled checked ng-if="vm.isSelectedChoice(choice)">
                                     <input type="checkbox" disabled ng-if="!vm.isSelectedChoice(choice)">
                                     <span style="cursor: default"></span>
-                                    <span class="ten eight-mobile">[[choice.value]]</span>
+                                    <span ng-if="!choice.is_custom || !vm.isSelectedChoice(choice)">[[choice.value]]</span>
+                                    <span ng-if="choice.is_custom && vm.isSelectedChoice(choice)" ng-bind-html="vm.getStringResponse()"></span>
                                 </label>
                             </div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.DATE">
-                            <div data-ng-bind-html="vm.getStringResponse(vm.question)"></div>
+                            <div data-ng-bind-html="vm.getStringResponse()"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.TIME">
-                            <div data-ng-bind-html="vm.getStringResponse(vm.question)"></div>
+                            <div data-ng-bind-html="vm.getStringResponse()"></div>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.FILE">
                             <div ng-repeat="filename in vm.getResponseFileNames()">
@@ -88,7 +89,8 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ['
                                     <input type="radio" disabled checked ng-if="vm.isSelectedChoice(choice)">
                                     <input type="radio" disabled ng-if="!vm.isSelectedChoice(choice)">
                                     <span style="cursor: default"></span>
-                                    <span class="ten eight-mobile">[[choice.value]]</span>
+                                    <span ng-if="!choice.is_custom || !vm.isSelectedChoice(choice)">[[choice.value]]</span>
+                                    <span ng-if="choice.is_custom && vm.isSelectedChoice(choice)" ng-bind-html="vm.getStringResponse()"></span>
                                 </label>
                             </div>
                         </div>
@@ -114,7 +116,7 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ['
                         </table>
                         <div ng-if="vm.question.question_type == vm.Types.CURSOR">
                             <span><i18n>formulaire.selected.value</i18n></span>
-                            <span ng-bind-html="vm.getStringResponse(vm.question)"></span>
+                            <span ng-bind-html="vm.getStringResponse()"></span>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.RANKING">
                             <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
@@ -139,7 +141,8 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ['
             const vm: IViewModel = $scope.vm;
             vm.Types = Types;
             vm.DistributionStatus = DistributionStatus;
-            let missingResponse = "<em>" + idiom.translate('formulaire.response.missing') + "</em>";
+            let missingResponseHtml: string = "<em>" + idiom.translate('formulaire.response.missing') + "</em>";
+            let otherHtml: string = "<em>" + idiom.translate('formulaire.other') + " : </em>";
 
             // Display helper functions
 
@@ -148,12 +151,27 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ['
             }
 
             vm.getStringResponse = () : string => {
-                let responses: Response[] = vm.responses.all.filter((r:Response) => r.question_id === vm.question.id);
-                if (responses && responses.length > 0) {
-                    let answer: string = responses[0].answer.toString();
-                    return answer ? answer : missingResponse;
+                let responses: Response[] = vm.responses.all.filter((r: Response) => r.question_id === vm.question.id);
+                if (responses == null || responses.length <= 0) {
+                    return vm.getHtmlDescription(missingResponseHtml)
                 }
-                return vm.getHtmlDescription(missingResponse);
+
+                if (vm.question.canHaveCustomAnswers()) {
+                    let customChoices: QuestionChoice[] = vm.question.choices.all.filter((c: QuestionChoice) => c.is_custom);
+                    let customChoiceId: number = customChoices.length > 0 ? customChoices[0].id : null;
+                    let customResponses: Response[] = responses.filter((r: Response) => r.choice_id === customChoiceId);
+                    let customResponse: Response = customResponses.length > 0 ? customResponses[0] : null;
+
+                    if (customResponse) {
+                        let customAnswer: string = customResponse.custom_answer
+                            ? customResponse.custom_answer.toString()
+                            : missingResponseHtml;
+                        return `${otherHtml}${customAnswer}`;
+                    }
+                }
+
+                let answer: string = responses[0].answer.toString();
+                return answer ? answer : missingResponseHtml;
             };
 
             vm.isSelectedChoice = (choice, child?) : boolean => {
@@ -169,7 +187,7 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ['
                     return responses[0].files.all.map((rf: ResponseFile) => rf.filename.substring(rf.filename.indexOf("_") + 1));
                 }
                 else {
-                    return [missingResponse];
+                    return [missingResponseHtml];
                 }
             };
 

@@ -1,5 +1,8 @@
 package fr.openent.formulaire.service.impl;
 
+import fr.openent.form.core.enums.I18nKeys;
+import fr.openent.form.core.enums.QuestionTypes;
+import fr.openent.form.helpers.I18nHelper;
 import fr.openent.form.helpers.FutureHelper;
 import fr.openent.formulaire.service.FormService;
 import fr.wseduc.webutils.Either;
@@ -292,7 +295,7 @@ public class DefaultFormService implements FormService {
 
     @Override
     public void duplicate(int formId, UserInfos user, String locale, Handler<Either<String, JsonArray>> handler) {
-        String COPY = I18n.getInstance().translate("formulaire.copy", I18n.DEFAULT_DOMAIN, locale);
+        String COPY = I18nHelper.getI18nValue(I18nKeys.COPY, locale);
         String query =
                 // Duplicate FORM
                 "WITH new_form_id AS (" +

@@ -17,7 +17,6 @@ import {FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_EMIT_EVENT, FORMULAIRE_FORM_ELEME
 interface ViewModel {
     formElements: FormElements;
     formElement: FormElement;
-    responses: (Response|Responses)[];
     distribution: Distribution;
     selectedIndexList: any;
     responsesChoicesList: any;
@@ -44,7 +43,6 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
     const vm: ViewModel = this;
     vm.formElements = new FormElements();
-    vm.responses = [];
     vm.distribution = new Distribution();
     vm.form = new Form();
     vm.nbFormElements = 1;
@@ -84,8 +82,11 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                             questionResponses.all.push(new Response(child.id, choice.id, choice.value, vm.distribution.id));
                         }
                     }
-                    else {
+                    else if (!choice.is_custom) {
                         questionResponses.all.push(new Response(question.id, choice.id, choice.value, vm.distribution.id));
+                    }
+                    else {
+                        questionResponses.all.push(new Response(question.id, choice.id, null, vm.distribution.id));
                     }
                 }
             }
@@ -240,7 +241,15 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
         if (responses.all[0].choice_id) {
             let matchingChoices: QuestionChoice[] = question.choices.all.filter((c: QuestionChoice) => c.id === responses.all[0].choice_id);
-            if (matchingChoices.length == 1) responses.all[0].answer = matchingChoices[0].value;
+            if (matchingChoices.length == 1) {
+                if (!matchingChoices[0].is_custom) {
+                    responses.all[0].answer = matchingChoices[0].value;
+                    responses.all[0].custom_answer = null;
+                }
+                else {
+                    responses.all[0].answer = null;
+                }
+            }
         }
         responses.all[0] = await responseService.save(responses.all[0], question.question_type);
 

@@ -15,6 +15,7 @@ export class QuestionChoice {
     position: number;
     type: ChoiceTypes;
     next_section_id: number;
+    is_custom: boolean;
     nbResponses: number;
 
     constructor (questionId?: number, position: number = 0, value?: string, next_section_id?: number, type?: ChoiceTypes) {
@@ -24,6 +25,7 @@ export class QuestionChoice {
         this.position = position;
         this.type = type ? type : ChoiceTypes.TXT;
         this.next_section_id = next_section_id ? next_section_id : null;
+        this.is_custom = false;
         this.nbResponses = 0;
     }
 
@@ -34,7 +36,8 @@ export class QuestionChoice {
             value: this.value,
             position: this.position,
             type: this.type,
-            next_section_id: this.next_section_id
+            next_section_id: this.next_section_id,
+            is_custom: this.is_custom
         }
     }
 }
