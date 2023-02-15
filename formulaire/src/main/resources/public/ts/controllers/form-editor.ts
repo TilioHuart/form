@@ -292,7 +292,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     }
                     if (question.question_type == Types.MATRIX) {
                         for (let child of question.children.all) {
-                            if (!child.form_id) child.form_id = question.form_id;
+                            child.form_id = question.form_id;
+                            child.matrix_id = questionId;
                             if (child.title) {
                                 await questionService.save(child);
                                 let duplicateChild: Question = new Question(newQuestion.id, child.question_type, child.matrix_position);
