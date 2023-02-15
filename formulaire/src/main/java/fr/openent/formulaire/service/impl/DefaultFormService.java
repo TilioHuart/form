@@ -83,7 +83,7 @@ public class DefaultFormService implements FormService {
     public Future<JsonArray> listForLinker(List<String> groupsAndUserIds, UserInfos user) {
         Promise<JsonArray> promise = Promise.promise();
 
-        JsonArray params = new JsonArray().add(false).add(true).add(true);
+        JsonArray params = new JsonArray();
 
         String checkGroupsAndUserIds = "";
         if (groupsAndUserIds != null && groupsAndUserIds.size() > 0) {
@@ -97,11 +97,12 @@ public class DefaultFormService implements FormService {
         String query = "SELECT f.* FROM " + FORM_TABLE + " f " +
                 "LEFT JOIN " + FORM_SHARES_TABLE + " fs ON f.id = fs.resource_id " +
                 "LEFT JOIN " + MEMBERS_TABLE + " m ON (fs.member_id = m.id AND m.group_id IS NOT NULL) " +
-                "WHERE f.archived = ? AND (f.sent = ? OR f.is_public = ?) AND (" + checkGroupsAndUserIds + "f.owner_id = ?) " +
+                "WHERE (" + checkGroupsAndUserIds + "f.owner_id = ?) AND f.archived = ? " +
+                "AND (f.is_public = ? OR f.id IN (SELECT DISTINCT form_id FROM " + DISTRIBUTION_TABLE + " WHERE active = ?)) " +
                 "GROUP BY f.id " +
                 "ORDER BY f.date_modification DESC;";
 
-        params.add(user.getUserId());
+        params.add(user.getUserId()).add(false).add(true).add(true);
 
         String errorMessage = "[Formulaire@DefaultFormService::listForLinker] Fail to list forms for linker for user with id " + user.getUserId();
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(FutureHelper.handlerEither(promise, errorMessage)));

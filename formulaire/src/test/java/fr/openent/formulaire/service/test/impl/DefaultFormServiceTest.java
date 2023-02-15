@@ -61,11 +61,12 @@ public class DefaultFormServiceTest {
         String expectedQuery = "SELECT f.* FROM " + FORM_TABLE + " f " +
                 "LEFT JOIN " + FORM_SHARES_TABLE + " fs ON f.id = fs.resource_id " +
                 "LEFT JOIN " + MEMBERS_TABLE + " m ON (fs.member_id = m.id AND m.group_id IS NOT NULL) " +
-                "WHERE f.archived = ? AND (f.sent = ? OR f.is_public = ?) AND (f.owner_id = ?) " +
+                "WHERE (f.owner_id = ?) AND f.archived = ? " +
+                "AND (f.is_public = ? OR f.id IN (SELECT DISTINCT form_id FROM " + DISTRIBUTION_TABLE + " WHERE active = ?)) " +
                 "GROUP BY f.id " +
                 "ORDER BY f.date_modification DESC;";
 
-        JsonArray expectedParams = new JsonArray().add(false).add(true).add(true).add(user.getUserId());
+        JsonArray expectedParams = new JsonArray().add(user.getUserId()).add(false).add(true).add(true);
 
         vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
             JsonObject body = (JsonObject) message.body();
@@ -92,16 +93,16 @@ public class DefaultFormServiceTest {
         String expectedQuery = "SELECT f.* FROM " + FORM_TABLE + " f " +
                 "LEFT JOIN " + FORM_SHARES_TABLE + " fs ON f.id = fs.resource_id " +
                 "LEFT JOIN " + MEMBERS_TABLE + " m ON (fs.member_id = m.id AND m.group_id IS NOT NULL) " +
-                "WHERE f.archived = ? AND (f.sent = ? OR f.is_public = ?) " +
-                "AND ((fs.member_id IN " + Sql.listPrepared(groupsAndUserIds.toArray()) +" AND fs.action = ?) OR f.owner_id = ?) " +
+                "WHERE ((fs.member_id IN " + Sql.listPrepared(groupsAndUserIds.toArray()) + " AND fs.action = ?) OR f.owner_id = ?) " +
+                "AND f.archived = ? AND (f.is_public = ? OR f.id IN (SELECT DISTINCT form_id FROM " + DISTRIBUTION_TABLE + " WHERE active = ?)) " +
                 "GROUP BY f.id " +
                 "ORDER BY f.date_modification DESC;";
 
-        JsonArray expectedParams = new JsonArray().add(false).add(true).add(true);
+        JsonArray expectedParams = new JsonArray();
         for (String groupOrUser : groupsAndUserIds) {
             expectedParams.add(groupOrUser);
         }
-        expectedParams.add(MANAGER_RESOURCE_BEHAVIOUR).add(user.getUserId());
+        expectedParams.add(MANAGER_RESOURCE_BEHAVIOUR).add(user.getUserId()).add(false).add(true).add(true);
 
         vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
             JsonObject body = (JsonObject) message.body();
