@@ -754,7 +754,11 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 switchDragAndDropTo(true);
                 rePositionFormElements(vm.formElements);
                 let formElement: FormElement = vm.formElements.getSelectedElement();
-                if (formElement) {
+                if (formElement && (formElement instanceof Section
+                    || formElement.question_type != Types.CURSOR
+                    || (formElement.cursor_min_val != null
+                        && formElement.cursor_max_val != null
+                        && formElement.cursor_min_val != formElement.cursor_max_val))) {
                     let savedElement: FormElement = await formElementService.save(formElement);
                     let newId: number = savedElement.id;
                     formElement.id = newId;

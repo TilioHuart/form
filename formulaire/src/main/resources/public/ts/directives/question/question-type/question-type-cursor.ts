@@ -51,7 +51,7 @@ function directive() {
                 <!-- Line about MIN value and label -->
                 <div class="cursor-line">
                     <div class="cursor-value-min twelve-mobile">
-                        <div class="six four-mobile"><label><i18n>formulaire.question.value.minimum</i18n><em>*</em> : </label></div>
+                        <div class="eight four-mobile"><label><i18n>formulaire.question.value.minimum</i18n><em>*</em> : </label></div>
                         <div ng-if="!vm.hasFormResponses">
                             <input type="number" ng-model="vm.question.cursor_min_val"
                                max="[[vm.question.cursor_max_val - vm.question.cursor_step]]" pattern="\\d*"
@@ -70,7 +70,7 @@ function directive() {
                 <!-- Line about MAX value and label -->
                 <div class="cursor-line">
                     <div class="cursor-value-max twelve-mobile">
-                        <div class="six four-mobile"><label><i18n>formulaire.question.value.maximum</i18n><em>*</em> : </label></div>
+                        <div class="eight four-mobile"><label><i18n>formulaire.question.value.maximum</i18n><em>*</em> : </label></div>
                         <div ng-if="!vm.hasFormResponses">
                             <input type="number" ng-model="vm.question.cursor_max_val"
                                min="[[vm.question.cursor_min_val + vm.question.cursor_step]]" pattern="\\d*"
@@ -89,7 +89,7 @@ function directive() {
                 <!-- Line about STEP value -->
                 <div class="cursor-line">
                     <div class="cursor-value-step">
-                        <div class="six four-mobile"><label><i18n>formulaire.question.value.step</i18n><em>*</em> : </label></div>
+                        <div class="eight four-mobile"><label><i18n>formulaire.question.value.step</i18n><em>*</em> : </label></div>
                         <div ng-if="!vm.hasFormResponses">
                             <input type="number" ng-model="vm.question.cursor_step"
                                ng-change="vm.onChangeStep(vm.question.cursor_step)" pattern="\\d*"
