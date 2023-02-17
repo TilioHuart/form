@@ -104,10 +104,10 @@ export const publicRecapQuestionItem: Directive = ng.directive('publicRecapQuest
                             <span ng-bind-html="vm.getStringResponse()"></span>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.RANKING">
-                            <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
+                            <div ng-repeat="resp in vm.responses.all | orderBy:['choice_position', 'id']">
                                 <label>
                                     <span style="cursor: default"></span>
-                                    <span class="ten eight-mobile">[[choice.value]]</span>
+                                    <span class="ten eight-mobile">[[resp.answer]]</span>
                                 </label>
                             </div>
                         </div>

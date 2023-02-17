@@ -94,6 +94,8 @@ public class Fields {
     public static final String VALUE = "value";
     public static final String ZIPCODE = "zipcode";
 
+    public static final String CHOICE_POSITION = "choice_position";
+
 
     // Request params
     public static final String PARAM_BOOKMARKS_IDS = "bookmarksIds";

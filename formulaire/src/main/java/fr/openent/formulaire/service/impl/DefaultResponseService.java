@@ -91,14 +91,15 @@ public class DefaultResponseService implements ResponseService {
 
     @Override
     public void create(JsonObject response, UserInfos user, String questionId, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO " + RESPONSE_TABLE + " (question_id, choice_id, answer, responder_id, distribution_id, custom_answer) " +
-                "VALUES (?, ?, ?, ?, ?, ?) RETURNING *;";
+        String query = "INSERT INTO " + RESPONSE_TABLE + " (question_id, choice_id, answer, responder_id, distribution_id, choice_position, custom_answer) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(questionId)
                 .add(response.getInteger(CHOICE_ID, null))
                 .add(response.getString(ANSWER, ""))
                 .add(user.getUserId())
                 .add(response.getInteger(DISTRIBUTION_ID, null))
+                .add(response.getInteger(CHOICE_POSITION, null))
                 .add(response.getString(CUSTOM_ANSWER, null));
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));

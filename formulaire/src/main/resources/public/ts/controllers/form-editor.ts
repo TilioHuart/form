@@ -563,7 +563,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     let question: Question = formElement instanceof Question ? formElement : (formElement as Section).questions.all[i];
                     let questionResponses: Responses = new Responses();
 
-                    if (question.isTypeMultipleRep()) {
+                    if (question.isTypeMultipleRep() || question.isRanking()) {
                         for (let choice of question.choices.all) {
                             if (question.children.all.length > 0) {
                                 for (let child of question.children.all) {

@@ -40,5 +40,8 @@
   "formulaire.public.captcha.description": "Avant d'envoyer vos réponses, veuillez résoudre le calcul suivant.",
   "formulaire.public.captcha.reload.description": "Charger un nouveau calcul",
   "formulaire.public.error.captchaService.get": "Une erreur est survenue lors de la récupération du captcha",
-  "formulaire.public.error.captcha": "La réponse au CAPTCHA est erronée. Veuillez réessayer."
+  "formulaire.public.error.captcha": "La réponse au CAPTCHA est erronée. Veuillez réessayer.",
+
+  "formulaire.selected.value": "Selected value : ",
+  "formulaire.public.error.question.reorganization": "Direction de réorganisation inconnue."
 }

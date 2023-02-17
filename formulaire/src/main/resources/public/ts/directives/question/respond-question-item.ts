@@ -1,4 +1,5 @@
 import {Directive, ng} from "entcore";
+import {Direction} from "@common/core/enums";
 import {
     Distribution,
     Question,
@@ -8,20 +9,23 @@ import {
     Responses,
     Types
 } from "../../models";
-import {I18nUtils} from "@common/utils";
+import {FormElementUtils, I18nUtils} from "@common/utils";
+import {PropPosition} from "@common/core/enums/prop-position";
 
 interface IViewModel {
     question: Question;
     responses: Responses;
     distribution: Distribution;
+    Direction: typeof Direction;
     files: Array<File>;
     Types: typeof Types;
     I18n: I18nUtils;
     mapChoiceResponseIndex: Map<QuestionChoice, number>;
 
     $onInit() : Promise<void>;
-    $onChanges(changes: any): Promise<void>;
+    moveResponse(resp: Response, direction: string): void;
     getHtmlDescription(description: string) : string;
+    $onChanges(changes: any): Promise<void>;
     isSelectedChoiceCustom(choiceId: number): boolean;
     deselectIfEmpty(choice: QuestionChoice) : void;
 }
@@ -133,12 +137,27 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                             </div>
                         </div>
                     </div>
-                    <div ng-if ="vm.question.question_type == vm.Types.RANKING">
-                        <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
-                            <label>
-                                <span>[[choice.value]]</span>
-                            </label>
+                    <div ng-if ="vm.question.question_type == vm.Types.RANKING" class="drag">
+                        <div class="row-shadow-effect"
+                             ng-repeat="resp in vm.responses.all | orderBy:['choice_position', 'id']">
+                            <div class="top">
+                                <div class="dots">
+                                    <i class="i-drag lg-icon dark-grey"></i>
+                                    <i class="i-drag lg-icon dark-grey"></i>
+                                </div>
+                            </div>
+                            <div class="main">
+                                <span class="title">[[resp.answer]]</span>
+                                <div class="one two-mobile container-arrow">
+                                    <div ng-class="{hidden : $first}" ng-click="vm.moveResponse(resp, vm.Direction.UP)">
+                                        <i class="i-chevron-up lg-icon"></i>
+                                    </div>
+                                    <div ng-class="{hidden : $last}" ng-click="vm.moveReponse(resp, vm.Direction.DOWN)">
+                                        <i class="i-chevron-down lg-icon"></i>
+                                    </div>
+                            </div>
                         </div>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -222,6 +241,7 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
             const vm: IViewModel = $scope.vm;
             vm.Types = Types;
             vm.I18n = I18nUtils;
+            vm.Direction = Direction;
 
             vm.getHtmlDescription = (description: string) : string => {
                 return !!description ? $sce.trustAsHtml(description) : null;
@@ -242,6 +262,12 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                 }
                 else return;
             }
+            vm.Direction = Direction;
+
+            vm.moveResponse = (resp: Response, direction: string) : void => {
+                FormElementUtils.switchPositions(vm.responses, resp.choice_position - 1, direction, PropPosition.CHOICE_POSITION);
+                vm.responses.all.sort((a: Response, b: Response) => a.choice_position - b.choice_position);
+            };
         }
     };
 }]);

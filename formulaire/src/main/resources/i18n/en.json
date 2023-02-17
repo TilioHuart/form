@@ -220,6 +220,7 @@
   "formulaire.question.type.SINGLEANSWERRADIO": "Radio bouton",
   "formulaire.question.type.MATRIX": "Matrice",
   "formulaire.question.type.CURSOR": "Curseur",
+  "formulaire.question.type.RANKING": "Order",
   "formulaire.question.type.description.FREETEXT": "Saisie d'un texte à afficher au répondant (ex : introduction d'une partie, ...)",
   "formulaire.question.type.description.SHORTANSWER":" Question permettant une réponse texte courte sans mise en page",
   "formulaire.question.type.description.LONGANSWER": "Question permettant une réponse plus longue avec une mise en page",

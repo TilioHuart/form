@@ -1,0 +1,27 @@
+<div class="twelve">
+    <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']" guard-root="formTitle">
+        <!-- Arrow to order -->
+        <div class="container-arrow" ng-if="vm.question.selected">
+            <div ng-class="{hidden : $first}" ng-click="vm.moveChoice(choice, vm.Direction.UP)">
+                <i class="i-chevron-up lg-icon"></i>
+            </div>
+            <div ng-class="{hidden : $last}" ng-click="vm.moveChoice(choice, vm.Direction.DOWN)">
+                <i class="i-chevron-down lg-icon"></i>
+            </div>
+        </div>
+        <!-- Choices -->
+        <label class="twelve left-spacing-twice">
+            <span style="cursor: default"></span>
+            <input type="text" class="width95 ten-mobile" ng-model="choice.value" ng-if="!vm.question.selected" disabled
+                   placeholder="[[vm.I18n.getWithParam('formulaire.choice', choice.position)]]">
+            <input type="text" class="width95 ten-mobile" ng-model="choice.value" ng-if="vm.question.selected" input-guard
+                   placeholder="[[vm.I18n.getWithParam('formulaire.choice', choice.position)]]">
+        </label>
+        <!-- Cross to delete choice -->
+        <i class="i-cancel lg-icon dontSave" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
+    </div>
+    <!-- Plus to add new choice -->
+    <div style="display: flex; justify-content: center;" ng-if="vm.question.selected && !vm.hasFormResponses">
+        <i class="i-plus-circle lg-icon" ng-click="vm.createNewChoice()"></i>
+    </div>
+</div>

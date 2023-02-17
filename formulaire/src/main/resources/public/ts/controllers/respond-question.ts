@@ -93,6 +93,13 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             else if (question.question_type === Types.CURSOR) {
                 questionResponses.all.push(new Response(question.id, null, question.cursor_min_val, vm.distribution.id));
             }
+            if (question.isRanking()) {
+                let questionChoices: QuestionChoice[] = question.choices.all;
+                for (let i: number = 0; i < questionChoices.length; i++) {
+                    let questionChoice: QuestionChoice = questionChoices[i];
+                    questionResponses.all.push(new Response(question.id, questionChoice.id, questionChoice.value, vm.distribution.id, questionChoice.position));
+                }
+            }
             else {
                 questionResponses.all.push(new Response(question.id, null, null, vm.distribution.id));
             }
@@ -221,7 +228,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         let responses: Responses = vm.currentResponses.get(question);
         let files: File[] = vm.currentFiles.get(question);
 
-        if (question.isTypeMultipleRep()) {
+        if (question.isTypeMultipleRep() || question.isRanking()) {
             await responseService.deleteByQuestionAndDistribution(question.id, vm.distribution.id);
             if (responses.selected.length > 0) {
                 for (let response of responses.selected) {
@@ -233,8 +240,14 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                     await responseService.create(new Response(child.id, null, null, vm.distribution.id));
                 }
             }
+            // In case of question type ranking, we need to add a choice index to each Response
+            if (question.isRanking()) {
+                for (let resp of responses.all) {
+                    responseService.create(new Response(question.id, resp.choice_id, resp.answer, vm.distribution.id,  resp.choice_position));
+                }
+            }
             else {
-                await responseService.create(new Response(question.id, null, null, vm.distribution.id));
+                responseService.create(new Response(question.id, null, null, vm.distribution.id));
             }
             return true;
         }

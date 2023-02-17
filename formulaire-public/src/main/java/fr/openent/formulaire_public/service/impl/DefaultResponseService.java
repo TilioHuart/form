@@ -30,8 +30,8 @@ public class DefaultResponseService implements ResponseService {
 
         if (!responsesList.isEmpty()) {
             SqlStatementsBuilder s = new SqlStatementsBuilder();
-            String query = "INSERT INTO " + RESPONSE_TABLE + " (question_id, choice_id, answer, responder_id, distribution_id, custom_answer) " +
-                    "VALUES (?, ?, ?, ?, ?, ?);";
+            String query = "INSERT INTO " + RESPONSE_TABLE + " (question_id, choice_id, answer, responder_id, distribution_id, choice_position, custom_answer) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?);";
 
             s.raw(TRANSACTION_BEGIN_QUERY);
             for (JsonObject response : responsesList) {
@@ -41,6 +41,7 @@ public class DefaultResponseService implements ResponseService {
                         .add(response.getValue(ANSWER, ""))
                         .add("")
                         .add(distribution.getInteger(ID, null))
+                        .add(response.getInteger(CHOICE_POSITION, null))
                         .add(response.getString(CUSTOM_ANSWER, null));
                 s.prepared(query, params);
             }

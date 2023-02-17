@@ -169,6 +169,13 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 				else if (question.question_type === Types.CURSOR) {
 					questionResponses.all.push(new Response(question.id, null, question.cursor_min_val));
 				}
+				if (question.isRanking()) {
+					let questionChoices: QuestionChoice[] = question.choices.all;
+						for (let i: number = 0; i < questionChoices.length; i++) {
+							let questionChoice: QuestionChoice = questionChoices[i];
+							questionResponses.all.push(new Response(question.id, questionChoice.id, questionChoice.value, null, questionChoice.position));
+						}
+				}
 				else {
 					questionResponses.all.push(new Response(question.id));
 				}
