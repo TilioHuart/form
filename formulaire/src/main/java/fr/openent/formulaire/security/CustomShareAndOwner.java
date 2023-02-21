@@ -113,7 +113,7 @@ public class CustomShareAndOwner implements ResourcesProvider {
             return PARAM_FILE_ID;
         }
         else {
-            return ID;
+            return ID; // For isShareJson(binding), isShareSubmit(binding), isShareResource(binding) and more
         }
     }
 
@@ -169,18 +169,6 @@ public class CustomShareAndOwner implements ResourcesProvider {
 
     private boolean isSendReminderForm(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.FormController|sendReminder");
-    }
-
-    private boolean isShareJson(final Binding binding) {
-        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.FormController|shareJson");
-    }
-
-    private boolean isShareSubmit(final Binding binding) {
-        return bindingIsThatMethod(binding, HttpMethod.PUT, "fr.openent.formulaire.controllers.FormController|shareSubmit");
-    }
-
-    private boolean isShareResource(final Binding binding) {
-        return bindingIsThatMethod(binding, HttpMethod.PUT, "fr.openent.formulaire.controllers.FormController|shareResource");
     }
 
     // FormElement
@@ -293,4 +281,16 @@ public class CustomShareAndOwner implements ResourcesProvider {
         return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.SectionController|delete");
     }
 
+    // SharingController
+    private boolean isShareJson(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.SharingController|shareJson");
+    }
+
+    private boolean isShareSubmit(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.PUT, "fr.openent.formulaire.controllers.SharingController|shareSubmit");
+    }
+
+    private boolean isShareResource(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.PUT, "fr.openent.formulaire.controllers.SharingController|shareResource");
+    }
 }
