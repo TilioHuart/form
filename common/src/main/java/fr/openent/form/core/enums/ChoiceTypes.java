@@ -7,19 +7,19 @@ public enum ChoiceTypes {
   IMAGE("IMAGE"),
   VIDEO("VIDEO");
 
-  private final String name;
+  private final String value;
 
-  ChoiceTypes(String name) {
-    this.name = name;
+  ChoiceTypes(String value) {
+    this.value = value;
   }
 
-  public String getName() {
-    return this.name;
+  public String getValue() {
+    return this.value;
   }
 
   public static ChoiceTypes getChoiceTypes(String value) {
      return Arrays.stream(ChoiceTypes.values())
-             .filter(choiceTypes -> choiceTypes.getName().equals(value))
+             .filter(choiceTypes -> choiceTypes.getValue().equals(value))
              .findFirst()
              .orElse(null);
   }

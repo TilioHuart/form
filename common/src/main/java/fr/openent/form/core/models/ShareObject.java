@@ -18,6 +18,7 @@ public class ShareObject implements Model<ShareObject> {
     private JsonObject bookmarks;
     private String role;
 
+
     // Constructors
 
     public ShareObject() { }
@@ -29,6 +30,7 @@ public class ShareObject implements Model<ShareObject> {
         this.role = shareObject.getString(ROLE, null);
     }
 
+
     // Getters
 
     public JsonObject getUsers() { return users; }
@@ -38,6 +40,7 @@ public class ShareObject implements Model<ShareObject> {
     public JsonObject getBookmarks() { return bookmarks; }
 
     public String getRole() { return role; }
+
 
     // Setters
 
@@ -60,6 +63,7 @@ public class ShareObject implements Model<ShareObject> {
         this.role = role;
         return this;
     }
+
 
     // Functions
 

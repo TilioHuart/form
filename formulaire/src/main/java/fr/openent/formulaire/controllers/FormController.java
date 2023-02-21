@@ -1,5 +1,6 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.core.enums.RgpdLifetimes;
 import fr.openent.form.core.models.ShareObject;
 import fr.openent.form.helpers.EventBusHelper;
 import fr.openent.form.helpers.UtilsHelper;
@@ -352,7 +353,7 @@ public class FormController extends ControllerHelper {
                 // RGPD lifetime should be in [3, 6, 9, 12]
                 boolean isRGPDLifetimeOk = DataChecker.checkRGPDLifetimeValidity(forms);
                 if (!isRGPDLifetimeOk) {
-                    String message = "[Formulaire@createMultipleForm] A RGPD lifetime value should be in " + RGPD_LIFETIME_VALUES;
+                    String message = "[Formulaire@createMultipleForm] A RGPD lifetime value should be in " + RgpdLifetimes.getAllValues();
                     log.error(message);
                     badRequest(request, message);
                     return;

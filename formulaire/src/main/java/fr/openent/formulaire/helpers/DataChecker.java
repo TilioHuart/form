@@ -1,5 +1,6 @@
 package fr.openent.formulaire.helpers;
 
+import fr.openent.form.core.enums.RgpdLifetimes;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -9,7 +10,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static fr.openent.form.core.constants.Constants.RGPD_LIFETIME_VALUES;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.helpers.UtilsHelper.getByProp;
 
@@ -50,7 +50,7 @@ public class DataChecker {
         int i = 0;
         while (areRGPDLifeTimeValid && i < forms.size()) {
             Integer rgpdLifetime = forms.getJsonObject(i).getInteger(RGPD_LIFETIME);
-            areRGPDLifeTimeValid = rgpdLifetime != null && RGPD_LIFETIME_VALUES.contains(rgpdLifetime);
+            areRGPDLifeTimeValid = rgpdLifetime != null && RgpdLifetimes.getAllValues().contains(rgpdLifetime);
             i++;
         }
 

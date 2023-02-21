@@ -1,22 +1,25 @@
 package fr.openent.form.core.models;
 
-import fr.openent.form.core.enums.ChoiceTypes;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import fr.openent.form.core.constants.Fields;
+import static fr.openent.form.core.constants.Fields.*;
 
-public class Question implements Model<Question> {
+import java.util.List;
+
+public class Question extends FormElement implements Model<Question> {
     private Integer questionType;
-    private Number id;
-    private Number questionId;
-    private String value;
-    private Number position;
-    private Number nextSectionId;
-    private Number nbResponses;
-    private ChoiceTypes type;
-    private Number code;
-    private String name;
+    private String statement;
+    private Boolean mandatory;
+    private Number originalQuestionId;
+    private Number sectionId;
+    private Number sectionPosition;
+    private Boolean conditional;
+    private String placeholder;
     private Number matrixId;
     private Number matrixPosition;
+    private List<QuestionChoice> questionChoices;
+    private List<Question> children;
+
 
     // Constructors
 
@@ -24,113 +27,134 @@ public class Question implements Model<Question> {
     }
 
     public Question(JsonObject question) {
-        this.questionType = question.getInteger(Fields.QUESTION_TYPE, null);
-        this.id = question.getInteger(Fields.ID, null);
-        this.name = question.getString(Fields.NAME, null);
-        this.questionId = question.getNumber(Fields.QUESTION, null);
-        this.value = question.getString(Fields.VALUE, null);
-        this.position = question.getNumber(Fields.POSITION, null);
-        this.nextSectionId = question.getNumber(Fields.NEXT_SECTION_ID, null);
-        this.nbResponses = question.getNumber(Fields.NB_RESPONSES, null);
-        this.code = question.getNumber(Fields.CODE, null);
-        this.type = ChoiceTypes.getChoiceTypes(question.getString(Fields.TYPE, null));
-        this.matrixId = question.getInteger(Fields.MATRIX_ID,null);
-        this.matrixPosition = question.getInteger(Fields.MATRIX_POSITION,null);
+        super(question);
+        this.questionType = question.getInteger(QUESTION_TYPE, null);
+        this.statement = question.getString(STATEMENT, null);
+        this.mandatory = question.getBoolean(MANDATORY, null);
+        this.originalQuestionId = question.getNumber(ORIGINAL_QUESTION_ID, null);
+        this.sectionId = question.getNumber(SECTION_ID, null);
+        this.sectionPosition = question.getNumber(SECTION_POSITION, null);
+        this.conditional = question.getBoolean(CONDITIONAL, null);
+        this.placeholder = question.getString(PLACEHOLDER, null);
+        this.matrixId = question.getNumber(MATRIX_ID,null);
+        this.matrixPosition = question.getNumber(MATRIX_POSITION,null);
+        this.questionChoices = new QuestionChoice().toList(question.getJsonArray(QUESTION_CHOICES, null));
+        this.children = new Question().toList(question.getJsonArray(CHILDREN, null));
     }
+
 
     // Getters
 
     public Integer getQuestionType() { return questionType; }
 
-    public Number getId() { return id; }
+    public String getStatement() { return statement; }
 
-    public Number getQuestionId() { return questionId; }
+    public Boolean getMandatory() { return mandatory; }
 
-    public String getValue() { return value; }
+    public Number getOriginalQuestionId() { return originalQuestionId; }
 
-    public Number getPosition() { return position; }
+    public Number getSectionId() { return sectionId; }
 
-    public Number getNextSectionId() { return nextSectionId; }
+    public Number getSectionPosition() { return sectionPosition; }
 
-    public Number getNbResponses() { return nbResponses; }
+    public Boolean getConditional() { return conditional; }
 
-    public ChoiceTypes getType() { return type; }
+    public String getPlaceholder() { return placeholder; }
 
-    public Number getCode() { return code; }
-
-    public String getName() { return name; }
     public Number getMatrixId() { return matrixId; }
 
     public Number getMatrixPosition() { return matrixPosition; }
 
+    public List<QuestionChoice> getQuestionChoices() { return questionChoices; }
+
+    public List<Question> getChildren() { return children; }
+
+
     // Setters
 
-    public Question setCode(Number code) {
-        this.code = code;
-        return this;
-    }
-    public Question setId(Number id) {
-        this.id = id;
-        return this;
-    }
-    public Question setMatrixId(Number matrixId) {
-        this.matrixId = matrixId;
-        return this;
-    }
-    public Question setMatrixPosition(Number matrixPosition) {
-        this.matrixPosition = matrixPosition;
-        return this;
-    }
-    public Question setName(String name) {
-        this.name = name;
-        return this;
-    }
-    public Question setNbResponses(Number nbResponses) {
-        this.nbResponses = nbResponses;
-        return this;
-    }
-    public Question setNextSectionId(Number nextSectionId) {
-        this.nextSectionId = nextSectionId;
-        return this;
-    }
-    public Question setPosition(Number position) {
-        this.position = position;
-        return this;
-    }
-    public Question setQuestionId(Number questionId) {
-        this.questionId = questionId;
-        return this;
-    }
     public Question setQuestionType(Integer questionType) {
         this.questionType = questionType;
         return this;
     }
-    public Question setType(ChoiceTypes type) {
-        this.type = type;
+
+    public Question setStatement(String statement) {
+        this.statement = statement;
         return this;
     }
-    public Question setValue(String value) {
-        this.value = value;
+
+    public Question setMandatory(Boolean mandatory) {
+        this.mandatory = mandatory;
         return this;
     }
+
+    public Question setOriginalQuestionId(Number originalQuestionId) {
+        this.originalQuestionId = originalQuestionId;
+        return this;
+    }
+
+    public Question setSectionId(Number sectionId) {
+        this.sectionId = sectionId;
+        return this;
+    }
+
+    public Question setSectionPosition(Number sectionPosition) {
+        this.sectionPosition = sectionPosition;
+        return this;
+    }
+
+    public Question setConditional(Boolean conditional) {
+        this.conditional = conditional;
+        return this;
+    }
+
+    public Question setPlaceholder(String placeholder) {
+        this.placeholder = placeholder;
+        return this;
+    }
+
+    public Question setMatrixId(Number matrixId) {
+        this.matrixId = matrixId;
+        return this;
+    }
+
+    public Question setMatrixPosition(Number matrixPosition) {
+        this.matrixPosition = matrixPosition;
+        return this;
+    }
+
+    public Question setQuestionChoices(List<QuestionChoice> questionChoices) {
+        this.questionChoices = questionChoices;
+        return this;
+    }
+
+    public Question setChildren(List<Question> children) {
+        this.children = children;
+        return this;
+    }
+
 
     // Functions
 
     public JsonObject toJson() {
         return new JsonObject()
-                .put(Fields.QUESTION_TYPE, this.questionType)
-                .put(Fields.ID, this.id)
-                .put(Fields.QUESTION_ID, this.questionId)
-                .put(Fields.VALUE, this.value)
-                .put(Fields.POSITION, this.position)
-                .put(Fields.NEXT_SECTION_ID, this.nextSectionId)
-                .put(Fields.NB_RESPONSES, this.nbResponses)
-                .put(Fields.TYPE, this.type)
-                .put(Fields.CODE, this.code)
-                .put(Fields.NAME, this.name)
-                .put(Fields.MATRIX_ID, this.matrixId)
-                .put(Fields.MATRIX_POSITION, this.matrixPosition);
+                .put(ID, this.id)
+                .put(FORM_ID, this.formId)
+                .put(TITLE, this.title)
+                .put(POSITION, this.position)
+                .put(QUESTION_TYPE, this.questionType)
+                .put(STATEMENT, this.statement)
+                .put(MANDATORY, this.mandatory)
+                .put(ORIGINAL_QUESTION_ID, this.originalQuestionId)
+                .put(SECTION_ID, this.sectionId)
+                .put(SECTION_POSITION, this.sectionPosition)
+                .put(CONDITIONAL, this.conditional)
+                .put(PLACEHOLDER, this.placeholder)
+                .put(MATRIX_ID, this.matrixId)
+                .put(MATRIX_POSITION, this.matrixPosition)
+                .put(QUESTION_CHOICES, new QuestionChoice().toJsonArray(this.questionChoices))
+                .put(CHILDREN, new Question().toJsonArray(this.children));
     }
+
     @Override
     public Question model(JsonObject question){
         return new Question(question);

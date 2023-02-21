@@ -57,6 +57,7 @@ public class Fields {
     public static final String OWNER_NAME = "owner_name";
     public static final String PICTURE = "picture";
     public static final String QUESTION = "question";
+    public static final String QUESTION_CHOICES = "question_choices";
     public static final String QUESTION_ID = "question_id";
     public static final String QUESTION_TYPE = "question_type";
     public static final String PARENT_ID = "parent_id";
