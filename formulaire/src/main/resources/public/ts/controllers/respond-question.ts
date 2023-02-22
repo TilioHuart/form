@@ -93,7 +93,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             else if (question.question_type === Types.CURSOR) {
                 questionResponses.all.push(new Response(question.id, null, question.cursor_min_val, vm.distribution.id));
             }
-            if (question.isRanking()) {
+            else if (question.isRanking()) {
                 let questionChoices: QuestionChoice[] = question.choices.all;
                 for (let i: number = 0; i < questionChoices.length; i++) {
                     let questionChoice: QuestionChoice = questionChoices[i];
@@ -240,14 +240,15 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                     await responseService.create(new Response(child.id, null, null, vm.distribution.id));
                 }
             }
-            // In case of question type ranking, we need to add a choice index to each Response
-            if (question.isRanking()) {
+            else if (question.isRanking()) { // In case of question type ranking, we need to add a choice index to each Response
+                let promises: any = [];
                 for (let resp of responses.all) {
-                    responseService.create(new Response(question.id, resp.choice_id, resp.answer, vm.distribution.id,  resp.choice_position));
+                    promises.push(responseService.create(new Response(question.id, resp.choice_id, resp.answer, vm.distribution.id,  resp.choice_position)));
                 }
+                await Promise.all(promises);
             }
             else {
-                responseService.create(new Response(question.id, null, null, vm.distribution.id));
+                await responseService.create(new Response(question.id, null, null, vm.distribution.id));
             }
             return true;
         }

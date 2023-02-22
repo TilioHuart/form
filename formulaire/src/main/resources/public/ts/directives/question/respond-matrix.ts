@@ -19,6 +19,7 @@ interface IViewModel {
     $onInit(): Promise<void>;
     $onChanges(changes: any): Promise<void>;
     switchValue(child: Question, choice: QuestionChoice): void;
+    resetLine(child: Question): void;
 }
 
 export const respondMatrix: Directive = ng.directive('respondMatrix', () => {
@@ -43,6 +44,7 @@ export const respondMatrix: Directive = ng.directive('respondMatrix', () => {
                             <tr>
                                 <th class="two"></th>
                                 <th ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">[[choice.value]]</th>
+                                <th class="one"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -54,6 +56,7 @@ export const respondMatrix: Directive = ng.directive('respondMatrix', () => {
                                                ng-model="vm.responses.all[vm.mapChildChoicesResponseIndex.get(child).get(choice)].selected">
                                     </label>
                                 </td>
+                                <td><i class="i-restore md-icon dark-grey spaced-left" ng-click="vm.resetLine(child)"></i></td>
                             </tr>
                         </tbody>
                     </table>
@@ -116,7 +119,12 @@ export const respondMatrix: Directive = ng.directive('respondMatrix', () => {
                         }
                     }
                 }
-                $scope.$apply();
+            }
+
+            vm.resetLine = (child: Question) : void => {
+                vm.responses.all
+                    .filter((r: Response) => r.question_id == child.id)
+                    .forEach((r: Response) => r.selected = false);
             }
         }
     };

@@ -232,16 +232,13 @@ public class ResponseController extends ControllerHelper {
                         });
                     }
                     else {
-                        if (question.getQuestionType() == QuestionTypes.DATE.getCode()) {
+                        if (question.getQuestionType() == QuestionTypes.DATE.getCode() && response.getString(ANSWER) != null && !response.getString(ANSWER).isEmpty()) {
                             try { dateFormatter.parse(response.getString(ANSWER)); }
                             catch (ParseException e) { e.printStackTrace(); }
                         }
-                        if (question.getQuestionType() == QuestionTypes.TIME.getCode()) {
+                        if (question.getQuestionType() == QuestionTypes.TIME.getCode() && response.getString(ANSWER) != null && !response.getString(ANSWER).isEmpty()) {
                             try { timeFormatter.parse(response.getString(ANSWER)); }
                             catch (ParseException e) { e.printStackTrace(); }
-                        }
-                        if (question.getQuestionType() == QuestionTypes.CURSOR.getCode()) {
-                            response.getString(ANSWER);
                         }
                         createResponse(request, response, user, questionId);
                     }
@@ -374,17 +371,13 @@ public class ResponseController extends ControllerHelper {
                         });
                     }
                     else {
-                        if (question_type == QuestionTypes.DATE.getCode()) {
+                        if (question_type == QuestionTypes.DATE.getCode() && response.getString(ANSWER) != null && !response.getString(ANSWER).isEmpty()) {
                             try { dateFormatter.parse(response.getString(ANSWER)); }
                             catch (ParseException e) { e.printStackTrace(); }
                         }
-                        if (question_type == QuestionTypes.TIME.getCode()) {
+                        if (question_type == QuestionTypes.TIME.getCode() && response.getString(ANSWER) != null && !response.getString(ANSWER).isEmpty()) {
                             try { timeFormatter.parse(response.getString(ANSWER)); }
                             catch (ParseException e) { e.printStackTrace(); }
-                        }
-                        if (question_type == QuestionTypes.CURSOR.getCode()) {
-                            try { response.getString(ANSWER); }
-                            catch (Exception e) { e.printStackTrace(); }
                         }
                         responseService.update(user, responseId, response, defaultResponseHandler(request));
                     }

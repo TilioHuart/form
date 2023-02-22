@@ -28,6 +28,8 @@ interface IViewModel {
     $onChanges(changes: any): Promise<void>;
     isSelectedChoiceCustom(choiceId: number): boolean;
     deselectIfEmpty(choice: QuestionChoice) : void;
+    onClickChoice(choice: QuestionChoice): void;
+    resetDate(): void;
 }
 
 export const respondQuestionItem: Directive = ng.directive('respondQuestionItem', ['$sce', ($sce) => {
@@ -82,9 +84,11 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                     </div>
                     <div ng-if="vm.question.question_type == vm.Types.DATE">
                         <date-picker ng-model="vm.responses.all[0].answer" input-guard></date-picker>
+                        <i class="i-restore md-icon dark-grey spaced-left" ng-click="vm.resetDate()"></i>
                     </div>
                     <div ng-if="vm.question.question_type == vm.Types.TIME">
                         <input type="time" ng-model="vm.responses.all[0].answer" input-guard/>
+                        <i class="i-restore md-icon dark-grey spaced-left" ng-click="vm.responses.all[0].answer = null;"></i>
                     </div>
                     <div ng-if="vm.question.question_type == vm.Types.FILE">
                         <formulaire-picker-file files="vm.files" multiple="true" input-guard></formulaire-picker-file>
@@ -92,7 +96,8 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                     <div ng-if ="vm.question.question_type == vm.Types.SINGLEANSWERRADIO">
                         <div ng-repeat ="choice in vm.question.choices.all | orderBy:['position', 'id']">
                             <label>
-                                <input type="radio" ng-model="vm.responses.all[0].choice_id" ng-value="[[choice.id]]" input-guard>
+                                <input type="radio" ng-model="vm.responses.all[0].choice_id" ng-value="[[choice.id]]"
+                                       ng-click="vm.onClickChoice(choice)" input-guard>
                                 <span>[[choice.value]]</span>
                                 <span ng-if="choice.is_custom"> : 
                                     <input type="text" ng-model="vm.responses.all[0].custom_answer"
@@ -262,12 +267,19 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                 }
                 else return;
             }
-            vm.Direction = Direction;
 
             vm.moveResponse = (resp: Response, direction: string) : void => {
                 FormElementUtils.switchPositions(vm.responses, resp.choice_position - 1, direction, PropPosition.CHOICE_POSITION);
                 vm.responses.all.sort((a: Response, b: Response) => a.choice_position - b.choice_position);
-            };
+            }
+
+            vm.onClickChoice = (choice: QuestionChoice) : void => {
+                vm.responses.all[0].choice_id = (vm.responses.all[0].choice_id != choice.id) ? choice.id : null;
+            }
+
+            vm.resetDate = () : void => {
+                vm.responses.all[0].answer = new Date();
+            }
         }
     };
 }]);

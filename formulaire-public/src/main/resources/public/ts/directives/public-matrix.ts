@@ -15,6 +15,7 @@ interface IPublicMatrixProps {
 interface IViewModel extends ng.IController, IPublicMatrixProps {
     init(): Promise<void>;
     switchValue(child: Question, choice: QuestionChoice): void;
+    resetLine(child: Question): void;
 }
 
 interface IPublicQuestionItemScope extends IScope, IPublicMatrixProps {
@@ -66,6 +67,12 @@ class Controller implements IViewModel {
         }
         this.$scope.$apply();
     }
+
+    resetLine = (child: Question) : void => {
+        this.responses.all
+            .filter((r: Response) => r.question_id == child.id)
+            .forEach((r: Response) => r.selected = false);
+    }
 }
 
 
@@ -90,6 +97,7 @@ function directive() {
                             <tr>
                                 <th class="two"></th>
                                 <th ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">[[choice.value]]</th>
+                                <th class="one"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -101,6 +109,7 @@ function directive() {
                                                ng-model="vm.responses.all[vm.mapChildChoicesResponseIndex.get(child).get(choice)].selected">
                                     </label>
                                 </td>
+                                <td><i class="i-restore md-icon dark-grey spaced-left" ng-click="vm.resetLine(child)"></i></td>
                             </tr>
                         </tbody>
                     </table>
