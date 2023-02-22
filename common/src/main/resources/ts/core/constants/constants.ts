@@ -2,6 +2,11 @@ export abstract class Constants {
     static readonly DEFAULT_DOMAIN: string = "default-domain";
     static readonly DEFAULT_NB_CHOICES: number = 3;
     static readonly DEFAULT_NB_CHILDREN: number = 3;
+    static readonly DEFAULT_CURSOR_MIN_VALUE: number = 1;
+    static readonly DEFAULT_CURSOR_MAX_VALUE: number = 10;
+    static readonly DEFAULT_CURSOR_STEP: number = 1;
+
+    // Colors
     static readonly GRAPH_COLORS: string[] = ['#37A4CD','#1691C0','#056F98','#5AB7DA','#89CEE9'];
     static readonly BLUE_COLORS: string[] = ['#37A4CD','#1691C0','#056F98','#5AB7DA','#89CEE9'];
     static readonly YELLOW_COLORS: string[] = ['#FFC73C','#F2AE00','#FFBB13','#FFD263','#FFDF91'];

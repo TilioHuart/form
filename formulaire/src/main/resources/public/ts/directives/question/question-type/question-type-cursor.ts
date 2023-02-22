@@ -1,6 +1,7 @@
 import {ng} from "entcore";
 import {Question} from "@common/models";
 import {IScope} from "angular";
+import {Constants} from "@common/core/constants";
 
 interface IQuestionTypeFreetextProps {
     question: Question;
@@ -21,7 +22,11 @@ class Controller implements IViewModel {
 
     constructor(private $scope: IQuestionTypeFreetextScope, private $sce: ng.ISCEService) {}
 
-    $onInit = async () : Promise<void> => {}
+    $onInit = async () : Promise<void> => {
+        this.question.cursor_min_val = this.question.cursor_min_val != null ? this.question.cursor_min_val : Constants.DEFAULT_CURSOR_MIN_VALUE;
+        this.question.cursor_max_val = this.question.cursor_max_val != null ? this.question.cursor_max_val : Constants.DEFAULT_CURSOR_MAX_VALUE;
+        this.question.cursor_step = this.question.cursor_step != null ? this.question.cursor_step : Constants.DEFAULT_CURSOR_STEP;
+    }
 
     $onDestroy = async () : Promise<void> => {}
 

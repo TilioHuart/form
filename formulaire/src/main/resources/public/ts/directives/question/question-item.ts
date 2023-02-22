@@ -1,6 +1,7 @@
 import {Directive, idiom, ng} from "entcore";
 import {FormElements, Question, Section, Types} from "../../models";
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
+import {Constants} from "@common/core/constants";
 
 interface IViewModel {
     question: Question;
@@ -154,9 +155,9 @@ export const questionItem: Directive = ng.directive('questionItem', () => {
             };
 
             vm.cursorChoiceIsConsistent = () : boolean => {
-                const minVal: number = vm.question.cursor_min_val != null ? vm.question.cursor_min_val : 1;
-                const maxVal: number = vm.question.cursor_max_val != null ? vm.question.cursor_max_val : 10;
-                const step: number = vm.question.cursor_step != null ? vm.question.cursor_step : 1;
+                const minVal: number = vm.question.cursor_min_val != null ? vm.question.cursor_min_val : Constants.DEFAULT_CURSOR_MIN_VALUE;
+                const maxVal: number = vm.question.cursor_max_val != null ? vm.question.cursor_max_val : Constants.DEFAULT_CURSOR_MAX_VALUE;
+                const step: number = vm.question.cursor_step != null ? vm.question.cursor_step : Constants.DEFAULT_CURSOR_STEP;
                 return (maxVal - minVal) % step == 0;
             }
         }

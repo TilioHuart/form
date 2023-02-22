@@ -4,11 +4,11 @@ import {
     FormElement,
     FormElements,
     Question,
-    QuestionChoice,
+    QuestionChoice, Questions,
     QuestionTypes,
     Response,
     Responses,
-    Section,
+    Section, Sections,
     Types
 } from "../models";
 import {
@@ -131,31 +131,35 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         vm.saveAll = async (displaySuccess= true) : Promise<void> => {
             vm.dontSave = true;
-            let sections = vm.formElements.getSections();
-            let sectionQuestions = sections.all.filter(s => s.id);
-            let questionsList = sectionQuestions.map(s => s.questions.all);
 
-            for (let questions of questionsList) {
-                let conditionalQuestions = questions.filter(q => q.conditional);
+            // Check conditional questions
+            let sectionQuestionsList: Question[][] = vm.formElements.getSections().all
+                .filter((s: Section) => s.id)
+                .map((s: Section) => s.questions.all);
+
+            for (let sectionQuestions of sectionQuestionsList) {
+                let conditionalQuestions: Question[] = sectionQuestions.filter(q => q.conditional);
                 if (conditionalQuestions.length >= 2) {
                     notify.error(idiom.translate('formulaire.question.save.missing.field'));
                     return;
                 }
             }
 
-            let wrongElements = vm.formElements.all.filter(fe => !fe.title); // TODO check more than just titles later
+            // Check titles
+            let wrongElements: FormElement[] = vm.formElements.all.filter(fe => !fe.title); // TODO check more than just titles later
             if (wrongElements.length > 0) {
                 notify.error(idiom.translate('formulaire.question.save.missing.field'));
                 return;
             }
 
-            let questionTypeCursor = vm.formElements.all.filter(fe => fe.question_type == Types.CURSOR);
-            if (questionTypeCursor.length > 0) {
-                let inconsistencyCursorChoice =
-                    vm.formElements.all.filter(fe => (
-                        ((fe.cursor_max_val ? fe.cursor_max_val : 10) - (fe.cursor_min_val ? fe.cursor_min_val : 1)) %
-                        (fe.cursor_step ? fe.cursor_step : 1) != 0)
-                    )
+            // Check cursor values
+            let questionsTypeCursor: Question[] = vm.formElements.getAllQuestions().filter((q: Question) => q.question_type == Types.CURSOR);
+            if (questionsTypeCursor.length > 0) {
+                // We search for question where : (maxVal - minVal) % step == 0
+                let inconsistencyCursorChoice: Question[] = questionsTypeCursor.filter((q: Question) => (
+                        ((q.cursor_max_val ? q.cursor_max_val : Constants.DEFAULT_CURSOR_MAX_VALUE) -
+                         (q.cursor_min_val ? q.cursor_min_val : Constants.DEFAULT_CURSOR_MIN_VALUE)) %
+                        (q.cursor_step ? q.cursor_step : Constants.DEFAULT_CURSOR_STEP) != 0));
                 if (inconsistencyCursorChoice.length > 0) {
                     notify.error(idiom.translate('formulaire.question.save.missing.field'));
                     return;
