@@ -82,7 +82,7 @@ function directive() {
                                i18n-placeholder="formulaire.question.cursor.default.max.val">
                         </div>
                         <div ng-if="vm.hasFormResponses">
-                            <input type="number" disabled ng-model="vm.question.cursor_min_val">
+                            <input type="number" disabled ng-model="vm.question.cursor_max_val">
                         </div>
                     </div>   
                     <div class="cursor-label-max-value">
