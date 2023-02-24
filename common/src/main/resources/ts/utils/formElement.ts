@@ -255,7 +255,7 @@ export class FormElementUtils {
             }
         }
 
-        formElements.all.sort((a, b) => a.position - b.position);
+        formElements.all.sort((a: FormElement, b: FormElement) => a.position - b.position);
         return false;
     };
 

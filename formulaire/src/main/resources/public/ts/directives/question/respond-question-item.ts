@@ -11,6 +11,8 @@ import {
 } from "../../models";
 import {FormElementUtils, I18nUtils} from "@common/utils";
 import {PropPosition} from "@common/core/enums/prop-position";
+import * as Sortable from "sortablejs";
+import {RankingUtils} from "@common/utils/ranking";
 
 interface IViewModel {
     question: Question;
@@ -30,6 +32,7 @@ interface IViewModel {
     deselectIfEmpty(choice: QuestionChoice) : void;
     onClickChoice(choice: QuestionChoice): void;
     resetDate(): void;
+    initDrag(): void;
 }
 
 export const respondQuestionItem: Directive = ng.directive('respondQuestionItem', ['$sce', ($sce) => {
@@ -142,8 +145,8 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                             </div>
                         </div>
                     </div>
-                    <div ng-if ="vm.question.question_type == vm.Types.RANKING" class="drag">
-                        <div class="row-shadow-effect"
+                    <div class="drag drag-container" ng-if ="vm.question.question_type == vm.Types.RANKING">
+                        <div class="row-shadow-effect " dragstart="vm.initDrag()"
                              ng-repeat="resp in vm.responses.all | orderBy:['choice_position', 'id']">
                             <div class="top">
                                 <div class="dots">
@@ -157,7 +160,7 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
                                     <div ng-class="{hidden : $first}" ng-click="vm.moveResponse(resp, vm.Direction.UP)">
                                         <i class="i-chevron-up lg-icon"></i>
                                     </div>
-                                    <div ng-class="{hidden : $last}" ng-click="vm.moveReponse(resp, vm.Direction.DOWN)">
+                                    <div ng-class="{hidden : $last}" ng-click="vm.moveResponse(resp, vm.Direction.DOWN)">
                                         <i class="i-chevron-down lg-icon"></i>
                                     </div>
                             </div>
@@ -279,6 +282,25 @@ export const respondQuestionItem: Directive = ng.directive('respondQuestionItem'
 
             vm.resetDate = () : void => {
                 vm.responses.all[0].answer = new Date();
+            }
+
+            vm.initDrag = () : void => {
+                // Loop through each sortable response for DragAndDrop in view response
+                window.setTimeout(() : void => {
+                    let respDrag = document.querySelectorAll(".drag-container");
+                    for (let i = 0; i < respDrag.length; i++) {
+                        Sortable.create(respDrag[i], {
+                            group: 'drag-container',
+                            animation: 150,
+                            fallbackOnBody: true,
+                            swapThreshold: 0.65,
+                            ghostClass: "sortable-ghost",
+                            onEnd: async function (evt) {
+                                await RankingUtils.onEndRankingDragAndDrop(evt, vm.responses);
+                            }
+                        });
+                    }
+                }, 500);
             }
         }
     };
