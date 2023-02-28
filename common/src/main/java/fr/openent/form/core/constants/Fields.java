@@ -15,12 +15,13 @@ public class Fields {
     public static final String CODE = "code";
     public static final String COLLAB = "collab";
     public static final String CONDITIONAL = "conditional";
+    public static final String COUNT = "count";
     public static final String CURSOR_MIN_LABEL = "cursor_min_label";
     public static final String CURSOR_MIN_VAL = "cursor_min_val";
     public static final String CURSOR_MAX_LABEL = "cursor_max_label";
     public static final String CURSOR_MAX_VAL = "cursor_max_val";
     public static final String CURSOR_STEP = "cursor_step";
-    public static final String COUNT = "count";
+    public static final String CUSTOM_ANSWER = "custom_answer";
     public static final String DATE_ENDING = "date_ending";
     public static final String DATE_CREATION = "date_creation";
     public static final String DATE_MODIFICATION = "date_modification";
@@ -37,6 +38,7 @@ public class Fields {
     public static final String FORM_ID = "form_id";
     public static final String GROUP_ID = "group_id";
     public static final String ID = "id";
+    public static final String IS_CUSTOM = "is_custom";
     public static final String IS_PUBLIC = "is_public";
     public static final String MAIL = "mail";
     public static final String MANDATORY = "mandatory";
