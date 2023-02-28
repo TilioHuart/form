@@ -1,12 +1,10 @@
 package fr.openent.formulaire.service.impl;
 
 import fr.openent.form.core.enums.I18nKeys;
-import fr.openent.form.core.enums.QuestionTypes;
 import fr.openent.form.helpers.I18nHelper;
 import fr.openent.form.helpers.FutureHelper;
 import fr.openent.formulaire.service.FormService;
 import fr.wseduc.webutils.Either;
-import fr.wseduc.webutils.I18n;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;

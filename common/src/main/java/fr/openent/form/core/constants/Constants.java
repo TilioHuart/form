@@ -11,6 +11,7 @@ public class Constants {
     public static final String DELETED_USER_FILE = "utilisateurSupprimé_Fichier";
     public static final String TRANSACTION_BEGIN_QUERY = "BEGIN;";
     public static final String TRANSACTION_COMMIT_QUERY = "COMMIT;";
+    public static final String EUROPE_PARIS = "Europe/Paris";
     public static final List<Integer> GRAPH_QUESTIONS = QuestionTypes.getGraphQuestions();
     public static final List<Integer> CONDITIONAL_QUESTIONS = QuestionTypes.getConditionalQuestions();
     public static final List<Integer> CHOICES_TYPE_QUESTIONS = QuestionTypes.getChoicesTypeQuestions();

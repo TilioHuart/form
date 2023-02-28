@@ -74,8 +74,8 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
             <div ng-if="vm.question.question_type == vm.Types.FREETEXT" class="freetext" data-ng-bind-html="vm.getHtmlDescription(vm.question.statement)"></div>
 
             <!-- List of results SINGLEANSWER, MULTIPLEANSWER, SINGLEANSWERRADIO -->
-            <div>
-                <div class="choices" ng-if="vm.question.canHaveCustomAnswers()">
+            <div ng-if="vm.question.canHaveCustomAnswers()">
+                <div class="choices">
                     <!-- Data -->
                     <div class="twelve-mobile" ng-class="vm.question.question_type == vm.Types.MULTIPLEANSWER ? 'twelve' : 'five'">
                         <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']" class="choice">
@@ -113,7 +113,7 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                 </div>
                 
                 <!-- Custom answers -->
-                <div class="custom-answers">
+                <div class="custom-answers" ng-if="vm.question.hasCustomChoice()">
                     <div class="custom-answers-title"><i18n>formulaire.results.custom.answers</i18n></div>
                     <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':true" class="distrib"
                          ng-if="vm.results.get(distrib.id).length > 0 && vm.question.hasCustomChoice()">

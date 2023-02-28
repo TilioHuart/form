@@ -1,5 +1,7 @@
 package fr.openent.formulaire.export;
 
+import fr.openent.form.core.enums.I18nKeys;
+import fr.openent.form.helpers.I18nHelper;
 import fr.openent.formulaire.service.QuestionService;
 import fr.openent.formulaire.service.ResponseService;
 import fr.openent.formulaire.service.impl.DefaultQuestionService;
@@ -139,7 +141,9 @@ public class FormResponsesExportCSV {
                 String answer = "";
                 for (int rep = 0; rep < questionResponses.size(); rep++) {
                   JsonObject response = questionResponses.getJsonObject(rep);
-                  String repAnswer = response.getString(CUSTOM_ANSWER, null) != null ? response.getString(CUSTOM_ANSWER) : response.getString(ANSWER);
+                  String repAnswer = response.getString(CUSTOM_ANSWER, null) != null
+                          ? I18nHelper.getI18nValue(I18nKeys.OTHER, request) + response.getString(CUSTOM_ANSWER)
+                          : response.getString(ANSWER);
                   answer += repAnswer + (rep < questionResponses.size() - 1 ? ";" : "");
                 }
                 content.append(addResponse(answer, allQuestions.lastIndexOf(question) == nbQuestions - 1));

@@ -1,5 +1,6 @@
 package fr.openent.formulaire.export;
 
+import fr.openent.form.core.constants.DateFormats;
 import fr.openent.form.core.enums.QuestionTypes;
 import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.QuestionService;
@@ -33,8 +34,7 @@ import org.entcore.common.pdf.PdfFactory;
 import org.entcore.common.pdf.PdfGenerator;
 
 import static fr.openent.form.core.constants.ConfigFields.NODE_PDF_GENERATOR;
-import static fr.openent.form.core.constants.Constants.GRAPH_QUESTIONS;
-import static fr.openent.form.core.constants.Constants.MAX_RESPONSES_EXPORT_PDF;
+import static fr.openent.form.core.constants.Constants.*;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
 import static fr.wseduc.webutils.http.Renders.*;
@@ -53,8 +53,8 @@ public class FormResponsesExportPDF {
     private final QuestionService questionService = new DefaultQuestionService();
     private final SectionService sectionService = new DefaultSectionService();
     private final DistributionService distributionService = new DefaultDistributionService();
-    private final SimpleDateFormat dateGetter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-    private final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+    private final SimpleDateFormat dateGetter = new SimpleDateFormat(DateFormats.YYYY_MM_DD_T_HH_MM_SS_SSS);
+    private final SimpleDateFormat dateFormatter = new SimpleDateFormat(DateFormats.DD_MM_YYYY_HH_MM);
     private final PdfFactory pdfFactory;
 
     public FormResponsesExportPDF(HttpServerRequest request, Vertx vertx, JsonObject config, Storage storage, JsonObject form) {
@@ -64,7 +64,7 @@ public class FormResponsesExportPDF {
         this.storage = storage;
         this.renders = new Renders(this.vertx, config);
         this.form = form;
-        dateFormatter.setTimeZone(TimeZone.getTimeZone("Europe/Paris")); // TODO to adapt for not France timezone
+        dateFormatter.setTimeZone(TimeZone.getTimeZone(EUROPE_PARIS)); // TODO to adapt for not France timezone
         pdfFactory = new PdfFactory(vertx, new JsonObject().put(NODE_PDF_GENERATOR, config.getJsonObject(NODE_PDF_GENERATOR, new JsonObject())));
     }
 
@@ -72,12 +72,12 @@ public class FormResponsesExportPDF {
         String formId = form.getInteger(ID).toString();
         questionService.export(formId, true, getQuestionsEvt -> {
             if (getQuestionsEvt.isLeft()) {
-                log.error("[Formulaire@FormExportPDF] Failed to retrieve all questions for the form with id " + formId);
+                log.error("[Formulaire@FormResponsesExportPDF::launch] Failed to retrieve all questions for the form with id " + formId);
                 renderInternalError(request, getQuestionsEvt);
                 return;
             }
             if (getQuestionsEvt.right().getValue().isEmpty()) {
-                String message = "[Formulaire@FormExportPDF] No questions found for form with id " + formId;
+                String message = "[Formulaire@FormResponsesExportPDF::launch] No questions found for form with id " + formId;
                 log.error(message);
                 notFound(request, message);
                 return;
@@ -86,7 +86,7 @@ public class FormResponsesExportPDF {
             JsonArray questionsInfo = getQuestionsEvt.right().getValue();
             sectionService.list(formId, getSectionsEvt -> {
                 if (getSectionsEvt.isLeft()) {
-                    log.error("[Formulaire@FormExportPDF] Failed to retrieve all sections for the form with id " + formId);
+                    log.error("[Formulaire@FormResponsesExportPDF::launch] Failed to retrieve all sections for the form with id " + formId);
                     renderInternalError(request, getSectionsEvt);
                     return;
                 }
@@ -94,12 +94,12 @@ public class FormResponsesExportPDF {
                 JsonArray sectionsInfos = getSectionsEvt.right().getValue();
                 distributionService.countFinished(form.getInteger(ID).toString(), countRepEvt -> {
                     if (countRepEvt.isLeft()) {
-                        log.error("[Formulaire@FormExportPDF] Failed to count nb responses for the form with id " + formId);
+                        log.error("[Formulaire@FormResponsesExportPDF::launch] Failed to count nb responses for the form with id " + formId);
                         renderInternalError(request, countRepEvt);
                         return;
                     }
                     if (countRepEvt.right().getValue().isEmpty()) {
-                        String message = "[Formulaire@FormExportPDF] No distributions found for form with id " + formId;
+                        String message = "[Formulaire@FormResponsesExportPDF::launch] No distributions found for form with id " + formId;
                         log.error(message);
                         notFound(request, message);
                         return;
@@ -110,12 +110,12 @@ public class FormResponsesExportPDF {
 
                     responseService.exportPDFResponses(formId, getResponsesEvt -> {
                         if (getResponsesEvt.isLeft()) {
-                            log.error("[Formulaire@FormExportPDF] Failed to get data for PDF export for the form with id " + formId);
+                            log.error("[Formulaire@FormResponsesExportPDF::launch] Failed to get data for PDF export for the form with id " + formId);
                             renderInternalError(request, getResponsesEvt);
                             return;
                         }
                         if (getResponsesEvt.right().getValue().isEmpty()) {
-                            String message = "[Formulaire@FormExportPDF] No responses found for form with id " + formId;
+                            String message = "[Formulaire@FormResponsesExportPDF::launch] No responses found for form with id " + formId;
                             log.error(message);
                             notFound(request, message);
                             return;
@@ -123,7 +123,7 @@ public class FormResponsesExportPDF {
 
                         formatData(getResponsesEvt.right().getValue(), questionsInfo, sectionsInfos, hasTooManyResponses, formatDataEvt -> {
                             if (formatDataEvt.isLeft()) {
-                                log.error("[Formulaire@FormExportPDF] Failed to format data for the form with id" + formId);
+                                log.error("[Formulaire@FormResponsesExportPDF::launch] Failed to format data for the form with id" + formId);
                                 renderInternalError(request, formatDataEvt);
                                 return;
                             }
@@ -240,7 +240,7 @@ public class FormResponsesExportPDF {
         // Get graph images, affect them to their respective questions and send the result
         CompositeFuture.all(questionsGraphs).onComplete(evt -> {
             if (evt.failed()) {
-                log.error("[Formulaire@FormExportPDF] Failed to retrieve graphs' data : " + evt.cause());
+                log.error("[Formulaire@FormResponsesExportPDF] Failed to retrieve graphs' data : " + evt.cause());
                 Future.failedFuture(evt.cause());
                 return;
             }
@@ -354,12 +354,12 @@ public class FormResponsesExportPDF {
                         JsonArray removesFiles = templateProps.getJsonArray(PARAM_ID_IMAGES_FILES);
                         if (removesFiles != null) {
                             storage.removeFiles(removesFiles, removeEvt -> {
-                                log.info(" [Formulaire@generatePDF] " + removeEvt.encode());
+                                log.info(" [Formulaire@FormResponsesExportPDF::generatePDF] " + removeEvt.encode());
                             });
                         }
                     })
                     .onFailure(error -> {
-                        String message = "[Formulaire@generatePDF] Failed to generatePDF : " + error.getMessage();
+                        String message = "[Formulaire@FormResponsesExportPDF::generatePDF] Failed to generatePDF : " + error.getMessage();
                         log.error(message);
                         promise.fail(message);
                     });
@@ -373,7 +373,7 @@ public class FormResponsesExportPDF {
             PdfGenerator pdfGenerator = pdfFactory.getPdfGenerator();
             pdfGenerator.generatePdfFromTemplate(filename, buffer, ar -> {
                 if (ar.failed()) {
-                    log.error("[Formulaire@generatePDF] Failed to generatePdfFromTemplate : " + ar.cause().getMessage());
+                    log.error("[Formulaire@FormResponsesExportPDF::generatePDF] Failed to generatePdfFromTemplate : " + ar.cause().getMessage());
                     promise.fail(ar.cause().getMessage());
                 } else {
                     promise.complete(ar.result());
@@ -381,7 +381,7 @@ public class FormResponsesExportPDF {
             });
         }
         catch (Exception e) {
-            log.error("[Formulaire@generatePDF] Failed to generatePDF: " + e.getMessage());
+            log.error("[Formulaire@FormResponsesExportPDF::generatePDF] Failed to generatePDF: " + e.getMessage());
             promise.fail(e.getMessage());
         }
         return promise.future();
