@@ -23,6 +23,7 @@ interface IViewModel {
     singleAnswerResponseChart: any;
     matrixResponseChart: any;
     cursorResponseChart: any;
+    rankingResponseChart: any;
     results: Map<number, Response[]>;
     hasFiles: boolean;
     nbResponses;
@@ -170,6 +171,13 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                     <div id="chart-[[vm.question.id]]"></div>
                 </div>
             </div>
+            
+               <!-- Graph for RANKING -->
+            <div ng-if="vm.question.question_type == vm.Types.RANKING">
+                 <div class="eight" style="height: 400px">
+                    <div id="chart-[[vm.question.id]]"></div>
+                </div>
+            </div>
 
             <!-- See more button -->
             <div ng-if="vm.showMoreButton()" style="margin: 1%;">
@@ -224,6 +232,11 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                 else if (vm.question.question_type == Types.CURSOR) {
                     if (vm.cursorResponseChart) { vm.cursorResponseChart.destroy(); }
                     GraphUtils.generateGraphForResult(vm.question, [vm.cursorResponseChart], vm.responses.all,
+                        null, false);
+                }
+                else if (vm.question.question_type == Types.RANKING) {
+                    if (vm.rankingResponseChart) { vm.cursorResponseChart.destroy(); }
+                    GraphUtils.generateGraphForResult(vm.question, [vm.rankingResponseChart], vm.responses.all,
                         null, false);
                 }
             };

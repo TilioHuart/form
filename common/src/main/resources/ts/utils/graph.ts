@@ -30,6 +30,9 @@ export class GraphUtils {
             case Types.CURSOR:
                 await GraphUtils.generateCursorChart(question, charts, responses, isExportPDF);
                 break;
+            case Types.RANKING:
+                await GraphUtils.generateRankingChart(question, charts, responses, isExportPDF);
+                break;
             default:
                 break;
         }
@@ -144,6 +147,64 @@ export class GraphUtils {
     }
 
     /**
+     * Generate and render graph of the results of a ranking's question
+     * @param question    Question object which we want to display the results
+     * @param charts      ApexChart to render at the end
+     * @param responses   Array of responses which we want to display the results
+     * @param isExportPDF Boolean to determine if we generate a graph for result or for PDF Export
+     */
+    private static generateRankingChart = async (question: Question, charts: ApexChart[], responses: Response[],
+                                                isExportPDF: boolean) : Promise<void> => {
+        let choices: QuestionChoice[] = question.choices.all.filter((c: QuestionChoice) => c.nbResponses > 0);
+        let series: any[] = [];
+
+        // Initialize labels
+        const labels: string[] = [];
+        for (let i = 1; i <= choices.length; i++) {
+            labels.push(i.toString());
+        }
+
+        // Build series
+        const choiceMap: Map<string, any> = new Map();
+
+        // Initialize data with zeros for each choice
+        choices.forEach(choice => {
+            const name: string = choice.value;
+            const data: number[] = Array(choices.length).fill(0);
+            choiceMap.set(name, {data});
+        });
+
+        // Iterate over responses and increment data for each choice position
+        responses.forEach(response => {
+            const choice: string = choiceMap.get(<string>response.answer);
+            const position: number = response.choice_position - 1;
+            const { data }: any  = choice;
+            data[position]++;
+        });
+
+        // Iterate over choiceMap and push seriesOptions into series
+        choiceMap.forEach(({ data }, name: string) => {
+            const seriesOptions = {
+                name,
+                data
+            };
+            // Fill series
+            series.push(seriesOptions);
+        });
+
+        let colors: string[] = ColorUtils.generateColorList(choices.length);
+        let newOptions: any = isExportPDF ?
+            GraphUtils.generateOptions(question.question_type, colors, labels,
+                null, null)
+            :
+            GraphUtils.generateOptions(question.question_type, colors, labels,
+                '100%', '100%');
+
+        newOptions.series = series;
+        await GraphUtils.renderChartForResult(newOptions, charts, question, isExportPDF);
+    }
+
+    /**
      * Generate and render graph of the results of a multiple answers question
      * @param question    Question object which we want to display the results
      * @param charts      ApexCharts to store and render at the end
@@ -199,13 +260,13 @@ export class GraphUtils {
 
     /**
      *  Generate and return ApexCharts options according to the type of the question to display
-     * @param type      Type of the question
-     * @param colors    Colors to use for the graph
-     * @param labels    Labels to display on the cart
-     * @param height    Height of the chart to display (optional)
-     * @param width     Width of the chart to display (optional)
-     * @param seriesPercent Percentage to use for the graph
-     * @param cursorAverage Average of answers
+     * @param type          Type of the question
+     * @param colors        Colors to use for the graph
+     * @param labels        Labels to display on the cart
+     * @param height        Height of the chart to display (optional)
+     * @param width         Width of the chart to display (optional)
+     * @param seriesPercent Percentage to use for the graph (optional)
+     * @param cursorAverage Average of answers (optional)
      */
     static generateOptions = (type: Types, colors: string[], labels: (string | number)[], height?: any, width?: any,
                               seriesPercent?: number[], cursorAverage?: string) : any => {
@@ -318,6 +379,40 @@ export class GraphUtils {
                         stops: [0, 90, 100]
                     }
                 },
+            }
+        }
+        else if (type === Types.RANKING) {
+            options = {
+                chart: {
+                    type: 'bar',
+                    height: height ? height : 400,
+                    width: width ? width : 600,
+                    toolbar: {
+                        show: false
+                    },
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: true
+                    }
+                },
+                colors: colors,
+                dataLabels: {
+                    enabled: true,
+                    offsetX: -6,
+                    style: {
+                        fontSize: '12px',
+                        colors: ['#fff']
+                    }
+                },
+                stroke: {
+                    show: true,
+                    width: 1,
+                    colors: ['#fff']
+                },
+                xaxis: {
+                    categories: labels,
+                }
             }
         }
         return options;

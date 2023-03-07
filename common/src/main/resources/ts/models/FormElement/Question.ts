@@ -177,7 +177,8 @@ export class Question extends FormElement {
             || this.question_type == Types.MULTIPLEANSWER
             || this.question_type == Types.SINGLEANSWERRADIO
             || this.question_type == Types.MATRIX
-            || this.question_type == Types.CURSOR;
+            || this.question_type == Types.CURSOR
+            || this.question_type == Types.RANKING;
     }
 
     isTypeChoicesQuestion = () : boolean => {
