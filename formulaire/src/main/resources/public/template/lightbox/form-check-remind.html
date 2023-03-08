@@ -34,14 +34,7 @@
                                    ng-if="vm.sortRemindlist.filter == 'name'"></i>
                             </div>
                         </th>
-                        <th class ="one">
-                            <div ng-click="vm.sortRemindlist.filter = 'surname'; vm.sortRemindlist.order = !vm.sortRemindlist.order">
-                                <i18n>formulaire.checkremind.table.surname</i18n>
-                                <i class="md-icon" ng-class="vm.sortRemindlist.order ? 'chevron-down' : 'chevron-up'"
-                                   ng-if="vm.sortRemindlist.filter == 'surname'"></i>
-                            </div>
-                        </th>
-                        <th class ="one" ng-if="vm.forms.selected[0].multiple">
+                        <th class ="one" ng-if="vm.forms.selected[0].multiple" style="text-align: center;">
                             <div ng-click="vm.sortRemindlist.filter = 'nbResponses'; vm.sortRemindlist.order = !vm.sortRemindlist.order">
                                 <i18n>formulaire.nb.responses</i18n>
                                 <i class="md-icon" ng-class="vm.sortRemindlist.order ? 'chevron-down' : 'chevron-up'"
@@ -53,7 +46,6 @@
                 <tbody>
                     <tr ng-repeat="responderInfo in vm.filterResponses() | orderBy:vm.sortRemindlist.filter:vm.sortRemindlist.order | limitTo : vm.limitTable">
                         <td>[[responderInfo.name]]</td>
-                        <td>[[responderInfo.surname]]</td>
                         <td ng-if="vm.forms.selected[0].multiple" style="text-align: center;">[[responderInfo.nbResponses]]</td>
                     </tr>
                 </tbody>

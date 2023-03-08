@@ -372,10 +372,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         }
         vm.responders = [];
         for (let uniqueDistribution of uniqueDistributions){
-            let responderNames: string[] = UtilsUtils.getNameAndSurname(uniqueDistribution.responder_name);
             let responderInfo: any = {
-                name : responderNames[0],
-                surname: responderNames[1],
+                name : uniqueDistribution.responder_name,
                 nbResponses: distributions.filter((d: Distribution) =>
                     d.responder_id === uniqueDistribution.responder_id &&
                     d.status === DistributionStatus.FINISHED).length
@@ -446,10 +444,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         else if(!vm.remindfilter.answered && vm.remindfilter.notanswered) {
             return vm.responders.filter(a => a.nbResponses <= 0);
         }
-        else if (!vm.remindfilter.answered && !vm.remindfilter.notanswered) {
-            return vm.responders;
-        }
-        else if(vm.remindfilter.answered && vm.remindfilter.notanswered) {
+        else {
             return vm.responders;
         }
     }
