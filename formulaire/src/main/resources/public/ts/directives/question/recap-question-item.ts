@@ -27,6 +27,7 @@ interface IViewModel {
     isSelectedChoice(choice: QuestionChoice, child?: Question) : boolean;
     getResponseFileNames() : string[];
     openQuestion(): void;
+    filterResponses(): void;
 }
 
 export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ['$sce', ($sce) => {
@@ -119,7 +120,7 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ['
                             <span ng-bind-html="vm.getStringResponse()"></span>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.RANKING">
-                            <div ng-repeat="resp in vm.responses.all | orderBy:['choice_position', 'id']">
+                            <div ng-repeat="resp in vm.filterResponses() | orderBy:['choice_position', 'id']">
                                 <label>
                                     <span style="cursor: default"></span>
                                     <span class="ten eight-mobile">[[resp.answer]]</span>
@@ -174,7 +175,7 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ['
                 return answer ? answer : missingResponseHtml;
             };
 
-            vm.isSelectedChoice = (choice, child?) : boolean => {
+            vm.isSelectedChoice = (choice: QuestionChoice, child?) : boolean => {
                 let selectedChoices: any = vm.responses.all
                     .filter((r: Response) => r.question_id === vm.question.id || (child && r.question_id === child.id))
                     .map((r: Response) => r.choice_id);
@@ -205,6 +206,10 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ['
                 };
                 $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, data);
             };
+
+            vm.filterResponses = () : Response[] => {
+                return vm.responses.all.filter((r: Response) => r.question_id === vm.question.id);
+            }
         }
     };
 }]);
