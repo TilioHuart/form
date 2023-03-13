@@ -2,10 +2,10 @@
     <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']" guard-root="formTitle">
         <!-- Arrow to order -->
         <div class="container-arrow" ng-if="vm.question.selected">
-            <div ng-class="{hidden : $first}" ng-click="vm.moveChoice(choice, vm.Direction.UP)">
+            <div ng-class="{hidden : $first}" ng-click="vm.moveChoice(choice, vm.direction.UP)">
                 <i class="i-chevron-up lg-icon"></i>
             </div>
-            <div ng-class="{hidden : $last}" ng-click="vm.moveChoice(choice, vm.Direction.DOWN)">
+            <div ng-class="{hidden : $last}" ng-click="vm.moveChoice(choice, vm.direction.DOWN)">
                 <i class="i-chevron-down lg-icon"></i>
             </div>
         </div>

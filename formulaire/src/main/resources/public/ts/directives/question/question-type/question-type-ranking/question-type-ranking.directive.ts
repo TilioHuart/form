@@ -9,7 +9,7 @@ import {RootsConst} from "../../../../core/constants/roots.const";
 interface IQuestionTypeRankingProps {
     I18n: I18nUtils;
     question: Question;
-    Direction: typeof Direction;
+    direction: typeof Direction;
 }
 
 interface IViewModel extends ng.IController, IQuestionTypeRankingProps {
@@ -21,11 +21,13 @@ interface IViewModel extends ng.IController, IQuestionTypeRankingProps {
 class Controller implements ng.IController, IViewModel {
     I18n: I18nUtils;
     question: Question;
-    Direction: typeof Direction;
+    direction: typeof Direction;
 
     constructor(private $scope: IQuestionTypeRankingProps, private $sce: ng.ISCEService) {}
 
-    $onInit = async () : Promise<void> => {}
+    $onInit = async () : Promise<void> => {
+        this.direction = Direction;
+    }
 
     $onDestroy = async () : Promise<void> => {}
 

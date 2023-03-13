@@ -510,7 +510,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                                 notify.error(idiom.translate('formulaire.error.question.reorganization'));
                                 break;
                         }
-                        target.questions.all.sort((a, b) => a.section_position - b.section_position);
+                        target.questions.all.sort((a: Question, b: Question) => a.section_position - b.section_position);
                     }
                 }
                 else {
@@ -536,11 +536,11 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     else { // Switch two questions into the parentSection
                         FormElementUtils.switchPositions(parentSection.questions, section_index, direction, PropPosition.SECTION_POSITION);
                     }
-                    parentSection.questions.all.sort((a, b) => a.section_position - b.section_position);
+                    parentSection.questions.all.sort((a: Question, b: Question) => a.section_position - b.section_position);
                 }
             }
 
-            vm.formElements.all.sort((a, b) => a.position - b.position);
+            vm.formElements.all.sort((a: FormElement, b: FormElement) => a.position - b.position);
             $scope.safeApply();
         };
 
@@ -571,7 +571,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                                 }
                             }
                             else {
-                                questionResponses.all.push(new Response(question.id, choice.id, choice.value));
+                                questionResponses.all.push(new Response(question.id, choice.id, choice.value,
+                                    null, choice.position));
                             }
                         }
                     }
