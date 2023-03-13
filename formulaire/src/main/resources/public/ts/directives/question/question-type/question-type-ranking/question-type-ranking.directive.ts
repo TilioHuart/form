@@ -23,10 +23,12 @@ class Controller implements ng.IController, IViewModel {
     question: Question;
     direction: typeof Direction;
 
-    constructor(private $scope: IQuestionTypeRankingProps, private $sce: ng.ISCEService) {}
+    constructor(private $scope: IQuestionTypeRankingProps, private $sce: ng.ISCEService) {
+        this.direction = Direction;
+    }
 
     $onInit = async () : Promise<void> => {
-        this.direction = Direction;
+
     }
 
     $onDestroy = async () : Promise<void> => {}
@@ -58,7 +60,7 @@ class Controller implements ng.IController, IViewModel {
 function directive() {
     return {
         restrict: 'E',
-        templateUrl: `${RootsConst.directive}question-type-ranking/question-type-ranking.html`,
+        templateUrl: `${RootsConst.directive}question/question-type/question-type-ranking/question-type-ranking.html`,
         transclude: true,
         scope: {
             question: '='

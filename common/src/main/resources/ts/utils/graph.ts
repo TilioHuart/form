@@ -390,6 +390,9 @@ export class GraphUtils {
                     toolbar: {
                         show: false
                     },
+                    animations: {
+                        enabled: false
+                    }
                 },
                 plotOptions: {
                     bar: {
@@ -397,14 +400,6 @@ export class GraphUtils {
                     }
                 },
                 colors: colors,
-                dataLabels: {
-                    enabled: true,
-                    offsetX: -6,
-                    style: {
-                        fontSize: '12px',
-                        colors: ['#fff']
-                    }
-                },
                 stroke: {
                     show: true,
                     width: 1,

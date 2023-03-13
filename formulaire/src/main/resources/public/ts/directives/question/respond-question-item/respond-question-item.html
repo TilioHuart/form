@@ -1,0 +1,123 @@
+<div class="question" guard-root>
+    <div class="question-title">
+        <h4>[[vm.question.title]]<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span></h4>
+    </div>
+    <div class="question-main">
+        <div ng-if="vm.question.question_type == vm.Types.FREETEXT">
+            <div ng-if="vm.question.statement" data-ng-bind-html="vm.getHtmlDescription(vm.question.statement)"></div>
+        </div>
+        <div ng-if="vm.question.question_type == vm.Types.SHORTANSWER">
+            <textarea ng-model="vm.responses.all[0].answer" i18n-placeholder="[[vm.question.placeholder || 'formulaire.question.type.SHORTANSWER']]" input-guard></textarea>
+        </div>
+        <div ng-if="vm.question.question_type == vm.Types.LONGANSWER">
+            <editor ng-model="vm.responses.all[0].answer" input-guard></editor>
+        </div>
+        <div ng-if="vm.question.question_type == vm.Types.SINGLEANSWER">
+            <select ng-model="vm.responses.all[0].choice_id" input-guard>
+                <option ng-value="">[[vm.I18n.translate('formulaire.options.select')]]</option>
+                <option ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']" ng-value="choice.id">[[choice.value]]</option>
+            </select>
+            <div ng-if="vm.isSelectedChoiceCustom(vm.responses.all[0].choice_id)">
+                <i18n>formulaire.response.custom.explanation</i18n>
+                <input type="text" ng-model="vm.responses.all[0].custom_answer" i18n-placeholder="formulaire.response.custom.write">
+            </div>
+        </div>
+        <div ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER">
+            <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
+                <label>
+                    <input type="checkbox" ng-model="vm.responses.all[vm.mapChoiceResponseIndex.get(choice)].selected" input-guard>
+                    <span>[[choice.value]]</span>
+                    <span ng-if="choice.is_custom"> :
+                                    <input type="text" ng-model="vm.responses.all[vm.mapChoiceResponseIndex.get(choice)].custom_answer"
+                                           ng-change="vm.deselectIfEmpty(choice)"
+                                           i18n-placeholder="formulaire.response.custom.write">
+                                </span>
+                </label>
+            </div>
+        </div>
+        <div ng-if="vm.question.question_type == vm.Types.DATE">
+            <date-picker ng-model="vm.responses.all[0].answer" input-guard></date-picker>
+            <i class="i-restore md-icon dark-grey spaced-left" ng-click="vm.resetDate()"></i>
+        </div>
+        <div ng-if="vm.question.question_type == vm.Types.TIME">
+            <input type="time" ng-model="vm.responses.all[0].answer" input-guard/>
+            <i class="i-restore md-icon dark-grey spaced-left" ng-click="vm.responses.all[0].answer = null;"></i>
+        </div>
+        <div ng-if="vm.question.question_type == vm.Types.FILE">
+            <formulaire-picker-file files="vm.files" multiple="true" input-guard></formulaire-picker-file>
+        </div>
+        <div ng-if ="vm.question.question_type == vm.Types.SINGLEANSWERRADIO">
+            <div ng-repeat ="choice in vm.question.choices.all | orderBy:['position', 'id']">
+                <label>
+                    <input type="radio" ng-model="vm.responses.all[0].choice_id" ng-value="[[choice.id]]"
+                           ng-click="vm.onClickChoice(choice)" input-guard>
+                    <span>[[choice.value]]</span>
+                    <span ng-if="choice.is_custom"> :
+                                    <input type="text" ng-model="vm.responses.all[0].custom_answer"
+                                           ng-change="vm.deselectIfEmpty(choice)"
+                                           i18n-placeholder="formulaire.response.custom.write">
+                                </span>
+                </label>
+            </div>
+        </div>
+        <div ng-if ="vm.question.question_type == vm.Types.CURSOR">
+            <div class="formulaire-cursor-input-wrapper">
+                <div class="formulaire-cursor-input-label">
+                    <label>[[vm.question.cursor_min_label]]</label> <!-- label minimum value (optional) -->
+                </div>
+                <div class="formulaire-cursor-input-range">
+                    <div class="range-slider"
+                         style="--min:[[vm.question.cursor_min_val]];
+                                            --max:[[vm.question.cursor_max_val]];
+                                            --step:[[vm.question.cursor_step]];
+                                            --value:[[vm.responses.all[0].answer]];">
+                        <!-- native cursor -->
+                        <input type="range" class="twelve" ng-model="vm.responses.all[0].answer"
+                               min="[[vm.question.cursor_min_val]]" max="[[vm.question.cursor_max_val]]"
+                               step="[[vm.question.cursor_step]]">
+                        <!-- pin cursor -->
+                        <output class="pin">
+                            <div class="pin-content">[[vm.responses.all[0].answer]]</div>
+                        </output>
+                        <!-- progress bar -->
+                        <div class="filler"></div>
+                    </div>
+
+
+                    <!-- Display MIN and MAX -->
+                    <div class="formulaire-cursor-input-range-values">
+                        <div>[[vm.question.cursor_min_val]]</div> <!-- minimum value -->
+                        <div>[[vm.question.cursor_max_val]]</div> <!-- maximum value -->
+                    </div>
+                </div>
+                <div class="formulaire-cursor-input-label">
+                    <label>[[vm.question.cursor_max_label]]</label> <!-- label maximum value (optional) -->
+                </div>
+            </div>
+        </div>
+        <div class="drag drag-container" ng-if ="vm.question.question_type == vm.Types.RANKING">
+            <ul class="drag-container">
+                <li class="row-shadow-effect " dragstart="vm.initDrag()"
+                     ng-repeat="resp in vm.responses.all | orderBy:['choice_position', 'id']">
+                    <div class="top">
+                        <div class="dots">
+                            <i class="i-drag lg-icon dark-grey"></i>
+                            <i class="i-drag lg-icon dark-grey"></i>
+                        </div>
+                    </div>
+                    <div class="main">
+                        <span class="title">[[resp.answer]]</span>
+                        <div class="one two-mobile container-arrow">
+                            <div ng-class="{hidden : $first}" ng-click="vm.moveResponse(resp, vm.Direction.UP)">
+                                <i class="i-chevron-up lg-icon"></i>
+                            </div>
+                            <div ng-class="{hidden : $last}" ng-click="vm.moveResponse(resp, vm.Direction.DOWN)">
+                                <i class="i-chevron-down lg-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
