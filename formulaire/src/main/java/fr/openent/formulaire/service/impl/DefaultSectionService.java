@@ -16,7 +16,6 @@ import org.entcore.common.sql.SqlStatementsBuilder;
 import static fr.openent.form.core.constants.Constants.TRANSACTION_BEGIN_QUERY;
 import static fr.openent.form.core.constants.Constants.TRANSACTION_COMMIT_QUERY;
 import static fr.openent.form.core.constants.Fields.*;
-import static fr.openent.form.core.constants.Tables.QUESTION_TABLE;
 import static fr.openent.form.core.constants.Tables.SECTION_TABLE;
 import static fr.openent.form.helpers.SqlHelper.getParamsForUpdateDateModifFormRequest;
 import static fr.openent.form.helpers.SqlHelper.getUpdateDateModifFormRequest;
@@ -90,6 +89,9 @@ public class DefaultSectionService implements SectionService {
 
             String errorMessage = "[Formulaire@DefaultSectionService::update] Fail to update sections " + sections + " : ";
             sql.transaction(s.build(), SqlResult.validResultsHandler(FutureHelper.handlerEither(promise, errorMessage)));
+        }
+        else {
+            promise.complete(new JsonArray());
         }
 
         return promise.future();

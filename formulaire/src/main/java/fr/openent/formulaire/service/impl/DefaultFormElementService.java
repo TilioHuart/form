@@ -5,7 +5,6 @@ import fr.openent.form.core.models.FormElement;
 import fr.openent.form.core.models.Question;
 import fr.openent.form.core.models.Section;
 import fr.openent.form.helpers.FutureHelper;
-import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.service.FormElementService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Future;
@@ -17,14 +16,12 @@ import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.sql.SqlStatementsBuilder;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static fr.openent.form.core.constants.Constants.*;
 import static fr.openent.form.core.constants.Constants.CONDITIONAL_QUESTIONS;
 import static fr.openent.form.core.constants.Fields.*;
-import static fr.openent.form.core.constants.Fields.ID;
 import static fr.openent.form.core.constants.Tables.QUESTION_TABLE;
 import static fr.openent.form.core.constants.Tables.SECTION_TABLE;
 import static fr.openent.form.helpers.SqlHelper.getParamsForUpdateDateModifFormRequest;
@@ -68,12 +65,12 @@ public class DefaultFormElementService implements FormElementService {
 
         if (sections.isEmpty()) {
             promise.fail("[Formulaire@DefaultFormElementService::update] formElements must contain at least one section. " +
-                    "You should use questionService.update instead.");
+                    "You should use questionService.update() instead.");
             return promise.future();
         }
         else if (questions.isEmpty()) {
             promise.fail("[Formulaire@DefaultFormElementService::update] formElements must contain at least one question. " +
-                    "You should use sectionService.update instead.");
+                    "You should use sectionService.update() instead.");
             return promise.future();
         }
 
