@@ -81,7 +81,8 @@ export class Question extends FormElement {
         }
 
         // Count responses for each choice
-        results = results.filter((r: Response) => r.question_id === this.id);
+        let finishedDistribIds : number[] = distribs.all.map((d: Distribution) => d.id);
+        results = results.filter((r: Response) => r.question_id === this.id && (<any>finishedDistribIds).includes(r.distribution_id));
         for (let result of results) {
             for (let choice of this.choices.all) {
                 if (result.choice_id === choice.id) {
@@ -91,7 +92,6 @@ export class Question extends FormElement {
         }
 
         // Deal with no choice responses
-        let finishedDistribIds : number[] = distribs.all.map((d: Distribution) => d.id);
         let noResponseChoice: QuestionChoice = new QuestionChoice(this.id, this.choices.all.length + 1);
         noResponseChoice.value = idiom.translate('formulaire.response.empty');
         noResponseChoice.nbResponses = results.filter(r => !r.choice_id && (<any>finishedDistribIds).includes(r.distribution_id)).length;
