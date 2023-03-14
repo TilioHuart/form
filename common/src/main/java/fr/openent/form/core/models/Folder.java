@@ -1,7 +1,6 @@
 package fr.openent.form.core.models;
 
 import static fr.openent.form.core.constants.Fields.*;
-import fr.openent.form.core.enums.ChoiceTypes;
 import io.vertx.core.json.JsonObject;
 
 public class Folder implements Model<Folder> {

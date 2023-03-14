@@ -1,16 +1,14 @@
 import {Selectable} from "entcore-toolkit";
+import {FormElementType} from "@common/core/enums/form-element-type";
 
 export abstract class FormElement implements Selectable {
     id: number;
     form_id: number;
     title: string;
     position: number;
+    form_element_type: string;
     nb_responses: number;
     selected: boolean;
-    question_type: number;
-    cursor_min_val: number;
-    cursor_max_val: number;
-    cursor_step: number;
 
     protected constructor() {
         this.id = null;
@@ -19,10 +17,6 @@ export abstract class FormElement implements Selectable {
         this.position = null;
         this.nb_responses = 0;
         this.selected = null;
-        this.question_type = 0;
-        this.cursor_min_val = 0;
-        this.cursor_max_val = 0;
-        this.cursor_step = 0;
     }
 
     toJson() : Object {
@@ -31,12 +25,17 @@ export abstract class FormElement implements Selectable {
             form_id: this.form_id,
             title: this.title,
             position: this.position,
+            form_element_type: this.form_element_type,
             nb_responses: this.nb_responses,
-            selected: this.selected,
-            types: this.question_type,
-            cursor_min_val: this.cursor_min_val,
-            cursor_max_val: this.cursor_max_val,
-            cursor_step: this.cursor_step
+            selected: this.selected
         }
+    }
+
+    isSection = () : boolean => {
+        return this.form_element_type === FormElementType.SECTION;
+    }
+
+    isQuestion = () : boolean => {
+        return this.form_element_type === FormElementType.QUESTION;
     }
 }

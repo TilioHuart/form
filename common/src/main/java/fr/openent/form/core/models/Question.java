@@ -29,17 +29,29 @@ public class Question extends FormElement implements Model<Question> {
     public Question(JsonObject question) {
         super(question);
         this.questionType = question.getInteger(QUESTION_TYPE, null);
-        this.statement = question.getString(STATEMENT, null);
-        this.mandatory = question.getBoolean(MANDATORY, null);
+        this.statement = question.getString(STATEMENT, "");
+        this.mandatory = question.getBoolean(MANDATORY, false);
         this.originalQuestionId = question.getNumber(ORIGINAL_QUESTION_ID, null);
         this.sectionId = question.getNumber(SECTION_ID, null);
         this.sectionPosition = question.getNumber(SECTION_POSITION, null);
-        this.conditional = question.getBoolean(CONDITIONAL, null);
-        this.placeholder = question.getString(PLACEHOLDER, null);
+        this.conditional = question.getBoolean(CONDITIONAL, false);
+        this.placeholder = question.getString(PLACEHOLDER, "");
         this.matrixId = question.getNumber(MATRIX_ID,null);
         this.matrixPosition = question.getNumber(MATRIX_POSITION,null);
-        this.questionChoices = new QuestionChoice().toList(question.getJsonArray(QUESTION_CHOICES, null));
-        this.children = new Question().toList(question.getJsonArray(CHILDREN, null));
+
+        if (question.getValue(QUESTION_CHOICES, null) instanceof JsonArray) {
+            this.questionChoices = new QuestionChoice().toList(question.getJsonArray(QUESTION_CHOICES, null));
+        }
+        else if (question.getValue(QUESTION_CHOICES, null) instanceof JsonObject && question.getJsonObject(QUESTION_CHOICES, null).containsKey(ARR)) {
+            this.questionChoices = new QuestionChoice().toList(question.getJsonObject(QUESTION_CHOICES, null).getJsonArray(ARR));
+        }
+
+        if (question.getValue(CHILDREN, null) instanceof JsonArray) {
+            this.children = new Question().toList(question.getJsonArray(CHILDREN, null));
+        }
+        else if (question.getValue(CHILDREN, null) instanceof JsonObject && question.getJsonObject(CHILDREN, null).containsKey(ARR)) {
+            this.children = new Question().toList(question.getJsonObject(CHILDREN, null).getJsonArray(ARR));
+        }
     }
 
 
@@ -151,6 +163,7 @@ public class Question extends FormElement implements Model<Question> {
                 .put(PLACEHOLDER, this.placeholder)
                 .put(MATRIX_ID, this.matrixId)
                 .put(MATRIX_POSITION, this.matrixPosition)
+                .put(FORM_ELEMENT_TYPE, this.formElementType)
                 .put(QUESTION_CHOICES, new QuestionChoice().toJsonArray(this.questionChoices))
                 .put(CHILDREN, new Question().toJsonArray(this.children));
     }

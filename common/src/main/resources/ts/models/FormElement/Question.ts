@@ -1,12 +1,13 @@
 import {Mix, Selection} from "entcore-toolkit";
 import {idiom, notify} from "entcore";
 import {questionChoiceService, questionService} from "../../services";
-import {QuestionChoice, QuestionChoices} from "../QuestionChoice";
-import {Types} from "../QuestionType";
+import {QuestionChoice, QuestionChoices} from "@common/models";
+import {Types} from "@common/models";
 import {FormElement} from "./FormElement";
-import {Distribution, Distributions} from "../Distribution";
+import {Distribution, Distributions} from "@common/models";
 import {Response} from "../Response";
 import {Constants} from "@common/core/constants";
+import {FormElementType} from "@common/core/enums/form-element-type";
 
 export class Question extends FormElement {
     question_type: number;
@@ -44,6 +45,7 @@ export class Question extends FormElement {
         this.cursor_step = null;
         this.cursor_min_label = null;
         this.cursor_max_label = null;
+        this.form_element_type = FormElementType.QUESTION;
     }
 
     toJson() : Object {
@@ -68,7 +70,8 @@ export class Question extends FormElement {
             cursor_max_val: this.cursor_max_val,
             cursor_step: this.cursor_step,
             cursor_min_label: this.cursor_min_label,
-            cursor_max_label: this.cursor_max_label
+            cursor_max_label: this.cursor_max_label,
+            form_element_type: this.form_element_type
         }
     }
 
@@ -153,6 +156,10 @@ export class Question extends FormElement {
         return this.question_type == Types.MATRIX
             && this.children.all.length > 0 &&
             this.children.all[0].question_type == Types.MULTIPLEANSWER;
+    }
+
+    isSameQuestionType = (formElement: FormElement) : boolean => {
+        return formElement instanceof Question && this.question_type === formElement.question_type;
     }
 }
 

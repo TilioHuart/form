@@ -1,6 +1,7 @@
 package fr.openent.form.core.models;
 
 import static fr.openent.form.core.constants.Fields.*;
+
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -19,9 +20,15 @@ public class Section extends FormElement implements Model<Section> {
 
     public Section(JsonObject section) {
         super(section);
-        this.description = section.getString(DESCRIPTION, null);
+        this.description = section.getString(DESCRIPTION, "");
         this.originalSectionId = section.getNumber(ORIGINAL_SECTION_ID, null);
-        this.questions = new Question().toList(section.getJsonArray(QUESTIONS, null));
+
+        if (section.getValue(QUESTIONS, null) instanceof JsonArray) {
+            this.questions = new Question().toList(section.getJsonArray(QUESTIONS, null));
+        }
+        else if (section.getValue(QUESTIONS, null) instanceof JsonObject && section.getJsonObject(QUESTIONS, null).containsKey(ARR)) {
+            this.questions = new Question().toList(section.getJsonObject(QUESTIONS, null).getJsonArray(ARR));
+        }
     }
 
 
@@ -62,6 +69,7 @@ public class Section extends FormElement implements Model<Section> {
                 .put(POSITION, this.position)
                 .put(DESCRIPTION, this.description)
                 .put(ORIGINAL_SECTION_ID, this.originalSectionId)
+                .put(FORM_ELEMENT_TYPE, this.formElementType)
                 .put(QUESTIONS, new Question().toJsonArray(questions));
     }
 

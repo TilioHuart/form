@@ -126,10 +126,10 @@ export class FormElementUtils {
                 item.position = newIndex + 1;
                 item.section_id = null;
                 item.section_position = null;
-                oldSection.questions.all = oldSection.questions.all.filter(q => q.id != item.id);
-                await questionService.update(oldSection.questions.all);
                 formElements.all.push(item);
                 await formElementService.update(formElements.all);
+                oldSection.questions.all = oldSection.questions.all.filter(q => q.id != item.id);
+                await questionService.update(oldSection.questions.all);
             }
             else { // Item moved FROM vm.formElements TO vm.formElements
                 FormElementUtils.updateSiblingsPositions(formElements, true, indexes.goUp, indexes.startIndex, indexes.endIndex);
@@ -156,7 +156,7 @@ export class FormElementUtils {
                     oldSection.questions.all = oldSection.questions.all.filter(q => q.id != item.id);
                     newSection.questions.all.push(item);
                 }
-                await formElementService.update(newSection.questions.all.concat(oldSection.questions.all));
+                await questionService.update(newSection.questions.all.concat(oldSection.questions.all));
             }
             else { // Item moved FROM vm.formElements TO section with id 'newNestedSectionId'
                 FormElementUtils.updateSiblingsPositions(formElements, false, null, oldIndex);

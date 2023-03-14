@@ -8,8 +8,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static fr.openent.form.core.constants.Dates.YYYY_MM_DD_T_HH_MM_SS_SSS;
 import static fr.openent.form.core.constants.Fields.*;
@@ -35,7 +33,6 @@ public class Form implements Model<Form> {
     private RgpdLifetimes rgpdLifetime;
     private String publicKey;
     private Number originalFormId;
-
     private List<FormElement> formElements;
 
 
@@ -64,7 +61,13 @@ public class Form implements Model<Form> {
         this.rgpdLifetime = RgpdLifetimes.getRgpdLifetimes(form.getInteger(RGPD_LIFETIME, null));
         this.publicKey = form.getString(PUBLIC_KEY, null);
         this.originalFormId = form.getNumber(ORIGINAL_FORM_ID,null);
-        this.formElements = this.toListFormElements(form.getJsonArray(FORM_ELEMENTS, null));
+
+        if (form.getValue(FORM_ELEMENTS, null) instanceof JsonArray) {
+            this.formElements = FormElement.toListFormElements(form.getJsonArray(FORM_ELEMENTS, null));
+        }
+        else if (form.getValue(FORM_ELEMENTS, null) instanceof JsonObject && form.getJsonObject(FORM_ELEMENTS, null).containsKey(ARR)) {
+            this.formElements = FormElement.toListFormElements(form.getJsonObject(FORM_ELEMENTS, null).getJsonArray(ARR));
+        }
     }
 
 
@@ -229,29 +232,12 @@ public class Form implements Model<Form> {
                 .put(RGPD_LIFETIME, this.rgpdLifetime.getValue())
                 .put(PUBLIC_KEY, this.publicKey)
                 .put(ORIGINAL_FORM_ID, this.originalFormId)
-                .put(FORM_ELEMENTS, this.toJsonArrayFormElements(this.formElements));
+                .put(FORM_ELEMENTS, FormElement.toJsonArrayFormElements(this.formElements));
     }
 
     @Override
     public Form model(JsonObject form){
         return new Form(form);
-    }
-
-    private List<FormElement> toListFormElements(JsonArray formElements) {
-        return formElements.stream()
-                .map(formElement -> {
-                    if (formElement instanceof JsonObject) {
-                        JsonObject jsonFormElement = (JsonObject)formElement;
-                        return jsonFormElement.containsKey(DESCRIPTION) ? new Section(jsonFormElement) : new Question(jsonFormElement);
-                    }
-                    return null;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
-
-    private JsonArray toJsonArrayFormElements(List<FormElement> formElements) {
-        return new JsonArray(formElements.stream().map(FormElement::toJson).collect(Collectors.toList()));
     }
 }
 

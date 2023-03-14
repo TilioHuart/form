@@ -33,6 +33,16 @@ public class DefaultQuestionService implements QuestionService {
     }
 
     @Override
+    public Future<JsonArray> listForForm(String formId) {
+        Promise<JsonArray> promise = Promise.promise();
+
+        String errorMessage = "[Formulaire@DefaultQuestionService::listForForm] Fail to list questions for form with id " + formId + " : ";
+        listForForm(formId, FutureHelper.handlerEither(promise, errorMessage));
+
+        return promise.future();
+    }
+
+    @Override
     public void listForSection(String sectionId, Handler<Either<String, JsonArray>> handler) {
         String query = "SELECT * FROM " + QUESTION_TABLE + " WHERE section_id = ? AND matrix_id IS NULL " +
                 "ORDER BY section_position;";
@@ -162,6 +172,16 @@ public class DefaultQuestionService implements QuestionService {
     }
 
     @Override
+    public Future<JsonObject> create(JsonObject question, String formId) {
+        Promise<JsonObject> promise = Promise.promise();
+
+        String errorMessage = "[Formulaire@DefaultQuestionService::create] Fail to create question " + question + " : ";
+        create(question, formId, FutureHelper.handlerEither(promise, errorMessage));
+
+        return promise.future();
+    }
+
+    @Override
     public void update(String formId, JsonArray questions, Handler<Either<String, JsonArray>> handler) {
         if (!questions.isEmpty()) {
             SqlStatementsBuilder s = new SqlStatementsBuilder();
@@ -204,6 +224,16 @@ public class DefaultQuestionService implements QuestionService {
         else {
             handler.handle(new Either.Right<>(new JsonArray()));
         }
+    }
+
+    @Override
+    public Future<JsonArray> update(String formId, JsonArray questions) {
+        Promise<JsonArray> promise = Promise.promise();
+
+        String errorMessage = "[Formulaire@DefaultQuestionService::update] Fail to update questions " + questions + " : ";
+        update(formId, questions, FutureHelper.handlerEither(promise, errorMessage));
+
+        return promise.future();
     }
 
     @Override

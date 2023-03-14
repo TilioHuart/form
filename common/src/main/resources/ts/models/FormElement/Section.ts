@@ -3,6 +3,7 @@ import {idiom, notify} from "entcore";
 import {sectionService} from "../../services";
 import {FormElement} from "./FormElement";
 import {Questions} from "./Question";
+import {FormElementType} from "@common/core/enums/form-element-type";
 
 export class Section extends FormElement {
     description: string;
@@ -11,6 +12,7 @@ export class Section extends FormElement {
     constructor() {
         super();
         this.description = null;
+        this.form_element_type = FormElementType.SECTION;
         this.questions = new Questions();
     }
 
@@ -22,6 +24,7 @@ export class Section extends FormElement {
             position: this.position,
             selected: this.selected,
             description: this.description,
+            form_element_type: this.form_element_type,
             questions: this.questions
         }
     }

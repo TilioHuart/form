@@ -1,8 +1,13 @@
 package fr.openent.formulaire.service;
 
+import fr.openent.form.core.models.FormElement;
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+
+import java.util.List;
 
 public interface FormElementService {
 
@@ -28,4 +33,11 @@ public interface FormElementService {
      * @param handler function handler returning JsonObject data
      */
     void getByTypeAndId(String elementId, String elementType, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Update a list of formElements in a specific form
+     * @param formElements form elements to update
+     * @param formId form identifier
+     */
+    Future<JsonArray> update(List<FormElement> formElements, String formId);
 }

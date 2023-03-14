@@ -1,8 +1,12 @@
 package fr.openent.formulaire.service.impl;
 
+import fr.openent.form.helpers.FutureHelper;
+import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.service.SectionService;
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
@@ -12,6 +16,7 @@ import org.entcore.common.sql.SqlStatementsBuilder;
 import static fr.openent.form.core.constants.Constants.TRANSACTION_BEGIN_QUERY;
 import static fr.openent.form.core.constants.Constants.TRANSACTION_COMMIT_QUERY;
 import static fr.openent.form.core.constants.Fields.*;
+import static fr.openent.form.core.constants.Tables.QUESTION_TABLE;
 import static fr.openent.form.core.constants.Tables.SECTION_TABLE;
 import static fr.openent.form.helpers.SqlHelper.getParamsForUpdateDateModifFormRequest;
 import static fr.openent.form.helpers.SqlHelper.getUpdateDateModifFormRequest;
@@ -24,6 +29,16 @@ public class DefaultSectionService implements SectionService {
         String query = "SELECT * FROM " + SECTION_TABLE + " WHERE form_id = ? ORDER BY position;";
         JsonArray params = new JsonArray().add(formId);
         sql.prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public Future<JsonArray> list(String formId) {
+        Promise<JsonArray> promise = Promise.promise();
+
+        String errorMessage = "[Formulaire@DefaultSectionService::list] Fail to list sections for form with id " + formId + " : ";
+        list(formId, FutureHelper.handlerEither(promise, errorMessage));
+
+        return promise.future();
     }
 
     @Override
@@ -50,12 +65,16 @@ public class DefaultSectionService implements SectionService {
     }
 
     @Override
-    public void update(String formId, JsonArray sections, Handler<Either<String, JsonArray>> handler) {
+    public Future<JsonArray> update(String formId, JsonArray sections) {
+        Promise<JsonArray> promise = Promise.promise();
+
         if (!sections.isEmpty()) {
             SqlStatementsBuilder s = new SqlStatementsBuilder();
+            String nullifyerQuery = "UPDATE " + SECTION_TABLE + " SET position = NULL WHERE id IN " + Sql.listPrepared(sections) + ";";
             String query = "UPDATE " + SECTION_TABLE + " SET title = ?, description = ?, position = ? WHERE id = ? RETURNING *;";
 
             s.raw(TRANSACTION_BEGIN_QUERY);
+            s.prepared(nullifyerQuery, UtilsHelper.getIds(sections, false));
             for (int i = 0; i < sections.size(); i++) {
                 JsonObject section = sections.getJsonObject(i);
                 JsonArray params = new JsonArray()
@@ -69,11 +88,11 @@ public class DefaultSectionService implements SectionService {
             s.prepared(getUpdateDateModifFormRequest(), getParamsForUpdateDateModifFormRequest(formId));
             s.raw(TRANSACTION_COMMIT_QUERY);
 
-            sql.transaction(s.build(), SqlResult.validResultsHandler(handler));
+            String errorMessage = "[Formulaire@DefaultSectionService::update] Fail to update sections " + sections + " : ";
+            sql.transaction(s.build(), SqlResult.validResultsHandler(FutureHelper.handlerEither(promise, errorMessage)));
         }
-        else {
-            handler.handle(new Either.Right<>(new JsonArray()));
-        }
+
+        return promise.future();
     }
 
     @Override

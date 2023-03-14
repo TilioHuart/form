@@ -1,12 +1,6 @@
 package fr.openent.form.core.models;
 
 import io.vertx.core.json.JsonObject;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import static fr.openent.form.core.constants.Dates.YYYY_MM_DD_T_HH_MM_SS_SSS;
 import static fr.openent.form.core.constants.Fields.*;
 
 public class ResponseFile implements Model<ResponseFile> {

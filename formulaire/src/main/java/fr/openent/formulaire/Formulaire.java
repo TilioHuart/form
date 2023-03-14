@@ -50,6 +50,7 @@ public class Formulaire extends BaseServer {
 		// Create and parameter confs for all controllers using sharing system
 		SqlConf distribConf = SqlConfs.createConf(DistributionController.class.getName());
 		SqlConf formConf = SqlConfs.createConf(FormController.class.getName());
+		SqlConf formElementConf = SqlConfs.createConf(FormElementController.class.getName());
 		SqlConf questionChoiceConf = SqlConfs.createConf(QuestionChoiceController.class.getName());
 		SqlConf questionConf = SqlConfs.createConf(QuestionController.class.getName());
 		SqlConf responseConf = SqlConfs.createConf(ResponseController.class.getName());
@@ -59,6 +60,7 @@ public class Formulaire extends BaseServer {
 		List<SqlConf> confs = new ArrayList<>();
 		confs.add(distribConf);
 		confs.add(formConf);
+		confs.add(formElementConf);
 		confs.add(questionChoiceConf);
 		confs.add(questionConf);
 		confs.add(responseConf);
@@ -85,6 +87,7 @@ public class Formulaire extends BaseServer {
 		addController(formController);
 		addController(new FormElementController());
 		addController(new FormulaireController(eventStore));
+		addController(new MonitoringController());
 		addController(new QuestionChoiceController());
 		addController(new QuestionController());
 		addController(new QuestionTypeController());

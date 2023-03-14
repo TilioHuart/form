@@ -4,18 +4,13 @@ import fr.openent.form.core.enums.QuestionTypes;
 import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
-import fr.openent.formulaire.service.DistributionService;
-import fr.openent.formulaire.service.FormService;
-import fr.openent.formulaire.service.QuestionService;
-import fr.openent.formulaire.service.QuestionSpecificFieldsService;
-import fr.openent.formulaire.service.impl.DefaultDistributionService;
-import fr.openent.formulaire.service.impl.DefaultFormService;
-import fr.openent.formulaire.service.impl.DefaultQuestionService;
-import fr.openent.formulaire.service.impl.DefaultQuestionSpecificFieldsService;
+import fr.openent.formulaire.service.*;
+import fr.openent.formulaire.service.impl.*;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
+import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -24,6 +19,9 @@ import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserUtils;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static fr.openent.form.core.constants.Constants.CONDITIONAL_QUESTIONS;
 import static fr.openent.form.core.constants.Fields.*;
@@ -36,6 +34,7 @@ import static org.entcore.common.http.response.DefaultResponseHandler.defaultRes
 public class QuestionController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(QuestionController.class);
     private final QuestionService questionService;
+    private final SectionService sectionService;
     private final QuestionSpecificFieldsService questionSpecificFieldsService;
     private final FormService formService;
     private final DistributionService distributionService;
@@ -43,6 +42,7 @@ public class QuestionController extends ControllerHelper {
     public QuestionController() {
         super();
         this.questionService = new DefaultQuestionService();
+        this.sectionService = new DefaultSectionService();
         this.questionSpecificFieldsService = new DefaultQuestionSpecificFieldsService();
         this.formService = new DefaultFormService();
         this.distributionService = new DefaultDistributionService();
@@ -229,22 +229,34 @@ public class QuestionController extends ControllerHelper {
     }
 
     private void createQuestion(HttpServerRequest request, JsonObject question, String formId) {
-        questionService.create(question, formId, questionEvt -> {
-            if (questionEvt.isLeft()) {
-                log.error("[Formulaire@QuestionController::createQuestion] Fail to create question : " + questionEvt.left().getValue());
-                renderInternalError(request, questionEvt);
-                return;
-            }
+        sectionService.list(formId)
+            .compose(sections -> {
+                // Check the question's position and if some sections already use it
+                Integer questionPosition = question.getInteger(POSITION);
+                JsonArray sectionPositions = UtilsHelper.getByProp(sections, POSITION);
+                if (questionPosition != null && sectionPositions.contains(questionPosition)) {
+                    String message = "Position " + questionPosition + " is already used by a section.";
+                    return Future.failedFuture(message);
+                }
 
-            // If question is cursor type, you insert fields in a specific table
-            if (question.getInteger(QUESTION_TYPE) == QuestionTypes.CURSOR.getCode()) {
-                String questionId = questionEvt.right().getValue().getInteger(ID).toString();
-                questionSpecificFieldsService.create(question, questionId, defaultResponseHandler(request));
-                return;
-            }
+                return questionService.create(question, formId);
+            })
+            .compose(createdQuestion -> {
+                // If question is cursor type, you insert fields in a specific table
+                if (question.getInteger(QUESTION_TYPE) == QuestionTypes.CURSOR.getCode()) {
+                    String questionId = createdQuestion.getInteger(ID).toString();
+                    return questionSpecificFieldsService.create(question, questionId);
+                }
 
-            renderJson(request, questionEvt.right().getValue());
-        });
+                return Future.succeededFuture(createdQuestion);
+            })
+            .onSuccess(createdQuestionAndSpecifics -> {
+                renderJson(request, createdQuestionAndSpecifics);
+            })
+            .onFailure(err -> {
+                log.error("[Formulaire@QuestionController::createQuestion] Failed to create question " + question + " : " + err.getMessage());
+                renderError(request);
+            });
     }
 
     @Put("/forms/:formId/questions")
@@ -255,7 +267,7 @@ public class QuestionController extends ControllerHelper {
         String formId = request.getParam(PARAM_FORM_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
-                String message = "[Formulaire@updateQuestions] User not found in session.";
+                String message = "[Formulaire@QuestionController::update] User not found in session.";
                 log.error(message);
                 unauthorized(request, message);
                 return;
@@ -263,7 +275,7 @@ public class QuestionController extends ControllerHelper {
 
             RequestUtils.bodyToJsonArray(request, questions -> {
                 if (questions == null || questions.isEmpty()) {
-                    log.error("[Formulaire@updateQuestions] No questions to update.");
+                    log.error("[Formulaire@QuestionController::update] No questions to update.");
                     noContent(request);
                     return;
                 }
@@ -276,22 +288,22 @@ public class QuestionController extends ControllerHelper {
                     Long sectionPosition = question.getLong(SECTION_POSITION);
 
                     if (sectionId == null ^ sectionPosition == null) { // ^ = XOR -> return true if they have different value, return false if they both have same value
-                        String message = "[Formulaire@updateQuestions] sectionId and sectionPosition must be both null or both not null : " + question;
+                        String message = "[Formulaire@QuestionController::update] sectionId and sectionPosition must be both null or both not null : " + question;
                         log.error(message);
                         badRequest(request, message);
                         return;
                     } else if (sectionId != null && (sectionId <= 0 || sectionPosition <= 0)) {
-                        String message = "[Formulaire@updateQuestions] sectionId and sectionPosition must have values greater than 0 : " + question;
+                        String message = "[Formulaire@QuestionController::update] sectionId and sectionPosition must have values greater than 0 : " + question;
                         log.error(message);
                         badRequest(request, message);
                         return;
                     } else if (sectionPosition != null && question.getInteger(POSITION) != null) {
-                        String message = "[Formulaire@updateQuestions] A question is either in or out of a section, it cannot have a position and a section_position : " + question;
+                        String message = "[Formulaire@QuestionController::update] A question is either in or out of a section, it cannot have a position and a section_position : " + question;
                         log.error(message);
                         badRequest(request, message);
                         return;
                     } else if (question.getBoolean(CONDITIONAL) && !CONDITIONAL_QUESTIONS.contains(question.getInteger(QUESTION_TYPE))) {
-                        String message = "[Formulaire@updateQuestions] A question conditional question must be of type : " + CONDITIONAL_QUESTIONS;
+                        String message = "[Formulaire@QuestionController::update] A question conditional question must be of type : " + CONDITIONAL_QUESTIONS;
                         log.error(message);
                         badRequest(request, message);
                         return;
@@ -301,12 +313,12 @@ public class QuestionController extends ControllerHelper {
 
                 formService.get(formId, user, formEvt -> {
                     if (formEvt.isLeft()) {
-                        log.error("[Formulaire@updateQuestions] Failed to get form with id : " + formId);
+                        log.error("[Formulaire@QuestionController::update] Failed to get form with id : " + formId);
                         renderInternalError(request, formEvt);
                         return;
                     }
                     if (formEvt.right().getValue().isEmpty()) {
-                        String message = "[Formulaire@updateQuestions] No form found for form with id " + formId;
+                        String message = "[Formulaire@QuestionController::update] No form found for form with id " + formId;
                         log.error(message);
                         notFound(request, message);
                         return;
@@ -317,7 +329,7 @@ public class QuestionController extends ControllerHelper {
                     // Check if the type of question if it's for a public form (type FILE is forbidden)
                     JsonArray questionTypes = getByProp(questions, QUESTION_TYPE);
                     if (form.getBoolean(IS_PUBLIC) && questionTypes.contains(8)) {
-                        String message = "[Formulaire@updateQuestions] You cannot create a question type FILE for the public form with id " + formId;
+                        String message = "[Formulaire@QuestionController::update] You cannot create a question type FILE for the public form with id " + formId;
                         log.error(message);
                         badRequest(request, message);
                         return;
@@ -327,7 +339,7 @@ public class QuestionController extends ControllerHelper {
                     JsonArray questionIds = UtilsHelper.getIds(questions);
                     questionService.getSectionIdsWithConditionalQuestions(formId, questionIds, sectionIdsEvt -> {
                         if (sectionIdsEvt.isLeft()) {
-                            log.error("[Formulaire@updateQuestions] Failed to get section ids for form with id : " + formId);
+                            log.error("[Formulaire@QuestionController::update] Failed to get section ids for form with id : " + formId);
                             renderInternalError(request, sectionIdsEvt);
                             return;
                         }
@@ -344,38 +356,43 @@ public class QuestionController extends ControllerHelper {
                         }
 
                         if (conflictingSectionId != null) {
-                            String message = "[Formulaire@updateQuestions] A conditional question is already existing for the section with id : " + conflictingSectionId;
+                            String message = "[Formulaire@QuestionController::update] A conditional question is already existing for the section with id : " + conflictingSectionId;
                             log.error(message);
                             badRequest(request, message);
                             return;
                         }
 
                         // If no conditional question conflict, we update
-                        questionService.update(formId, questions, updatedQuestionsEvt -> {
-                            if (updatedQuestionsEvt.isLeft()) {
-                                log.error("[Formulaire@updateQuestions] Failed to update questions : " + updatedQuestionsEvt.left().getValue());
-                                renderInternalError(request, updatedQuestionsEvt);
-                                return;
-                            }
+                        JsonObject composeInfos = new JsonObject();
+                        sectionService.list(formId)
+                            .compose(sections -> {
+                                JsonArray questionPositions = UtilsHelper.getByProp(questions, POSITION);
+                                JsonArray sectionPositions = UtilsHelper.getByProp(sections, POSITION);
 
-                            JsonArray updatedQuestionsInfos = updatedQuestionsEvt.right().getValue();
-                            JsonArray updatedQuestions = new JsonArray();
-                            for (int k = 0; k < updatedQuestionsInfos.size(); k++) {
-                                updatedQuestions.addAll(updatedQuestionsInfos.getJsonArray(k));
-                            }
-
-                            questionSpecificFieldsService.update(questions, updateSpecificsEvt -> {
-                                if (updateSpecificsEvt.isLeft()) {
-                                    log.error("[Formulaire@updateQuestions] Failed to update questions specifics : " + updateSpecificsEvt.left().getValue());
-                                    renderInternalError(request, updateSpecificsEvt);
-                                    return;
+                                List<Object> doubles = questionPositions.stream().filter(sectionPositions::contains).collect(Collectors.toList());
+                                if (doubles.size() > 0) {
+                                    String message = "Position(s) " + doubles + " are/is already used by some question(s).";
+                                    return Future.failedFuture(message);
                                 }
+                                return questionService.update(formId, questions);
+                            })
+                            .compose(updatedQuestionsInfos -> {
+                                JsonArray updatedQuestions = new JsonArray();
+                                for (int k = 0; k < updatedQuestionsInfos.size(); k++) {
+                                    updatedQuestions.addAll(updatedQuestionsInfos.getJsonArray(k));
+                                }
+                                composeInfos.put(QUESTIONS, updatedQuestions);
 
-                                JsonArray updateSpecifics = updateSpecificsEvt.right().getValue();
-                                JsonArray updatedQuestionsAndSpecifics = UtilsHelper.mergeQuestionsAndSpecifics(updatedQuestions, updateSpecifics);
+                                return questionSpecificFieldsService.update(questions);
+                            })
+                            .onSuccess(updatedSpecifics -> {
+                                JsonArray updatedQuestionsAndSpecifics = UtilsHelper.mergeQuestionsAndSpecifics(composeInfos.getJsonArray(QUESTIONS), updatedSpecifics);
                                 renderJson(request, updatedQuestionsAndSpecifics);
+                            })
+                            .onFailure(err -> {
+                                log.error("[Formulaire@QuestionController::update] Failed to update questions " + questions + " : " + err.getMessage());
+                                renderError(request);
                             });
-                        });
                     });
                 });
             });

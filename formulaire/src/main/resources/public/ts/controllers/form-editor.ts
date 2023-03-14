@@ -4,11 +4,11 @@ import {
     FormElement,
     FormElements,
     Question,
-    QuestionChoice, Questions,
+    QuestionChoice,
     QuestionTypes,
     Response,
     Responses,
-    Section, Sections,
+    Section,
     Types
 } from "../models";
 import {
@@ -250,8 +250,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 }
             }
 
-            await questionService.update(vm.formElements.getAllQuestions().all);
-            await sectionService.update(vm.formElements.getSections().all);
+            await formElementService.update(vm.formElements.all);
             vm.display.lightbox.reorganization = false;
             template.close('lightbox');
             $scope.safeApply();
@@ -758,11 +757,18 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 switchDragAndDropTo(true);
                 rePositionFormElements(vm.formElements);
                 let formElement: FormElement = vm.formElements.getSelectedElement();
-                if (formElement && (formElement instanceof Section
-                    || formElement.question_type != Types.CURSOR
-                    || (formElement.cursor_min_val != null
-                        && formElement.cursor_max_val != null
-                        && formElement.cursor_min_val != formElement.cursor_max_val))) {
+                let isSection: boolean = formElement && formElement instanceof Section;
+                let isQuestionNotCursor: boolean = formElement
+                    && formElement instanceof Question
+                    && formElement.question_type != Types.CURSOR;
+                let isCursorQuestionAndValuesOk: boolean = formElement
+                    && formElement instanceof Question
+                    && formElement.question_type == Types.CURSOR
+                    && formElement.cursor_min_val != null
+                    && formElement.cursor_max_val != null
+                    && formElement.cursor_min_val != formElement.cursor_max_val;
+
+                if (isSection || isQuestionNotCursor || isCursorQuestionAndValuesOk) {
                     let savedElement: FormElement = await formElementService.save(formElement);
                     let newId: number = savedElement.id;
                     formElement.id = newId;

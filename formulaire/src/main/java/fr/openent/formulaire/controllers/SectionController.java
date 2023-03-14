@@ -1,24 +1,31 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.helpers.DataChecker;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.FormElementService;
+import fr.openent.formulaire.service.QuestionService;
 import fr.openent.formulaire.service.SectionService;
 import fr.openent.formulaire.service.impl.DefaultDistributionService;
 import fr.openent.formulaire.service.impl.DefaultFormElementService;
+import fr.openent.formulaire.service.impl.DefaultQuestionService;
 import fr.openent.formulaire.service.impl.DefaultSectionService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
+import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_RIGHT;
@@ -29,12 +36,14 @@ import static org.entcore.common.http.response.DefaultResponseHandler.defaultRes
 public class SectionController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(SectionController.class);
     private final SectionService sectionService;
+    private final QuestionService questionService;
     private final FormElementService formElementService;
     private final DistributionService distributionService;
 
     public SectionController() {
         super();
         this.sectionService = new DefaultSectionService();
+        this.questionService = new DefaultQuestionService();
         this.formElementService = new DefaultFormElementService();
         this.distributionService = new DefaultDistributionService();
     }
@@ -122,9 +131,10 @@ public class SectionController extends ControllerHelper {
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
+
         RequestUtils.bodyToJsonArray(request, sections -> {
             if (sections == null || sections.isEmpty()) {
-                log.error("[Formulaire@updateSection] No section to update.");
+                log.error("[Formulaire@SectionController::update] No section to update.");
                 noContent(request);
                 return;
             }
@@ -132,26 +142,35 @@ public class SectionController extends ControllerHelper {
             // Check position values validity
             boolean arePositionsOk = DataChecker.checkSectionPositionsValidity(sections);
             if (!arePositionsOk) {
-                String message = "[Formulaire@updateSection] You cannot create a section with a position null or under 1 : " + sections;
+                String message = "[Formulaire@SectionController::update] You cannot create a section with a position null or under 1 : " + sections;
                 log.error(message);
                 badRequest(request, message);
                 return;
             }
 
-            sectionService.update(formId, sections, updatedSectionsEvt -> {
-                if (updatedSectionsEvt.isLeft()) {
-                    log.error("[Formulaire@updateQuestion] Failed to update sections : " + sections);
-                    renderInternalError(request, updatedSectionsEvt);
-                    return;
-                }
+            questionService.listForForm(formId)
+                .compose(questions -> {
+                    JsonArray questionPositions = UtilsHelper.getByProp(questions, POSITION);
+                    JsonArray sectionPositions = UtilsHelper.getByProp(sections, POSITION);
 
-                JsonArray updatedSectionsInfos = updatedSectionsEvt.right().getValue();
-                JsonArray updatedSections = new JsonArray();
-                for(int i = 0; i < updatedSectionsInfos.size(); i++) {
-                    updatedSections.addAll(updatedSectionsInfos.getJsonArray(i));
-                }
-                renderJson(request, updatedSections);
-            });
+                    List<Object> doubles = questionPositions.stream().filter(sectionPositions::contains).collect(Collectors.toList());
+                    if (doubles.size() > 0) {
+                        String message = "[Formulaire@SectionController::update] Position(s) " + doubles + " are/is already used by some question(s).";
+                        return Future.failedFuture(message);
+                    }
+                    return sectionService.update(formId, sections);
+                })
+                .onSuccess(updatedSectionsInfos -> {
+                    JsonArray updatedSections = new JsonArray();
+                    for (int i = 0; i < updatedSectionsInfos.size(); i++) {
+                        updatedSections.addAll(updatedSectionsInfos.getJsonArray(i));
+                    }
+                    renderJson(request, updatedSections);
+                })
+                .onFailure(err -> {
+                    log.error("[Formulaire@SectionController::update] Failed to update sections " + sections + " : " + err.getMessage());
+                    renderError(request);
+                });
         });
     }
 

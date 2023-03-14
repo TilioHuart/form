@@ -15,6 +15,12 @@ public interface QuestionService {
     void listForForm(String formId, Handler<Either<String, JsonArray>> handler);
 
     /**
+     * List all the questions out of sections of a specific form
+     * @param formId form identifier
+     */
+    Future<JsonArray> listForForm(String formId);
+
+    /**
      * List all the questions in a specific section
      * @param sectionId section identifier
      * @param handler function handler returning JsonArray data
@@ -80,12 +86,26 @@ public interface QuestionService {
     void create(JsonObject question, String formId, Handler<Either<String, JsonObject>> handler);
 
     /**
+     * Create a question in a specific form
+     * @param question JsonObject data
+     * @param formId form identifier
+     */
+    Future<JsonObject> create(JsonObject question, String formId);
+
+    /**
      * Update specific questions
      * @param formId question identifier
      * @param questions JsonArray data
      * @param handler function handler returning JsonArray data
      */
     void update(String formId, JsonArray questions, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * Update specific questions
+     * @param formId question identifier
+     * @param questions JsonArray data
+     */
+    Future<JsonArray> update(String formId, JsonArray questions);
 
     /**
      * Delete a specific question

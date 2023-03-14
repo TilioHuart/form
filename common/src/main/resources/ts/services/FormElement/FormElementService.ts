@@ -81,12 +81,21 @@ export const formElementService: FormElementService = {
 
     async update(formElements: FormElement[]) : Promise<any> {
         try {
-            if (formElements.length <= 0) {
+            let questions: Question[] = formElements.filter((f: FormElement) => f.isQuestion()).map((f: FormElement) => f as Question);
+            let sections: Section[] = formElements.filter((f: FormElement) => f.isSection()).map((f: FormElement) => f as Section);
+
+            if (questions.length > 0 && sections.length === 0) {
+                return questionService.update(questions);
+            }
+            else if (sections.length > 0 && questions.length === 0) {
+                return sectionService.update(sections);
+            }
+            else if (sections.length > 0 && questions.length > 0) {
+                return DataUtils.getData(await http.put(`/formulaire/forms/${formElements[0].form_id}/elements`, formElements));
+            }
+            else {
                 return [];
             }
-            let updatedQuestions = await questionService.update(formElements.filter(e => e instanceof Question) as Question[]);
-            let updatedSections = await sectionService.update(formElements.filter(e => e instanceof Section) as Section[]);
-            return [].concat(updatedQuestions, updatedSections);
 
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formElementService.update'));

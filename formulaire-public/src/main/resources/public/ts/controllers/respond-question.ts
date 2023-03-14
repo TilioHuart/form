@@ -18,9 +18,7 @@ interface ViewModel {
 	formKey: string;
 	formElements: FormElements;
 	allResponsesInfos: Map<FormElement, Map<Question, Responses>>;
-
 	formElement: FormElement;
-
 	form: Form;
 	nbFormElements: number;
 	historicPosition: number[];
@@ -56,7 +54,8 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 		formatResponses();
 		let prevPosition = vm.historicPosition[vm.historicPosition.length - 2];
 		if (prevPosition > 0) {
-			let isSameQuestionType: boolean = vm.formElement.question_type === vm.formElements.all[prevPosition - 1].question_type;
+			let isSameQuestionType: boolean = vm.formElement instanceof Question
+				&& vm.formElement.isSameQuestionType(vm.formElements.all[prevPosition - 1]);
 			vm.formElement = vm.formElements.all[prevPosition - 1];
 			vm.historicPosition.pop();
 			goToFormElement(isSameQuestionType);
@@ -67,7 +66,8 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 		formatResponses();
 		let nextPosition = getNextPositionIfValid();
 		if (nextPosition && nextPosition <= vm.nbFormElements) {
-			let isSameQuestionType: boolean = vm.formElement.question_type === vm.formElements.all[nextPosition - 1].question_type;
+			let isSameQuestionType: boolean = vm.formElement instanceof Question
+				&& vm.formElement.isSameQuestionType(vm.formElements.all[nextPosition - 1]);
 			vm.formElement = vm.formElements.all[nextPosition - 1];
 			vm.historicPosition.push(vm.formElement.position);
 			goToFormElement(isSameQuestionType);

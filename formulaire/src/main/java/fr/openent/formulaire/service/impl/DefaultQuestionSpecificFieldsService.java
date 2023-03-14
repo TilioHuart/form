@@ -74,6 +74,16 @@ public class DefaultQuestionSpecificFieldsService implements QuestionSpecificFie
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
+    @Override
+    public Future<JsonObject> create(JsonObject question, String questionId) {
+        Promise<JsonObject> promise = Promise.promise();
+
+        String errorMessage = "[Formulaire@DefaultQuestionSpecificFieldsService::create] Fail to create question specifics for question " + question + " : ";
+        create(question, questionId, FutureHelper.handlerEither(promise, errorMessage));
+
+        return promise.future();
+    }
+
     public void update(JsonArray questions, Handler<Either<String, JsonArray>> handler) {
         if (!questions.isEmpty()) {
             SqlStatementsBuilder s = new SqlStatementsBuilder();
@@ -100,5 +110,15 @@ public class DefaultQuestionSpecificFieldsService implements QuestionSpecificFie
         else {
             handler.handle(new Either.Right<>(new JsonArray()));
         }
+    }
+
+    @Override
+    public Future<JsonArray> update(JsonArray questions) {
+        Promise<JsonArray> promise = Promise.promise();
+
+        String errorMessage = "[Formulaire@DefaultQuestionSpecificFieldsService::update] Fail to update questions specifics for questions " + questions + " : ";
+        update(questions, FutureHelper.handlerEither(promise, errorMessage));
+
+        return promise.future();
     }
 }

@@ -85,9 +85,9 @@ public class CustomShareAndOwner implements ResourcesProvider {
 
     private String getKeyByBinding(Binding binding) {
         if (isGetForm(binding) || isCountDistribution(binding) || isGetByFormResponderAndStatusDistribution(binding) ||
-                isUpdateForm(binding) || isDeleteForm(binding) || isSendReminderForm(binding) || isCreateQuestion(binding) ||
-                isListByFormResponse(binding) || isDeleteResponse(binding) || isExportResponse(binding) ||
-                isCreateSection(binding) || isUpdateSection(binding) || isUpdateQuestion(binding)) {
+                isUpdateForm(binding) || isDeleteForm(binding) || isSendReminderForm(binding) || isUpdateFormElement(binding) ||
+                isCreateQuestion(binding) || isListByFormResponse(binding) || isDeleteResponse(binding) ||
+                isExportResponse(binding) || isCreateSection(binding) || isUpdateSection(binding) || isUpdateQuestion(binding)) {
             return PARAM_FORM_ID;
         }
         else if (isGetDistribution(binding) || isAddDistribution(binding) || isUpdateDistribution(binding) ||
@@ -181,6 +181,11 @@ public class CustomShareAndOwner implements ResourcesProvider {
 
     private boolean isShareResource(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.PUT, "fr.openent.formulaire.controllers.FormController|shareResource");
+    }
+
+    // FormElement
+    private boolean isUpdateFormElement(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.PUT, "fr.openent.formulaire.controllers.FormElementController|update");
     }
 
     // QuestionChoice

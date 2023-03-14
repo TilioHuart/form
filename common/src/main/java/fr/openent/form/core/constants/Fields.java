@@ -9,6 +9,7 @@ public class Fields {
     public static final String ANONYMOUS = "anonymous";
     public static final String ANSWER = "answer";
     public static final String ARCHIVED = "archived";
+    public static final String ARR = "arr";
     public static final String CAPTCHA_ID = "captcha_id";
     public static final String CHOICE_ID = "choice_id";
     public static final String CITY = "city";
@@ -35,6 +36,7 @@ public class Fields {
     public static final String ENTITY = "entity";
     public static final String FILENAME = "filename";
     public static final String FOLDER_ID = "folder_id";
+    public static final String FORM_ELEMENT_TYPE = "form_element_type";
     public static final String FORM_ID = "form_id";
     public static final String GROUP_ID = "group_id";
     public static final String ID = "id";
