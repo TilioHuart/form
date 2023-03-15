@@ -101,14 +101,14 @@ export class FormElementUtils {
         let itemId: number = scopeElem.question ? scopeElem.question.id : scopeElem.section.id;
         let newNestedSectionId: number = evt.to.id.split("-")[1] != "0" ? parseInt(evt.to.id.split("-")[1]) : null;
         let oldNestedContainerId: number = evt.from.id.split("-")[1] != "0" ? parseInt(evt.from.id.split("-")[1]) : null;
-        let oldSection: Section = oldNestedContainerId ? (formElements.all.filter(e => e instanceof Section && e.id === oldNestedContainerId)[0]) as Section : null;
+        let oldSection: Section = oldNestedContainerId ? (formElements.all.filter((e: FormElement) => e instanceof Section && e.id === oldNestedContainerId)[0]) as Section : null;
         let item: any = null;
         if (scopeElem.section) {
-            item = formElements.all.filter(e => e.id === itemId)[0] as Section;
+            item = formElements.all.filter((e: FormElement) => e.id === itemId)[0] as Section;
         }
         else {
             let oldSiblings: any = oldSection ? oldSection.questions : formElements;
-            item = oldSiblings.all.filter(e => e.id === itemId)[0] as Question;
+            item = oldSiblings.all.filter((e: FormElement) => e.id === itemId)[0] as Question;
         }
         let oldIndex: number = evt.oldIndex;
         let newIndex: number = evt.newIndex;
@@ -127,8 +127,10 @@ export class FormElementUtils {
                 item.section_id = null;
                 item.section_position = null;
                 formElements.all.push(item);
+                FormElementUtils.rePositionFormElements(formElements, PropPosition.POSITION);
                 await formElementService.update(formElements.all);
-                oldSection.questions.all = oldSection.questions.all.filter(q => q.id != item.id);
+                oldSection.questions.all = oldSection.questions.all.filter((q: Question) => q.id != item.id);
+                FormElementUtils.rePositionFormElements(oldSection.questions, PropPosition.SECTION_POSITION);
                 await questionService.update(oldSection.questions.all);
             }
             else { // Item moved FROM vm.formElements TO vm.formElements
@@ -136,11 +138,12 @@ export class FormElementUtils {
                 item.position = newIndex + 1;
                 item.section_id = null;
                 item.section_position = null;
+                FormElementUtils.rePositionFormElements(formElements, PropPosition.POSITION);
                 await formElementService.update(formElements.all);
             }
         }
         else {
-            let newSection: Section = (formElements.all.filter(e => e instanceof Section && e.id === newNestedSectionId)[0]) as Section;
+            let newSection: Section = (formElements.all.filter((e: FormElement) => e instanceof Section && e.id === newNestedSectionId)[0]) as Section;
             if (oldSection) { // Item moved FROM oldSection TO section with id 'newNestedSectionId'
                 if (newSection.id != oldSection.id) {
                     FormElementUtils.updateSiblingsPositions(oldSection.questions, false, null, oldIndex);
@@ -153,9 +156,10 @@ export class FormElementUtils {
                 item.section_id = newNestedSectionId;
                 item.section_position = newIndex + 1;
                 if (newSection.id != oldSection.id) {
-                    oldSection.questions.all = oldSection.questions.all.filter(q => q.id != item.id);
+                    oldSection.questions.all = oldSection.questions.all.filter((q: Question) => q.id != item.id);
                     newSection.questions.all.push(item);
                 }
+                FormElementUtils.rePositionFormElements(oldSection.questions, PropPosition.SECTION_POSITION);
                 await questionService.update(newSection.questions.all.concat(oldSection.questions.all));
             }
             else { // Item moved FROM vm.formElements TO section with id 'newNestedSectionId'
@@ -165,8 +169,10 @@ export class FormElementUtils {
                 item.section_id = newNestedSectionId;
                 item.section_position = newIndex + 1;
                 newSection.questions.all.push(item);
+                FormElementUtils.rePositionFormElements(newSection.questions, PropPosition.SECTION_POSITION);
                 await questionService.update(newSection.questions.all);
-                formElements.all = formElements.all.filter(e => e.id != item.id);
+                formElements.all = formElements.all.filter((e: FormElement) => e.id != item.id);
+                FormElementUtils.rePositionFormElements(formElements, PropPosition.POSITION);
                 await formElementService.update(formElements.all);
             }
         }
@@ -179,14 +185,14 @@ export class FormElementUtils {
         let newNestedSectionId = evt.to.id.split("-")[2] != "0" ? parseInt(evt.to.id.split("-")[2]) : null;
         newNestedSectionId ? elem.classList.add("sectionChild") : elem.classList.remove("sectionChild");
         let oldNestedContainerId = evt.from.id.split("-")[2] != "0" ? parseInt(evt.from.id.split("-")[2]) : null;
-        let oldSection = oldNestedContainerId ? (formElements.all.filter(e => e instanceof Section && e.id === oldNestedContainerId)[0]) as Section: null;
+        let oldSection = oldNestedContainerId ? (formElements.all.filter((e: FormElement) => e instanceof Section && e.id === oldNestedContainerId)[0]) as Section: null;
         let item = null;
         if (scopElem.section) {
-            item = formElements.all.filter(e => e.id === itemId)[0] as Section;
+            item = formElements.all.filter((e: FormElement) => e.id === itemId)[0] as Section;
         }
         else {
             let oldSiblings = oldSection ? oldSection.questions : formElements;
-            item = (oldSiblings as any).all.filter(q => q.id === itemId)[0] as Question;
+            item = (oldSiblings as any).all.filter((q: Question) => q.id === itemId)[0] as Question;
         }
         let oldIndex = evt.oldIndex;
         let newIndex = evt.newIndex;
@@ -204,15 +210,16 @@ export class FormElementUtils {
                 item.position = newIndex + 1;
                 item.section_id = null;
                 item.section_position = null;
-                oldSection.questions.all = oldSection.questions.all.filter(q => q.id != item.id);
+                oldSection.questions.all = oldSection.questions.all.filter((q: Question) => q.id != item.id);
                 formElements.all.push(item);
-                oldSection.questions.all.sort((a, b) => a.section_position - b.section_position);
+                FormElementUtils.rePositionFormElements(oldSection.questions, PropPosition.SECTION_POSITION);
             }
             else { // Item moved FROM vm.formElements TO vm.formElements
                 FormElementUtils.updateSiblingsPositions(formElements, true, indexes.goUp, indexes.startIndex, indexes.endIndex);
                 item.position = newIndex + 1;
                 item.section_id = null;
                 item.section_position = null;
+                FormElementUtils.rePositionFormElements(formElements, PropPosition.POSITION);
             }
         }
         else {
@@ -229,11 +236,11 @@ export class FormElementUtils {
                 item.section_id = newNestedSectionId;
                 item.section_position = newIndex + 1;
                 if (newSection.id != oldSection.id) {
-                    oldSection.questions.all = oldSection.questions.all.filter(q => q.id != item.id);
+                    oldSection.questions.all = oldSection.questions.all.filter((q: Question) => q.id != item.id);
                     newSection.questions.all.push(item);
-                    oldSection.questions.all.sort((a, b) => a.section_position - b.section_position);
+                    FormElementUtils.rePositionFormElements(oldSection.questions, PropPosition.SECTION_POSITION);
                 }
-                newSection.questions.all.sort((a, b) => a.section_position - b.section_position);
+                FormElementUtils.rePositionFormElements(newSection.questions, PropPosition.SECTION_POSITION);
             }
             else { // Item moved FROM vm.formElements TO section with id 'newNestedSectionId'
                 FormElementUtils.updateSiblingsPositions(formElements, false, null, oldIndex);
@@ -242,8 +249,9 @@ export class FormElementUtils {
                 item.section_id = newNestedSectionId;
                 item.section_position = newIndex + 1;
                 newSection.questions.all.push(item);
-                formElements.all = formElements.all.filter(e => e.id != item.id);
-                newSection.questions.all.sort((a, b) => a.section_position - b.section_position);
+                formElements.all = formElements.all.filter((e: FormElement) => e.id != item.id);
+                FormElementUtils.rePositionFormElements(formElements, PropPosition.POSITION);
+                FormElementUtils.rePositionFormElements(newSection.questions, PropPosition.SECTION_POSITION);
             }
         }
 
@@ -300,4 +308,11 @@ export class FormElementUtils {
         }
         return indexes;
     }
+
+    static rePositionFormElements = (formElements: FormElements|Questions, propPosition: PropPosition) : void => {
+        formElements.all.sort((a, b) => a[propPosition] - b[propPosition]);
+        for (let i: number = 0; i < formElements.all.length; i++) {
+            formElements.all[i][propPosition] = i + 1;
+        }
+    };
 }

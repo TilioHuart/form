@@ -367,7 +367,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 vm.form.setFromJson(await formService.get(vm.form.id));
                 await vm.formElements.sync(vm.form.id);
                 vm.nbFormElements = vm.formElements.all.length;
-                rePositionFormElements(vm.formElements);
+                FormElementUtils.rePositionFormElements(vm.formElements, PropPosition.POSITION);
                 vm.dontSave = false;
                 $scope.safeApply();
             }
@@ -744,18 +744,10 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }, 500);
         }
 
-        const rePositionFormElements = (formElements: FormElements) : void => {
-            formElements.all.sort((a, b) => a.position - b.position);
-            for (let i = 0; i < formElements.all.length; i++) {
-                formElements.all[i].position = i + 1;
-            }
-            $scope.safeApply();
-        };
-
         const saveFormElements = async (displaySuccess: boolean = false) : Promise<void> => {
             try {
                 switchDragAndDropTo(true);
-                rePositionFormElements(vm.formElements);
+                FormElementUtils.rePositionFormElements(vm.formElements, PropPosition.POSITION);
                 let formElement: FormElement = vm.formElements.getSelectedElement();
                 let isSection: boolean = formElement && formElement instanceof Section;
                 let isQuestionNotCursor: boolean = formElement
