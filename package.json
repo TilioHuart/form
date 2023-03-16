@@ -1,6 +1,6 @@
 {
   "name": "Formulaire",
-  "version": "1.6.3",
+  "version": "1.7.2",
   "description": "Formulaire",
   "main": "gulpfile.js",
   "scripts": {
