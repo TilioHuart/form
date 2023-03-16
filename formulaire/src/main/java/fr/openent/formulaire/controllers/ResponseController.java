@@ -2,8 +2,7 @@ package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.enums.QuestionTypes;
 import fr.openent.form.core.models.Question;
-import fr.openent.formulaire.export.FormResponsesExportCSV;
-import fr.openent.formulaire.export.FormResponsesExportPDF;
+import fr.openent.formulaire.export.*;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.*;
@@ -152,29 +151,31 @@ public class ResponseController extends ControllerHelper {
         String questionId = request.getParam(PARAM_QUESTION_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
-                String message = "[Formulaire@createResponse] User not found in session.";
+                String message = "[Formulaire@ResponseController::createResponse] User not found in session.";
                 log.error(message);
-                unauthorized(request, message);
+                unauthorized(request);
                 return;
             }
 
             RequestUtils.bodyToJson(request, response -> {
                 if (response == null || response.isEmpty()) {
-                    log.error("[Formulaire@createResponse] No response to create.");
+                    log.error("[Formulaire@ResponseController::createResponse] No response to create.");
                     noContent(request);
                     return;
                 }
 
                 questionService.get(questionId, questionEvt -> {
                     if (questionEvt.isLeft()) {
-                        log.error("[Formulaire@createResponse] Fail to get question corresponding to id : " + questionId);
+                        String message = "[Formulaire@ResponseController::createResponse] Fail to get question " +
+                                "corresponding to id " + questionId + " : " + questionEvt.left().getValue();
+                        log.error(message);
                         renderInternalError(request, questionEvt);
                         return;
                     }
                     if (questionEvt.right().getValue().isEmpty()) {
-                        String message = "[Formulaire@createResponse] No question found for id " + questionId;
+                        String message = "[Formulaire@ResponseController::createResponse] No question found for id " + questionId;
                         log.error(message);
-                        notFound(request, message);
+                        notFound(request);
                         return;
                     }
 
@@ -183,9 +184,10 @@ public class ResponseController extends ControllerHelper {
 
                     // Check if it's a question type you can respond to
                     if (FORBIDDEN_QUESTIONS.contains(question.getQuestionType())) {
-                        String message = "[Formulaire@createResponse] You cannot create a response for a question of type " + question.getQuestionType();
+                        String message = "[Formulaire@ResponseController::createResponse] You cannot create a response " +
+                                "for a question of type " + question.getQuestionType();
                         log.error(message);
-                        badRequest(request, message);
+                        badRequest(request);
                         return;
                     }
 
@@ -193,14 +195,16 @@ public class ResponseController extends ControllerHelper {
                     if (choice_id != null && CHOICES_TYPE_QUESTIONS.contains(question.getQuestionType())) {
                         questionChoiceService.get(choice_id.toString(), choiceEvt -> {
                             if (choiceEvt.isLeft()) {
-                                log.error("[Formulaire@createResponse] Fail to get question choice corresponding to id : " + choice_id);
+                                String message = "[Formulaire@ResponseController::createResponse] Fail to get question " +
+                                        "choice corresponding to id " + choice_id + " : " + choiceEvt.left().getValue();
+                                log.error(message);
                                 renderInternalError(request, choiceEvt);
                                 return;
                             }
                             if (choiceEvt.right().getValue().isEmpty()) {
-                                String message = "[Formulaire@createResponse] No choice found for id " + choice_id;
+                                String message = "[Formulaire@ResponseController::createResponse] No choice found for id " + choice_id;
                                 log.error(message);
-                                notFound(request, message);
+                                notFound(request);
                                 return;
                             }
 
@@ -208,20 +212,19 @@ public class ResponseController extends ControllerHelper {
 
                             // Check choice validity
                             if (question.getMatrixId() != null &&
-                                (!choice.getInteger(QUESTION_ID).equals(question.getMatrixId()) ||
+                                (!question.getMatrixId().equals(choice.getInteger(QUESTION_ID).longValue()) ||
                                 !choice.getString(VALUE).equals(response.getString(ANSWER)))) {
-                                String message ="[Formulaire@createResponse] Wrong choice for response " + response;
+                                String message = "[Formulaire@ResponseController::createResponse] Wrong choice for response " + response;
                                 log.error(message);
-                                badRequest(request, message);
+                                badRequest(request);
                                 return;
-
                             }
                             else if (question.getMatrixId() == null &&
-                                    (!choice.getInteger(QUESTION_ID).toString().equals(questionId) ||
+                                    (!question.getId().equals(choice.getInteger(QUESTION_ID).longValue()) ||
                                     !choice.getString(VALUE).equals(response.getString(ANSWER)))) {
-                                String message ="[Formulaire@createResponse] Wrong choice for response " + response;
+                                String message = "[Formulaire@ResponseController::createResponse] Wrong choice for response " + response;
                                 log.error(message);
-                                badRequest(request, message);
+                                badRequest(request);
                                 return;
                             }
                             createResponse(request, response, user, questionId);
@@ -253,7 +256,7 @@ public class ResponseController extends ControllerHelper {
 
         responseService.listMineByDistribution(questionId, distributionId.toString(), user, listEvt -> {
             if (listEvt.isLeft()) {
-                log.error("[Formulaire@createResponse] Fail to list responses : " + listEvt.left().getValue());
+                log.error("[Formulaire@ResponseController::createResponse] Fail to list responses : " + listEvt.left().getValue());
                 renderInternalError(request, listEvt);
                 return;
             }
@@ -273,9 +276,9 @@ public class ResponseController extends ControllerHelper {
             }
 
             if (found) {
-                String message = "[Formulaire@createResponse] An identical response already exists " + responses.getJsonObject(i-1);
+                String message = "[Formulaire@ResponseController::createResponse] An identical response already exists " + responses.getJsonObject(i-1);
                 log.error(message);
-                conflict(request, message);
+                conflict(request);
                 return;
             }
 
