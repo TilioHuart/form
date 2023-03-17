@@ -20,7 +20,7 @@ interface IRespondQuestionItemScopeProps {
     question: Question;
     responses: Responses;
     distribution: Distribution;
-    Direction: typeof Direction;
+    direction: typeof Direction;
     files: Array<File>;
     Types: typeof Types;
     I18n: I18nUtils;
@@ -47,7 +47,7 @@ class Controller implements ng.IController, IViewModel {
     question: Question;
     responses: Responses;
     distribution: Distribution;
-    Direction: typeof Direction;
+    direction: typeof Direction;
     files: Array<File>;
     Types: typeof Types;
     I18n: I18nUtils;
@@ -55,10 +55,14 @@ class Controller implements ng.IController, IViewModel {
 
     constructor(private $scope: IRespondQuestionItemScope, private $sce: ng.ISCEService) {
         this.Types = Types;
+        this.direction = Direction;
     }
 
     $onInit = async () : Promise<void> => {
         await this.initRespondQuestionItem();
+        if (this.question.question_type === Types.RANKING) {
+            this.initDrag();
+        }
     };
 
     $onChanges = async (changes: any) : Promise<void> => {
@@ -160,24 +164,25 @@ class Controller implements ng.IController, IViewModel {
         this.responses.all[0].answer = new Date();
     }
 
-    initDrag = () : void => {
+    initDrag = (): void => {
         // Loop through each sortable response for DragAndDrop in view response
-        window.setTimeout(() : void => {
+        window.setTimeout((): void => {
             let respDrag = document.querySelectorAll(".drag-container");
             for (let i = 0; i < respDrag.length; i++) {
                 Sortable.create(respDrag[i], {
-                    group: 'drag-container',
+                    group: "drag-container",
                     animation: 150,
                     fallbackOnBody: true,
                     swapThreshold: 0.65,
                     ghostClass: "sortable-ghost",
-                    onEnd: async function (evt) {
+                    onEnd: async (evt): Promise<void> => {
                         await RankingUtils.onEndRankingDragAndDrop(evt, this.responses);
+                        this.$scope.$apply();
                     }
                 });
             }
         }, 500);
-    }
+    };
 
 }
 
