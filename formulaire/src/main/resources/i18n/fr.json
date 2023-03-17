@@ -92,7 +92,7 @@
   "formulaire.selected.value": "Valeur sélectionnée : ",
 
   "formulaire.prop.public.label": "Créer un formulaire public",
-  "formulaire.prop.public.description": "Un formulaire public est anonyme et doit impérativement comporter une date de fin.",
+  "formulaire.prop.public.description": "Un formulaire public est anonyme et doit impérativement comporter une date de fin. Il n'est pas possible de transformer un formulaire public en formulaire privé et inversement.",
   "formulaire.prop.public.link": "Lien du formulaire : ",
   "formulaire.prop.multiple.label": "Permettre plusieurs réponses d'un même utilisateur",
   "formulaire.prop.multiple.label.mobile": "Permettre plusieurs réponses",
