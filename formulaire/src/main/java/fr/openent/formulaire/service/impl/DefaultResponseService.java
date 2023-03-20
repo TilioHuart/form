@@ -167,7 +167,7 @@ public class DefaultResponseService implements ResponseService {
                 "JOIN " + RESPONSE_TABLE + " r ON r.distribution_id = d.id " +
                 "JOIN " + QUESTION_TABLE + " q ON r.question_id = q.id " +
                 "WHERE d.form_id = ? AND d.status = ? AND q.question_type NOT IN " + Sql.listPrepared(QUESTIONS_WITHOUT_RESPONSES) +
-                "ORDER BY d.date_response DESC, d.responder_id, d.id, position, q.id;";
+                "ORDER BY d.date_response DESC, d.responder_id, d.id, position, choice_position, q.id;";
 
         JsonArray params = new JsonArray().add(formId).add(FINISHED).addAll(new JsonArray(QUESTIONS_WITHOUT_RESPONSES));
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
