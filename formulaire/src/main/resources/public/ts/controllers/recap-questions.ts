@@ -137,7 +137,7 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
                     }
                 }
             }
-            else if (vm.responses.all.filter((r: Response) => r.question_id === question.id && r.answer).length <= 0) {
+            else if (vm.responses.all.filter((r: Response) => r.question_id === question.id && (r.answer || r.custom_answer)).length <= 0) {
                 return false;
             }
         }
