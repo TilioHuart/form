@@ -63,11 +63,13 @@ class Controller implements ng.IController, IViewModel {
         if (this.question.question_type === Types.RANKING) {
             this.initDrag();
         }
+        this.$scope.$apply();
     };
 
     $onChanges = async (changes: any) : Promise<void> => {
         this.question = changes.question.currentValue;
         await this.initRespondQuestionItem();
+        this.$scope.$apply();
     };
 
     initRespondQuestionItem = async () : Promise<void> => {
@@ -128,7 +130,6 @@ class Controller implements ng.IController, IViewModel {
                 }
             }
         }
-        this.$scope.$apply();
     };
 
     getHtmlDescription = (description: string) : string => {
