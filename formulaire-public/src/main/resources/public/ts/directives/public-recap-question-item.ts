@@ -19,6 +19,7 @@ interface IViewModel {
     getStringResponse(): string;
     isSelectedChoice(choice: QuestionChoice, child?: Question) : boolean;
     openQuestion(): void;
+    filterQuestionResponses(): Response[];
 }
 
 export const publicRecapQuestionItem: Directive = ng.directive('publicRecapQuestionItem', ['$sce', ($sce) => {
@@ -134,7 +135,7 @@ export const publicRecapQuestionItem: Directive = ng.directive('publicRecapQuest
             }
 
             vm.getStringResponse = () : string => {
-                let responses: Response[] = vm.responses.all.filter((r: Response) => r.question_id === vm.question.id);
+                let responses: Response[] = vm.filterQuestionResponses();
                 if (responses == null || responses.length <= 0) {
                     return vm.getHtmlDescription(missingResponseHtml)
                 }
@@ -174,6 +175,10 @@ export const publicRecapQuestionItem: Directive = ng.directive('publicRecapQuest
                 sessionStorage.setItem('historicPosition', JSON.stringify(vm.historicPosition));
                 template.open('main', 'containers/respond-question');
             };
+
+            vm.filterQuestionResponses = () : Response[] => {
+                return vm.responses.all.filter((r: Response) => r.question_id === vm.question.id);
+            }
         }
     };
 }]);

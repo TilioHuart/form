@@ -27,7 +27,7 @@ interface IViewModel {
     isSelectedChoice(choice: QuestionChoice, child?: Question) : boolean;
     getResponseFileNames() : string[];
     openQuestion(): void;
-    filterResponses(): void;
+    filterQuestionResponses(): Response[];
 }
 
 export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ['$sce', ($sce) => {
@@ -120,7 +120,7 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ['
                             <span ng-bind-html="vm.getStringResponse()"></span>
                         </div>
                         <div ng-if="vm.question.question_type == vm.Types.RANKING">
-                            <div ng-repeat="resp in vm.filterResponses() | orderBy:['choice_position', 'id']">
+                            <div ng-repeat="resp in vm.filterQuestionResponses() | orderBy:['choice_position', 'id']">
                                 <label>
                                     <span style="cursor: default"></span>
                                     <span class="ten eight-mobile">[[resp.answer]]</span>
@@ -152,7 +152,7 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ['
             }
 
             vm.getStringResponse = () : string => {
-                let responses: Response[] = vm.responses.all.filter((r: Response) => r.question_id === vm.question.id);
+                let responses: Response[] = vm.filterQuestionResponses();
                 if (responses == null || responses.length <= 0) {
                     return vm.getHtmlDescription(missingResponseHtml)
                 }
@@ -207,7 +207,7 @@ export const recapQuestionItem: Directive = ng.directive('recapQuestionItem', ['
                 $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, data);
             };
 
-            vm.filterResponses = () : Response[] => {
+            vm.filterQuestionResponses = () : Response[] => {
                 return vm.responses.all.filter((r: Response) => r.question_id === vm.question.id);
             }
         }
