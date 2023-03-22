@@ -55,6 +55,7 @@ class Controller implements ng.IController, IViewModel {
 
     constructor(private $scope: IRespondQuestionItemScope, private $sce: ng.ISCEService) {
         this.Types = Types;
+        this.I18n = I18nUtils;
         this.direction = Direction;
     }
 

@@ -24,6 +24,7 @@ class Controller implements ng.IController, IViewModel {
     direction: typeof Direction;
 
     constructor(private $scope: IQuestionTypeRankingProps, private $sce: ng.ISCEService) {
+        this.I18n = I18nUtils;
         this.direction = Direction;
     }
 
