@@ -31,7 +31,7 @@ interface IViewModel extends ng.IController, IRespondQuestionItemScopeProps {
     $onInit() : Promise<void>;
     moveResponse(resp: Response, direction: string): void;
     getHtmlDescription(description: string) : string;
-    $onChanges(changes: any): Promise<void>;
+    $onChanges(changes: any): void;
     isSelectedChoiceCustom(choiceId: number): boolean;
     deselectIfEmpty(choice: QuestionChoice) : void;
     onClickChoice(choice: QuestionChoice): void;
@@ -67,10 +67,9 @@ class Controller implements ng.IController, IViewModel {
         this.$scope.$apply();
     };
 
-    $onChanges = async (changes: any) : Promise<void> => {
+    $onChanges = (changes: any) : void => {
         this.question = changes.question.currentValue;
-        await this.initRespondQuestionItem();
-        this.$scope.$apply();
+        this.$onInit();
     };
 
     initRespondQuestionItem = async () : Promise<void> => {
