@@ -75,6 +75,10 @@
             font-size: 14px;
             border: thin solid #e9ebef;
         }
+        h5.others {
+            font-size: 14px;
+            font-style: italic;
+        }
         .inline {
             display: inline-block;
         }
@@ -122,9 +126,28 @@
                     {{/type_text}}
 
                     {{#type_graph}}
-                    <div class="response">
-                        <span><img src="{{graphData}}" alt="Graph"/></span>
-                    </div>
+                        <div class="response">
+                            <span><img src="{{graphData}}" alt="Graph"/></span>
+                        </div>
+                        {{#has_custom_answers}}
+                        <h5 class="others">Détails des réponses 'Autres' : </h5>
+                        {{#responses}}
+                            {{#custom_answer}}
+                            <div class="response">
+                                {{^anonymous}}
+                                <span class="eight inline">
+                                    <span class="four inline">{{date_response}}</span>
+                                    <span class="inline">{{responder_name}}</span>
+                                </span>
+                                {{/anonymous}}
+                                {{#anonymous}}
+                                <span class="four inline">{{date_response}}</span>
+                                {{/anonymous}}
+                                <span>{{{custom_answer}}}</span>
+                            </div>
+                            {{/custom_answer}}
+                        {{/responses}}
+                        {{/has_custom_answers}}
                     {{/type_graph}}
                 </div>
                 {{/question_type}}
@@ -173,9 +196,28 @@
                     {{/type_text}}
 
                     {{#type_graph}}
-                    <div class="response">
-                        <span><img src="{{graphData}}" alt="Graph"/></span>
-                    </div>
+                        <div class="response">
+                            <span><img src="{{graphData}}" alt="Graph"/></span>
+                        </div>
+                        {{#has_custom_answers}}
+                        <h5 class="others">Détails des réponses 'Autres' : </h5>
+                        {{#responses}}
+                            {{#custom_answer}}
+                            <div class="response">
+                                {{^anonymous}}
+                                <span class="eight inline">
+                                            <span class="four inline">{{date_response}}</span>
+                                            <span class="inline">{{responder_name}}</span>
+                                        </span>
+                                {{/anonymous}}
+                                {{#anonymous}}
+                                <span class="four inline">{{date_response}}</span>
+                                {{/anonymous}}
+                                <span>{{{custom_answer}}}</span>
+                            </div>
+                            {{/custom_answer}}
+                        {{/responses}}
+                        {{/has_custom_answers}}
                     {{/type_graph}}
                 </div>
                 {{/question_type}}

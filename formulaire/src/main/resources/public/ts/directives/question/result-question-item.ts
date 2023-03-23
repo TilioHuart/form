@@ -1,5 +1,6 @@
 import {Directive, ng} from "entcore";
 import {
+    Distribution,
     Distributions,
     DistributionStatus,
     Form,
@@ -42,6 +43,7 @@ interface IViewModel {
     formatAnswers(distribId: number) : any;
     showMoreButton() : boolean;
     loadMoreResults() : Promise<void>;
+    getCustomResponse(distribution: Distribution): Response;
 }
 
 export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', ['$sce', ($sce) => {
@@ -116,17 +118,14 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                 <!-- Custom answers -->
                 <div class="custom-answers" ng-if="vm.question.hasCustomChoice()">
                     <div class="custom-answers-title"><i18n>formulaire.results.custom.answers</i18n></div>
-                    <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':true" class="distrib"
-                         ng-if="vm.results.get(distrib.id).length > 0 && vm.question.hasCustomChoice()">
+                    <div ng-repeat="distrib in vm.distributions.all | filter: vm.getCustomResponse | orderBy:'date_response':true"
+                         class="distrib">
                         <div class="infos four twelve-mobile">
                             <div class="four twelve-mobile">[[vm.DateUtils.displayDate(distrib.date_response)]]</div>
                             <div class="eight twelve-mobile ellipsis" ng-if="!vm.form.anonymous">[[distrib.responder_name]]</div>
                         </div>
                         <div class="eight twelve-mobile results">
-                            <div ng-repeat="result in vm.results.get(distrib.id) | filter:{custom_answer:'!!'}"
-                                 ng-class="{'notLast' : !$last}">
-                                <div>[[result.custom_answer]]</div>
-                            </div>
+                            <div ng-class="{'notLast' : !$last}">[[vm.getCustomResponse(distrib).custom_answer]]</div>
                         </div>
                     </div>
                 </div>
@@ -141,7 +140,8 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
 
             <!-- List of results SHORTANSWER, LONGANSWER, DATE, TIME, FILE -->
             <div ng-if="!vm.question.isTypeGraphQuestion() && vm.question.question_type != vm.Types.FREETEXT">
-                <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':true" class="distrib" ng-if="vm.results.get(distrib.id).length > 0">
+                <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':true" class="distrib"
+                     ng-if="vm.results.get(distrib.id).length > 0">
                     <div class="infos four twelve-mobile">
                         <div class="four twelve-mobile">[[vm.DateUtils.displayDate(distrib.date_response)]]</div>
                         <div class="eight twelve-mobile ellipsis" ng-if="!vm.form.anonymous">[[distrib.responder_name]]</div>
@@ -300,6 +300,11 @@ export const resultQuestionItem: Directive = ng.directive('resultQuestionItem', 
                     UtilsUtils.safeApply($scope);
                 }
             };
+
+            vm.getCustomResponse = (distribution: Distribution) : Response => {
+                let customResponses: Response[] = vm.results.get(distribution.id).filter((r: Response) => !!r.custom_answer);
+                return customResponses.length == 1 ? customResponses[0] : null;
+            }
 
             $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.REFRESH_QUESTION, () => { vm.$onInit(); });
         }

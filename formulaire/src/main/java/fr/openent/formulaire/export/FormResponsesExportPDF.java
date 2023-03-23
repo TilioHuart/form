@@ -158,20 +158,22 @@ public class FormResponsesExportPDF {
             boolean isGraph = GRAPH_QUESTIONS.contains(question_type);
 
             if (!hasTooManyResponses || isGraph) {
-                questions.add(new JsonObject()
-                        .put(ID, questionInfo.getInteger(ID))
-                        .put(TITLE, questionInfo.getString(TITLE))
-                        .put(QUESTION_TYPE, new JsonObject())
-                        .put(STATEMENT,
-                                "<div>" + questionInfo.getString(STATEMENT, "")
-                                .replace("\"","'")
-                                .replace("<o:p></o:p>", " ")
-                                + "</div>"
-                        )
-                        .put(MANDATORY, questionInfo.getBoolean(MANDATORY))
-                        .put(SECTION_ID, questionInfo.getInteger(SECTION_ID))
-                        .put(POSITION, questionInfo.getInteger(POSITION))
-                        .put(RESPONSES, new JsonArray())
+                questions.add(
+                    new JsonObject()
+                    .put(ID, questionInfo.getInteger(ID))
+                    .put(TITLE, questionInfo.getString(TITLE))
+                    .put(QUESTION_TYPE, new JsonObject())
+                    .put(STATEMENT,
+                        "<div>" + questionInfo.getString(STATEMENT, "")
+                        .replace("\"","'")
+                        .replace("<o:p></o:p>", " ")
+                        + "</div>"
+                    )
+                    .put(MANDATORY, questionInfo.getBoolean(MANDATORY))
+                    .put(SECTION_ID, questionInfo.getInteger(SECTION_ID))
+                    .put(POSITION, questionInfo.getInteger(POSITION))
+                    .put(RESPONSES, new JsonArray())
+                    .put(HAS_CUSTOM_ANSWERS, false)
                 );
 
                 // Affect boolean to each type of answer (freetext, simple text, graph)
@@ -233,6 +235,9 @@ public class FormResponsesExportPDF {
 
                 if (question != null) {
                     question.getJsonArray(RESPONSES).add(response);
+                    if (!question.getBoolean(HAS_CUSTOM_ANSWERS) && response.getString(CUSTOM_ANSWER) != null) {
+                        question.put(HAS_CUSTOM_ANSWERS, true);
+                    }
                 }
             }
         }

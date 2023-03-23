@@ -166,6 +166,7 @@ public class Fields {
     public static final String FORM_ELEMENTS = "form_elements";
     public static final String FORM_TILE = "form_title";
     public static final String GROUPS = "groups";
+    public static final String HAS_CUSTOM_ANSWERS = "has_custom_answers";
     public static final String IDS = "ids";
     public static final String IMAGES = "images";
     public static final String IS_QUESTION = "is_question";

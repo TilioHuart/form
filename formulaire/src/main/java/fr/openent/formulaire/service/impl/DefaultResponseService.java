@@ -175,13 +175,14 @@ public class DefaultResponseService implements ResponseService {
 
     @Override
     public void exportPDFResponses(String formId, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT question_id, date_response, d.responder_id, responder_name, structure, answer, rf.filename " +
+        String query = "SELECT question_id, date_response, d.responder_id, responder_name, structure, answer, " +
+            "custom_answer, rf.filename " +
             "FROM " + DISTRIBUTION_TABLE + " d " +
             "LEFT JOIN " + RESPONSE_TABLE + " r ON r.distribution_id = d.id " +
             "LEFT JOIN " + RESPONSE_FILE_TABLE + " rf ON rf.response_id = r.id " +
             "LEFT JOIN " + QUESTION_TABLE + " q ON r.question_id = q.id " +
             "WHERE d.form_id = ? AND d.status = ? " +
-            "ORDER BY position, date_response;";
+            "ORDER BY position ASC, date_response DESC;";
 
         JsonArray params = new JsonArray().add(formId).add(FINISHED);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
