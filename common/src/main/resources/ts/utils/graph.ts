@@ -399,14 +399,27 @@ export class GraphUtils {
                         horizontal: true
                     }
                 },
+                dataLabels: {
+                    enabled: false
+                },
                 colors: colors,
                 stroke: {
                     show: true,
                     width: 1,
                     colors: ['#fff']
                 },
+                tooltip: {
+                    x: {
+                        show: false
+                    },
+                    y: {
+                        formatter: (value) => {
+                            return value.toFixed(0)
+                        }
+                    }
+                },
                 xaxis: {
-                    categories: labels,
+                    categories: labels
                 }
             }
         }
