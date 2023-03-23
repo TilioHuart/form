@@ -188,13 +188,16 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
                 tableMappingIds.put(SECTION, oldNewSectionIdsMap);
                 return importExportService.importQuestions(tableContents.get(QUESTION), oldNewSectionIdsMap, tableMappingIds.get(FORM));
             })
-            .compose(oldNewIdsAndMatrixIds -> {
-                Map<Integer, Integer> oldNewQuestionIdsMap = importExportService.generateMapping(oldNewIdsAndMatrixIds, ORIGINAL_QUESTION_ID, ID);
-                Map<Integer, Integer> newIdOldMatrixIdsMap = importExportService.generateMapping(oldNewIdsAndMatrixIds, ID, MATRIX_ID);
+            .compose(oldNewQuestionIds -> {
+                Map<Integer, Integer> oldNewQuestionIdsMap = importExportService.generateMapping(oldNewQuestionIds, ORIGINAL_QUESTION_ID, ID);
                 tableMappingIds.put(QUESTION, oldNewQuestionIdsMap);
-                return importExportService.updateMatrixChildrenQuestions(oldNewQuestionIdsMap, newIdOldMatrixIdsMap);
+                return importExportService.importChildrenQuestions(tableContents.get(QUESTION), oldNewQuestionIdsMap, tableMappingIds.get(SECTION), tableMappingIds.get(FORM));
             })
-            .compose(updatedQuestions -> importExportService.importQuestionSpecifics(tableContents.get(QUESTION_SPECIFIC_FIELDS), tableMappingIds.get(QUESTION)))
+            .compose(updatedChildrenQuestionsIds -> {
+                Map<Integer, Integer> oldNewChildrenQuestionIdsMap = importExportService.generateMapping(updatedChildrenQuestionsIds, ORIGINAL_QUESTION_ID, ID);
+                tableMappingIds.get(QUESTION).putAll(oldNewChildrenQuestionIdsMap);
+                return importExportService.importQuestionSpecifics(tableContents.get(QUESTION_SPECIFIC_FIELDS), tableMappingIds.get(QUESTION));
+            })
             .compose(newQuestionSpecifics -> importExportService.importQuestionChoices(tableContents.get(QUESTION_CHOICE), tableMappingIds.get(QUESTION), tableMappingIds.get(SECTION)))
             .compose(newQuestionChoices -> importExportService.createFolderLinks(tableMappingIds.get(FORM), userId))
             .onSuccess(result -> {

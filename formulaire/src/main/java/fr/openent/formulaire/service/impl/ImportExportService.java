@@ -15,6 +15,7 @@ import org.entcore.common.sql.SqlStatementsBuilder;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static fr.openent.form.core.constants.Constants.*;
 import static fr.openent.form.core.constants.Fields.QUESTION_TYPE;
@@ -195,17 +196,20 @@ public class ImportExportService {
         Promise<JsonArray> promise = Promise.promise();
 
         List<String> fields = questions.getJsonArray(FIELDS).getList();
-        JsonArray results = questions.getJsonArray(RESULTS);
+        int indexMatrixIdField = fields.indexOf(MATRIX_ID);
+        List<JsonArray> results = questions.getJsonArray(RESULTS).stream()
+                .filter(entry -> ((JsonArray) entry).getInteger(indexMatrixIdField) == null)
+                .map(JsonArray.class::cast)
+                .collect(Collectors.toList());
 
         SqlStatementsBuilder s = new SqlStatementsBuilder();
         String query = "INSERT INTO " + QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
                 "mandatory, original_question_id, section_id, section_position, conditional, placeholder, matrix_id, matrix_position) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
-                "RETURNING original_question_id, id, matrix_id;";
+                "RETURNING original_question_id, id;";
 
         s.raw(TRANSACTION_BEGIN_QUERY);
-        for (int i = 0; i < results.size(); i++) {
-            JsonArray entry = results.getJsonArray(i);
+        for (JsonArray entry : results) {
             JsonArray params = new JsonArray()
                     .add(oldNewFormIdsMap.get(entry.getInteger(fields.indexOf(FORM_ID))))
                     .add(entry.getString(fields.indexOf(TITLE)))
@@ -230,29 +234,52 @@ public class ImportExportService {
         return promise.future();
     }
 
+
     /**
-     * Update matrix_id of the new forms with the new matrix_id
+     * Insert in BDD the imported children questions data for matrix
+     * @param questions content of the imported questions to insert
      * @param oldNewQuestionIdsMap Map containing old and new question ids
-     * @param newIdOldMatrixIdsMap Map containing new question ids with old matrix ids
-     * @return return a future containing the content the updated questions
+     * @param oldNewSectionIdsMap Map containing old and new section ids
+     * @param oldNewFormIdsMap Map containing old and new form ids
+     * @return return a future containing the content the imported children questions
      */
-    public Future<JsonArray> updateMatrixChildrenQuestions(Map<Integer, Integer> oldNewQuestionIdsMap, Map<Integer, Integer> newIdOldMatrixIdsMap) {
+    public Future<JsonArray> importChildrenQuestions(JsonObject questions, Map<Integer, Integer> oldNewQuestionIdsMap, Map<Integer, Integer> oldNewSectionIdsMap, Map<Integer, Integer> oldNewFormIdsMap) {
         Promise<JsonArray> promise = Promise.promise();
 
-        List<Integer> newQuestionIds = new ArrayList<>(oldNewQuestionIdsMap.values());
+        List<String> fields = questions.getJsonArray(FIELDS).getList();
+        int indexMatrixIdField = fields.indexOf(MATRIX_ID);
+        List<JsonArray> results = questions.getJsonArray(RESULTS).stream()
+                .filter(entry -> ((JsonArray) entry).getInteger(indexMatrixIdField) != null)
+                .map(JsonArray.class::cast)
+                .collect(Collectors.toList());
 
         SqlStatementsBuilder s = new SqlStatementsBuilder();
-        String query = "UPDATE " + QUESTION_TABLE + " SET matrix_id = ? WHERE id = ? RETURNING *;";
+        String query = "INSERT INTO " + QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
+                "mandatory, original_question_id, section_id, section_position, conditional, placeholder, matrix_id, matrix_position) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
+                "RETURNING original_question_id, id;";
 
         s.raw(TRANSACTION_BEGIN_QUERY);
-        for (int newQuestionId : newQuestionIds) {
-            Integer oldMatrixId = newIdOldMatrixIdsMap.get(newQuestionId);
-            JsonArray params = new JsonArray().add(oldMatrixId == null ? null : oldNewQuestionIdsMap.get(oldMatrixId)).add(newQuestionId);
+        for (JsonArray entry : results) {
+            JsonArray params = new JsonArray()
+                    .add(oldNewFormIdsMap.get(entry.getInteger(fields.indexOf(FORM_ID))))
+                    .add(entry.getString(fields.indexOf(TITLE)))
+                    .add(entry.getInteger(fields.indexOf(POSITION)))
+                    .add(entry.getInteger(fields.indexOf(QUESTION_TYPE)))
+                    .add(entry.getString(fields.indexOf(STATEMENT)))
+                    .add(entry.getBoolean(fields.indexOf(MANDATORY)))
+                    .add(entry.getInteger(fields.indexOf(ID)))
+                    .add(oldNewSectionIdsMap.get(entry.getInteger(fields.indexOf(SECTION_ID))))
+                    .add(entry.getInteger(fields.indexOf(SECTION_POSITION)))
+                    .add(entry.getBoolean(fields.indexOf(CONDITIONAL)))
+                    .add(entry.getString(fields.indexOf(PLACEHOLDER)))
+                    .add(oldNewQuestionIdsMap.get(entry.getInteger(fields.indexOf(MATRIX_ID))))
+                    .add(entry.getInteger(fields.indexOf(MATRIX_POSITION)));
             s.prepared(query, params);
         }
         s.raw(TRANSACTION_COMMIT_QUERY);
 
-        String errorMessage = "[Formulaire@ImportExportService::updateMatrixChildrenQuestions] Failed to update matrix_id for questions from file : ";
+        String errorMessage = "[Formulaire@ImportExportService::importChildrenQuestions] Failed to import children questions from file : ";
         sql.transaction(s.build(), SqlResult.validResultsHandler(FutureHelper.handlerEither(promise, errorMessage)));
 
         return promise.future();
