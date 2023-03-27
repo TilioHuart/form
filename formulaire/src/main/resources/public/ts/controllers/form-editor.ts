@@ -157,9 +157,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             if (questionsTypeCursor.length > 0) {
                 // We search for question where : (maxVal - minVal) % step == 0
                 let inconsistencyCursorChoice: Question[] = questionsTypeCursor.filter((q: Question) => (
-                        ((q.cursor_max_val ? q.cursor_max_val : Constants.DEFAULT_CURSOR_MAX_VALUE) -
-                         (q.cursor_min_val ? q.cursor_min_val : Constants.DEFAULT_CURSOR_MIN_VALUE)) %
-                        (q.cursor_step ? q.cursor_step : Constants.DEFAULT_CURSOR_STEP) != 0));
+                        ((q.cursor_max_val != null ? q.cursor_max_val : Constants.DEFAULT_CURSOR_MAX_VALUE) -
+                         (q.cursor_min_val != null ? q.cursor_min_val : Constants.DEFAULT_CURSOR_MIN_VALUE)) %
+                        (q.cursor_step != null ? q.cursor_step : Constants.DEFAULT_CURSOR_STEP) != 0));
                 if (inconsistencyCursorChoice.length > 0) {
                     notify.error(idiom.translate('formulaire.question.save.missing.field'));
                     return;
