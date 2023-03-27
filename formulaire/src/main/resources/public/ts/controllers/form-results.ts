@@ -182,14 +182,15 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
                     question.choices.replaceSpace();
                     let resultsQuestionDistribId: number[] = results.all.filter((r: Response) => r.question_id === question.id).map((r:Response) => r.distribution_id);
                     let distribsQuestion: Distributions = new Distributions();
-                    distribsQuestion.all = distribs.all.filter((d: Distribution) => (resultsQuestionDistribId as any).includes(d.id));
-                    question.fillChoicesInfo(distribsQuestion, results.all);
+                    distribsQuestion.all = distribs.all.filter((d: Distribution) => (<any>resultsQuestionDistribId).includes(d.id));
 
                     // Filter result by question
-                    let questionResults: Response[] = results.all.filter((r: Response) => r.question_id === question.id);
+                    let finishedDistribIds: any = distribs.all.map((d: Distribution) => d.id);
+                    let questionResults: Response[] = results.all.filter((r: Response) => r.question_id === question.id && finishedDistribIds.includes(r.distribution_id));
+                    question.fillChoicesInfo(distribsQuestion, results.all.filter((r: Response) => finishedDistribIds.includes(r.distribution_id)));
 
                     // Generate graphs
-                    await GraphUtils.generateGraphForResult(question, vm.pdfResponseCharts, questionResults, distribs.all.length, true);
+                    await GraphUtils.generateGraphForResult(question, vm.pdfResponseCharts, questionResults, distribsQuestion.all.length, true);
                 }
 
                 await storeAllCharts(questions, vm.pdfResponseCharts, images);

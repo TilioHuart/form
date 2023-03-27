@@ -116,15 +116,15 @@
 
     <!-- Graph for RANKING -->
     <div class="graph-histogram twelve" ng-if="vm.question.question_type == vm.Types.RANKING">
-    <div class="eight" style="height: 400px">
-        <div id="chart-[[vm.question.id]]"></div>
+        <div class="eight" style="height: 400px">
+            <div id="chart-[[vm.question.id]]"></div>
+        </div>
     </div>
-</div>
 
-<!-- See more button -->
-<div ng-if="vm.showMoreButton()" style="margin: 1%;">
-    <a ng-click="vm.loadMoreResults()">
-        <i18n>formulaire.seeMore</i18n>
-    </a>
-</div>
+    <!-- See more button -->
+    <div ng-if="vm.showMoreButton()" style="margin: 1%;">
+        <a ng-click="vm.loadMoreResults()">
+            <i18n>formulaire.seeMore</i18n>
+        </a>
+    </div>
 </div>
