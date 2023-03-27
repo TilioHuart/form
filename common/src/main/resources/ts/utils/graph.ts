@@ -435,8 +435,15 @@ export class GraphUtils {
                         show: false
                     },
                     y: {
-                        formatter: (value) => {
-                            return value.toFixed(0)
+                        title: {
+                            formatter: function () {
+                                return ''
+                            }
+                        },
+                        formatter: function(value, { seriesIndex, w }) {
+                            const seriesName = w.globals.seriesNames[seriesIndex];
+                            const dataValue = value.toFixed(0);
+                            return `${seriesName} : ${dataValue}`;
                         }
                     }
                 },
