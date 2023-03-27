@@ -87,9 +87,11 @@
   "formulaire.block.sharing": "Une ou plusieurs questions de votre formulaire ne sont pas valides. Veuillez corriger ces questions avant d'effectuer le partage.",
   "formulaire.copy": "Copie",
   "formulaire.archive.zip.name": "Fichiers déposés",
-  "formulaire.response.average": "Average response",
+  "formulaire.response.average": "Average response: ",
   "formulaire.nb.responses": "Responses' number",
-  "formulaire.selected.value": "Selected value : ",
+  "formulaire.selected.value": "Selected value: ",
+  "formulaire.selected.values": "Selected values",
+  "formulaire.position.selected": "Selected position",
 
   "formulaire.prop.public.label": "Créer un formulaire public",
   "formulaire.prop.public.description": "A public form is anonymous and must necessarily have an end date. It is not possible to convert a public form into a private form and vice versa.",

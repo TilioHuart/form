@@ -125,7 +125,6 @@ export class GraphUtils {
                                                 isExportPDF: boolean) : Promise<void> => {
         // build array with all response
         let resp: number[] = responses.map((r: Response) => Number(r.answer)).sort((a: number, b: number) => a - b);
-        let cursorAverage: string = (resp.reduce((a: number, b: number) => a + b, 0) / resp.length).toFixed(2);
 
         // map to build object with response and number of each one
         const map: Map<number, number> = resp.reduce((acc: Map<number, number>, e: number) =>
@@ -136,12 +135,12 @@ export class GraphUtils {
 
         let newPDFOptions: any = isExportPDF ?
             GraphUtils.generateOptions(question.question_type, colors, labels,
-            null, null, null, cursorAverage)
+            null, null)
             :
             GraphUtils.generateOptions(question.question_type, colors, labels,
-            '100%', '100%', null, cursorAverage);
+            '100%', '100%');
 
-        newPDFOptions.series = [{ name: lang.translate('formulaire.nb.responses'), data: Array.from(map.values()) }];
+        newPDFOptions.series = [{ name: lang.translate('formulaire.number.responses'), data: Array.from(map.values()) }];
 
         await GraphUtils.renderChartForResult(newPDFOptions, charts, question, isExportPDF);
     }
@@ -266,10 +265,9 @@ export class GraphUtils {
      * @param height        Height of the chart to display (optional)
      * @param width         Width of the chart to display (optional)
      * @param seriesPercent Percentage to use for the graph (optional)
-     * @param cursorAverage Average of answers (optional)
      */
     static generateOptions = (type: Types, colors: string[], labels: (string | number)[], height?: any, width?: any,
-                              seriesPercent?: number[], cursorAverage?: string) : any => {
+                              seriesPercent?: number[]) : any => {
         let options: any;
         if (type === Types.SINGLEANSWER || type === Types.SINGLEANSWERRADIO) {
             options = {
@@ -331,6 +329,16 @@ export class GraphUtils {
                 xaxis: {
                     categories: labels,
                 },
+                yaxis: {
+                    title: {
+                        text: lang.translate('formulaire.number.responses'),
+                        style: {
+                            fontSize: '14px',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            fontWeight: 500
+                        },
+                    },
+                },
                 fill: {
                     opacity: 1
                 }
@@ -359,7 +367,13 @@ export class GraphUtils {
                 xaxis: {
                     categories: labels,
                     title: {
-                        text: lang.translate('formulaire.response.average') + ' (' + cursorAverage + ')'
+                        text: lang.translate('formulaire.selected.values'),
+                        style: {
+                            fontSize: '14px',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            fontWeight: 500
+                        },
+                        position: 'bottom'
                     }
                 },
                 yaxis: {
@@ -367,6 +381,14 @@ export class GraphUtils {
                     labels: {
                         formatter: (value) => {
                             return Math.floor(value)
+                        }
+                    },
+                    title: {
+                        text: lang.translate('formulaire.nb.responses'),
+                        style: {
+                            fontSize: '14px',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            fontWeight: 500
                         }
                     }
                 },
@@ -378,7 +400,7 @@ export class GraphUtils {
                         opacityTo: 0.9,
                         stops: [0, 90, 100]
                     }
-                },
+                }
             }
         }
         else if (type === Types.RANKING) {
@@ -419,7 +441,25 @@ export class GraphUtils {
                     }
                 },
                 xaxis: {
-                    categories: labels
+                    categories: labels,
+                    title: {
+                        text: lang.translate('formulaire.number.responses'),
+                        style: {
+                            fontSize: '14px',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            fontWeight: 500
+                        }
+                    }
+                },
+                yaxis: {
+                    title: {
+                        text: lang.translate('formulaire.position.selected'),
+                        style: {
+                            fontSize: '14px',
+                            fontFamily: 'Helvetica, Arial, sans-serif',
+                            fontWeight: 500
+                        }
+                    }
                 }
             }
         }

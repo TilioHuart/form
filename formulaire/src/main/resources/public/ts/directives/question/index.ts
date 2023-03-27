@@ -6,5 +6,5 @@ export * from './question-type/index';
 export * from './recap-question-item';
 export * from './respond-question-item/respond-question-item.directive';
 export * from './respond-matrix';
-export * from './result-question-item';
+export * from './result-question-item/result-question-item.directive';
 export * from '../section-item';
