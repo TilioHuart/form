@@ -151,6 +151,7 @@ public class Fields {
     public static final String CONTENT_TRANSFER_ENCODING = "content_transfer_encoding";
     public static final String CONTENT_TYPE = "content-type";
     public static final String CSV = "csv";
+    public static final String CURSOR_AVERAGE = "cursor_average";
     public static final String DEFAULT = "DEFAULT";
     public static final String DISTRIBUTION_CAPTCHA = "distribution_captcha";
     public static final String DISTRIBUTION_KEY = "distribution_key";
@@ -169,6 +170,7 @@ public class Fields {
     public static final String HAS_CUSTOM_ANSWERS = "has_custom_answers";
     public static final String IDS = "ids";
     public static final String IMAGES = "images";
+    public static final String IS_CURSOR = "is_cursor";
     public static final String IS_QUESTION = "is_question";
     public static final String KO = "ko";
     public static final String LOCALE = "locale";
@@ -192,6 +194,7 @@ public class Fields {
     public static final String SIZE = "size";
     public static final String STATEMENTS = "statements";
     public static final String SUBJECT = "subject";
+    public static final String SUM_RESPONSES = "sum_responses";
     public static final String TO = "to";
     public static final String TRANSACTION = "transaction";
     public static final String TYPE_FREETEXT = "type_freetext";

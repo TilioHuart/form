@@ -134,11 +134,9 @@ export class GraphUtils {
         let colors: string[] = ColorUtils.generateColorList(labels.length);
 
         let newPDFOptions: any = isExportPDF ?
-            GraphUtils.generateOptions(question.question_type, colors, labels,
-            null, null)
+            GraphUtils.generateOptions(question.question_type, colors, labels,null, null)
             :
-            GraphUtils.generateOptions(question.question_type, colors, labels,
-            '100%', '100%');
+            GraphUtils.generateOptions(question.question_type, colors, labels,'100%', '100%');
 
         newPDFOptions.series = [{ name: lang.translate('formulaire.number.responses'), data: Array.from(map.values()) }];
 
@@ -193,11 +191,9 @@ export class GraphUtils {
 
         let colors: string[] = ColorUtils.generateColorList(choices.length);
         let newOptions: any = isExportPDF ?
-            GraphUtils.generateOptions(question.question_type, colors, labels,
-                null, null)
+            GraphUtils.generateOptions(question.question_type, colors, labels, null, null)
             :
-            GraphUtils.generateOptions(question.question_type, colors, labels,
-                '100%', '100%');
+            GraphUtils.generateOptions(question.question_type, colors, labels, '100%', '100%');
 
         newOptions.series = series;
         await GraphUtils.renderChartForResult(newOptions, charts, question, isExportPDF);
@@ -231,8 +227,7 @@ export class GraphUtils {
         }
 
         let colors: string[] = ColorUtils.generateColorList(labels.length);
-        let newOptions: any = GraphUtils.generateOptions(question.question_type, colors, labels, null, null,
-            seriesPercent);
+        let newOptions: any = GraphUtils.generateOptions(question.question_type, colors, labels, null, null, seriesPercent);
         newOptions.series = [{ data: series }];
 
         await GraphUtils.renderChartForResult(newOptions, charts, question, isExportPDF);
@@ -363,6 +358,20 @@ export class GraphUtils {
                 colors: colors,
                 dataLabels: {
                     enabled: false
+                },
+                tooltip: {
+                    y: {
+                        title: {
+                            formatter: function () {
+                                return ''
+                            }
+                        },
+                        formatter: function(value, { seriesIndex, w }) {
+                            const seriesName = w.globals.seriesNames[seriesIndex];
+                            const dataValue = value.toFixed(0);
+                            return `${seriesName} : ${dataValue}`;
+                        }
+                    }
                 },
                 xaxis: {
                     categories: labels,

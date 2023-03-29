@@ -75,7 +75,7 @@
             font-size: 14px;
             border: thin solid #e9ebef;
         }
-        h5.others {
+        h5.graph-subtitle {
             font-size: 14px;
             font-style: italic;
         }
@@ -129,8 +129,11 @@
                         <div class="response">
                             <span><img src="{{graphData}}" alt="Graph"/></span>
                         </div>
+                        {{#is_cursor}}
+                        <h5 class="graph-subtitle">Moyenne des réponses : {{cursor_average}}</h5>
+                        {{/is_cursor}}
                         {{#has_custom_answers}}
-                        <h5 class="others">Détails des réponses 'Autres' : </h5>
+                        <h5 class="graph-subtitle">Détails des réponses 'Autres' : </h5>
                         {{#responses}}
                             {{#custom_answer}}
                             <div class="response">
@@ -199,16 +202,19 @@
                         <div class="response">
                             <span><img src="{{graphData}}" alt="Graph"/></span>
                         </div>
+                        {{#is_cursor}}
+                        <h5 class="graph-subtitle">Moyenne des réponses : {{cursor_average}}</h5>
+                        {{/is_cursor}}
                         {{#has_custom_answers}}
-                        <h5 class="others">Détails des réponses 'Autres' : </h5>
+                        <h5 class="graph-subtitle">Détails des réponses 'Autres' : </h5>
                         {{#responses}}
                             {{#custom_answer}}
                             <div class="response">
                                 {{^anonymous}}
                                 <span class="eight inline">
-                                            <span class="four inline">{{date_response}}</span>
-                                            <span class="inline">{{responder_name}}</span>
-                                        </span>
+                                    <span class="four inline">{{date_response}}</span>
+                                    <span class="inline">{{responder_name}}</span>
+                                </span>
                                 {{/anonymous}}
                                 {{#anonymous}}
                                 <span class="four inline">{{date_response}}</span>

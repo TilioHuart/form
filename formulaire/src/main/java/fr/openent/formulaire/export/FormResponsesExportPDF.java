@@ -180,9 +180,10 @@ public class FormResponsesExportPDF {
                 // type_freetext (FREETEXT), type_text (SHORTANSWER, LONGANSWER, DATE, TIME, FILE), type_graph (SINGLEANSWER, MULTIPLEANSWER, MATRIX)
                 questions.getJsonObject(questions.size() - 1).getJsonObject(QUESTION_TYPE)
                     .put(QUESTION_TYPE_ID, question_type)
-                    .put(TYPE_FREETEXT, question_type == 1)
-                    .put(TYPE_TEXT, question_type != 1 && !isGraph)
-                    .put(TYPE_GRAPH, isGraph);
+                    .put(TYPE_FREETEXT, question_type == QuestionTypes.FREETEXT.getCode())
+                    .put(TYPE_TEXT, question_type != QuestionTypes.FREETEXT.getCode() && !isGraph)
+                    .put(TYPE_GRAPH, isGraph)
+                    .put(IS_CURSOR, question_type == QuestionTypes.CURSOR.getCode());
 
 
                 // Prepare futures to get graph images
@@ -235,6 +236,11 @@ public class FormResponsesExportPDF {
 
                 if (question != null) {
                     question.getJsonArray(RESPONSES).add(response);
+                    if (question.getJsonObject(QUESTION_TYPE).getBoolean(IS_CURSOR)) {
+                        question.put(NB_RESPONSES, question.getInteger(NB_RESPONSES, 0) + 1);
+                        question.put(SUM_RESPONSES, question.getDouble(SUM_RESPONSES, 0d) + Double.parseDouble(response.getString(ANSWER)));
+                        question.put(CURSOR_AVERAGE, question.getDouble(SUM_RESPONSES, 0d) / question.getInteger(NB_RESPONSES, 1));
+                    }
                     if (!question.getBoolean(HAS_CUSTOM_ANSWERS) && response.getString(CUSTOM_ANSWER) != null) {
                         question.put(HAS_CUSTOM_ANSWERS, true);
                     }
