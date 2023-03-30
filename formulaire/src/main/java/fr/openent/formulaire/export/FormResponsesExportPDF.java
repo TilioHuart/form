@@ -239,7 +239,8 @@ public class FormResponsesExportPDF {
                     if (question.getJsonObject(QUESTION_TYPE).getBoolean(IS_CURSOR)) {
                         question.put(NB_RESPONSES, question.getInteger(NB_RESPONSES, 0) + 1);
                         question.put(SUM_RESPONSES, question.getDouble(SUM_RESPONSES, 0d) + Double.parseDouble(response.getString(ANSWER)));
-                        question.put(CURSOR_AVERAGE, question.getDouble(SUM_RESPONSES, 0d) / question.getInteger(NB_RESPONSES, 1));
+                        Double newAverage = question.getDouble(SUM_RESPONSES, 0d) / question.getInteger(NB_RESPONSES, 1);
+                        question.put(CURSOR_AVERAGE, (double)Math.round(newAverage * 100d) / 100d);
                     }
                     if (!question.getBoolean(HAS_CUSTOM_ANSWERS) && response.getString(CUSTOM_ANSWER) != null) {
                         question.put(HAS_CUSTOM_ANSWERS, true);
