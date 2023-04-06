@@ -1,15 +1,18 @@
 package fr.openent.form.core.models;
 
 import static fr.openent.form.core.constants.Fields.*;
+
+import fr.openent.form.core.enums.FormElementTypes;
 import io.vertx.core.json.JsonObject;
 
 public class QuestionChoice implements Model<QuestionChoice> {
-    private Number id;
-    private Number questionId;
+    private Long id;
+    private Long questionId;
     private String value;
     private String type;
-    private Number position;
-    private Number nextSectionId;
+    private Long position;
+    private Long nextFormElementId;
+    private FormElementTypes nextFormElementType;
     private Boolean isCustom;
 
 
@@ -19,41 +22,46 @@ public class QuestionChoice implements Model<QuestionChoice> {
     }
 
     public QuestionChoice(JsonObject questionChoice) {
-        this.id = questionChoice.getNumber(ID, null);
-        this.questionId = questionChoice.getNumber(QUESTION_ID, null);
+        this.id = questionChoice.getLong(ID, null);
+        this.questionId = questionChoice.getLong(QUESTION_ID, null);
         this.value = questionChoice.getString(VALUE, null);
         this.type = questionChoice.getString(TYPE, null);
-        this.position = questionChoice.getNumber(POSITION, null);
-        this.nextSectionId = questionChoice.getNumber(NEXT_SECTION_ID, null);
-        this.isCustom = questionChoice.getBoolean(IS_CUSTOM, null);
+        this.position = questionChoice.getLong(POSITION, null);
+        this.nextFormElementId = questionChoice.getLong(NEXT_FORM_ELEMENT_ID, null);
+        this.nextFormElementType = this.nextFormElementId == null ?
+                null :
+                FormElementTypes.getFormElementType(questionChoice.getString(NEXT_FORM_ELEMENT_TYPE, null));
+        this.isCustom = questionChoice.getBoolean(IS_CUSTOM, false);
     }
 
 
     // Getters
 
-    public Number getId() { return id; }
+    public Long getId() { return id; }
 
-    public Number getQuestionId() { return questionId; }
+    public Long getQuestionId() { return questionId; }
 
     public String getValue() { return value; }
 
     public String getType() { return type; }
 
-    public Number getPosition() { return position; }
+    public Long getPosition() { return position; }
 
-    public Number getNextSectionId() { return nextSectionId; }
+    public Long getNextFormElementId() { return nextFormElementId; }
+
+    public FormElementTypes getNextFormElementType() { return nextFormElementType; }
 
     public Boolean getIsCustom() { return isCustom; }
 
 
     // Setters
 
-    public QuestionChoice setId(Number id) {
+    public QuestionChoice setId(Long id) {
         this.id = id;
         return this;
     }
 
-    public QuestionChoice setQuestionId(Number questionId) {
+    public QuestionChoice setQuestionId(Long questionId) {
         this.questionId = questionId;
         return this;
     }
@@ -68,13 +76,18 @@ public class QuestionChoice implements Model<QuestionChoice> {
         return this;
     }
 
-    public QuestionChoice setPosition(Number position) {
+    public QuestionChoice setPosition(Long position) {
         this.position = position;
         return this;
     }
 
-    public QuestionChoice setNextSectionId(Number nextSectionId) {
-        this.nextSectionId = nextSectionId;
+    public QuestionChoice setNextFormElementId(Long nextFormElementId) {
+        this.nextFormElementId = nextFormElementId;
+        return this;
+    }
+
+    public QuestionChoice setNextFormElementType(FormElementTypes nextFormElementType) {
+        this.nextFormElementType = nextFormElementType;
         return this;
     }
 
@@ -93,7 +106,8 @@ public class QuestionChoice implements Model<QuestionChoice> {
                 .put(VALUE, this.value)
                 .put(TYPE, this.type)
                 .put(POSITION, this.position)
-                .put(NEXT_SECTION_ID, this.nextSectionId)
+                .put(NEXT_FORM_ELEMENT_ID, this.nextFormElementId)
+                .put(NEXT_FORM_ELEMENT_TYPE, this.nextFormElementType)
                 .put(IS_CUSTOM, this.isCustom);
     }
 

@@ -7,7 +7,7 @@ export abstract class FormElement implements Selectable {
     form_id: number;
     title: string;
     position: number;
-    form_element_type: string;
+    form_element_type: FormElementType;
     nb_responses: number;
     selected: boolean;
 

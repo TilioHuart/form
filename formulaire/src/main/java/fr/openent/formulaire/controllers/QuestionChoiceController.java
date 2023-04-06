@@ -1,6 +1,7 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.enums.ChoiceTypes;
+import fr.openent.form.core.models.QuestionChoice;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.QuestionChoiceService;
@@ -12,9 +13,9 @@ import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.request.RequestUtils;
+import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
@@ -70,86 +71,37 @@ public class QuestionChoiceController extends ControllerHelper {
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
         String questionId = request.getParam(PARAM_QUESTION_ID);
-        RequestUtils.bodyToJson(request, choice -> {
-            if (choice == null || choice.isEmpty()) {
-                log.error("[Formulaire@createQuestionChoice] No choice to create.");
+        RequestUtils.bodyToJson(request, choiceJson -> {
+            if (choiceJson == null || choiceJson.isEmpty()) {
+                log.error("[Formulaire@QuestionChoiceController::create] No choice to create.");
                 noContent(request);
                 return;
             }
 
             // Check choice type validity
-            if (!choice.getString(TYPE).equals(ChoiceTypes.TXT.getValue())) {
-                String message = "[Formulaire@createQuestionChoice] Invalid choice type : " + choice.getString(TYPE);
+            if (!choiceJson.getString(TYPE).equals(ChoiceTypes.TXT.getValue())) {
+                String message = "[Formulaire@QuestionChoiceController::create] Invalid choice type : " + choiceJson.getString(TYPE);
                 log.error(message);
-                badRequest(request, message);
+                badRequest(request);
                 return;
             }
 
-            Integer nextSectionId = choice.getInteger(NEXT_SECTION_ID, null);
+            QuestionChoice choice = new QuestionChoice(choiceJson);
             String locale = I18n.acceptLanguage(request);
-            if (nextSectionId != null) {
-                questionService.getSectionIdsByForm(questionId, sectionsEvt -> {
-                    if (sectionsEvt.isLeft()) {
-                        log.error("[Formulaire@createQuestionChoice] Failed to get section for form of the question with id : " + questionId);
-                        renderInternalError(request, sectionsEvt);
-                        return;
+
+            questionChoiceService.isChoiceTargetValid(choice)
+                .compose(choiceValidity -> {
+                    if (!choiceValidity) {
+                        String errorMessage = "[Formulaire@QuestionChoiceController::create] Invalid choice.";
+                        return Future.failedFuture(errorMessage);
                     }
-                    if (sectionsEvt.right().getValue().isEmpty()) {
-                        String message = "[Formulaire@createQuestionChoice] No section found for form of question with id " + questionId;
-                        log.error(message);
-                        notFound(request, message);
-                        return;
-                    }
-
-                    // Check if values of next_section_id exist
-                    JsonArray sections = sectionsEvt.right().getValue();
-                    JsonArray sectionIds = getIds(sections, false);
-                    if (!sectionIds.contains(nextSectionId)) {
-                        String message = "[Formulaire@createQuestionChoice] Wrong value for the next_section_id, this form has no section with id : " + nextSectionId;
-                        log.error(message);
-                        badRequest(request, message);
-                        return;
-                    }
-
-                    // Check if targeted section is after the current question
-                    questionService.getFormPosition(questionId, positionEvt -> {
-                        if (positionEvt.isLeft()) {
-                            log.error("[Formulaire@createQuestionChoice] Failed to get form position for question with id : " + questionId);
-                            renderInternalError(request, sectionsEvt);
-                            return;
-                        }
-                        if (positionEvt.right().getValue().isEmpty()) {
-                            String message = "[Formulaire@createQuestionChoice] No position found for question with id " + questionId;
-                            log.error(message);
-                            notFound(request, message);
-                            return;
-                        }
-
-                        Integer currentQuestionPosition = positionEvt.right().getValue().getInteger(POSITION);
-                        JsonObject targetedSection = null;
-                        int i = 0;
-                        while (targetedSection == null && i < sections.size()) {
-                            JsonObject section = sections.getJsonObject(i);
-                            if (section.getInteger(ID).equals(nextSectionId)) {
-                                targetedSection = section;
-                            }
-                            i++;
-                        }
-
-                        if (targetedSection != null && currentQuestionPosition >= targetedSection.getInteger(POSITION)) {
-                            String message = "[Formulaire@createQuestionChoice] You cannot target a section placed before your question : " + targetedSection;
-                            log.error(message);
-                            badRequest(request, message);
-                            return;
-                        }
-
-                        questionChoiceService.create(questionId, choice, locale, defaultResponseHandler(request));
-                    });
+                    return questionChoiceService.create(questionId, choice, locale);
+                })
+                .onSuccess(result -> renderJson(request, result))
+                .onFailure(err -> {
+                    log.error(err.getMessage());
+                    renderError(request);
                 });
-            }
-            else {
-                questionChoiceService.create(questionId, choice, locale, defaultResponseHandler(request));
-            }
         });
     }
 
@@ -158,88 +110,38 @@ public class QuestionChoiceController extends ControllerHelper {
     @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
-        String choiceId = request.getParam(PARAM_CHOICE_ID);
-        RequestUtils.bodyToJson(request, choice -> {
-            if (choice == null || choice.isEmpty()) {
-                log.error("[Formulaire@updateQuestionChoice] No choice to update.");
+        RequestUtils.bodyToJson(request, choiceJson -> {
+            if (choiceJson == null || choiceJson.isEmpty()) {
+                log.error("[Formulaire@QuestionChoiceController::update] No choice to update.");
                 noContent(request);
                 return;
             }
 
             // Check choice type validity
-            if (!choice.getString(TYPE).equals(ChoiceTypes.TXT.getValue())) {
-                String message = "[Formulaire@updateQuestionChoice] Invalid choice type : " + choice.getString(TYPE);
+            if (!choiceJson.getString(TYPE).equals(ChoiceTypes.TXT.getValue())) {
+                String message = "[Formulaire@QuestionChoiceController::update] Invalid choice type : " + choiceJson.getString(TYPE);
                 log.error(message);
-                badRequest(request, message);
+                badRequest(request);
                 return;
             }
 
-            String questionId = choice.getInteger(QUESTION_ID).toString();
-            Integer nextSectionId = choice.getInteger(NEXT_SECTION_ID, null);
+            QuestionChoice choice = new QuestionChoice(choiceJson);
             String locale = I18n.acceptLanguage(request);
-            if (nextSectionId != null) {
-                questionService.getSectionIdsByForm(questionId, sectionsEvt -> {
-                    if (sectionsEvt.isLeft()) {
-                        log.error("[Formulaire@updateQuestionChoice] Failed to get section for form of the question with id : " + questionId);
-                        renderInternalError(request, sectionsEvt);
-                        return;
+
+
+            questionChoiceService.isChoiceTargetValid(choice)
+                .compose(choiceValidity -> {
+                    if (!choiceValidity) {
+                        String errorMessage = "[Formulaire@QuestionChoiceController::update] Invalid choice.";
+                        return Future.failedFuture(errorMessage);
                     }
-                    if (sectionsEvt.right().getValue().isEmpty()) {
-                        String message = "[Formulaire@updateQuestionChoice] No sections found for form of the question with id " + questionId;
-                        log.error(message);
-                        notFound(request, message);
-                        return;
-                    }
-
-                    // Check if values of next_section_id exist
-                    JsonArray sections = sectionsEvt.right().getValue();
-                    JsonArray sectionIds = getIds(sections, false);
-                    if (sections.isEmpty() || !sectionIds.contains(nextSectionId)) {
-                        String message = "[Formulaire@updateQuestionChoice] Wrong value for the next_section_id, this form has no section with id : " + nextSectionId;
-                        log.error(message);
-                        badRequest(request, message);
-                        return;
-                    }
-
-                    // Check if targeted section is after the current question
-                    questionService.getFormPosition(questionId, positionEvt -> {
-                        if (positionEvt.isLeft()) {
-                            log.error("[Formulaire@updateQuestionChoice] Failed to get form position for question with id : " + questionId);
-                            renderInternalError(request, sectionsEvt);
-                            return;
-                        }
-                        if (positionEvt.right().getValue().isEmpty()) {
-                            String message = "[Formulaire@updateQuestionChoice] No position found for question with id " + questionId;
-                            log.error(message);
-                            notFound(request, message);
-                            return;
-                        }
-
-                        Integer currentQuestionPosition = positionEvt.right().getValue().getInteger(POSITION);
-                        JsonObject targetedSection = null;
-                        int i = 0;
-                        while (targetedSection == null && i < sections.size()) {
-                            JsonObject section = sections.getJsonObject(i);
-                            if (section.getInteger(ID).equals(nextSectionId)) {
-                                targetedSection = section;
-                            }
-                            i++;
-                        }
-
-                        if (targetedSection != null && currentQuestionPosition >= targetedSection.getInteger(POSITION)) {
-                            String message = "[Formulaire@updateQuestionChoice] You cannot target a section placed before your question : " + targetedSection;
-                            log.error(message);
-                            badRequest(request, message);
-                            return;
-                        }
-
-                        questionChoiceService.update(choiceId, choice, locale, defaultResponseHandler(request));
-                    });
+                    return questionChoiceService.update(choice, locale);
+                })
+                .onSuccess(result -> renderJson(request, result))
+                .onFailure(err -> {
+                    log.error(err.getMessage());
+                    renderError(request);
                 });
-            }
-            else {
-                questionChoiceService.update(choiceId, choice, locale, defaultResponseHandler(request));
-            }
         });
     }
 
@@ -249,6 +151,11 @@ public class QuestionChoiceController extends ControllerHelper {
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void delete(HttpServerRequest request) {
         String choiceId = request.getParam(PARAM_CHOICE_ID);
-        questionChoiceService.delete(choiceId, defaultResponseHandler(request));
+        questionChoiceService.delete(choiceId)
+            .onSuccess(result -> renderJson(request, result))
+            .onFailure(err -> {
+                log.error(err.getMessage());
+                renderError(request);
+            });
     }
 }

@@ -40,7 +40,8 @@ export const questionType: Directive = ng.directive('questionType', () => {
                 <question-type-singleanswer ng-if="vm.question.question_type == vm.types.SINGLEANSWER"
                                             question="vm.question"
                                             has-form-responses="vm.hasFormResponses"
-                                            form-elements="vm.formElements">
+                                            form-elements="vm.formElements"
+                                            is-radio="false">
                 </question-type-singleanswer>
                 <!-- MULTIPLEANSWER -->
                 <question-type-multipleanswer ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER"
@@ -60,11 +61,12 @@ export const questionType: Directive = ng.directive('questionType', () => {
                                     question="vm.question">
                 </question-type-file>
                 <!-- SINGLEANSWERRADIO -->
-                <question-type-singleanswer-radio ng-if="vm.question.question_type == vm.types.SINGLEANSWERRADIO"
-                                                  question="vm.question"
-                                                  has-form-responses="vm.hasFormResponses"
-                                                  form-elements="vm.formElements">
-                </question-type-singleanswer-radio>
+                <question-type-singleanswer ng-if="vm.question.question_type == vm.types.SINGLEANSWERRADIO"
+                                            question="vm.question"
+                                            has-form-responses="vm.hasFormResponses"
+                                            form-elements="vm.formElements"
+                                            is-radio="true">
+                </question-type-singleanswer>
                 <!-- MATRIX -->
                 <question-type-matrix ng-if="vm.question.question_type == vm.types.MATRIX"
                                       question="vm.question"

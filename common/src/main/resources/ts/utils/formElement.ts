@@ -3,7 +3,7 @@ import {
     Form,
     FormElement,
     FormElements,
-    Question,
+    Question, QuestionChoice,
     Questions,
     Response,
     Responses,
@@ -53,34 +53,38 @@ export class FormElementUtils {
         let formElements = new FormElements();
         let responses = new Responses();
         await formElements.sync(form.id);
-        if (FormElementUtils.isLastElementValid(formElements)) {
+        if (FormElementUtils.isElementAValidLast(formElements)) {
             return true;
         }
         else {
-            let lastQuestions = FormElementUtils.getLastConditionalQuestions(formElements);
+            let lastQuestions = FormElementUtils.getConditionalQuestionsTargetingEnd(formElements);
             await responses.syncByDistribution(distribution.id);
             return responses.all.filter(r => FormElementUtils.isValidLastResponse(r, lastQuestions)).length > 0;
         }
     };
 
-    static isLastElementValid = (formElements: FormElements) : boolean => {
+    static isElementAValidLast = (formElements: FormElements) : boolean => {
         let lastElement = formElements.all[formElements.all.length - 1];
-        let isLastElementValidSection = lastElement instanceof Section && lastElement.questions.all.filter(q => q.conditional).length === 0;
-        let isLastElementValidQuestion = lastElement instanceof Question && !lastElement.conditional;
-        return isLastElementValidSection || isLastElementValidQuestion;
+        // Last question should not be conditional or should have all choices targeting end
+        let isLastElementValidQuestion = lastElement instanceof Question && (!lastElement.conditional || lastElement.choices.all.every((c: QuestionChoice) => !c.next_form_element_id));
+        // Last section should have one conditional question with all choices targeting end
+        let isLastElementValidSectionAndHasConditionalQuestion = lastElement instanceof Section
+            && lastElement.questions.all.filter((q: Question) => q.conditional).length === 1
+            && lastElement.questions.all.filter((q: Question) => q.conditional)[0].choices.all.every((c: QuestionChoice) => !c.next_form_element_id);
+        return isLastElementValidQuestion || isLastElementValidSectionAndHasConditionalQuestion;
     };
 
-    static getLastConditionalQuestions = (formElements: FormElements) : any => {
+    static getConditionalQuestionsTargetingEnd = (formElements: FormElements) : any => {
         let lastQuestions = [];
         for (let e of formElements.all) {
             if (e instanceof Question) {
-                if (e.conditional && e.choices.all.filter(c => !c.next_section_id).length > 0) {
+                if (e.conditional && e.choices.all.filter((c: QuestionChoice) => !c.next_form_element_id).length > 0) {
                     lastQuestions.push(e);
                 }
             }
             else if (e instanceof Section) {
-                let conditionalQuestions = e.questions.all.filter(q => q.conditional);
-                if (conditionalQuestions.length === 1 && conditionalQuestions[0].choices.all.filter(c => !c.next_section_id).length > 0) {
+                let conditionalQuestions = e.questions.all.filter((q: Question) => q.conditional);
+                if (conditionalQuestions.length === 1 && conditionalQuestions[0].choices.all.filter((c: QuestionChoice) => !c.next_form_element_id).length > 0) {
                     lastQuestions.push(conditionalQuestions[0]);
                 }
             }

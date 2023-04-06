@@ -67,9 +67,9 @@ public class Section extends FormElement implements Model<Section> {
                 .put(FORM_ID, this.formId)
                 .put(TITLE, this.title)
                 .put(POSITION, this.position)
+                .put(FORM_ELEMENT_TYPE, this.formElementType)
                 .put(DESCRIPTION, this.description)
                 .put(ORIGINAL_SECTION_ID, this.originalSectionId)
-                .put(FORM_ELEMENT_TYPE, this.formElementType)
                 .put(QUESTIONS, new Question().toJsonArray(questions));
     }
 

@@ -1,6 +1,8 @@
 import {Mix} from "entcore-toolkit";
 import {idiom, notify} from "entcore";
 import {questionChoiceService} from "../services";
+import {FormElementType} from "@common/core/enums/form-element-type";
+import {FormElement, FormElements} from "@common/models/FormElement";
 
 export enum ChoiceTypes {
     TXT = 'TXT',
@@ -14,17 +16,21 @@ export class QuestionChoice {
     value: string;
     position: number;
     type: ChoiceTypes;
-    next_section_id: number;
+    next_form_element: FormElement;
+    next_form_element_id: number;
+    next_form_element_type: FormElementType;
     is_custom: boolean;
     nbResponses: number;
 
-    constructor (questionId?: number, position: number = 0, value?: string, next_section_id?: number, type?: ChoiceTypes) {
+    constructor (questionId?: number, position: number = 0, value?: string, next_form_element?: FormElement, type?: ChoiceTypes) {
         this.id = null;
         this.question_id = questionId ? questionId : null;
         this.value = value ? value : "";
         this.position = position;
         this.type = type ? type : ChoiceTypes.TXT;
-        this.next_section_id = next_section_id ? next_section_id : null;
+        this.next_form_element = next_form_element ? next_form_element : null;
+        this.next_form_element_id = next_form_element ? next_form_element.id : null;
+        this.next_form_element_type = next_form_element ? next_form_element.form_element_type : null;
         this.is_custom = false;
         this.nbResponses = 0;
     }
@@ -36,7 +42,9 @@ export class QuestionChoice {
             value: this.value,
             position: this.position,
             type: this.type,
-            next_section_id: this.next_section_id,
+            next_form_element: this.next_form_element,
+            next_form_element_id: this.next_form_element_id,
+            next_form_element_type: this.next_form_element_type,
             is_custom: this.is_custom
         }
     }

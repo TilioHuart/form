@@ -13,6 +13,7 @@ import {
 } from "../models";
 import {responseFileService, responseService} from "../services";
 import {FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_EMIT_EVENT, FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
+import {FormElementType} from "@common/core/enums/form-element-type";
 
 interface ViewModel {
     formElements: FormElements;
@@ -176,10 +177,11 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         }
         else if (conditionalQuestion && response) {
             let choices: QuestionChoice[] = conditionalQuestion.choices.all.filter((c: QuestionChoice) => c.id === response.choice_id);
-            let sectionId: number = choices.length === 1 ? choices[0].next_section_id : null;
-            let filteredSections: Section[] = vm.formElements.getSections().all.filter((s: Section) => s.id === sectionId);
-            let targetSection: Section = filteredSections.length === 1 ? filteredSections[0] : null;
-            nextPosition = targetSection ? targetSection.position : null;
+            let nextElementId: number = choices.length === 1 ? choices[0].next_form_element_id : null;
+            let nextElementType: FormElementType = choices.length === 1 ? choices[0].next_form_element_type : null;
+            let filteredElements: FormElement[] = vm.formElements.all.filter((e: FormElement) => e.id === nextElementId && e.form_element_type == nextElementType);
+            let targetedElement: FormElement = filteredElements.length === 1 ? filteredElements[0] : null;
+            nextPosition = targetedElement ? targetedElement.position : null;
         }
 
         return nextPosition;

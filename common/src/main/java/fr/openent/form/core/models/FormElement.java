@@ -77,7 +77,8 @@ public abstract class FormElement {
                 .put(ID, this.id)
                 .put(FORM_ID, this.formId)
                 .put(TITLE, this.title)
-                .put(POSITION, this.position);
+                .put(POSITION, this.position)
+                .put(FORM_ELEMENT_TYPE, this.formElementType);
     }
 
     public static List<FormElement> toListFormElements(JsonArray formElements) {

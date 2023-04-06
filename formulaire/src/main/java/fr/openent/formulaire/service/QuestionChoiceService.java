@@ -1,6 +1,8 @@
 package fr.openent.formulaire.service;
 
+import fr.openent.form.core.models.QuestionChoice;
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -30,11 +32,10 @@ public interface QuestionChoiceService {
     /**
      * Create a choice for a specific question
      * @param questionId question identifier
-     * @param choice JsonObject data
+     * @param choice QuestionChoice data
      * @param locale locale language
-     * @param handler function handler returning JsonObject data
      */
-    void create(String questionId, JsonObject choice, String locale, Handler<Either<String, JsonObject>> handler);
+    Future<JsonObject> create(String questionId, QuestionChoice choice, String locale);
 
     /**
      * Duplicate choices of a specific question
@@ -47,17 +48,20 @@ public interface QuestionChoiceService {
 
     /**
      * Update a specific choice
-     * @param choiceId choice identifier
-     * @param choice JsonObject data
+     * @param choice QuestionChoice data
      * @param locale locale language
-     * @param handler function handler returning JsonObject data
      */
-    void update(String choiceId, JsonObject choice, String locale, Handler<Either<String, JsonObject>> handler);
+    Future<JsonObject> update(QuestionChoice choice, String locale);
 
     /**
      * Delete a specific choice
      * @param choiceId choice identifier
-     * @param handler function handler returning JsonObject data
      */
-    void delete(String choiceId, Handler<Either<String, JsonObject>> handler);
+    Future<JsonObject> delete(String choiceId);
+
+    /**
+     * Check validity of a specific choice
+     * @param choice choice to check
+     */
+    Future<Boolean> isChoiceTargetValid(QuestionChoice choice);
 }

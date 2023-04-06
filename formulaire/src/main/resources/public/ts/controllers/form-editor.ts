@@ -32,6 +32,7 @@ import * as Sortable from "sortablejs";
 import {FormElementUtils} from "@common/utils";
 import {Constants} from "@common/core/constants";
 import {PropPosition} from "@common/core/enums/prop-position";
+import {FormElementType} from "@common/core/enums/form-element-type";
 
 enum PreviewPage { RGPD = 'rgpd', QUESTION = 'question', RECAP = 'recap'}
 
@@ -671,10 +672,11 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
             else if (conditionalQuestion && response) {
                 let choices: QuestionChoice[] = conditionalQuestion.choices.all.filter((c: QuestionChoice) => c.id === response.choice_id);
-                let sectionId: number = choices.length === 1 ? choices[0].next_section_id : null;
-                let filteredSections: Section[] = vm.formElements.getSections().all.filter((s: Section) => s.id === sectionId);
-                let targetSection: Section = filteredSections.length === 1 ? filteredSections[0] : null;
-                nextPosition = targetSection ? targetSection.position : null;
+                let nextElementId: number = choices.length === 1 ? choices[0].next_form_element_id : null;
+                let nextElementType: FormElementType = choices.length === 1 ? choices[0].next_form_element_type : null;
+                let filteredElements: FormElement[] = vm.formElements.all.filter((e: FormElement) => e.id === nextElementId && e.form_element_type == nextElementType);
+                let targetedElement: FormElement = filteredElements.length === 1 ? filteredElements[0] : null;
+                nextPosition = targetedElement ? targetedElement.position : null;
             }
 
             return nextPosition;
@@ -764,17 +766,18 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     && formElement.cursor_min_val != formElement.cursor_max_val;
 
                 if (isSection || isQuestionNotCursor || isCursorQuestionAndValuesOk) {
+                    // Save form element
                     let savedElement: FormElement = await formElementService.save(formElement);
                     let newId: number = savedElement.id;
                     formElement.id = newId;
 
                     if (formElement instanceof Question) {
-                        // Create choices
+                        // Save choices
                         let registeredChoiceValues: string[] = [];
                         formElement.choices.replaceSpace();
                         let positionCounter: number = 1;
                         for (let choice of formElement.choices.all) {
-                            if (choice.value && !registeredChoiceValues.find(v => v === choice.value)) {
+                            if (choice.value && !registeredChoiceValues.find((v: string) => v === choice.value)) {
                                 choice.position = positionCounter;
                                 choice.question_id = newId;
                                 choice.id = (await questionChoiceService.save(choice)).id;
@@ -782,7 +785,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                                 positionCounter++;
                             }
                         }
-                        // Create children (for MATRIX questions)
+                        // Save children (for MATRIX questions)
                         positionCounter = 1;
                         if (formElement.question_type === Types.MATRIX) {
                             let registeredChildrenTitles: string[] = [];
