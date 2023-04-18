@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class FormElement {
-    protected Number id;
-    protected Number formId;
+    protected Long id;
+    protected Long formId;
     protected String title;
-    protected Number position;
+    protected Long position;
     protected FormElementTypes formElementType;
 
 
@@ -22,35 +22,35 @@ public abstract class FormElement {
     public FormElement() {}
 
     public FormElement(JsonObject formElement) {
-        this.id = formElement.getNumber(ID, null);
-        this.formId = formElement.getNumber(FORM_ID, null);
+        this.id = formElement.getLong(ID, null);
+        this.formId = formElement.getLong(FORM_ID, null);
         this.title = formElement.getString(TITLE, "");
-        this.position = formElement.getNumber(POSITION, null);
+        this.position = formElement.getLong(POSITION, null);
         this.formElementType = FormElementTypes.getFormElementType(formElement.getString(FORM_ELEMENT_TYPE, null));
     }
 
 
     // Getters
 
-    public Number getId() { return id; }
+    public Long getId() { return id; }
 
-    public Number getFormId() { return formId; }
+    public Long getFormId() { return formId; }
 
     public String getTitle() { return title; }
 
-    public Number getPosition() { return position; }
+    public Long getPosition() { return position; }
 
     public FormElementTypes getFormElementType() { return formElementType; }
 
 
     // Setters
 
-    public FormElement setId(Number id) {
+    public FormElement setId(Long id) {
         this.id = id;
         return this;
     }
 
-    public FormElement setFormId(Number formId) {
+    public FormElement setFormId(Long formId) {
         this.formId = formId;
         return this;
     }
@@ -60,7 +60,7 @@ public abstract class FormElement {
         return this;
     }
 
-    public FormElement setPosition(Number position) {
+    public FormElement setPosition(Long position) {
         this.position = position;
         return this;
     }

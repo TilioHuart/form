@@ -69,13 +69,22 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
 
     @Override
     public void duplicate(int formId, int questionId, int originalQuestionId, Handler<Either<String, JsonObject>> handler) {
-        String query = "INSERT INTO " + QUESTION_CHOICE_TABLE + " " +
+        String query = "" +
+                "WITH form_elements_infos AS (" +
+                    "SELECT * FROM (" +
+                        "SELECT id, form_id, 'QUESTION' AS type, original_question_id AS original_id FROM " + QUESTION_TABLE +
+                        " UNION " +
+                        "SELECT id, form_id, 'SECTION' AS type, original_section_id AS original_id FROM " + SECTION_TABLE +
+                    ") AS qs_infos " +
+                    "WHERE form_id = ? " +
+                ")" +
+                "INSERT INTO " + QUESTION_CHOICE_TABLE + " " +
                 "(question_id, value, position, type, is_custom, next_form_element_id, next_form_element_type) " +
                 "SELECT ?, value, position, type, is_custom, " +
-                "(SELECT id FROM " + SECTION_TABLE + " WHERE original_section_id = qc.next_form_element_id AND form_id = ?) " +
+                "(SELECT id FROM form_elements_infos WHERE original_id = qc.next_form_element_id AND type = qc.next_form_element_type), next_form_element_type " +
                 "FROM " + QUESTION_CHOICE_TABLE + " qc " +
                 "WHERE question_id = ? ORDER BY qc.id;";
-        JsonArray params = new JsonArray().add(questionId).add(formId).add(originalQuestionId);
+        JsonArray params = new JsonArray().add(formId).add(questionId).add(originalQuestionId);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
@@ -116,7 +125,7 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
     }
 
     @Override
-    public Future<Boolean> isChoiceTargetValid(QuestionChoice choice) {
+    public Future<Boolean> isTargetValid(QuestionChoice choice) {
         Promise<Boolean> promise = Promise.promise();
 
         if (choice.getNextFormElementId() == null && choice.getNextFormElementType() == null) {
@@ -124,7 +133,7 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
             return promise.future();
         }
         else if (choice.getNextFormElementId() == null ^ choice.getNextFormElementType() == null) {
-            String errorMessage = "[Formulaire@DefaultQuestionChoiceService::isChoiceValid] Choice next_form_element_id " +
+            String errorMessage = "[Formulaire@DefaultQuestionChoiceService::isTargetValid] Choice next_form_element_id " +
                     "and next_form_element_type must be both null or both not null.";
             log.error(errorMessage);
             promise.fail(errorMessage);
@@ -145,10 +154,10 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
                 "WHERE form_id = (SELECT form_id FROM " + QUESTION_TABLE + " WHERE id = ?) " +
                 "AND position IS NOT NULL " +
                 "AND position > (SELECT position FROM element_position) " +
-                "AND  id = ?;";
+                "AND id = ?;";
         JsonArray params = new JsonArray().add(questionId).add(questionId).add(targetedId);
 
-        String errorMessage = "[Formulaire@DefaultQuestionChoiceService::isChoiceValid] Fail to check if choice target is valid : ";
+        String errorMessage = "[Formulaire@DefaultQuestionChoiceService::isTargetValid] Fail to check if choice target is valid : ";
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(event -> {
             if (event.isRight()) {
                 promise.complete(event.right().getValue().getBoolean(COUNT));

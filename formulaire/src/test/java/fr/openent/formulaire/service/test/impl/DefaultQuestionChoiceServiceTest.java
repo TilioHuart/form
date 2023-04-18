@@ -1,6 +1,5 @@
 package fr.openent.formulaire.service.test.impl;
 
-import fr.openent.form.core.enums.FormElementTypes;
 import fr.openent.form.core.models.QuestionChoice;
 import fr.openent.formulaire.service.impl.DefaultQuestionChoiceService;
 import io.vertx.core.Vertx;
@@ -124,7 +123,7 @@ public class DefaultQuestionChoiceServiceTest {
                 "WHERE form_id = (SELECT form_id FROM " + QUESTION_TABLE + " WHERE id = ?) " +
                 "AND position IS NOT NULL " +
                 "AND position > (SELECT position FROM element_position) " +
-                "AND  id = ?;";
+                "AND id = ?;";
         JsonArray expectedParams = new JsonArray("[23,23,29]");
 
         vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
@@ -134,7 +133,7 @@ public class DefaultQuestionChoiceServiceTest {
             ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
             async.complete();
         });
-        defaultQuestionChoiceService.isChoiceTargetValid(choice)
+        defaultQuestionChoiceService.isTargetValid(choice)
                 .onSuccess(result -> async.complete());
 
         async.awaitSuccess(10000);

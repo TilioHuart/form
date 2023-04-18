@@ -38,6 +38,7 @@ public class Tables {
     public static final String RESPONSE = "response";
     public static final String RESPONSE_FILE = "response_file";
     public static final String SECTION = "section";
+    public static final String SECTION_TYPE = "section_type";
     public static final String USERS = "users";
 
     private Tables() {

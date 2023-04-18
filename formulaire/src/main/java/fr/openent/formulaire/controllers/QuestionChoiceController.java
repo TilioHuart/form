@@ -89,7 +89,7 @@ public class QuestionChoiceController extends ControllerHelper {
             QuestionChoice choice = new QuestionChoice(choiceJson);
             String locale = I18n.acceptLanguage(request);
 
-            questionChoiceService.isChoiceTargetValid(choice)
+            questionChoiceService.isTargetValid(choice)
                 .compose(choiceValidity -> {
                     if (!choiceValidity) {
                         String errorMessage = "[Formulaire@QuestionChoiceController::create] Invalid choice.";
@@ -129,7 +129,7 @@ public class QuestionChoiceController extends ControllerHelper {
             String locale = I18n.acceptLanguage(request);
 
 
-            questionChoiceService.isChoiceTargetValid(choice)
+            questionChoiceService.isTargetValid(choice)
                 .compose(choiceValidity -> {
                     if (!choiceValidity) {
                         String errorMessage = "[Formulaire@QuestionChoiceController::update] Invalid choice.";

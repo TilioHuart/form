@@ -2,6 +2,7 @@ package fr.openent.form.core.models;
 
 import static fr.openent.form.core.constants.Fields.*;
 
+import fr.openent.form.core.enums.FormElementTypes;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -9,7 +10,9 @@ import java.util.List;
 
 public class Section extends FormElement implements Model<Section> {
     private String description;
-    private Number originalSectionId;
+    private Long originalSectionId;
+    private Long nextFormElementId;
+    private FormElementTypes nextFormElementType;
     private List<Question> questions;
 
 
@@ -21,7 +24,11 @@ public class Section extends FormElement implements Model<Section> {
     public Section(JsonObject section) {
         super(section);
         this.description = section.getString(DESCRIPTION, "");
-        this.originalSectionId = section.getNumber(ORIGINAL_SECTION_ID, null);
+        this.originalSectionId = section.getLong(ORIGINAL_SECTION_ID, null);
+        this.nextFormElementId = section.getLong(NEXT_FORM_ELEMENT_ID, null);
+        this.nextFormElementType = this.nextFormElementId == null ?
+                null :
+                FormElementTypes.getFormElementType(section.getString(NEXT_FORM_ELEMENT_TYPE, null));
 
         if (section.getValue(QUESTIONS, null) instanceof JsonArray) {
             this.questions = new Question().toList(section.getJsonArray(QUESTIONS, null));
@@ -36,7 +43,11 @@ public class Section extends FormElement implements Model<Section> {
 
     public String getDescription() { return description; }
 
-    public Number getOriginalSectionId() { return originalSectionId; }
+    public Long getOriginalSectionId() { return originalSectionId; }
+
+    public Long getNextFormElementId() { return nextFormElementId; }
+
+    public FormElementTypes getNextFormElementType() { return nextFormElementType; }
 
     public List<Question> getQuestions() { return questions; }
 
@@ -48,8 +59,18 @@ public class Section extends FormElement implements Model<Section> {
         return this;
     }
 
-    public Section setOriginalSectionId(Number originalSectionId) {
+    public Section setOriginalSectionId(Long originalSectionId) {
         this.originalSectionId = originalSectionId;
+        return this;
+    }
+
+    public Section setNextFormElementId(Long nextFormElementId) {
+        this.nextFormElementId = nextFormElementId;
+        return this;
+    }
+
+    public Section setNextFormElementType(FormElementTypes nextFormElementType) {
+        this.nextFormElementType = nextFormElementType;
         return this;
     }
 
@@ -70,6 +91,8 @@ public class Section extends FormElement implements Model<Section> {
                 .put(FORM_ELEMENT_TYPE, this.formElementType)
                 .put(DESCRIPTION, this.description)
                 .put(ORIGINAL_SECTION_ID, this.originalSectionId)
+                .put(NEXT_FORM_ELEMENT_ID, this.nextFormElementId)
+                .put(NEXT_FORM_ELEMENT_TYPE, this.nextFormElementType)
                 .put(QUESTIONS, new Question().toJsonArray(questions));
     }
 

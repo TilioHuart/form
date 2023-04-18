@@ -17,11 +17,13 @@ interface IQuestionTypeSingleanswerRadioScope extends IScope, IQuestionTypeSingl
 }
 
 interface IViewModel extends ng.IController, IQuestionTypeSingleanswerProps {
-    I18n: I18nUtils;
-    Direction: typeof Direction;
+    i18n: I18nUtils;
+    direction: typeof Direction;
 
     deleteChoice(index: number): Promise<void>;
-    isFormElementAfter(formElement: FormElement): boolean;
+    getPosition(): number;
+    getNextElement(position?: number): FormElement;
+    filterNextElements(formElement: FormElement): boolean;
     onSelectOption(choice: QuestionChoice): void;
 }
 
@@ -30,12 +32,12 @@ class Controller implements IViewModel {
     hasFormResponses: boolean;
     formElements: FormElements;
     isRadio: boolean;
-    I18n: I18nUtils;
-    Direction: typeof Direction;
+    i18n: I18nUtils;
+    direction: typeof Direction;
 
     constructor(private $scope: IQuestionTypeSingleanswerRadioScope, private $sce: ng.ISCEService) {
-        this.I18n = I18nUtils;
-        this.Direction = Direction;
+        this.i18n = I18nUtils;
+        this.direction = Direction;
     }
 
     $onInit = async () : Promise<void> => {
@@ -54,11 +56,22 @@ class Controller implements IViewModel {
         await this.question.deleteChoice(index);
     }
 
-    isFormElementAfter = (formElement: FormElement) : boolean => {
-        let position: number = this.question.position ?
+    getPosition = () : number => {
+        return this.question.position ?
             this.question.position :
             this.formElements.all.filter((e: FormElement) => e.id === this.question.section_id)[0].position;
-        return formElement.position > position;
+    }
+
+    getNextElement = (position?: number) : FormElement => {
+        let nextPosition: number = (position ? position : this.getPosition()) + 1;
+        let nextElements: FormElement[] = this.formElements.all.filter((e: FormElement) => e.position === nextPosition);
+        return nextElements.length > 0 ? nextElements[0] : null;
+    }
+
+    filterNextElements = (formElement: FormElement) : boolean => {
+        let position: number = this.getPosition();
+        let nextElement: FormElement = this.getNextElement(position);
+        return formElement.position > position && nextElement && formElement.id != nextElement.id;
     }
 
     onSelectOption = (choice: QuestionChoice) : void => {

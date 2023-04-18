@@ -1,0 +1,51 @@
+<div class="question-item" ng-class="vm.question.section_id ? 'twelve' : 'nine'">
+    <div class="domino" ng-class="{
+                'questionError': !vm.question.title || vm.question.choices.length === 0 || (vm.types.CURSOR && !vm.cursorChoiceIsConsistent()),
+                'disabled': vm.hasFormResponses || vm.question.selected
+                }">
+        <div class="question-top grab">
+            <div class="dots" ng-if="vm.reorder || !vm.hasFormResponses">
+                <i class="i-drag xl-icon"></i>
+                <i class="i-drag xl-icon"></i>
+            </div>
+        </div>
+        <div class="question-main focusable">
+            <!-- Title component -->
+            <question-title question="vm.question"
+                            has-form-responses="vm.hasFormResponses"
+                            matrix-type="vm.matrixType">
+            </question-title>
+            <!-- Main component -->
+            <question-type question="vm.question"
+                           has-form-responses="vm.hasFormResponses"
+                           form-elements="vm.formElements"
+                           matrix-type="vm.matrixType">
+            </question-type>
+            <!-- Interaction buttons-->
+            <div class="question-bottom" ng-if="vm.question.selected">
+                <div class="mandatory" ng-if="vm.question.question_type != vm.types.FREETEXT" title="[[vm.getTitle('mandatory.explanation')]]">
+                    <switch ng-model="vm.question.mandatory" ng-class="{switchoff: vm.hasFormResponses}"
+                            ng-change="vm.onSwitchMandatory(vm.question.mandatory)"></switch>
+                    <i18n>formulaire.mandatory</i18n>
+                </div>
+                <div class="conditional" ng-if="vm.showConditionalSwitch()">
+                    <switch ng-model="vm.question.conditional" ng-class="{switchoff: vm.hasFormResponses}"
+                            ng-change="vm.onSwitchConditional(vm.question.conditional)"></switch>
+                    <i18n>formulaire.conditional</i18n>
+                </div>
+                <i class="i-duplicate lg-icon spaced-right cursor-pointer" reset-guard="vm.duplicateQuestion()"
+                   ng-class="{disabled: vm.hasFormResponses}" title="[[vm.getTitle('duplicate')]]"></i>
+                <i class="i-delete lg-icon spaced-right cursor-pointer" reset-guard="vm.deleteQuestion()"
+                   ng-class="{disabled: vm.hasFormResponses}" title="[[vm.getTitle('delete')]]"></i>
+                <i class="i-undo lg-icon spaced-right cursor-pointer" reset-guard="vm.undoQuestionChanges()"
+                   title="[[vm.getTitle('cancel')]]"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="warning" ng-if="!vm.question.title"><i18n>formulaire.question.missing.field.title</i18n></div>
+    <div class="warning" ng-if="vm.question.choices.length <= 0"><i18n>formulaire.question.missing.field.choice</i18n></div>
+    <div class="warning" ng-if="vm.question.question_type == vm.types.CURSOR && !vm.cursorChoiceIsConsistent()">
+        <i18n>formulaire.question.cursor.inconsistency.between.values</i18n>
+    </div>
+</div>

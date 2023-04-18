@@ -1,7 +1,7 @@
 import {Mix, Selection} from "entcore-toolkit";
 import {idiom, notify} from "entcore";
 import {questionChoiceService, questionService} from "../../services";
-import {QuestionChoice, QuestionChoices} from "@common/models";
+import {FormElements, QuestionChoice, QuestionChoices, Section, Sections} from "@common/models";
 import {Types} from "@common/models";
 import {FormElement} from "./FormElement";
 import {Distribution, Distributions} from "@common/models";
@@ -224,6 +224,50 @@ export class Question extends FormElement {
 
     isSameQuestionTypeOfType = (formElement: FormElement, type: Types) : boolean => {
         return this.isSameQuestionType(formElement) && this.question_type === type;
+    }
+
+    setChoicesNextFormElements = (formElements: FormElements) : void => {
+        let nextPosition: number = this.getPosition(formElements) + 1;
+        let nextElements: FormElement[] = formElements.all.filter((e: FormElement) => e.position === nextPosition);
+        let nextElement: FormElement = nextElements.length == 1 ? nextElements[0] : null;
+
+        for (let choice of this.choices.all) {
+            // If conditional prop was unchecked we set to null
+            if (!this.conditional) {
+                choice.next_form_element_id = null;
+                choice.next_form_element_type = null;
+            }
+            // If conditional prop was checked and a next_form_element was defined we use it
+            else if (choice.next_form_element) {
+                choice.next_form_element_id = choice.next_form_element.id;
+                choice.next_form_element_type = choice.next_form_element.form_element_type;
+            }
+            // If conditional prop was checked and there's no next_form_element, we use nextElement
+            else {
+                choice.next_form_element = nextElement;
+                choice.next_form_element_id = nextElement ? nextElement.id : null;
+                choice.next_form_element_type = nextElement ? nextElement.form_element_type : null;
+                choice.is_next_form_element_default = true;
+            }
+        }
+    }
+
+    setParentSectionNextFormElements = (formElements: FormElements) : void => {
+        let parentSection: Section = this.getParentSection(formElements);
+
+        if (this.conditional) {
+            parentSection.next_form_element_id = null;
+            parentSection.next_form_element_type = null;
+        }
+        else if (parentSection.next_form_element) {
+            parentSection.next_form_element_id = parentSection.next_form_element.id;
+            parentSection.next_form_element_type = parentSection.next_form_element.form_element_type;
+        }
+    }
+
+    getParentSection = (formElements: FormElements) : Section => {
+        let parents: FormElement[] = formElements.all.filter((e: FormElement) => e.id === this.section_id && e instanceof Section);
+        return parents.length == 1 ? <Section>parents[0] : null;
     }
 }
 

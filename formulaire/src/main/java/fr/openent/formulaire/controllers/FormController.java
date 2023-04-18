@@ -526,7 +526,7 @@ public class FormController extends ControllerHelper {
         List<Future> questionsInfosFutures = new ArrayList<>();
 
         for (Object questions : questionsEvt.result().list()) {
-            JsonArray questionsInfos = ((JsonArray) questions);
+            JsonArray questionsInfos = ((JsonArray) questions).getJsonArray(1);
             if (questionsInfos.size() > 0
                 && questionsInfos.getJsonObject(0).getInteger(ID) != null
                 && questionsInfos.getJsonObject(0).getInteger(FORM_ID) != null) {
@@ -559,7 +559,7 @@ public class FormController extends ControllerHelper {
         eventStore.createAndStoreEvent(CREATE.name(), request);
         JsonArray newFormIds = new JsonArray();
         for (Object question : questionsEvt.result().list()) {
-            newFormIds.add(((JsonArray) question).getJsonObject(0).getInteger(FORM_ID));
+            newFormIds.add(((JsonArray) question).getJsonArray(1).getJsonObject(0).getInteger(FORM_ID));
         }
         relFormFolderService.create(user, newFormIds, folderId, createRelEvt -> {
             if (createRelEvt.isLeft()) {

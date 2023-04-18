@@ -153,6 +153,7 @@ public class Question extends FormElement implements Model<Question> {
                 .put(FORM_ID, this.formId)
                 .put(TITLE, this.title)
                 .put(POSITION, this.position)
+                .put(FORM_ELEMENT_TYPE, this.formElementType)
                 .put(QUESTION_TYPE, this.questionType)
                 .put(STATEMENT, this.statement)
                 .put(MANDATORY, this.mandatory)
@@ -163,7 +164,6 @@ public class Question extends FormElement implements Model<Question> {
                 .put(PLACEHOLDER, this.placeholder)
                 .put(MATRIX_ID, this.matrixId)
                 .put(MATRIX_POSITION, this.matrixPosition)
-                .put(FORM_ELEMENT_TYPE, this.formElementType)
                 .put(QUESTION_CHOICES, new QuestionChoice().toJsonArray(this.questionChoices))
                 .put(CHILDREN, new Question().toJsonArray(this.children));
     }

@@ -1,5 +1,6 @@
 package fr.openent.formulaire.service.impl;
 
+import fr.openent.form.core.enums.FormElementTypes;
 import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.form.helpers.FutureHelper;
 import io.vertx.core.Future;
@@ -162,9 +163,9 @@ public class ImportExportService {
         JsonArray results = sections.getJsonArray(RESULTS);
 
         SqlStatementsBuilder s = new SqlStatementsBuilder();
-        String query = "INSERT INTO " + SECTION_TABLE + " (form_id, title, description, position, original_section_id) " +
-                "VALUES (?, ?, ?, ?, ?) " +
-                "RETURNING original_section_id, id;";
+        String query = "INSERT INTO " + SECTION_TABLE + " (form_id, title, description, position, next_form_element_id, next_form_element_type, original_section_id) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?) " +
+                "RETURNING original_section_id, id, next_form_element_type;";
 
         s.raw(TRANSACTION_BEGIN_QUERY);
         for (int i = 0; i < results.size(); i++) {
@@ -174,6 +175,8 @@ public class ImportExportService {
                     .add(entry.getString(fields.indexOf(TITLE)))
                     .add(entry.getString(fields.indexOf(DESCRIPTION)))
                     .add(entry.getInteger(fields.indexOf(POSITION)))
+                    .add(entry.getInteger(fields.indexOf(NEXT_FORM_ELEMENT_ID)))
+                    .add(entry.getString(fields.indexOf(NEXT_FORM_ELEMENT_TYPE)))
                     .add(entry.getInteger(fields.indexOf(ID)));
             s.prepared(query, params);
         }
@@ -229,6 +232,34 @@ public class ImportExportService {
         s.raw(TRANSACTION_COMMIT_QUERY);
 
         String errorMessage = "[Formulaire@ImportExportService::importQuestions] Failed to import questions from file : ";
+        sql.transaction(s.build(), SqlResult.validResultsHandler(FutureHelper.handlerEither(promise, errorMessage)));
+
+        return promise.future();
+    }
+
+    /**
+     * Update in BDD the imported sections data
+     * @param oldNewSectionIdsMap Map containing old and new section ids
+     * @param newSectionIdsTypeMap Map containing old section ids and next_form_element_type
+     * @return return a future containing the content the imported questions
+     */
+    public Future<JsonArray> updateSections(Map<Integer, Integer> oldNewSectionIdsMap, Map<Integer, String> newSectionIdsTypeMap) {
+        Promise<JsonArray> promise = Promise.promise();
+
+        List<Integer> newSectionIds = new ArrayList<>(oldNewSectionIdsMap.values());
+
+        SqlStatementsBuilder s = new SqlStatementsBuilder();
+        s.raw(TRANSACTION_BEGIN_QUERY);
+        for (Integer newSectionId : newSectionIds) {
+            String subQuery = FormElementTypes.QUESTION.getName().equals(newSectionIdsTypeMap.get(newSectionId)) ?
+                "SELECT id FROM " + QUESTION_TABLE + " WHERE original_question_id = s.next_form_element_id AND form_id = s.form_id" :
+                "SELECT id FROM " + SECTION_TABLE + " WHERE original_section_id = s.next_form_element_id AND form_id = s.form_id";
+            String query = "UPDATE " + SECTION_TABLE + " s SET next_form_element_id = (" + subQuery + ") WHERE id = ?;";
+            s.prepared(query, new JsonArray().add(newSectionId));
+        }
+        s.raw(TRANSACTION_COMMIT_QUERY);
+
+        String errorMessage = "[Formulaire@ImportExportService::updateSections] Failed to update sections : ";
         sql.transaction(s.build(), SqlResult.validResultsHandler(FutureHelper.handlerEither(promise, errorMessage)));
 
         return promise.future();
@@ -343,14 +374,18 @@ public class ImportExportService {
         s.raw(TRANSACTION_BEGIN_QUERY);
         for (int i = 0; i < results.size(); ++i) {
             JsonArray entry = results.getJsonArray(i);
+            String nextFormElementType = entry.getString(fields.indexOf(NEXT_FORM_ELEMENT_TYPE));
+            Integer nextFormElementId = nextFormElementType.equals(FormElementTypes.QUESTION.getName()) ?
+                    oldNewQuestionIdsMap.get(entry.getInteger(fields.indexOf(NEXT_FORM_ELEMENT_ID))) :
+                    oldNewSectionIdsMap.get(entry.getInteger(fields.indexOf(NEXT_FORM_ELEMENT_ID)));
             JsonArray params = new JsonArray()
                     .add(oldNewQuestionIdsMap.get(entry.getInteger(fields.indexOf(QUESTION_ID))))
                     .add(entry.getString(fields.indexOf(VALUE)))
                     .add(entry.getString(fields.indexOf(TYPE)))
                     .add(entry.getInteger(fields.indexOf(POSITION)))
                     .add(entry.getBoolean(fields.indexOf(IS_CUSTOM)))
-                    .add(oldNewSectionIdsMap.get(entry.getInteger(fields.indexOf(NEXT_FORM_ELEMENT_ID))))
-                    .add(entry.getString(fields.indexOf(NEXT_FORM_ELEMENT_TYPE)));
+                    .add(nextFormElementId)
+                    .add(nextFormElementType);
             s.prepared(query, params);
         }
         s.raw(TRANSACTION_COMMIT_QUERY);
@@ -389,17 +424,33 @@ public class ImportExportService {
     }
 
     /**
-     * Generate mappings between two fields from given data
+     * Generate mappings int/int between two fields from given data
      * @param data data results of a transaction
      * @param keyName name of the field to get to fill the map's keys
      * @param valueName name of the field to get to fill the map's values
      * @return A complete mapping between the two given fields
      */
-    public Map<Integer, Integer> generateMapping(JsonArray data, String keyName, String valueName) {
+    public Map<Integer, Integer> generateMappingIntInt(JsonArray data, String keyName, String valueName) {
         Map<Integer, Integer> map = new HashMap();
         for (int i = 1; i < data.size() - 1; i++) {
             JsonObject entry = data.getJsonArray(i).getJsonObject(0);
             map.put(entry.getInteger(keyName), entry.getInteger(valueName));
+        }
+        return map;
+    }
+
+    /**
+     * Generate mappings int/string between two fields from given data
+     * @param data data results of a transaction
+     * @param keyName name of the field to get to fill the map's keys
+     * @param valueName name of the field to get to fill the map's values
+     * @return A complete mapping between the two given fields
+     */
+    public Map<Integer, String> generateMappingIntString(JsonArray data, String keyName, String valueName) {
+        Map<Integer, String> map = new HashMap();
+        for (int i = 1; i < data.size() - 1; i++) {
+            JsonObject entry = data.getJsonArray(i).getJsonObject(0);
+            map.put(entry.getInteger(keyName), entry.getString(valueName));
         }
         return map;
     }

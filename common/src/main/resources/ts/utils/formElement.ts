@@ -14,6 +14,7 @@ import {Direction} from "../core/enums";
 import {angular, idiom, notify} from "entcore";
 import {formElementService, questionService} from "../services";
 import {PropPosition} from "@common/core/enums/prop-position";
+import {FormElementType} from "@common/core/enums/form-element-type";
 
 export class FormElementUtils {
     static castFormElement = (formElement: any) : Question|Section => {
@@ -59,7 +60,7 @@ export class FormElementUtils {
         else {
             let lastQuestions = FormElementUtils.getConditionalQuestionsTargetingEnd(formElements);
             await responses.syncByDistribution(distribution.id);
-            return responses.all.filter(r => FormElementUtils.isValidLastResponse(r, lastQuestions)).length > 0;
+            return responses.all.filter((r: Response) => FormElementUtils.isValidLastResponse(r, lastQuestions)).length > 0;
         }
     };
 
@@ -71,7 +72,11 @@ export class FormElementUtils {
         let isLastElementValidSectionAndHasConditionalQuestion = lastElement instanceof Section
             && lastElement.questions.all.filter((q: Question) => q.conditional).length === 1
             && lastElement.questions.all.filter((q: Question) => q.conditional)[0].choices.all.every((c: QuestionChoice) => !c.next_form_element_id);
-        return isLastElementValidQuestion || isLastElementValidSectionAndHasConditionalQuestion;
+        // Or last section should have no conditional question but a next_form_element_id targeting end (= null)
+        let isLastElementValidSectionAndHasNotConditionalQuestion = lastElement instanceof Section
+            && lastElement.questions.all.filter((q: Question) => q.conditional).length === 0
+            && lastElement.next_form_element_id == null;
+        return isLastElementValidQuestion || isLastElementValidSectionAndHasConditionalQuestion || isLastElementValidSectionAndHasNotConditionalQuestion;
     };
 
     static getConditionalQuestionsTargetingEnd = (formElements: FormElements) : any => {
@@ -84,7 +89,10 @@ export class FormElementUtils {
             }
             else if (e instanceof Section) {
                 let conditionalQuestions = e.questions.all.filter((q: Question) => q.conditional);
-                if (conditionalQuestions.length === 1 && conditionalQuestions[0].choices.all.filter((c: QuestionChoice) => !c.next_form_element_id).length > 0) {
+                if (conditionalQuestions.length == 0 && e.next_form_element_id == null) {
+                    lastQuestions.concat(e.questions.all);
+                }
+                else if (conditionalQuestions.length === 1 && conditionalQuestions[0].choices.all.filter((c: QuestionChoice) => !c.next_form_element_id).length > 0) {
                     lastQuestions.push(conditionalQuestions[0]);
                 }
             }
@@ -93,7 +101,7 @@ export class FormElementUtils {
     };
 
     static isValidLastResponse = (response: Response, lastQuestions: any) : boolean => {
-        let matchingQuestions = lastQuestions.filter(q => q.id === response.question_id);
+        let matchingQuestions = lastQuestions.filter((q: Question) => q.id === response.question_id);
         let question = matchingQuestions.length > 0 ? matchingQuestions[0] : null;
         return question && (question.conditional ? !!response.answer : true);
     };
@@ -132,9 +140,11 @@ export class FormElementUtils {
                 item.section_position = null;
                 formElements.all.push(item);
                 FormElementUtils.rePositionFormElements(formElements, PropPosition.POSITION);
+                FormElementUtils.updateNextFormElementValues(formElements);
                 await formElementService.update(formElements.all);
                 oldSection.questions.all = oldSection.questions.all.filter((q: Question) => q.id != item.id);
                 FormElementUtils.rePositionFormElements(oldSection.questions, PropPosition.SECTION_POSITION);
+                FormElementUtils.updateNextFormElementValues(oldSection.questions, formElements);
                 await questionService.update(oldSection.questions.all);
             }
             else { // Item moved FROM vm.formElements TO vm.formElements
@@ -143,6 +153,7 @@ export class FormElementUtils {
                 item.section_id = null;
                 item.section_position = null;
                 FormElementUtils.rePositionFormElements(formElements, PropPosition.POSITION);
+                FormElementUtils.updateNextFormElementValues(formElements);
                 await formElementService.update(formElements.all);
             }
         }
@@ -164,6 +175,7 @@ export class FormElementUtils {
                     newSection.questions.all.push(item);
                 }
                 FormElementUtils.rePositionFormElements(oldSection.questions, PropPosition.SECTION_POSITION);
+                FormElementUtils.updateNextFormElementValues(oldSection.questions, formElements);
                 await questionService.update(newSection.questions.all.concat(oldSection.questions.all));
             }
             else { // Item moved FROM vm.formElements TO section with id 'newNestedSectionId'
@@ -174,9 +186,11 @@ export class FormElementUtils {
                 item.section_position = newIndex + 1;
                 newSection.questions.all.push(item);
                 FormElementUtils.rePositionFormElements(newSection.questions, PropPosition.SECTION_POSITION);
+                FormElementUtils.updateNextFormElementValues(newSection.questions, formElements);
                 await questionService.update(newSection.questions.all);
                 formElements.all = formElements.all.filter((e: FormElement) => e.id != item.id);
                 FormElementUtils.rePositionFormElements(formElements, PropPosition.POSITION);
+                FormElementUtils.updateNextFormElementValues(formElements);
                 await formElementService.update(formElements.all);
             }
         }
@@ -217,6 +231,7 @@ export class FormElementUtils {
                 oldSection.questions.all = oldSection.questions.all.filter((q: Question) => q.id != item.id);
                 formElements.all.push(item);
                 FormElementUtils.rePositionFormElements(oldSection.questions, PropPosition.SECTION_POSITION);
+                // TODO updateNextFormElementValues()
             }
             else { // Item moved FROM vm.formElements TO vm.formElements
                 FormElementUtils.updateSiblingsPositions(formElements, true, indexes.goUp, indexes.startIndex, indexes.endIndex);
@@ -224,6 +239,7 @@ export class FormElementUtils {
                 item.section_id = null;
                 item.section_position = null;
                 FormElementUtils.rePositionFormElements(formElements, PropPosition.POSITION);
+                // TODO updateNextFormElementValues()
             }
         }
         else {
@@ -245,6 +261,7 @@ export class FormElementUtils {
                     FormElementUtils.rePositionFormElements(oldSection.questions, PropPosition.SECTION_POSITION);
                 }
                 FormElementUtils.rePositionFormElements(newSection.questions, PropPosition.SECTION_POSITION);
+                // TODO updateNextFormElementValues()
             }
             else { // Item moved FROM vm.formElements TO section with id 'newNestedSectionId'
                 FormElementUtils.updateSiblingsPositions(formElements, false, null, oldIndex);
@@ -256,6 +273,7 @@ export class FormElementUtils {
                 formElements.all = formElements.all.filter((e: FormElement) => e.id != item.id);
                 FormElementUtils.rePositionFormElements(formElements, PropPosition.POSITION);
                 FormElementUtils.rePositionFormElements(newSection.questions, PropPosition.SECTION_POSITION);
+                // TODO updateNextFormElementValues()
             }
         }
 
@@ -318,5 +336,39 @@ export class FormElementUtils {
         for (let i: number = 0; i < formElements.all.length; i++) {
             formElements.all[i][propPosition] = i + 1;
         }
-    };
+    }
+
+    static updateNextFormElementValues = (elementsToUpdate: FormElements|Questions, formElements?: FormElements) : void => {
+        if (!formElements && elementsToUpdate instanceof FormElements) {
+            formElements = elementsToUpdate;
+        }
+        else if (!formElements && elementsToUpdate instanceof Questions) {
+            return;
+        }
+
+        for (let element of elementsToUpdate.all) {
+            if (element instanceof Section && element.is_next_form_element_default) {
+                element.setNextFormElementValuesWithDefault(formElements);
+            }
+            else if (element instanceof Section && !element.is_next_form_element_default) {
+                let nextElementPosition: number = element.getNextFormElementPosition(formElements);
+                if (nextElementPosition <= element.position) {
+                    element.setNextFormElementValuesWithDefault(formElements);
+                }
+            }
+            else if (element instanceof Question && element.conditional) {
+                for (let choice of element.choices.all) {
+                    if (choice.is_next_form_element_default) {
+                        choice.setNextFormElementValuesWithDefault(formElements, element);
+                    }
+                    if (!choice.is_next_form_element_default) {
+                        let nextElementPosition: number = choice.getNextFormElementPosition(formElements);
+                        if (nextElementPosition <= element.getPosition(formElements)) {
+                            choice.setNextFormElementValuesWithDefault(formElements, element);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

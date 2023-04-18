@@ -1,5 +1,7 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.core.models.Section;
+import fr.openent.form.helpers.FutureHelper;
 import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.helpers.DataChecker;
 import fr.openent.formulaire.security.AccessRight;
@@ -17,6 +19,7 @@ import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.logging.Logger;
@@ -24,6 +27,7 @@ import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,54 +76,69 @@ public class SectionController extends ControllerHelper {
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
-        RequestUtils.bodyToJson(request, section -> {
-            if (section == null || section.isEmpty()) {
-                log.error("[Formulaire@createSection] No section to create.");
+        RequestUtils.bodyToJson(request, sectionJson -> {
+            if (sectionJson == null || sectionJson.isEmpty()) {
+                log.error("[Formulaire@SectionController::create] No section to create.");
                 noContent(request);
                 return;
             }
 
+            Section section = new Section(sectionJson);
             // Check if form is not already responded
             distributionService.countFinished(formId, countRepEvt -> {
                 if (countRepEvt.isLeft()) {
-                    log.error("[Formulaire@createQuestion] Failed to count finished distributions form form with id : " + formId);
+                    log.error("[Formulaire@SectionController::create] Failed to count finished distributions form form with id : " + formId);
                     renderInternalError(request, countRepEvt);
                     return;
                 }
 
                 int nbResponseTot = countRepEvt.right().getValue().getInteger(COUNT, 0);
                 if (nbResponseTot > 0) {
-                    String message = "[Formulaire@createQuestion] You cannot create a question for a form already responded";
+                    String message = "[Formulaire@SectionController::create] You cannot create a question for a form already responded";
                     log.error(message);
                     badRequest(request, message);
                     return;
                 }
 
                 // Check position value validity
-                if (section.getLong(POSITION, 0L) < 1) {
-                    String message = "[Formulaire@createSection] You cannot create a section with a position null or under 1 : " + section.getLong(POSITION);
+                Long position = section.getPosition();
+                if (position < 1) {
+                    String message = "[Formulaire@SectionController::create] You cannot create a section with a position " +
+                            "null or under 1 : " + position;
                     log.error(message);
                     badRequest(request, message);
                     return;
                 }
 
                 // Check if position is not already used
-                Long position = section.getLong(POSITION);
                 formElementService.getTypeAndIdByPosition(formId, position.toString(), formElementEvt -> {
                     if (formElementEvt.isLeft()) {
-                        log.error("[Formulaire@createSection] Error in getting form element id of position " + position + " for form " + formId);
+                        log.error("[Formulaire@SectionController::create] Error in getting form element id of position " + position + " for form " + formId);
                         renderInternalError(request, formElementEvt);
                         return;
                     }
 
                     if (!formElementEvt.right().getValue().isEmpty()) {
-                        String message = "[Formulaire@createSection] You cannot create a section with a position already occupied : " + formElementEvt.right().getValue();
+                        String message = "[Formulaire@SectionController::create] You cannot create a section with a " +
+                                "position already occupied : " +formElementEvt.right().getValue();
                         log.error(message);
                         badRequest(request, message);
                         return;
                     }
 
-                    sectionService.create(section, formId, defaultResponseHandler(request));
+                    sectionService.isTargetValid(section)
+                        .compose(sectionValidity -> {
+                            if (!sectionValidity) {
+                                String errorMessage = "[Formulaire@SectionController::create] Invalid section.";
+                                return Future.failedFuture(errorMessage);
+                            }
+                            return sectionService.create(section, formId);
+                        })
+                        .onSuccess(result -> renderJson(request, result))
+                        .onFailure(err -> {
+                            log.error(err.getMessage());
+                            renderError(request);
+                        });
                 });
             });
         });
@@ -132,33 +151,51 @@ public class SectionController extends ControllerHelper {
     public void update(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
 
-        RequestUtils.bodyToJsonArray(request, sections -> {
-            if (sections == null || sections.isEmpty()) {
+        RequestUtils.bodyToJsonArray(request, sectionsJson -> {
+            if (sectionsJson == null || sectionsJson.isEmpty()) {
                 log.error("[Formulaire@SectionController::update] No section to update.");
                 noContent(request);
                 return;
             }
 
             // Check position values validity
-            boolean arePositionsOk = DataChecker.checkSectionPositionsValidity(sections);
+            boolean arePositionsOk = DataChecker.checkSectionPositionsValidity(sectionsJson);
             if (!arePositionsOk) {
-                String message = "[Formulaire@SectionController::update] You cannot create a section with a position null or under 1 : " + sections;
+                String message = "[Formulaire@SectionController::update] You cannot create a section with a position null or under 1 : " + sectionsJson;
                 log.error(message);
                 badRequest(request, message);
                 return;
             }
 
+            List<Section> sections = new Section().toList(sectionsJson);
             questionService.listForForm(formId)
                 .compose(questions -> {
                     JsonArray questionPositions = UtilsHelper.getByProp(questions, POSITION);
-                    JsonArray sectionPositions = UtilsHelper.getByProp(sections, POSITION);
+                    JsonArray sectionPositions = UtilsHelper.getByProp(sectionsJson, POSITION);
 
                     List<Object> doubles = questionPositions.stream().filter(sectionPositions::contains).collect(Collectors.toList());
                     if (doubles.size() > 0) {
                         String message = "[Formulaire@SectionController::update] Position(s) " + doubles + " are/is already used by some question(s).";
                         return Future.failedFuture(message);
                     }
-                    return sectionService.update(formId, sections);
+
+                    List<Future<Boolean>> futures = new ArrayList<>();
+                    for (Section section : sections) {
+                        futures.add(sectionService.isTargetValid(section));
+                    }
+
+                    Promise<List<Boolean>> promise = Promise.promise();
+                    FutureHelper.all(futures)
+                        .onSuccess(result -> promise.complete(result.list()))
+                        .onFailure(promise::fail);
+                    return promise.future();
+                })
+                .compose(sectionsValidity -> {
+                    if (sectionsValidity.stream().anyMatch(sv -> !sv)) {
+                        String errorMessage = "[Formulaire@SectionController::create] At least one section is invalid.";
+                        return Future.failedFuture(errorMessage);
+                    }
+                    return sectionService.update(formId, sectionsJson);
                 })
                 .onSuccess(updatedSectionsInfos -> {
                     JsonArray updatedSections = new JsonArray();
@@ -168,7 +205,7 @@ public class SectionController extends ControllerHelper {
                     renderJson(request, updatedSections);
                 })
                 .onFailure(err -> {
-                    log.error("[Formulaire@SectionController::update] Failed to update sections " + sections + " : " + err.getMessage());
+                    log.error("[Formulaire@SectionController::update] Failed to update sections " + sectionsJson + " : " + err.getMessage());
                     renderError(request);
                 });
         });

@@ -26,6 +26,8 @@ import static fr.openent.form.core.constants.DistributionStatus.FINISHED;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.*;
 import static fr.openent.form.core.constants.Tables.*;
+import static fr.openent.form.helpers.SqlHelper.getParamsForUpdateDateModifFormRequest;
+import static fr.openent.form.helpers.SqlHelper.getUpdateDateModifFormRequest;
 
 public class DefaultFormService implements FormService {
     private final Sql sql = Sql.getInstance();
@@ -294,7 +296,11 @@ public class DefaultFormService implements FormService {
     @Override
     public void duplicate(int formId, UserInfos user, String locale, Handler<Either<String, JsonArray>> handler) {
         String COPY = I18nHelper.getI18nValue(I18nKeys.COPY, locale);
-        String query =
+
+        SqlStatementsBuilder s = new SqlStatementsBuilder();
+        s.raw(TRANSACTION_BEGIN_QUERY);
+
+        String mainQuery =
                 // Duplicate FORM
                 "WITH new_form_id AS (" +
                     "INSERT INTO " + FORM_TABLE + " (owner_id, owner_name, title, description, picture, date_opening, date_ending, " +
@@ -306,8 +312,8 @@ public class DefaultFormService implements FormService {
                 "), " +
                 // Duplicate SECTIONS of the form
                 "new_sections AS (" +
-                    "INSERT INTO " + SECTION_TABLE + " (form_id, title, description, position, original_section_id) " +
-                    "SELECT (SELECT id from new_form_id), title, description, position, id " +
+                    "INSERT INTO " + SECTION_TABLE + " (form_id, title, description, position, next_form_element_id, next_form_element_type, original_section_id) " +
+                    "SELECT (SELECT id from new_form_id), title, description, position, next_form_element_id, next_form_element_type, id " +
                     "FROM " + SECTION_TABLE + " WHERE form_id = ? " +
                     "RETURNING id, form_id, original_section_id" +
                 "), " +
@@ -360,8 +366,7 @@ public class DefaultFormService implements FormService {
                 "SELECT fr.*, qsf.cursor_min_val, qsf.cursor_max_val, qsf.cursor_step, qsf.cursor_min_label, qsf.cursor_max_label FROM final_results fr " +
                 "LEFT JOIN new_questions_specifics qsf ON fr.id = qsf.question_id " +
                 "ORDER BY fr.id;";
-
-        JsonArray params = new JsonArray()
+        JsonArray mainParams = new JsonArray()
                 .add(user.getUserId())
                 .add(user.getUsername())
                 .add(formId)
@@ -370,7 +375,31 @@ public class DefaultFormService implements FormService {
                 .add(formId)
                 .addAll(new JsonArray(QUESTIONS_WITH_SPECIFICS));
 
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+        // Update new SECTIONS of the form to set their next_form_element_id values
+        String updateSectionsQuery =
+                "WITH new_form_id AS (SELECT MAX(id) FROM " + FORM_TABLE + " WHERE original_form_id = ?), " +
+                "new_form_elements_infos AS (" +
+                    "SELECT * FROM (" +
+                        "SELECT id, form_id, 'QUESTION' AS type, original_question_id AS original_id FROM " + QUESTION_TABLE +
+                        " UNION " +
+                        "SELECT id, form_id, 'SECTION' AS type, original_section_id AS original_id FROM " + SECTION_TABLE +
+                    ") AS qs_infos " +
+                    "WHERE form_id = (SELECT * FROM new_form_id) " +
+                ") " +
+                "UPDATE " + SECTION_TABLE + " s SET next_form_element_id = nfei.id " +
+                "FROM new_form_elements_infos nfei " +
+                "WHERE s.form_id = (SELECT * FROM new_form_id) " +
+                "AND s.next_form_element_id = nfei.original_id " +
+                "AND s.next_form_element_type = nfei.type " +
+                "RETURNING *;";
+        JsonArray updateSectionsParams = new JsonArray().add(formId);
+
+        s.prepared(mainQuery, mainParams);
+        s.prepared(updateSectionsQuery, updateSectionsParams);
+
+        s.raw(TRANSACTION_COMMIT_QUERY);
+
+        sql.transaction(s.build(), SqlResult.validResultsHandler(handler));
     }
 
     @Override

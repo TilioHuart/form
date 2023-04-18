@@ -63,5 +63,5 @@ public interface QuestionChoiceService {
      * Check validity of a specific choice
      * @param choice choice to check
      */
-    Future<Boolean> isChoiceTargetValid(QuestionChoice choice);
+    Future<Boolean> isTargetValid(QuestionChoice choice);
 }

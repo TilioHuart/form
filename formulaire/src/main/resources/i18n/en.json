@@ -36,6 +36,7 @@
   "formulaire.mandatory.explanation": "Impossible de rendre non obligatoire une question conditionnelle",
   "formulaire.mandatory.explanation.matrix": "Le répondant doit répondre à chaque ligne",
   "formulaire.access.element": "Accéder à l'élément : ",
+  "formulaire.access.next": "Accéder à la question/section suivante",
   "formulaire.access.recap": "Accéder au récapitulatif des réponses (fin du formulaire)",
   "formulaire.sent": "Envoyé",
   "formulaire.shared": "Partagé",

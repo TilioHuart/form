@@ -1,5 +1,7 @@
 package fr.openent.formulaire.service;
 
+import fr.openent.form.core.models.QuestionChoice;
+import fr.openent.form.core.models.Section;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -29,11 +31,10 @@ public interface SectionService {
 
     /**
      * Create a section in a specific form
-     * @param section JsonObject data
+     * @param section Section data
      * @param formId form identifier
-     * @param handler function handler returning JsonObject data
      */
-    void create(JsonObject section, String formId, Handler<Either<String, JsonObject>> handler);
+    Future<JsonObject> create(Section section, String formId);
 
     /**
      * Update specific sections
@@ -48,4 +49,10 @@ public interface SectionService {
      * @param handler function handler returning JsonObject data
      */
     void delete(JsonObject section, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Check validity of a specific section
+     * @param section Section data
+     */
+    Future<Boolean> isTargetValid(Section section);
 }

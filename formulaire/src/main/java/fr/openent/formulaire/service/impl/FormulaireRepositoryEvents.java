@@ -127,7 +127,7 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
         // Continue
         sql.transaction(builder.build(), message -> {
             if (OK.equals(message.body().getString(STATUS))) {
-                List<String> tables = new ArrayList<>(Arrays.asList(FORM, SECTION, QUESTION, QUESTION_CHOICE));
+                List<String> tables = new ArrayList<>(Arrays.asList(FORM, SECTION, QUESTION, QUESTION_SPECIFIC_FIELDS, QUESTION_CHOICE));
                 Map<String,String> tablesWithId = new HashMap<>();
                 tablesWithId.put(FORM, DEFAULT);
                 tablesWithId.put(SECTION, DEFAULT);
@@ -168,6 +168,7 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
 
         // For each table we'll store in 'tableMappings' a map of the old ids with new ids
         Map<String, Map<Integer, Integer>> tableMappingIds = new HashMap();
+        Map<String, Map<Integer, String>> tableMappingIdsString = new HashMap();
 
         // For each table we'll store in 'tableContents' a map of the name of the table with the table content of the file
         Map<String, JsonObject> tableContents = new HashMap();
@@ -179,22 +180,25 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
             .compose(questionSpecifics -> importExportService.getTableContent(importPath, schema, QUESTION_SPECIFIC_FIELDS, tableContents))
             .compose(questionChoices -> importExportService.importForms(tableContents.get(FORM), userId, userName))
             .compose(oldNewFormIds -> {
-                Map<Integer, Integer> oldNewFormIdsMap = importExportService.generateMapping(oldNewFormIds, ORIGINAL_FORM_ID, ID);
+                Map<Integer, Integer> oldNewFormIdsMap = importExportService.generateMappingIntInt(oldNewFormIds, ORIGINAL_FORM_ID, ID);
                 tableMappingIds.put(FORM, oldNewFormIdsMap);
                 return importExportService.importSections(tableContents.get(SECTION), oldNewFormIdsMap);
             })
             .compose(oldNewSectionIds -> {
-                Map<Integer, Integer> oldNewSectionIdsMap = importExportService.generateMapping(oldNewSectionIds, ORIGINAL_SECTION_ID, ID);
+                Map<Integer, Integer> oldNewSectionIdsMap = importExportService.generateMappingIntInt(oldNewSectionIds, ORIGINAL_SECTION_ID, ID);
                 tableMappingIds.put(SECTION, oldNewSectionIdsMap);
+                Map<Integer, String> newSectionIdsTypeMap = importExportService.generateMappingIntString(oldNewSectionIds, ID, NEXT_FORM_ELEMENT_TYPE);
+                tableMappingIdsString.put(SECTION_TYPE, newSectionIdsTypeMap);
                 return importExportService.importQuestions(tableContents.get(QUESTION), oldNewSectionIdsMap, tableMappingIds.get(FORM));
             })
             .compose(oldNewQuestionIds -> {
-                Map<Integer, Integer> oldNewQuestionIdsMap = importExportService.generateMapping(oldNewQuestionIds, ORIGINAL_QUESTION_ID, ID);
+                Map<Integer, Integer> oldNewQuestionIdsMap = importExportService.generateMappingIntInt(oldNewQuestionIds, ORIGINAL_QUESTION_ID, ID);
                 tableMappingIds.put(QUESTION, oldNewQuestionIdsMap);
-                return importExportService.importChildrenQuestions(tableContents.get(QUESTION), oldNewQuestionIdsMap, tableMappingIds.get(SECTION), tableMappingIds.get(FORM));
+                return importExportService.updateSections(tableMappingIds.get(SECTION), tableMappingIdsString.get(SECTION_TYPE));
             })
+            .compose(updatedSections -> importExportService.importChildrenQuestions(tableContents.get(QUESTION), tableMappingIds.get(QUESTION), tableMappingIds.get(SECTION), tableMappingIds.get(FORM)))
             .compose(updatedChildrenQuestionsIds -> {
-                Map<Integer, Integer> oldNewChildrenQuestionIdsMap = importExportService.generateMapping(updatedChildrenQuestionsIds, ORIGINAL_QUESTION_ID, ID);
+                Map<Integer, Integer> oldNewChildrenQuestionIdsMap = importExportService.generateMappingIntInt(updatedChildrenQuestionsIds, ORIGINAL_QUESTION_ID, ID);
                 tableMappingIds.get(QUESTION).putAll(oldNewChildrenQuestionIdsMap);
                 return importExportService.importQuestionSpecifics(tableContents.get(QUESTION_SPECIFIC_FIELDS), tableMappingIds.get(QUESTION));
             })

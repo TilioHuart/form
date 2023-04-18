@@ -1,11 +1,11 @@
 <div class="twelve">
     <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
         <div class="container-arrow" ng-if="vm.question.selected">
-            <div ng-class="{hidden : $first || choice.is_custom}" ng-click="vm.question.moveChoice(choice, vm.Direction.UP)">
+            <div ng-class="{hidden : $first || choice.is_custom}" ng-click="vm.question.moveChoice(choice, vm.direction.UP)">
                 <i class="i-chevron-up lg-icon"></i>
             </div>
             <div ng-class="{hidden : $last || vm.question.choices.all[$index+1].is_custom}"
-                 ng-click="vm.question.moveChoice(choice, vm.Direction.DOWN)">
+                 ng-click="vm.question.moveChoice(choice, vm.direction.DOWN)">
                 <i class="i-chevron-down lg-icon"></i>
             </div>
         </div>
@@ -18,19 +18,21 @@
 
             <input type="text" ng-model="choice.value" ng-if="!vm.question.selected && !choice.is_custom" disabled
                    ng-class="vm.question.conditional ? 'eleven eight-mobile' : 'width95 ten-mobile'"
-                   placeholder="[[vm.I18n.getWithParam('formulaire.choice', choice.position)]]">
+                   placeholder="[[vm.i18n.getWithParam('formulaire.choice', choice.position)]]">
             <input type="text" ng-model="choice.value" ng-if="vm.question.selected && !choice.is_custom" input-guard
                    ng-class="vm.question.conditional ? 'eleven eight-mobile' : 'width95 ten-mobile'"
-                   placeholder="[[vm.I18n.getWithParam('formulaire.choice', choice.position)]]">
-            <input type="text" value="[[vm.I18n.translate('formulaire.other')]] : " ng-if="choice.is_custom" disabled
+                   placeholder="[[vm.i18n.getWithParam('formulaire.choice', choice.position)]]">
+            <input type="text" value="[[vm.i18n.translate('formulaire.other')]] : " ng-if="choice.is_custom" disabled
                    ng-class="vm.question.conditional ? 'eleven eight-mobile' : 'width95 ten-mobile'">
         </label>
         <i class="i-cancel lg-icon dontSave" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
-        <select class="five" ng-if="vm.question.conditional" ng-model="choice.next_form_element" ng-change="vm.onSelectOption(choice)" ng-disabled="!vm.question.selected" input-guard>
-            <option ng-repeat="formElement in vm.formElements.all | filter:vm.isFormElementAfter" ng-value="formElement">
-                [[vm.I18n.translate('formulaire.access.element') + formElement.title]]
+        <select class="five" ng-if="vm.question.conditional" ng-model="choice.next_form_element"
+                ng-change="vm.onSelectOption(choice)" ng-disabled="!vm.question.selected" input-guard>
+            <option ng-if="vm.getNextElement() != null" ng-value="vm.getNextElement()">[[vm.i18n.translate('formulaire.access.next')]]</option>
+            <option ng-repeat="formElement in vm.formElements.all | filter:vm.filterNextElements | orderBy:['position', 'id']" ng-value="formElement">
+                [[vm.i18n.translate('formulaire.access.element') + formElement.title]]
             </option>
-            <option ng-value="null">[[vm.I18n.translate('formulaire.access.recap')]]</option>
+            <option ng-value="null">[[vm.i18n.translate('formulaire.access.recap')]]</option>
         </select>
     </div>
     <div class="add-choice" ng-if="vm.question.selected && !vm.hasFormResponses">

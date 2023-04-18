@@ -4,15 +4,24 @@ import {sectionService} from "../../services";
 import {FormElement} from "./FormElement";
 import {Questions} from "./Question";
 import {FormElementType} from "@common/core/enums/form-element-type";
+import {FormElements} from "@common/models";
 
 export class Section extends FormElement {
     description: string;
+    next_form_element: FormElement;
+    next_form_element_id: number;
+    next_form_element_type: FormElementType;
+    is_next_form_element_default: boolean;
     questions: Questions;
 
     constructor() {
         super();
-        this.description = null;
         this.form_element_type = FormElementType.SECTION;
+        this.description = null;
+        this.next_form_element = null;
+        this.next_form_element_id = null;
+        this.next_form_element_type = null;
+        this.is_next_form_element_default = true;
         this.questions = new Questions();
     }
 
@@ -23,10 +32,34 @@ export class Section extends FormElement {
             title: this.title,
             position: this.position,
             selected: this.selected,
-            description: this.description,
             form_element_type: this.form_element_type,
+            description: this.description,
+            next_form_element: this.next_form_element,
+            next_form_element_id: this.next_form_element_id,
+            next_form_element_type: this.next_form_element_type,
+            is_next_form_element_default: this.is_next_form_element_default,
             questions: this.questions
         }
+    }
+
+    setNextFormElementValuesWithDefault = (formElements: FormElements) : void => {
+        this.next_form_element = this.getFollowingFormElement(formElements);
+        this.next_form_element_id = this.next_form_element ? this.next_form_element.id : null;
+        this.next_form_element_type = this.next_form_element ? this.next_form_element.form_element_type : null;
+        this.is_next_form_element_default = true;
+    }
+
+    getNextFormElement = (formElements: FormElements) : FormElement => {
+        let nextElements: FormElement[] = formElements.all.filter((e: FormElement) =>
+            e.id === this.next_form_element_id &&
+            e.form_element_type === this.next_form_element_type
+        );
+        return nextElements.length == 1 ? nextElements[0] : null;
+    }
+
+    getNextFormElementPosition = (formElements: FormElements) : number => {
+        let nextFormElement: FormElement = this.getNextFormElement(formElements);
+        return nextFormElement ? nextFormElement.position : null;
     }
 }
 

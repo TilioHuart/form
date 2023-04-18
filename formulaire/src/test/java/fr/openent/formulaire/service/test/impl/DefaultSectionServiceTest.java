@@ -1,5 +1,6 @@
 package fr.openent.formulaire.service.test.impl;
 
+import fr.openent.form.core.models.Section;
 import fr.openent.formulaire.service.impl.DefaultSectionService;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -22,19 +23,32 @@ import static fr.openent.form.helpers.SqlHelper.getUpdateDateModifFormRequest;
 public class DefaultSectionServiceTest {
     private Vertx vertx;
     private DefaultSectionService defaultSectionService;
+    private Section section;
 
     @Before
     public void setUp(){
         vertx = Vertx.vertx();
         defaultSectionService = new DefaultSectionService();
         Sql.getInstance().init(vertx.eventBus(), FORMULAIRE_ADDRESS);
+
+        JsonObject sectionJson = new JsonObject()
+                .put(ID, 1)
+                .put(FORM_ID, 9)
+                .put(TITLE, TITLE)
+                .put(POSITION, 2)
+                .put(FORM_ELEMENT_TYPE, "SECTION")
+                .put(DESCRIPTION, DESCRIPTION)
+                .put(ORIGINAL_SECTION_ID, 1)
+                .put(NEXT_FORM_ELEMENT_ID, 29)
+                .put(NEXT_FORM_ELEMENT_TYPE, "QUESTION");
+        section = new Section(sectionJson);
     }
 
     @Test
     public void testList(TestContext ctx) {
         Async async = ctx.async();
         String expectedQuery = "SELECT * FROM " + SECTION_TABLE + " WHERE form_id = ? ORDER BY position;";
-        JsonArray expectedParams = new JsonArray().add("1");
+        JsonArray expectedParams = new JsonArray("[\"1\"]");
 
         vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
             JsonObject body = (JsonObject) message.body();
@@ -50,7 +64,7 @@ public class DefaultSectionServiceTest {
     public void testGet(TestContext ctx) {
         Async async = ctx.async();
         String expectedQuery = "SELECT * FROM " + SECTION_TABLE + " WHERE id = ?;";
-        JsonArray expectedParams = new JsonArray().add("1");
+        JsonArray expectedParams = new JsonArray("[\"1\"]");
 
         vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
             JsonObject body = (JsonObject) message.body();
@@ -65,25 +79,13 @@ public class DefaultSectionServiceTest {
     @Test
     public void testCreate(TestContext ctx) {
         Async async = ctx.async();
-        String expectedQuery = "INSERT INTO " + SECTION_TABLE + " (form_id, title, description, position) " +
-                "VALUES (?, ?, ?, ?) RETURNING *;";
 
-        JsonObject section = new JsonObject();
-        section.put(ID, 2)
-                .put(FORM_ID, 1)
-                .put(TITLE, TITLE)
-                .put(POSITION, 1)
-                .put(DESCRIPTION, DESCRIPTION)
-                .put(ORIGINAL_SECTION_ID, 1);
-
-        JsonArray expectedParams = new JsonArray()
-                .add(section.getInteger(FORM_ID, null).toString())
-                .add(section.getString(TITLE, ""))
-                .add(section.getString(DESCRIPTION, ""))
-                .add(section.getInteger(POSITION, null));
+        String expectedQuery = "INSERT INTO " + SECTION_TABLE + " (form_id, title, description, position, next_form_element_id, next_form_element_type) " +
+                "VALUES (?, ?, ?, ?, ?, ?) RETURNING *;";
+        JsonArray expectedParams = new JsonArray("[\"9\",\"title\",\"description\",2,29,\"QUESTION\"]");
 
         String expectedQueryResult = expectedQuery + getUpdateDateModifFormRequest();
-        expectedParams.addAll(getParamsForUpdateDateModifFormRequest(section.getInteger(FORM_ID, null).toString()));
+        expectedParams.addAll(getParamsForUpdateDateModifFormRequest("9"));
 
         vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
             JsonObject body = (JsonObject) message.body();
@@ -92,7 +94,11 @@ public class DefaultSectionServiceTest {
             ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
             async.complete();
         });
-        defaultSectionService.create(section, "1", null);
+
+        defaultSectionService.create(section, "9")
+                .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
     }
 
     @Test
@@ -106,7 +112,7 @@ public class DefaultSectionServiceTest {
             async.complete();
         });
 
-        defaultSectionService.update("1", sections)
+        defaultSectionService.update("9", sections)
                 .onSuccess(result -> async.complete());
 
         async.awaitSuccess(10000);
@@ -116,31 +122,16 @@ public class DefaultSectionServiceTest {
     public void testUpdate_Sections(TestContext ctx) {
         Async async = ctx.async();
 
-        JsonObject section = new JsonObject();
-        section.put(ID, 2)
-                .put(FORM_ID, 1)
-                .put(TITLE, TITLE)
-                .put(POSITION, 1)
-                .put(DESCRIPTION, DESCRIPTION)
-                .put(ORIGINAL_SECTION_ID, 1);
-
-        JsonObject updatedSection = new JsonObject();
-        updatedSection.put(ID, 4)
-                .put(FORM_ID, 1)
-                .put(TITLE, TITLE)
-                .put(POSITION, 2)
-                .put(DESCRIPTION, DESCRIPTION)
-                .put(ORIGINAL_SECTION_ID, 2);
-
-        JsonArray sections = new JsonArray();
-        sections.add(section)
-                .add(updatedSection);
+        JsonArray sections = new JsonArray("[" +
+            "{\"id\":1,\"form_id\":\"9\",\"title\":\"title\",\"position\":3,\"form_element_type\":\"SECTION\",\"description\":\"description\",\"original_section_id\":0,\"next_form_element_id\":29,\"next_form_element_type\":\"QUESTION\"}," +
+            "{\"id\":4,\"form_id\":\"9\",\"title\":\"title\",\"position\":5,\"form_element_type\":\"SECTION\",\"description\":\"description\",\"original_section_id\":3,\"next_form_element_id\":27,\"next_form_element_type\":\"QUESTION\"}" +
+        "]");
 
         String expectedQuery = "[{\"action\":\"raw\",\"command\":\"BEGIN;\"}," +
-                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + SECTION_TABLE + " SET position = NULL WHERE id IN (?,?);\",\"values\":[2,4]}," +
-                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + SECTION_TABLE + " SET title = ?, description = ?, position = ? WHERE id = ? RETURNING *;\",\"values\":[\"title\",\"description\",1,2]}," +
-                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + SECTION_TABLE + " SET title = ?, description = ?, position = ? WHERE id = ? RETURNING *;\",\"values\":[\"title\",\"description\",2,4]}," +
-                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + FORM_TABLE + " SET date_modification = ? WHERE id = ?; \",\"values\":[\"NOW()\",\"1\"]}," +
+                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + SECTION_TABLE + " SET position = NULL WHERE id IN (?,?);\",\"values\":[1,4]}," +
+                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + SECTION_TABLE + " SET title = ?, description = ?, position = ?, next_form_element_id = ?, next_form_element_type = ? WHERE id = ? RETURNING *;\",\"values\":[\"title\",\"description\",3,29,\"QUESTION\",1]}," +
+                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + SECTION_TABLE + " SET title = ?, description = ?, position = ?, next_form_element_id = ?, next_form_element_type = ? WHERE id = ? RETURNING *;\",\"values\":[\"title\",\"description\",5,27,\"QUESTION\",4]}," +
+                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + FORM_TABLE + " SET date_modification = ? WHERE id = ?; \",\"values\":[\"NOW()\",\"9\"]}," +
                 "{\"action\":\"raw\",\"command\":\"COMMIT;\"}]";
 
 
@@ -151,7 +142,7 @@ public class DefaultSectionServiceTest {
             async.complete();
         });
 
-        defaultSectionService.update("1", sections)
+        defaultSectionService.update("9", sections)
                 .onSuccess(result -> async.complete());
 
         async.awaitSuccess(10000);
@@ -161,19 +152,10 @@ public class DefaultSectionServiceTest {
     public void testDelete(TestContext ctx){
         Async async = ctx.async();
         String expectedQuery = "DELETE FROM " + SECTION_TABLE + " WHERE id = ?;";
-
-        JsonObject section = new JsonObject();
-        section.put(ID, 2)
-                .put(FORM_ID, 1)
-                .put(TITLE, TITLE)
-                .put(POSITION, 1)
-                .put(DESCRIPTION, DESCRIPTION)
-                .put(ORIGINAL_SECTION_ID, 1);
-
-        JsonArray expectedParams = new JsonArray().add(section.getInteger(ID, null).toString());
+        JsonArray expectedParams = new JsonArray("[\"1\"]");
 
         String expectedQueryResult =  expectedQuery + getUpdateDateModifFormRequest();
-        expectedParams.addAll(getParamsForUpdateDateModifFormRequest(section.getInteger(FORM_ID).toString()));
+        expectedParams.addAll(getParamsForUpdateDateModifFormRequest("9"));
 
         vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
             JsonObject body = (JsonObject) message.body();
@@ -182,6 +164,29 @@ public class DefaultSectionServiceTest {
             ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
             async.complete();
         });
-        defaultSectionService.delete(section, null);
+        defaultSectionService.delete(section.toJson(), null);
+    }
+
+    @Test
+    public void testIsSectionTargetValid(TestContext ctx) {
+        Async async = ctx.async();
+        String targetedTable = QUESTION_TABLE; // Because we defined "QUESTION" in the object section
+
+        String expectedQuery =
+                "SELECT COUNT(*) = 1 AS count FROM (SELECT id, form_id, position FROM " + targetedTable + ") AS targets_infos " +
+                "WHERE form_id = ? AND position IS NOT NULL AND position > ? AND id = ?;";
+        JsonArray expectedParams = new JsonArray("[9,2,29]");
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getString(STATEMENT));
+            ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
+            async.complete();
+        });
+        defaultSectionService.isTargetValid(section)
+                .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
     }
 }
