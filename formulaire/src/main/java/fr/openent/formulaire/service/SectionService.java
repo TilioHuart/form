@@ -1,6 +1,5 @@
 package fr.openent.formulaire.service;
 
-import fr.openent.form.core.models.QuestionChoice;
 import fr.openent.form.core.models.Section;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Future;

@@ -16,7 +16,7 @@ export const questionChoiceService: QuestionChoiceService = {
 
     async list(questionId: number) : Promise<any> {
         try {
-            return DataUtils.getData(await http.get(`/formulaire/questions/${questionId}/choices`));
+            return DataUtils.getData(await http.get(`/formulaire/questions/${questionId}/choices`, { headers: { Accept: 'application/json;version=1.9'} }));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionChoiceService.list'));
             throw err;
@@ -28,7 +28,7 @@ export const questionChoiceService: QuestionChoiceService = {
             if (questionIds.length <= 0) {
                 return [];
             }
-            return DataUtils.getData(await http.get(`/formulaire/questions/choices/all`, { params: questionIds }));
+            return DataUtils.getData(await http.get(`/formulaire/questions/choices/all`, { params: questionIds, headers: { Accept: 'application/json;version=1.9'} }));
         } catch(err){
             notify.error(idiom.translate('formulaire.error.questionChoiceService.list'));
             throw err;
@@ -41,7 +41,7 @@ export const questionChoiceService: QuestionChoiceService = {
 
     async create(choice: QuestionChoice) : Promise<any> {
         try {
-            return DataUtils.getData(await http.post(`/formulaire/questions/${choice.question_id}/choices`, choice));
+            return DataUtils.getData(await http.post(`/formulaire/questions/${choice.question_id}/choices`, choice, { headers: { Accept: 'application/json;version=1.9'} }));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionChoiceService.create'));
             throw err;
@@ -50,7 +50,7 @@ export const questionChoiceService: QuestionChoiceService = {
 
     async update(choice: QuestionChoice) : Promise<any> {
         try {
-            return DataUtils.getData(await http.put(`/formulaire/choices/${choice.id}`, choice));
+            return DataUtils.getData(await http.put(`/formulaire/choices/${choice.id}`, choice, { headers: { Accept: 'application/json;version=1.9'} }));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionChoiceService.update'));
             throw err;

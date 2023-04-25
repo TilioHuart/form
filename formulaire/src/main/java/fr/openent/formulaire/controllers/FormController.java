@@ -12,9 +12,7 @@ import fr.openent.formulaire.service.impl.*;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
-import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.I18n;
-import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.*;
 import io.vertx.core.eventbus.Message;
@@ -26,13 +24,10 @@ import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.events.EventStore;
 import org.entcore.common.http.filter.ResourceFilter;
-import org.entcore.common.notification.TimelineHelper;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 

@@ -1,7 +1,6 @@
 package fr.openent.formulaire.service.impl;
 
 import fr.openent.form.core.enums.FormElementTypes;
-import fr.openent.form.core.models.QuestionChoice;
 import fr.openent.form.core.models.Section;
 import fr.openent.form.helpers.FutureHelper;
 import fr.openent.form.helpers.UtilsHelper;

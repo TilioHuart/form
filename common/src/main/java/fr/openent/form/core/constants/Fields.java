@@ -54,6 +54,7 @@ public class Fields {
     public static final String NB_RESPONSES = "nb_responses";
     public static final String NEXT_FORM_ELEMENT_ID = "next_form_element_id";
     public static final String NEXT_FORM_ELEMENT_TYPE = "next_form_element_type";
+    public static final String NEXT_SECTION_ID = "next_section_id";
     public static final String ORIGINAL_ID = "original_id";
     public static final String ORIGINAL_FORM_ID = "original_form_id";
     public static final String ORIGINAL_QUESTION_ID = "original_question_id";

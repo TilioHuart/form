@@ -2,12 +2,11 @@ package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.enums.ChoiceTypes;
 import fr.openent.form.core.models.QuestionChoice;
+import fr.openent.formulaire.helpers.ApiVersionHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.QuestionChoiceService;
-import fr.openent.formulaire.service.QuestionService;
 import fr.openent.formulaire.service.impl.DefaultQuestionChoiceService;
-import fr.openent.formulaire.service.impl.DefaultQuestionService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
@@ -23,20 +22,16 @@ import org.entcore.common.http.filter.ResourceFilter;
 
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_RIGHT;
+import static fr.openent.form.core.enums.ApiVersions.*;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
-import static fr.openent.form.helpers.UtilsHelper.getIds;
-import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
-import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
 
 public class QuestionChoiceController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(QuestionChoiceController.class);
     private final QuestionChoiceService questionChoiceService;
-    private final QuestionService questionService;
 
     public QuestionChoiceController() {
         super();
         this.questionChoiceService = new DefaultQuestionChoiceService();
-        this.questionService = new DefaultQuestionService();
     }
 
     @Get("/questions/:questionId/choices")
@@ -45,7 +40,18 @@ public class QuestionChoiceController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
         String questionId = request.getParam(PARAM_QUESTION_ID);
-        questionChoiceService.list(questionId, arrayResponseHandler(request));
+        String apiVersion = RequestUtils.acceptVersion(request);
+        boolean shouldAdaptData = !ONE_NINE.isUnderOrEqual(apiVersion);
+        questionChoiceService.list(questionId, questionChoicesEvt -> {
+            if (questionChoicesEvt.isLeft()) {
+                String message = "[Formulaire@QuestionChociceController::list] Failed to list question choices for question with id " + questionId;
+                renderInternalError(request, questionChoicesEvt, message);
+            }
+
+            JsonArray questionChoices = questionChoicesEvt.right().getValue();
+            if (shouldAdaptData) ApiVersionHelper.convertToNextSectionId(questionChoices);
+            renderJson(request, questionChoices);
+        });
     }
 
     @Get("/questions/choices/all")
@@ -54,15 +60,26 @@ public class QuestionChoiceController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listChoices(HttpServerRequest request){
         JsonArray questionIds = new JsonArray();
+        String apiVersion = RequestUtils.acceptVersion(request);
+        boolean shouldAdaptData = !ONE_NINE.isUnderOrEqual(apiVersion);
         for (Integer i = 0; i < request.params().size(); i++) {
             questionIds.add(request.getParam(i.toString()));
         }
         if (questionIds.size() <= 0) {
-            log.error("[Formulaire@listChoices] No choiceIds to list.");
+            log.error("[Formulaire@QuestionChociceController::listChoices] No choiceIds to list.");
             noContent(request);
             return;
         }
-        questionChoiceService.listChoices(questionIds, arrayResponseHandler(request));
+        questionChoiceService.listChoices(questionIds, questionChoicesEvt -> {
+            if (questionChoicesEvt.isLeft()) {
+                String message = "[Formulaire@QuestionChociceController::listChoices] Failed to list question choices for questions with ids " + questionIds;
+                renderInternalError(request, questionChoicesEvt, message);
+            }
+
+            JsonArray questionChoices = questionChoicesEvt.right().getValue();
+            if (shouldAdaptData) ApiVersionHelper.convertToNextSectionId(questionChoices);
+            renderJson(request, questionChoices);
+        });
     }
 
     @Post("/questions/:questionId/choices")
@@ -71,6 +88,8 @@ public class QuestionChoiceController extends ControllerHelper {
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
         String questionId = request.getParam(PARAM_QUESTION_ID);
+        String apiVersion = RequestUtils.acceptVersion(request);
+        boolean shouldAdaptData = !ONE_NINE.isUnderOrEqual(apiVersion);
         RequestUtils.bodyToJson(request, choiceJson -> {
             if (choiceJson == null || choiceJson.isEmpty()) {
                 log.error("[Formulaire@QuestionChoiceController::create] No choice to create.");
@@ -86,6 +105,8 @@ public class QuestionChoiceController extends ControllerHelper {
                 return;
             }
 
+            if (shouldAdaptData) ApiVersionHelper.convertToNextFormElementId(choiceJson);
+
             QuestionChoice choice = new QuestionChoice(choiceJson);
             String locale = I18n.acceptLanguage(request);
 
@@ -97,7 +118,10 @@ public class QuestionChoiceController extends ControllerHelper {
                     }
                     return questionChoiceService.create(questionId, choice, locale);
                 })
-                .onSuccess(result -> renderJson(request, result))
+                .onSuccess(result -> {
+                    if (shouldAdaptData) ApiVersionHelper.convertToNextSectionId(result);
+                    renderJson(request, result);
+                })
                 .onFailure(err -> {
                     log.error(err.getMessage());
                     renderError(request);
@@ -110,6 +134,9 @@ public class QuestionChoiceController extends ControllerHelper {
     @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
+        String apiVersion = RequestUtils.acceptVersion(request);
+        String choiceId = request.getParam(PARAM_CHOICE_ID);
+        boolean shouldAdaptData = !ONE_NINE.isUnderOrEqual(apiVersion);
         RequestUtils.bodyToJson(request, choiceJson -> {
             if (choiceJson == null || choiceJson.isEmpty()) {
                 log.error("[Formulaire@QuestionChoiceController::update] No choice to update.");
@@ -117,17 +144,27 @@ public class QuestionChoiceController extends ControllerHelper {
                 return;
             }
 
-            // Check choice type validity
-            if (!choiceJson.getString(TYPE).equals(ChoiceTypes.TXT.getValue())) {
-                String message = "[Formulaire@QuestionChoiceController::update] Invalid choice type : " + choiceJson.getString(TYPE);
+            if (shouldAdaptData) ApiVersionHelper.convertToNextFormElementId(choiceJson);
+
+            QuestionChoice choice = new QuestionChoice(choiceJson);
+            String locale = I18n.acceptLanguage(request);
+
+            // Check id validity
+            if (!choiceId.equals(choice.getId().toString())) {
+                String message = "[Formulaire@QuestionChoiceController::update] Id in URL " + choiceId +
+                        " does not match with id in body : " + choice.toJson();
                 log.error(message);
                 badRequest(request);
                 return;
             }
 
-            QuestionChoice choice = new QuestionChoice(choiceJson);
-            String locale = I18n.acceptLanguage(request);
-
+            // Check choice type validity
+            if (!ChoiceTypes.TXT.getValue().equals(choice.getType())) {
+                String message = "[Formulaire@QuestionChoiceController::update] Invalid choice type : " + choiceJson.getString(TYPE);
+                log.error(message);
+                badRequest(request);
+                return;
+            }
 
             questionChoiceService.isTargetValid(choice)
                 .compose(choiceValidity -> {
@@ -137,7 +174,10 @@ public class QuestionChoiceController extends ControllerHelper {
                     }
                     return questionChoiceService.update(choice, locale);
                 })
-                .onSuccess(result -> renderJson(request, result))
+                .onSuccess(result -> {
+                    if (shouldAdaptData) ApiVersionHelper.convertToNextSectionId(result);
+                    renderJson(request, result);
+                })
                 .onFailure(err -> {
                     log.error(err.getMessage());
                     renderError(request);
