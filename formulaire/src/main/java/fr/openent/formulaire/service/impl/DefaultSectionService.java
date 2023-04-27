@@ -143,14 +143,14 @@ public class DefaultSectionService implements SectionService {
         String targetedTable = section.getNextFormElementType() == FormElementTypes.QUESTION ? QUESTION_TABLE : SECTION_TABLE;
 
         String query =
-                "SELECT COUNT(*) = 1 AS count FROM (SELECT id, form_id, position FROM " + targetedTable + ") AS targets_infos " +
+                "SELECT COUNT(*) = 1 AS is_valid FROM (SELECT id, form_id, position FROM " + targetedTable + ") AS targets_infos " +
                 "WHERE form_id = ? AND position IS NOT NULL AND position > ? AND id = ?;";
         JsonArray params = new JsonArray().add(section.getFormId()).add(section.getPosition()).add(section.getNextFormElementId());
 
         String errorMessage = "[Formulaire@DefaultSectionService::isTargetValid] Fail to check if choice target is valid : ";
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(event -> {
             if (event.isRight()) {
-                promise.complete(event.right().getValue().getBoolean(COUNT));
+                promise.complete(event.right().getValue().getBoolean(IS_VALID));
                 return;
             }
             log.error(errorMessage + event.left().getValue());

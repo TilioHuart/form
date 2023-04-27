@@ -173,7 +173,7 @@ public class DefaultSectionServiceTest {
         String targetedTable = QUESTION_TABLE; // Because we defined "QUESTION" in the object section
 
         String expectedQuery =
-                "SELECT COUNT(*) = 1 AS count FROM (SELECT id, form_id, position FROM " + targetedTable + ") AS targets_infos " +
+                "SELECT COUNT(*) = 1 AS is_valid FROM (SELECT id, form_id, position FROM " + targetedTable + ") AS targets_infos " +
                 "WHERE form_id = ? AND position IS NOT NULL AND position > ? AND id = ?;";
         JsonArray expectedParams = new JsonArray("[9,2,29]");
 

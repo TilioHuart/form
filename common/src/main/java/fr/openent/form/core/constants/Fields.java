@@ -43,6 +43,7 @@ public class Fields {
     public static final String ID = "id";
     public static final String IS_CUSTOM = "is_custom";
     public static final String IS_PUBLIC = "is_public";
+    public static final String IS_VALID = "is_valid";
     public static final String MAIL = "mail";
     public static final String MANDATORY = "mandatory";
     public static final String MATRIX_ID = "matrix_id";
