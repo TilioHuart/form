@@ -1,6 +1,5 @@
-import {Mix, Selection} from "entcore-toolkit";
+import {Selection} from "entcore-toolkit";
 import {idiom, notify} from "entcore";
-import {questionService, sectionService} from "../../services";
 import {Question, Questions} from "./Question";
 import {FormElement} from "./FormElement";
 import {Section, Sections} from "./Section";
@@ -68,6 +67,12 @@ export class FormElements extends Selection<FormElement> {
         questions.all = questions.all.concat(children.flat());
 
         return questions;
+    }
+
+    getAllSectionsAndQuestions = () : FormElement[] => {
+        let sections: FormElement[] = this.getSections().all;
+        let allQuestions: FormElement[] = this.getAllQuestions().all;
+        return sections.concat(allQuestions);
     }
 
     getQuestionById = (questionId: number) : Question => {

@@ -2,7 +2,7 @@ import {Mix, Selection} from "entcore-toolkit";
 import {idiom, notify} from "entcore";
 import {sectionService} from "../../services";
 import {FormElement} from "./FormElement";
-import {Questions} from "./Question";
+import {Question, Questions} from "./Question";
 import {FormElementType} from "@common/core/enums/form-element-type";
 import {FormElements} from "@common/models";
 
@@ -47,6 +47,14 @@ export class Section extends FormElement {
         this.next_form_element_id = this.next_form_element ? this.next_form_element.id : null;
         this.next_form_element_type = this.next_form_element ? this.next_form_element.form_element_type : null;
         this.is_next_form_element_default = true;
+    }
+
+    setNextFormElement = (formElements: FormElements) : void => {
+        this.next_form_element = this.getNextFormElement(formElements);
+        let followingFormElement: FormElement = this.getFollowingFormElement(formElements);
+        this.is_next_form_element_default = this.next_form_element ?
+            this.next_form_element.equals(followingFormElement) :
+            followingFormElement == null;
     }
 
     getNextFormElement = (formElements: FormElements) : FormElement => {

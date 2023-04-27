@@ -36,6 +36,9 @@ public class Section extends FormElement implements Model<Section> {
         else if (section.getValue(QUESTIONS, null) instanceof JsonObject && section.getJsonObject(QUESTIONS, null).containsKey(ARR)) {
             this.questions = new Question().toList(section.getJsonObject(QUESTIONS, null).getJsonArray(ARR));
         }
+        else if (section.getValue(QUESTIONS, null) instanceof JsonObject && section.getJsonObject(QUESTIONS, null).containsKey(ALL)) {
+            this.questions = new Question().toList(section.getJsonObject(QUESTIONS, null).getJsonArray(ALL));
+        }
     }
 
 

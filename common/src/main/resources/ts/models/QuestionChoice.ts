@@ -52,11 +52,19 @@ export class QuestionChoice {
         }
     }
 
-    setNextFormElementValuesWithDefault = (formElements: FormElements, parent: Question) : void => {
-        this.next_form_element = parent.getFollowingFormElement(formElements);
+    setNextFormElementValuesWithDefault = (formElements: FormElements, parentQuestion: Question) : void => {
+        this.next_form_element = parentQuestion.getFollowingFormElement(formElements);
         this.next_form_element_id = this.next_form_element ? this.next_form_element.id : null;
         this.next_form_element_type = this.next_form_element ? this.next_form_element.form_element_type : null;
         this.is_next_form_element_default = true;
+    }
+
+    setNextFormElement = (formElements: FormElements, parentQuestion: Question) : void => {
+        this.next_form_element = this.getNextFormElement(formElements);
+        let followingFormElement: FormElement = parentQuestion.getFollowingFormElement(formElements);
+        this.is_next_form_element_default = this.next_form_element ?
+            this.next_form_element.equals(followingFormElement) :
+            followingFormElement == null;
     }
 
     getNextFormElement = (formElements: FormElements) : FormElement => {

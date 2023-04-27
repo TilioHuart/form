@@ -251,7 +251,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 }
             }
 
-            await formElementService.update(vm.formElements.all);
+            await formElementService.update(vm.formElements.getAllSectionsAndQuestions());
             vm.display.lightbox.reorganization = false;
             template.close('lightbox');
             $scope.safeApply();

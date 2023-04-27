@@ -49,7 +49,7 @@ export abstract class FormElement implements Selectable {
     }
 
     equals = (formElement: FormElement) : boolean => {
-        return this.form_element_type === formElement.form_element_type && this.id === formElement.id;
+        return formElement && this.form_element_type === formElement.form_element_type && this.id === formElement.id;
     }
 
     getPosition = (formElements: FormElements) : number => {
@@ -61,15 +61,14 @@ export abstract class FormElement implements Selectable {
     getFollowingFormElement = (formElements: FormElements) : FormElement => {
         // Case formElement is not formElement but question inside a section
         if (this instanceof Question && this.section_id) {
-            let parent: Section = this.getParentSection(formElements);
-            let nextElements: FormElement[] = formElements.all.filter((e: FormElement) => e.id === parent.position + 1);
-            return nextElements.length == 1 ? nextElements[0] : null;
+            let parentSection: Section = this.getParentSection(formElements);
+            let followingPosition: number = parentSection.position + 1;
+            return formElements.all.find((e: FormElement) => e.position === followingPosition);
         }
 
         // Case formElement is section without target or just a solo question
-        let nextPosition: number = this.position + 1;
-        let nextElements: FormElement[] = formElements.all.filter((e: FormElement) => e.position === nextPosition);
-        return nextElements.length == 1 ? nextElements[0] : null;
+        let followingPosition: number = this.position + 1;
+        return formElements.all.find((e: FormElement) => e.position === followingPosition);
     }
 
     getFollowingFormElementPosition = (formElements: FormElements) : number => {

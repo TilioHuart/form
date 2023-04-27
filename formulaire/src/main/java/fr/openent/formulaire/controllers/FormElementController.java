@@ -1,14 +1,19 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.models.FormElement;
+import fr.openent.form.core.models.Question;
+import fr.openent.form.core.models.QuestionChoice;
 import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.FormElementService;
+import fr.openent.formulaire.service.QuestionChoiceService;
 import fr.openent.formulaire.service.impl.DefaultFormElementService;
+import fr.openent.formulaire.service.impl.DefaultQuestionChoiceService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
@@ -30,10 +35,13 @@ import static org.entcore.common.http.response.DefaultResponseHandler.defaultRes
 public class FormElementController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(FormElementController.class);
     private final FormElementService formElementService;
+    private final QuestionChoiceService questionChoiceService;
+
 
     public FormElementController() {
         super();
         this.formElementService = new DefaultFormElementService();
+        this.questionChoiceService = new DefaultQuestionChoiceService();
     }
 
     @Get("/forms/:formId/elements/count")
@@ -91,7 +99,7 @@ public class FormElementController extends ControllerHelper {
                     .filter(i -> Collections.frequency(positions.getList(), i) > 1)
                     .collect(Collectors.toSet());
             if (doubles.size() > 0) {
-                String message = "[Formulaire@FormElementController::update] Position(s) " + doubles + " are/is used by several questions.";
+                String message = "[Formulaire@FormElementController::update] Positions " + doubles + " are used by several questions.";
                 log.error(message);
                 renderError(request);
                 return;
@@ -99,6 +107,14 @@ public class FormElementController extends ControllerHelper {
 
             List<FormElement> formElements = FormElement.toListFormElements(formElementsJson);
             formElementService.update(formElements, formId)
+                .compose(updatedFormElements -> {
+                    List<QuestionChoice> choices = formElements.stream()
+                            .filter(e -> e instanceof Question)
+                            .map(Question.class::cast)
+                            .flatMap(q -> q.getChoices().stream())
+                            .collect(Collectors.toList());
+                    return questionChoiceService.update(choices, I18n.acceptLanguage(request));
+                })
                 .onSuccess(result -> renderJson(request, result))
                 .onFailure(err -> {
                     log.error("[Formulaire@FormElementController::update] Failed to update form elements " + formElements + " : " + err.getMessage());

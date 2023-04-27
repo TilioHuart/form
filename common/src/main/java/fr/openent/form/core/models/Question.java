@@ -17,7 +17,7 @@ public class Question extends FormElement implements Model<Question> {
     private String placeholder;
     private Number matrixId;
     private Number matrixPosition;
-    private List<QuestionChoice> questionChoices;
+    private List<QuestionChoice> choices;
     private List<Question> children;
 
 
@@ -39,11 +39,14 @@ public class Question extends FormElement implements Model<Question> {
         this.matrixId = question.getNumber(MATRIX_ID,null);
         this.matrixPosition = question.getNumber(MATRIX_POSITION,null);
 
-        if (question.getValue(QUESTION_CHOICES, null) instanceof JsonArray) {
-            this.questionChoices = new QuestionChoice().toList(question.getJsonArray(QUESTION_CHOICES, null));
+        if (question.getValue(CHOICES, null) instanceof JsonArray) {
+            this.choices = new QuestionChoice().toList(question.getJsonArray(CHOICES, null));
         }
-        else if (question.getValue(QUESTION_CHOICES, null) instanceof JsonObject && question.getJsonObject(QUESTION_CHOICES, null).containsKey(ARR)) {
-            this.questionChoices = new QuestionChoice().toList(question.getJsonObject(QUESTION_CHOICES, null).getJsonArray(ARR));
+        else if (question.getValue(CHOICES, null) instanceof JsonObject && question.getJsonObject(CHOICES, null).containsKey(ARR)) {
+            this.choices = new QuestionChoice().toList(question.getJsonObject(CHOICES, null).getJsonArray(ARR));
+        }
+        else if (question.getValue(CHOICES, null) instanceof JsonObject && question.getJsonObject(CHOICES, null).containsKey(ALL)) {
+            this.choices = new QuestionChoice().toList(question.getJsonObject(CHOICES, null).getJsonArray(ALL));
         }
 
         if (question.getValue(CHILDREN, null) instanceof JsonArray) {
@@ -51,6 +54,9 @@ public class Question extends FormElement implements Model<Question> {
         }
         else if (question.getValue(CHILDREN, null) instanceof JsonObject && question.getJsonObject(CHILDREN, null).containsKey(ARR)) {
             this.children = new Question().toList(question.getJsonObject(CHILDREN, null).getJsonArray(ARR));
+        }
+        else if (question.getValue(CHILDREN, null) instanceof JsonObject && question.getJsonObject(CHILDREN, null).containsKey(ALL)) {
+            this.children = new Question().toList(question.getJsonObject(CHILDREN, null).getJsonArray(ALL));
         }
     }
 
@@ -77,7 +83,7 @@ public class Question extends FormElement implements Model<Question> {
 
     public Number getMatrixPosition() { return matrixPosition; }
 
-    public List<QuestionChoice> getQuestionChoices() { return questionChoices; }
+    public List<QuestionChoice> getChoices() { return choices; }
 
     public List<Question> getChildren() { return children; }
 
@@ -134,8 +140,8 @@ public class Question extends FormElement implements Model<Question> {
         return this;
     }
 
-    public Question setQuestionChoices(List<QuestionChoice> questionChoices) {
-        this.questionChoices = questionChoices;
+    public Question setChoices(List<QuestionChoice> choices) {
+        this.choices = choices;
         return this;
     }
 
@@ -164,7 +170,7 @@ public class Question extends FormElement implements Model<Question> {
                 .put(PLACEHOLDER, this.placeholder)
                 .put(MATRIX_ID, this.matrixId)
                 .put(MATRIX_POSITION, this.matrixPosition)
-                .put(QUESTION_CHOICES, new QuestionChoice().toJsonArray(this.questionChoices))
+                .put(CHOICES, new QuestionChoice().toJsonArray(this.choices))
                 .put(CHILDREN, new Question().toJsonArray(this.children));
     }
 

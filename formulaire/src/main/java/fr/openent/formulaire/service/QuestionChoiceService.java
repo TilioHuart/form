@@ -7,6 +7,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.util.List;
+
 public interface QuestionChoiceService {
     /**
      * List all the choices of a specific question
@@ -52,6 +54,13 @@ public interface QuestionChoiceService {
      * @param locale locale language
      */
     Future<JsonObject> update(QuestionChoice choice, String locale);
+
+    /**
+     * Update a list of specific choices
+     * @param choices List<QuestionChoice> data
+     * @param locale locale language
+     */
+    Future<JsonArray> update(List<QuestionChoice> choices, String locale);
 
     /**
      * Delete a specific choice

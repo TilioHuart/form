@@ -16,11 +16,17 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
+import org.entcore.common.sql.SqlStatementsBuilder;
 
+import java.util.List;
+
+import static fr.openent.form.core.constants.Constants.TRANSACTION_BEGIN_QUERY;
+import static fr.openent.form.core.constants.Constants.TRANSACTION_COMMIT_QUERY;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.Tables.*;
 
 public class DefaultQuestionChoiceService implements QuestionChoiceService {
+    private final Sql sql = Sql.getInstance();
     private static final Logger log = LoggerFactory.getLogger(DefaultQuestionChoiceService.class);
 
     @Override
@@ -107,6 +113,41 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
 
         String errorMessage = "[Formulaire@DefaultQuestionChoiceService::update] Fail to update question choice : ";
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(FutureHelper.handlerEither(promise, errorMessage)));
+
+        return promise.future();
+    }
+
+    @Override
+    public Future<JsonArray> update(List<QuestionChoice> choices, String locale) {
+        Promise<JsonArray> promise = Promise.promise();
+
+        if (!choices.isEmpty()) {
+            SqlStatementsBuilder s = new SqlStatementsBuilder();
+            String query = "UPDATE " + QUESTION_CHOICE_TABLE + " SET value = ?, position = ?, type = ?, " +
+                    "next_form_element_id = ?, next_form_element_type = ?, is_custom = ? " +
+                    "WHERE id = ? RETURNING *;";
+
+            s.raw(TRANSACTION_BEGIN_QUERY);
+            for (QuestionChoice choice : choices) {
+                boolean isCustom = choice.getIsCustom();
+                JsonArray params = new JsonArray()
+                        .add(isCustom ? I18nHelper.getI18nValue(I18nKeys.OTHER, locale) : choice.getValue())
+                        .add(choice.getPosition())
+                        .add(choice.getType())
+                        .add(choice.getNextFormElementId())
+                        .add(choice.getNextFormElementType())
+                        .add(isCustom)
+                        .add(choice.getId());
+                s.prepared(query, params);
+            }
+            s.raw(TRANSACTION_COMMIT_QUERY);
+
+            String errorMessage = "[Formulaire@DefaultQuestionChoiceService::update] Fail to update question choice : ";
+            sql.transaction(s.build(), SqlResult.validResultsHandler(FutureHelper.handlerEither(promise, errorMessage)));
+        }
+        else {
+            promise.complete(new JsonArray());
+        }
 
         return promise.future();
     }

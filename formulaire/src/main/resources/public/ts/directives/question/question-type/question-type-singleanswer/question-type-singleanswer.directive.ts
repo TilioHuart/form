@@ -17,12 +17,11 @@ interface IQuestionTypeSingleanswerRadioScope extends IScope, IQuestionTypeSingl
 }
 
 interface IViewModel extends ng.IController, IQuestionTypeSingleanswerProps {
+    followingFormElement: FormElement;
     i18n: I18nUtils;
     direction: typeof Direction;
 
     deleteChoice(index: number): Promise<void>;
-    getPosition(): number;
-    getNextElement(position?: number): FormElement;
     filterNextElements(formElement: FormElement): boolean;
     onSelectOption(choice: QuestionChoice): void;
 }
@@ -32,6 +31,7 @@ class Controller implements IViewModel {
     hasFormResponses: boolean;
     formElements: FormElements;
     isRadio: boolean;
+    followingFormElement: FormElement;
     i18n: I18nUtils;
     direction: typeof Direction;
 
@@ -42,12 +42,9 @@ class Controller implements IViewModel {
 
     $onInit = async () : Promise<void> => {
         for (let choice of this.question.choices.all) {
-            if (choice.next_form_element_id) {
-                choice.next_form_element = this.formElements.all.filter((e: FormElement) =>
-                    e.id === choice.next_form_element_id &&
-                    e.form_element_type === choice.next_form_element_type)[0];
-            }
+            choice.setNextFormElement(this.formElements, this.question);
         }
+        this.followingFormElement = this.question.getFollowingFormElement(this.formElements);
     }
 
     $onDestroy = async () : Promise<void> => {}
@@ -56,27 +53,18 @@ class Controller implements IViewModel {
         await this.question.deleteChoice(index);
     }
 
-    getPosition = () : number => {
-        return this.question.position ?
-            this.question.position :
-            this.formElements.all.filter((e: FormElement) => e.id === this.question.section_id)[0].position;
-    }
-
-    getNextElement = (position?: number) : FormElement => {
-        let nextPosition: number = (position ? position : this.getPosition()) + 1;
-        let nextElements: FormElement[] = this.formElements.all.filter((e: FormElement) => e.position === nextPosition);
-        return nextElements.length > 0 ? nextElements[0] : null;
-    }
-
     filterNextElements = (formElement: FormElement) : boolean => {
-        let position: number = this.getPosition();
-        let nextElement: FormElement = this.getNextElement(position);
-        return formElement.position > position && nextElement && formElement.id != nextElement.id;
+        let position: number = this.question.getPosition(this.formElements);
+        return formElement.position > position && this.followingFormElement && formElement.id != this.followingFormElement.id;
     }
 
     onSelectOption = (choice: QuestionChoice) : void => {
         choice.next_form_element_id = choice.next_form_element ? choice.next_form_element.id : null;
         choice.next_form_element_type = choice.next_form_element ? choice.next_form_element.form_element_type : null;
+        let followingFormElement: FormElement = this.question.getFollowingFormElement(this.formElements);
+        choice.is_next_form_element_default = choice.next_form_element ?
+            choice.next_form_element.equals(followingFormElement) :
+            followingFormElement == null;
     }
 }
 

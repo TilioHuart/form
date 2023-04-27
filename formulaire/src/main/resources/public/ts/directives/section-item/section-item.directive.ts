@@ -14,6 +14,7 @@ interface ISectionItemProps {
 }
 
 interface IViewModel extends ng.IController, ISectionItemProps {
+    followingFormElement: FormElement;
     i18n: I18nUtils;
 
     getHtmlDescription(description: string) : string;
@@ -27,7 +28,6 @@ interface IViewModel extends ng.IController, ISectionItemProps {
     addQuestionToSection(): Promise<void>;
     addQuestionToSectionGuard(): void;
     hasConditional() : boolean;
-    getNextElement(): FormElement;
     filterNextElements(formElement: FormElement): boolean;
     onSelectOption(): Promise<void>;
 }
@@ -40,6 +40,7 @@ class Controller implements IViewModel {
     section: Section;
     reorder: boolean;
     hasFormResponses: boolean;
+    followingFormElement: FormElement;
     formElements: FormElements;
     i18n: I18nUtils;
 
@@ -48,12 +49,8 @@ class Controller implements IViewModel {
     }
 
     $onInit = async (): Promise<void> => {
-        if (this.section.next_form_element_id) {
-            this.section.next_form_element = this.formElements.all.filter((e: FormElement) =>
-                e.id === this.section.next_form_element_id &&
-                e.form_element_type === this.section.next_form_element_type)[0];
-            this.section.is_next_form_element_default = this.section.next_form_element.equals(this.getNextElement());
-        }
+        this.section.setNextFormElement(this.formElements);
+        this.followingFormElement = this.section.getFollowingFormElement(this.formElements);
     }
 
     $onDestroy = async (): Promise<void> => {}
@@ -104,20 +101,17 @@ class Controller implements IViewModel {
         return this.section.questions.all.filter((q: Question) => q.conditional).length > 0;
     }
 
-    getNextElement = () : FormElement => {
-        let nextElements: FormElement[] = this.formElements.all.filter((e: FormElement) => e.position === this.section.position + 1);
-        return nextElements.length == 1 ? nextElements[0] : null;
-    }
-
     filterNextElements = (formElement: FormElement) : boolean => {
-        let nextElement: FormElement = this.getNextElement();
-        return formElement.position > this.section.position && nextElement && formElement.id != nextElement.id;
+        return formElement.position > this.section.position && this.followingFormElement && formElement.id != this.followingFormElement.id;
     }
 
     onSelectOption = async () : Promise<void> => {
         this.section.next_form_element_id = this.section.next_form_element ? this.section.next_form_element.id : null;
         this.section.next_form_element_type = this.section.next_form_element ? this.section.next_form_element.form_element_type : null;
-        this.section.is_next_form_element_default = this.section.next_form_element.equals(this.getNextElement());
+        let followingFormElement: FormElement = this.section.getFollowingFormElement(this.formElements);
+        this.section.is_next_form_element_default = this.section.next_form_element ?
+            this.section.next_form_element.equals(followingFormElement) :
+            followingFormElement == null;
         await sectionService.update([this.section]);
         this.$scope.$apply();
     }

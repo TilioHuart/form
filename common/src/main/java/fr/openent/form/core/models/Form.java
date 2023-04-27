@@ -68,6 +68,9 @@ public class Form implements Model<Form> {
         else if (form.getValue(FORM_ELEMENTS, null) instanceof JsonObject && form.getJsonObject(FORM_ELEMENTS, null).containsKey(ARR)) {
             this.formElements = FormElement.toListFormElements(form.getJsonObject(FORM_ELEMENTS, null).getJsonArray(ARR));
         }
+        else if (form.getValue(FORM_ELEMENTS, null) instanceof JsonObject && form.getJsonObject(FORM_ELEMENTS, null).containsKey(ALL)) {
+            this.formElements = FormElement.toListFormElements(form.getJsonObject(FORM_ELEMENTS, null).getJsonArray(ALL));
+        }
     }
 
 

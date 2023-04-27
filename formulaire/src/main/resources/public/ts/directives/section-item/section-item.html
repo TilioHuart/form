@@ -71,7 +71,7 @@
                 <!-- Next element selector -->
                 <select class="four dontSave" ng-if="!vm.section.selected && !vm.hasConditional()" input-guard
                         ng-model="vm.section.next_form_element" ng-change="vm.onSelectOption()">
-                    <option ng-if="vm.getNextElement() != null" ng-value="vm.getNextElement()">[[vm.i18n.translate('formulaire.access.next')]]</option>
+                    <option ng-if="vm.followingFormElement != null" ng-value="vm.followingFormElement">[[vm.i18n.translate('formulaire.access.next')]]</option>
                     <option ng-repeat="formElement in vm.formElements.all | filter:vm.filterNextElements | orderBy:['position', 'id']" ng-value="formElement">
                         [[vm.i18n.translate('formulaire.access.element') + formElement.title]]
                     </option>
