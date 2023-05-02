@@ -226,11 +226,7 @@ export class Question extends FormElement {
         return this.isSameQuestionType(formElement) && this.question_type === type;
     }
 
-    setChoicesNextFormElements = (formElements: FormElements) : void => {
-        let nextPosition: number = this.getPosition(formElements) + 1;
-        let nextElements: FormElement[] = formElements.all.filter((e: FormElement) => e.position === nextPosition);
-        let nextElement: FormElement = nextElements.length == 1 ? nextElements[0] : null;
-
+    setChoicesNextFormElementsProps = (formElements: FormElements) : void => {
         for (let choice of this.choices.all) {
             // If conditional prop was unchecked we set to null
             if (!this.conditional) {
@@ -242,26 +238,30 @@ export class Question extends FormElement {
                 choice.next_form_element_id = choice.next_form_element.id;
                 choice.next_form_element_type = choice.next_form_element.form_element_type;
             }
-            // If conditional prop was checked and there's no next_form_element, we use nextElement
+            // If conditional prop was checked and there's no next_form_element, we calculate following element
             else {
-                choice.next_form_element = nextElement;
-                choice.next_form_element_id = nextElement ? nextElement.id : null;
-                choice.next_form_element_type = nextElement ? nextElement.form_element_type : null;
-                choice.is_next_form_element_default = true;
+                choice.setNextFormElementValuesWithDefault(formElements, this);
             }
         }
     }
 
     setParentSectionNextFormElements = (formElements: FormElements) : void => {
         let parentSection: Section = this.getParentSection(formElements);
+        if (!parentSection) return;
 
+        // If conditional prop was checked we set parent section target to null
         if (this.conditional) {
             parentSection.next_form_element_id = null;
             parentSection.next_form_element_type = null;
         }
+        // If conditional prop was unchecked and a next_form_element was defined we use it
         else if (parentSection.next_form_element) {
             parentSection.next_form_element_id = parentSection.next_form_element.id;
             parentSection.next_form_element_type = parentSection.next_form_element.form_element_type;
+        }
+        // If conditional prop was unchecked and there's no next_form_element, we calculate following element
+        else {
+            parentSection.setNextFormElementValuesWithDefault(formElements);
         }
     }
 

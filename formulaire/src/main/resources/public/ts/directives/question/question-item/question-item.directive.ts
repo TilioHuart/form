@@ -102,7 +102,7 @@ class Controller implements IViewModel {
             this.question.conditional = !isConditional;
         }
         this.question.mandatory = this.question.conditional;
-        this.question.setChoicesNextFormElements(this.formElements);
+        this.question.setChoicesNextFormElementsProps(this.formElements);
         this.question.setParentSectionNextFormElements(this.formElements);
         this.$scope.$apply();
     }
