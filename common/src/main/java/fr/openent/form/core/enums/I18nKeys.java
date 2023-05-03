@@ -3,7 +3,8 @@ package fr.openent.form.core.enums;
 public enum I18nKeys {
     ARCHIVE_ZIP_NAME("formulaire.archive.zip.name"),
     COPY("formulaire.copy"),
-    OTHER("formulaire.other");
+    OTHER("formulaire.other"),
+    END_FORM("formulaire.access.recap");
 
     private final String key;
 

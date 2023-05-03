@@ -1,6 +1,8 @@
 package fr.openent.formulaire.export;
 
+import fr.openent.form.core.enums.I18nKeys;
 import fr.openent.form.core.enums.QuestionTypes;
+import fr.openent.form.helpers.I18nHelper;
 import fr.openent.formulaire.service.QuestionChoiceService;
 import fr.openent.formulaire.service.QuestionService;
 import fr.openent.formulaire.service.QuestionSpecificFieldsService;
@@ -96,6 +98,7 @@ public class FormQuestionsExportPDF extends ControllerHelper {
                             JsonArray form_elements = new JsonArray();
                             Map<Integer, Integer> mapSectionIdPositionList = new HashMap<>();
                             Map<Integer, JsonObject> mapQuestions = new HashMap<>();
+                            Map<Integer, JsonObject> mapSections = new HashMap<>();
 
                             for (int i = 0; i < sectionsInfos.size(); i++) {
                                 JsonObject sectionInfo = sectionsInfos.getJsonObject(i);
@@ -103,6 +106,8 @@ public class FormQuestionsExportPDF extends ControllerHelper {
                                            .put(QUESTIONS, new JsonArray());
                                 form_elements.add(sectionInfo);
                                 mapSectionIdPositionList.put(sectionInfo.getInteger(ID), i);
+                                int id = sectionInfo.getInteger(ID);
+                                mapSections.put(id, sectionInfo);
                             }
 
                             for (int i = 0; i < questionsInfos.size(); i++) {
@@ -124,11 +129,8 @@ public class FormQuestionsExportPDF extends ControllerHelper {
 
                                     if (Objects.equals(choice.getInteger(QUESTION_ID), question.getInteger(ID))) {
                                         if (!question.containsKey(CHOICES)) {
-                                            // If first choice, create new JsonArray
                                             JsonArray choicesArray = new JsonArray();
-                                            // recup id et type du nextFormElt
-                                            // soit section soit question (faire map section la haut)
-                                            //
+
                                             choicesArray.add(choice);
                                             question.put(CHOICES, choicesArray);
 
@@ -138,11 +140,35 @@ public class FormQuestionsExportPDF extends ControllerHelper {
                                         } else {
                                             // If already exist, add choice to JsonArray
                                             JsonArray choicesArray = question.getJsonArray(CHOICES);
-                                            // TODO A REPORTER ICI
                                             choicesArray.add(choice);
                                         }
                                     }
                                 }
+
+                                for (JsonObject q : mapQuestions.values()) {
+                                    if (q.containsKey(CONDITIONAL) && q.getBoolean(CONDITIONAL)) {
+                                        Integer nextQuestionId;
+                                        JsonArray choices = q.getJsonArray(CHOICES);
+                                        if (choices != null) {
+                                            for (int j = 0; j < choices.size(); j++) {
+                                                JsonObject choice = choices.getJsonObject(j);
+                                                if (choice.containsKey(NEXT_FORM_ELEMENT_ID)) {
+                                                    nextQuestionId = choice.getInteger(NEXT_FORM_ELEMENT_ID);
+                                                    if (nextQuestionId != null) {
+                                                        JsonObject nextQuestion = mapQuestions.get(nextQuestionId);
+                                                            if (nextQuestion != null) {
+                                                                choice.put(TITLE_NEXT, nextQuestion.getString(TITLE));
+                                                            }
+                                                        }
+                                                    if (nextQuestionId == null) {
+                                                        choice.put(TITLE_NEXT, I18nHelper.getI18nValue(I18nKeys.END_FORM, request));
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
 
                                 for (int k = 0; k < listChildren.size(); k ++) {
                                     JsonObject child = listChildren.getJsonObject(k);

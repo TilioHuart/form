@@ -22,6 +22,7 @@ import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_BEHAVI
 import static fr.openent.form.core.constants.ShareRights.MANAGER_RESOURCE_BEHAVIOUR;
 import static fr.openent.form.core.constants.Tables.*;
 import static fr.openent.form.core.constants.Tables.QUESTION;
+import static fr.openent.form.core.constants.Tables.SECTION;
 
 public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
     private static final Logger log = LoggerFactory.getLogger(FormulaireRepositoryEvents.class);

@@ -79,6 +79,7 @@ public class Fields {
     public static final String RGPD_GOAL = "rgpd_goal";
     public static final String RGPD_LIFETIME = "rgpd_lifetime";
     public static final String SEARCH = "search";
+    public static final String SECTION = "section";
     public static final String SECTION_ID = "section_id";
     public static final String SECTION_POSITION = "section_position";
     public static final String SENDER_ID = "sender_id";
@@ -207,6 +208,7 @@ public class Fields {
     public static final String STATEMENTS = "statements";
     public static final String SUBJECT = "subject";
     public static final String SUM_RESPONSES = "sum_responses";
+    public static final String TITLE_NEXT = "title_next";
     public static final String TO = "to";
     public static final String TRANSACTION = "transaction";
     public static final String TYPE_FREETEXT = "type_freetext";
