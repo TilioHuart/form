@@ -143,8 +143,8 @@ export class FormElementUtils {
                 FormElementUtils.rePositionFormElements(oldSection.questions, PropPosition.SECTION_POSITION);
                 FormElementUtils.rePositionFormElements(formElements, PropPosition.POSITION);
                 FormElementUtils.updateNextFormElementValues(formElements);
-                await questionService.update(oldSection.questions.all);
                 await formElementService.update(FormElementUtils.getSectionsAndInsideConditionalQuestions(formElements));
+                await questionService.update(oldSection.questions.all);
             }
             else { // Item moved FROM vm.formElements TO vm.formElements
                 FormElementUtils.updateSiblingsPositions(formElements, true, indexes.goUp, indexes.startIndex, indexes.endIndex);
