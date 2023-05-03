@@ -1,4 +1,5 @@
 export enum Exports {
     CSV = 'CSV',
-    PDF = 'PDF'
+    PDF = 'PDF',
+    ZIP = 'ZIP'
 }

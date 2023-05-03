@@ -12,11 +12,11 @@ import {
     Section,
     Sections
 } from "../models";
-import {distributionService, formService, questionService, folderService} from "../services";
-import {FiltersFilters, FiltersOrders, FORMULAIRE_EMIT_EVENT} from "@common/core/enums";
+import {distributionService, folderService, formService, questionService, responseService} from "../services";
+import {Exports, FiltersFilters, FiltersOrders, FORMULAIRE_EMIT_EVENT} from "@common/core/enums";
 import {Mix} from "entcore-toolkit";
 import {Element} from "entcore/types/src/ts/workspace/model";
-import {I18nUtils, UtilsUtils} from "@common/utils";
+import {I18nUtils} from "@common/utils";
 
 interface ViewModel {
     forms: Forms;
@@ -76,6 +76,7 @@ interface ViewModel {
     selectedFolder: Element;
     draggable : Draggable;
     draggedItem : any;
+    exportFormat: Exports;
 
     importForms() : void;
     doImportForms(): Promise<void>;
@@ -397,12 +398,37 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.doExportForms = async () : Promise<void> => {
         vm.display.loading.export = true;
-        let exportId: string = await formService.export(vm.forms.selected.map((f: Form) => f.id));
-        window.setTimeout(async () => {
-            if (!exportId) return await initFormsList();
-            await formService.verifyExportAndDownload(exportId);
-            vm.closeExportForms();
-        },5000);
+
+        // Generate document PDF and store it in a blob
+        if (vm.exportFormat === Exports.PDF) {
+            let doc: any = await formService.export(vm.forms.selected.map((f: Form) => f.id), vm.exportFormat);
+            let blob: Blob = new Blob([doc.data], {type: 'application/pdf; charset=utf-18'});
+
+            // Download the blob
+            let link: any = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download =  doc.headers['content-disposition'].split('filename=')[1];
+            document.body.appendChild(link);
+            link.click();
+            setTimeout(function() {
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(link.href);
+            }, 100);
+
+            vm.display.lightbox.export = false;
+            vm.display.loading.export = false;
+            template.close('lightbox');
+            $scope.safeApply();
+        }
+        // Generate ZIP
+        else if (vm.exportFormat === Exports.ZIP) {
+            let exportId: string = await formService.export(vm.forms.selected.map((f: Form) => f.id), vm.exportFormat);
+            window.setTimeout(async () => {
+                if (!exportId) return await initFormsList();
+                await formService.verifyExportAndDownload(exportId);
+                vm.closeExportForms();
+            },5000);
+        }
     };
 
     vm.closeExportForms = () : void => {

@@ -37,10 +37,22 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
     }
 
     @Override
-    public void listChoices(JsonArray questionIds, Handler<Either<String, JsonArray>> handler) {
+    public Future<JsonArray> listChoices(JsonArray questionIds) {
+        Promise<JsonArray> promise = Promise.promise();
+
         String query = "SELECT * FROM " + QUESTION_CHOICE_TABLE + " WHERE question_id IN " + Sql.listPrepared(questionIds);
         JsonArray params = new JsonArray().addAll(questionIds);
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(FutureHelper.handlerJsonArray(promise)));
+
+        return promise.future();
+    }
+
+    @Override
+    public void listChoices(JsonArray questionIds, Handler<Either<String, JsonArray>> handler) {
+        listChoices(questionIds)
+                .onSuccess(result -> handler.handle(new Either.Right<>(result)))
+                .onFailure(err -> handler.handle(new Either.Left<>(err.getMessage())));
     }
 
     @Override

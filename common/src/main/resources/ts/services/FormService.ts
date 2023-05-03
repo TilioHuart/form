@@ -20,7 +20,7 @@ export interface FormService {
     delete(formId: number) : Promise<any>;
     move(formIds : number[], parentId: number) : Promise<any>;
     sendReminder(formId: number, mail: {}) : Promise<any>;
-    export(formIds: number[]) : Promise<any>;
+    export(formIds: number[], type: Exports) : Promise<any>;
     verifyExportAndDownload(exportId: string) : Promise<void>;
     import(zipFile: FormData) : Promise<any>;
     unshare(formId: number) : Promise<any>;
@@ -163,10 +163,15 @@ export const formService: FormService = {
         }
     },
 
-    async export(formIds: number[]) : Promise<string> {
+    async export(formIds: number[], type: Exports) : Promise<any> {
         try {
-            let res = await http.post(`/formulaire/forms/export`, formIds);
-            return res.data.exportId;
+            if (type === Exports.ZIP) {
+                let res = await http.post(`/formulaire/forms/export/zip`, formIds);
+                return res.data.exportId;
+            }
+            else if (type === Exports.PDF) {
+                return await http.post(`/formulaire/forms/export/pdf`, formIds, {responseType: "arraybuffer"});
+            }
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.export'));
             throw err;

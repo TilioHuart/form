@@ -35,6 +35,12 @@ public interface QuestionService {
 
     /**
      * List all the children questions of a list of questions
+     * @param questionIds JsonArray identifier
+     */
+    Future<JsonArray> listChildren(JsonArray questionIds);
+
+    /**
+     * List all the children questions of a list of questions
      * @param questionIds question identifiers
      * @param handler function handler returning JsonArray data
      */

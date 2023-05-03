@@ -20,6 +20,12 @@ public interface QuestionChoiceService {
     /**
      * ListChoices all the choices of a specific question
      * @param questionIds JsonArray identifier
+     */
+    Future<JsonArray> listChoices(JsonArray questionIds);
+
+    /**
+     * ListChoices all the choices of a specific question
+     * @param questionIds JsonArray identifier
      * @param handler function handler returning JsonArray data
      */
     void listChoices(JsonArray questionIds, Handler<Either<String, JsonArray>> handler);

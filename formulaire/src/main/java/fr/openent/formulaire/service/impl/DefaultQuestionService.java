@@ -16,8 +16,8 @@ import org.entcore.common.sql.SqlStatementsBuilder;
 
 import static fr.openent.form.core.constants.Constants.*;
 import static fr.openent.form.core.constants.Fields.*;
-import static fr.openent.form.core.constants.Tables.QUESTION_TABLE;
-import static fr.openent.form.core.constants.Tables.SECTION_TABLE;
+import static fr.openent.form.core.constants.Tables.*;
+import static fr.openent.form.core.constants.Tables.QUESTION_TYPE;
 import static fr.openent.form.helpers.SqlHelper.getParamsForUpdateDateModifFormRequest;
 import static fr.openent.form.helpers.SqlHelper.getUpdateDateModifFormRequest;
 
@@ -64,10 +64,20 @@ public class DefaultQuestionService implements QuestionService {
     }
 
     @Override
-    public void listChildren(JsonArray questionIds, Handler<Either<String, JsonArray>> handler) {
+    public Future<JsonArray> listChildren(JsonArray questionIds) {
+        Promise<JsonArray> promise = Promise.promise();
+
         String query = "SELECT * FROM " + QUESTION_TABLE + " WHERE matrix_id IN " + Sql.listPrepared(questionIds);
         JsonArray params = new JsonArray().addAll(questionIds);
-        sql.prepared(query, params, SqlResult.validResultHandler(handler));
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(FutureHelper.handlerJsonArray(promise)));
+        return promise.future();
+    }
+
+    @Override
+    public void listChildren(JsonArray questionIds, Handler<Either<String, JsonArray>> handler) {
+        listChildren(questionIds)
+                .onSuccess(result -> handler.handle(new Either.Right<>(result)))
+                .onFailure(err -> handler.handle(new Either.Left<>(err.getMessage())));
     }
 
     @Override
@@ -86,7 +96,7 @@ public class DefaultQuestionService implements QuestionService {
                 "END AS section_position";
 
         String query = "SELECT q.id, q.title, q.position, q.question_type, q.statement, q.mandatory, q.section_id, " +
-                getElementPosition + ", " + getSectionPosition + ", q.matrix_position " +
+                getElementPosition + ", " + getSectionPosition + ", q.matrix_position, q.conditional, q.placeholder " +
                 "FROM " + QUESTION_TABLE + " q " +
                 "LEFT JOIN " + QUESTION_TABLE + " parent ON parent.id = q.matrix_id " +
                 "LEFT JOIN " + SECTION_TABLE + " s ON q.section_id = s.id OR parent.section_id = s.id " +

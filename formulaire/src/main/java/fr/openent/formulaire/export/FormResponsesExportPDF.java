@@ -271,7 +271,7 @@ public class FormResponsesExportPDF {
             JsonArray form_elements = fillFormElements(sectionsInfos, questions);
 
             // Finish to fill final object with useful form's data
-            results.put(FORM_TILE, form.getString(TITLE));
+            results.put(FORM_TITLE, form.getString(TITLE));
             results.put(ANONYMOUS, form.getBoolean(ANONYMOUS));
             results.put(FORM_ELEMENTS, form_elements);
             handler.handle(new Either.Right<>(results));

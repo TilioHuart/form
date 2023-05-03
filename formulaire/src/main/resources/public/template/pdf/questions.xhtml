@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+
+<head>
+    <title></title>
+    <style type="text/css">
+        body {
+            font-family: "Roboto", sans-serif;
+            color: #5b6472;
+            font-size: 13px;
+        }
+        .page {
+            display: block;
+            margin: 5% 3%;
+        }
+        @page {
+            size: A4;
+            margin: 5% 3%;
+
+            @bottom-center {
+                content: counter(page) ' / ' counter(pages);
+                font-family: "Roboto", sans-serif;
+                font-weight: bold;
+                color: #5b6472;
+                font-size: 13px;
+            }
+        }
+
+        .one { width: 8.33333%; }
+        .two { width: 16.66667%; }
+        .three { width: 25%; }
+        .four { width: 33.33333%; }
+        .five { width: 41.66667%; }
+        .six { width: 50%; }
+        .seven { width: 58.33333%; }
+        .eight { width: 66.66667%; }
+        .nine { width: 75%; }
+        .ten { width: 83.33333%; }
+        .eleven { width: 91.66667%; }
+        .twelve { width: 100%; }
+        .flex { display: flex; }
+
+        h1 {
+            color: #4bafd5;
+            text-align: center;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 10%;
+        }
+        h4 {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .question, .section {
+            margin-bottom: 10%;
+        }
+        .section {
+            border: thin solid #e9ebef;
+        }
+        .section h4.top {
+            background-color: #2a9bc7;
+            color: white;
+            margin: 0 !important;
+            padding: 5px 10px;
+        }
+        .section .description {
+            padding: 5px 10px;
+        }
+        h5.graph-subtitle {
+            font-size: 14px;
+            font-style: italic;
+        }
+        .inline {
+            display: inline-block;
+        }
+        .nobreakpage {
+            page-break-inside: avoid;
+        }
+        .ranking-value {
+            position: relative;
+            padding-left: 10px;
+            line-height: 2em;
+        }
+
+        .ranking-value::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 1px;
+            width: 10px;
+            background-color: black;
+        }
+
+        .is_cursor {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .is_cursor::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            width: 100%;
+            height: 1px;
+            background-color: black;
+        }
+
+        .is_cursor-label {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-right: auto;
+            margin-left: 10px;
+        }
+
+        .is_cursor-value {
+            margin-left: auto;
+            margin-right: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        th {
+            border-top: 1px solid orange;
+            border-left: 1px solid orange;
+        }
+
+        td {
+            border-bottom: 1px solid lightgray;
+        }
+
+
+    </style>
+</head>
+
+<body class="page">
+<h1 class="title">{{form_title}}</h1>
+    {{#form_elements}}
+        {{#is_section}}
+            <div class="section">
+                <h4 class="top">{{title}}</h4>
+                <span class="description">
+                    {{#description}}{{{description}}}{{/description}}
+                    <em>{{^description}}Pas de description{{/description}}</em>
+                </span>
+            </div>
+
+            {{#questions}}
+            <div class="question">
+                <h4>
+                    {{title}}{{#mandatory}}<span style="color:red;margin-left:10px">*</span>{{/mandatory}}
+                </h4>
+
+                <div class="main">
+                    <!-- Type freetext, shortanswer -->
+                    {{#type_text}}
+                    <div class="freetext-border" style="border: 1px solid black; padding: 10px;">
+                        {{placeholder}}
+                    </div>
+                    {{/type_text}}
+
+                    <!-- Single answer, radio btn -->
+                    <div class="radio-buttons-container" style="display: flex; flex-direction: column">
+                        {{#radio_btn}}
+                        {{#choices}}
+                        <div class="radio-btn-choice">
+                            <input type="radio"/><label>{{value}}</label>
+                            {{#is_conditional}}
+                            (Aller à : {{title_next}})
+                            {{/is_conditional}}
+                        </div>
+                        {{/choices}}
+                        {{/radio_btn}}
+                    </div>
+
+                    <!-- Multiple answer -->
+                    <div class="checkbox-container" style="display: flex; flex-direction: column">
+                        {{#multiple_choice}}
+                        {{#choices}}
+                        <div class="checkbox-choice">
+                            <input type="checkbox"/><label>{{value}}</label>
+                        </div>
+                        {{/choices}}
+                        {{/multiple_choice}}
+                    </div>
+
+                    <!-- Date, hour -->
+                    {{#date_hour}}
+                    <div style="border-bottom: 1px solid black; margin-top: 5px; width: 30px;"></div>
+                    {{/date_hour}}
+
+                    <!-- Matrix -->
+                    {{#is_matrix}}
+                    <table class="matrix-table" style="border-collapse: collapse;">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            {{#choices}}
+                            <th style="border-bottom: 1px solid black; padding: 5px;">{{value}}</th>
+                            {{/choices}}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{#children}}
+                        <tr style="border-bottom: 1px solid black;">
+                            <th style="border-right: 1px solid black; padding: 5px;">{{title}}</th>
+                            {{#choices}}
+                            <td style="border-right: 1px solid black; padding: 5px; text-align: center;">
+                                <input type="radio"/>
+                            </td>
+                            {{/choices}}
+                        </tr>
+                        {{/children}}
+                        </tbody>
+                    </table>
+                    {{/is_matrix}}
+
+                    <!-- Cursor -->
+                    {{#is_cursor}}
+                    <div style="display: flex; align-items: center;">
+                        <div style="display: flex; flex-direction: column; align-items: flex-start; margin-right: 10px;">
+                            <div>{{cursor_min_label}} {{cursor_min_val}}</div>
+                        </div>
+                        <div style="border-bottom: 1px solid black; flex-grow: 1;"></div>
+                        <div style="display: flex; flex-direction: column; align-items: flex-start; margin-left: 10px;">
+                            <div>{{cursor_max_val}} {{cursor_max_label}}</div>
+                        </div>
+                    </div>
+                    {{/is_cursor}}
+
+                    <!-- Ranking -->
+                    {{#is_ranking}}
+                    {{#choices}}
+                    <div class="ranking-value">
+                        {{value}}
+                    </div>
+                    {{/choices}}
+                    {{/is_ranking}}
+                </div>
+            </div>
+            {{/questions}}
+        {{/is_section}}
+
+        {{#is_question}}
+        <div class="question">
+            <h4>
+                {{title}}{{#mandatory}}<span style="color:red;margin-left:10px">*</span>{{/mandatory}}
+            </h4>
+
+                <div class="main">
+                    <!-- Type freetext, shortanswer -->
+                        {{#type_text}}
+                            <div class="freetext-border" style="border: 1px solid black; padding: 10px;">
+                                {{placeholder}}
+                            </div>
+                        {{/type_text}}
+
+                        <!-- Single answer, radio btn -->
+                        <div class="radio-buttons-container" style="display: flex; flex-direction: column">
+                            {{#radio_btn}}
+                            {{#choices}}
+                            <div class="radio-btn-choice">
+                                <input type="radio"/><label>{{value}}</label>
+                                {{#is_conditional}}
+                                    (Aller à : {{title_next}})
+                                {{/is_conditional}}
+                            </div>
+                            {{/choices}}
+                            {{/radio_btn}}
+                        </div>
+
+                        <!-- Multiple answer -->
+                        <div class="checkbox-container" style="display: flex; flex-direction: column">
+                            {{#multiple_choice}}
+                                {{#choices}}
+                                <div class="checkbox-choice">
+                                    <input type="checkbox"/><label>{{value}}</label>
+                                </div>
+                                {{/choices}}
+                            {{/multiple_choice}}
+                        </div>
+
+                        <!-- Date, hour -->
+                        {{#date_hour}}
+                            <div style="border-bottom: 1px solid black; margin-top: 5px; width: 30px;"></div>
+                        {{/date_hour}}
+
+                        <!-- Matrix -->
+                        {{#is_matrix}}
+                        <table class="matrix-table" style="border-collapse: collapse;">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                {{#choices}}
+                                <th style="border-bottom: 1px solid black; padding: 5px;">{{value}}</th>
+                                {{/choices}}
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{#children}}
+                            <tr style="border-bottom: 1px solid black;">
+                                <th style="border-right: 1px solid black; padding: 5px;">{{title}}</th>
+                                {{#choices}}
+                                <td style="border-right: 1px solid black; padding: 5px; text-align: center;">
+                                    <input type="radio"/>
+                                </td>
+                                {{/choices}}
+                            </tr>
+                            {{/children}}
+                            </tbody>
+                        </table>
+                        {{/is_matrix}}
+
+                        <!-- Cursor -->
+                        {{#is_cursor}}
+                        <div style="display: flex; align-items: center;">
+                            <div style="display: flex; flex-direction: column; align-items: flex-start; margin-right: 10px;">
+                                <div>{{cursor_min_label}} {{cursor_min_val}}</div>
+                            </div>
+                            <div style="border-bottom: 1px solid black; flex-grow: 1;"></div>
+                            <div style="display: flex; flex-direction: column; align-items: flex-start; margin-left: 10px;">
+                                <div>{{cursor_max_val}} {{cursor_max_label}}</div>
+                            </div>
+                        </div>
+                        {{/is_cursor}}
+
+                        <!-- Ranking -->
+                        {{#is_ranking}}
+                            {{#choices}}
+                                <div class="ranking-value">
+                                    {{value}}
+                                </div>
+                            {{/choices}}
+                        {{/is_ranking}}
+                </div>
+        </div>
+        {{/is_question}}
+    {{/form_elements}}
+
+</body>
+
+</html>

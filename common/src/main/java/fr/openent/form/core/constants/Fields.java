@@ -25,8 +25,6 @@ public class Fields {
     public static final String CURSOR_STEP = "cursor_step";
     public static final String CUSTOM_ANSWER = "custom_answer";
     public static final String DATE_ENDING = "date_ending";
-    public static final String DATE_CREATION = "date_creation";
-    public static final String DATE_MODIFICATION = "date_modification";
     public static final String DATE_OPENING = "date_opening";
     public static final String DATE_RESPONSE = "date_response";
     public static final String DATE_SENDING = "date_sending";
@@ -43,7 +41,6 @@ public class Fields {
     public static final String ID = "id";
     public static final String IS_CUSTOM = "is_custom";
     public static final String IS_PUBLIC = "is_public";
-    public static final String IS_VALID = "is_valid";
     public static final String MAIL = "mail";
     public static final String MANDATORY = "mandatory";
     public static final String MATRIX_ID = "matrix_id";
@@ -97,7 +94,6 @@ public class Fields {
     public static final String USER_ID = "user_id";
     public static final String VALUE = "value";
     public static final String ZIPCODE = "zipcode";
-
     public static final String CHOICE_POSITION = "choice_position";
 
 
@@ -145,6 +141,7 @@ public class Fields {
     public static final String APPS = "apps";
     public static final String ARCHIVE = "archive";
     public static final String ARCHIVES = "archives";
+    public static final String BASE_URL = "baseUrl";
     public static final String BODY = "body";
     public static final String BOOKMARKS = "bookmarks";
     public static final String CAPTCHA = "captcha";
@@ -152,10 +149,12 @@ public class Fields {
     public static final String CHARSET = "charset";
     public static final String CHILDREN = "children";
     public static final String CHOICES = "choices";
+    public static final String CONTENT = "content";
     public static final String CONTENT_TRANSFER_ENCODING = "content_transfer_encoding";
     public static final String CONTENT_TYPE = "content-type";
     public static final String CSV = "csv";
     public static final String CURSOR_AVERAGE = "cursor_average";
+    public static final String DATE_HOUR = "date_hour";
     public static final String DEFAULT = "DEFAULT";
     public static final String DISTRIBUTION_CAPTCHA = "distribution_captcha";
     public static final String DISTRIBUTION_KEY = "distribution_key";
@@ -169,32 +168,41 @@ public class Fields {
     public static final String FOLDERS = "folders";
     public static final String FORMS = "forms";
     public static final String FORM_ELEMENTS = "form_elements";
-    public static final String FORM_TILE = "form_title";
+    public static final String FORM_TITLE = "form_title";
     public static final String GROUPS = "groups";
     public static final String HAS_CUSTOM_ANSWERS = "has_custom_answers";
     public static final String IDS = "ids";
     public static final String IMAGES = "images";
+    public static final String IS_CONDITIONAL = "is_conditional";
     public static final String IS_CURSOR = "is_cursor";
+    public static final String IS_MATRIX = "is_matrix";
     public static final String IS_QUESTION = "is_question";
+    public static final String IS_RANKING = "is_ranking";
+    public static final String IS_VALID = "is_valid";
+    public static final String IS_SECTION = "is_section";
     public static final String KO = "ko";
     public static final String LOCALE = "locale";
     public static final String MESSAGE = "message";
     public static final String METADATA = "metadata";
+    public static final String MULTIPLE_CHOICE = "multiple_choice";
     public static final String NB_LINES = "nb_lines";
     public static final String NEW = "new";
+    public static final String NODE = "node";
     public static final String NULL = "null";
     public static final String OK = "ok";
     public static final String PARENT = "parent";
     public static final String PDF = "pdf";
     public static final String PREPARED = "prepared";
-    public static final String QUESTION_TYPE_ID = "question_type_id";
     public static final String QUESTIONS = "questions";
-    public static final String RAW = "raw";
+    public static final String QUESTIONS_CHOICES = "questions_choices";
+    public static final String QUESTION_TYPE_ID = "question_type_id";
+    public static final String RADIO_BTN = "radio_btn";
     public static final String RESPONSES = "responses";
     public static final String RESULT = "result";
     public static final String RESULTS = "results";
     public static final String ROLE = "role";
     public static final String SEND = "send";
+    public static final String SERVER = "server";
     public static final String SIZE = "size";
     public static final String STATEMENTS = "statements";
     public static final String SUBJECT = "subject";
@@ -207,6 +215,7 @@ public class Fields {
     public static final String UNDEFINED = "undefined";
     public static final String USERS = "users";
     public static final String VALUES = "values";
+    public static final String ZIP = "zip";
 
     private Fields() {
         throw new IllegalStateException("Utility class");

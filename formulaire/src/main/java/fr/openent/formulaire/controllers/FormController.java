@@ -1,9 +1,9 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.enums.RgpdLifetimes;
-import fr.openent.form.core.models.ShareObject;
 import fr.openent.form.helpers.EventBusHelper;
 import fr.openent.form.helpers.UtilsHelper;
+import fr.openent.formulaire.export.FormQuestionsExportPDF;
 import fr.openent.formulaire.helpers.DataChecker;
 import fr.openent.form.helpers.FutureHelper;
 import fr.openent.formulaire.security.*;
@@ -1096,11 +1096,12 @@ public class FormController extends ControllerHelper {
 
     // Export / Import
 
-    @Post("/forms/export")
-    @ApiDoc("Export forms in a ZIP file")
+    @Post("/forms/export/:fileType")
+    @ApiDoc("Export forms in a file (ZIP or PDF)")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void exportForm(final HttpServerRequest request) {
+        String fileType = request.getParam(PARAM_FILE_TYPE);
         RequestUtils.bodyToJsonArray(request, formIds -> {
             UserUtils.getUserInfos(eb, request, user -> {
                 if (user == null) {
@@ -1138,21 +1139,48 @@ public class FormController extends ControllerHelper {
                         return;
                     }
 
-                    // Create the directory in the file system
-                    JsonObject ebMessage = new JsonObject()
-                            .put(ACTION, START)
-                            .put(PARAM_USER_ID, user.getUserId())
-                            .put(LOCALE, I18n.acceptLanguage(request))
-                            .put(APPS, new JsonArray().add(DB_SCHEMA))
-                            .put(PARAM_RESOURCES_IDS, new JsonArray().addAll(formIds));
+                    switch (fileType) {
+                        case ZIP:
+                            // Create the directory in the file system
+                            JsonObject ebMessage = new JsonObject()
+                                    .put(ACTION, START)
+                                    .put(PARAM_USER_ID, user.getUserId())
+                                    .put(LOCALE, I18n.acceptLanguage(request))
+                                    .put(APPS, new JsonArray().add(DB_SCHEMA))
+                                    .put(PARAM_RESOURCES_IDS, new JsonArray().addAll(formIds));
 
-                    EventBusHelper.requestJsonObject(EXPORT_ADDRESS, eb, ebMessage)
-                        .onSuccess(res -> renderJson(request, res))
-                        .onFailure(err -> {
-                            String message = "[Formulaire@exportForms] Failed to export data : " + err.getMessage();
+                            EventBusHelper.requestJsonObject(EXPORT_ADDRESS, eb, ebMessage)
+                                    .onSuccess(res -> renderJson(request, res))
+                                    .onFailure(err -> {
+                                        String message = "[Formulaire@FormController::exportForm] Failed to export data : " + err.getMessage();
+                                        log.error(message);
+                                        renderInternalError(request, message);
+                                    });
+                            break;
+                        case PDF:
+                            formService.get(String.valueOf(formIds.getInteger(0)), user, formEvt -> {
+                                if (formEvt.isLeft()) {
+                                    log.error("[Formulaire@exportForm] Error in getting form to export questions of form " + formIds);
+                                    renderInternalError(request, formEvt);
+                                    return;
+                                }
+                                if (formEvt.right().getValue().isEmpty()) {
+                                    String errMessage = "[Formulaire@exportForm] No form found for id " + formIds;
+                                    log.error(errMessage);
+                                    notFound(request, errMessage);
+                                }
+                                JsonObject form = formEvt.right().getValue();
+                                new FormQuestionsExportPDF(request, vertx, config, storage, form).launch();
+                            });
+                            break;
+                        default:
+                            String message = "[Formulaire@exportForms] Wrong export format type : " + fileType;
                             log.error(message);
-                            renderInternalError(request, message);
-                        });
+                            badRequest(request, message);
+                            break;
+                    }
+
+
                 });
             });
         });
