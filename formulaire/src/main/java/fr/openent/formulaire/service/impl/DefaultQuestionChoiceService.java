@@ -67,8 +67,8 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
         Promise<JsonObject> promise = Promise.promise();
 
         String query = "INSERT INTO " + QUESTION_CHOICE_TABLE + " (question_id, value, position, type, " +
-                "next_form_element_id, next_form_element_type, is_custom) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+                "next_form_element_id, next_form_element_type, is_next_form_element_default, is_custom) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
         boolean isCustom = choice.getIsCustom();
         JsonArray params = new JsonArray()
                 .add(questionId)
@@ -77,6 +77,7 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
                 .add(choice.getType())
                 .add(choice.getNextFormElementId())
                 .add(choice.getNextFormElementType())
+                .add(choice.getIsNextFormElementDefault())
                 .add(isCustom);
 
         String errorMessage = "[Formulaire@DefaultQuestionChoiceService::create] Fail to create question choice : ";
@@ -96,10 +97,11 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
                     ") AS qs_infos " +
                     "WHERE form_id = ? " +
                 ")" +
-                "INSERT INTO " + QUESTION_CHOICE_TABLE + " " +
-                "(question_id, value, position, type, is_custom, next_form_element_id, next_form_element_type) " +
+                "INSERT INTO " + QUESTION_CHOICE_TABLE + " (question_id, value, position, type, is_custom, next_form_element_id, " +
+                    "next_form_element_type, is_next_form_element_default) " +
                 "SELECT ?, value, position, type, is_custom, " +
-                "(SELECT id FROM form_elements_infos WHERE original_id = qc.next_form_element_id AND type = qc.next_form_element_type), next_form_element_type " +
+                    "(SELECT id FROM form_elements_infos WHERE original_id = qc.next_form_element_id AND type = qc.next_form_element_type), " +
+                    "next_form_element_type, is_next_form_element_default " +
                 "FROM " + QUESTION_CHOICE_TABLE + " qc " +
                 "WHERE question_id = ? ORDER BY qc.id;";
         JsonArray params = new JsonArray().add(formId).add(questionId).add(originalQuestionId);
@@ -111,7 +113,7 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
         Promise<JsonObject> promise = Promise.promise();
 
         String query = "UPDATE " + QUESTION_CHOICE_TABLE + " SET value = ?, position = ?, type = ?, " +
-                "next_form_element_id = ?, next_form_element_type = ?, is_custom = ? " +
+                "next_form_element_id = ?, next_form_element_type = ?, is_next_form_element_default = ?, is_custom = ? " +
                 "WHERE id = ? RETURNING *;";
         boolean isCustom = choice.getIsCustom();
         JsonArray params = new JsonArray()
@@ -120,6 +122,7 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
                 .add(choice.getType())
                 .add(choice.getNextFormElementId())
                 .add(choice.getNextFormElementType())
+                .add(choice.getIsNextFormElementDefault())
                 .add(isCustom)
                 .add(choice.getId());
 
@@ -136,7 +139,7 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
         if (!choices.isEmpty()) {
             SqlStatementsBuilder s = new SqlStatementsBuilder();
             String query = "UPDATE " + QUESTION_CHOICE_TABLE + " SET value = ?, position = ?, type = ?, " +
-                    "next_form_element_id = ?, next_form_element_type = ?, is_custom = ? " +
+                    "next_form_element_id = ?, next_form_element_type = ?, is_next_form_element_default = ?, is_custom = ? " +
                     "WHERE id = ? RETURNING *;";
 
             s.raw(TRANSACTION_BEGIN_QUERY);
@@ -148,6 +151,7 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
                         .add(choice.getType())
                         .add(choice.getNextFormElementId())
                         .add(choice.getNextFormElementType())
+                        .add(choice.getIsNextFormElementDefault())
                         .add(isCustom)
                         .add(choice.getId());
                 s.prepared(query, params);

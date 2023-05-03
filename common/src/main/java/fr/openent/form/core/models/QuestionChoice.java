@@ -13,6 +13,7 @@ public class QuestionChoice implements Model<QuestionChoice> {
     private Long position;
     private Long nextFormElementId;
     private FormElementTypes nextFormElementType;
+    private Boolean isNextFormElementDefault;
     private Boolean isCustom;
 
 
@@ -31,6 +32,7 @@ public class QuestionChoice implements Model<QuestionChoice> {
         this.nextFormElementType = this.nextFormElementId == null ?
                 null :
                 FormElementTypes.getFormElementType(questionChoice.getString(NEXT_FORM_ELEMENT_TYPE, null));
+        this.isNextFormElementDefault = questionChoice.getBoolean(IS_NEXT_FORM_ELEMENT_DEFAULT, false);
         this.isCustom = questionChoice.getBoolean(IS_CUSTOM, false);
     }
 
@@ -50,6 +52,8 @@ public class QuestionChoice implements Model<QuestionChoice> {
     public Long getNextFormElementId() { return nextFormElementId; }
 
     public FormElementTypes getNextFormElementType() { return nextFormElementType; }
+
+    public Boolean getIsNextFormElementDefault() { return isNextFormElementDefault; }
 
     public Boolean getIsCustom() { return isCustom; }
 
@@ -91,6 +95,11 @@ public class QuestionChoice implements Model<QuestionChoice> {
         return this;
     }
 
+    public QuestionChoice setIsNextFormElementDefault(Boolean isNextFormElementDefault) {
+        this.isNextFormElementDefault = isNextFormElementDefault;
+        return this;
+    }
+
     public QuestionChoice setCustom(Boolean isCustom) {
         this.isCustom = isCustom;
         return this;
@@ -108,6 +117,7 @@ public class QuestionChoice implements Model<QuestionChoice> {
                 .put(POSITION, this.position)
                 .put(NEXT_FORM_ELEMENT_ID, this.nextFormElementId)
                 .put(NEXT_FORM_ELEMENT_TYPE, this.nextFormElementType)
+                .put(IS_NEXT_FORM_ELEMENT_DEFAULT, this.isNextFormElementDefault)
                 .put(IS_CUSTOM, this.isCustom);
     }
 

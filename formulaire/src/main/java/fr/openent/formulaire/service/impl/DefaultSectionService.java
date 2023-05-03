@@ -57,15 +57,17 @@ public class DefaultSectionService implements SectionService {
     public Future<JsonObject> create(Section section, String formId) {
         Promise<JsonObject> promise = Promise.promise();
 
-        String query = "INSERT INTO " + SECTION_TABLE + " (form_id, title, description, position, next_form_element_id, next_form_element_type) " +
-                "VALUES (?, ?, ?, ?, ?, ?) RETURNING *;";
+        String query = "INSERT INTO " + SECTION_TABLE + " (form_id, title, description, position, next_form_element_id, " +
+                "next_form_element_type, is_next_form_element_default) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *;";
         JsonArray params = new JsonArray()
                 .add(formId)
                 .add(section.getTitle())
                 .add(section.getDescription())
                 .add(section.getPosition())
                 .add(section.getNextFormElementId())
-                .add(section.getNextFormElementType());
+                .add(section.getNextFormElementType())
+                .add(section.getIsNextFormElementDefault());
 
         query += getUpdateDateModifFormRequest();
         params.addAll(getParamsForUpdateDateModifFormRequest(formId));
@@ -83,7 +85,8 @@ public class DefaultSectionService implements SectionService {
         if (!sections.isEmpty()) {
             SqlStatementsBuilder s = new SqlStatementsBuilder();
             String nullifyerQuery = "UPDATE " + SECTION_TABLE + " SET position = NULL WHERE id IN " + Sql.listPrepared(sections) + ";";
-            String query = "UPDATE " + SECTION_TABLE + " SET title = ?, description = ?, position = ?, next_form_element_id = ?, next_form_element_type = ? WHERE id = ? RETURNING *;";
+            String query = "UPDATE " + SECTION_TABLE + " SET title = ?, description = ?, position = ?, next_form_element_id = ?, " +
+                    "next_form_element_type = ?, is_next_form_element_default = ? WHERE id = ? RETURNING *;";
 
             s.raw(TRANSACTION_BEGIN_QUERY);
             s.prepared(nullifyerQuery, UtilsHelper.getIds(sections, false));
@@ -95,6 +98,7 @@ public class DefaultSectionService implements SectionService {
                         .add(section.getInteger(POSITION, null))
                         .add(section.getInteger(NEXT_FORM_ELEMENT_ID, null))
                         .add(section.getString(NEXT_FORM_ELEMENT_TYPE, null))
+                        .add(section.getBoolean(IS_NEXT_FORM_ELEMENT_DEFAULT, false))
                         .add(section.getInteger(ID, null));
                 s.prepared(query, params);
             }

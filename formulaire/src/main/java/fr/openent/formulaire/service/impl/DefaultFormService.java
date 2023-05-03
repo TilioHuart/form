@@ -312,8 +312,8 @@ public class DefaultFormService implements FormService {
                 "), " +
                 // Duplicate SECTIONS of the form
                 "new_sections AS (" +
-                    "INSERT INTO " + SECTION_TABLE + " (form_id, title, description, position, next_form_element_id, next_form_element_type, original_section_id) " +
-                    "SELECT (SELECT id from new_form_id), title, description, position, next_form_element_id, next_form_element_type, id " +
+                    "INSERT INTO " + SECTION_TABLE + " (form_id, title, description, position, next_form_element_id, next_form_element_type, is_next_form_element_default, original_section_id) " +
+                    "SELECT (SELECT id from new_form_id), title, description, position, next_form_element_id, next_form_element_type, is_next_form_element_default, id " +
                     "FROM " + SECTION_TABLE + " WHERE form_id = ? " +
                     "RETURNING id, form_id, original_section_id" +
                 "), " +

@@ -143,9 +143,8 @@ export class FormElementUtils {
                 FormElementUtils.rePositionFormElements(oldSection.questions, PropPosition.SECTION_POSITION);
                 FormElementUtils.rePositionFormElements(formElements, PropPosition.POSITION);
                 FormElementUtils.updateNextFormElementValues(formElements);
-                await formElementService.update(formElements.all);
-                FormElementUtils.updateNextFormElementValues(oldSection.questions, formElements);
                 await questionService.update(oldSection.questions.all);
+                await formElementService.update(FormElementUtils.getSectionsAndInsideConditionalQuestions(formElements));
             }
             else { // Item moved FROM vm.formElements TO vm.formElements
                 FormElementUtils.updateSiblingsPositions(formElements, true, indexes.goUp, indexes.startIndex, indexes.endIndex);
@@ -154,7 +153,7 @@ export class FormElementUtils {
                 item.section_position = null;
                 FormElementUtils.rePositionFormElements(formElements, PropPosition.POSITION);
                 FormElementUtils.updateNextFormElementValues(formElements);
-                await formElementService.update(formElements.all);
+                await formElementService.update(FormElementUtils.getSectionsAndInsideConditionalQuestions(formElements));
             }
         }
         else {
@@ -174,10 +173,9 @@ export class FormElementUtils {
                     oldSection.questions.all = oldSection.questions.all.filter((q: Question) => q.id != item.id);
                     newSection.questions.all.push(item);
                     FormElementUtils.rePositionFormElements(oldSection.questions, PropPosition.SECTION_POSITION);
-                    FormElementUtils.updateNextFormElementValues(oldSection.questions, formElements);
                 }
                 FormElementUtils.rePositionFormElements(newSection.questions, PropPosition.SECTION_POSITION);
-                FormElementUtils.updateNextFormElementValues(newSection.questions, formElements);
+                FormElementUtils.updateNextFormElementValues(formElements);
                 await questionService.update(newSection.questions.all.concat(oldSection.questions.all));
             }
             else { // Item moved FROM vm.formElements TO section with id 'newSectionId'
@@ -190,10 +188,9 @@ export class FormElementUtils {
                 formElements.all = formElements.all.filter((e: FormElement) => e.id != item.id);
                 FormElementUtils.rePositionFormElements(newSection.questions, PropPosition.SECTION_POSITION);
                 FormElementUtils.rePositionFormElements(formElements, PropPosition.POSITION);
-                FormElementUtils.updateNextFormElementValues(newSection.questions, formElements);
-                await questionService.update(newSection.questions.all);
                 FormElementUtils.updateNextFormElementValues(formElements);
-                await formElementService.update(formElements.all);
+                await questionService.update(newSection.questions.all);
+                await formElementService.update(FormElementUtils.getSectionsAndInsideConditionalQuestions(formElements));
             }
         }
     };
@@ -235,7 +232,6 @@ export class FormElementUtils {
                 FormElementUtils.rePositionFormElements(formElements, PropPosition.POSITION);
                 FormElementUtils.rePositionFormElements(oldSection.questions, PropPosition.SECTION_POSITION);
                 FormElementUtils.updateNextFormElementValues(formElements);
-                FormElementUtils.updateNextFormElementValues(oldSection.questions, formElements);
             }
             else { // Item moved FROM vm.formElements TO vm.formElements
                 FormElementUtils.updateSiblingsPositions(formElements, true, indexes.goUp, indexes.startIndex, indexes.endIndex);
@@ -263,10 +259,9 @@ export class FormElementUtils {
                     oldSection.questions.all = oldSection.questions.all.filter((q: Question) => q.id != item.id);
                     newSection.questions.all.push(item);
                     FormElementUtils.rePositionFormElements(oldSection.questions, PropPosition.SECTION_POSITION);
-                    FormElementUtils.updateNextFormElementValues(oldSection.questions, formElements);
                 }
                 FormElementUtils.rePositionFormElements(newSection.questions, PropPosition.SECTION_POSITION);
-                FormElementUtils.updateNextFormElementValues(newSection.questions, formElements);
+                FormElementUtils.updateNextFormElementValues(formElements);
             }
             else { // Item moved FROM vm.formElements TO section with id 'newSectionId'
                 FormElementUtils.updateSiblingsPositions(formElements, false, null, oldIndex);
@@ -278,7 +273,6 @@ export class FormElementUtils {
                 formElements.all = formElements.all.filter((e: FormElement) => e.id != item.id);
                 FormElementUtils.rePositionFormElements(newSection.questions, PropPosition.SECTION_POSITION);
                 FormElementUtils.rePositionFormElements(formElements, PropPosition.POSITION);
-                FormElementUtils.updateNextFormElementValues(newSection.questions, formElements);
                 FormElementUtils.updateNextFormElementValues(formElements);
             }
         }
@@ -344,15 +338,9 @@ export class FormElementUtils {
         }
     }
 
-    static updateNextFormElementValues = (elementsToUpdate: FormElements|Questions, formElements?: FormElements) : void => {
-        if (!formElements && elementsToUpdate instanceof FormElements) {
-            formElements = elementsToUpdate;
-        }
-        else if (!formElements && elementsToUpdate instanceof Questions) {
-            return;
-        }
-
-        for (let element of elementsToUpdate.all) {
+    static updateNextFormElementValues = (formElements: FormElements) : void => {
+        let elementsToUpdate: FormElement[] = formElements.getAllSectionsAndAllQuestions();
+        for (let element of elementsToUpdate) {
             if (element instanceof Section && element.is_next_form_element_default) {
                 element.setNextFormElementValuesWithDefault(formElements);
             }
@@ -376,5 +364,13 @@ export class FormElementUtils {
                 }
             }
         }
+    }
+
+    static getSectionsAndInsideConditionalQuestions = (formElements: FormElements) : FormElement[] => {
+        let insideConditionalQuestions: FormElement[] = (formElements.all as any)
+            .filter((e: FormElement) => e instanceof Section)
+            .flatMap((s: Section) => s.questions.all)
+            .filter((q: Question) => q.conditional);
+        return formElements.all.concat(insideConditionalQuestions);
     }
 }

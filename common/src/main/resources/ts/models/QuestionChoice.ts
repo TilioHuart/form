@@ -59,14 +59,6 @@ export class QuestionChoice {
         this.is_next_form_element_default = true;
     }
 
-    setNextFormElement = (formElements: FormElements, parentQuestion: Question) : void => {
-        this.next_form_element = this.getNextFormElement(formElements);
-        let followingFormElement: FormElement = parentQuestion.getFollowingFormElement(formElements);
-        this.is_next_form_element_default = this.next_form_element ?
-            this.next_form_element.equals(followingFormElement) :
-            followingFormElement == null;
-    }
-
     getNextFormElement = (formElements: FormElements) : FormElement => {
         return formElements.all.find((e: FormElement) =>
             e.id === this.next_form_element_id &&

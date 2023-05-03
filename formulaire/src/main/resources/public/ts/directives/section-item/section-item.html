@@ -75,7 +75,7 @@
                     <option ng-repeat="formElement in vm.formElements.all | filter:vm.filterNextElements | orderBy:['position', 'id']" ng-value="formElement">
                         [[vm.i18n.translate('formulaire.access.element') + formElement.title]]
                     </option>
-                    <option ng-value="null">[[vm.i18n.translate('formulaire.access.recap')]]</option>
+                    <option ng-value="null || undefined">[[vm.i18n.translate('formulaire.access.recap')]]</option>
                 </select>
                 <!-- Add question button -->
                 <div class="addQuestion" ng-if="!vm.section.selected && !vm.hasFormResponses"

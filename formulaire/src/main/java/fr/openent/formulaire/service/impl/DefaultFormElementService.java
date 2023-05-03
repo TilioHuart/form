@@ -88,7 +88,8 @@ public class DefaultFormElementService implements FormElementService {
                 "WHERE id IN " + Sql.listPrepared(questionIds) + ";";
 
         // Sections and questions queries
-        String sectionQueryUpdate = "UPDATE " + SECTION_TABLE + " SET title = ?, description = ?, position = ?, next_form_element_id = ?, next_form_element_type = ? WHERE id = ? RETURNING *;";
+        String sectionQueryUpdate = "UPDATE " + SECTION_TABLE + " SET title = ?, description = ?, position = ?, " +
+                "next_form_element_id = ?, next_form_element_type = ?, is_next_form_element_default = ? WHERE id = ? RETURNING *;";
         String questionQueryUpdate =
                 "UPDATE " + QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, statement = ?, mandatory = ?, " +
                 "section_id = ?, section_position = ?, conditional = ?, placeholder = ?, matrix_id = ?, matrix_position = ? " +
@@ -108,6 +109,7 @@ public class DefaultFormElementService implements FormElementService {
                     .add(section.getPosition())
                     .add(section.getNextFormElementId())
                     .add(section.getNextFormElementType())
+                    .add(section.getIsNextFormElementDefault())
                     .add(section.getId());
             s.prepared(sectionQueryUpdate, params);
         }

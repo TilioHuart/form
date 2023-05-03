@@ -2,7 +2,8 @@ ALTER TABLE formulaire.question_choice
     RENAME COLUMN next_section_id TO next_form_element_id;
 
 ALTER TABLE formulaire.question_choice
-    ADD COLUMN next_form_element_type varchar,
+    ADD COLUMN next_form_element_type           varchar,
+    ADD COLUMN is_next_form_element_default     boolean NOT NULL DEFAULT FALSE,
     DROP CONSTRAINT fk_next_section_id;
 
 UPDATE formulaire.question_choice SET next_form_element_type = 'SECTION'
@@ -13,10 +14,14 @@ ALTER TABLE formulaire.question_choice
         (next_form_element_id IS NULL AND next_form_element_type IS NULL) OR
         (next_form_element_id IS NOT NULL AND next_form_element_type IS NOT NULL));
 
+
 ALTER TABLE formulaire.section
-    ADD COLUMN next_form_element_id     bigint,
-    ADD COLUMN next_form_element_type   varchar,
-    ADD CONSTRAINT check_next_form_element_logic CHECK ((next_form_element_id IS NULL AND next_form_element_type IS NULL) OR (next_form_element_id IS NOT NULL AND next_form_element_type IS NOT NULL));
+    ADD COLUMN next_form_element_id             bigint,
+    ADD COLUMN next_form_element_type           varchar,
+    ADD COLUMN is_next_form_element_default     boolean NOT NULL DEFAULT TRUE,
+    ADD CONSTRAINT check_next_form_element_logic CHECK (
+        (next_form_element_id IS NULL AND next_form_element_type IS NULL) OR
+        (next_form_element_id IS NOT NULL AND next_form_element_type IS NOT NULL));
 
 WITH form_elements_infos AS (
     SELECT id, form_id, position, 'QUESTION' AS type FROM formulaire.question

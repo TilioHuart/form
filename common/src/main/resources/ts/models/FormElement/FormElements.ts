@@ -69,7 +69,7 @@ export class FormElements extends Selection<FormElement> {
         return questions;
     }
 
-    getAllSectionsAndQuestions = () : FormElement[] => {
+    getAllSectionsAndAllQuestions = () : FormElement[] => {
         let sections: FormElement[] = this.getSections().all;
         let allQuestions: FormElement[] = this.getAllQuestions().all;
         return sections.concat(allQuestions);

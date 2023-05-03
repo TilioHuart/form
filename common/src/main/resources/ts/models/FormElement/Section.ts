@@ -49,14 +49,6 @@ export class Section extends FormElement {
         this.is_next_form_element_default = true;
     }
 
-    setNextFormElement = (formElements: FormElements) : void => {
-        this.next_form_element = this.getNextFormElement(formElements);
-        let followingFormElement: FormElement = this.getFollowingFormElement(formElements);
-        this.is_next_form_element_default = this.next_form_element ?
-            this.next_form_element.equals(followingFormElement) :
-            followingFormElement == null;
-    }
-
     getNextFormElement = (formElements: FormElements) : FormElement => {
         let nextElements: FormElement[] = formElements.all.filter((e: FormElement) =>
             e.id === this.next_form_element_id &&

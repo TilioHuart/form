@@ -49,7 +49,7 @@ class Controller implements IViewModel {
     }
 
     $onInit = async (): Promise<void> => {
-        this.section.setNextFormElement(this.formElements);
+        this.section.next_form_element = this.section.getNextFormElement(this.formElements);
         this.followingFormElement = this.section.getFollowingFormElement(this.formElements);
     }
 

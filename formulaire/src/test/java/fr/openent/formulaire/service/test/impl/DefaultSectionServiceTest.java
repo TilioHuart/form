@@ -40,7 +40,8 @@ public class DefaultSectionServiceTest {
                 .put(DESCRIPTION, DESCRIPTION)
                 .put(ORIGINAL_SECTION_ID, 1)
                 .put(NEXT_FORM_ELEMENT_ID, 29)
-                .put(NEXT_FORM_ELEMENT_TYPE, "QUESTION");
+                .put(NEXT_FORM_ELEMENT_TYPE, "QUESTION")
+                .put(IS_NEXT_FORM_ELEMENT_DEFAULT, false);
         section = new Section(sectionJson);
     }
 
@@ -80,9 +81,9 @@ public class DefaultSectionServiceTest {
     public void testCreate(TestContext ctx) {
         Async async = ctx.async();
 
-        String expectedQuery = "INSERT INTO " + SECTION_TABLE + " (form_id, title, description, position, next_form_element_id, next_form_element_type) " +
-                "VALUES (?, ?, ?, ?, ?, ?) RETURNING *;";
-        JsonArray expectedParams = new JsonArray("[\"9\",\"title\",\"description\",2,29,\"QUESTION\"]");
+        String expectedQuery = "INSERT INTO " + SECTION_TABLE + " (form_id, title, description, position, next_form_element_id, next_form_element_type, is_next_form_element_default) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+        JsonArray expectedParams = new JsonArray("[\"9\",\"title\",\"description\",2,29,\"QUESTION\",false]");
 
         String expectedQueryResult = expectedQuery + getUpdateDateModifFormRequest();
         expectedParams.addAll(getParamsForUpdateDateModifFormRequest("9"));
@@ -123,14 +124,14 @@ public class DefaultSectionServiceTest {
         Async async = ctx.async();
 
         JsonArray sections = new JsonArray("[" +
-            "{\"id\":1,\"form_id\":\"9\",\"title\":\"title\",\"position\":3,\"form_element_type\":\"SECTION\",\"description\":\"description\",\"original_section_id\":0,\"next_form_element_id\":29,\"next_form_element_type\":\"QUESTION\"}," +
-            "{\"id\":4,\"form_id\":\"9\",\"title\":\"title\",\"position\":5,\"form_element_type\":\"SECTION\",\"description\":\"description\",\"original_section_id\":3,\"next_form_element_id\":27,\"next_form_element_type\":\"QUESTION\"}" +
+            "{\"id\":1,\"form_id\":\"9\",\"title\":\"title\",\"position\":3,\"form_element_type\":\"SECTION\",\"description\":\"description\",\"original_section_id\":0,\"next_form_element_id\":29,\"next_form_element_type\":\"QUESTION\",\"is_next_form_element_default\":false}," +
+            "{\"id\":4,\"form_id\":\"9\",\"title\":\"title\",\"position\":5,\"form_element_type\":\"SECTION\",\"description\":\"description\",\"original_section_id\":3,\"next_form_element_id\":27,\"next_form_element_type\":\"QUESTION\",\"is_next_form_element_default\":false}" +
         "]");
 
         String expectedQuery = "[{\"action\":\"raw\",\"command\":\"BEGIN;\"}," +
                 "{\"action\":\"prepared\",\"statement\":\"UPDATE " + SECTION_TABLE + " SET position = NULL WHERE id IN (?,?);\",\"values\":[1,4]}," +
-                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + SECTION_TABLE + " SET title = ?, description = ?, position = ?, next_form_element_id = ?, next_form_element_type = ? WHERE id = ? RETURNING *;\",\"values\":[\"title\",\"description\",3,29,\"QUESTION\",1]}," +
-                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + SECTION_TABLE + " SET title = ?, description = ?, position = ?, next_form_element_id = ?, next_form_element_type = ? WHERE id = ? RETURNING *;\",\"values\":[\"title\",\"description\",5,27,\"QUESTION\",4]}," +
+                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + SECTION_TABLE + " SET title = ?, description = ?, position = ?, next_form_element_id = ?, next_form_element_type = ?, is_next_form_element_default = ? WHERE id = ? RETURNING *;\",\"values\":[\"title\",\"description\",3,29,\"QUESTION\",false,1]}," +
+                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + SECTION_TABLE + " SET title = ?, description = ?, position = ?, next_form_element_id = ?, next_form_element_type = ?, is_next_form_element_default = ? WHERE id = ? RETURNING *;\",\"values\":[\"title\",\"description\",5,27,\"QUESTION\",false,4]}," +
                 "{\"action\":\"prepared\",\"statement\":\"UPDATE " + FORM_TABLE + " SET date_modification = ? WHERE id = ?; \",\"values\":[\"NOW()\",\"9\"]}," +
                 "{\"action\":\"raw\",\"command\":\"COMMIT;\"}]";
 

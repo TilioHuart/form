@@ -25,6 +25,8 @@ public class Fields {
     public static final String CURSOR_STEP = "cursor_step";
     public static final String CUSTOM_ANSWER = "custom_answer";
     public static final String DATE_ENDING = "date_ending";
+    public static final String DATE_CREATION = "date_creation";
+    public static final String DATE_MODIFICATION = "date_modification";
     public static final String DATE_OPENING = "date_opening";
     public static final String DATE_RESPONSE = "date_response";
     public static final String DATE_SENDING = "date_sending";
@@ -41,6 +43,7 @@ public class Fields {
     public static final String ID = "id";
     public static final String IS_CUSTOM = "is_custom";
     public static final String IS_PUBLIC = "is_public";
+    public static final String IS_NEXT_FORM_ELEMENT_DEFAULT = "is_next_form_element_default";
     public static final String MAIL = "mail";
     public static final String MANDATORY = "mandatory";
     public static final String MATRIX_ID = "matrix_id";

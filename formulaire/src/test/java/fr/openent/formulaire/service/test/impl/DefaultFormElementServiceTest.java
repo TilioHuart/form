@@ -108,7 +108,8 @@ public class DefaultFormElementServiceTest {
                 "WHERE id IN " + Sql.listPrepared(questionIds) + ";";
 
         // Sections and questions queries
-        String updatingSectionQuery = "UPDATE " + SECTION_TABLE + " SET title = ?, description = ?, position = ?, next_form_element_id = ?, next_form_element_type = ? WHERE id = ? RETURNING *;";
+        String updatingSectionQuery = "UPDATE " + SECTION_TABLE + " SET title = ?, description = ?, position = ?, " +
+                "next_form_element_id = ?, next_form_element_type = ?, is_next_form_element_default = ? WHERE id = ? RETURNING *;";
         String updatingQuestionQuery =
                 "UPDATE " + QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, statement = ?, mandatory = ?, " +
                 "section_id = ?, section_position = ?, conditional = ?, placeholder = ?, matrix_id = ?, matrix_position = ? " +
@@ -117,7 +118,7 @@ public class DefaultFormElementServiceTest {
         String expectedQuery = "[{\"action\":\"raw\",\"command\":\"BEGIN;\"}," +
                 "{\"action\":\"prepared\",\"statement\":\"" + nullifyingSectionQuery + "\",\"values\":[2]}," +
                 "{\"action\":\"prepared\",\"statement\":\"" + nullifyingQuestionQuery + "\",\"values\":[2]}," +
-                "{\"action\":\"prepared\",\"statement\":\"" + updatingSectionQuery + "\",\"values\":[\"title\",\"description\",1,null,null,2]}," +
+                "{\"action\":\"prepared\",\"statement\":\"" + updatingSectionQuery + "\",\"values\":[\"title\",\"description\",1,null,null,false,2]}," +
                 "{\"action\":\"prepared\",\"statement\":\"" + updatingQuestionQuery + "\",\"values\":[\"title\",2,2,\"statement\",false,null,null,false,\"placeholder\",null,null,2]}," +
                 "{\"action\":\"prepared\",\"statement\":\"UPDATE " + FORM_TABLE + " SET date_modification = ? WHERE id = ?; \",\"values\":[\"NOW()\",\"1\"]}," +
                 "{\"action\":\"raw\",\"command\":\"COMMIT;\"}]";

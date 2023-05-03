@@ -13,6 +13,7 @@ public class Section extends FormElement implements Model<Section> {
     private Long originalSectionId;
     private Long nextFormElementId;
     private FormElementTypes nextFormElementType;
+    private Boolean isNextFormElementDefault;
     private List<Question> questions;
 
 
@@ -29,6 +30,7 @@ public class Section extends FormElement implements Model<Section> {
         this.nextFormElementType = this.nextFormElementId == null ?
                 null :
                 FormElementTypes.getFormElementType(section.getString(NEXT_FORM_ELEMENT_TYPE, null));
+        this.isNextFormElementDefault = section.getBoolean(IS_NEXT_FORM_ELEMENT_DEFAULT, false);
 
         if (section.getValue(QUESTIONS, null) instanceof JsonArray) {
             this.questions = new Question().toList(section.getJsonArray(QUESTIONS, null));
@@ -51,6 +53,8 @@ public class Section extends FormElement implements Model<Section> {
     public Long getNextFormElementId() { return nextFormElementId; }
 
     public FormElementTypes getNextFormElementType() { return nextFormElementType; }
+
+    public Boolean getIsNextFormElementDefault() { return isNextFormElementDefault; }
 
     public List<Question> getQuestions() { return questions; }
 
@@ -77,6 +81,11 @@ public class Section extends FormElement implements Model<Section> {
         return this;
     }
 
+    public Section setIsNextFormElementDefault(Boolean isNextFormElementDefault) {
+        this.isNextFormElementDefault = isNextFormElementDefault;
+        return this;
+    }
+
     public Section setQuestions(List<Question> questions) {
         this.questions = questions;
         return this;
@@ -96,6 +105,7 @@ public class Section extends FormElement implements Model<Section> {
                 .put(ORIGINAL_SECTION_ID, this.originalSectionId)
                 .put(NEXT_FORM_ELEMENT_ID, this.nextFormElementId)
                 .put(NEXT_FORM_ELEMENT_TYPE, this.nextFormElementType)
+                .put(IS_NEXT_FORM_ELEMENT_DEFAULT, this.isNextFormElementDefault)
                 .put(QUESTIONS, new Question().toJsonArray(questions));
     }
 

@@ -163,8 +163,9 @@ public class ImportExportService {
         JsonArray results = sections.getJsonArray(RESULTS);
 
         SqlStatementsBuilder s = new SqlStatementsBuilder();
-        String query = "INSERT INTO " + SECTION_TABLE + " (form_id, title, description, position, next_form_element_id, next_form_element_type, original_section_id) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?) " +
+        String query = "INSERT INTO " + SECTION_TABLE + " (form_id, title, description, position, next_form_element_id, " +
+                "next_form_element_type, is_next_form_element_default, original_section_id) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?) " +
                 "RETURNING original_section_id, id, next_form_element_type;";
 
         s.raw(TRANSACTION_BEGIN_QUERY);
@@ -368,8 +369,8 @@ public class ImportExportService {
 
         SqlStatementsBuilder s = new SqlStatementsBuilder();
         String query = "INSERT INTO " + QUESTION_CHOICE_TABLE + " (question_id, value, type, position, is_custom, " +
-                "next_form_element_id, next_form_element_type) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+                "next_form_element_id, next_form_element_type, is_next_form_element_default) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
 
         s.raw(TRANSACTION_BEGIN_QUERY);
         for (int i = 0; i < results.size(); ++i) {
@@ -385,7 +386,8 @@ public class ImportExportService {
                     .add(entry.getInteger(fields.indexOf(POSITION)))
                     .add(entry.getBoolean(fields.indexOf(IS_CUSTOM)))
                     .add(nextFormElementId)
-                    .add(nextFormElementType);
+                    .add(nextFormElementType)
+                    .add(entry.getBoolean(fields.indexOf(IS_NEXT_FORM_ELEMENT_DEFAULT)));
             s.prepared(query, params);
         }
         s.raw(TRANSACTION_COMMIT_QUERY);

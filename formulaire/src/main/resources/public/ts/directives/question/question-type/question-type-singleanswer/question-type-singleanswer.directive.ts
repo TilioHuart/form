@@ -42,7 +42,7 @@ class Controller implements IViewModel {
 
     $onInit = async () : Promise<void> => {
         for (let choice of this.question.choices.all) {
-            choice.setNextFormElement(this.formElements, this.question);
+            choice.next_form_element = choice.getNextFormElement(this.formElements);
         }
         this.followingFormElement = this.question.getFollowingFormElement(this.formElements);
     }
