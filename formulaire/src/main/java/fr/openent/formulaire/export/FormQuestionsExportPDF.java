@@ -183,9 +183,13 @@ public class FormQuestionsExportPDF extends ControllerHelper {
 
                                 switch (QuestionTypes.values()[question.getInteger(QUESTION_TYPE) - 1]) {
                                     case FREETEXT:
+                                        question.put(TYPE_FREETEXT, true);
+                                        break;
                                     case SHORTANSWER:
+                                        question.put(SHORT_ANSWER, true);
+                                        break;
                                     case LONGANSWER:
-                                        question.put(TYPE_TEXT, true);
+                                        question.put(LONG_ANSWER, true);
                                         break;
                                     case SINGLEANSWERRADIO:
                                     case SINGLEANSWER:

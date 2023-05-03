@@ -96,7 +96,7 @@ public class DefaultQuestionService implements QuestionService {
                 "END AS section_position";
 
         String query = "SELECT q.id, q.title, q.position, q.question_type, q.statement, q.mandatory, q.section_id, " +
-                getElementPosition + ", " + getSectionPosition + ", q.matrix_position, q.conditional, q.placeholder " +
+                getElementPosition + ", " + getSectionPosition + ", q.matrix_position, q.conditional " +
                 "FROM " + QUESTION_TABLE + " q " +
                 "LEFT JOIN " + QUESTION_TABLE + " parent ON parent.id = q.matrix_id " +
                 "LEFT JOIN " + SECTION_TABLE + " s ON q.section_id = s.id OR parent.section_id = s.id " +

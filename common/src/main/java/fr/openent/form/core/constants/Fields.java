@@ -183,6 +183,7 @@ public class Fields {
     public static final String IS_SECTION = "is_section";
     public static final String KO = "ko";
     public static final String LOCALE = "locale";
+    public static final String LONG_ANSWER = "long_answer";
     public static final String MESSAGE = "message";
     public static final String METADATA = "metadata";
     public static final String MULTIPLE_CHOICE = "multiple_choice";
@@ -204,6 +205,7 @@ public class Fields {
     public static final String ROLE = "role";
     public static final String SEND = "send";
     public static final String SERVER = "server";
+    public static final String SHORT_ANSWER = "short_answer";
     public static final String SIZE = "size";
     public static final String STATEMENTS = "statements";
     public static final String SUBJECT = "subject";

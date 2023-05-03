@@ -433,6 +433,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.closeExportForms = () : void => {
         vm.display.loading.export = false;
+        vm.exportFormat = undefined;
         template.close('lightbox');
         vm.display.lightbox.export = false;
         $scope.safeApply();
