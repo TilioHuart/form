@@ -29,9 +29,7 @@ import org.entcore.common.storage.Storage;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static fr.openent.form.core.constants.ConfigFields.NODE_PDF_GENERATOR;
 import static fr.openent.form.core.constants.Fields.*;
@@ -218,8 +216,13 @@ public class FormQuestionsExportPDF extends ControllerHelper {
                                 form_elements.add(question);
                             }
 
+                            // Sort sections & questions to display it in the right order
+                            List<JsonObject> sorted_form_elements = form_elements.getList();
+                            sorted_form_elements.removeIf(element -> element.getInteger(POSITION) == null);
+                            Collections.sort(sorted_form_elements, Comparator.nullsFirst(Comparator.comparingInt(a -> a.getInteger(POSITION))));
+
                             JsonObject results = new JsonObject()
-                                    .put(FORM_ELEMENTS, form_elements)
+                                    .put(FORM_ELEMENTS, sorted_form_elements)
                                     .put(FORM_TITLE, form.getString(TITLE));
 
                             generatePDF(request, results,"questions.xhtml", pdf ->
