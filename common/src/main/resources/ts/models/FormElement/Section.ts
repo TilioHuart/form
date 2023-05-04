@@ -50,11 +50,10 @@ export class Section extends FormElement {
     }
 
     getNextFormElement = (formElements: FormElements) : FormElement => {
-        let nextElements: FormElement[] = formElements.all.filter((e: FormElement) =>
+        return formElements.all.find((e: FormElement) =>
             e.id === this.next_form_element_id &&
             e.form_element_type === this.next_form_element_type
         );
-        return nextElements.length == 1 ? nextElements[0] : null;
     }
 
     getNextFormElementPosition = (formElements: FormElements) : number => {
