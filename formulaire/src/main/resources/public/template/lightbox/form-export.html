@@ -4,14 +4,14 @@
 
     <div class="bottom-spacing-twice">
         <input type="radio" ng-model="vm.exportFormat" value="ZIP">
-            <label><i18n>formulaire.format.zip</i18n></label>
-            <label><i18n>formulaire.export.explanation.zip</i18n></label>
+            <label><i18n>formulaire.format.zip</i18n></label><br>
+            <label class="block left-spacing-twice"><i18n>formulaire.export.explanation.zip</i18n></label>
     </div>
 
     <div ng-if="vm.forms.selectedElements.length <= 1">
         <input type="radio" ng-model="vm.exportFormat" value="PDF">
-        <label><i18n>formulaire.format.pdf</i18n></label>
-        <label><i18n>formulaire.export.explanation.pdf</i18n></label>
+        <label><i18n>formulaire.format.pdf</i18n></label><br>
+        <label class="block left-spacing-twice"><i18n>formulaire.export.explanation.pdf</i18n></label>
     </div>
 
     <div ng-if="vm.display.loading.export" class="twelve loader">
