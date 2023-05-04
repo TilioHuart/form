@@ -119,7 +119,8 @@ public class FormQuestionsExportPDF extends ControllerHelper {
                                 }
 
                                 if (question.containsKey(SECTION_ID) && question.getInteger(SECTION_ID) != null) {
-                                    Integer positionSectionFormElt = mapSectionIdPositionList.get(i);
+                                    Integer sectionId = question.getInteger(SECTION_ID);
+                                    Integer positionSectionFormElt = mapSectionIdPositionList.get(sectionId);
                                     JsonObject section = form_elements.getJsonObject(positionSectionFormElt);
                                     section.getJsonArray(QUESTIONS).add(question);
                                 }
