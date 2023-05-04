@@ -24,6 +24,7 @@ import org.entcore.common.http.filter.ResourceFilter;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -96,6 +97,7 @@ public class FormElementController extends ControllerHelper {
             // Check doubles inside
             JsonArray positions = UtilsHelper.getByProp(formElementsJson, POSITION);
             Set<Object> doubles = positions.stream()
+                    .filter(Objects::nonNull) // We don't check the questions inside sections
                     .filter(i -> Collections.frequency(positions.getList(), i) > 1)
                     .collect(Collectors.toSet());
             if (doubles.size() > 0) {
