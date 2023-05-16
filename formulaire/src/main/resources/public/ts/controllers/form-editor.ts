@@ -679,7 +679,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 nextPosition = targetedElement ? targetedElement.position : null;
             }
             else if (vm.preview.formElement instanceof Section && vm.preview.formElement.questions.all.filter((q: Question) => q.conditional).length == 0) {
-                nextPosition = vm.preview.formElement.getFollowingFormElementPosition(vm.formElements);
+                nextPosition = vm.preview.formElement.getNextFormElementPosition(vm.formElements);
             }
 
             return nextPosition;
