@@ -14,7 +14,6 @@ import {
 import {responseFileService, responseService} from "../services";
 import {FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_EMIT_EVENT, FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
 import {FormElementType} from "@common/core/enums/form-element-type";
-import {FormElementUtils} from "@common/utils";
 
 interface ViewModel {
     formElements: FormElements;
@@ -185,7 +184,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             nextPosition = targetedElement ? targetedElement.position : null;
         }
         else if (vm.formElement instanceof Section && vm.formElement.questions.all.filter((q: Question) => q.conditional).length == 0) {
-            nextPosition = vm.formElement.getFollowingFormElementPosition(vm.formElements);
+            nextPosition = vm.formElement.getNextFormElementPosition(vm.formElements);
         }
 
         return nextPosition;
