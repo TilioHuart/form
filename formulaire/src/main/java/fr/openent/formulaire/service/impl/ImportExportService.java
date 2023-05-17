@@ -178,6 +178,7 @@ public class ImportExportService {
                     .add(entry.getInteger(fields.indexOf(POSITION)))
                     .add(entry.getInteger(fields.indexOf(NEXT_FORM_ELEMENT_ID)))
                     .add(entry.getString(fields.indexOf(NEXT_FORM_ELEMENT_TYPE)))
+                    .add(entry.getBoolean(fields.indexOf(IS_NEXT_FORM_ELEMENT_DEFAULT)))
                     .add(entry.getInteger(fields.indexOf(ID)));
             s.prepared(query, params);
         }
@@ -376,7 +377,7 @@ public class ImportExportService {
         for (int i = 0; i < results.size(); ++i) {
             JsonArray entry = results.getJsonArray(i);
             String nextFormElementType = entry.getString(fields.indexOf(NEXT_FORM_ELEMENT_TYPE));
-            Integer nextFormElementId = nextFormElementType.equals(FormElementTypes.QUESTION.getName()) ?
+            Integer nextFormElementId = FormElementTypes.QUESTION.getName().equals(nextFormElementType) ?
                     oldNewQuestionIdsMap.get(entry.getInteger(fields.indexOf(NEXT_FORM_ELEMENT_ID))) :
                     oldNewSectionIdsMap.get(entry.getInteger(fields.indexOf(NEXT_FORM_ELEMENT_ID)));
             JsonArray params = new JsonArray()
