@@ -38,10 +38,10 @@
                                               question="question"
                                               responses="vm.allResponsesInfos.get(vm.formElement).get(question)">
                         </public-question-item>
-                        <public-matrix ng-if="question.question_type == Types.MATRIX"
+                        <public-respond-matrix ng-if="question.question_type == Types.MATRIX"
                                        question="question"
                                        responses="vm.allResponsesInfos.get(vm.formElement).get(question)">
-                        </public-matrix>
+                        </public-respond-matrix>
                     </div>
                 </div>
             </div>
