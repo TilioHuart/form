@@ -315,6 +315,9 @@ export class GraphUtils {
                     width: width ? width : 600,
                     animations: {
                         enabled: false
+                    },
+                    toolbar: {
+                        show: false
                     }
                 },
                 colors: colors,
