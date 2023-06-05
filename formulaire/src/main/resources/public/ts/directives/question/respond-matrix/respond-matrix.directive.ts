@@ -46,7 +46,7 @@ class Controller implements IViewModel {
         await this.initRespondMatrix();
     }
 
-    $onChange = async (changes: any) : Promise<void> => {
+    $onChanges = async (changes: any) : Promise<void> => {
         this.question = changes.question.currentValue;
         await this.initRespondMatrix();
     }
