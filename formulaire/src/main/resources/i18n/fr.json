@@ -1,5 +1,6 @@
 {
   "formulaire.title": "Formulaires",
+  "formulaire.end.form": "Fin du formulaire",
   "formulaire.separator": " / ",
   "formulaire.dots": " ... ",
   "formulaire.mine": "Mon formulaire",
@@ -95,6 +96,7 @@
   "formulaire.selected.value": "Valeur sélectionnée : ",
   "formulaire.selected.values": "Valeurs sélectionnées",
   "formulaire.position.selected": "Position sélectionnée",
+  "formulaire.visualize.path": "Visualiser le parcours",
 
   "formulaire.prop.public.label": "Créer un formulaire public",
   "formulaire.prop.public.description": "Un formulaire public est anonyme et doit impérativement comporter une date de fin. Il n'est pas possible de transformer un formulaire public en formulaire privé et inversement.",
