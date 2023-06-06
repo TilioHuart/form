@@ -328,6 +328,12 @@ export class GraphUtils {
                     categories: labels,
                 },
                 yaxis: {
+                    forceNiceScale: true,
+                    labels: {
+                        formatter: function (value) {
+                            return Math.round(value);
+                        }
+                    },
                     title: {
                         text: lang.translate('formulaire.number.responses'),
                         style: {
