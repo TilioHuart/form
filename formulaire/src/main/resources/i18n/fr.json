@@ -1,6 +1,8 @@
 {
   "formulaire.title": "Formulaires",
   "formulaire.end.form": "Fin du formulaire",
+  "formulaire.mouse.legend": "Maintenez le clic et déplacez la souris pour vous déplacer sur l'arbre",
+  "formulaire.scroll.legend": "Utilisez la molette (scroll) de votre souris pour zoomer/dézoomer",
   "formulaire.separator": " / ",
   "formulaire.dots": " ... ",
   "formulaire.mine": "Mon formulaire",
