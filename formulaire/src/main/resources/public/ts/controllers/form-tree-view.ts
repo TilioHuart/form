@@ -29,13 +29,13 @@ export const formTreeViewController = ng.controller('FormTreeViewController', ['
     function ($scope) {
 
         const vm: ViewModel = this;
+        let mainGraph: any = null;
         vm.form = new Form();
         vm.formElements = new FormElements();
 
         vm.$onInit = async () : Promise<void> => {
             vm.loading = true;
             $scope.safeApply();
-
             vm.form = $scope.form;
             await vm.formElements.sync(vm.form.id);
             initD3Dagre();
@@ -50,15 +50,9 @@ export const formTreeViewController = ng.controller('FormTreeViewController', ['
         };
 
         const initD3Dagre = () : void => {
-            const vw: number = window.innerWidth;
-            const vh: number = window.innerHeight;
             // Init nodes and edges
             let nodes: any[] = initNodes(); // List of form elements
             let edgeList: any[] = initEdgeList(); // List of links between form elements
-
-            // Create/Init a new directed graph
-            let graph: any = new dagreD3.graphlib.Graph();
-            graph.setGraph({});
 
             // Create a renderer
             let render: any = new dagreD3.render();
@@ -68,8 +62,8 @@ export const formTreeViewController = ng.controller('FormTreeViewController', ['
             let inner: any = svg.select("g");
 
             //Set up zoom support
-            let zoom = d3.zoom().scaleExtent([0.1, 2]).on('zoom', function(e) {
-                inner.attr('transform', e.transform);
+            let zoom: d3.ZoomBehavior<Element, unknown> = d3.zoom().on("zoom", function(e) {
+                inner.attr("transform", e.transform);
             });
             svg.call(zoom);
 
@@ -77,12 +71,13 @@ export const formTreeViewController = ng.controller('FormTreeViewController', ['
             render_graph(render, nodes, edgeList, inner, svg);
 
             // Center the graph
-            let innerInfos: any = inner._groups[0][0].getBoundingClientRect();
-            // Get the current width of the inner SVG element
-            let innerWidth: number = innerInfos.width;
-            // Set the new width of the SVG element
-            svg.attr("width", vw - (5 * vw /100) ).attr("height", vh - (20 * vh / 100));
-
+            const vw: number = window.innerWidth - (window.innerWidth * 8 / 100);
+            svg.attr('width', vw);
+            let initialScale: number = 0.75;
+            if(mainGraph != null){
+                svg.call(zoom.transform, d3.zoomIdentity.translate((svg.attr("width") - mainGraph.graph().width * initialScale) / 2, 20).scale(initialScale));
+                svg.attr('height', mainGraph.graph().height * initialScale + 300);
+            }
         }
 
         // List initializations
@@ -191,6 +186,7 @@ export const formTreeViewController = ng.controller('FormTreeViewController', ['
             }
             g.graph().rankdir = "TB"; // Direction of the flow of the graph TopBottom (TB) or LeftRight (LR)...
             g.graph().nodesep = 60; // Space between each node
+            mainGraph = g;
             render(inner, g);
         }
 
