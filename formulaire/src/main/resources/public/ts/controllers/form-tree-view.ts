@@ -15,7 +15,6 @@ import * as dagreD3 from 'dagre-d3';
 import {IconUtils} from "@common/utils/icon";
 import {Mix} from "entcore-toolkit";
 import {TreeUtils} from "@common/utils/tree";
-import {Pages} from "@common/core/enums";
 
 interface ViewModel {
     form: Form;
@@ -223,13 +222,13 @@ export const formTreeViewController = ng.controller('FormTreeViewController', ['
             if (formElement instanceof Question) {
                 return `<div class="tree-view-question">
                             <img src="${IconUtils.displayTypeIcon(formElement.question_type)}"/>
-                            <div class="title">${formElement.title}</div>
+                            <div class="title ellipsis">${formElement.title}</div>
                         </div>`;
             }
             else if (formElement instanceof Section) {
                 return `<div class="tree-view-section">
                             <div class="top twelve">
-                                <span class="title">${formElement.title}</span>
+                                <span class="title ellipsis">${formElement.title}</span>
                             </div>
                             
                             <div class="main twelve">
@@ -240,7 +239,7 @@ export const formTreeViewController = ng.controller('FormTreeViewController', ['
             else {
                 return `<div class="tree-view-section">
                             <div class="top no-main twelve">
-                                <span class="title">${formElement.title}</span>
+                                <span class="title ellipsis">${formElement.title}</span>
                             </div>
                         </div>`;
             }
