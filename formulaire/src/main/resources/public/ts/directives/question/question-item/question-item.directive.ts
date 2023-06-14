@@ -1,5 +1,5 @@
 import {Directive, idiom, ng} from "entcore";
-import {FormElement, FormElements, Question, Section, Types} from "@common/models";
+import {Form, FormElement, FormElements, Question, Section, Types} from "@common/models";
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
 import {Constants} from "@common/core/constants";
 import {RootsConst} from "../../../core/constants/roots.const";
@@ -7,6 +7,7 @@ import {IScope} from "angular";
 
 interface IQuestionItemProps {
     question: Question;
+    form: Form;
     reorder: boolean;
     hasFormResponses: boolean;
     formElements: FormElements;
@@ -32,6 +33,7 @@ interface IQuestionItemScope extends IScope, IQuestionItemProps{
 
 class Controller implements IViewModel {
     question: Question;
+    form: Form;
     reorder: boolean;
     hasFormResponses: boolean;
     formElements: FormElements;
@@ -135,6 +137,7 @@ function directive() {
         transclude: true,
         scope: {
             question: '=',
+            form: '<',
             reorder: '=',
             hasFormResponses: '=',
             formElements: '<'

@@ -41,33 +41,38 @@
                                    question="formElement"
                                    reorder="true"
                                    has-form-responses="vm.form.nb_responses > 0"
-                                   form-elements="vm.formElements">
+                                   form-elements="vm.formElements"
+                                   form="vm.form">
                     </question-item>
                     <!--  Section component -->
                     <section-item ng-if="!FormElementUtils.isQuestion(formElement)"
                                   section="formElement"
                                   reorder="true"
                                   has-form-responses="vm.form.nb_responses > 0"
-                                  form-elements="vm.formElements">
+                                  form-elements="vm.formElements"
+                                  form="vm.form">
                     </section-item>
                 </div>
             </div>
             <!-- List of formElements mobile -->
             <div class="elements" ng-if="isMobile || (!isMobile && vm.formElements.selected.length > 0) || vm.form.nb_responses > 0">
+
                 <div ng-repeat="formElement in vm.formElements.all | orderBy:'position'" class="twelve twelve-mobile">
                     <!--  Question component -->
                     <question-item ng-if="FormElementUtils.isQuestion(formElement)"
                                    question="formElement"
                                    reorder="false"
                                    has-form-responses="vm.form.nb_responses > 0"
-                                   form-elements="vm.formElements">
+                                   form-elements="vm.formElements"
+                                   form="vm.form">
                     </question-item>
                     <!--  Section component -->
                     <section-item ng-if="!FormElementUtils.isQuestion(formElement)"
                                   section="formElement"
                                   reorder="false"
                                   has-form-responses="vm.form.nb_responses > 0"
-                                  form-elements="vm.formElements">
+                                  form-elements="vm.formElements"
+                                  form="vm.form">
                     </section-item>
                 </div>
             </div>

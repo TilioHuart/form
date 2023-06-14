@@ -43,7 +43,7 @@
                     <div ng-if="!vm.section.description" class="nodescription"><i18n>formulaire.section.no.description</i18n></div>
                 </div>
                 <div class="dontSave" ng-if="vm.section.selected">
-                    <editor ng-model="vm.section.description" input-guard></editor>
+                    <editor ng-model="vm.section.description" visibility="vm.form.is_public ? 'public' : ''" input-guard></editor>
                 </div>
             </div>
             <!-- Questions children -->
@@ -52,7 +52,8 @@
                     <question-item question="question"
                                    reorder="vm.reorder"
                                    has-form-responses="vm.hasFormResponses"
-                                   form-elements="vm.formElements">
+                                   form-elements="vm.formElements"
+                                   form="vm.form">
                     </question-item>
                 </div>
             </div>
@@ -61,7 +62,8 @@
                     <question-item question="question"
                                    reorder="vm.reorder"
                                    has-form-responses="vm.hasFormResponses"
-                                   form-elements="vm.formElements">
+                                   form-elements="vm.formElements"
+                                   form="vm.form">
                     </question-item>
                 </div>
             </div>

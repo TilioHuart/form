@@ -1,8 +1,9 @@
 import {Directive, ng} from "entcore";
-import {FormElements, Question, Types} from "@common/models";
+import {Form, FormElements, Question, Types} from "@common/models";
 
 interface IViewModel {
     question: Question;
+    form: Form;
     hasFormResponses: boolean;
     types: typeof Types;
     formElements: FormElements;
@@ -16,6 +17,7 @@ export const questionType: Directive = ng.directive('questionType', () => {
         transclude: true,
         scope: {
             question: '=',
+            form: '<',
             hasFormResponses: '=',
             formElements: '<',
             matrixType: '<'
@@ -26,7 +28,8 @@ export const questionType: Directive = ng.directive('questionType', () => {
             <div class="question-type focusable">
                 <!-- FREETEXT -->
                 <question-type-freetext ng-if="vm.question.question_type == vm.types.FREETEXT"
-                                        question="vm.question">
+                                        question="vm.question"
+                                        form="vm.form">
                 </question-type-freetext>
                 <!-- SHORTANSWER -->
                 <question-type-shortanswer ng-if="vm.question.question_type == vm.types.SHORTANSWER"

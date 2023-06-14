@@ -1,5 +1,5 @@
 import {Directive, idiom, ng} from "entcore";
-import {FormElement, FormElements, Question, Section} from "@common/models";
+import {Form, FormElement, FormElements, Question, Section} from "@common/models";
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
 import {I18nUtils} from "@common/utils";
 import {RootsConst} from "../../core/constants/roots.const";
@@ -42,6 +42,7 @@ class Controller implements IViewModel {
     hasFormResponses: boolean;
     followingFormElement: FormElement;
     formElements: FormElements;
+    form: Form;
     i18n: I18nUtils;
 
     constructor(private $scope: ISectionItemScope, private $sce: ng.ISCEService) {
@@ -126,7 +127,8 @@ function directive() {
             section: '=',
             reorder: '=',
             hasFormResponses: '=',
-            formElements: '<'
+            formElements: '<',
+            form: '<'
         },
         controllerAs: 'vm',
         bindToController: true,

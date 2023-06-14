@@ -1,9 +1,10 @@
 import {ng} from "entcore";
-import {Question} from "@common/models";
+import {Form, Question} from "@common/models";
 import {IScope} from "angular";
 
 interface IQuestionTypeFreetextProps {
     question: Question;
+    form: Form;
 }
 
 interface IViewModel extends ng.IController, IQuestionTypeFreetextProps {
@@ -16,6 +17,7 @@ interface IQuestionTypeFreetextScope extends IScope, IQuestionTypeFreetextProps 
 
 class Controller implements IViewModel {
     question: Question;
+    form: Form;
 
     constructor(private $scope: IQuestionTypeFreetextScope, private $sce: ng.ISCEService) {}
 
@@ -34,7 +36,8 @@ function directive() {
         restrict: 'E',
         transclude: true,
         scope: {
-            question: '='
+            question: '=',
+            form: '<',
         },
         controllerAs: 'vm',
         bindToController: true,
@@ -45,7 +48,7 @@ function directive() {
                     <textarea disabled ng-if="!vm.question.statement" i18n-placeholder="formulaire.question.type.FREETEXT"></textarea>
                 </div>
                 <div ng-if="vm.question.selected">
-                    <editor ng-model="vm.question.statement" input-guard></editor>
+                    <editor ng-model="vm.question.statement" visibility="vm.form.is_public ? 'public' : ''" input-guard></editor>
                 </div>
             </div>
         `,
