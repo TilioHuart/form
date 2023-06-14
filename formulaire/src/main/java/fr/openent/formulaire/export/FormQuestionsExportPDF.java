@@ -13,7 +13,10 @@ import fr.openent.formulaire.service.impl.DefaultQuestionSpecificFieldsService;
 import fr.openent.formulaire.service.impl.DefaultSectionService;
 import fr.wseduc.webutils.data.FileResolver;
 import fr.wseduc.webutils.http.Renders;
-import io.vertx.core.*;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
@@ -34,7 +37,7 @@ import java.util.*;
 import static fr.openent.form.core.constants.ConfigFields.NODE_PDF_GENERATOR;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
-import static fr.openent.form.helpers.UtilsHelper.*;
+import static fr.openent.form.helpers.UtilsHelper.getIds;
 
 public class FormQuestionsExportPDF extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(FormQuestionsExportPDF.class);
@@ -108,6 +111,7 @@ public class FormQuestionsExportPDF extends ControllerHelper {
                                 mapSections.put(id, sectionInfo);
                             }
 
+
                             for (int i = 0; i < questionsInfos.size(); i++) {
                                 JsonObject question = questionsInfos.getJsonObject(i);
                                 if (question.containsKey(SECTION_ID) && question.getInteger(SECTION_ID) == null) {
@@ -146,25 +150,8 @@ public class FormQuestionsExportPDF extends ControllerHelper {
 
                                 for (JsonObject q : mapQuestions.values()) {
                                     if (q.containsKey(CONDITIONAL) && q.getBoolean(CONDITIONAL)) {
-                                        Integer nextQuestionId;
                                         JsonArray choices = q.getJsonArray(CHOICES);
-                                        if (choices != null) {
-                                            for (int j = 0; j < choices.size(); j++) {
-                                                JsonObject choice = choices.getJsonObject(j);
-                                                if (choice.containsKey(NEXT_FORM_ELEMENT_ID)) {
-                                                    nextQuestionId = choice.getInteger(NEXT_FORM_ELEMENT_ID);
-                                                    if (nextQuestionId != null) {
-                                                        JsonObject nextQuestion = mapQuestions.get(nextQuestionId);
-                                                            if (nextQuestion != null) {
-                                                                choice.put(TITLE_NEXT, nextQuestion.getString(TITLE));
-                                                            }
-                                                        }
-                                                    if (nextQuestionId == null) {
-                                                        choice.put(TITLE_NEXT, I18nHelper.getI18nValue(I18nKeys.END_FORM, request));
-                                                    }
-                                                }
-                                            }
-                                        }
+                                        addNextTitleToQuestionChoices(choices, mapSections, mapQuestions);
                                     }
                                 }
 
@@ -222,10 +209,51 @@ public class FormQuestionsExportPDF extends ControllerHelper {
                                 form_elements.add(question);
                             }
 
-                            // Sort sections & questions to display it in the right order
+
+
                             List<JsonObject> sorted_form_elements = form_elements.getList();
+                            Map<Integer, JsonArray> mapQuestionChoices = new HashMap<>();
+                            JsonArray sectionQuestions = new JsonArray();
+                            JsonArray choices = new JsonArray();
+
+                            // Handle next title to conditional questions within sections
+                            for(JsonObject elt: sorted_form_elements){
+                                if (elt.containsKey(QUESTIONS)){
+                                    sectionQuestions.addAll(elt.getJsonArray(QUESTIONS));
+                                }
+                            }
+
+                            if(!sectionQuestions.isEmpty()) {
+                                for (int i = 0; i < sectionQuestions.size(); i++) {
+                                    JsonObject question = sectionQuestions.getJsonObject(i);
+                                    if (question.containsKey(CHOICES)) {
+                                        int questionId = question.getInteger(ID);
+                                        mapQuestionChoices.put(questionId, question.getJsonArray(CHOICES));
+                                        choices.addAll(question.getJsonArray(CHOICES));
+                                    }
+                                }
+                            }
+                            addNextTitleToQuestionChoices(choices, mapSections, mapQuestions);
+
+
+                            // Update choices with right datas
+                            for (JsonObject elt : sorted_form_elements) {
+                                if (elt.containsKey(QUESTIONS)) {
+                                    JsonArray questions = elt.getJsonArray(QUESTIONS);
+                                    for (int i = 0; i < questions.size(); i++) {
+                                        JsonObject question = questions.getJsonObject(i);
+                                        if (question.containsKey(CHOICES)) {
+                                            int questionId = question.getInteger(ID);
+                                            JsonArray choiceToReplace = mapQuestionChoices.get(questionId);
+                                            question.put(CHOICES, choiceToReplace);
+                                        }
+                                    }
+                                }
+                            };
+
+                            // Sort sections & questions to display it in the right order
                             sorted_form_elements.removeIf(element -> element.getInteger(POSITION) == null);
-                            Collections.sort(sorted_form_elements, Comparator.nullsFirst(Comparator.comparingInt(a -> a.getInteger(POSITION))));
+                            sorted_form_elements.sort(Comparator.nullsFirst(Comparator.comparingInt(a -> a.getInteger(POSITION))));
 
                             JsonObject results = new JsonObject()
                                     .put(FORM_ELEMENTS, sorted_form_elements)
@@ -246,6 +274,40 @@ public class FormQuestionsExportPDF extends ControllerHelper {
                         });
             });
         });
+    }
+
+    /**
+     * Get all the titles of next form element to add them in JsonArray question choices and then sort choices by position
+     * @param questionChoices choices from conditional questions
+     * @param mapSections map with all sections
+     * @param mapQuestions map with all questions but not in sections
+     */
+    private void addNextTitleToQuestionChoices(JsonArray questionChoices, Map<Integer, JsonObject> mapSections, Map<Integer, JsonObject> mapQuestions){
+        if( questionChoices == null || questionChoices.isEmpty())return;
+        for (int j = 0; j < questionChoices.size(); j++) {
+            JsonObject choice = questionChoices.getJsonObject(j);
+            if (choice != null && choice.containsKey(NEXT_FORM_ELEMENT_ID)) {
+                Integer nextQuestionId = choice.getInteger(NEXT_FORM_ELEMENT_ID);
+                if (nextQuestionId != null) {
+                    String titleNext = null;
+                    JsonObject nextQuestion = mapQuestions.get(nextQuestionId);
+                    JsonObject nextSection = mapSections.get(nextQuestionId);
+                    if (nextQuestion != null) {
+                        titleNext = nextQuestion.getString(TITLE);
+                    } else if (nextSection != null) {
+                        titleNext = nextSection.getString(TITLE);
+                    }
+
+                    if(titleNext != null){
+                        choice.put(TITLE_NEXT, titleNext);
+                    }
+                } else {
+                    choice.put(TITLE_NEXT, I18nHelper.getI18nValue(I18nKeys.END_FORM, request));
+                }
+            }
+        }
+        List<JsonObject> choicesList = questionChoices.getList();
+        choicesList.sort(Comparator.nullsFirst(Comparator.comparingInt(a -> a.getInteger(POSITION))));
     }
 
     private void generatePDF(HttpServerRequest request, JsonObject templateProps, String templateName, Handler<Buffer> handler) {
