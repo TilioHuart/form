@@ -38,7 +38,7 @@ public class DefaultResponseServiceTest {
     public void createResponse_Should_Return_Correct_RequestSQL_Default(TestContext ctx) {
         Async async = ctx.async();
         String expectedQuery = "INSERT INTO " + RESPONSE_TABLE + " (question_id, choice_id, answer, responder_id, " +
-                "distribution_id, choice_position, custom_answer) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+                "distribution_id, choice_position, custom_answer, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
 
         JsonObject response = new JsonObject();
         String questionId = "1";

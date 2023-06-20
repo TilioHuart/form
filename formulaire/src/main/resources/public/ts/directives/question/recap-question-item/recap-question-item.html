@@ -15,15 +15,29 @@
         <div ng-if="vm.question.question_type == vm.types.SINGLEANSWER">
             <div data-ng-bind-html="vm.getStringResponse()"></div>
         </div>
-        <div ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER">
+        <div ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER" ng-class="{'image-container': vm.hasImages()}">
             <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
-                <label>
-                    <input type="checkbox" disabled checked ng-if="vm.isSelectedChoice(choice)">
-                    <input type="checkbox" disabled ng-if="!vm.isSelectedChoice(choice)">
-                    <span style="cursor: default"></span>
-                    <span ng-if="!choice.is_custom || !vm.isSelectedChoice(choice)">[[choice.value]]</span>
-                    <span ng-if="choice.is_custom && vm.isSelectedChoice(choice)" ng-bind-html="vm.getStringResponse()"></span>
-                </label>
+                <div ng-if="vm.hasImages()">
+                    <label class="choice-image">
+                        <input type="checkbox" disabled checked ng-if="vm.isSelectedChoice(choice)">
+                        <input type="checkbox" disabled ng-if="!vm.isSelectedChoice(choice)">
+                        <span style="cursor: default"></span>
+                        <span ng-if="!choice.is_custom || !vm.isSelectedChoice(choice)">[[choice.value]]</span>
+                        <img data-ng-src="[[choice.image]]"
+                              data-ng-if="choice.image !== null && choice.image !== undefined && choice.image !== ''"
+                              alt="choice image">
+                        <span ng-if="choice.is_custom && vm.isSelectedChoice(choice)" ng-bind-html="vm.getStringResponse()"></span>
+                    </label>
+                </div>
+                <div ng-if="!vm.hasImages()">
+                    <label>
+                        <input type="checkbox" disabled checked ng-if="vm.isSelectedChoice(choice)">
+                        <input type="checkbox" disabled ng-if="!vm.isSelectedChoice(choice)">
+                        <span style="cursor: default"></span>
+                        <span ng-if="!choice.is_custom || !vm.isSelectedChoice(choice)">[[choice.value]]</span>
+                        <span ng-if="choice.is_custom && vm.isSelectedChoice(choice)" ng-bind-html="vm.getStringResponse()"></span>
+                    </label>
+                </div>
             </div>
         </div>
         <div ng-if="vm.question.question_type == vm.types.DATE">

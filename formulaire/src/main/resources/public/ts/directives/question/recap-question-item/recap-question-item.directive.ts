@@ -35,6 +35,7 @@ interface IViewModel {
     getResponseFileNames() : string[];
     openQuestion(): void;
     filterQuestionResponses(): Response[];
+    hasImages(): boolean;
 }
 
 interface IRecapQuestionItemScope extends IScope, IRecapQuestionItemProps {
@@ -128,7 +129,11 @@ class Controller implements IViewModel {
 
     filterQuestionResponses = () : Response[] => {
         return this.responses.all.filter((r: Response) => r.question_id === this.question.id);
-    }
+    };
+
+    hasImages = () : boolean => {
+        return this.question.choices.all.some((choice: QuestionChoice) => choice.image !== null && choice.image !== undefined && choice.image !== '');
+    };
 }
 
 function directive() {

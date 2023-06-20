@@ -37,6 +37,7 @@ interface IViewModel extends ng.IController, IRespondQuestionItemScopeProps {
     onClickChoice(choice: QuestionChoice): void;
     resetDate(): void;
     initDrag(): void;
+    hasImages(): boolean;
 }
 
 interface IRespondQuestionItemScope extends IScope, IRespondQuestionItemScopeProps {
@@ -94,6 +95,16 @@ class Controller implements ng.IController, IViewModel {
                 if (existingMatchingResponses.length == 1) {
                     this.responses.all[matchingIndex] = existingMatchingResponses[0];
                     this.responses.all[matchingIndex].selected = true;
+                }
+
+                // If question type multiplanswer, assign image to each choice
+                if (this.question.question_type === Types.MULTIPLEANSWER) {
+                    for (let response of this.responses.all) {
+                        const choice = this.question.choices.all.find(c => c.id === response.choice_id);
+                        if (choice) {
+                            response.image = choice.image;
+                        }
+                    }
                 }
 
                 this.mapChoiceResponseIndex.set(choice, matchingIndex);
@@ -163,6 +174,10 @@ class Controller implements ng.IController, IViewModel {
 
     resetDate = () : void => {
         this.responses.all[0].answer = new Date();
+    }
+
+    hasImages = () : boolean => {
+        return this.question.choices.all.some((choice: QuestionChoice) => choice.image !== null && choice.image !== undefined && choice.image !== '');
     }
 
     initDrag = (): void => {

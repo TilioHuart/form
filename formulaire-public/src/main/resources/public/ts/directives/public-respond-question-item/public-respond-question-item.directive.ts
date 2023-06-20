@@ -33,6 +33,7 @@ interface IViewModel extends ng.IController, IPublicQuestionItemProps {
     deselectIfEmpty(choice: QuestionChoice) : void;
     onClickChoice(choice: QuestionChoice): void;
     resetDate(): void;
+    hasImages(): boolean;
 }
 
 interface IPublicQuestionItemScope extends IScope, IPublicQuestionItemProps {
@@ -81,6 +82,16 @@ class Controller implements IViewModel {
                 let matchingResponses: Response[] = this.responses.all.filter((r:Response) => r.choice_id == choice.id);
                 if (matchingResponses.length != 1) console.error("Be careful, 'vm.responses' has been badly implemented !!");
                 this.mapChoiceResponseIndex.set(choice, this.responses.all.indexOf(matchingResponses[0]));
+
+                // If question type multiplanswer, assign image to each choice
+                if (this.question.question_type === Types.MULTIPLEANSWER) {
+                    for (let response of this.responses.all) {
+                        const choice: QuestionChoice = this.question.choices.all.find((c: QuestionChoice) => c.id === response.choice_id);
+                        if (choice) {
+                            response.image = choice.image;
+                        }
+                    }
+                }
             }
         }
 
@@ -121,6 +132,10 @@ class Controller implements IViewModel {
 
     resetDate = () : void => {
         this.responses.all[0].answer = new Date();
+    }
+
+    hasImages = () : boolean => {
+        return this.question.choices.all.some((choice: QuestionChoice) => choice.image !== null && choice.image !== undefined && choice.image !== '');
     }
 
     initDrag = (): void => {

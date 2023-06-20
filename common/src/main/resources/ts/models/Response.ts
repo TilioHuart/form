@@ -17,6 +17,7 @@ export class Response implements Selectable {
     selected: boolean;
     selectedIndex: boolean[]; // For multiple answer in preview
     choice_position: number; // For question type ranking to order
+    image?: string; // For question type multiple answer
 
     constructor(question_id?: number, choice_id?: number, answer?: string|Date|number, distribution_id?: number, choice_position?: number) {
         this.id = null;
@@ -29,6 +30,7 @@ export class Response implements Selectable {
         this.files = new ResponseFiles();
         this.selected = false;
         this.choice_position = choice_position ? choice_position : null;
+        this.image = null;
     }
 
     toJson() : Object {
@@ -42,7 +44,8 @@ export class Response implements Selectable {
             custom_answer: this.custom_answer,
             files: this.files,
             selected: this.selected,
-            choice_position: this.choice_position
+            choice_position: this.choice_position,
+            image: this.image
         }
     }
 }
