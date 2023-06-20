@@ -170,6 +170,15 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 }
             }
 
+            // Check choice.image and choice.value for questions of type Types.MULTIPLEANSWER
+            let questionTypeMultipleanswers: Question[] = vm.formElements.getAllQuestions().filter((q: Question) => q.question_type == Types.MULTIPLEANSWER);
+            const foundChoice = (<any>questionTypeMultipleanswers).flatMap((question: Question) => question.choices.all)
+                .find((choice: QuestionChoice) => (choice.image && !choice.value));
+
+            if (foundChoice) {
+                notify.error(idiom.translate('formulaire.question.save.missing.field'));
+            }
+
             await saveFormElements(displaySuccess && wrongElements.length <= 0);
             vm.dontSave = false;
         };

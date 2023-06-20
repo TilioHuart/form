@@ -1,5 +1,13 @@
 import {Directive, idiom, ng} from "entcore";
-import {Form, FormElement, FormElements, Question, Section, Types} from "@common/models";
+import {
+    Form,
+    FormElement,
+    FormElements,
+    Question,
+    QuestionChoice,
+    Section,
+    Types
+} from "@common/models";
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
 import {Constants} from "@common/core/constants";
 import {RootsConst} from "../../../core/constants/roots.const";
@@ -25,6 +33,7 @@ interface IViewModel extends ng.IController, IQuestionItemProps {
     onSwitchMandatory(isMandatory: boolean): void;
     onSwitchConditional(isConditional: boolean): void;
     cursorChoiceIsConsistent(): boolean;
+    isImageMissingLabel(): boolean;
 }
 
 interface IQuestionItemScope extends IScope, IQuestionItemProps{
@@ -128,6 +137,11 @@ class Controller implements IViewModel {
         let nextElements: FormElement[] = this.formElements.all.filter((e: FormElement) => e.position === this.getPosition() + 1);
         return nextElements.length > 0 ? nextElements[0].id : null;
     }
+
+    isImageMissingLabel = (): boolean => {
+        return this.question.choices.all.some((choice: QuestionChoice) => choice.image !== null
+            && (choice.value === "" || choice.value === null || choice.value === undefined));
+    };
 }
 
 function directive() {

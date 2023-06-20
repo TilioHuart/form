@@ -267,6 +267,7 @@
   "formulaire.question.value.label": "Label de la valeur : ",
   "formulaire.question.label": "Label",
   "formulaire.question.selected.result": "Résultat sélectionné : ",
+  "formulaire.question.multipleanswer.value.mandatory": "Attention, le choix ne peut pas comporter une image seule. Veuillez aussi saisir du texte",
 
   "formulaire.matrix.type.SINGLEANSWERRADIO": "Matrice à choix unique",
   "formulaire.matrix.type.MULTIPLEANSWER": "Matrice avec cases à cocher",

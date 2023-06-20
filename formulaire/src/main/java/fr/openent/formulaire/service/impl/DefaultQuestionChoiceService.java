@@ -67,8 +67,8 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
         Promise<JsonObject> promise = Promise.promise();
 
         String query = "INSERT INTO " + QUESTION_CHOICE_TABLE + " (question_id, value, position, type, " +
-                "next_form_element_id, next_form_element_type, is_next_form_element_default, is_custom) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+                "next_form_element_id, next_form_element_type, is_next_form_element_default, is_custom, image) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
         boolean isCustom = choice.getIsCustom();
         JsonArray params = new JsonArray()
                 .add(questionId)
@@ -78,7 +78,8 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
                 .add(choice.getNextFormElementId())
                 .add(choice.getNextFormElementType())
                 .add(choice.getIsNextFormElementDefault())
-                .add(isCustom);
+                .add(isCustom)
+                .add(choice.getImage());
 
         String errorMessage = "[Formulaire@DefaultQuestionChoiceService::create] Fail to create question choice : ";
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(FutureHelper.handlerEither(promise, errorMessage)));
@@ -98,10 +99,10 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
                     "WHERE form_id = ? " +
                 ")" +
                 "INSERT INTO " + QUESTION_CHOICE_TABLE + " (question_id, value, position, type, is_custom, next_form_element_id, " +
-                    "next_form_element_type, is_next_form_element_default) " +
+                    "next_form_element_type, is_next_form_element_default, image) " +
                 "SELECT ?, value, position, type, is_custom, " +
                     "(SELECT id FROM form_elements_infos WHERE original_id = qc.next_form_element_id AND type = qc.next_form_element_type), " +
-                    "next_form_element_type, is_next_form_element_default " +
+                    "next_form_element_type, is_next_form_element_default, image " +
                 "FROM " + QUESTION_CHOICE_TABLE + " qc " +
                 "WHERE question_id = ? ORDER BY qc.id;";
         JsonArray params = new JsonArray().add(formId).add(questionId).add(originalQuestionId);
@@ -113,8 +114,8 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
         Promise<JsonObject> promise = Promise.promise();
 
         String query = "UPDATE " + QUESTION_CHOICE_TABLE + " SET value = ?, position = ?, type = ?, " +
-                "next_form_element_id = ?, next_form_element_type = ?, is_next_form_element_default = ?, is_custom = ? " +
-                "WHERE id = ? RETURNING *;";
+                "next_form_element_id = ?, next_form_element_type = ?, is_next_form_element_default = ?, is_custom = ?, " +
+                "image = ? WHERE id = ? RETURNING *;";
         boolean isCustom = choice.getIsCustom();
         JsonArray params = new JsonArray()
                 .add(isCustom ? I18nHelper.getI18nValue(I18nKeys.OTHER, locale) : choice.getValue())
@@ -124,6 +125,7 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
                 .add(choice.getNextFormElementType())
                 .add(choice.getIsNextFormElementDefault())
                 .add(isCustom)
+                .add(choice.getImage())
                 .add(choice.getId());
 
         String errorMessage = "[Formulaire@DefaultQuestionChoiceService::update] Fail to update question choice : ";
@@ -139,8 +141,8 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
         if (!choices.isEmpty()) {
             SqlStatementsBuilder s = new SqlStatementsBuilder();
             String query = "UPDATE " + QUESTION_CHOICE_TABLE + " SET value = ?, position = ?, type = ?, " +
-                    "next_form_element_id = ?, next_form_element_type = ?, is_next_form_element_default = ?, is_custom = ? " +
-                    "WHERE id = ? RETURNING *;";
+                    "next_form_element_id = ?, next_form_element_type = ?, is_next_form_element_default = ?, is_custom = ?, " +
+                    "image = ? WHERE id = ? RETURNING *;";
 
             s.raw(TRANSACTION_BEGIN_QUERY);
             for (QuestionChoice choice : choices) {
@@ -153,6 +155,7 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
                         .add(choice.getNextFormElementType())
                         .add(choice.getIsNextFormElementDefault())
                         .add(isCustom)
+                        .add(choice.getImage())
                         .add(choice.getId());
                 s.prepared(query, params);
             }

@@ -6,6 +6,6 @@ export * from './question-type-file';
 export * from './question-type-freetext';
 export * from './question-type-longanswer';
 export * from './question-type-matrix';
-export * from './question-type-multipleanswer';
+export * from './question-type-multipleanswer/question-type-multipleanswer.directive';
 export * from './question-type-shortanswer';
 export * from './question-type-time';

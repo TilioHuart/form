@@ -50,4 +50,7 @@
     <div class="warning" ng-if="vm.question.question_type == vm.types.CURSOR && !vm.cursorChoiceIsConsistent()">
         <i18n>formulaire.question.cursor.inconsistency.between.values</i18n>
     </div>
+    <div class="warning" ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER && vm.isImageMissingLabel()">
+        <i18n>formulaire.question.multipleanswer.value.mandatory</i18n>
+    </div>
 </div>

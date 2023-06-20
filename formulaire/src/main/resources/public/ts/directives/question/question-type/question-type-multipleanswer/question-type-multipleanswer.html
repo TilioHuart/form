@@ -1,0 +1,44 @@
+<div class="twelve">
+  <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
+    <div class="container-arrow" ng-if="vm.question.selected">
+      <div ng-class="{hidden : $first || choice.is_custom}" ng-click="vm.question.moveChoice(choice, vm.direction.UP)">
+        <i class="i-chevron-up lg-icon"></i>
+      </div>
+      <div ng-class="{hidden : $last || vm.question.choices.all[$index+1].is_custom}"
+           ng-click="vm.question.moveChoice(choice, vm.direction.DOWN)">
+        <i class="i-chevron-down lg-icon"></i>
+      </div>
+    </div>
+    <label class="twelve left-spacing-twice">
+      <input type="checkbox" id="check-[[choice.id]]" disabled>
+      <span style="cursor: default"></span>
+      <input type="text" class="width95 ten-mobile" ng-model="choice.value" ng-if="!vm.question.selected && !choice.is_custom"
+             placeholder="[[vm.i18n.getWithParam('formulaire.choice', choice.position)]]" disabled>
+      <input type="text" class="width95 ten-mobile" ng-model="choice.value" ng-if="vm.question.selected && !choice.is_custom"
+             placeholder="[[vm.i18n.getWithParam('formulaire.choice', choice.position)]]" input-guard>
+      <input type="text" class="width95 ten-mobile" ng-if="choice.is_custom"
+             value="[[vm.i18n.translate('formulaire.other')]] : " disabled>
+      <div class="image-container">
+          <i class="i-close lg-icon" ng-click="vm.deleteImageSelect($index)" ng-if="vm.question.selected && !vm.hasFormResponses && choice.image !== ''"></i>
+          <image-select id="img-{{$index}}" class="initialFloat cell"
+                        ng-if="vm.selectedChoiceIndex === $index && !vm.hasFormResponses"
+                        default="/img/illustrations/image-default.svg" ng-model="choice.image">
+          </image-select>
+          <img ng-src="[[ choice.image || '/formulaire/public/img/empty-image.png' ]]"
+               ng-if="choice.image && vm.selectedChoiceIndex !== $index"
+               alt="">
+      </div>
+    </label>
+    <i class="i-image lg-icon" ng-click="vm.displayImageSelect($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
+    <i class="i-cancel lg-icon dontSave" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
+  </div>
+  <div class="add-choice" ng-if="vm.question.selected && !vm.hasFormResponses">
+    <i class="i-plus-circle lg-icon" ng-click="vm.question.createNewChoice()"></i>
+    <div ng-if="!vm.question.choices.all[vm.question.choices.all.length - 1].is_custom">
+      <i18n>formulaire.question.add.choice.other.text</i18n>
+      <a class="dontSave" ng-click="vm.question.createNewChoice(true)"><i18n>formulaire.question.add.choice.other.link</i18n></a>
+    </div>
+  </div>
+
+  <container template='lightbox'></container>
+</div>

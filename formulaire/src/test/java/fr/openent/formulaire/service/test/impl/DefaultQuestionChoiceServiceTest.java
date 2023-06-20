@@ -45,7 +45,8 @@ public class DefaultQuestionChoiceServiceTest {
                 .put(NEXT_FORM_ELEMENT_ID, 29)
                 .put(NEXT_FORM_ELEMENT_TYPE, "SECTION")
                 .put(IS_NEXT_FORM_ELEMENT_DEFAULT, false)
-                .put(IS_CUSTOM, true);
+                .put(IS_CUSTOM, true)
+                .put(IMAGE, "/workspace/document/25389fc4-dbd8-4952-b4bd-bce9fb30b559");
         choice = new QuestionChoice(questionChoice);
     }
 
@@ -55,9 +56,11 @@ public class DefaultQuestionChoiceServiceTest {
         String questionId = "1";
         String locale = "fr";
 
-        String expectedQuery = "INSERT INTO " + QUESTION_CHOICE_TABLE + " (question_id, value, position, type, next_form_element_id, next_form_element_type, is_next_form_element_default, is_custom) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
-        JsonArray expectedParams = new JsonArray("[\"1\",\"formulaire.other\",2,\"TXT\",29,\"SECTION\",false,true]");
+        String expectedQuery = "INSERT INTO " + QUESTION_CHOICE_TABLE + " (question_id, value, position, type, next_form_element_id, " +
+                "next_form_element_type, is_next_form_element_default, is_custom, image) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+        JsonArray expectedParams = new JsonArray("[\"1\",\"formulaire.other\",2,\"TXT\",29,\"SECTION\",false,true, " +
+                "\"/workspace/document/25389fc4-dbd8-4952-b4bd-bce9fb30b559\"]");
 
         vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
             JsonObject body = (JsonObject) message.body();
@@ -78,9 +81,10 @@ public class DefaultQuestionChoiceServiceTest {
         String locale = "fr";
 
         String expectedQuery = "UPDATE " + QUESTION_CHOICE_TABLE + " SET value = ?, position = ?, type = ?, " +
-                "next_form_element_id = ?, next_form_element_type = ?, is_next_form_element_default = ?, is_custom = ? " +
-                "WHERE id = ? RETURNING *;";
-        JsonArray expectedParams = new JsonArray("[\"formulaire.other\",2,\"TXT\",29,\"SECTION\",false,true,1]");
+                "next_form_element_id = ?, next_form_element_type = ?, is_next_form_element_default = ?, is_custom = ?, " +
+                "image = ? WHERE id = ? RETURNING *;";
+        JsonArray expectedParams = new JsonArray("[\"formulaire.other\",2,\"TXT\",29,\"SECTION\",false,true, " +
+                "\"/workspace/document/25389fc4-dbd8-4952-b4bd-bce9fb30b559\", 1]");
 
         vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
             JsonObject body = (JsonObject) message.body();

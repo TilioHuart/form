@@ -15,6 +15,7 @@ public class QuestionChoice implements Model<QuestionChoice> {
     private FormElementTypes nextFormElementType;
     private Boolean isNextFormElementDefault;
     private Boolean isCustom;
+    private String image;
 
 
     // Constructors
@@ -34,6 +35,7 @@ public class QuestionChoice implements Model<QuestionChoice> {
                 FormElementTypes.getFormElementType(questionChoice.getString(NEXT_FORM_ELEMENT_TYPE, null));
         this.isNextFormElementDefault = questionChoice.getBoolean(IS_NEXT_FORM_ELEMENT_DEFAULT, false);
         this.isCustom = questionChoice.getBoolean(IS_CUSTOM, false);
+        this.image = questionChoice.getString(IMAGE, null);
     }
 
 
@@ -56,6 +58,8 @@ public class QuestionChoice implements Model<QuestionChoice> {
     public Boolean getIsNextFormElementDefault() { return isNextFormElementDefault; }
 
     public Boolean getIsCustom() { return isCustom; }
+
+    public String getImage() { return image; }
 
 
     // Setters
@@ -105,6 +109,11 @@ public class QuestionChoice implements Model<QuestionChoice> {
         return this;
     }
 
+    public QuestionChoice setImage(String image) {
+        this.image = image;
+        return this;
+    }
+
 
     // Functions
 
@@ -118,7 +127,8 @@ public class QuestionChoice implements Model<QuestionChoice> {
                 .put(NEXT_FORM_ELEMENT_ID, this.nextFormElementId)
                 .put(NEXT_FORM_ELEMENT_TYPE, this.nextFormElementType)
                 .put(IS_NEXT_FORM_ELEMENT_DEFAULT, this.isNextFormElementDefault)
-                .put(IS_CUSTOM, this.isCustom);
+                .put(IS_CUSTOM, this.isCustom)
+                .put(IMAGE, this.image);
     }
 
     @Override

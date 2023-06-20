@@ -22,6 +22,7 @@ export class QuestionChoice {
     is_next_form_element_default: boolean;
     is_custom: boolean;
     nbResponses: number;
+    image?: string;
 
     constructor (questionId?: number, position: number = 0, value?: string) {
         this.id = null;
@@ -35,6 +36,7 @@ export class QuestionChoice {
         this.is_next_form_element_default = false;
         this.is_custom = false;
         this.nbResponses = 0;
+        this.image = null;
     }
 
     toJson() : Object {
@@ -48,7 +50,8 @@ export class QuestionChoice {
             next_form_element_id: this.next_form_element_id,
             next_form_element_type: this.next_form_element_type,
             is_next_form_element_default: this.is_next_form_element_default,
-            is_custom: this.is_custom
+            is_custom: this.is_custom,
+            image: this.image
         }
     }
 
