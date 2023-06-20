@@ -96,4 +96,14 @@ export abstract class FormElement implements Selectable {
         }
         this.label = label;
     }
+
+    abstract getPayload(): FormElementPayload;
+}
+
+export interface FormElementPayload {
+    id: number;
+    form_id: number;
+    title: string;
+    position: number;
+    form_element_type: FormElementType;
 }

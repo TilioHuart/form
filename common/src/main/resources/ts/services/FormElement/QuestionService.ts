@@ -1,7 +1,7 @@
 import {idiom, ng, notify} from 'entcore';
 import http from 'axios';
 import {DataUtils} from "../../utils";
-import {Question} from "../../models";
+import {Question, QuestionPayload} from "../../models";
 import {Mix} from "entcore-toolkit";
 
 export interface QuestionService {
@@ -51,7 +51,8 @@ export const questionService: QuestionService = {
 
     async create(question: Question) : Promise<any> {
         try {
-            return DataUtils.getData(await http.post(`/formulaire/forms/${question.form_id}/questions`, question));
+            let questionPayload: QuestionPayload = new QuestionPayload(question);
+            return DataUtils.getData(await http.post(`/formulaire/forms/${question.form_id}/questions`, questionPayload));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.create'));
             throw err;
@@ -61,9 +62,10 @@ export const questionService: QuestionService = {
     async update(questions: Question[]) : Promise<Question[]> {
         try {
             if (questions.length <= 0) {
-                return []
+                return [];
             }
-            return Mix.castArrayAs(Question, DataUtils.getData(await http.put(`/formulaire/forms/${questions[0].form_id}/questions`, questions)));
+            let questionsPayload: QuestionPayload[] = questions.map((q: Question) => new QuestionPayload(q));
+            return Mix.castArrayAs(Question, DataUtils.getData(await http.put(`/formulaire/forms/${questions[0].form_id}/questions`, questionsPayload)));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.update'));
             throw err;

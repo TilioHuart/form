@@ -1,7 +1,14 @@
 import {Mix, Selection} from "entcore-toolkit";
 import {idiom, notify} from "entcore";
 import {questionChoiceService, questionService} from "../../services";
-import {FormElements, QuestionChoice, QuestionChoices, Section} from "@common/models";
+import {
+    FormElementPayload,
+    FormElements,
+    QuestionChoice,
+    QuestionChoicePayload,
+    QuestionChoices,
+    Section
+} from "@common/models";
 import {Types} from "@common/models";
 import {FormElement} from "./FormElement";
 import {Distribution, Distributions} from "@common/models";
@@ -274,6 +281,10 @@ export class Question extends FormElement {
         if (!this.conditional || this.choices.all.length <= 0) return [];
         return this.choices.all.map((c: QuestionChoice) => c.getNextFormElement(formElements));
     }
+
+    getPayload = () : FormElementPayload => {
+        return new QuestionPayload(this);
+    }
 }
 
 export class Questions extends Selection<Question> {
@@ -330,6 +341,86 @@ export class Questions extends Selection<Question> {
                 }
                 question.children.all.sort((a: Question, b: Question) => a.matrix_position - b.matrix_position);
             }
+        }
+    }
+}
+
+export class QuestionPayload implements FormElementPayload {
+    id: number;
+    form_id: number;
+    title: string;
+    position: number;
+    form_element_type: FormElementType;
+    nb_responses: number;
+    selected: boolean;
+    label: string;
+    question_type: number;
+    statement: string;
+    mandatory: boolean;
+    section_id: number;
+    section_position: number;
+    conditional: boolean;
+    matrix_id: number;
+    matrix_position: number;
+    choices: QuestionChoicePayload[];
+    placeholder: string;
+    children: QuestionPayload[];
+    cursor_min_val: number;
+    cursor_max_val: number;
+    cursor_step: number;
+    cursor_min_label: string;
+    cursor_max_label: string;
+
+    constructor(question: Question) {
+        this.id = typeof question.id == 'number' ? question.id : null;
+        this.form_id = typeof question.form_id == 'number' ? question.form_id : null;
+        this.title = question.title ? question.title : "";
+        this.position = question.position ? question.position : null;
+        this.form_element_type = question.form_element_type ? question.form_element_type : FormElementType.QUESTION;
+        this.label = question.label ? question.label : null;
+        this.question_type = question.question_type ? question.question_type : null;
+        this.statement = question.statement ? question.statement : null;
+        this.mandatory = question.mandatory ? question.mandatory : false;
+        this.statement = question.statement ? question.statement : null;
+        this.section_id = typeof question.section_id == 'number' ? question.section_id : null;
+        this.section_position = question.section_position ? question.section_position : null;
+        this.conditional = question.conditional ? question.conditional : false;
+        this.matrix_id = typeof question.matrix_id == 'number' ? question.matrix_id : null;
+        this.matrix_position = question.matrix_position ? question.matrix_position : null;
+        this.choices = question.choices.all.map((c: QuestionChoice) => new QuestionChoicePayload(c));
+        this.children = question.children.all.map((q: Question) => new QuestionPayload(q));
+        this.placeholder = question.placeholder ? question.placeholder : null;
+        this.cursor_min_val = question.cursor_min_val ? question.cursor_min_val : null;
+        this.cursor_max_val = question.cursor_max_val ? question.cursor_max_val : null;
+        this.cursor_step = question.cursor_step ? question.cursor_step : null;
+        this.cursor_min_label = question.cursor_min_label ? question.cursor_min_label : null;
+        this.cursor_max_label = question.cursor_max_label ? question.cursor_max_label : null;
+    }
+
+    toJson() : Object {
+        return {
+            id: this.id,
+            form_id: this.form_id,
+            title: this.title,
+            placeholder: this.placeholder,
+            position: this.position,
+            selected: this.selected,
+            question_type: this.question_type,
+            statement: this.statement,
+            mandatory: this.mandatory,
+            section_id: this.section_id,
+            section_position: this.section_position,
+            conditional: this.conditional,
+            matrix_id: this.matrix_id,
+            matrix_position: this.matrix_position,
+            choices: this.choices,
+            children: this.children,
+            cursor_min_val: this.cursor_min_val,
+            cursor_max_val: this.cursor_max_val,
+            cursor_step: this.cursor_step,
+            cursor_min_label: this.cursor_min_label,
+            cursor_max_label: this.cursor_max_label,
+            form_element_type: this.form_element_type
         }
     }
 }

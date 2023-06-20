@@ -1,5 +1,5 @@
 import {idiom, ng, notify} from 'entcore';
-import {FormElement, Question, Section} from "../../models";
+import {FormElement, FormElementPayload, Question, QuestionPayload, Section, SectionPayload} from "../../models";
 import {questionService, sectionService} from "../../services";
 import {DataUtils, FormElementUtils} from "../../utils";
 import http from "axios";
@@ -91,7 +91,8 @@ export const formElementService: FormElementService = {
                 return sectionService.update(sections);
             }
             else if (sections.length > 0 && questions.length > 0) {
-                return DataUtils.getData(await http.put(`/formulaire/forms/${formElements[0].form_id}/elements`, formElements));
+                let formElementsPayload: FormElementPayload[] = formElements.map((e: FormElement) => e.getPayload());
+                return DataUtils.getData(await http.put(`/formulaire/forms/${formElements[0].form_id}/elements`, formElementsPayload));
             }
             else {
                 return [];

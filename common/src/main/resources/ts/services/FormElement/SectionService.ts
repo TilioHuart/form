@@ -1,7 +1,7 @@
 import {idiom, ng, notify} from 'entcore';
 import http from 'axios';
 import {DataUtils} from "../../utils";
-import {Question, Section, Sections} from "../../models";
+import {Section, SectionPayload} from "../../models";
 import {Mix} from "entcore-toolkit";
 
 export interface SectionService {
@@ -41,7 +41,8 @@ export const sectionService: SectionService = {
 
     async create(section: Section) : Promise<any> {
         try {
-            return DataUtils.getData(await http.post(`/formulaire/forms/${section.form_id}/sections`, section));
+            let sectionPayload: SectionPayload = new SectionPayload(section);
+            return DataUtils.getData(await http.post(`/formulaire/forms/${section.form_id}/sections`, sectionPayload));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.sectionService.create'));
             throw err;
@@ -53,8 +54,9 @@ export const sectionService: SectionService = {
             if (sections.length <= 0) {
                 return [];
             }
-            let data = DataUtils.getData(await http.put(`/formulaire/forms/${sections[0].form_id}/sections`, sections));
-            let updatedSections = Mix.castArrayAs(Section, data);
+            let sectionsPayload: SectionPayload[] = sections.map((s: Section) => new SectionPayload(s));
+            let data: any = DataUtils.getData(await http.put(`/formulaire/forms/${sections[0].form_id}/sections`, sectionsPayload));
+            let updatedSections: Section[] = Mix.castArrayAs(Section, data);
             for (let section of updatedSections) {
                 await section.questions.sync(section.id, true);
             }

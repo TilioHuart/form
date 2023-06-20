@@ -99,3 +99,41 @@ export class QuestionChoices {
         }
     }
 }
+
+export class QuestionChoicePayload {
+    id: number;
+    question_id: number;
+    value: string;
+    position: number;
+    type: ChoiceTypes;
+    next_form_element_id: number;
+    next_form_element_type: FormElementType;
+    is_next_form_element_default: boolean;
+    is_custom: boolean;
+
+    constructor (questionChoice: QuestionChoice) {
+        this.id = questionChoice.id ? questionChoice.id : null;
+        this.question_id = questionChoice.question_id ? questionChoice.question_id : null;
+        this.value = questionChoice.value ? questionChoice.value : "";
+        this.position = questionChoice.position ? questionChoice.position : null;
+        this.type = questionChoice.type ? questionChoice.type : ChoiceTypes.TXT;
+        this.next_form_element_id = questionChoice.next_form_element_id ? questionChoice.next_form_element_id : null;
+        this.next_form_element_type = questionChoice.next_form_element_type ? questionChoice.next_form_element_type : null;
+        this.is_next_form_element_default = questionChoice.is_next_form_element_default ? questionChoice.is_next_form_element_default : false;
+        this.is_custom = questionChoice.is_custom ? questionChoice.is_custom : false;
+    }
+
+    toJson() : Object {
+        return {
+            id: this.id,
+            question_id: this.question_id,
+            value: this.value,
+            position: this.position,
+            type: this.type,
+            next_form_element_id: this.next_form_element_id,
+            next_form_element_type: this.next_form_element_type,
+            is_next_form_element_default: this.is_next_form_element_default,
+            is_custom: this.is_custom
+        }
+    }
+}

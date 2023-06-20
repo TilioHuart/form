@@ -1,6 +1,6 @@
 import {idiom, ng, notify} from 'entcore';
 import http from 'axios';
-import {QuestionChoice} from '../models';
+import {QuestionChoice, QuestionChoicePayload} from '../models';
 import {DataUtils} from "../utils";
 
 export interface QuestionChoiceService {
@@ -41,7 +41,8 @@ export const questionChoiceService: QuestionChoiceService = {
 
     async create(choice: QuestionChoice) : Promise<any> {
         try {
-            return DataUtils.getData(await http.post(`/formulaire/questions/${choice.question_id}/choices`, choice, { headers: { Accept: 'application/json;version=1.9'} }));
+            let choicePayload: QuestionChoicePayload = new QuestionChoicePayload(choice);
+            return DataUtils.getData(await http.post(`/formulaire/questions/${choice.question_id}/choices`, choicePayload, { headers: { Accept: 'application/json;version=1.9'} }));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionChoiceService.create'));
             throw err;
@@ -50,7 +51,8 @@ export const questionChoiceService: QuestionChoiceService = {
 
     async update(choice: QuestionChoice) : Promise<any> {
         try {
-            return DataUtils.getData(await http.put(`/formulaire/choices/${choice.id}`, choice, { headers: { Accept: 'application/json;version=1.9'} }));
+            let choicePayload: QuestionChoicePayload = new QuestionChoicePayload(choice);
+            return DataUtils.getData(await http.put(`/formulaire/choices/${choice.id}`, choicePayload, { headers: { Accept: 'application/json;version=1.9'} }));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionChoiceService.update'));
             throw err;
