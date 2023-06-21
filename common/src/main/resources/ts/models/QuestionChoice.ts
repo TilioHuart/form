@@ -110,6 +110,7 @@ export class QuestionChoicePayload {
     next_form_element_type: FormElementType;
     is_next_form_element_default: boolean;
     is_custom: boolean;
+    image: string;
 
     constructor (questionChoice: QuestionChoice) {
         this.id = questionChoice.id ? questionChoice.id : null;
@@ -121,6 +122,7 @@ export class QuestionChoicePayload {
         this.next_form_element_type = questionChoice.next_form_element_type ? questionChoice.next_form_element_type : null;
         this.is_next_form_element_default = questionChoice.is_next_form_element_default ? questionChoice.is_next_form_element_default : false;
         this.is_custom = questionChoice.is_custom ? questionChoice.is_custom : false;
+        this.image = questionChoice.image ? questionChoice.image : null;
     }
 
     toJson() : Object {
@@ -133,7 +135,8 @@ export class QuestionChoicePayload {
             next_form_element_id: this.next_form_element_id,
             next_form_element_type: this.next_form_element_type,
             is_next_form_element_default: this.is_next_form_element_default,
-            is_custom: this.is_custom
+            is_custom: this.is_custom,
+            image: this.image
         }
     }
 }
