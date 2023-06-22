@@ -39,12 +39,11 @@ public class Formulaire extends BaseServer {
 
 		final EventBus eb = getEventBus(vertx);
 		final TimelineHelper timelineHelper = new TimelineHelper(vertx, eb, config);
-		EventStore eventStore = EventStoreFactory.getFactory().getEventStore(Formulaire.class.getSimpleName());
+		final EventStore eventStore = EventStoreFactory.getFactory().getEventStore(Formulaire.class.getSimpleName());
+		final Storage storage = new StorageFactory(vertx, config).getStorage();
 
 		// Set RepositoryEvents implementation used to process events published for transition
 		setRepositoryEvents(new FormulaireRepositoryEvents(vertx));
-
-		final Storage storage = new StorageFactory(vertx, config).getStorage();
 
 
 		// Create and parameter confs for all controllers using sharing system

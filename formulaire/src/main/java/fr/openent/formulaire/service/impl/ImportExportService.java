@@ -3,13 +3,13 @@ package fr.openent.formulaire.service.impl;
 import fr.openent.form.core.enums.FormElementTypes;
 import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.form.helpers.FutureHelper;
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
+import io.vertx.core.*;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.entcore.common.folders.FolderImporter;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.sql.SqlStatementsBuilder;
@@ -28,10 +28,12 @@ public class ImportExportService {
     private static final Logger log = LoggerFactory.getLogger(ImportExportService.class);
     private final Sql sql;
     private final FileSystem fs;
+    protected final FolderImporter fileImporter;
 
-    public ImportExportService(Sql sql, FileSystem fs) {
+    public ImportExportService(Sql sql, FileSystem fs, Vertx vertx) {
         this.sql = sql;
         this.fs = fs;
+        fileImporter = new FolderImporter(vertx, vertx.fileSystem(), vertx.eventBus());
     }
 
     // Export
@@ -370,8 +372,8 @@ public class ImportExportService {
 
         SqlStatementsBuilder s = new SqlStatementsBuilder();
         String query = "INSERT INTO " + QUESTION_CHOICE_TABLE + " (question_id, value, type, position, is_custom, " +
-                "next_form_element_id, next_form_element_type, is_next_form_element_default) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+                "next_form_element_id, next_form_element_type, is_next_form_element_default, image) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
 
         s.raw(TRANSACTION_BEGIN_QUERY);
         for (int i = 0; i < results.size(); ++i) {
@@ -388,7 +390,8 @@ public class ImportExportService {
                     .add(entry.getBoolean(fields.indexOf(IS_CUSTOM)))
                     .add(nextFormElementId)
                     .add(nextFormElementType)
-                    .add(entry.getBoolean(fields.indexOf(IS_NEXT_FORM_ELEMENT_DEFAULT)));
+                    .add(entry.getBoolean(fields.indexOf(IS_NEXT_FORM_ELEMENT_DEFAULT)))
+                    .add(entry.getString(fields.indexOf(IMAGE)));
             s.prepared(query, params);
         }
         s.raw(TRANSACTION_COMMIT_QUERY);

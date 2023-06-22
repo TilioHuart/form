@@ -30,7 +30,7 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
 
     public FormulaireRepositoryEvents(Vertx vertx) {
         super(vertx);
-        this.importExportService = new ImportExportService(sql, fs);
+        this.importExportService = new ImportExportService(sql, fs, vertx);
     }
 
     // Export/Import events
@@ -204,7 +204,12 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
                 return importExportService.importQuestionSpecifics(tableContents.get(QUESTION_SPECIFIC_FIELDS), tableMappingIds.get(QUESTION));
             })
             .compose(newQuestionSpecifics -> importExportService.importQuestionChoices(tableContents.get(QUESTION_CHOICE), tableMappingIds.get(QUESTION), tableMappingIds.get(SECTION)))
-            .compose(newQuestionChoices -> importExportService.createFolderLinks(tableMappingIds.get(FORM), userId))
+            .compose(newQuestionChoices -> {
+                Promise<JsonArray> promise = Promise.promise();
+                super.importDocumentsDependancies(importPath, userId, userName, new SqlStatementsBuilder().build(), FutureHelper.handler(promise));
+                return promise.future();
+            })
+            .compose(attachments -> importExportService.createFolderLinks(tableMappingIds.get(FORM), userId))
             .onSuccess(result -> {
                 int nbFormsImported = tableMappingIds.get(FORM).size();
                 JsonObject finalResultInfos = new JsonObject().put(STATUS, OK)

@@ -34,6 +34,10 @@ public class FutureHelper {
         return handlerEither(promise, null);
     }
 
+    public static <R> Handler<R> handler(Promise<R> promise) {
+        return promise::complete;
+    }
+
 
     // Promise AsyncResult
 

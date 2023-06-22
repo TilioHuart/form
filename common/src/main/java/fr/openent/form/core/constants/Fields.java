@@ -164,6 +164,7 @@ public class Fields {
     public static final String DISTRIBUTION_CAPTCHA = "distribution_captcha";
     public static final String DISTRIBUTION_KEY = "distribution_key";
     public static final String DISTRIBUTION_KEY_ = "distribution_key_";
+    public static final String DOCUMENTS = "Documents";
     public static final String ELEMENT_POSITION = "element_position";
     public static final String ERROR = "error";
     public static final String FIELDS = "fields";
