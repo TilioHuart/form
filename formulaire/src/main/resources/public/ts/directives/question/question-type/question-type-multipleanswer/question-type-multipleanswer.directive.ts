@@ -1,5 +1,5 @@
 import {Directive, ng} from "entcore";
-import {Question} from "@common/models";
+import {Form, Question} from "@common/models";
 import {I18nUtils} from "@common/utils";
 import {Direction} from "@common/core/enums";
 import {RootsConst} from "../../../../core/constants/roots.const";
@@ -7,6 +7,7 @@ import {RootsConst} from "../../../../core/constants/roots.const";
 interface IQuestionTypeMultipleanswerProps {
     question: Question;
     hasFormResponses: boolean;
+    form: Form;
 }
 
 interface IViewModel {
@@ -24,6 +25,7 @@ interface IViewModel {
 class Controller implements ng.IController, IViewModel {
     question: Question;
     hasFormResponses: boolean;
+    form: Form;
     i18n: I18nUtils;
     direction: typeof Direction;
     lightbox: any;
@@ -73,7 +75,8 @@ function directive() {
         transclude: true,
         scope: {
             question: '=',
-            hasFormResponses: '='
+            hasFormResponses: '=',
+            form: '<'
         },
         controllerAs: 'vm',
         bindToController: true,

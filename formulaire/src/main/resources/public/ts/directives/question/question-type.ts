@@ -49,7 +49,8 @@ export const questionType: Directive = ng.directive('questionType', () => {
                 <!-- MULTIPLEANSWER -->
                 <question-type-multipleanswer ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER"
                                               question="vm.question"
-                                              has-form-responses="vm.hasFormResponses">
+                                              has-form-responses="vm.hasFormResponses"
+                                              form="vm.form">
                 </question-type-multipleanswer>
                 <!-- DATE -->
                 <question-type-date ng-if="vm.question.question_type == vm.types.DATE"

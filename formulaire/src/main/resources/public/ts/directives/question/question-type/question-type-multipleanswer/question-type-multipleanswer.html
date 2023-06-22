@@ -22,7 +22,9 @@
           <i class="i-close lg-icon" ng-click="vm.deleteImageSelect($index)" ng-if="vm.question.selected && !vm.hasFormResponses && choice.image !== ''"></i>
           <image-select id="img-{{$index}}" class="initialFloat cell"
                         ng-if="vm.selectedChoiceIndex === $index && !vm.hasFormResponses"
-                        default="/img/illustrations/image-default.svg" ng-model="choice.image">
+                        ng-model="choice.image"
+                        default="/img/illustrations/image-default.svg"
+                        visibility="vm.form.is_public ? 'public' : ''">
           </image-select>
           <img ng-src="[[ choice.image || '/formulaire/public/img/empty-image.png' ]]"
                ng-if="choice.image && vm.selectedChoiceIndex !== $index"
