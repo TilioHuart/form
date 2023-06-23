@@ -102,12 +102,12 @@ export class Question extends FormElement {
         }
 
         this.choices.all.push(choice);
-        this.choices.all.sort((a, b) => a.position - b.position);
+        this.choices.all.sort((a: QuestionChoice, b: QuestionChoice) => a.position - b.position);
     }
 
     moveChoice = (choice: QuestionChoice, direction: string) : void => {
         FormElementUtils.switchPositions(this.choices, choice.position - 1, direction, PropPosition.POSITION);
-        this.choices.all.sort((a, b) => a.position - b.position);
+        this.choices.all.sort((a: QuestionChoice, b: QuestionChoice) => a.position - b.position);
     }
 
     deleteChoice = async (index: number) : Promise<void> => {
@@ -118,7 +118,7 @@ export class Question extends FormElement {
             this.choices.all[i].position--;
         }
         this.choices.all.splice(index,1);
-        this.choices.all.sort((a, b) => a.position - b.position);
+        this.choices.all.sort((a: QuestionChoice, b: QuestionChoice) => a.position - b.position);
         return;
     }
 
@@ -284,6 +284,11 @@ export class Question extends FormElement {
 
     getPayload = () : FormElementPayload => {
         return new QuestionPayload(this);
+    }
+
+    canHaveImages = () : boolean => {
+        return this.question_type == Types.SINGLEANSWER
+            || this.question_type == Types.SINGLEANSWERRADIO;
     }
 }
 

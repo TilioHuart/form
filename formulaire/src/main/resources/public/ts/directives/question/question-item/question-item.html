@@ -1,6 +1,7 @@
 <div class="question-item" ng-class="vm.question.section_id ? 'twelve' : 'nine'">
     <div class="domino" ng-class="{
-                'questionError': !vm.question.title || vm.question.choices.length === 0 || (vm.types.CURSOR && !vm.cursorChoiceIsConsistent()),
+                'questionError': !vm.question.title || vm.question.choices.length === 0 || (vm.types.CURSOR && !vm.cursorChoiceIsConsistent())
+                || (vm.question.canHaveImages() && vm.isImageMissingLabel(),
                 'disabled': vm.hasFormResponses || vm.question.selected
                 }">
         <div class="question-top grab">
@@ -50,7 +51,7 @@
     <div class="warning" ng-if="vm.question.question_type == vm.types.CURSOR && !vm.cursorChoiceIsConsistent()">
         <i18n>formulaire.question.cursor.inconsistency.between.values</i18n>
     </div>
-    <div class="warning" ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER && vm.isImageMissingLabel()">
+    <div class="warning" ng-if="vm.question.canHaveImages() && vm.isImageMissingLabel()">
         <i18n>formulaire.question.multipleanswer.value.mandatory</i18n>
     </div>
 </div>

@@ -9,7 +9,7 @@
         <i class="i-chevron-down lg-icon"></i>
       </div>
     </div>
-    <label class="twelve left-spacing-twice">
+    <label class="twelve left-spacing-twice" ng-class="vm.question.conditional ? 'five four-mobile' : 'twelve'">
       <input type="checkbox" id="check-[[choice.id]]" disabled>
       <span style="cursor: default"></span>
       <input type="text" class="width95 ten-mobile" ng-model="choice.value" ng-if="!vm.question.selected && !choice.is_custom"
@@ -19,7 +19,8 @@
       <input type="text" class="width95 ten-mobile" ng-if="choice.is_custom"
              value="[[vm.i18n.translate('formulaire.other')]] : " disabled>
       <div class="image-container">
-          <i class="i-close lg-icon" ng-click="vm.deleteImageSelect($index)" ng-if="vm.question.selected && !vm.hasFormResponses && choice.image !== ''"></i>
+          <i class="i-close lg-icon" ng-click="vm.deleteImageSelect($index)"
+             ng-if="vm.question.selected && !vm.hasFormResponses && choice.image !== ''"></i>
           <image-select id="img-{{$index}}" class="initialFloat cell"
                         ng-if="vm.selectedChoiceIndex === $index && !vm.hasFormResponses"
                         ng-model="choice.image"

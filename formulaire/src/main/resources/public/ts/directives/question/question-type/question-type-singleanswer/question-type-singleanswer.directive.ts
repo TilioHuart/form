@@ -20,8 +20,11 @@ interface IViewModel extends ng.IController, IQuestionTypeSingleanswerProps {
     followingFormElement: FormElement;
     i18n: I18nUtils;
     direction: typeof Direction;
+    selectedChoiceIndex: number;
 
     deleteChoice(index: number): Promise<void>;
+    displayImageSelect(index: number): void;
+    deleteImageSelect(index: number): void;
     filterNextElements(formElement: FormElement): boolean;
     onSelectOption(choice: QuestionChoice): void;
 }
@@ -34,10 +37,12 @@ class Controller implements IViewModel {
     followingFormElement: FormElement;
     i18n: I18nUtils;
     direction: typeof Direction;
+    selectedChoiceIndex: number;
 
     constructor(private $scope: IQuestionTypeSingleanswerRadioScope, private $sce: ng.ISCEService) {
         this.i18n = I18nUtils;
         this.direction = Direction;
+        this.selectedChoiceIndex = -1;
     }
 
     $onInit = async () : Promise<void> => {
@@ -65,6 +70,16 @@ class Controller implements IViewModel {
         choice.is_next_form_element_default = choice.next_form_element ?
             choice.next_form_element.equals(followingFormElement) :
             followingFormElement == null;
+    }
+
+    displayImageSelect(index: number): void {
+        this.selectedChoiceIndex = index;
+    }
+
+    deleteImageSelect = (index: number): void => {
+        this.selectedChoiceIndex = -1;
+        const choice = this.question.choices.all[index];
+        choice.image = null;
     }
 }
 
