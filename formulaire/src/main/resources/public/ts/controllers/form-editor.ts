@@ -172,7 +172,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
             // Check choice.image and choice.value for questions of type MULTIPLEANSWER & SINGLEANSWER
             let multipleanswerOrSingleanswer: Question[] =
-                vm.formElements.getAllQuestions().filter((q: Question) => (q.canHaveImages()));
+                vm.formElements.getAllQuestions().filter((q: Question) => q.canHaveImages());
             const foundChoice = (<any>multipleanswerOrSingleanswer).flatMap((question: Question) => question.choices.all)
                 .find((choice: QuestionChoice) => (choice.image && !choice.value));
 

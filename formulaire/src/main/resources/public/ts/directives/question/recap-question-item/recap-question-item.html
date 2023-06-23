@@ -51,15 +51,29 @@
                 <span data-ng-bind-html="vm.getHtmlDescription(filename)"></span>
             </div>
         </div>
-        <div ng-if="vm.question.question_type == vm.types.SINGLEANSWERRADIO">
+        <div ng-if="vm.question.question_type == vm.types.SINGLEANSWERRADIO" ng-class="{'image-container': vm.hasImages()}">
             <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
-                <label>
-                    <input type="radio" disabled checked ng-if="vm.isSelectedChoice(choice)">
-                    <input type="radio" disabled ng-if="!vm.isSelectedChoice(choice)">
-                    <span style="cursor: default"></span>
-                    <span ng-if="!choice.is_custom || !vm.isSelectedChoice(choice)">[[choice.value]]</span>
-                    <span ng-if="choice.is_custom && vm.isSelectedChoice(choice)" ng-bind-html="vm.getStringResponse()"></span>
-                </label>
+                <div ng-if="vm.hasImages()">
+                    <label class="choice-image">
+                        <input type="radio" disabled checked ng-if="vm.isSelectedChoice(choice)">
+                        <input type="radio" disabled ng-if="!vm.isSelectedChoice(choice)">
+                        <span style="cursor: default"></span>
+                        <span ng-if="!choice.is_custom || !vm.isSelectedChoice(choice)">[[choice.value]]</span>
+                        <img data-ng-src="[[choice.image]]"
+                             data-ng-if="choice.image !== null && choice.image !== undefined && choice.image !== ''"
+                             alt="choice image">
+                        <span ng-if="choice.is_custom && vm.isSelectedChoice(choice)" ng-bind-html="vm.getStringResponse()"></span>
+                    </label>
+                </div>
+                <div ng-if="!vm.hasImages()">
+                    <label>
+                        <input type="radio" disabled checked ng-if="vm.isSelectedChoice(choice)">
+                        <input type="radio" disabled ng-if="!vm.isSelectedChoice(choice)">
+                        <span style="cursor: default"></span>
+                        <span ng-if="!choice.is_custom || !vm.isSelectedChoice(choice)">[[choice.value]]</span>
+                        <span ng-if="choice.is_custom && vm.isSelectedChoice(choice)" ng-bind-html="vm.getStringResponse()"></span>
+                    </label>
+                </div>
             </div>
         </div>
         <table ng-if="vm.question.question_type == vm.types.MATRIX" class="twelve matrix-table">

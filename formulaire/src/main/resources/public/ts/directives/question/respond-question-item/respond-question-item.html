@@ -63,19 +63,36 @@
         <div ng-if="vm.question.question_type == vm.types.FILE">
             <formulaire-picker-file files="vm.files" multiple="true" input-guard></formulaire-picker-file>
         </div>
-        <div ng-if ="vm.question.question_type == vm.types.SINGLEANSWERRADIO">
+        <div ng-if="vm.question.question_type == vm.types.SINGLEANSWERRADIO" ng-class="{'image-container': vm.hasImages()}">
             <div ng-repeat ="choice in vm.question.choices.all | orderBy:['position', 'id']">
-                <label>
-                    <input type="radio" ng-model="vm.responses.all[0].choice_id" ng-value="[[choice.id]]"
-                           ng-click="vm.onClickChoice(choice)" input-guard>
-                    <span>[[choice.value]]</span>
-                    <span ng-if="choice.is_custom"> :
-                        <input type="text" ng-model="vm.responses.all[0].custom_answer"
-                                           ng-change="vm.deselectIfEmpty(choice)"
-                                           i18n-placeholder="formulaire.response.custom.write"
-                        >
-                    </span>
-                </label>
+                <div ng-if="vm.hasImages()">
+                    <label class="choice-image">
+                        <input type="radio" ng-model="vm.responses.all[0].choice_id" ng-value="[[choice.id]]"
+                            ng-click="vm.onClickChoice(choice)" input-guard>
+                        <span>[[choice.value]]</span>
+                        <img data-ng-src="[[choice.image]]"
+                             data-ng-if="choice.image !== null && choice.image !== undefined && choice.image !== ''"
+                             alt="choice image">
+                        <span ng-if="choice.is_custom"> :
+                            <input type="text" ng-model="vm.responses.all[0].custom_answer"
+                                   ng-change="vm.deselectIfEmpty(choice)"
+                                   i18n-placeholder="formulaire.response.custom.write"
+                            >
+                        </span>
+                    </label>
+                </div>
+                <div ng-if="!vm.hasImages()">
+                    <label>
+                        <input type="radio" ng-model="vm.responses.all[0].choice_id" ng-value="[[choice.id]]"
+                               ng-click="vm.onClickChoice(choice)" input-guard>
+                        <span>[[choice.value]]</span>
+                        <span ng-if="choice.is_custom"> :
+                            <input type="text" ng-model="vm.responses.all[vm.mapChoiceResponseIndex.get(choice)].custom_answer"
+                                   ng-change="vm.deselectIfEmpty(choice)"
+                                   i18n-placeholder="formulaire.response.custom.write">
+                        </span>
+                    </label>
+                </div>
             </div>
         </div>
         <div ng-if ="vm.question.question_type == vm.types.CURSOR">
