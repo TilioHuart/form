@@ -1,5 +1,5 @@
 import {Directive, ng} from "entcore";
-import {FormElement, FormElements, Question, QuestionChoice} from "@common/models";
+import {Form, FormElement, FormElements, Question, QuestionChoice} from "@common/models";
 import {I18nUtils} from "@common/utils";
 import {Direction} from "@common/core/enums";
 import {RootsConst} from "../../../../core/constants/roots.const";
@@ -10,6 +10,7 @@ interface IQuestionTypeSingleanswerProps {
     hasFormResponses: boolean;
     formElements: FormElements;
     isRadio: boolean;
+    form: Form;
 }
 
 interface IQuestionTypeSingleanswerRadioScope extends IScope, IQuestionTypeSingleanswerProps{
@@ -34,6 +35,7 @@ class Controller implements IViewModel {
     hasFormResponses: boolean;
     formElements: FormElements;
     isRadio: boolean;
+    form: Form;
     followingFormElement: FormElement;
     i18n: I18nUtils;
     direction: typeof Direction;
@@ -92,7 +94,8 @@ function directive() {
             question: '=',
             hasFormResponses: '=',
             formElements: '<',
-            isRadio: '<'
+            isRadio: '<',
+            form: '<'
         },
         controllerAs: 'vm',
         bindToController: true,

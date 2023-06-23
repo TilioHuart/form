@@ -44,7 +44,8 @@ export const questionType: Directive = ng.directive('questionType', () => {
                                             question="vm.question"
                                             has-form-responses="vm.hasFormResponses"
                                             form-elements="vm.formElements"
-                                            is-radio="false">
+                                            is-radio="false"
+                                            form="vm.form">
                 </question-type-singleanswer>
                 <!-- MULTIPLEANSWER -->
                 <question-type-multipleanswer ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER"
