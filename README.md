@@ -13,6 +13,7 @@
     ...
     "zimbra-max-recipients": ${zimbraMaxRecipients},
     "rgpd-cron": "${rgpdCron}",
+    "notify-cron": "${notifyCron}",
     "max-responses-export-PDF": ${maxResponsesExportPDF},
     "max-users-sharing": ${maxUsersSharing}
   }
@@ -23,10 +24,13 @@ Dans votre springboard, vous devez inclure des variables d'environnement :
 
 <pre>
 zimbraMaxRecipients = Integer
-rgpdCron = String
+rgpdCron = String (exemple: 0 0 0 */1 * ? *)
+notifyCron = String (exemple: 0 0 0 */1 * ? *)
 maxResponsesExportPDF = Integer
 maxUsersSharing = Integer
 </pre>
+
+Dans ce meme fichier inclure "formulaire" dans la liste "ressourcesApplications"
 
 Il y aura aussi à ajouter des variables d'environnement dans votre ent-core.json afin d'utiliser l'export pdf :
 
