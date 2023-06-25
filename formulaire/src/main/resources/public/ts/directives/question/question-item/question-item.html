@@ -1,10 +1,11 @@
 <div class="question-item" ng-class="vm.question.section_id ? 'twelve' : 'nine'">
     <div class="domino" ng-class="{
-                'questionError': !vm.question.title || vm.question.choices.length === 0 || (vm.types.CURSOR && !vm.cursorChoiceIsConsistent())
-                || (vm.question.canHaveImages() && vm.isImageMissingLabel(),
-                'disabled': vm.hasFormResponses || vm.question.selected
-                }">
-        <div class="question-top grab">
+    'questionError': !vm.question.title || vm.question.choices.length === 0 || (vm.types.CURSOR && !vm.cursorChoiceIsConsistent())
+    || (vm.question.canHaveImages() && vm.isImageMissingLabel()),
+    'disabled': vm.hasFormResponses || vm.question.selected
+    }">
+
+    <div class="question-top grab">
             <div class="dots" ng-if="vm.reorder || !vm.hasFormResponses">
                 <i class="i-drag xl-icon"></i>
                 <i class="i-drag xl-icon"></i>
