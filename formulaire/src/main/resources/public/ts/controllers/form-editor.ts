@@ -64,6 +64,7 @@ interface ViewModel {
     PreviewPage: typeof PreviewPage;
     nestedSortables: any[];
     iconUtils: IconUtils;
+    initializing: boolean;
 
     $onInit() : Promise<void>;
 
@@ -119,6 +120,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.iconUtils = IconUtils;
 
         vm.$onInit = async () : Promise<void> => {
+            vm.initializing = true;
             vm.form = $scope.form;
             vm.form.nb_responses = vm.form.id ? (await distributionService.count(vm.form.id)).count : 0;
             await vm.formElements.sync(vm.form.id);
@@ -128,6 +130,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             $scope.safeApply();
 
             initNestedSortables();
+            vm.initializing = false;
             $scope.safeApply();
         };
 
@@ -208,6 +211,13 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.doCreateNewElement = async (code?, parentSection?) => {
             vm.dontSave = true;
 
+            if (vm.initializing) {
+                window.setTimeout(() => {
+                    vm.doCreateNewElement(code, parentSection);
+                }, 100);
+                return;
+            }
+
             vm.newElement = code ? new Question() : new Section();
             if (vm.newElement instanceof Question) {
                 vm.newElement.question_type = code;
@@ -242,6 +252,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             vm.display.lightbox.newElement = false;
             template.close('lightbox');
             vm.dontSave = false;
+            window.scrollTo(0, document.body.scrollHeight);
             $scope.safeApply();
         };
 
