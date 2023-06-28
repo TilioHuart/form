@@ -57,7 +57,7 @@ export const formTreeViewController = ng.controller('FormTreeViewController', ['
             let render: any = new dagreD3.render();
 
             // Set up an SVG group so that we can translate the final graph.
-            let svg: any = d3.select("svg");
+            let svg: any = d3.select("#tree-svg");
             let inner: any = svg.select("g");
 
             //Set up zoom support
@@ -67,7 +67,7 @@ export const formTreeViewController = ng.controller('FormTreeViewController', ['
             svg.call(zoom);
 
             // Run the renderer. This is what draws the final graph.
-            render_graph(render, nodes, edgeList, inner, svg);
+             render_graph(render, nodes, edgeList, inner, svg);
 
             // Center the graph
             const treeView: any = d3.select(".tree-view");
@@ -133,8 +133,7 @@ export const formTreeViewController = ng.controller('FormTreeViewController', ['
         }
 
         // Rendering
-
-        const render_graph = (render, nodes, edgeList, inner, svg) : void => {
+        const render_graph = (render, nodes, edgeList, inner, svg): void => {
             let nbTries: number = 100; // try 100 times, if optimal not found, give up
             let iter_cnt: number = 0;
             let optimalArray: any[] | undefined;
@@ -144,7 +143,6 @@ export const formTreeViewController = ng.controller('FormTreeViewController', ['
                 let list: any[] = TreeUtils.shuffle(edgeList);
                 if (!optimalArray) optimalArray = list;
                 setNodesAndEdges(nodes, edgeList, render, inner);
-
                 let arrows: Arrows = extractArrows(svg);
                 let collisionArrowsCnt: number = arrows.countNbCollisions();
 
@@ -190,34 +188,33 @@ export const formTreeViewController = ng.controller('FormTreeViewController', ['
             render(inner, g);
         }
 
-        const extractArrows = (svg: any) : Arrows => {
-            let nn = svg.select(".edgePaths");
-            let paths = nn._groups ? nn._groups[0][0] : nn[0][0];
+        const extractArrows = (svg: any): Arrows => {
+            let nn: any = svg.select(".edgePaths");
+            let paths: any = nn.node();
             let fc = paths.firstChild;
             let arrows: Arrows = new Arrows();
+
             while (fc) {
                 let path = fc.firstChild.getAttribute("d");
-                let coords = path.split(/,|L/)
-                    .map((c: string) => {
-                        let n: string = c;
-                        if ((c[0]=="M" || c[0]=="L")) n = c.substring(1);
-                        return parseFloat(n);
-                    })
+                let coords = path.split(/,|L/).map((c: string) => {
+                    let n: string = c;
+                    if (c[0] === "M" || c[0] === "L") n = c.substring(1);
+                    return parseFloat(n);
+                });
 
                 let arrow: Arrow = new Arrow();
-                for (let i = 0; i <= coords.length - 4; i+=2) {
-                    arrow.lines.all.push(new Line(coords[i], coords[i+1], coords[i+2], coords[i+3]));
+                for (let i = 0; i <= coords.length - 4; i += 2) {
+                    arrow.lines.all.push(new Line(coords[i], coords[i + 1], coords[i + 2], coords[i + 3]));
                 }
                 arrows.all.push(arrow);
-
                 fc = fc.nextSibling;
             }
-
             return arrows;
-        }
+        };
+
+
 
         // HTML
-
         const getHtmlNode = (formElement: FormElement) : string => {
             if (formElement instanceof Question) {
                 return `<div class="tree-view-question">
