@@ -51,7 +51,8 @@ interface ViewModel {
             reorganization: boolean,
             delete: boolean,
             undo: boolean
-        }
+        },
+        loading: boolean
     };
     preview: {
         formElement: FormElement, // Question for preview
@@ -113,7 +114,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 reorganization: false,
                 delete: false,
                 undo: false
-            }
+            },
+            loading: false
         };
         vm.PreviewPage = PreviewPage;
         vm.nestedSortables = [];
@@ -201,22 +203,19 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
         };
 
-        vm.createNewElement = async (parentSection?) : Promise<void>=> {
+        vm.createNewElement = async (parentSection?) : Promise<void> => {
+            vm.display.loading = true;
             vm.parentSection = parentSection ? parentSection : null;
             template.open('lightbox', 'lightbox/new-element');
             vm.display.lightbox.newElement = true;
+            $scope.safeApply();
+            await saveFormElements(false);
+            vm.display.loading = false;
             $scope.safeApply();
         };
 
         vm.doCreateNewElement = async (code?, parentSection?) => {
             vm.dontSave = true;
-
-            if (vm.initializing) {
-                window.setTimeout(() => {
-                    vm.doCreateNewElement(code, parentSection);
-                }, 100);
-                return;
-            }
 
             vm.newElement = code ? new Question() : new Section();
             if (vm.newElement instanceof Question) {
@@ -246,13 +245,13 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 vm.newElement.position = vm.formElements.all.length + 1;
                 vm.formElements.all.push(vm.newElement);
                 vm.nbFormElements = vm.formElements.all.length;
+                window.scrollTo(0, document.body.scrollHeight);
             }
 
             vm.parentSection = null;
             vm.display.lightbox.newElement = false;
             template.close('lightbox');
             vm.dontSave = false;
-            window.scrollTo(0, document.body.scrollHeight);
             $scope.safeApply();
         };
 

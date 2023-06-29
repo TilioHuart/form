@@ -1,23 +1,30 @@
 <lightbox class="new-element dontSave" show="vm.display.lightbox.newElement" on-close="vm.closeLightbox('newElement')">
     <h2><i18n>formulaire.element.new.title</i18n></h2>
-    <div class="section" ng-click="vm.doCreateNewElement()" ng-if="!vm.parentSection">
-        <div class="subtitle"><i18n>formulaire.element.new.section.title</i18n></div>
-        <div><i18n>formulaire.element.new.section.description</i18n></div>
-    </div>
-    <div class="question">
-        <div class="subtitle"><i18n>formulaire.element.new.question.title</i18n></div>
-        <div class="dominos">
-            <div ng-repeat="type in vm.questionTypes.all" class="item"
-                 ng-click="vm.doCreateNewElement(type.code, vm.parentSection)" title="[[vm.displayTypeDescription(type.name)]]">
-                <div class="domino">
-                    <div class="data-text">
-                        <h5>[[vm.displayTypeName(type.name)]]</h5>
-                    </div>
-                    <div class="picture">
-                        <img ng-src="[[(vm.iconUtils.displayTypeIcon(type.code)) || '/formulaire/public/img/empty-image.png']]"/>
+    <div  ng-if="!vm.display.loading">
+        <div class="section" ng-click="vm.doCreateNewElement()" ng-if="!vm.parentSection">
+            <div class="subtitle"><i18n>formulaire.element.new.section.title</i18n></div>
+            <div><i18n>formulaire.element.new.section.description</i18n></div>
+        </div>
+        <div class="question">
+            <div class="subtitle"><i18n>formulaire.element.new.question.title</i18n></div>
+            <div class="dominos">
+                <div ng-repeat="type in vm.questionTypes.all" class="item"
+                     ng-click="vm.doCreateNewElement(type.code, vm.parentSection)" title="[[vm.displayTypeDescription(type.name)]]">
+                    <div class="domino">
+                        <div class="data-text">
+                            <h5>[[vm.displayTypeName(type.name)]]</h5>
+                        </div>
+                        <div class="picture">
+                            <img ng-src="[[(vm.iconUtils.displayTypeIcon(type.code)) || '/formulaire/public/img/empty-image.png']]"/>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Loader -->
+    <div ng-if="vm.display.loading" class="twelve loader">
+        <loader min-height="'10px'"/>
     </div>
 </lightbox>
