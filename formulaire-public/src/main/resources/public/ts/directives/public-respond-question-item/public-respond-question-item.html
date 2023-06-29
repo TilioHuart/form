@@ -26,26 +26,29 @@
       <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
         <div ng-if="vm.hasImages()">
           <label class="choice-image">
-            <input type="checkbox" ng-model="vm.responses.all[vm.mapChoiceResponseIndex.get(choice)].selected" input-guard>
-            <span>[[choice.value]]</span>
+            <div class="choice-text" ng-class="{ notCustomChoice : !choice.is_custom }">
+              <input type="checkbox" ng-model="vm.responses.all[vm.mapChoiceResponseIndex.get(choice)].selected" input-guard>
+              <span>[[choice.value]]</span>
+              <span ng-if="choice.is_custom">&nbsp;:
+                <input type="text" class="customInput"
+                      ng-model="vm.responses.all[vm.mapChoiceResponseIndex.get(choice)].custom_answer"
+                      ng-change="vm.deselectIfEmpty(choice)"
+                      i18n-placeholder="formulaire.public.response.custom.write">
+                </span>
+            </div>
             <img data-ng-src="[[choice.image]]"
                  data-ng-if="choice.image !== null && choice.image !== undefined && choice.image !== ''"
                  alt="choice image">
-              <span ng-if="choice.is_custom"> :
-                 <input type="text" ng-model="vm.responses.all[vm.mapChoiceResponseIndex.get(choice)].custom_answer"
-                                    ng-change="vm.deselectIfEmpty(choice)"
-                                    i18n-placeholder="formulaire.public.response.custom.write">
-             </span>
           </label>
         </div>
         <div ng-if="!vm.hasImages()">
           <label>
             <input type="checkbox" ng-model="vm.responses.all[vm.mapChoiceResponseIndex.get(choice)].selected" input-guard>
             <span>[[choice.value]]</span>
-            <span ng-if="choice.is_custom"> :
+            <span ng-if="choice.is_custom">&nbsp;:
                <input type="text" ng-model="vm.responses.all[vm.mapChoiceResponseIndex.get(choice)].custom_answer"
-                                  ng-change="vm.deselectIfEmpty(choice)"
-                                  i18n-placeholder="formulaire.response.custom.write">
+                      ng-change="vm.deselectIfEmpty(choice)"
+                      i18n-placeholder="formulaire.response.custom.write">
             </span>
           </label>
         </div>
@@ -63,18 +66,21 @@
       <div ng-repeat ="choice in vm.question.choices.all | orderBy:['position', 'id']">
         <div ng-if="vm.hasImages()">
           <label class="choice-image">
-            <input type="radio" ng-model="vm.responses.all[0].choice_id" ng-value="choice.id"
-                   ng-click="vm.onClickChoice(choice)" input-guard>
-            <span>[[choice.value]]</span>
+            <div class="choice-text" ng-class="{ notCustomChoice : !choice.is_custom }">
+              <input type="radio" ng-model="vm.responses.all[0].choice_id" ng-value="[[choice.id]]"
+                     ng-click="vm.onClickChoice(choice)" input-guard>
+              <span>[[choice.value]]</span>
+              <span ng-if="choice.is_custom">&nbsp;:
+                <input type="text"  class="customInput"
+                       ng-model="vm.responses.all[0].custom_answer"
+                       ng-change="vm.deselectIfEmpty(choice)"
+                       i18n-placeholder="formulaire.public.response.custom.write"
+                >
+              </span>
+            </div>
             <img data-ng-src="[[choice.image]]"
                  data-ng-if="choice.image !== null && choice.image !== undefined && choice.image !== ''"
                  alt="choice image">
-            <span ng-if="choice.is_custom"> :
-                <input type="text" ng-model="vm.responses.all[0].custom_answer"
-                                   ng-change="vm.deselectIfEmpty(choice)"
-                                   i18n-placeholder="formulaire.public.response.custom.write"
-                >
-            </span>
           </label>
         </div>
         <div ng-if="!vm.hasImages()">
@@ -82,10 +88,10 @@
             <input type="radio" ng-model="vm.responses.all[0].choice_id" ng-value="[[choice.id]]"
                    ng-click="vm.onClickChoice(choice)" input-guard>
             <span>[[choice.value]]</span>
-            <span ng-if="choice.is_custom"> :
-                            <input type="text" ng-model="vm.responses.all[vm.mapChoiceResponseIndex.get(choice)].custom_answer"
-                                   ng-change="vm.deselectIfEmpty(choice)"
-                                   i18n-placeholder="formulaire.response.custom.write">
+            <span ng-if="choice.is_custom">&nbsp;:
+              <input type="text" ng-model="vm.responses.all[vm.mapChoiceResponseIndex.get(choice)].custom_answer"
+                     ng-change="vm.deselectIfEmpty(choice)"
+                     i18n-placeholder="formulaire.response.custom.write">
             </span>
           </label>
         </div>
