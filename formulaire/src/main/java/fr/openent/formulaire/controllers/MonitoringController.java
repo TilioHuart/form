@@ -65,13 +65,34 @@ public class MonitoringController extends ControllerHelper {
             .onSuccess(result -> {
                 if (result.isEmpty()) {
                     String message = "No duplicates found to clean.";
-                    result.add(new JsonObject().put(MESSAGE, message));
+                    renderJson(request,new JsonObject().put(MESSAGE, message));
+                    return;
                 }
-                renderJson(request, result.getJsonArray(2));
+                renderJson(request, result);
             })
             .onFailure(err -> {
                 log.error("[Formulaire@MonitoringController::cleanPositionDuplicates] Fail to clean duplicates : " + err.getMessage());
                 renderError(request);
             });
+    }
+
+    @Get("/scripts")
+    @ApiDoc("Get all scripts")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(SuperAdminFilter.class)
+    public void getAllScripts(HttpServerRequest request) {
+        monitoringService.getScripts()
+                .onSuccess(result -> {
+                    if (result.isEmpty()) {
+                        String message = "No script found.";
+                        renderJson(request, new JsonObject().put(MESSAGE, message));
+                        return;
+                    }
+                    renderJson(request, result);
+                })
+                .onFailure(err -> {
+                    log.error("[Formulaire@MonitoringController::getAllScripts] Fail to get scripts information : " + err.getMessage());
+                    renderError(request);
+                });
     }
 }
