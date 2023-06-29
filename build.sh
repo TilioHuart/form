@@ -22,18 +22,38 @@ clean () {
   docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle clean
 }
 
+# Node
+
 buildNode () {
   case `uname -s` in
     MINGW*)
-      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "npm install --no-bin-links && node_modules/gulp/bin/gulp.js build"
+      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "yarn install --no-bin-links && node_modules/gulp/bin/gulp.js build && yarn run build:sass"
       ;;
     *)
-      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "npm install && node_modules/gulp/bin/gulp.js build"
+      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "yarn install && node_modules/gulp/bin/gulp.js build && yarn run build:sass"
   esac
 }
 
-buildGradle () {
-  docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle shadowJar install publishToMavenLocal
+formulaire:buildNode() {
+  case $(uname -s) in
+  MINGW*)
+    docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "yarn install --no-bin-links && node_modules/gulp/bin/gulp.js build --targetModule=formulaire && yarn run build:sass"
+    ;;
+  *)
+    docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "yarn install && node_modules/gulp/bin/gulp.js build --targetModule=formulaire && yarn run build:sass"
+    ;;
+  esac
+}
+
+formulairePublic:buildNode() {
+  case $(uname -s) in
+  MINGW*)
+    docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "npm install --no-bin-links && node_modules/gulp/bin/gulp.js build --targetModule=formulaire-public && yarn run build:sass"
+    ;;
+  *)
+    docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "npm install && node_modules/gulp/bin/gulp.js build --targetModule=formulaire-public && yarn run build:sass"
+    ;;
+  esac
 }
 
 testNode() {
@@ -41,10 +61,10 @@ testNode() {
   rm -rf */build
   case `uname -s` in
     MINGW*)
-      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "npm install --no-bin-links && node_modules/gulp/bin/gulp.js drop-cache &&  npm test"
+      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "yarn install --no-bin-links && node_modules/gulp/bin/gulp.js drop-cache && yarn test"
       ;;
     *)
-      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "npm install && node_modules/gulp/bin/gulp.js drop-cache && npm test"
+      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "yarn install && node_modules/gulp/bin/gulp.js drop-cache && yarn test"
     esac
 }
 
@@ -53,16 +73,52 @@ testNodeDev () {
   rm -rf */build
   case `uname -s` in
     MINGW*)
-      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "npm install --no-bin-links && node_modules/gulp/bin/gulp.js drop-cache &&  npm run test:dev"
+      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "yarn install --no-bin-links && node_modules/gulp/bin/gulp.js drop-cache && yarn run test:dev"
       ;;
     *)
-      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "npm install && node_modules/gulp/bin/gulp.js drop-cache && npm run test:dev"
+      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "yarn install && node_modules/gulp/bin/gulp.js drop-cache && yarn run test:dev"
   esac
+}
+
+# CSS
+
+buildCss() {
+    docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "yarn run build:sass"
+}
+
+# Gradle
+
+buildGradle () {
+  docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle shadowJar install publishToMavenLocal
+}
+
+formulaire:buildGradle() {
+  docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle :formulaire:shadowJar :formulaire:install :formulaire:publishToMavenLocal
+}
+
+formulairePublic:buildGradle() {
+  docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle :formulaire-public:shadowJar :formulaire-public:install :formulaire-public:publishToMavenLocal
 }
 
 testGradle() {
   docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle test --no-build-cache --rerun-tasks
 }
+
+# Gulp
+
+buildGulp() {
+  docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "node_modules/gulp/bin/gulp.js build"
+}
+
+formulaire:buildGulp() {
+  docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "node_modules/gulp/bin/gulp.js build --targetModule=formulaire"
+}
+
+formulairePublic:buildGulp() {
+  docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "node_modules/gulp/bin/gulp.js build --targetModule=formulaire-public"
+}
+
+# Publish
 
 publish () {
   if [ -e "?/.gradle" ] && [ ! -e "?/.gradle/gradle.properties" ]
@@ -75,35 +131,7 @@ publish () {
   docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle publish
 }
 
-formulaire:buildNode() {
-  case $(uname -s) in
-  MINGW*)
-    docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "npm install --no-bin-links && node_modules/gulp/bin/gulp.js build --targetModule=formulaire"
-    ;;
-  *)
-    docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "npm install && node_modules/gulp/bin/gulp.js build --targetModule=formulaire"
-    ;;
-  esac
-}
-
-formulaire:buildGradle() {
-  docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle :formulaire:shadowJar :formulaire:install :formulaire:publishToMavenLocal
-}
-
-formulairePublic:buildNode() {
-  case $(uname -s) in
-  MINGW*)
-    docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "npm install --no-bin-links && node_modules/gulp/bin/gulp.js build --targetModule=formulaire-public"
-    ;;
-  *)
-    docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "npm install && node_modules/gulp/bin/gulp.js build --targetModule=formulaire-public"
-    ;;
-  esac
-}
-
-formulairePublic:buildGradle() {
-  docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle :formulaire-public:shadowJar :formulaire-public:install :formulaire-public:publishToMavenLocal
-}
+# Commands
 
 for param in "$@"
 do
@@ -114,17 +142,11 @@ do
     buildNode)
       buildNode
       ;;
-    buildGradle)
-      buildGradle
+    formulaire:buildNode)
+      formulaire:buildNode
       ;;
-    install)
-      buildNode && buildGradle
-      ;;
-    publish)
-      publish
-      ;;
-    test)
-      testNode ; testGradle
+    formulairePublic:buildNode)
+      formulairePublic:buildNode
       ;;
     testNode)
       testNode
@@ -132,26 +154,44 @@ do
     testNodeDev)
       testNodeDev
       ;;
-    testGradle)
-      testGradle
+    buildCss)
+      buildCss
       ;;
-    formulaire:buildNode)
-      formulaire:buildNode
+    buildGradle)
+      buildGradle
       ;;
     formulaire:buildGradle)
       formulaire:buildGradle
       ;;
-    formulaire)
-      formulaire:buildNode && formulaire:buildGradle
-      ;;
-    formulairePublic:buildNode)
-      formulairePublic:buildNode
-      ;;
     formulairePublic:buildGradle)
       formulairePublic:buildGradle
       ;;
+    testGradle)
+      testGradle
+      ;;
+    buildGulp)
+      buildGulp
+      ;;
+    formulaire:buildGulp)
+      formulaire:buildGulp
+      ;;
+    formulairePublic:buildGulp)
+      formulairePublic:buildGulp
+      ;;
+    install)
+      buildNode && buildGradle
+      ;;
+    publish)
+      publish
+      ;;
+    formulaire)
+      formulaire:buildNode && formulaire:buildGradle
+      ;;
     formulairePublic)
       formulairePublic:buildNode && formulairePublic:buildGradle
+      ;;
+    test)
+      testNode ; testGradle
       ;;
     *)
       echo "Invalid argument : $param"
