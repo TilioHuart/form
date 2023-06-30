@@ -12,15 +12,20 @@ public class EventBusHelper {
 
     /**
      * Call event bus with action
-     * @param address   EventBus address
-     * @param eb        EventBus
-     * @param action    The action to perform
+     * @param address           EventBus address
+     * @param eb                EventBus
+     * @param action            The action to perform
+     * @param deliveryOptions   The delivery options
      * @return          Future with the body of the response from the eb
      */
-    public static Future<JsonObject> requestJsonObject(String address, EventBus eb, JsonObject action) {
+    public static Future<JsonObject> requestJsonObject(String address, EventBus eb, JsonObject action, DeliveryOptions deliveryOptions) {
         Promise<JsonObject> promise = Promise.promise();
-        eb.request(address, action, MessageResponseHelper.messageJsonObjectHandler(FutureHelper.handlerEither(promise)));
+        eb.request(address, action, deliveryOptions, MessageResponseHelper.messageJsonObjectHandler(FutureHelper.handlerEither(promise)));
         return promise.future();
+    }
+
+    public static Future<JsonObject> requestJsonObject(String address, EventBus eb, JsonObject action) {
+        return requestJsonObject(address, eb, action, null);
     }
 
     public static Future<JsonArray> requestJsonArray(String address, EventBus eb, JsonObject action) {

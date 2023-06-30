@@ -400,36 +400,43 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         vm.display.loading.export = true;
 
         // Generate document PDF and store it in a blob
-        if (vm.exportFormat === Exports.PDF) {
-            let doc: any = await formService.export(vm.forms.selected.map((f: Form) => f.id), vm.exportFormat);
-            let blob: Blob = new Blob([doc.data], {type: 'application/pdf; charset=utf-18'});
+        try {
+            if (vm.exportFormat === Exports.PDF) {
+                let doc: any = await formService.export(vm.forms.selected.map((f: Form) => f.id), vm.exportFormat);
+                let blob: Blob = new Blob([doc.data], {type: 'application/pdf; charset=utf-18'});
 
-            // Download the blob
-            let link: any = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download =  doc.headers['content-disposition'].split('filename=')[1];
-            document.body.appendChild(link);
-            link.click();
-            setTimeout(function() {
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(link.href);
-            }, 100);
+                // Download the blob
+                let link: any = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download =  doc.headers['content-disposition'].split('filename=')[1];
+                document.body.appendChild(link);
+                link.click();
+                setTimeout(function() {
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(link.href);
+                }, 100);
 
-            vm.display.lightbox.export = false;
+                vm.display.lightbox.export = false;
+                vm.display.loading.export = false;
+                template.close('lightbox');
+                $scope.safeApply();
+            }
+            // Generate ZIP
+            else if (vm.exportFormat === Exports.ZIP) {
+                let exportId: string = await formService.export(vm.forms.selected.map((f: Form) => f.id), vm.exportFormat);
+                window.setTimeout(async () => {
+                    if (!exportId) return await initFormsList();
+                    await formService.verifyExportAndDownload(exportId);
+                    vm.closeExportForms();
+                },5000);
+            }
+        }
+        catch (err) {
             vm.display.loading.export = false;
-            template.close('lightbox');
             $scope.safeApply();
+            throw err;
         }
-        // Generate ZIP
-        else if (vm.exportFormat === Exports.ZIP) {
-            let exportId: string = await formService.export(vm.forms.selected.map((f: Form) => f.id), vm.exportFormat);
-            window.setTimeout(async () => {
-                if (!exportId) return await initFormsList();
-                await formService.verifyExportAndDownload(exportId);
-                vm.closeExportForms();
-            },5000);
-        }
-    };
+    }
 
     vm.closeExportForms = () : void => {
         vm.display.loading.export = false;

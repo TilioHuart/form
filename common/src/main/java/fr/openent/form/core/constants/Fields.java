@@ -221,6 +221,7 @@ public class Fields {
     public static final String STATEMENTS = "statements";
     public static final String SUBJECT = "subject";
     public static final String SUM_RESPONSES = "sum_responses";
+    public static final String TIMEOUT = "timeout";
     public static final String TITLE_NEXT = "title_next";
     public static final String TO = "to";
     public static final String TRANSACTION = "transaction";

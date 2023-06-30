@@ -15,6 +15,7 @@ import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.*;
+import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServerRequest;
@@ -1108,7 +1109,7 @@ public class FormController extends ControllerHelper {
         RequestUtils.bodyToJsonArray(request, formIds -> {
             UserUtils.getUserInfos(eb, request, user -> {
                 if (user == null) {
-                    String message = "[Formulaire@exportForms] User not found in session.";
+                    String message = "[Formulaire@FormController::exportForms] User not found in session.";
                     log.error(message);
                     unauthorized(request, message);
                     return;
@@ -1122,12 +1123,12 @@ public class FormController extends ControllerHelper {
 
                 formService.checkFormsRights(groupsAndUserIds, user, MANAGER_RESOURCE_BEHAVIOUR, formIds, hasRightsEvt -> {
                     if (hasRightsEvt.isLeft()) {
-                        log.error("[Formulaire@exportForms] Fail to check rights for method " + hasRightsEvt);
+                        log.error("[Formulaire@FormController::exportForms] Fail to check rights for method " + hasRightsEvt);
                         renderInternalError(request, hasRightsEvt);
                         return;
                     }
                     if (hasRightsEvt.right().getValue().isEmpty()) {
-                        String message = "[Formulaire@exportForms] No rights found for forms with ids " + formIds;
+                        String message = "[Formulaire@FormController::exportForms] No rights found for forms with ids " + formIds;
                         log.error(message);
                         notFound(request, message);
                         return;
@@ -1136,7 +1137,7 @@ public class FormController extends ControllerHelper {
                     // Check if user is owner or manager to all the forms
                     Long count = hasRightsEvt.right().getValue().getLong(COUNT);
                     if (count == null || count != formIds.size()) {
-                        String message = "[Formulaire@exportForms] You're missing rights on one form or more.";
+                        String message = "[Formulaire@FormController::exportForms] You're missing rights on one form or more.";
                         log.error(message);
                         unauthorized(request, message);
                         return;
@@ -1152,7 +1153,9 @@ public class FormController extends ControllerHelper {
                                     .put(APPS, new JsonArray().add(DB_SCHEMA))
                                     .put(PARAM_RESOURCES_IDS, new JsonArray().addAll(formIds));
 
-                            EventBusHelper.requestJsonObject(EXPORT_ADDRESS, eb, ebMessage)
+                            DeliveryOptions deliveryOptions = new DeliveryOptions();
+
+                            EventBusHelper.requestJsonObject(EXPORT_ADDRESS, eb, ebMessage, deliveryOptions)
                                     .onSuccess(res -> renderJson(request, res))
                                     .onFailure(err -> {
                                         String message = "[Formulaire@FormController::exportForm] Failed to export data : " + err.getMessage();
@@ -1163,12 +1166,12 @@ public class FormController extends ControllerHelper {
                         case PDF:
                             formService.get(String.valueOf(formIds.getInteger(0)), user, formEvt -> {
                                 if (formEvt.isLeft()) {
-                                    log.error("[Formulaire@exportForm] Error in getting form to export questions of form " + formIds);
+                                    log.error("[Formulaire@FormController::exportForm] Error in getting form to export questions of form " + formIds);
                                     renderInternalError(request, formEvt);
                                     return;
                                 }
                                 if (formEvt.right().getValue().isEmpty()) {
-                                    String errMessage = "[Formulaire@exportForm] No form found for id " + formIds;
+                                    String errMessage = "[Formulaire@FormController::exportForm] No form found for id " + formIds;
                                     log.error(errMessage);
                                     notFound(request, errMessage);
                                 }
@@ -1177,13 +1180,11 @@ public class FormController extends ControllerHelper {
                             });
                             break;
                         default:
-                            String message = "[Formulaire@exportForms] Wrong export format type : " + fileType;
+                            String message = "[Formulaire@FormController::exportForms] Wrong export format type : " + fileType;
                             log.error(message);
                             badRequest(request, message);
                             break;
                     }
-
-
                 });
             });
         });
