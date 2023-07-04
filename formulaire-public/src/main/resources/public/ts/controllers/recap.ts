@@ -17,10 +17,11 @@ interface ViewModel {
 
     $onInit() : Promise<void>;
     goCaptcha(): Promise<void>;
+    getHtmlDescription(statement: string): string;
 }
 
-export const recapController = ng.controller('RecapController', ['$scope',
-    function ($scope) {
+export const recapController = ng.controller('RecapController', ['$scope', '$sce',
+    function ($scope, $sce) {
 
     const vm: ViewModel = this;
     vm.form = new Form();
@@ -60,6 +61,10 @@ export const recapController = ng.controller('RecapController', ['$scope',
             notify.error(idiom.translate('formulaire.public.warning.send.missing.responses.missing'));
         }
     };
+
+    vm.getHtmlDescription = (description: string) : string => {
+        return !!description ? $sce.trustAsHtml(description) : null;
+    }
 
     // Utils
 
