@@ -24,6 +24,7 @@ interface ViewModel {
     filesList: any;
     form: Form;
     nbFormElements: number;
+    longestPath: number;
     loading : boolean;
     historicPosition: number[];
     currentResponses: Map<Question, Responses>;
@@ -47,6 +48,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
     vm.distribution = new Distribution();
     vm.form = new Form();
     vm.nbFormElements = 1;
+    vm.longestPath = 1;
     vm.loading = true;
     vm.currentResponses = new Map();
     vm.currentFiles = new Map();
@@ -63,12 +65,43 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         vm.formElement = vm.formElements.all[$scope.responsePosition - 1];
         vm.nbFormElements = vm.formElements.all.length;
         vm.historicPosition = $scope.historicPosition.length > 0 ? $scope.historicPosition : [1];
-
+        vm.longestPath = vm.historicPosition.length + findLongestPathInFormElement(vm.formElement.id, vm.formElements) - 1;
         initFormElementResponses();
-
         window.setTimeout(() => vm.loading = false,500);
         $scope.safeApply();
     }
+
+
+    const findLongestPathInFormElement = (formElementId: number, formElements: FormElements): number => {
+        let currentNode: FormElement = formElements.all.find((node: FormElement) => node.id === formElementId);
+        if (!currentNode) return 1;
+        if (currentNode.isSection()) {
+            let questions: Question[] = (<Section>currentNode).questions.all;
+            let conditionalQuestions: any = questions.filter((q: Question) => q.conditional);
+            let choices: Question[] = (conditionalQuestions && conditionalQuestions.length > 0) ? conditionalQuestions.flatMap((q: Question) => q.choices.all) : null;
+            return findLongestPathInQuestionChoices(choices, currentNode, formElements);
+        } else {
+            let question: Question = <Question>currentNode;
+            let questionChoices: QuestionChoice[] = question.conditional ? question.choices.all : null;
+            return findLongestPathInQuestionChoices(questionChoices, currentNode, formElements);
+        }
+    };
+
+
+    const findLongestPathInQuestionChoices = (choices: any, currentFormElement: FormElement, formElements: FormElements): number => {
+        if (!choices || choices.length === 0) {
+            let nextElementId: number = currentFormElement.getNextFormElementId(formElements);
+            if (!nextElementId) {return 1;}
+            return findLongestPathInFormElement(nextElementId, formElements) + 1;
+        } else {
+            let tab: number[] = choices.map((choice: any) => {
+                if (!choice.next_form_element_id) return 1;
+                return findLongestPathInFormElement(choice.next_form_element_id, formElements);
+            });
+            return Math.max(...tab) + 1;
+        }
+    }
+
 
     const initFormElementResponses = () : void => {
         let nbQuestions: number = vm.formElement instanceof Question ? 1 : (vm.formElement as Section).questions.all.length;
@@ -118,6 +151,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             await saveResponses();
             vm.formElement = vm.formElements.all[prevPosition - 1];
             vm.historicPosition.pop();
+            vm.longestPath = vm.historicPosition.length + findLongestPathInFormElement(vm.formElement.id, vm.formElements) - 1;
             goToFormElement();
         }
     };
@@ -131,7 +165,9 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         if (nextPosition && nextPosition <= vm.nbFormElements) {
             await saveResponses();
             vm.formElement = vm.formElements.all[nextPosition - 1];
+            vm.longestPath = findLongestPathInFormElement(vm.formElement.id, vm.formElements);
             vm.historicPosition.push(vm.formElement.position);
+            vm.longestPath = vm.historicPosition.length + findLongestPathInFormElement(vm.formElement.id, vm.formElements) - 1;
             goToFormElement();
         }
         else if (nextPosition !== undefined) {
