@@ -65,7 +65,7 @@ export abstract class FormElement implements Selectable {
         // Case formElement is not formElement but question inside a section
         if (this instanceof Question && this.section_id) {
             let parentSection: Section = this.getParentSection(formElements);
-            let followingPosition: number = parentSection.position + 1;
+            let followingPosition: number = parentSection ? parentSection.position + 1 : null;
             return formElements.all.find((e: FormElement) => e.position === followingPosition);
         }
 

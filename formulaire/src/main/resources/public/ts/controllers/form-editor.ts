@@ -51,8 +51,7 @@ interface ViewModel {
             reorganization: boolean,
             delete: boolean,
             undo: boolean
-        },
-        loading: boolean
+        }
     };
     preview: {
         formElement: FormElement, // Question for preview
@@ -114,8 +113,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 reorganization: false,
                 delete: false,
                 undo: false
-            },
-            loading: false
+            }
         };
         vm.PreviewPage = PreviewPage;
         vm.nestedSortables = [];
@@ -204,13 +202,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         };
 
         vm.createNewElement = async (parentSection?) : Promise<void> => {
-            vm.display.loading = true;
             vm.parentSection = parentSection ? parentSection : null;
             template.open('lightbox', 'lightbox/new-element');
             vm.display.lightbox.newElement = true;
-            $scope.safeApply();
-            await saveFormElements(false);
-            vm.display.loading = false;
             $scope.safeApply();
         };
 

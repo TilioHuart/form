@@ -6,6 +6,7 @@ import {Mix} from "entcore-toolkit";
 
 export interface QuestionService {
     list(id: number, isForSection?: boolean) : Promise<any>;
+    listAll(id: number) : Promise<any>;
     listChildren(questions: Question[]) : Promise<any>;
     get(questionId: number) : Promise<any>;
     save(question: Question) : Promise<any>;
@@ -16,7 +17,7 @@ export interface QuestionService {
 
 export const questionService: QuestionService = {
 
-    async list (id: number, isForSection: boolean = false) : Promise<any> {
+    async list(id: number, isForSection: boolean = false) : Promise<any> {
         try {
             let parentEntity = isForSection ? 'sections' : 'forms';
             return DataUtils.getData(await http.get(`/formulaire/${parentEntity}/${id}/questions`));
@@ -26,7 +27,16 @@ export const questionService: QuestionService = {
         }
     },
 
-    async listChildren (questions: Question[]) : Promise<any> {
+    async listAll(formId: number) : Promise<any> {
+        try {
+            return DataUtils.getData(await http.get(`/formulaire/forms/${formId}/questions/all`));
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.questionService.list'));
+            throw err;
+        }
+    },
+
+    async listChildren(questions: Question[]) : Promise<any> {
         try {
             let questionIds: number[] = questions.map((q: Question) => q.id);
             return DataUtils.getData(await http.get(`/formulaire/questions/children`, { params: questionIds }));

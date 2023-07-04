@@ -1,6 +1,7 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.enums.QuestionTypes;
+import fr.openent.form.helpers.BusResultHelper;
 import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
@@ -87,6 +88,23 @@ public class QuestionController extends ControllerHelper {
                     .onSuccess(result -> renderJson(request, result))
                     .onFailure(error -> renderError(request));
         });
+    }
+
+    @Get("/forms/:formId/questions/all")
+    @ApiDoc("List all the questions of a specific form")
+    @ResourceFilter(AccessRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void listForFormAndSection(HttpServerRequest request) {
+        String formId = request.getParam(PARAM_FORM_ID);
+
+        questionService.listForFormAndSection(formId)
+                .onSuccess(result -> renderJson(request, result))
+                .onFailure(error -> {
+                    String errorMessage = "[Formulaire@QuestionController::listForFormAndSection] " +
+                            "Failed to list questions for form and sections : " + error.getMessage();
+                    log.error(errorMessage);
+                    renderError(request);
+                });
     }
 
     @Get("/questions/children")

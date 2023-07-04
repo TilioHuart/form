@@ -1,9 +1,10 @@
-import {Selection} from "entcore-toolkit";
+import {Mix, Selection} from "entcore-toolkit";
 import {idiom, notify} from "entcore";
 import {Question, Questions} from "./Question";
 import {FormElement} from "./FormElement";
 import {Section, Sections} from "./Section";
-import {Types} from "@common/models";
+import {QuestionChoice, Types} from "@common/models";
+import {questionChoiceService, questionService, sectionService} from "@common/services";
 
 export class FormElements extends Selection<FormElement> {
     all: FormElement[];
@@ -13,16 +14,39 @@ export class FormElements extends Selection<FormElement> {
     }
 
     sync = async (formId: number) : Promise<void> => {
+        // Sections
         try {
-            // Add all questions
-            let questions: Questions = new Questions();
-            await questions.sync(formId, false);
-            this.all = questions.all;
-
-            // Add all sections
             let sections: Sections = new Sections();
-            await sections.sync(formId);
-            this.all = this.all.concat(sections.all);
+            let data = await sectionService.list(formId);
+            sections.all = Mix.castArrayAs(Section, data);
+            this.all = sections.all;
+
+            // Questions
+            try {
+                let allQuestions: Questions = new Questions();
+                let data = await questionService.listAll(formId);
+                allQuestions.all = Mix.castArrayAs(Question, data);
+
+                // Choices and Children of matrix
+                if (allQuestions.all.length > 0) {
+                    await allQuestions.syncChoices();
+                    await allQuestions.syncChildren();
+                }
+
+                for (let question of allQuestions.all) {
+                    if (!question.section_id) {
+                        this.all.push(question);
+                    }
+                    else {
+                        let parentSection: Section = sections.all.find((s: Section) => s.id === question.section_id);
+                        parentSection.questions.all.push(question);
+                        parentSection.questions.all.sort((a: Question, b: Question) => a.section_position - b.section_position);
+                    }
+                }
+            } catch (e) {
+                notify.error(idiom.translate('formulaire.error.question.sync'));
+                throw e;
+            }
 
             this.all.sort((a, b) => a.position - b.position);
         } catch (e) {
