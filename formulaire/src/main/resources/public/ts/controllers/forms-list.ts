@@ -12,7 +12,7 @@ import {
     Section,
     Sections
 } from "../models";
-import {distributionService, folderService, formService, questionService, responseService} from "../services";
+import {distributionService, folderService, formService, questionService} from "../services";
 import {Exports, FiltersFilters, FiltersOrders, FORMULAIRE_EMIT_EVENT} from "@common/core/enums";
 import {Mix} from "entcore-toolkit";
 import {Element} from "entcore/types/src/ts/workspace/model";
@@ -209,6 +209,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         vm.forms.orders.find(o => o.name === FiltersOrders.MODIFICATION_DATE).display = true;
         vm.forms.orders.find(o => o.name === FiltersOrders.TITLE).display = true;
         (window as any).LAZY_MODE = false;
+        vm.exportFormat = Exports.ZIP;
         vm.display.loading.list = false;
         vm.initDragAndDrop();
 
@@ -440,7 +441,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.closeExportForms = () : void => {
         vm.display.loading.export = false;
-        vm.exportFormat = undefined;
+        vm.exportFormat = Exports.ZIP;
         template.close('lightbox');
         vm.display.lightbox.export = false;
         $scope.safeApply();

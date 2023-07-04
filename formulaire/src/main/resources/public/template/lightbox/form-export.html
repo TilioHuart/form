@@ -1,22 +1,37 @@
 <lightbox show="vm.display.lightbox.export" on-close="vm.closeExportForms()">
     <h2><i18n>formulaire.export</i18n></h2>
-    <div class="bottom-spacing-twice"><i18n>formulaire.export.choice.format</i18n></div>
+    <div><i18n>formulaire.export.choice.format</i18n></div>
 
-    <div class="bottom-spacing-twice">
-        <input type="radio" ng-model="vm.exportFormat" value="ZIP">
-            <label><i18n>formulaire.format.zip</i18n></label><br>
-            <label class="block left-spacing-twice"><i18n>formulaire.export.explanation.zip</i18n></label>
+    <div class="export-lightbox">
+        <!-- ZIP format -->
+        <div>
+            <label>
+                <input type="radio" ng-model="vm.exportFormat" value="ZIP">
+                <div>
+                    <div><b><i18n>formulaire.format.zip</i18n></b></div>
+                    <div><i18n>formulaire.export.explanation.zip</i18n></div>
+                </div>
+            </label>
+        </div>
+
+        <!-- PDF format -->
+        <div ng-if="vm.forms.selectedElements.length <= 1">
+            <label>
+                <input type="radio" ng-model="vm.exportFormat" value="PDF">
+                <div>
+                    <div><b><i18n>formulaire.format.pdf</i18n></b></div>
+                    <div><i18n>formulaire.export.explanation.pdf</i18n></div>
+                </div>
+            </label>
+        </div>
     </div>
 
-    <div ng-if="vm.forms.selectedElements.length <= 1">
-        <input type="radio" ng-model="vm.exportFormat" value="PDF">
-        <label><i18n>formulaire.format.pdf</i18n></label><br>
-        <label class="block left-spacing-twice"><i18n>formulaire.export.explanation.pdf</i18n></label>
-    </div>
-
+    <!-- Loader -->
     <div ng-if="vm.display.loading.export" class="twelve loader">
         <loader min-height="'10px'"/>
     </div>
+
+    <!-- Buttons -->
     <div ng-if="!vm.display.loading.export" class="action-buttons">
         <button class="cell cancel" ng-click="vm.closeExportForms()"><i18n>formulaire.close</i18n></button>
         <button class="cell" ng-click="vm.doExportForms()"><i18n>formulaire.export</i18n></button>
