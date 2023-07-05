@@ -21,6 +21,17 @@ body.formulaire {
         }
 
         .formulaire-cursor-input-range {
+            /***** Thumb Styles *****/
+            /* Chrome, Safari, Opera, and Edge Chromium */
+            input[type="range"]::-webkit-slider-thumb,  {
+                position: static;
+            }
+
+            /* Firefox */
+            input[type="range"]::-moz-range-thumb {
+                position: static;
+            }
+
             .filler {
                 &::before {
                     bottom: 6px;
@@ -35,19 +46,25 @@ body.formulaire {
                 padding-top: 5px;
             }
         }
-    }
 
-    label.chip,
-    .chip,
-    contact-chip {
-        display: inline-block;
-        margin: 5px;
-    }
+        label.chip, .chip, contact-chip {
+            display: inline-block;
+            margin: 5px;
+        }
 
-    .section-top-container {
-        input {
-            background: transparent !important;
-            border: transparent !important;
+        .section-top-container {
+            input {
+                background: transparent !important;
+                border: transparent !important;
+            }
+        }
+
+        .prop-form .item .domino .data-text .editable {
+            font-style: normal;
+        }
+
+        .new-element .question .dominos .item .domino .picture {
+            padding: 10px 10px 0 10px;
         }
     }
 }

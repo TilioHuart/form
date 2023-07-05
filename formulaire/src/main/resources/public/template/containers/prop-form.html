@@ -41,38 +41,46 @@
                                 </span>
                             </div>
                             <div class="public" ng-if="canCreatePublic()">
-                                <div class="text">
+                                <div class="text ellipsis">
                                     <label for="isPublic">
                                         <input type="checkbox" id="isPublic" ng-model="vm.form.is_public"
                                                ng-change="vm.onSwitchPublic(vm.form.is_public)" ng-disabled="vm.form.id"/>
-                                        <span ng-style="{'cursor' : vm.form.id ? 'default' : 'pointer'}"><i18n>formulaire.prop.public.label</i18n></span>
+                                        <span ng-style="{'cursor' : vm.form.id ? 'default' : 'pointer'}"
+                                              title="[[idiom.translate('formulaire.prop.public.label')]]">
+                                            <i18n>formulaire.prop.public.label</i18n>
+                                        </span>
                                         <i class="i-info sm-icon centered" title="[[idiom.translate('formulaire.prop.public.description')]]"></i>
                                     </label>
                                 </div>
                             </div>
                             <div class="multiple">
-                                <div class="text">
+                                <div class="text ellipsis">
                                     <label for="isMultiple">
                                         <input type="checkbox" id="isMultiple" ng-model="vm.form.multiple" ng-disabled="vm.form.is_public || vm.form.nb_responses > 0"/>
-                                        <span ng-style="{'cursor' : vm.form.is_public || vm.form.nb_responses > 0 ? 'default' : 'pointer'}">
+                                        <span ng-style="{'cursor' : vm.form.is_public || vm.form.nb_responses > 0 ? 'default' : 'pointer'}"
+                                              title="[[idiom.translate('formulaire.prop.multiple.label')]]">
                                             <i18n>formulaire.prop.multiple.label</i18n>
                                         </span>
                                     </label>
                                 </div>
                             </div>
                             <div class="editable">
-                                <div class="text">
+                                <div class="text ellipsis">
                                     <label for="isEditable">
                                         <input type="checkbox" id="isEditable" ng-model="vm.form.editable" ng-disabled="vm.form.is_public"/>
-                                        <span ng-style="{'cursor' : vm.form.is_public ? 'default' : 'pointer'}"><i18n>formulaire.prop.editable.label</i18n></span>
+                                        <span ng-style="{'cursor' : vm.form.is_public ? 'default' : 'pointer'}"
+                                              title="[[idiom.translate('formulaire.prop.editable.label')]]">
+                                            <i18n>formulaire.prop.editable.label</i18n>
+                                        </span>
                                     </label>
                                 </div>
                             </div>
                             <div class="anonymous">
-                                <div class="text">
+                                <div class="text ellipsis">
                                     <label for="isAnonymous">
                                         <input type="checkbox" id="isAnonymous" ng-model="vm.form.anonymous" ng-disabled="vm.form.is_public || vm.form.nb_responses > 0"/>
-                                        <span ng-style="{'cursor' : vm.form.is_public || vm.form.nb_responses > 0 ? 'default' : 'pointer'}">
+                                        <span ng-style="{'cursor' : vm.form.is_public || vm.form.nb_responses > 0 ? 'default' : 'pointer'}"
+                                              title="[[idiom.translate('formulaire.prop.anonymous.label')]]">
                                             <i18n>formulaire.prop.anonymous.label</i18n>
                                         </span>
                                         <i class="i-info sm-icon centered" title="[[idiom.translate('formulaire.prop.anonymous.description')]]"></i>
@@ -80,10 +88,10 @@
                                 </div>
                             </div>
                             <div class="notified">
-                                <div class="text">
+                                <div class="text ellipsis">
                                     <label for="isNotified">
                                         <input type="checkbox" id="isNotified" ng-model="vm.form.response_notified"/>
-                                        <span><i18n>formulaire.prop.notified.label</i18n></span>
+                                        <span title="[[idiom.translate('formulaire.prop.notified.label')]]"><i18n>formulaire.prop.notified.label</i18n></span>
                                         <i class="i-info sm-icon centered" title="[[idiom.translate('formulaire.prop.notified.description')]]"></i>
                                     </label>
                                 </div>

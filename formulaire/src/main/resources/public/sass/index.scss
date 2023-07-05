@@ -2,3 +2,7 @@
 @import "./entcore-css-lib/scss/index.scss";
 
 @import "global/formulaire";
+
+.panda {
+  @import "panda/formulaire";
+}
