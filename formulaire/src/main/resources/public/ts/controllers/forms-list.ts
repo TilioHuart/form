@@ -416,11 +416,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
                     document.body.removeChild(link);
                     window.URL.revokeObjectURL(link.href);
                 }, 100);
-
-                vm.display.lightbox.export = false;
-                vm.display.loading.export = false;
-                template.close('lightbox');
-                $scope.safeApply();
+                vm.closeExportForms();
             }
             // Generate ZIP
             else if (vm.exportFormat === Exports.ZIP) {
