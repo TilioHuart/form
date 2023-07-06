@@ -111,19 +111,19 @@ export class FormElementUtils {
     // Drag and drop
 
     static onEndDragAndDrop = async (evt: any, formElements: FormElements) : Promise<void> => {
-        let elem = evt.item.firstElementChild.firstElementChild;
-        let scopeElem = angular.element(elem).scope().vm;
-        let itemId: number = scopeElem.question ? scopeElem.question.id : scopeElem.section.id;
         let newSectionId: number = evt.to.id.split("-")[1] != "0" ? parseInt(evt.to.id.split("-")[1]) : null;
         let oldContainerId: number = evt.from.id.split("-")[1] != "0" ? parseInt(evt.from.id.split("-")[1]) : null;
         let oldSection: Section = oldContainerId ? (formElements.all.filter((e: FormElement) => e instanceof Section && e.id === oldContainerId)[0]) as Section : null;
         let item: any = null;
-        if (scopeElem.section) {
-            item = formElements.all.filter((e: FormElement) => e.id === itemId)[0] as Section;
+        if (evt.item.childElementCount === 2) {
+            item = formElements.all[evt.oldIndex] as Section;
         }
-        else {
+        else if (evt.item.childElementCount === 1) {
             let oldSiblings: any = oldSection ? oldSection.questions : formElements;
-            item = oldSiblings.all.filter((e: FormElement) => e.id === itemId)[0] as Question;
+            item = oldSiblings.all[evt.oldIndex] as Question;
+        }
+        else { // Error, it should be either 1 or 2 (Question or Section)
+            return;
         }
         let oldIndex: number = evt.oldIndex;
         let newIndex: number = evt.newIndex;
@@ -199,20 +199,21 @@ export class FormElementUtils {
     };
 
     static onEndOrgaDragAndDrop = async (evt: any, formElements: FormElements) : Promise<boolean> => {
-        let elem = evt.item.firstElementChild.firstElementChild;
-        let scopeElem = angular.element(elem).scope().vm;
-        let itemId: number = scopeElem.formElement.id;
+        let elem: HTMLElement = evt.item.firstElementChild.firstElementChild;
         let newSectionId: number = evt.to.id.split("-")[2] != "0" ? parseInt(evt.to.id.split("-")[2]) : null;
         newSectionId ? elem.classList.add("sectionChild") : elem.classList.remove("sectionChild");
         let oldContainerId: number = evt.from.id.split("-")[2] != "0" ? parseInt(evt.from.id.split("-")[2]) : null;
         let oldSection: Section = oldContainerId ? (formElements.all.filter((e: FormElement) => e instanceof Section && e.id === oldContainerId)[0]) as Section : null;
         let item: any = null;
-        if (scopeElem.section) {
-            item = formElements.all.filter((e: FormElement) => e.id === itemId)[0] as Section;
+        if (evt.item.childElementCount === 2) {
+            item = formElements.all[evt.oldIndex] as Section;
         }
-        else {
+        else if (evt.item.childElementCount === 1) {
             let oldSiblings: any = oldSection ? oldSection.questions : formElements;
-            item = oldSiblings.all.filter((q: Question) => q.id === itemId)[0] as Question;
+            item = oldSiblings.all[evt.oldIndex] as Question;
+        }
+        else { // Error, it should be either 1 or 2 (Question or Section)
+            return true;
         }
         let oldIndex: number = evt.oldIndex;
         let newIndex: number = evt.newIndex;
