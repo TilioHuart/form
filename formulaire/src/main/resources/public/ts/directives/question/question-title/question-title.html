@@ -7,7 +7,7 @@
                 <i18n ng-if="vm.question.question_type != vm.types.FREETEXT">formulaire.question.title.empty</i18n>
             </h4>
             <div ng-if="vm.question.question_type == vm.types.MATRIX">
-                <select class="two" ng-model="vm.matrixType" ng-disabled="true">
+                <select ng-model="vm.matrixType" ng-disabled="true">
                     <option ng-repeat="matrixType in vm.matrixTypes" ng-value="matrixType"
                             ng-attr-selected="[[matrixType === vm.matrixType ? 'selected' : undefined]]">
                         [[vm.i18n.translate('formulaire.matrix.type.' + vm.types[matrixType])]]
@@ -22,7 +22,7 @@
                    ng-model="vm.question.title" i18n-placeholder="formulaire.question.title.empty" input-guard/>
             <div class="flex-spaced" ng-if="vm.question.question_type == vm.types.MATRIX">
                 <input type="text" class="nine" ng-model="vm.question.title" i18n-placeholder="formulaire.question.title.empty" input-guard/>
-                <select class="two" ng-if="!vm.hasFormResponses" ng-model="vm.matrixType" required
+                <select ng-if="!vm.hasFormResponses" ng-model="vm.matrixType" required
                         ng-change="vm.onChangeMatrixType(vm.matrixType)" input-guard>
                     <option ng-repeat="matrixType in vm.matrixTypes" ng-value="matrixType"
                             ng-attr-selected="[[matrixType === vm.matrixType ? 'selected' : undefined]]">

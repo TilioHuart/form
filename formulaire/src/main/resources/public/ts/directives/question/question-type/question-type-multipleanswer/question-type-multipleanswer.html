@@ -19,8 +19,8 @@
       <input type="text" class="width95 ten-mobile" ng-if="choice.is_custom"
              value="[[vm.i18n.translate('formulaire.other')]] : " disabled>
       <div class="image-container">
-          <i class="i-close lg-icon" ng-click="vm.deleteImageSelect($index)"
-             ng-if="vm.question.selected && !vm.hasFormResponses && choice.image !== ''"></i>
+          <i class="i-close lg-icon focusable" ng-click="vm.deleteImageSelect($index)"
+             ng-if="vm.question.selected && !vm.hasFormResponses && !!choice.image"></i>
           <image-select id="img-{{$index}}" class="initialFloat cell"
                         ng-if="vm.selectedChoiceIndex === $index && !vm.hasFormResponses"
                         ng-model="choice.image"
