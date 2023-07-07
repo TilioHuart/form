@@ -28,8 +28,7 @@ $formulaire-green: green;
   font-style: normal;
 }
 
-body.formulaire section.toggle-buttons {
-
+body.formulaire-module section.toggle-buttons {
   button{
     @media screen and (max-width: $formulaire-screen-mobile) {
       min-height: unset;
@@ -37,7 +36,7 @@ body.formulaire section.toggle-buttons {
   }
 }
 
-body.formulaire section.main {
+body.formulaire-module section.main {
   @import "components/index";
 
   .margin-vertical-1 {
