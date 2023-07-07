@@ -89,6 +89,7 @@ interface ViewModel {
     duplicateForms() : Promise<void>;
     shareForm() : void;
     closeShareFormLightbox() : void;
+    shareFailure(error: JQueryXHR) : void;
     seeResultsForm() : void;
     isFormOpened(): boolean;
     checkRemind() : Promise<void>;
@@ -352,6 +353,12 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             window.setTimeout(async function () { await vm.openFolder(vm.folder, false); }, 100);
         }
     };
+
+    vm.shareFailure = (error: JQueryXHR) : void => {
+        notify.error(error.responseJSON.error);
+    }
+
+
 
     vm.seeResultsForm = () : void => {
         $scope.redirectTo(`/form/${vm.forms.selected[0].id}/results/1`);

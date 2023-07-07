@@ -1,6 +1,8 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.core.enums.I18nKeys;
 import fr.openent.form.core.models.ShareObject;
+import fr.openent.form.helpers.I18nHelper;
 import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.*;
 import fr.openent.formulaire.service.impl.*;
@@ -31,12 +33,10 @@ import java.util.*;
 
 import static fr.openent.form.core.constants.Constants.MAX_USERS_SHARING;
 import static fr.openent.form.core.constants.EbFields.ACTION;
-import static fr.openent.form.core.constants.EbFields.WORKSPACE_ADDRESS;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.*;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
 import static fr.openent.form.helpers.UtilsHelper.getStringIds;
-import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 
 public class SharingController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(SharingController.class);
@@ -189,9 +189,11 @@ public class SharingController extends ControllerHelper {
 
                         // Check max sharing limit
                         if (responders.size() > MAX_USERS_SHARING) {
-                            log.error("[Formulaire@SharingController::shareResource] " +
-                                    "Share to more than " + MAX_USERS_SHARING + " people is not allowed.");
-                            badRequest(request);
+                            String message = "[Formulaire@SharingController::shareResource] " +
+                                    "Share to more than " + MAX_USERS_SHARING + " people is not allowed.";
+                            log.error(message);
+                            String i18n = I18nHelper.getWithParam(I18nKeys.MAX_USERS_SHARING_ERROR, MAX_USERS_SHARING, request);
+                            renderInternalError(request, i18n);
                             return;
                         }
 

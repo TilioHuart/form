@@ -1,5 +1,6 @@
 <lightbox show="vm.display.lightbox.sharing" on-close="vm.closeShareFormLightbox()">
-    <share-panel app-prefix="formulaire" resources="vm.forms.selected" auto-close="true"></share-panel>
+    <share-panel app-prefix="formulaire" resources="vm.forms.selected" auto-close="true"
+    on-failure="vm.shareFailure($error)"></share-panel>
 
     <div ng-if="!vm.isCloseConfirmationOpen() && vm.forms.selected[0].is_public">
         <h2><i18n>formulaire.share.link.access</i18n></h2>

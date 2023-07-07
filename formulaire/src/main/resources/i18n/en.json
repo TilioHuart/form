@@ -55,6 +55,7 @@
   "formulaire.send": "Envoyer",
   "formulaire.sendTo": "Envoyer à ...",
   "formulaire.share": "Partager",
+  "formulaire.share.error.max.users": "Vous n'êtes pas autorisé à partager à plus de {0} utilisateurs",
   "formulaire.results": "Résultats",
   "formulaire.remind": "Rappel",
   "formulaire.checkremind": "Suivi",
