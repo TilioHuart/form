@@ -141,7 +141,7 @@ public class QuestionController extends ControllerHelper {
         String formId = request.getParam(PARAM_FORM_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
-                String message = "[Formulaire@createQuestion] User not found in session.";
+                String message = "[Formulaire@QuestionController::createQuestion] User not found in session.";
                 log.error(message);
                 unauthorized(request, message);
                 return;
@@ -149,7 +149,7 @@ public class QuestionController extends ControllerHelper {
 
             RequestUtils.bodyToJson(request, question -> {
                 if (question == null || question.isEmpty()) {
-                    log.error("[Formulaire@createQuestion] No question to create.");
+                    log.error("[Formulaire@QuestionController::createQuestion] No question to create.");
                     noContent(request);
                     return;
                 }
@@ -159,37 +159,38 @@ public class QuestionController extends ControllerHelper {
 
                 // Check section infos validity
                 if (sectionId == null ^ sectionPosition == null) { // ^ = XOR -> return true if they have different value, return false if they both have same value
-                    String message = "[Formulaire@createQuestion] sectionId and sectionPosition must be both null or both not null.";
+                    String message = "[Formulaire@QuestionController::createQuestion] sectionId and sectionPosition must be both null or both not null.";
                     log.error(message);
-                    badRequest(request, message);
+                    badRequest(request);
                     return;
                 } else if (sectionId != null && (sectionId <= 0 || sectionPosition <= 0)) {
-                    String message = "[Formulaire@createQuestion] sectionId and sectionPosition must have values greater than 0.";
+                    String message = "[Formulaire@QuestionController::createQuestion] sectionId and sectionPosition must have values greater than 0.";
                     log.error(message);
-                    badRequest(request, message);
+                    badRequest(request);
                     return;
                 } else if (sectionPosition != null && question.getInteger(POSITION) != null) {
-                    String message = "[Formulaire@createQuestion] A question is either in or out of a section, it cannot have a position and a section_position.";
+                    String message = "[Formulaire@QuestionController::createQuestion] A question is either in or out of a " +
+                            "section, it cannot have a position and a section_position.";
                     log.error(message);
-                    badRequest(request, message);
+                    badRequest(request);
                     return;
                 } else if (question.getBoolean(CONDITIONAL) && !CONDITIONAL_QUESTIONS.contains(question.getInteger(QUESTION_TYPE))) {
-                    String message = "[Formulaire@createQuestion] A question conditional question must be of type : " + CONDITIONAL_QUESTIONS;
+                    String message = "[Formulaire@QuestionController::createQuestion] A question conditional question must be of type : " + CONDITIONAL_QUESTIONS;
                     log.error(message);
-                    badRequest(request, message);
+                    badRequest(request);
                     return;
                 }
 
                 formService.get(formId, user, formEvt -> {
                     if (formEvt.isLeft()) {
-                        log.error("[Formulaire@createQuestion] Failed to get form with id : " + formId);
-                        renderInternalError(request, formEvt);
+                        log.error("[Formulaire@QuestionController::createQuestion] Failed to get form with id " + formId + " : " + formEvt.left().getValue());
+                        renderError(request);
                         return;
                     }
                     if (formEvt.right().getValue().isEmpty()) {
-                        String message = "[Formulaire@createQuestion] No form found for form with id " + formId;
+                        String message = "[Formulaire@QuestionController::createQuestion] No form found for form with id " + formId;
                         log.error(message);
-                        notFound(request, message);
+                        notFound(request);
                         return;
                     }
 
@@ -198,24 +199,23 @@ public class QuestionController extends ControllerHelper {
                     // Check if form is not already responded
                     distributionService.countFinished(formId, countRepEvt -> {
                         if (countRepEvt.isLeft()) {
-                            log.error("[Formulaire@createQuestion] Failed to count finished distributions form form with id : " + formId);
-                            renderInternalError(request, countRepEvt);
+                            log.error("[Formulaire@QuestionController::createQuestion] Failed to count finished distributions " +
+                                    "for form with id " + formId + " : " + countRepEvt.left().getValue());
+                            renderError(request);
                             return;
                         }
 
                         int nbResponseTot = countRepEvt.right().getValue().getInteger(COUNT, 0);
                         if (nbResponseTot > 0) {
-                            String message = "[Formulaire@createQuestion] You cannot create a question for a form already responded";
-                            log.error(message);
-                            badRequest(request, message);
+                            log.error("[Formulaire@QuestionController::createQuestion] You cannot create a question for a form already responded");
+                            badRequest(request);
                             return;
                         }
 
                         // Check if the type of question if it's for a public form (type FILE is forbidden)
                         if (form.getBoolean(IS_PUBLIC) && question.getInteger(QUESTION_TYPE) != null && question.getInteger(QUESTION_TYPE) == 8) {
-                            String message = "[Formulaire@createQuestion] You cannot create a question type FILE for the public form with id " + formId;
-                            log.error(message);
-                            badRequest(request, message);
+                            log.error("[Formulaire@QuestionController::createQuestion] You cannot create a question type FILE for the public form with id " + formId);
+                            badRequest(request);
                             return;
                         }
 
@@ -223,15 +223,16 @@ public class QuestionController extends ControllerHelper {
                         if (question.getBoolean(CONDITIONAL) && sectionId != null) {
                             questionService.getSectionIdsWithConditionalQuestions(formId, new JsonArray(), sectionIdsEvt -> {
                                 if (sectionIdsEvt.isLeft()) {
-                                    log.error("[Formulaire@createQuestion] Failed to get section ids for form with id : " + formId);
-                                    renderInternalError(request, sectionIdsEvt);
+                                    log.error("[Formulaire@QuestionController::createQuestion] Failed to get section ids " +
+                                            "for form with id " + formId + " : " + sectionIdsEvt.left().getValue());
+                                    renderError(request);
                                     return;
                                 }
                                 JsonArray sectionIds = getByProp(sectionIdsEvt.right().getValue(), SECTION_ID);
                                 if (sectionIds.contains(sectionId)) {
-                                    String message = "[Formulaire@createQuestion] A conditional question is already existing for the section with id : " + sectionId;
-                                    log.error(message);
-                                    badRequest(request, message);
+                                    log.error("[Formulaire@QuestionController::createQuestion] A conditional question is " +
+                                            "already existing for the section with id " + sectionId);
+                                    badRequest(request);
                                     return;
                                 }
                                 createQuestion(request, question, formId);
