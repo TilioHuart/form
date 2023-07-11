@@ -1,11 +1,10 @@
 package fr.openent.formulaire.service;
 
 import fr.openent.form.core.models.Form;
-import fr.openent.form.core.models.ShareMember;
+import fr.openent.form.core.models.Sharing.ShareMember;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.user.UserInfos;

@@ -1,6 +1,6 @@
 package fr.openent.formulaire.service.impl;
 
-import fr.openent.form.core.models.ShareMember;
+import fr.openent.form.core.models.Sharing.ShareMember;
 import fr.openent.form.helpers.FutureHelper;
 import fr.openent.formulaire.service.FormService;
 import fr.wseduc.webutils.DefaultAsyncResult;

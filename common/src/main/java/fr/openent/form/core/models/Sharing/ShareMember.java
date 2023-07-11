@@ -1,6 +1,8 @@
-package fr.openent.form.core.models;
+package fr.openent.form.core.models.Sharing;
 
 import static fr.openent.form.core.constants.Fields.*;
+
+import fr.openent.form.core.models.IModel;
 import io.vertx.core.json.JsonObject;
 
 public class ShareMember implements IModel<ShareMember> {

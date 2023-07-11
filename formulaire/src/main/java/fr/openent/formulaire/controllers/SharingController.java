@@ -1,7 +1,10 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.enums.I18nKeys;
-import fr.openent.form.core.models.ShareObject;
+import fr.openent.form.core.models.Form;
+import fr.openent.form.core.models.Sharing.ShareInfo.ShareInfos;
+import fr.openent.form.core.models.Sharing.ShareInfo.ShareInfosAction;
+import fr.openent.form.core.models.Sharing.ShareObject.ShareObject;
 import fr.openent.form.helpers.I18nHelper;
 import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.*;
@@ -63,51 +66,51 @@ public class SharingController extends ControllerHelper {
     @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void shareJson(final HttpServerRequest request) {
-        final String id = request.params().get(ID);
-        if (id != null && !id.trim().isEmpty()) {
-            UserUtils.getUserInfos(this.eb, request, user -> {
-                if (user == null) {
-                    log.error("[Formulaire@SharingController::shareJson] User not found in session.");
-                    unauthorized(request);
+        final String formId = request.params().get(ID);
+
+        UserUtils.getUserInfos(this.eb, request, user -> {
+            if (user == null) {
+                log.error("[Formulaire@SharingController::shareJson] User not found in session.");
+                unauthorized(request);
+                return;
+            }
+
+            super.shareService.shareInfos(user.getUserId(), formId, I18n.acceptLanguage(request), request.params().get(SEARCH), shareInfosEvt -> {
+                if (shareInfosEvt.isLeft()) {
+                    log.error("[Formulaire@SharingController::shareResource] Fail to get sharing infos : " + shareInfosEvt.left().getValue());
+                    renderError(request);
                     return;
                 }
 
-                super.shareService.shareInfos(user.getUserId(), id, I18n.acceptLanguage(request), request.params().get(SEARCH), shareInfosEvt -> {
-                    if (shareInfosEvt.isLeft()) {
-                        log.error("[Formulaire@SharingController::shareResource] Fail to get sharing infos : " + shareInfosEvt.left().getValue());
-                        renderError(request);
-                        return;
-                    }
-
-                    JsonObject shareInfos = shareInfosEvt.right().getValue().copy();
-                    JsonArray actions = shareInfos.getJsonArray(ACTIONS);
-
-                    formService.get(id, user, formEvt -> {
-                        if (formEvt.isLeft()) {
-                            log.error("[Formulaire@SharingController::shareJson] Fail to get form with id " + id + " : " + formEvt.left().getValue());
-                            renderError(request);
+                formService.get(formId)
+                    .onSuccess(result -> {
+                        if (!result.isPresent()) {
+                            log.error("[Formulaire@SharingController::shareJson] No form found for id " + formId);
+                            noContent(request);
                             return;
                         }
 
-                        JsonObject form = formEvt.right().getValue();
-                        boolean isPublicForm = form.getBoolean(IS_PUBLIC, false);
+                        boolean isPublicForm = result.get().getIsPublic();
 
-                        for (int i = actions.size() - 1; i >= 0; i--) {
-                            JsonObject action = actions.getJsonObject(i);
-                            boolean isReadRight = action.getString(PARAM_DISPLAY_NAME).equals(READ_RESOURCE_RIGHT);
-                            boolean isResponderRight = action.getString(PARAM_DISPLAY_NAME).equals(RESPONDER_RESOURCE_RIGHT);
-                            if (isReadRight || (isPublicForm && isResponderRight)) actions.remove(i);
-                        }
+                        ShareInfos shareInfos = new ShareInfos(shareInfosEvt.right().getValue());
+                        List<ShareInfosAction> filteredActions = shareInfos.getActions().stream()
+                                .filter(action -> {
+                                    boolean isReadRight = action.getDisplayName().equals(READ_RESOURCE_RIGHT);
+                                    boolean isResponderRight = action.getDisplayName().equals(RESPONDER_RESOURCE_RIGHT);
+                                    return !(isReadRight || (isPublicForm && isResponderRight));
+                                })
+                                .collect(Collectors.toList());
+                        shareInfos.setActions(filteredActions);
 
-                        renderJson(request, shareInfos);
+                        renderJson(request, shareInfos.toJson(false));
+                    })
+                    .onFailure(err -> {
+                        String errMessage = "[Formulaire@SharingController::shareJson] Fail to get form with id " + formId;
+                        log.error(errMessage + " : " + err.getMessage());
+                        renderError(request);
                     });
-                });
             });
-        }
-        else {
-            log.error("[Formulaire@SharingController::shareJson] ID parameter must not be null or empty.");
-            badRequest(request);
-        }
+        });
     }
 
     @Put("/share/json/:id")
@@ -156,19 +159,22 @@ public class SharingController extends ControllerHelper {
                     }
 
                     JsonObject shareInfos = shareInfosEvt.right().getValue();
-                    JsonArray readRights = shareInfos.getJsonArray(ACTIONS).stream()
+                    List<String> readRights = shareInfos.getJsonArray(ACTIONS).stream()
                             .map(JsonObject.class::cast)
                             .filter(action -> action.getString(PARAM_DISPLAY_NAME).equals(READ_RESOURCE_RIGHT))
                             .findFirst()
                             .get()
-                            .getJsonArray(NAME);
+                            .getJsonArray(NAME)
+                            .stream()
+                            .map(String.class::cast)
+                            .collect(Collectors.toList());
                     shareObject.addCommonRights(readRights);
 
 
                     // Get all ids, filter the one about sending (response right)
-                    Map<String, Object> idUsers = shareObject.getUsers().getMap();
-                    Map<String, Object> idGroups = shareObject.getGroups().getMap();
-                    Map<String, Object> idBookmarks = shareObject.getBookmarks().getMap();
+                    Map<String, List<String>> idUsers = shareObject.getUsers().getUsersRights();
+                    Map<String, List<String>> idGroups = shareObject.getGroups().getGroupsRights();
+                    Map<String, List<String>> idBookmarks = shareObject.getBookmarks().getBookmarksRights();
 
                     JsonArray usersIds = new JsonArray(new ArrayList<>(filterIdsForSending(idUsers).keySet()));
                     JsonArray groupsIds = new JsonArray(new ArrayList<>(filterIdsForSending(idGroups).keySet()));
@@ -224,7 +230,7 @@ public class SharingController extends ControllerHelper {
                                 }
 
                                 // Update 'collab' property as needed
-                                List<Map<String, Object>> idsObjects = new ArrayList<>();
+                                List<Map<String, List<String>>> idsObjects = new ArrayList<>();
                                 idsObjects.add(idUsers);
                                 idsObjects.add(idGroups);
                                 idsObjects.add(idBookmarks);
@@ -245,8 +251,8 @@ public class SharingController extends ControllerHelper {
         });
     }
 
-    private Map<String, Object> filterIdsForSending(Map<String, Object> map) {
-        Map<String, Object> filteredMap = new HashMap<>();
+    private Map<String, List<String>> filterIdsForSending(Map<String, List<String>> map) {
+        Map<String, List<String>> filteredMap = new HashMap<>();
         for (String key : map.keySet()) {
             ArrayList<String> values = (ArrayList<String>)map.get(key);
             for (String value : values) {
@@ -410,7 +416,7 @@ public class SharingController extends ControllerHelper {
         });
     }
 
-    private void updateFormCollabProp(String formId, UserInfos user, List<Map<String, Object>> idsObjects, Handler<Either<String, JsonObject>> handler) {
+    private void updateFormCollabProp(String formId, UserInfos user, List<Map<String, List<String>>> idsObjects, Handler<Either<String, JsonObject>> handler) {
         formService.get(formId, user, formEvt -> {
             if (formEvt.isLeft()) {
                 log.error("[Formulaire@SharingController::updateFormCollabProp] Fail to get form : " + formEvt.left().getValue());
@@ -430,7 +436,7 @@ public class SharingController extends ControllerHelper {
             int i = 0;
             while (!isShared && i < idsObjects.size()) { // Iterate over "users", "groups", "bookmarks"
                 int j = 0;
-                Map<String, Object> o = idsObjects.get(i);
+                Map<String, List<String>> o = idsObjects.get(i);
                 List<Object> values = new ArrayList<Object>(o.values());
 
                 while (!isShared && j < values.size()) { // Iterate over each pair id-actions
@@ -476,11 +482,11 @@ public class SharingController extends ControllerHelper {
 
             JsonArray rights = formSharedEvt.right().getValue();
             String id = user.getUserId();
-            shareObject.getUsers().put(id, new JsonArray());
+            shareObject.getUsers().getUsersRights().put(id, new ArrayList<>());
 
             for (int i = 0; i < rights.size(); i++) {
                 JsonObject right = rights.getJsonObject(i);
-                shareObject.getUsers().getJsonArray(id).add(right.getString(ACTION));
+                shareObject.getUsers().getUsersRights().get(id).add(right.getString(ACTION));
             }
 
             JsonObject jsonShareObject = shareObject.toJson();

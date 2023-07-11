@@ -12,7 +12,9 @@ public class Fields {
     public static final String ALL = "all";
     public static final String ARR = "arr";
     public static final String CAPTCHA_ID = "captcha_id";
+    public static final String CHECKED = "checked";
     public static final String CHOICE_ID = "choice_id";
+    public static final String CHOICE_POSITION = "choice_position";
     public static final String CITY = "city";
     public static final String CODE = "code";
     public static final String COLLAB = "collab";
@@ -45,6 +47,7 @@ public class Fields {
     public static final String IS_CUSTOM = "is_custom";
     public static final String IS_PUBLIC = "is_public";
     public static final String IS_NEXT_FORM_ELEMENT_DEFAULT = "is_next_form_element_default";
+    public static final String LOGIN = "login";
     public static final String MAIL = "mail";
     public static final String MANDATORY = "mandatory";
     public static final String MATRIX_ID = "matrix_id";
@@ -65,6 +68,7 @@ public class Fields {
     public static final String OWNER_ID = "owner_id";
     public static final String OWNER_NAME = "owner_name";
     public static final String PICTURE = "picture";
+    public static final String PROFILE = "profile";
     public static final String QUESTION = "question";
     public static final String QUESTION_CHOICES = "question_choices";
     public static final String QUESTION_ID = "question_id";
@@ -99,12 +103,13 @@ public class Fields {
     public static final String USERNAME = "username";
     public static final String USER_ID = "user_id";
     public static final String VALUE = "value";
+    public static final String VISIBLES = "visibles";
     public static final String ZIPCODE = "zipcode";
-    public static final String CHOICE_POSITION = "choice_position";
 
 
     // Request params
     public static final String PARAM_BOOKMARKS_IDS = "bookmarksIds";
+    public static final String PARAM_BOOKMARKS_RIGHTS = "bookmarksRights";
     public static final String PARAM_CHOICE_ID = "choiceId";
     public static final String PARAM_CHOICE_IMAGE = "imageChoice";
     public static final String PARAM_DISPLAY_NAME = "displayName";
@@ -114,6 +119,7 @@ public class Fields {
     public static final String PARAM_ERRORS_NUMBER = "errorsNumber";
     public static final String PARAM_FILE_ID = "fileId";
     public static final String PARAM_FILE_TYPE = "fileType";
+    public static final String PARAM_FIRST_NAME = "firstName";
     public static final String PARAM_FOLDER_ID = "folderId";
     public static final String PARAM_FORM_ID = "formId";
     public static final String PARAM_FORM_KEY = "formKey";
@@ -123,9 +129,11 @@ public class Fields {
     public static final String PARAM_GRAPH_DATA = "graphData";
     public static final String PARAM_GROUP_IDS = "groupIds";
     public static final String PARAM_GROUPS_IDS = "groupsIds";
+    public static final String PARAM_GROUPS_RIGHTS = "groupsRights";
     public static final String PARAM_ID_IMAGE = "idImage";
     public static final String PARAM_ID_IMAGES_FILES = "idImagesFiles";
     public static final String PARAM_ID_IMAGES_PER_QUESTION = "idImagesPerQuestion";
+    public static final String PARAM_LAST_NAME = "lastName";
     public static final String PARAM_MAIN_RESOURCE_NAME = "mainResourceName";
     public static final String PARAM_NB_LINES = "nbLines";
     public static final String PARAM_NB_RESPONSE_TOT = "nbResponseTot";
@@ -138,10 +146,12 @@ public class Fields {
     public static final String PARAM_RESOURCES_NUMBER = "resourcesNumber";
     public static final String PARAM_RESPONSE_ID = "responseId";
     public static final String PARAM_SECTION_ID = "sectionId";
+    public static final String PARAM_STRUCTURE_NAME = "structureName";
     public static final String PARAM_USER_ID = "userId";
     public static final String PARAM_USER_IDS = "userIds";
     public static final String PARAM_USER_URI = "userUri";
     public static final String PARAM_USERS_IDS = "usersIds";
+    public static final String PARAM_USERS_RIGHTS = "usersRights";
 
 
     // Others

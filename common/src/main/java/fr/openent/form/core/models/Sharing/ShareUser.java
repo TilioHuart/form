@@ -1,5 +1,6 @@
-package fr.openent.form.core.models;
+package fr.openent.form.core.models.Sharing;
 
+import fr.openent.form.core.models.IModel;
 import io.vertx.core.json.JsonObject;
 
 import static fr.openent.form.core.constants.Fields.*;
