@@ -91,6 +91,10 @@ public class FormController extends ControllerHelper {
 
     // Init sharing rights
 
+    @SecuredAction(value = READ_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void initReadResourceRight(final HttpServerRequest request) {
+    }
+
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void initContribResourceRight(final HttpServerRequest request) {
     }
@@ -174,7 +178,7 @@ public class FormController extends ControllerHelper {
     @Get("/forms/:formId")
     @ApiDoc("Get a specific form by id")
     @ResourceFilter(CustomShareAndOwner.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @SecuredAction(value = READ_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
         UserUtils.getUserInfos(eb, request, user -> {
@@ -1055,8 +1059,8 @@ public class FormController extends ControllerHelper {
 
     @Get("/forms/:formId/rights")
     @ApiDoc("Get my rights for a specific form")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(CustomShareAndOwner.class)
+    @SecuredAction(value = READ_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void getMyFormRights(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
         UserUtils.getUserInfos(eb, request, user -> {

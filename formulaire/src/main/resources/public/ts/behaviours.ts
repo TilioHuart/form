@@ -3,6 +3,9 @@ import {formService} from "@common/services";
 
 const rights = {
     resources: {
+        read: {
+            right: "fr-openent-formulaire-controllers-FormController|initReadResourceRight"
+        },
         contrib: {
             right: "fr-openent-formulaire-controllers-FormController|initContribResourceRight"
         },
@@ -42,6 +45,6 @@ Behaviours.register('formulaire', {
     },
 
     resourceRights: function () {
-        return ['contrib', 'manager', 'comment'];
+        return ['read', 'contrib', 'manager', 'comment'];
     }
 });

@@ -3,7 +3,6 @@ package fr.openent.formulaire.controllers;
 import fr.openent.form.core.enums.I18nKeys;
 import fr.openent.form.helpers.I18nHelper;
 import fr.openent.formulaire.helpers.folder_exporter.FolderExporterZip;
-import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.ResponseFileService;
 import fr.openent.formulaire.service.impl.DefaultResponseFileService;
@@ -26,8 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static fr.openent.form.core.constants.Fields.*;
-import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_RIGHT;
-import static fr.openent.form.core.constants.ShareRights.RESPONDER_RESOURCE_RIGHT;
+import static fr.openent.form.core.constants.ShareRights.*;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
@@ -48,8 +46,8 @@ public class ResponseFileController extends ControllerHelper {
 
     @Get("/responses/:responseId/files/all")
     @ApiDoc("List all files of a specific response")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(CustomShareAndOwner.class)
+    @SecuredAction(value = READ_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
         String responseId = request.getParam(PARAM_RESPONSE_ID);
         responseFileService.list(responseId, arrayResponseHandler(request));
@@ -57,8 +55,8 @@ public class ResponseFileController extends ControllerHelper {
 
     @Get("/questions/:questionId/files/all")
     @ApiDoc("List all files of all responses to a specific question")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(CustomShareAndOwner.class)
+    @SecuredAction(value = READ_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void listByQuestion(HttpServerRequest request) {
         String questionId = request.getParam(PARAM_QUESTION_ID);
         responseFileService.listByQuestion(questionId, arrayResponseHandler(request));

@@ -30,6 +30,7 @@ import org.entcore.common.user.UserUtils;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static fr.openent.form.core.constants.Constants.MAX_USERS_SHARING;
 import static fr.openent.form.core.constants.EbFields.ACTION;
@@ -73,29 +74,29 @@ public class SharingController extends ControllerHelper {
 
                 super.shareService.shareInfos(user.getUserId(), id, I18n.acceptLanguage(request), request.params().get(SEARCH), shareInfosEvt -> {
                     if (shareInfosEvt.isLeft()) {
-                        log.error("[Formulaire@SharingController::shareJson] Fail to get sharing infos : " + shareInfosEvt.left().getValue());
-                        renderInternalError(request, shareInfosEvt);
+                        log.error("[Formulaire@SharingController::shareResource] Fail to get sharing infos : " + shareInfosEvt.left().getValue());
+                        renderError(request);
                         return;
                     }
 
                     JsonObject shareInfos = shareInfosEvt.right().getValue().copy();
+                    JsonArray actions = shareInfos.getJsonArray(ACTIONS);
+
                     formService.get(id, user, formEvt -> {
                         if (formEvt.isLeft()) {
                             log.error("[Formulaire@SharingController::shareJson] Fail to get form with id " + id + " : " + formEvt.left().getValue());
-                            renderInternalError(request, formEvt);
+                            renderError(request);
                             return;
                         }
 
                         JsonObject form = formEvt.right().getValue();
-                        if (form.getBoolean(IS_PUBLIC, false)) {
-                            JsonArray actions = shareInfos.getJsonArray(ACTIONS);
+                        boolean isPublicForm = form.getBoolean(IS_PUBLIC, false);
 
-                            for (int i = actions.size() - 1; i >= 0; i--) {
-                                JsonObject action = actions.getJsonObject(i);
-                                if (action.getString(PARAM_DISPLAY_NAME).equals(RESPONDER_RESOURCE_RIGHT)) {
-                                    actions.remove(i);
-                                }
-                            }
+                        for (int i = actions.size() - 1; i >= 0; i--) {
+                            JsonObject action = actions.getJsonObject(i);
+                            boolean isReadRight = action.getString(PARAM_DISPLAY_NAME).equals(READ_RESOURCE_RIGHT);
+                            boolean isResponderRight = action.getString(PARAM_DISPLAY_NAME).equals(RESPONDER_RESOURCE_RIGHT);
+                            if (isReadRight || (isPublicForm && isResponderRight)) actions.remove(i);
                         }
 
                         renderJson(request, shareInfos);
@@ -130,6 +131,8 @@ public class SharingController extends ControllerHelper {
     @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void shareResource(final HttpServerRequest request) {
+        final String formId = request.params().get(ID);
+
         RequestUtils.bodyToJson(request, pathPrefix + "share", shareObjectJson -> {
             if (shareObjectJson == null || shareObjectJson.isEmpty()) {
                 log.error("[Formulaire@SharingController::shareResource] No forms to share.");
@@ -137,7 +140,6 @@ public class SharingController extends ControllerHelper {
                 return;
             }
             ShareObject shareObject = new ShareObject(shareObjectJson);
-            shareObject.addCommonRights();
 
             UserUtils.getUserInfos(eb, request, user -> {
                 if (user == null) {
@@ -146,78 +148,95 @@ public class SharingController extends ControllerHelper {
                     return;
                 }
 
-                // Get all ids, filter the one about sending (response right)
-                final String formId = request.params().get(ID);
-                Map<String, Object> idUsers = shareObject.getUsers().getMap();
-                Map<String, Object> idGroups = shareObject.getGroups().getMap();
-                Map<String, Object> idBookmarks = shareObject.getBookmarks().getMap();
-
-                JsonArray usersIds = new JsonArray(new ArrayList<>(filterIdsForSending(idUsers).keySet()));
-                JsonArray groupsIds = new JsonArray(new ArrayList<>(filterIdsForSending(idGroups).keySet()));
-                JsonArray bookmarksIds = new JsonArray(new ArrayList<>(filterIdsForSending(idBookmarks).keySet()));
-
-                // Get group ids and users ids from bookmarks and add them to previous lists
-                neoService.getIdsFromBookMarks(bookmarksIds, bookmarksEvt -> {
-                    if (bookmarksEvt.isLeft()) {
-                        log.error("[Formulaire@SharingController::shareResource] Fail to get ids from bookmarks' ids");
-                        renderInternalError(request, bookmarksEvt);
+                super.shareService.shareInfos(user.getUserId(), formId, I18n.acceptLanguage(request), request.params().get(SEARCH), shareInfosEvt -> {
+                    if (shareInfosEvt.isLeft()) {
+                        log.error("[Formulaire@SharingController::shareResource] Fail to get sharing infos : " + shareInfosEvt.left().getValue());
+                        renderError(request);
                         return;
                     }
 
-                    JsonArray ids = bookmarksEvt.right().getValue().getJsonObject(0).getJsonArray(IDS).getJsonObject(0).getJsonArray(IDS);
-                    for (int i = 0; i < ids.size(); i++) {
-                        JsonObject id = ids.getJsonObject(i);
-                        boolean isGroup = id.getString(NAME) != null;
-                        (isGroup ? groupsIds : usersIds).add(id.getString(ID));
-                    }
+                    JsonObject shareInfos = shareInfosEvt.right().getValue();
+                    JsonArray readRights = shareInfos.getJsonArray(ACTIONS).stream()
+                            .map(JsonObject.class::cast)
+                            .filter(action -> action.getString(PARAM_DISPLAY_NAME).equals(READ_RESOURCE_RIGHT))
+                            .findFirst()
+                            .get()
+                            .getJsonArray(NAME);
+                    shareObject.addCommonRights(readRights);
 
-                    // Get all users ids from usersIds & groupsIds
-                    // Sync with distribution table
-                    neoService.getUsersInfosFromIds(usersIds, groupsIds, usersEvt -> {
-                        if (usersEvt.isLeft()) {
-                            log.error("[Formulaire@SharingController::shareResource] Fail to get users' ids from groups' ids");
-                            renderInternalError(request, usersEvt);
+
+                    // Get all ids, filter the one about sending (response right)
+                    Map<String, Object> idUsers = shareObject.getUsers().getMap();
+                    Map<String, Object> idGroups = shareObject.getGroups().getMap();
+                    Map<String, Object> idBookmarks = shareObject.getBookmarks().getMap();
+
+                    JsonArray usersIds = new JsonArray(new ArrayList<>(filterIdsForSending(idUsers).keySet()));
+                    JsonArray groupsIds = new JsonArray(new ArrayList<>(filterIdsForSending(idGroups).keySet()));
+                    JsonArray bookmarksIds = new JsonArray(new ArrayList<>(filterIdsForSending(idBookmarks).keySet()));
+
+                    // Get group ids and users ids from bookmarks and add them to previous lists
+                    neoService.getIdsFromBookMarks(bookmarksIds, bookmarksEvt -> {
+                        if (bookmarksEvt.isLeft()) {
+                            log.error("[Formulaire@SharingController::shareResource] Fail to get ids from bookmarks' ids : " + bookmarksEvt.left().getValue());
+                            renderError(request);
                             return;
                         }
 
-                        JsonArray infos = usersEvt.right().getValue();
-                        JsonArray responders = new JsonArray();
-                        for (int i = 0; i < infos.size(); i++) {
-                            JsonArray users = infos.getJsonObject(i).getJsonArray(USERS);
-                            responders.addAll(users);
+                        JsonArray ids = bookmarksEvt.right().getValue().getJsonObject(0).getJsonArray(IDS).getJsonObject(0).getJsonArray(IDS);
+                        for (int i = 0; i < ids.size(); i++) {
+                            JsonObject id = ids.getJsonObject(i);
+                            boolean isGroup = id.getString(NAME) != null;
+                            (isGroup ? groupsIds : usersIds).add(id.getString(ID));
                         }
 
-                        // Check max sharing limit
-                        if (responders.size() > MAX_USERS_SHARING) {
-                            String message = "[Formulaire@SharingController::shareResource] " +
-                                    "Share to more than " + MAX_USERS_SHARING + " people is not allowed.";
-                            log.error(message);
-                            String i18n = I18nHelper.getWithParam(I18nKeys.MAX_USERS_SHARING_ERROR, MAX_USERS_SHARING, request);
-                            renderInternalError(request, i18n);
-                            return;
-                        }
-
-                        syncDistributions(request, formId, user, responders, syncEvt -> {
-                            if (syncEvt.isLeft()) {
-                                log.error("[Formulaire@SharingController::shareResource] " +
-                                        "Fail to sync distributions for form " + formId);
-                                renderInternalError(request, syncEvt);
+                        // Get all users ids from usersIds & groupsIds
+                        // Sync with distribution table
+                        neoService.getUsersInfosFromIds(usersIds, groupsIds, usersEvt -> {
+                            if (usersEvt.isLeft()) {
+                                log.error("[Formulaire@SharingController::shareResource] Fail to get users' ids from groups' ids : " + usersEvt.left().getValue());
+                                renderError(request);
                                 return;
                             }
 
-                            // Update 'collab' property as needed
-                            List<Map<String, Object>> idsObjects = new ArrayList<>();
-                            idsObjects.add(idUsers);
-                            idsObjects.add(idGroups);
-                            idsObjects.add(idBookmarks);
-                            updateFormCollabProp(formId, user, idsObjects, updateEvt -> {
-                                if (updateEvt.isLeft()) {
+                            JsonArray infos = usersEvt.right().getValue();
+                            JsonArray responders = new JsonArray();
+                            for (int i = 0; i < infos.size(); i++) {
+                                JsonArray users = infos.getJsonObject(i).getJsonArray(USERS);
+                                responders.addAll(users);
+                            }
+
+                            // Check max sharing limit
+                            if (responders.size() > MAX_USERS_SHARING) {
+                                String message = "[Formulaire@SharingController::shareResource] " +
+                                        "Share to more than " + MAX_USERS_SHARING + " people is not allowed.";
+                                log.error(message);
+                                String i18n = I18nHelper.getWithParam(I18nKeys.MAX_USERS_SHARING_ERROR, MAX_USERS_SHARING, request);
+                                renderInternalError(request, i18n);
+                                return;
+                            }
+
+                            syncDistributions(request, formId, user, responders, syncEvt -> {
+                                if (syncEvt.isLeft()) {
                                     log.error("[Formulaire@SharingController::shareResource] " +
-                                            "Fail to update collab prop for form " + formId);
-                                    renderInternalError(request, updateEvt);
+                                            "Fail to sync distributions for form " + formId + " : " + syncEvt.left().getValue());
+                                    renderError(request);
                                     return;
                                 }
-                                fixBugAutoUnsharing(request, formId, user, shareObject);
+
+                                // Update 'collab' property as needed
+                                List<Map<String, Object>> idsObjects = new ArrayList<>();
+                                idsObjects.add(idUsers);
+                                idsObjects.add(idGroups);
+                                idsObjects.add(idBookmarks);
+                                updateFormCollabProp(formId, user, idsObjects, updateEvt -> {
+                                    if (updateEvt.isLeft()) {
+                                        log.error("[Formulaire@SharingController::shareResource] " +
+                                                "Fail to update collab prop for form " + formId + " : " + updateEvt.left().getValue());
+                                        renderError(request);
+                                        return;
+                                    }
+                                    fixBugAutoUnsharing(request, formId, user, shareObject);
+                                });
                             });
                         });
                     });

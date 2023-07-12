@@ -1,6 +1,5 @@
 package fr.openent.formulaire.controllers;
 
-import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.security.ResponseRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
@@ -93,8 +92,8 @@ public class DistributionController extends ControllerHelper {
 
     @Get("/distributions/forms/:formId/listMine")
     @ApiDoc("List all the distributions for a specific form sent to me")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(CustomShareAndOwner.class)
+    @SecuredAction(value = READ_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void listByFormAndResponder(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
         UserUtils.getUserInfos(eb, request, user -> {

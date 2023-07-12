@@ -80,27 +80,20 @@ public class ShareObject implements IModel<ShareObject> {
         return new ShareObject(shareObject);
     }
 
-    public ShareObject addCommonRights() {
-        JsonArray commonRights = RightsHelper.getCommonRights();
-
+    public void addCommonRights(JsonArray commonRights) {
         addCommonRightByField(USERS, commonRights);
         addCommonRightByField(GROUPS, commonRights);
         addCommonRightByField(BOOKMARKS, commonRights);
-
-        return this;
     }
 
     private void addCommonRightByField(String field, JsonArray commonRights) {
         JsonObject rightsById = getJsonObjectFieldInfos(field);
 
-        if (!rightsById.isEmpty()) {
-            List<String> ids = new ArrayList<>(rightsById.fieldNames());
-
-            for (String id : ids) {
-                JsonArray rights = rightsById.getJsonArray(id);
-                boolean shouldAddCommonRight = rights.stream().anyMatch(right -> RightsHelper.hasSharingRight((String) right));
-                if (shouldAddCommonRight) rights.addAll(commonRights);
-            }
+        if (rightsById != null && !rightsById.isEmpty()) {
+            rightsById.fieldNames().stream()
+                .map(rightsById::getJsonArray)
+                .filter(rights -> rights.stream().anyMatch(right -> RightsHelper.hasSharingRight((String) right)))
+                .forEach(rights -> rights.addAll(commonRights));
         }
     }
 

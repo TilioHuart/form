@@ -1,10 +1,8 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.models.Section;
-import fr.openent.form.helpers.FutureHelper;
 import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.helpers.DataChecker;
-import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.FormElementService;
@@ -19,7 +17,6 @@ import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.logging.Logger;
@@ -27,12 +24,12 @@ import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_RIGHT;
+import static fr.openent.form.core.constants.ShareRights.READ_RESOURCE_RIGHT;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
@@ -54,8 +51,8 @@ public class SectionController extends ControllerHelper {
 
     @Get("/forms/:formId/sections")
     @ApiDoc("List all the sections of a specific form")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(CustomShareAndOwner.class)
+    @SecuredAction(value = READ_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
         sectionService.list(formId, arrayResponseHandler(request));

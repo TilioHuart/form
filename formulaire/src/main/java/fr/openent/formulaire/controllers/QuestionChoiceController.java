@@ -22,6 +22,7 @@ import org.entcore.common.http.filter.ResourceFilter;
 
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_RIGHT;
+import static fr.openent.form.core.constants.ShareRights.READ_RESOURCE_RIGHT;
 import static fr.openent.form.core.enums.ApiVersions.*;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
 
@@ -36,8 +37,8 @@ public class QuestionChoiceController extends ControllerHelper {
 
     @Get("/questions/:questionId/choices")
     @ApiDoc("List all the choices of a specific question")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(CustomShareAndOwner.class)
+    @SecuredAction(value = READ_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void list(HttpServerRequest request) {
         String questionId = request.getParam(PARAM_QUESTION_ID);
         String apiVersion = RequestUtils.acceptVersion(request);

@@ -4,7 +4,6 @@ import fr.openent.form.core.models.FormElement;
 import fr.openent.form.core.models.Question;
 import fr.openent.form.core.models.QuestionChoice;
 import fr.openent.form.helpers.UtilsHelper;
-import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.FormElementService;
 import fr.openent.formulaire.service.QuestionChoiceService;
@@ -30,6 +29,7 @@ import java.util.stream.Collectors;
 
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_RIGHT;
+import static fr.openent.form.core.constants.ShareRights.READ_RESOURCE_RIGHT;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
 
@@ -47,8 +47,8 @@ public class FormElementController extends ControllerHelper {
 
     @Get("/forms/:formId/elements/count")
     @ApiDoc("Count the number of form elements in a specific form")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(CustomShareAndOwner.class)
+    @SecuredAction(value = READ_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void countFormElements(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
         formElementService.countFormElements(formId, defaultResponseHandler(request));
@@ -56,8 +56,8 @@ public class FormElementController extends ControllerHelper {
 
     @Get("/forms/:formId/elements/:position")
     @ApiDoc("Get a specific form element by position in a specific form")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(CustomShareAndOwner.class)
+    @SecuredAction(value = READ_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void getByPosition(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
         String position = request.getParam(POSITION);

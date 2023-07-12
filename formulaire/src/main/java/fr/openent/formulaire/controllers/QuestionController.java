@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import static fr.openent.form.core.constants.Constants.CONDITIONAL_QUESTIONS;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_RIGHT;
+import static fr.openent.form.core.constants.ShareRights.READ_RESOURCE_RIGHT;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
 import static fr.openent.form.helpers.UtilsHelper.getByProp;
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
@@ -51,15 +52,15 @@ public class QuestionController extends ControllerHelper {
 
     @Get("/forms/:formId/questions")
     @ApiDoc("List all the questions of a specific form")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(CustomShareAndOwner.class)
+    @SecuredAction(value = READ_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void listForForm(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
 
         questionService.listForForm(formId, listQuestionsEvt -> {
             if (listQuestionsEvt.isLeft()) {
-                log.error("[Formulaire@listForFrom] Fail to list questions for form with id : " + formId);
-                renderInternalError(request, listQuestionsEvt);
+                log.error("[Formulaire@QuestionController::listForForm] Fail to list questions for form with id " + formId + " : " + listQuestionsEvt);
+                renderError(request);
                 return;
             }
             JsonArray questions = listQuestionsEvt.right().getValue();
@@ -71,8 +72,8 @@ public class QuestionController extends ControllerHelper {
 
     @Get("/sections/:sectionId/questions")
     @ApiDoc("List all the questions of a specific section")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(CustomShareAndOwner.class)
+    @SecuredAction(value = READ_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void listForSection(HttpServerRequest request) {
         String sectionId = request.getParam(PARAM_SECTION_ID);
 
@@ -92,8 +93,8 @@ public class QuestionController extends ControllerHelper {
 
     @Get("/forms/:formId/questions/all")
     @ApiDoc("List all the questions of a specific form")
-    @ResourceFilter(AccessRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(CustomShareAndOwner.class)
+    @SecuredAction(value = READ_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void listForFormAndSection(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
 
