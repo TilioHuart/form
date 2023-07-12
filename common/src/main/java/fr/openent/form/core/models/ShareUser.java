@@ -4,7 +4,7 @@ import io.vertx.core.json.JsonObject;
 
 import static fr.openent.form.core.constants.Fields.*;
 
-public class ShareUser implements Model<ShareUser> {
+public class ShareUser implements IModel<ShareUser> {
     private String id;
     private String username;
 

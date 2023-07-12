@@ -4,7 +4,7 @@ import io.vertx.core.json.JsonObject;
 
 import static fr.openent.form.core.constants.Fields.*;
 
-public class QuestionType implements Model<QuestionType> {
+public class QuestionType implements IModel<QuestionType> {
     private Number id;
     private Number code;
     private String name;

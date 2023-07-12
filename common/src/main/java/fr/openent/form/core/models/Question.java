@@ -6,7 +6,7 @@ import static fr.openent.form.core.constants.Fields.*;
 
 import java.util.List;
 
-public class Question extends FormElement implements Model<Question> {
+public class Question extends FormElement implements IModel<Question> {
     private Integer questionType;
     private String statement;
     private Boolean mandatory;

@@ -1,5 +1,6 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.core.models.Folder;
 import fr.openent.formulaire.helpers.DataChecker;
 import fr.openent.form.helpers.FutureHelper;
 import fr.openent.formulaire.security.CreationRight;
@@ -72,7 +73,30 @@ public class FolderController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void get(final HttpServerRequest request) {
         String folderId = request.getParam(PARAM_FOLDER_ID);
-        folderService.get(folderId, defaultResponseHandler(request));
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user == null) {
+                String message = "[Formulaire@FolderController::get] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
+            }
+
+            folderService.get(folderId)
+                .onSuccess(folder -> {
+                    // Check that folder is owned by the connected user
+                    if (!folder.getUserId().equals(user.getUserId())) {
+                        String message = "[Formulaire@FolderController::get] You're not owner of the folder with id " + folderId;
+                        log.error(message);
+                        unauthorized(request);
+                        return;
+                    }
+                    renderJson(request, folder.toJson());
+                })
+                .onFailure(err -> {
+                    log.error("[Formulaire@FolderController::get] Failed to get folder with id " + folderId + " : " + err.getMessage());
+                    renderError(request);
+                });
+        });
     }
 
     @Post("/folders")

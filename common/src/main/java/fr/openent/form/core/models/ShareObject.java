@@ -11,7 +11,7 @@ import java.util.List;
 
 import static fr.openent.form.core.constants.Fields.*;
 
-public class ShareObject implements Model<ShareObject> {
+public class ShareObject implements IModel<ShareObject> {
     private static final Logger log = LoggerFactory.getLogger(ShareObject.class);
     private JsonObject users;
     private JsonObject groups;

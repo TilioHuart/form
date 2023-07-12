@@ -3,7 +3,7 @@ package fr.openent.form.core.models;
 import static fr.openent.form.core.constants.Fields.*;
 import io.vertx.core.json.JsonObject;
 
-public class Delegate implements Model<Delegate> {
+public class Delegate implements IModel<Delegate> {
     private Number id;
     private String entity;
     private String mail;

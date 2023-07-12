@@ -4,7 +4,7 @@ import io.vertx.core.json.JsonObject;
 
 import static fr.openent.form.core.constants.Fields.*;
 
-public class RelFormFolder implements Model<RelFormFolder> {
+public class RelFormFolder implements IModel<RelFormFolder> {
     private String userId;
     private Number formId;
     private Number folderId;

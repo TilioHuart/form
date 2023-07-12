@@ -3,7 +3,7 @@ package fr.openent.form.core.models;
 import static fr.openent.form.core.constants.Fields.*;
 import io.vertx.core.json.JsonObject;
 
-public class Captcha implements Model<Captcha> {
+public class Captcha implements IModel<Captcha> {
     private Number id;
     private String question;
     private String answer;

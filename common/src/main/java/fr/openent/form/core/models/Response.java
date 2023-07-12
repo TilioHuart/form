@@ -3,7 +3,7 @@ package fr.openent.form.core.models;
 import io.vertx.core.json.JsonObject;
 import static fr.openent.form.core.constants.Fields.*;
 
-public class Response implements Model<Response> {
+public class Response implements IModel<Response> {
     private Number id;
     private Number questionId;
     private String answer;

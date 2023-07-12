@@ -5,7 +5,7 @@ import static fr.openent.form.core.constants.Fields.*;
 import fr.openent.form.core.enums.FormElementTypes;
 import io.vertx.core.json.JsonObject;
 
-public class QuestionChoice implements Model<QuestionChoice> {
+public class QuestionChoice implements IModel<QuestionChoice> {
     private Long id;
     private Long questionId;
     private String value;

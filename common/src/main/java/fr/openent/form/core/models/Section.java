@@ -8,7 +8,7 @@ import io.vertx.core.json.JsonObject;
 
 import java.util.List;
 
-public class Section extends FormElement implements Model<Section> {
+public class Section extends FormElement implements IModel<Section> {
     private String description;
     private Long originalSectionId;
     private Long nextFormElementId;

@@ -3,7 +3,7 @@ package fr.openent.form.core.models;
 import io.vertx.core.json.JsonObject;
 import static fr.openent.form.core.constants.Fields.*;
 
-public class ResponseFile implements Model<ResponseFile> {
+public class ResponseFile implements IModel<ResponseFile> {
     private String id;
     private Number responseId;
     private String filename;

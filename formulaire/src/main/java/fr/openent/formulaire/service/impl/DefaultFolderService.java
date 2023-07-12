@@ -1,8 +1,12 @@
 package fr.openent.formulaire.service.impl;
 
+import fr.openent.form.core.models.Folder;
+import fr.openent.form.helpers.IModelHelper;
 import fr.openent.formulaire.service.FolderService;
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
@@ -31,12 +35,28 @@ public class DefaultFolderService implements FolderService {
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
+    /**
+     * @deprecated Use {@link #get(String)}
+     */
     @Override
+    @Deprecated
     public void get(String folderId, Handler<Either<String, JsonObject>> handler) {
+        this.get(folderId)
+            .onSuccess(res -> handler.handle(new Either.Right<>(res.toJson())))
+            .onFailure(error -> handler.handle(new Either.Left<>(error.getMessage())));
+    }
+
+    @Override
+    public Future<Folder> get(String folderId) {
+        Promise<Folder> promise = Promise.promise();
+
         String query = "SELECT * FROM " + FOLDER_TABLE + " WHERE id = ?;";
         JsonArray params = new JsonArray().add(folderId);
 
-        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+        String errorMessage = "[Formulaire@DefaultFolderService::get] Fail to get folder with id " + folderId;
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(IModelHelper.sqlUniqueResultToIModel(promise, Folder.class, errorMessage)));
+
+        return promise.future();
     }
 
     @Override

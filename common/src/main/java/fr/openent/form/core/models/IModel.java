@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public interface Model<I extends Model<I>> {
+public interface IModel<I extends IModel<I>> {
     JsonObject toJson();
 
     I model(JsonObject model);
@@ -25,6 +25,6 @@ public interface Model<I extends Model<I>> {
 
     default JsonArray toJsonArray(List<I> models) {
         if (models == null) return null;
-        return new JsonArray(models.stream().map(Model::toJson).collect(Collectors.toList()));
+        return new JsonArray(models.stream().map(IModel::toJson).collect(Collectors.toList()));
     }
 }

@@ -3,7 +3,7 @@ package fr.openent.form.core.models;
 import static fr.openent.form.core.constants.Fields.*;
 import io.vertx.core.json.JsonObject;
 
-public class FormShare implements Model<FormShare> {
+public class FormShare implements IModel<FormShare> {
     private String memberId;
     private Number resourceId;
     private String action;
