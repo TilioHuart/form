@@ -3,6 +3,7 @@ package fr.openent.form.core.models;
 import static fr.openent.form.core.constants.Fields.*;
 
 import fr.openent.form.core.enums.FormElementTypes;
+import fr.openent.form.helpers.IModelHelper;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -106,7 +107,7 @@ public class Section extends FormElement implements IModel<Section> {
                 .put(NEXT_FORM_ELEMENT_ID, this.nextFormElementId)
                 .put(NEXT_FORM_ELEMENT_TYPE, this.nextFormElementType)
                 .put(IS_NEXT_FORM_ELEMENT_DEFAULT, this.isNextFormElementDefault)
-                .put(QUESTIONS, new Question().toJsonArray(questions));
+                .put(QUESTIONS, this.questions != null ? IModelHelper.toJsonArray(this.questions) : null);
     }
 
     @Override

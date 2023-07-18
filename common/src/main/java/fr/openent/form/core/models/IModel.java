@@ -12,6 +12,9 @@ public interface IModel<I extends IModel<I>> {
 
     I model(JsonObject model);
 
+    /**
+     * @deprecated Should instead use IModelHelper directly
+     */
     @SuppressWarnings("unchecked")
     default List<I> toList(JsonArray results) {
         if (results == null) return null;
@@ -23,6 +26,9 @@ public interface IModel<I extends IModel<I>> {
         }
     }
 
+    /**
+     * @deprecated Should instead use IModelHelper directly
+     */
     default JsonArray toJsonArray(List<I> models) {
         if (models == null) return null;
         return new JsonArray(models.stream().map(IModel::toJson).collect(Collectors.toList()));

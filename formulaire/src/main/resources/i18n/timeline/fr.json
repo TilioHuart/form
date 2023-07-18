@@ -3,9 +3,11 @@
 
     "formulaire.response_notification": "Notification de réponse à un formulaire",
     "formulaire.new_form_notification": "Notification de nouveau formulaire à répondre",
+    "formulaire.infected_file_notification": "Notification d'une tentative d'upload d'un fichier infecté",
 
     "push.notif.formulaire.response": "Nouvelle notification Formulaire",
     "push.notif.formulaire.newForm": "Nouvelle notification Formulaire",
+    "push.notif.formulaire.infectedFile": "Nouvelle notification Formulaire",
 
     "timeline.formulaire.new.notification": "Nouvelle notification Formulaire ",
     "timeline.formulaire.from": "de ",
@@ -16,5 +18,7 @@
     "timeline.formulaire.sent.by.unknow": "Vous avez reçu un nouveau formulaire. ",
     "timeline.formulaire.see": ". Voir les ",
     "timeline.formulaire.results": "résultats",
-    "timeline.formulaire.access": "Accéder au formulaire "
+    "timeline.formulaire.access": "Accéder au formulaire ",
+    "timeline.formulaire.uploaded.infected.file": " a tenté de telécharger un fichier malveillant nommé ",
+    "timeline.formulaire.responded.form": ". Il répondait au formulaire "
 }

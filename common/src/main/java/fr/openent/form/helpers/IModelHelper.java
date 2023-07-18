@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -22,10 +23,10 @@ import java.util.stream.Collectors;
  * ⚠ This will guarantee the correct execution of the line modelClass.getConstructor(JsonObject.class).newInstance(iModel).
  */
 public class IModelHelper {
-    private final static Logger log = LoggerFactory.getLogger(IModelHelper.class);
     private final static List<Class<?>> validJsonClasses = Arrays.asList(String.class, boolean.class, Boolean.class,
             double.class, Double.class, float.class, Float.class, Integer.class, int.class, CharSequence.class,
             JsonObject.class, JsonArray.class, Long.class, long.class);
+    private final static Logger log = LoggerFactory.getLogger(IModelHelper.class);
 
     private IModelHelper() {
         throw new IllegalStateException("Utility class");
@@ -35,7 +36,9 @@ public class IModelHelper {
         return results.stream()
                 .filter(JsonObject.class::isInstance)
                 .map(JsonObject.class::cast)
-                .map(iModel -> toModel(iModel, modelClass)).filter(Objects::nonNull)
+                .map(iModel -> toModel(iModel, modelClass))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toList());
     }
 
@@ -139,7 +142,7 @@ public class IModelHelper {
     /**
      * See {@link #sqlUniqueResultToIModel(Promise, Class, String)}
      */
-    public static <T extends IModel<T>> Handler<Either<String, JsonObject>> sqlUniqueResultToIModel(Promise<T> promise, Class<T> modelClass) {
+    public static <T extends IModel<T>> Handler<Either<String, JsonObject>> sqlUniqueResultToIModel(Promise<Optional<T>> promise, Class<T> modelClass) {
         return sqlUniqueResultToIModel(promise, modelClass, null);
     }
 
@@ -151,25 +154,27 @@ public class IModelHelper {
      * @param errorMessage a message logged when the sql query fail
      * @param <T> the type of the model
      */
-    public static <T extends IModel<T>> Handler<Either<String, JsonObject>> sqlUniqueResultToIModel(Promise<T> promise, Class<T> modelClass, String errorMessage) {
+    public static <T extends IModel<T>> Handler<Either<String, JsonObject>> sqlUniqueResultToIModel(Promise<Optional<T>> promise, Class<T> modelClass, String errorMessage) {
         return event -> {
             if (event.isLeft()) {
                 if (errorMessage != null) {
                     log.error(errorMessage + " : " + event.left().getValue());
                 }
                 promise.fail(event.left().getValue());
+            } else if (event.right().getValue().isEmpty()) {
+                promise.complete(Optional.empty());
             } else {
                 promise.complete(toModel(event.right().getValue(), modelClass));
             }
         };
     }
 
-    public static <T extends IModel<T>> T toModel(JsonObject iModel, Class<T> modelClass) {
+    public static <T extends IModel<T>> Optional<T> toModel(JsonObject iModel, Class<T> modelClass) {
         try {
-            return modelClass.getConstructor(JsonObject.class).newInstance(iModel);
+            return Optional.of(modelClass.getConstructor(JsonObject.class).newInstance(iModel));
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
                  InvocationTargetException e) {
-            return null;
+            return Optional.empty();
         }
     }
 }

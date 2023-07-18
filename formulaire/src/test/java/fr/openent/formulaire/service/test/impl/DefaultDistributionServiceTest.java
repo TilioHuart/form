@@ -1,6 +1,5 @@
 package fr.openent.formulaire.service.test.impl;
 
-import fr.openent.form.core.constants.DistributionStatus;
 import fr.openent.formulaire.service.impl.DefaultDistributionService;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;

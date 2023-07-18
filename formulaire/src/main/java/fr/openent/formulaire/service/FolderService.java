@@ -8,6 +8,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.user.UserInfos;
 
+import java.util.Optional;
+
 public interface FolderService {
     /**
      * List all the folders
@@ -34,7 +36,7 @@ public interface FolderService {
      * Get a folder by id
      * @param folderId  folder identifier
      */
-    Future<Folder> get(String folderId);
+    Future<Optional<Folder>> get(String folderId);
 
     /**
      * Create a folder

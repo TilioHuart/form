@@ -84,13 +84,13 @@ public class FolderController extends ControllerHelper {
             folderService.get(folderId)
                 .onSuccess(folder -> {
                     // Check that folder is owned by the connected user
-                    if (!folder.getUserId().equals(user.getUserId())) {
+                    if (!folder.isPresent() || !user.getUserId().equals(folder.get().getUserId())) {
                         String message = "[Formulaire@FolderController::get] You're not owner of the folder with id " + folderId;
                         log.error(message);
                         unauthorized(request);
                         return;
                     }
-                    renderJson(request, folder.toJson());
+                    renderJson(request, folder.get().toJson());
                 })
                 .onFailure(err -> {
                     log.error("[Formulaire@FolderController::get] Failed to get folder with id " + folderId + " : " + err.getMessage());

@@ -1,0 +1,30 @@
+<span>{{#i18n}}timeline.formulaire.new.notification{{/i18n}}</span>
+
+{{^anonymous}}
+ <span>{{#i18n}}timeline.formulaire.from{{/i18n}}</span>
+ {{#userUri}}<a href="{{#host}}{{userUri}}{{/host}}">{{username}}</a>{{/userUri}}
+ {{^userUri}}
+  {{#username}}{{username}}{{/username}}
+  {{^username}}<span>{{#i18n}}timeline.formulaire.unknown.sender{{/i18n}}</span>{{/username}}
+ {{/userUri}}
+{{/anonymous}}
+ :<br/>
+
+{{^anonymous}}
+ {{#username}}{{username}}{{/username}}
+ {{^username}}<span>{{#i18n}}timeline.formulaire.unknown.sender{{/i18n}}</span>{{/username}}
+{{/anonymous}}
+{{#anonymous}}<span>{{#i18n}}timeline.formulaire.lambda.sender{{/i18n}}</span>{{/anonymous}}
+<span>{{#i18n}}timeline.formulaire.uploaded.infected.file{{/i18n}}</span>{{#filename}}"{{filename}}"{{/filename}}
+<span>{{#i18n}}timeline.formulaire.responded.form{{/i18n}}</span>
+{{#formUri}}
+ {{#formName}}
+  <a href="{{#host}}{{formUri}}{{/host}}">{{formName}}</a>
+ {{/formName}}
+{{/formUri}}
+
+
+{{#formResultsUri}}
+ <span>{{#i18n}}timeline.formulaire.see{{/i18n}}</span>
+ <a href="{{#host}}{{formResultsUri}}{{/host}}">{{#i18n}}timeline.formulaire.results{{/i18n}}</a>.
+{{/formResultsUri}}

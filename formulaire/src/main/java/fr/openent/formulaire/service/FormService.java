@@ -1,5 +1,7 @@
 package fr.openent.formulaire.service;
 
+import fr.openent.form.core.models.Form;
+import fr.openent.form.core.models.ShareMember;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -8,6 +10,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.user.UserInfos;
 import java.util.List;
+import java.util.Optional;
 
 public interface FormService {
     /**
@@ -42,9 +45,8 @@ public interface FormService {
     /**
      * List all the contributors to a form
      * @param formId form identifier
-     * @param handler function handler returning JsonArray data
      */
-    void listContributors(String formId, Handler<Either<String, JsonArray>> handler);
+    Future<List<ShareMember>> listContributors(String formId);
 
     /**
      * List all the managers of a form
@@ -57,6 +59,12 @@ public interface FormService {
      * List all sent forms opening today
      */
     Future<JsonArray> listSentFormsOpeningToday();
+
+    /**
+     * Get a specific form by id
+     * @param formId form identifier
+     */
+    Future<Optional<Form>> get(String formId);
 
     /**
      * Get a specific form by id

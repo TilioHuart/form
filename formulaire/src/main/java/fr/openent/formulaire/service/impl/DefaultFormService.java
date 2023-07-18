@@ -1,8 +1,11 @@
 package fr.openent.formulaire.service.impl;
 
 import fr.openent.form.core.enums.I18nKeys;
+import fr.openent.form.core.models.Form;
+import fr.openent.form.core.models.ShareMember;
 import fr.openent.form.helpers.FutureHelper;
 import fr.openent.form.helpers.I18nHelper;
+import fr.openent.form.helpers.IModelHelper;
 import fr.openent.formulaire.service.FormService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Future;
@@ -19,6 +22,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static fr.openent.form.core.constants.Constants.*;
@@ -112,23 +116,32 @@ public class DefaultFormService implements FormService {
     }
 
     @Override
-    public void listContributors(String formId, Handler<Either<String, JsonArray>> handler) {
-        listUsersByRights(formId, CONTRIB_RESOURCE_BEHAVIOUR, handler);
+    public Future<List<ShareMember>> listContributors(String formId) {
+        return listUsersByRights(formId, CONTRIB_RESOURCE_BEHAVIOUR);
     }
 
     @Override
     public void listManagers(String formId, Handler<Either<String, JsonArray>> handler) {
-        listUsersByRights(formId, MANAGER_RESOURCE_BEHAVIOUR, handler);
+        listUsersByRights(formId, MANAGER_RESOURCE_BEHAVIOUR)
+            .onSuccess(res -> handler.handle(new Either.Right<>(IModelHelper.toJsonArray(res))))
+            .onFailure(error -> handler.handle(new Either.Left<>(error.getMessage())));
     }
 
-    private void listUsersByRights(String formId, String right, Handler<Either<String, JsonArray>> handler) {
+    private Future<List<ShareMember>> listUsersByRights(String formId, String right) {
+        Promise<List<ShareMember>> promise = Promise.promise();
+
         String query = "SELECT DISTINCT fs.member_id AS id FROM " + FORM_TABLE + " f " +
                 "JOIN " + FORM_SHARES_TABLE + " fs ON fs.resource_id = f.id " +
                 "WHERE f.id = ? AND fs.action = ? " +
                 "UNION " +
                 "SELECT owner_id FROM "  + FORM_TABLE + " WHERE id = ?;";
         JsonArray params = new JsonArray().add(formId).add(right).add(formId);
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+
+        String errorMessage = "[Formulaire@DefaultFormService::listUsersByRights] " +
+                "Fail to users with right " + right +" for form with id " + formId + " : ";
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(IModelHelper.sqlResultToIModel(promise, ShareMember.class, errorMessage)));
+
+        return promise.future();
     }
 
     @Override
@@ -142,6 +155,19 @@ public class DefaultFormService implements FormService {
 
         String errorMessage = "[Formulaire@DefaultFormService::listFormsOpeningToday] Fail to list forms opening today";
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(FutureHelper.handlerEither(promise, errorMessage)));
+
+        return promise.future();
+    }
+
+    @Override
+    public Future<Optional<Form>> get(String formId) {
+        Promise<Optional<Form>> promise = Promise.promise();
+
+        String query = "SELECT * FROM " + FORM_TABLE + " WHERE id = ?;";
+        JsonArray params = new JsonArray().add(formId);
+
+        String errorMessage = "[Formulaire@DefaultFormService::get] Fail to get form with id " + formId;
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(IModelHelper.sqlUniqueResultToIModel(promise, Form.class, errorMessage)));
 
         return promise.future();
     }

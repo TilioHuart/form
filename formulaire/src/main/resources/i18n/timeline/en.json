@@ -3,9 +3,11 @@
 
   "formulaire.response_notification": "Notification of a response to a form",
   "formulaire.new_form_notification": "Notification of a new form to answer",
+  "formulaire.infected_file_notification": "Notification of a tentative of upload of an infected file",
 
   "push.notif.formulaire.response": "New Formulaire notification",
   "push.notif.formulaire.newForm": "New Formulaire notification",
+  "push.notif.formulaire.infectedFile": "New Formulaire notification",
 
   "timeline.formulaire.new.notification": "New Formulaire notification ",
   "timeline.formulaire.from": "from ",
@@ -16,5 +18,7 @@
   "timeline.formulaire.sent.by.unknow": "Vous avez reçu un nouveau formulaire. ",
   "timeline.formulaire.see": ". See the ",
   "timeline.formulaire.results": "results",
-  "timeline.formulaire.access": "Go to the form "
+  "timeline.formulaire.access": "Go to the form ",
+  "timeline.formulaire.uploaded.infected.file": " try to upload an infected file named ",
+  "timeline.formulaire.responded.form": ". He was responding to the form "
 }

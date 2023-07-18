@@ -5,6 +5,7 @@ import fr.openent.form.core.constants.Tables;
 import fr.openent.formulaire.controllers.*;
 import fr.openent.formulaire.cron.NotifyCron;
 import fr.openent.formulaire.cron.RgpdCron;
+import fr.openent.formulaire.service.impl.FormulaireApplicationStorage;
 import fr.openent.formulaire.service.impl.FormulaireRepositoryEvents;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.logging.Logger;
@@ -23,6 +24,7 @@ import org.entcore.common.storage.StorageFactory;
 import java.util.ArrayList;
 import java.util.List;
 import fr.wseduc.cron.CronTrigger;
+import org.entcore.common.storage.impl.PostgresqlApplicationStorage;
 
 import static fr.openent.form.core.constants.ConfigFields.*;
 import static fr.openent.form.core.constants.Tables.DB_SCHEMA;
@@ -40,7 +42,8 @@ public class Formulaire extends BaseServer {
 		final EventBus eb = getEventBus(vertx);
 		final TimelineHelper timelineHelper = new TimelineHelper(vertx, eb, config);
 		final EventStore eventStore = EventStoreFactory.getFactory().getEventStore(Formulaire.class.getSimpleName());
-		final Storage storage = new StorageFactory(vertx, config).getStorage();
+		final PostgresqlApplicationStorage applicationStorage = new FormulaireApplicationStorage(timelineHelper, eb);
+		final Storage storage = new StorageFactory(vertx, config, applicationStorage).getStorage();
 
 		// Set RepositoryEvents implementation used to process events published for transition
 		setRepositoryEvents(new FormulaireRepositoryEvents(vertx));

@@ -17,7 +17,7 @@ import static fr.openent.form.core.constants.Fields.*;
 import static fr.wseduc.webutils.http.Renders.unauthorized;
 
 public class DefaultNotifyService implements NotifyService {
-    private final static Logger log = LoggerFactory.getLogger(DefaultNotifyService.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultNotifyService.class);
 
     private final TimelineHelper timelineHelper;
     private final EventBus eb;
@@ -53,7 +53,7 @@ public class DefaultNotifyService implements NotifyService {
         String formUri = "/formulaire#/form/" + form.getInteger(ID) + "/" + endPath;
 
         JsonObject params = new JsonObject()
-                .put(PARAM_USER_ID, "/userbook/annuaire#" + user.getUserId())
+                .put(PARAM_USER_URI, "/userbook/annuaire#" + user.getUserId())
                 .put(USERNAME, user.getUsername())
                 .put(PARAM_FORM_URI, formUri)
                 .put(PARAM_FORM_NAME, form.getString(TITLE))
@@ -77,7 +77,7 @@ public class DefaultNotifyService implements NotifyService {
 
             JsonObject params = new JsonObject()
                     .put(ANONYMOUS, form.getBoolean(ANONYMOUS))
-                    .put(PARAM_USER_ID, "/userbook/annuaire#" + user.getUserId())
+                    .put(PARAM_USER_URI, "/userbook/annuaire#" + user.getUserId())
                     .put(USERNAME, user.getUsername())
                     .put(PARAM_FORM_URI, "/formulaire#/form/" + form.getInteger(ID) + "/edit")
                     .put(PARAM_FORM_NAME, form.getString(TITLE))

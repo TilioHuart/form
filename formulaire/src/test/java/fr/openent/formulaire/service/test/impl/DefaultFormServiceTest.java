@@ -118,6 +118,53 @@ public class DefaultFormServiceTest {
     }
 
     @Test
+    public void testListContributors(TestContext ctx) {
+        Async async = ctx.async();
+
+        String expectedQuery = "SELECT DISTINCT fs.member_id AS id FROM " + FORM_TABLE + " f " +
+                "JOIN " + FORM_SHARES_TABLE + " fs ON fs.resource_id = f.id " +
+                "WHERE f.id = ? AND fs.action = ? " +
+                "UNION " +
+                "SELECT owner_id FROM "  + FORM_TABLE + " WHERE id = ?;";
+        JsonArray expectedParams = new JsonArray("[\"1\", \"fr-openent-formulaire-controllers-FormController|initContribResourceRight\", \"1\"]");
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getString(STATEMENT));
+            ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
+            async.complete();
+        });
+
+        defaultFormService.listContributors("1")
+                .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
+    }
+
+    @Test
+    public void testListManagers(TestContext ctx) {
+        Async async = ctx.async();
+
+        String expectedQuery = "SELECT DISTINCT fs.member_id AS id FROM " + FORM_TABLE + " f " +
+                "JOIN " + FORM_SHARES_TABLE + " fs ON fs.resource_id = f.id " +
+                "WHERE f.id = ? AND fs.action = ? " +
+                "UNION " +
+                "SELECT owner_id FROM "  + FORM_TABLE + " WHERE id = ?;";
+        JsonArray expectedParams = new JsonArray("[\"1\", \"fr-openent-formulaire-controllers-FormController|initManagerResourceRight\", \"1\"]");
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getString(STATEMENT));
+            ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
+            async.complete();
+        });
+
+        defaultFormService.listManagers("1", null);
+    }
+
+    @Test
     public void testListSentFormsOpeningToday(TestContext ctx) {
         Async async = ctx.async();
 
@@ -136,6 +183,27 @@ public class DefaultFormServiceTest {
 
         defaultFormService.listSentFormsOpeningToday()
                 .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
+    }
+
+    @Test
+    public void testGet(TestContext ctx) {
+        Async async = ctx.async();
+
+        String expectedQuery = "SELECT * FROM " + FORM_TABLE + " WHERE id = ?;";
+        JsonArray expectedParams = new JsonArray("[\"1\"]");
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getString(STATEMENT));
+            ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
+            async.complete();
+        });
+
+        defaultFormService.get("1")
+            .onSuccess(result -> async.complete());
 
         async.awaitSuccess(10000);
     }

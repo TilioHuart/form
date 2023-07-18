@@ -41,8 +41,8 @@ public class Distribution implements IModel<Distribution> {
         this.responderName = distribution.getString(RESPONDER_NAME, null);
         this.status = distribution.getString(STATUS, null);
         try {
-            this.dateSending = dateFormatter.parse(distribution.getString(DATE_SENDING, null));
-            this.dateResponse = dateFormatter.parse(distribution.getString(DATE_RESPONSE, null));
+            this.dateSending = distribution.getString(DATE_SENDING, null) != null ? dateFormatter.parse(distribution.getString(DATE_SENDING, null)) : null;
+            this.dateResponse = distribution.getString(DATE_RESPONSE, null) != null ? dateFormatter.parse(distribution.getString(DATE_RESPONSE, null)) : null;
         }
         catch (ParseException e) { e.printStackTrace(); }
         this.active = distribution.getBoolean(ACTIVE, null);
@@ -169,8 +169,8 @@ public class Distribution implements IModel<Distribution> {
                 .put(RESPONDER_ID, this.responderId)
                 .put(RESPONDER_NAME, this.responderName)
                 .put(STATUS, this.status)
-                .put(DATE_SENDING, this.dateSending)
-                .put(DATE_RESPONSE, this.dateResponse)
+                .put(DATE_SENDING, this.dateSending != null ? this.dateSending.toString() : null)
+                .put(DATE_RESPONSE, this.dateResponse != null ? this.dateResponse.toString() : null)
                 .put(ACTIVE, this.active)
                 .put(STRUCTURE, this.structure)
                 .put(ORIGINAL_ID, this.originalId)

@@ -4,6 +4,7 @@ import fr.openent.form.core.enums.QuestionTypes;
 import java.util.List;
 
 public class Constants {
+    public static String FORMULAIRE = "Formulaire";
     public static int MAX_RESPONSES_EXPORT_PDF;
     public static int MAX_USERS_SHARING;
     public static final int NB_NEW_LINES = 10;

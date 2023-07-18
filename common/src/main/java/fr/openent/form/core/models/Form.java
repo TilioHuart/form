@@ -48,8 +48,8 @@ public class Form implements IModel<Form> {
         this.ownerId = form.getString(OWNER_ID, null);
         this.ownerName = form.getString(OWNER_NAME, null);
         try {
-            this.dateOpening = dateFormatter.parse(form.getString(DATE_OPENING, null));
-            this.dateEnding = dateFormatter.parse(form.getString(DATE_ENDING, null));
+            this.dateOpening = form.getString(DATE_OPENING, null) != null ? dateFormatter.parse(form.getString(DATE_OPENING, null)) : null;
+            this.dateEnding = form.getString(DATE_ENDING, null) != null ? dateFormatter.parse(form.getString(DATE_ENDING, null)) : null;
         }
         catch (ParseException e) { e.printStackTrace(); }
         this.multiple = form.getBoolean(MULTIPLE, null);
@@ -225,8 +225,8 @@ public class Form implements IModel<Form> {
                 .put(PICTURE, this.picture)
                 .put(OWNER_ID, this.ownerId)
                 .put(OWNER_NAME, this.ownerName)
-                .put(DATE_OPENING, this.dateOpening)
-                .put(DATE_ENDING, this.dateEnding)
+                .put(DATE_OPENING, this.dateOpening != null ? this.dateOpening.toString() : null)
+                .put(DATE_ENDING, this.dateEnding != null ? this.dateEnding.toString() : null)
                 .put(MULTIPLE, this.multiple)
                 .put(ANONYMOUS, this.anonymous)
                 .put(REMINDED, this.reminded)
@@ -235,7 +235,7 @@ public class Form implements IModel<Form> {
                 .put(RGPD_LIFETIME, this.rgpdLifetime.getValue())
                 .put(PUBLIC_KEY, this.publicKey)
                 .put(ORIGINAL_FORM_ID, this.originalFormId)
-                .put(FORM_ELEMENTS, FormElement.toJsonArrayFormElements(this.formElements));
+                .put(FORM_ELEMENTS, this.formElements != null ? FormElement.toJsonArrayFormElements(this.formElements) : null);
     }
 
     @Override

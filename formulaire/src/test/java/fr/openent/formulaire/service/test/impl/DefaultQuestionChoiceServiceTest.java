@@ -1,9 +1,6 @@
 package fr.openent.formulaire.service.test.impl;
 
-import fr.openent.form.core.models.FormElement;
-import fr.openent.form.core.models.Question;
 import fr.openent.form.core.models.QuestionChoice;
-import fr.openent.form.core.models.Section;
 import fr.openent.formulaire.service.impl.DefaultQuestionChoiceService;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -15,10 +12,6 @@ import org.entcore.common.sql.Sql;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import static fr.openent.form.core.constants.EbFields.FORMULAIRE_ADDRESS;
 import static fr.openent.form.core.constants.Fields.*;

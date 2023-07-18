@@ -1,5 +1,6 @@
 package fr.openent.form.core.models;
 
+import fr.openent.form.helpers.IModelHelper;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import static fr.openent.form.core.constants.Fields.*;
@@ -170,8 +171,8 @@ public class Question extends FormElement implements IModel<Question> {
                 .put(PLACEHOLDER, this.placeholder)
                 .put(MATRIX_ID, this.matrixId)
                 .put(MATRIX_POSITION, this.matrixPosition)
-                .put(CHOICES, new QuestionChoice().toJsonArray(this.choices))
-                .put(CHILDREN, new Question().toJsonArray(this.children));
+                .put(CHOICES, this.choices != null ? IModelHelper.toJsonArray(this.choices) : null)
+                .put(CHILDREN, this.children != null ? IModelHelper.toJsonArray(this.children) : null);
     }
 
     @Override

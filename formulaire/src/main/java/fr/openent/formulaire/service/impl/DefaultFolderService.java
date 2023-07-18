@@ -13,6 +13,8 @@ import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
 
+import java.util.Optional;
+
 import static fr.openent.form.core.constants.Fields.NAME;
 import static fr.openent.form.core.constants.Fields.PARENT_ID;
 import static fr.openent.form.core.constants.Tables.FOLDER_TABLE;
@@ -42,13 +44,13 @@ public class DefaultFolderService implements FolderService {
     @Deprecated
     public void get(String folderId, Handler<Either<String, JsonObject>> handler) {
         this.get(folderId)
-            .onSuccess(res -> handler.handle(new Either.Right<>(res.toJson())))
+            .onSuccess(res -> handler.handle(new Either.Right<>(res.get().toJson())))
             .onFailure(error -> handler.handle(new Either.Left<>(error.getMessage())));
     }
 
     @Override
-    public Future<Folder> get(String folderId) {
-        Promise<Folder> promise = Promise.promise();
+    public Future<Optional<Folder>> get(String folderId) {
+        Promise<Optional<Folder>> promise = Promise.promise();
 
         String query = "SELECT * FROM " + FOLDER_TABLE + " WHERE id = ?;";
         JsonArray params = new JsonArray().add(folderId);
