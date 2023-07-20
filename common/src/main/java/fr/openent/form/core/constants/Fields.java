@@ -144,7 +144,6 @@ public class Fields {
 
 
     // Others
-    public static final String SLASH = "/";
     public static final String _ID = "_id";
     public static final String APPS = "apps";
     public static final String ARCHIVE = "archive";
@@ -152,6 +151,7 @@ public class Fields {
     public static final String BASE_URL = "baseUrl";
     public static final String BODY = "body";
     public static final String BOOKMARKS = "bookmarks";
+    public static final String BUFFER = "buffer";
     public static final String CAPTCHA = "captcha";
     public static final String CCI = "cci";
     public static final String CHARSET = "charset";
@@ -163,7 +163,7 @@ public class Fields {
     public static final String CSV = "csv";
     public static final String CURSOR_AVERAGE = "cursor_average";
     public static final String DATA = "data";
-    public static final String DATE_HOUR = "date_hour";
+    public static final String IS_DATE_HOUR = "is_date_hour";
     public static final String DEFAULT = "DEFAULT";
     public static final String DISTRIBUTION_CAPTCHA = "distribution_captcha";
     public static final String DISTRIBUTION_KEY = "distribution_key";
@@ -195,10 +195,10 @@ public class Fields {
     public static final String HAS_IMAGE = "has_image";
     public static final String KO = "ko";
     public static final String LOCALE = "locale";
-    public static final String LONG_ANSWER = "long_answer";
+    public static final String IS_LONG_ANSWER = "is_long_answer";
     public static final String MESSAGE = "message";
     public static final String METADATA = "metadata";
-    public static final String MULTIPLE_CHOICE = "multiple_choice";
+    public static final String IS_MULTIPLE_CHOICE = "is_multiple_choice";
     public static final String NB_LINES = "nb_lines";
     public static final String NEW = "new";
     public static final String NODE = "node";
@@ -210,15 +210,16 @@ public class Fields {
     public static final String QUESTIONS = "questions";
     public static final String QUESTIONS_CHOICES = "questions_choices";
     public static final String QUESTION_TYPE_ID = "question_type_id";
-    public static final String RADIO_BTN = "radio_btn";
+    public static final String IS_RADIO_BTN = "is_radio_btn";
     public static final String RESPONSES = "responses";
     public static final String RESULT = "result";
     public static final String RESULTS = "results";
     public static final String ROLE = "role";
     public static final String SEND = "send";
     public static final String SERVER = "server";
-    public static final String SHORT_ANSWER = "short_answer";
+    public static final String IS_SHORT_ANSWER = "is_short_answer";
     public static final String SIZE = "size";
+    public static final String SLASH = "/";
     public static final String STATEMENTS = "statements";
     public static final String SUBJECT = "subject";
     public static final String SUM_RESPONSES = "sum_responses";
@@ -226,7 +227,7 @@ public class Fields {
     public static final String TITLE_NEXT = "title_next";
     public static final String TO = "to";
     public static final String TRANSACTION = "transaction";
-    public static final String TYPE_FREETEXT = "type_freetext";
+    public static final String IS_TYPE_FREETEXT = "is_type_freetext";
     public static final String TYPE_TEXT = "type_text";
     public static final String TYPE_GRAPH = "type_graph";
     public static final String UNDEFINED = "undefined";

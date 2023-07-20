@@ -136,7 +136,7 @@ public class DefaultQuestionServiceTest {
             ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
             async.complete();
         });
-        defaultQuestionService.export(FORM_ID,false, null);
+        defaultQuestionService.getExportInfos(FORM_ID,false, null);
     }
 
     @Test
@@ -172,7 +172,7 @@ public class DefaultQuestionServiceTest {
             ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
             async.complete();
         });
-        defaultQuestionService.export(FORM_ID,true, null);
+        defaultQuestionService.getExportInfos(FORM_ID,true, null);
     }
 
     @Test

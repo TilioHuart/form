@@ -81,7 +81,16 @@ public class DefaultQuestionService implements QuestionService {
     }
 
     @Override
-    public void export(String formId, boolean isPdf, Handler<Either<String, JsonArray>> handler) {
+    @Deprecated
+    public void getExportInfos(String formId, boolean isPdf, Handler<Either<String, JsonArray>> handler) {
+        this.getExportInfos(formId, isPdf)
+            .onSuccess(res-> handler.handle(new Either.Right<>(res)))
+            .onFailure(error -> handler.handle(new Either.Left<>(error.getMessage())));
+    }
+
+    @Override
+    public Future<JsonArray> getExportInfos(String formId, boolean isPdf){
+        Promise<JsonArray> promise = Promise.promise();
         String getElementPosition =
                 "CASE " +
                     "WHEN q.position ISNULL AND s.position IS NOT NULL THEN s.position " +
@@ -105,7 +114,8 @@ public class DefaultQuestionService implements QuestionService {
                 "ORDER BY element_position, section_position, q.matrix_position, q.id;";
         JsonArray params = new JsonArray().add(formId);
         if (!isPdf) params.addAll(new JsonArray(QUESTIONS_WITHOUT_RESPONSES));
-        sql.prepared(query, params, SqlResult.validResultHandler(handler));
+        sql.prepared(query, params, SqlResult.validResultHandler(FutureHelper.handlerEither(promise)));
+        return promise.future();
     }
 
     @Override

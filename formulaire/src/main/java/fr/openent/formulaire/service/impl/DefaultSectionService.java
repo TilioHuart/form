@@ -28,21 +28,22 @@ import static fr.openent.form.helpers.SqlHelper.getUpdateDateModifFormRequest;
 public class DefaultSectionService implements SectionService {
     private final Sql sql = Sql.getInstance();
     private static final Logger log = LoggerFactory.getLogger(DefaultSectionService.class);
-
+    
     @Override
+    @Deprecated
     public void list(String formId, Handler<Either<String, JsonArray>> handler) {
-        String query = "SELECT * FROM " + SECTION_TABLE + " WHERE form_id = ? ORDER BY position;";
-        JsonArray params = new JsonArray().add(formId);
-        sql.prepared(query, params, SqlResult.validResultHandler(handler));
+        this.list(formId)
+                .onSuccess(res -> handler.handle(new Either.Right<>(res)))
+                .onFailure(error -> handler.handle(new Either.Left<>(error.getMessage())));
     }
 
     @Override
     public Future<JsonArray> list(String formId) {
         Promise<JsonArray> promise = Promise.promise();
-
         String errorMessage = "[Formulaire@DefaultSectionService::list] Fail to list sections for form with id " + formId + " : ";
-        list(formId, FutureHelper.handlerEither(promise, errorMessage));
-
+        String query = "SELECT * FROM " + SECTION_TABLE + " WHERE form_id = ? ORDER BY position;";
+        JsonArray params = new JsonArray().add(formId);
+        sql.prepared(query, params, SqlResult.validResultHandler(FutureHelper.handlerEither(promise, errorMessage)));
         return promise.future();
     }
 

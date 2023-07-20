@@ -1113,7 +1113,7 @@ public class FormController extends ControllerHelper {
         RequestUtils.bodyToJsonArray(request, formIds -> {
             UserUtils.getUserInfos(eb, request, user -> {
                 if (user == null) {
-                    String message = "[Formulaire@FormController::exportForms] User not found in session.";
+                    String message = "[Formulaire@FormController::exportForm] User not found in session.";
                     log.error(message);
                     unauthorized(request, message);
                     return;
@@ -1127,12 +1127,12 @@ public class FormController extends ControllerHelper {
 
                 formService.checkFormsRights(groupsAndUserIds, user, MANAGER_RESOURCE_BEHAVIOUR, formIds, hasRightsEvt -> {
                     if (hasRightsEvt.isLeft()) {
-                        log.error("[Formulaire@FormController::exportForms] Fail to check rights for method " + hasRightsEvt);
-                        renderInternalError(request, hasRightsEvt);
+                        log.error("[Formulaire@FormController::exportForm] Fail to check rights for method " + hasRightsEvt.left().getValue());
+                        renderError(request);
                         return;
                     }
                     if (hasRightsEvt.right().getValue().isEmpty()) {
-                        String message = "[Formulaire@FormController::exportForms] No rights found for forms with ids " + formIds;
+                        String message = "[Formulaire@FormController::exportForm] No rights found for forms with ids " + formIds;
                         log.error(message);
                         notFound(request, message);
                         return;
@@ -1141,7 +1141,7 @@ public class FormController extends ControllerHelper {
                     // Check if user is owner or manager to all the forms
                     Long count = hasRightsEvt.right().getValue().getLong(COUNT);
                     if (count == null || count != formIds.size()) {
-                        String message = "[Formulaire@FormController::exportForms] You're missing rights on one form or more.";
+                        String message = "[Formulaire@FormController::exportForm] You're missing rights on one form or more.";
                         log.error(message);
                         unauthorized(request, message);
                         return;
@@ -1164,27 +1164,33 @@ public class FormController extends ControllerHelper {
                                     .onFailure(err -> {
                                         String message = "[Formulaire@FormController::exportForm] Failed to export data : " + err.getMessage();
                                         log.error(message);
-                                        renderInternalError(request, message);
+                                        renderError(request);
                                     });
                             break;
                         case PDF:
-                            formService.get(String.valueOf(formIds.getInteger(0)), user, formEvt -> {
-                                if (formEvt.isLeft()) {
-                                    log.error("[Formulaire@FormController::exportForm] Error in getting form to export questions of form " + formIds);
-                                    renderInternalError(request, formEvt);
-                                    return;
-                                }
-                                if (formEvt.right().getValue().isEmpty()) {
-                                    String errMessage = "[Formulaire@FormController::exportForm] No form found for id " + formIds;
-                                    log.error(errMessage);
-                                    notFound(request, errMessage);
-                                }
-                                JsonObject form = formEvt.right().getValue();
-                                new FormQuestionsExportPDF(request, vertx, config, storage, eb, form).launch();
-                            });
+                            formService.get(String.valueOf(formIds.getInteger(0)))
+                                    .compose(form -> {
+                                        if (!form.isPresent()) {
+                                            String errMessage = "[Formulaire@FormController::exportForm] No form found for id " + formIds.getInteger(0);
+                                            log.error(errMessage);
+                                            return Future.failedFuture((String)null);
+                                        } else {
+                                            return new FormQuestionsExportPDF(request, vertx, config, storage, eb, form.get()).launch();
+                                        }
+                                    })
+                                    .onSuccess(pdfInfo -> {
+                                        request.response()
+                                                .putHeader("Content-Type", "application/pdf; charset=utf-8")
+                                                .putHeader("Content-Disposition", "attachment; filename=" + pdfInfo.getString(TITLE))
+                                                .end(pdfInfo.getString(BUFFER));
+                                    })
+                                    .onFailure(err -> {
+                                        log.error("[Formulaire@FormController::exportForm] Failed to export form " + formIds.getInteger(0) + " : " + err.getMessage());
+                                        renderError(request);
+                                    });
                             break;
                         default:
-                            String message = "[Formulaire@FormController::exportForms] Wrong export format type : " + fileType;
+                            String message = "[Formulaire@FormController::exportForm] Wrong export format type : " + fileType;
                             log.error(message);
                             badRequest(request, message);
                             break;

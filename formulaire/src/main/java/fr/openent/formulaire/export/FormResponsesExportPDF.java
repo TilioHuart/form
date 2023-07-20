@@ -70,7 +70,7 @@ public class FormResponsesExportPDF {
 
     public void launch() {
         String formId = form.getInteger(ID).toString();
-        questionService.export(formId, true, getQuestionsEvt -> {
+        questionService.getExportInfos(formId, true, getQuestionsEvt -> {
             if (getQuestionsEvt.isLeft()) {
                 log.error("[Formulaire@FormResponsesExportPDF::launch] Failed to retrieve all questions for the form with id " + formId);
                 renderInternalError(request, getQuestionsEvt);
@@ -180,7 +180,7 @@ public class FormResponsesExportPDF {
                 // type_freetext (FREETEXT), type_text (SHORTANSWER, LONGANSWER, DATE, TIME, FILE), type_graph (SINGLEANSWER, MULTIPLEANSWER, MATRIX)
                 questions.getJsonObject(questions.size() - 1).getJsonObject(QUESTION_TYPE)
                     .put(QUESTION_TYPE_ID, question_type)
-                    .put(TYPE_FREETEXT, question_type == QuestionTypes.FREETEXT.getCode())
+                    .put(IS_TYPE_FREETEXT, question_type == QuestionTypes.FREETEXT.getCode())
                     .put(TYPE_TEXT, question_type != QuestionTypes.FREETEXT.getCode() && !isGraph)
                     .put(TYPE_GRAPH, isGraph)
                     .put(IS_CURSOR, question_type == QuestionTypes.CURSOR.getCode());

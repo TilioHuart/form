@@ -4,8 +4,8 @@ public enum I18nKeys {
     ARCHIVE_ZIP_NAME("formulaire.archive.zip.name"),
     COPY("formulaire.copy"),
     OTHER("formulaire.other"),
-    END_FORM("formulaire.access.recap"),
-    MAX_USERS_SHARING_ERROR("formulaire.share.error.max.users");
+    MAX_USERS_SHARING_ERROR("formulaire.share.error.max.users"),
+    END_FORM("formulaire.access.end");
 
     private final String key;
 

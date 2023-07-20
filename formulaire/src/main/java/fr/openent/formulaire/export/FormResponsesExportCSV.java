@@ -45,7 +45,7 @@ public class FormResponsesExportCSV {
 
   public void launch() {
     String formId = request.getParam(PARAM_FORM_ID);
-    questionService.export(formId, false, getQuestionsEvt -> {
+    questionService.getExportInfos(formId, false, getQuestionsEvt -> {
       if (getQuestionsEvt.isLeft()) {
         String message = "[Formulaire@FormExportCSV] Failed to retrieve all questions of the form " + formId;
         renderInternalError(request, getQuestionsEvt, message);
