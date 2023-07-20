@@ -1,5 +1,6 @@
 package fr.openent.formulaire_public.controllers;
 
+import fr.openent.form.core.constants.DateFormats;
 import fr.openent.form.core.constants.DistributionStatus;
 import fr.openent.form.helpers.MessageResponseHelper;
 import fr.openent.form.helpers.UtilsHelper;
@@ -9,11 +10,9 @@ import fr.openent.formulaire_public.service.impl.*;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
 import fr.wseduc.rs.Post;
+import fr.wseduc.webutils.request.CookieHelper;
 import fr.wseduc.webutils.request.RequestUtils;
-import io.vertx.core.http.Cookie;
-import io.vertx.core.http.CookieSameSite;
 import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.http.impl.CookieImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -23,15 +22,14 @@ import org.entcore.common.notification.TimelineHelper;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 
 import static fr.openent.form.core.constants.Constants.CHOICES_TYPE_QUESTIONS;
+import static fr.openent.form.core.constants.DateFormats.*;
 import static fr.openent.form.core.constants.EbFields.*;
 import static fr.openent.form.core.constants.EbFields.ACTION;
 import static fr.openent.form.core.constants.Fields.*;
-import static fr.openent.form.helpers.RenderHelper.renderBadRequest;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
 
 public class FormController extends ControllerHelper {
@@ -41,10 +39,12 @@ public class FormController extends ControllerHelper {
     private final ResponseService publicResponseService;
     private final NotifyService publicNotifyService;
     private final CaptchaService publicCaptchaService;
-    private final SimpleDateFormat formDateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-    private final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
-    private final SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm");
+    private final CookieHelper cookieHelper;
+    private final SimpleDateFormat formDateFormatter = new SimpleDateFormat(YYYY_MM_DD_T_HH_MM_SS_SSS);
+    private final SimpleDateFormat dateFormatter = new SimpleDateFormat(DD_MM_YYYY);
+    private final SimpleDateFormat timeFormatter = new SimpleDateFormat(HH_MM);
     private final long minTimeToAllowResponse = 4 * 1000;
+    private final String cookiePath = "/formulaire-public";
 
     public FormController(TimelineHelper timelineHelper) {
         super();
@@ -53,16 +53,17 @@ public class FormController extends ControllerHelper {
         this.publicResponseService = new DefaultResponseService();
         this.publicNotifyService = new DefaultNotifyService(timelineHelper);
         this.publicCaptchaService = new DefaultCaptchaService();
+        this.cookieHelper = CookieHelper.getInstance();
     }
 
     @Get("/forms/key/:formKey")
     @ApiDoc("Create a distribution and get a specific form by key")
     public void getPublicFormByKey(HttpServerRequest request) {
         String formKey = request.getParam(PARAM_FORM_KEY);
-        Cookie distributionKeyCookie = request.getCookie(DISTRIBUTION_KEY_ + formKey);
+        String distributionKeyCookie = cookieHelper.getSigned(DISTRIBUTION_KEY_ + formKey, cookiePath, request);
 
         if (distributionKeyCookie != null) {
-            String message = "[FormulairePublic@createPublicResponses] The form has already been answered for distributionKey " + distributionKeyCookie.getValue();
+            String message = "[FormulairePublic@createPublicResponses] The form has already been answered for distributionKey " + distributionKeyCookie;
             log.error(message);
             badRequest(request, message);
             return;
@@ -234,10 +235,10 @@ public class FormController extends ControllerHelper {
     public void createResponses(HttpServerRequest request) {
         String formKey = request.getParam(PARAM_FORM_KEY);
         String distributionKey = request.getParam(PARAM_DISTRIBUTION_KEY);
-        Cookie distributionKeyCookie = request.getCookie(DISTRIBUTION_KEY_ + formKey);
+        String distributionKeyCookie = cookieHelper.getSigned(DISTRIBUTION_KEY_ + formKey, cookiePath, request);
 
         if (distributionKeyCookie != null) {
-            String message = "[FormulairePublic@createPublicResponses] The form has already been answered for distributionKey " + distributionKeyCookie.getValue();
+            String message = "[FormulairePublic@createPublicResponses] The form has already been answered for distributionKey " + distributionKeyCookie;
             log.error(message);
             badRequest(request, message);
             return;
@@ -482,10 +483,7 @@ public class FormController extends ControllerHelper {
                                         }
 
                                         // Set cookie
-                                        Cookie cookie = new CookieImpl(DISTRIBUTION_KEY_ + formKey, distributionKey);
-                                        cookie.setPath("/formulaire-public");
-                                        cookie.setSameSite(CookieSameSite.STRICT);
-                                        request.response().addCookie(cookie);
+                                        cookieHelper.setSigned(DISTRIBUTION_KEY_ + formKey, distributionKey, Long.MAX_VALUE, cookiePath, request);
 
                                         finishDistribution(request, distributionKey, formId, form);
                                     });
