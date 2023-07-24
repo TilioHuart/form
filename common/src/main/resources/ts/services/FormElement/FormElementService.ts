@@ -65,7 +65,7 @@ export const formElementService: FormElementService = {
     async create(formElement: FormElement) : Promise<any> {
         try {
             if (formElement instanceof Question) {
-                return await questionService.create(formElement);
+                return await questionService.createSingle(formElement);
             }
             else if (formElement instanceof Section) {
                 return await sectionService.create(formElement);

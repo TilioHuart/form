@@ -1,5 +1,6 @@
 package fr.openent.form.core.models;
 
+import fr.openent.form.core.enums.QuestionTypes;
 import fr.openent.form.helpers.IModelHelper;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -11,13 +12,14 @@ public class Question extends FormElement implements IModel<Question> {
     private Integer questionType;
     private String statement;
     private Boolean mandatory;
-    private Number originalQuestionId;
-    private Number sectionId;
-    private Number sectionPosition;
+    private Long originalQuestionId;
+    private Long sectionId;
+    private Long sectionPosition;
     private Boolean conditional;
     private String placeholder;
-    private Number matrixId;
-    private Number matrixPosition;
+    private Long matrixId;
+    private Long matrixPosition;
+    private QuestionSpecificFields specificFields;
     private List<QuestionChoice> choices;
     private List<Question> children;
 
@@ -32,13 +34,16 @@ public class Question extends FormElement implements IModel<Question> {
         this.questionType = question.getInteger(QUESTION_TYPE, null);
         this.statement = question.getString(STATEMENT, "");
         this.mandatory = question.getBoolean(MANDATORY, false);
-        this.originalQuestionId = question.getNumber(ORIGINAL_QUESTION_ID, null);
-        this.sectionId = question.getNumber(SECTION_ID, null);
-        this.sectionPosition = question.getNumber(SECTION_POSITION, null);
+        this.originalQuestionId = question.getLong(ORIGINAL_QUESTION_ID, null);
+        this.sectionId = question.getLong(SECTION_ID, null);
+        this.sectionPosition = question.getLong(SECTION_POSITION, null);
         this.conditional = question.getBoolean(CONDITIONAL, false);
         this.placeholder = question.getString(PLACEHOLDER, "");
-        this.matrixId = question.getNumber(MATRIX_ID,null);
-        this.matrixPosition = question.getNumber(MATRIX_POSITION,null);
+        this.matrixId = question.getLong(MATRIX_ID,null);
+        this.matrixPosition = question.getLong(MATRIX_POSITION,null);
+        this.specificFields = question.getJsonObject(SPECIFIC_FIELDS) != null && this.questionType == QuestionTypes.CURSOR.getCode()
+                ? new QuestionSpecificFields(question.getJsonObject(SPECIFIC_FIELDS, new JsonObject()))
+                : null;
 
         if (question.getValue(CHOICES, null) instanceof JsonArray) {
             this.choices = new QuestionChoice().toList(question.getJsonArray(CHOICES, null));
@@ -70,19 +75,21 @@ public class Question extends FormElement implements IModel<Question> {
 
     public Boolean getMandatory() { return mandatory; }
 
-    public Number getOriginalQuestionId() { return originalQuestionId; }
+    public Long getOriginalQuestionId() { return originalQuestionId; }
 
-    public Number getSectionId() { return sectionId; }
+    public Long getSectionId() { return sectionId; }
 
-    public Number getSectionPosition() { return sectionPosition; }
+    public Long getSectionPosition() { return sectionPosition; }
 
     public Boolean getConditional() { return conditional; }
 
     public String getPlaceholder() { return placeholder; }
 
-    public Number getMatrixId() { return matrixId; }
+    public Long getMatrixId() { return matrixId; }
 
-    public Number getMatrixPosition() { return matrixPosition; }
+    public Long getMatrixPosition() { return matrixPosition; }
+
+    public QuestionSpecificFields getSpecificFields() { return specificFields; }
 
     public List<QuestionChoice> getChoices() { return choices; }
 
@@ -106,17 +113,17 @@ public class Question extends FormElement implements IModel<Question> {
         return this;
     }
 
-    public Question setOriginalQuestionId(Number originalQuestionId) {
+    public Question setOriginalQuestionId(Long originalQuestionId) {
         this.originalQuestionId = originalQuestionId;
         return this;
     }
 
-    public Question setSectionId(Number sectionId) {
+    public Question setSectionId(Long sectionId) {
         this.sectionId = sectionId;
         return this;
     }
 
-    public Question setSectionPosition(Number sectionPosition) {
+    public Question setSectionPosition(Long sectionPosition) {
         this.sectionPosition = sectionPosition;
         return this;
     }
@@ -131,13 +138,18 @@ public class Question extends FormElement implements IModel<Question> {
         return this;
     }
 
-    public Question setMatrixId(Number matrixId) {
+    public Question setMatrixId(Long matrixId) {
         this.matrixId = matrixId;
         return this;
     }
 
-    public Question setMatrixPosition(Number matrixPosition) {
+    public Question setMatrixPosition(Long matrixPosition) {
         this.matrixPosition = matrixPosition;
+        return this;
+    }
+
+    public Question setSpecificFields(QuestionSpecificFields questionSpecificFields) {
+        this.specificFields = questionSpecificFields;
         return this;
     }
 
@@ -171,6 +183,7 @@ public class Question extends FormElement implements IModel<Question> {
                 .put(PLACEHOLDER, this.placeholder)
                 .put(MATRIX_ID, this.matrixId)
                 .put(MATRIX_POSITION, this.matrixPosition)
+                .put(SPECIFIC_FIELDS, this.specificFields)
                 .put(CHOICES, this.choices != null ? IModelHelper.toJsonArray(this.choices) : null)
                 .put(CHILDREN, this.children != null ? IModelHelper.toJsonArray(this.children) : null);
     }
@@ -178,6 +191,13 @@ public class Question extends FormElement implements IModel<Question> {
     @Override
     public Question model(JsonObject question){
         return new Question(question);
+    }
+
+    public Question addSpecificFields(QuestionSpecificFields questionSpecificFields) {
+        if (this.getQuestionType() == QuestionTypes.CURSOR.getCode()) {
+            setSpecificFields(questionSpecificFields);
+        }
+        return this;
     }
 }
 

@@ -1,10 +1,14 @@
 package fr.openent.formulaire.service;
 
+import fr.openent.form.core.models.Question;
+import fr.openent.form.core.models.QuestionSpecificFields;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+
+import java.util.Optional;
 
 public interface QuestionSpecificFieldsService {
 
@@ -22,18 +26,10 @@ public interface QuestionSpecificFieldsService {
 
     /**
      * Add specific fields to a question
-     * @param question JsonObject data
-     * @param questionId question identifier
-     * @param handler function handler returning JsonObject data
-     */
-    void create(JsonObject question, String questionId, Handler<Either<String, JsonObject>> handler);
-
-    /**
-     * Add specific fields to a question
-     * @param question JsonObject data
+     * @param question QuestionSpecificFields data
      * @param questionId question identifier
      */
-    Future<JsonObject> create(JsonObject question, String questionId);
+    Future<Optional<QuestionSpecificFields>> create(QuestionSpecificFields question, Long questionId);
 
     /**
      * Update specific fields of questions

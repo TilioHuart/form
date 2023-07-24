@@ -17,6 +17,7 @@ import {Constants} from "@common/core/constants";
 import {FormElementUtils} from "@common/utils";
 import {PropPosition} from "@common/core/enums/prop-position";
 import {FormElementType} from "@common/core/enums/form-element-type";
+import {QuestionSpecificFieldsPayload} from "@common/models/QuestionSpecificFields";
 
 export class Question extends FormElement {
     question_type: number;
@@ -370,11 +371,7 @@ export class QuestionPayload implements FormElementPayload {
     choices: QuestionChoicePayload[];
     placeholder: string;
     children: QuestionPayload[];
-    cursor_min_val: number;
-    cursor_max_val: number;
-    cursor_step: number;
-    cursor_min_label: string;
-    cursor_max_label: string;
+    specific_fields: QuestionSpecificFieldsPayload;
 
     constructor(question: Question) {
         this.id = typeof question.id == 'number' ? question.id : null;
@@ -395,11 +392,7 @@ export class QuestionPayload implements FormElementPayload {
         this.choices = question.choices.all.map((c: QuestionChoice) => new QuestionChoicePayload(c));
         this.children = question.children.all.map((q: Question) => new QuestionPayload(q));
         this.placeholder = question.placeholder ? question.placeholder : null;
-        this.cursor_min_val = question.cursor_min_val ? question.cursor_min_val : null;
-        this.cursor_max_val = question.cursor_max_val ? question.cursor_max_val : null;
-        this.cursor_step = question.cursor_step ? question.cursor_step : null;
-        this.cursor_min_label = question.cursor_min_label ? question.cursor_min_label : null;
-        this.cursor_max_label = question.cursor_max_label ? question.cursor_max_label : null;
+        this.specific_fields = new QuestionSpecificFieldsPayload(question);
     }
 
     toJson() : Object {
@@ -420,11 +413,7 @@ export class QuestionPayload implements FormElementPayload {
             matrix_position: this.matrix_position,
             choices: this.choices,
             children: this.children,
-            cursor_min_val: this.cursor_min_val,
-            cursor_max_val: this.cursor_max_val,
-            cursor_step: this.cursor_step,
-            cursor_min_label: this.cursor_min_label,
-            cursor_max_label: this.cursor_max_label,
+            specific_fields: this.specific_fields,
             form_element_type: this.form_element_type
         }
     }

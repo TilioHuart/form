@@ -1,6 +1,7 @@
 package fr.openent.formulaire.service.test.impl;
 
 import fr.openent.form.core.constants.Fields;
+import fr.openent.form.core.models.QuestionSpecificFields;
 import fr.openent.formulaire.service.impl.DefaultQuestionSpecificFieldsService;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -21,12 +22,21 @@ import static fr.openent.form.core.constants.Tables.*;
 public class DefaultQuestionSpecificServiceTest {
     private Vertx vertx;
     private DefaultQuestionSpecificFieldsService defaultQuestionSpecificFieldsService;
+    private QuestionSpecificFields questionSpecificFields;
 
     @Before
     public void setUp(){
         vertx = Vertx.vertx();
         defaultQuestionSpecificFieldsService = new DefaultQuestionSpecificFieldsService();
         Sql.getInstance().init(vertx.eventBus(), FORMULAIRE_ADDRESS);
+
+        JsonObject questionSpecificFieldsJson = new JsonObject()
+                .put(CURSOR_MIN_VAL, 2)
+                .put(CURSOR_MAX_VAL, 9)
+                .put(CURSOR_STEP, 1)
+                .put(CURSOR_MIN_LABEL, "min")
+                .put(CURSOR_MAX_LABEL, "max");
+        questionSpecificFields = new QuestionSpecificFields(questionSpecificFieldsJson);
     }
 
     @Test
@@ -52,19 +62,10 @@ public class DefaultQuestionSpecificServiceTest {
     @Test
     public void create(TestContext ctx) {
         Async async = ctx.async();
+
         String expectedQuery = "INSERT INTO " + QUESTION_SPECIFIC_FIELDS_TABLE + " (question_id, cursor_min_val, cursor_max_val, " +
                 "cursor_step, cursor_min_label, cursor_max_label) VALUES (?, ?, ?, ?, ?, ?) RETURNING *;";
-
-        String questionId = "1";
-        JsonObject question = new JsonObject().put(Fields.QUESTION_TYPE, 11);
-
-        JsonArray expectedParams = new JsonArray()
-                .add(questionId)
-                .add(question.getInteger(CURSOR_MIN_VAL, 1))
-                .add(question.getInteger(CURSOR_MAX_VAL, 10))
-                .add(question.getInteger(CURSOR_STEP,  1))
-                .add(question.getString(CURSOR_MIN_LABEL, ""))
-                .add(question.getString(CURSOR_MAX_LABEL, ""));
+        JsonArray expectedParams = new JsonArray("[1, 2, 9, 1, \"min\", \"max\"]");
 
         vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
             JsonObject body = (JsonObject) message.body();
@@ -73,7 +74,11 @@ public class DefaultQuestionSpecificServiceTest {
             ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
             async.complete();
         });
-        defaultQuestionSpecificFieldsService.create(question, questionId, null);
+
+        defaultQuestionSpecificFieldsService.create(this.questionSpecificFields, 1L)
+            .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);;
     }
 
     @Test

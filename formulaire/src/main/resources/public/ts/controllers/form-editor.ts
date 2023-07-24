@@ -289,7 +289,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.duplicateQuestion = async (question: Question) : Promise<void> => {
             try {
                 vm.dontSave = true;
-                let questionId: number = (await questionService.save(question)).id;
+                let questionId: number = (await questionService.saveSingle(question)).id;
                 let duplicata: Question = question;
                 if (question.section_id) {
                     let section: Section = vm.formElements.all.filter(e => e instanceof Section && e.id === question.section_id)[0] as Section;
@@ -306,7 +306,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     await formElementService.update(vm.formElements.all.slice(question.position));
                     duplicata.position++;
                 }
-                let newQuestion = await questionService.create(duplicata);
+                let newQuestion = await questionService.createSingle(duplicata);
                 if (question.isTypeChoicesQuestion()) {
                     question.choices.all.sort((a, b) => a.position - b.position);
                     for (let choice of question.choices.all) {
@@ -321,11 +321,11 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                             child.form_id = question.form_id;
                             child.matrix_id = questionId;
                             if (child.title) {
-                                await questionService.save(child);
+                                await questionService.saveSingle(child);
                                 let duplicateChild: Question = new Question(newQuestion.id, child.question_type, child.matrix_position);
                                 duplicateChild.form_id = question.form_id;
                                 duplicateChild.title = child.title;
-                                await questionService.create(duplicateChild);
+                                await questionService.createSingle(duplicateChild);
                             }
                         }
                     }
@@ -790,11 +790,11 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                                     child.matrix_position = positionCounter;
                                     child.matrix_id = newId;
                                     child.form_id = formElement.form_id;
-                                    child.id = (await questionService.save(child)).id;
                                     registeredChildrenTitles.push(child.title);
                                     positionCounter++;
                                 }
                             }
+                            await questionService.save(formElement.children.all);
                         }
                     }
 

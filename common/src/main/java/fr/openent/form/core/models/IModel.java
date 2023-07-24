@@ -10,11 +10,16 @@ import java.util.stream.Collectors;
 public interface IModel<I extends IModel<I>> {
     JsonObject toJson();
 
+    /**
+     * @deprecated Should instead use IModelHelper directly
+     */
+    @Deprecated
     I model(JsonObject model);
 
     /**
      * @deprecated Should instead use IModelHelper directly
      */
+    @Deprecated
     @SuppressWarnings("unchecked")
     default List<I> toList(JsonArray results) {
         if (results == null) return null;
@@ -29,6 +34,7 @@ public interface IModel<I extends IModel<I>> {
     /**
      * @deprecated Should instead use IModelHelper directly
      */
+    @Deprecated
     default JsonArray toJsonArray(List<I> models) {
         if (models == null) return null;
         return new JsonArray(models.stream().map(IModel::toJson).collect(Collectors.toList()));

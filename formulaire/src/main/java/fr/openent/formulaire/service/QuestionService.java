@@ -1,10 +1,13 @@
 package fr.openent.formulaire.service;
 
+import fr.openent.form.core.models.Question;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+
+import java.util.Optional;
 
 public interface QuestionService {
     /**
@@ -92,18 +95,10 @@ public interface QuestionService {
 
     /**
      * Create a question in a specific form
-     * @param question JsonObject data
-     * @param formId form identifier
-     * @param handler function handler returning JsonObject data
-     */
-    void create(JsonObject question, String formId, Handler<Either<String, JsonObject>> handler);
-
-    /**
-     * Create a question in a specific form
-     * @param question JsonObject data
+     * @param question Question data
      * @param formId form identifier
      */
-    Future<JsonObject> create(JsonObject question, String formId);
+    Future<Optional<Question>> create(Question question, String formId);
 
     /**
      * Update specific questions

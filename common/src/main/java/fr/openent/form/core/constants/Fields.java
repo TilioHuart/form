@@ -220,6 +220,7 @@ public class Fields {
     public static final String IS_SHORT_ANSWER = "is_short_answer";
     public static final String SIZE = "size";
     public static final String SLASH = "/";
+    public static final String SPECIFIC_FIELDS = "specific_fields";
     public static final String STATEMENTS = "statements";
     public static final String SUBJECT = "subject";
     public static final String SUM_RESPONSES = "sum_responses";

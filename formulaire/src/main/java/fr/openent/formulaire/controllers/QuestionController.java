@@ -1,7 +1,10 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.enums.QuestionTypes;
+import fr.openent.form.core.models.Question;
+import fr.openent.form.core.models.QuestionSpecificFields;
 import fr.openent.form.helpers.BusResultHelper;
+import fr.openent.form.helpers.IModelHelper;
 import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
@@ -11,7 +14,9 @@ import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -21,7 +26,7 @@ import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserUtils;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static fr.openent.form.core.constants.Constants.CONDITIONAL_QUESTIONS;
@@ -142,54 +147,63 @@ public class QuestionController extends ControllerHelper {
         String formId = request.getParam(PARAM_FORM_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
-                String message = "[Formulaire@QuestionController::createQuestion] User not found in session.";
+                String message = "[Formulaire@QuestionController::create] User not found in session.";
                 log.error(message);
                 unauthorized(request, message);
                 return;
             }
 
-            RequestUtils.bodyToJson(request, question -> {
-                if (question == null || question.isEmpty()) {
-                    log.error("[Formulaire@QuestionController::createQuestion] No question to create.");
+            RequestUtils.bodyToJsonArray(request, questionsJson -> {
+                if (questionsJson == null || questionsJson.isEmpty()) {
+                    log.error("[Formulaire@QuestionController::create] No question to create.");
                     noContent(request);
                     return;
                 }
 
-                Long sectionId = question.getLong(SECTION_ID);
-                Long sectionPosition = question.getLong(SECTION_POSITION);
+                List<Question> questions = IModelHelper.toList(questionsJson, Question.class).stream()
+                        .filter(question -> question.getFormId() == Long.parseLong(formId))
+                        .collect(Collectors.toList());
 
                 // Check section infos validity
-                if (sectionId == null ^ sectionPosition == null) { // ^ = XOR -> return true if they have different value, return false if they both have same value
-                    String message = "[Formulaire@QuestionController::createQuestion] sectionId and sectionPosition must be both null or both not null.";
-                    log.error(message);
-                    badRequest(request);
-                    return;
-                } else if (sectionId != null && (sectionId <= 0 || sectionPosition <= 0)) {
-                    String message = "[Formulaire@QuestionController::createQuestion] sectionId and sectionPosition must have values greater than 0.";
-                    log.error(message);
-                    badRequest(request);
-                    return;
-                } else if (sectionPosition != null && question.getInteger(POSITION) != null) {
-                    String message = "[Formulaire@QuestionController::createQuestion] A question is either in or out of a " +
-                            "section, it cannot have a position and a section_position.";
-                    log.error(message);
-                    badRequest(request);
-                    return;
-                } else if (question.getBoolean(CONDITIONAL) && !CONDITIONAL_QUESTIONS.contains(question.getInteger(QUESTION_TYPE))) {
-                    String message = "[Formulaire@QuestionController::createQuestion] A question conditional question must be of type : " + CONDITIONAL_QUESTIONS;
-                    log.error(message);
-                    badRequest(request);
-                    return;
+                int i = 0;
+                for (Question question : questions) {
+                    Long sectionId = question.getSectionId();
+                    Long sectionPosition = question.getSectionPosition();
+
+                    if (sectionId == null ^ sectionPosition == null) { // ^ = XOR -> return true if they have different value, return false if they both have same value
+                        String message = "[Formulaire@QuestionController::create] sectionId and sectionPosition must be both null or both not null : " + question;
+                        log.error(message);
+                        badRequest(request);
+                        return;
+                    }
+                    else if (sectionId != null && (sectionId <= 0 || sectionPosition <= 0)) {
+                        String message = "[Formulaire@QuestionController::create] sectionId and sectionPosition must have values greater than 0 : " + question;
+                        log.error(message);
+                        badRequest(request);
+                        return;
+                    }
+                    else if (sectionPosition != null && question.getPosition() != null) {
+                        String message = "[Formulaire@QuestionController::create] A question is either in or out of a section, it cannot have a position and a section_position : " + question;
+                        log.error(message);
+                        badRequest(request);
+                        return;
+                    }
+                    else if (question.getConditional() && !CONDITIONAL_QUESTIONS.contains(question.getQuestionType())) {
+                        String message = "[Formulaire@QuestionController::create] A question conditional question must be of type : " + CONDITIONAL_QUESTIONS;
+                        log.error(message);
+                        badRequest(request);
+                        return;
+                    }
                 }
 
                 formService.get(formId, user, formEvt -> {
                     if (formEvt.isLeft()) {
-                        log.error("[Formulaire@QuestionController::createQuestion] Failed to get form with id " + formId + " : " + formEvt.left().getValue());
+                        log.error("[Formulaire@QuestionController::create] Failed to get form with id " + formId + " : " + formEvt.left().getValue());
                         renderError(request);
                         return;
                     }
                     if (formEvt.right().getValue().isEmpty()) {
-                        String message = "[Formulaire@QuestionController::createQuestion] No form found for form with id " + formId;
+                        String message = "[Formulaire@QuestionController::create] No form found for form with id " + formId;
                         log.error(message);
                         notFound(request);
                         return;
@@ -200,7 +214,7 @@ public class QuestionController extends ControllerHelper {
                     // Check if form is not already responded
                     distributionService.countFinished(formId, countRepEvt -> {
                         if (countRepEvt.isLeft()) {
-                            log.error("[Formulaire@QuestionController::createQuestion] Failed to count finished distributions " +
+                            log.error("[Formulaire@QuestionController::create] Failed to count finished distributions " +
                                     "for form with id " + formId + " : " + countRepEvt.left().getValue());
                             renderError(request);
                             return;
@@ -208,51 +222,68 @@ public class QuestionController extends ControllerHelper {
 
                         int nbResponseTot = countRepEvt.right().getValue().getInteger(COUNT, 0);
                         if (nbResponseTot > 0) {
-                            log.error("[Formulaire@QuestionController::createQuestion] You cannot create a question for a form already responded");
+                            log.error("[Formulaire@QuestionController::create] You cannot create a question for a form already responded");
                             badRequest(request);
                             return;
                         }
 
                         // Check if the type of question if it's for a public form (type FILE is forbidden)
-                        if (form.getBoolean(IS_PUBLIC) && question.getInteger(QUESTION_TYPE) != null && question.getInteger(QUESTION_TYPE) == 8) {
-                            log.error("[Formulaire@QuestionController::createQuestion] You cannot create a question type FILE for the public form with id " + formId);
-                            badRequest(request);
+                        boolean hasTypeFile = questions.stream().anyMatch(question -> question.getQuestionType() == QuestionTypes.FILE.getCode());
+                        if (form.getBoolean(IS_PUBLIC) && hasTypeFile) {
+                            String message = "[Formulaire@QuestionController::create] You cannot create a question type FILE for the public form with id " + formId;
+                            log.error(message);
+                            badRequest(request, message);
                             return;
                         }
 
-                        // If it's a conditional question in a section, check if another one already exists
-                        if (question.getBoolean(CONDITIONAL) && sectionId != null) {
-                            questionService.getSectionIdsWithConditionalQuestions(formId, new JsonArray(), sectionIdsEvt -> {
-                                if (sectionIdsEvt.isLeft()) {
-                                    log.error("[Formulaire@QuestionController::createQuestion] Failed to get section ids " +
-                                            "for form with id " + formId + " : " + sectionIdsEvt.left().getValue());
+                        List<Long> questionSectionIds = questions.stream()
+                                .map(question -> question.getSectionId())
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toList());
+
+                        questionService.getSectionIdsWithConditionalQuestions(formId, new JsonArray(), sectionIdsEvt -> {
+                            if (sectionIdsEvt.isLeft()) {
+                                log.error("[Formulaire@QuestionController::create] Failed to get section ids " +
+                                        "for form with id " + formId + " : " + sectionIdsEvt.left().getValue());
+                                renderError(request);
+                                return;
+                            }
+
+                            JsonArray sectionIds = getByProp(sectionIdsEvt.right().getValue(), SECTION_ID);
+                            questionSectionIds.retainAll(sectionIds.getList());
+                            if (questionSectionIds.size() > 0) {
+                                log.error("[Formulaire@QuestionController::create] A conditional question is " +
+                                        "already existing for the sections with ids " + questionSectionIds);
+                                badRequest(request);
+                                return;
+                            }
+
+                            List<Future> createdQuestions = questions.stream()
+                                    .map(question -> createQuestion(question, formId))
+                                    .collect(Collectors.toList());
+
+                            CompositeFuture.all(createdQuestions)
+                                .onSuccess(result -> render(request, result.list()))
+                                .onFailure(err -> {
+                                    String errorMessage = "[Formulaire@QuestionController::create] Fail to create questions " + questions + " : " + err.getMessage();
+                                    log.error(errorMessage);
                                     renderError(request);
-                                    return;
-                                }
-                                JsonArray sectionIds = getByProp(sectionIdsEvt.right().getValue(), SECTION_ID);
-                                if (sectionIds.contains(sectionId)) {
-                                    log.error("[Formulaire@QuestionController::createQuestion] A conditional question is " +
-                                            "already existing for the section with id " + sectionId);
-                                    badRequest(request);
-                                    return;
-                                }
-                                createQuestion(request, question, formId);
-                            });
-                        }
-                        else {
-                            createQuestion(request, question, formId);
-                        }
+                                });
+                        });
                     });
                 });
             });
         });
     }
 
-    private void createQuestion(HttpServerRequest request, JsonObject question, String formId) {
+    private Future<JsonObject> createQuestion(Question question, String formId) {
+        Promise<JsonObject> promise = Promise.promise();
+        Map<String,Question> promiseInfos = new HashMap<>();
+
         sectionService.list(formId)
             .compose(sections -> {
                 // Check the question's position and if some sections already use it
-                Integer questionPosition = question.getInteger(POSITION);
+                Long questionPosition = question.getPosition();
                 JsonArray sectionPositions = UtilsHelper.getByProp(sections, POSITION);
                 if (questionPosition != null && sectionPositions.contains(questionPosition)) {
                     String message = "Position " + questionPosition + " is already used by a section.";
@@ -262,21 +293,27 @@ public class QuestionController extends ControllerHelper {
                 return questionService.create(question, formId);
             })
             .compose(createdQuestion -> {
+                promiseInfos.put(QUESTION, createdQuestion.get());
+
                 // If question is cursor type, you insert fields in a specific table
-                if (question.getInteger(QUESTION_TYPE) == QuestionTypes.CURSOR.getCode()) {
-                    String questionId = createdQuestion.getInteger(ID).toString();
-                    return questionSpecificFieldsService.create(question, questionId);
+                if (question.getQuestionType() == QuestionTypes.CURSOR.getCode() && createdQuestion.isPresent()) {
+                    Long questionId = createdQuestion.get().getId();
+                    return questionSpecificFieldsService.create(question.getSpecificFields(), questionId);
                 }
 
-                return Future.succeededFuture(createdQuestion);
+                return Future.succeededFuture(Optional.empty());
             })
-            .onSuccess(createdQuestionAndSpecifics -> {
-                renderJson(request, createdQuestionAndSpecifics);
+            .onSuccess(specificFields -> {
+                Question createdQuestion = promiseInfos.get(QUESTION);
+                createdQuestion.addSpecificFields(specificFields.orElse(null));
+                promise.complete(createdQuestion.toJson());
             })
             .onFailure(err -> {
                 log.error("[Formulaire@QuestionController::createQuestion] Failed to create question " + question + " : " + err.getMessage());
-                renderError(request);
+                promise.fail(err.getMessage());
             });
+
+        return promise.future();
     }
 
     @Put("/forms/:formId/questions")

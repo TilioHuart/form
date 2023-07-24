@@ -9,9 +9,12 @@ export interface QuestionService {
     listAll(id: number) : Promise<any>;
     listChildren(questions: Question[]) : Promise<any>;
     get(questionId: number) : Promise<any>;
-    save(question: Question) : Promise<any>;
-    create(question: Question) : Promise<any>;
+    save(questions: Question[]) : Promise<Question[]>;
+    create(questions: Question[]) : Promise<Question[]>;
     update(questions: Question[]) : Promise<Question[]>;
+    saveSingle(question: Question) : Promise<Question>;
+    createSingle(question: Question) : Promise<Question>;
+    updateSingle(question: Question) : Promise<Question>;
     delete(questionId: number) : Promise<any>;
 }
 
@@ -55,14 +58,26 @@ export const questionService: QuestionService = {
         }
     },
 
-    async save(question: Question) : Promise<any> {
-        return question.id ? (await this.update([question]))[0] : await this.create(question);
+    async save(questions: Question[]) : Promise<Question[]> {
+        let questionsToUpdate: Question[] = questions.filter((q: Question) => q.id);
+        let questionsToCreate: Question[] = questions.filter((q: Question) => !q.id);
+        let promises: Promise<Question[]>[] = [this.update(questionsToUpdate), this.create(questionsToCreate)];
+        try {
+            let results: Question[][] = await Promise.all(promises);
+            return results[0].concat(results[1]);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.questionService.save'));
+            throw err;
+        }
     },
 
-    async create(question: Question) : Promise<any> {
+    async create(questions: Question[]) : Promise<Question[]> {
         try {
-            let questionPayload: QuestionPayload = new QuestionPayload(question);
-            return DataUtils.getData(await http.post(`/formulaire/forms/${question.form_id}/questions`, questionPayload));
+            if (questions.length <= 0) {
+                return [];
+            }
+            let questionsPayload: QuestionPayload[] = questions.map((q: Question) => new QuestionPayload(q));
+            return DataUtils.getData(await http.post(`/formulaire/forms/${questionsPayload[0].form_id}/questions`, questionsPayload));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.create'));
             throw err;
@@ -80,6 +95,18 @@ export const questionService: QuestionService = {
             notify.error(idiom.translate('formulaire.error.questionService.update'));
             throw err;
         }
+    },
+
+    async saveSingle(question: Question) : Promise<Question> {
+        return (question.id ? await this.update([question]) : await this.create([question]))[0];
+    },
+
+    async createSingle(question: Question) : Promise<Question> {
+        return (await this.create([question]))[0];
+    },
+
+    async updateSingle(question: Question) : Promise<Question> {
+        return (await this.update([question]))[0];
     },
 
     async delete(questionId: number) : Promise<any> {

@@ -1,6 +1,8 @@
 package fr.openent.formulaire.service.impl;
 
 import fr.openent.form.core.enums.QuestionTypes;
+import fr.openent.form.core.models.Question;
+import fr.openent.form.helpers.IModelHelper;
 import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.form.helpers.FutureHelper;
 import fr.openent.formulaire.service.QuestionService;
@@ -13,6 +15,8 @@ import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.sql.SqlStatementsBuilder;
+
+import java.util.Optional;
 
 import static fr.openent.form.core.constants.Constants.*;
 import static fr.openent.form.core.constants.Fields.*;
@@ -160,42 +164,37 @@ public class DefaultQuestionService implements QuestionService {
     }
 
     @Override
-    public void create(JsonObject question, String formId, Handler<Either<String, JsonObject>> handler) {
+    public Future<Optional<Question>> create(Question question, String formId) {
+        Promise<Optional<Question>> promise = Promise.promise();
+
         String query = "INSERT INTO " + QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
                 "mandatory, section_id, section_position, conditional, placeholder, matrix_id, matrix_position) VALUES " +
                 "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
-        int questionType = question.getInteger(MATRIX_ID, null) != null &&
-                !MATRIX_CHILD_QUESTIONS.contains(question.getInteger(QUESTION_TYPE, 1)) ?
+        int questionType = question.getMatrixId() != null &&
+                !MATRIX_CHILD_QUESTIONS.contains(question.getQuestionType()) ?
                 QuestionTypes.SINGLEANSWERRADIO.getCode() :
-                question.getInteger(QUESTION_TYPE, 1);
-        boolean isConditional = CONDITIONAL_QUESTIONS.contains(question.getInteger(QUESTION_TYPE)) && question.getBoolean(CONDITIONAL, false);
+                question.getQuestionType();
+        boolean isConditional = CONDITIONAL_QUESTIONS.contains(question.getQuestionType()) && question.getConditional();
 
         JsonArray params = new JsonArray()
                 .add(formId)
-                .add(question.getString(TITLE, ""))
-                .add(question.getInteger(SECTION_POSITION, null) != null ? null : question.getInteger(POSITION, null))
+                .add(question.getTitle())
+                .add(question.getSectionId() != null ? null : question.getPosition())
                 .add(questionType)
-                .add(question.getString(STATEMENT, ""))
-                .add(question.getBoolean(MANDATORY, false) || isConditional)
-                .add(question.getInteger(SECTION_ID, null))
-                .add(question.getInteger(SECTION_POSITION, null))
+                .add(question.getStatement())
+                .add(question.getMandatory() || isConditional)
+                .add(question.getSectionId())
+                .add(question.getSectionPosition())
                 .add(isConditional)
-                .add(question.getString(PLACEHOLDER, ""))
-                .add(question.getInteger(MATRIX_ID, null))
-                .add(question.getInteger(MATRIX_POSITION, null));
+                .add(question.getPlaceholder())
+                .add(question.getMatrixId())
+                .add(question.getMatrixPosition());
 
         query += getUpdateDateModifFormRequest();
         params.addAll(getParamsForUpdateDateModifFormRequest(formId));
 
-        sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
-    }
-
-    @Override
-    public Future<JsonObject> create(JsonObject question, String formId) {
-        Promise<JsonObject> promise = Promise.promise();
-
         String errorMessage = "[Formulaire@DefaultQuestionService::create] Fail to create question " + question + " : ";
-        create(question, formId, FutureHelper.handlerEither(promise, errorMessage));
+        sql.prepared(query, params, SqlResult.validUniqueResultHandler(IModelHelper.sqlUniqueResultToIModel(promise, Question.class, errorMessage)));
 
         return promise.future();
     }
