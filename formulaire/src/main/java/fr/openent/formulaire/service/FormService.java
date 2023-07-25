@@ -26,7 +26,14 @@ public interface FormService {
      * @param formIds list of form ids
      * @param handler function handler returning JsonArray data
      */
+    @Deprecated
     void listByIds(JsonArray formIds, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * List all forms by ids
+     * @param formIds list of form ids
+     */
+    Future<List<Form>> listByIds(JsonArray formIds);
 
     /**
      * List all the forms sent to me

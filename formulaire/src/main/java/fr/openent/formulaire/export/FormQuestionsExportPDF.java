@@ -77,6 +77,9 @@ public class FormQuestionsExportPDF extends ControllerHelper {
         pdfFactory = new PdfFactory(vertx, new JsonObject().put(NODE_PDF_GENERATOR, config.getJsonObject(NODE_PDF_GENERATOR, new JsonObject())));
     }
 
+
+    // Getters / Setters
+
     public JsonArray getQuestionsInfos() {
         return this.questionsInfos;
     }
@@ -101,11 +104,16 @@ public class FormQuestionsExportPDF extends ControllerHelper {
         this.choicesInfos = choicesInfos;
     }
 
-    public JsonArray getMatrixChidren() {
+    public JsonArray getMatrixChildren() {
         return this.matrixChildren;
     }
 
-    public void setMatrixChildren(JsonArray matrixChildren) {this.matrixChildren = matrixChildren;}
+    public void setMatrixChildren(JsonArray matrixChildren) {
+        this.matrixChildren = matrixChildren;
+    }
+
+
+    // Functions
 
     public Future<JsonObject> launch() {
         Promise<JsonObject> promise = Promise.promise();
@@ -124,14 +132,14 @@ public class FormQuestionsExportPDF extends ControllerHelper {
             })
             .compose(questionData -> {
                 if (questionData.isEmpty()) {
-                    String errMessage = "[Formulaire@FormQuestionsExportPDF::fetchQuestionsInfos] No questions found for form with id " + formId;
+                    String errMessage = "No questions found for form with id " + formId;
+                    log.error("[Formulaire@FormQuestionsExportPDF::fetchQuestionsInfos] " + errMessage);
                     return Future.failedFuture(errMessage);
-                } else {
-                    setQuestionsInfos(questionData);
-                    questionsIds.set(getIds(questionsInfos));
-                    fillMap(sectionsInfos, mapSections);
-                    fillMap(questionsInfos, mapQuestions);
                 }
+                setQuestionsInfos(questionData);
+                questionsIds.set(getIds(questionsInfos));
+                fillMap(sectionsInfos, mapSections);
+                fillMap(questionsInfos, mapQuestions);
                 return questionSpecificFieldsService.syncQuestionSpecs(questionsInfos);
             })
             .compose(questionsWithSpecifics -> questionChoiceService.listChoices(questionsIds.get()))
@@ -144,10 +152,9 @@ public class FormQuestionsExportPDF extends ControllerHelper {
             .compose(listChildren -> {
                 setMatrixChildren(listChildren);
                 fillChoices(choicesInfos, mapSections, mapQuestions, imageInfos);
-
                 return FutureHelper.all(imageInfos);
             })
-            .compose(result -> {
+            .compose(imageInfosResults -> {
                 //Get choices images, affect them to their respective choice and send the result
                 fillChoicesImages(imageInfos, localChoicesMap, choicesInfos);
                 fillMatrixQuestions(questionsInfos, matrixChildren);
@@ -162,16 +169,14 @@ public class FormQuestionsExportPDF extends ControllerHelper {
 
                 return generatePDF(request, results,"questions.xhtml");
             })
-            .onSuccess(buffer -> {
+            .compose(buffer -> {
                 JsonObject pdfInfos = new JsonObject()
-                        .put(TITLE, "Questions_" + form.getTitle() + ".pdf")
-                        .put(BUFFER, buffer);
-                promise.complete(pdfInfos);
+                        .put(TITLE, "Questions_" + form.getTitle() + ".pdf");
+                return uploadPdfAndSetFileId(pdfInfos, buffer);
             })
+            .onSuccess(promise::complete)
             .onFailure(err -> {
-                String errMessage = String.format("[Formulaire@FormQuestionsExportPDF::launch]  " +
-                                "No questions found for form with id: %s" + formId,
-                        this.getClass().getSimpleName(), err.getMessage());
+                String errMessage = String.format("[Formulaire@FormQuestionsExportPDF::launch] Failed to export PDF for form with id " + formId + " : " + err.getMessage());
                 log.error(errMessage);
                 promise.fail(err.getMessage());
             });
@@ -219,7 +224,7 @@ public class FormQuestionsExportPDF extends ControllerHelper {
                 .filter(Objects::nonNull)
                 .map(JsonObject.class::cast)
                 .forEach(choice -> {
-                    if (choice.containsKey(IMAGE))imageInfos.add(getImageData(choice));
+                    if (choice.containsKey(IMAGE) && choice.getString(IMAGE) != null) imageInfos.add(getImageData(choice));
                     Integer nextQuestionId = choice.getInteger(NEXT_FORM_ELEMENT_ID);
                     if (nextQuestionId != null) {
                         String titleNext = null;
@@ -418,8 +423,8 @@ public class FormQuestionsExportPDF extends ControllerHelper {
 
         vertx.fileSystem().readFile(path, result -> {
             if (!result.succeeded()) {
-                String message = "[Formulaire@FormQuestionsExportPDF::generatePDF] Failed to read template file";
-                log.error(message);
+                String message = "Failed to read template file.";
+                log.error("[Formulaire@FormQuestionsExportPDF::generatePDF] " + message);
                 promise.fail(message);
                 return;
             }
@@ -428,8 +433,8 @@ public class FormQuestionsExportPDF extends ControllerHelper {
             renders.processTemplate(request, templateProps, templateName, reader, writer -> {
                 String processedTemplate = ((StringWriter) writer).getBuffer().toString();
                 if (processedTemplate.isEmpty()) {
-                    String message = "[Formulaire@FormQuestionsExportPDF::generatePDF] Failed to process template";
-                    log.error(message);
+                    String message = "Failed to process template.";
+                    log.error("[Formulaire@FormQuestionsExportPDF::generatePDF] " + message);
                     promise.fail(message);
                     return;
                 }
@@ -444,7 +449,7 @@ public class FormQuestionsExportPDF extends ControllerHelper {
                 }
 
                 actionObject.put(CONTENT, bytes).put(BASE_URL, baseUrl);
-                generatePDF(TITLE, processedTemplate)
+                generatePDF(templateProps.getString(FORM_TITLE), processedTemplate)
                     .onSuccess(res -> promise.complete(res.getContent()))
                     .onFailure(error -> {
                         String message = "[Formulaire@FormQuestionsExportPDF::generatePDF] Failed to generatePDF : " + error.getMessage();
@@ -471,9 +476,24 @@ public class FormQuestionsExportPDF extends ControllerHelper {
             });
         }
         catch (Exception e) {
-            log.error("[Formulaire@FormQuestionsExportPDF::generatePDF] Failed to generatePDF: " + e.getMessage());
+            log.error("[Formulaire@FormQuestionsExportPDF::generatePDF] Failed to generatePDF : " + e.getMessage());
             promise.fail(e.getMessage());
         }
+        return promise.future();
+    }
+
+    private Future<JsonObject> uploadPdfAndSetFileId(JsonObject pdfInfos, Buffer buffer) {
+        Promise<JsonObject> promise = Promise.promise();
+        storage.writeBuffer(buffer, "application/pdf", pdfInfos.getString(TITLE), uploadEvt -> {
+            if (!uploadEvt.getString(STATUS).equals(OK)) {
+                String errorMessage = "[Formulaire@FormQuestionsExportPDF::uploadPdf] Failed to upload PDF to storage : " + uploadEvt.getString(MESSAGE);
+                log.error(errorMessage);
+                promise.fail(uploadEvt.getString(MESSAGE));
+                return;
+            }
+            pdfInfos.put(FILE_ID, uploadEvt.getString(_ID));
+            promise.complete(pdfInfos);
+        });
         return promise.future();
     }
 }

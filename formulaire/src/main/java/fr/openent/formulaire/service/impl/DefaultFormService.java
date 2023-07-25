@@ -20,10 +20,7 @@ import org.entcore.common.user.UserInfos;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static fr.openent.form.core.constants.Constants.*;
 import static fr.openent.form.core.constants.DistributionStatus.FINISHED;
@@ -65,11 +62,30 @@ public class DefaultFormService implements FormService {
         Sql.getInstance().prepared(query.toString(), params, SqlResult.validResultHandler(handler));
     }
 
+    @Deprecated
     @Override
     public void listByIds(JsonArray formIds, Handler<Either<String, JsonArray>> handler) {
+        listByIds(formIds)
+            .onSuccess(res -> handler.handle(new Either.Right<>(new JsonArray(res))))
+            .onFailure(error -> handler.handle(new Either.Left<>(error.getMessage())));
+    }
+
+    @Override
+    public Future<List<Form>> listByIds(JsonArray formIds) {
+        Promise<List<Form>> promise = Promise.promise();
+
+        if (formIds == null || formIds.isEmpty()) {
+            promise.complete(new ArrayList<>());
+            return promise.future();
+        }
+
         String query = "SELECT * FROM " + FORM_TABLE + " WHERE id IN " + Sql.listPrepared(formIds) + ";";
         JsonArray params = new JsonArray().addAll(formIds);
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+
+        String errorMessage = "[Formulaire@DefaultFormService::listByIds] Fail to get forms with id " + formIds;
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(IModelHelper.sqlResultToIModel(promise, Form.class, errorMessage)));
+
+        return promise.future();
     }
 
     @Override

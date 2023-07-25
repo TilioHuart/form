@@ -36,7 +36,7 @@ public class DefaultFormServiceTest {
     @Test
     public void testListByIds(TestContext ctx) {
         Async async = ctx.async();
-        JsonArray formIds = new JsonArray().add("1").add("2").add("3");
+        JsonArray formIds = new JsonArray("[\"1\", \"2\", \"3\"]");
         String expectedQuery = "SELECT * FROM " + FORM_TABLE + " WHERE id IN " + Sql.listPrepared(formIds) + ";";
         JsonArray expectedParams = new JsonArray().addAll(formIds);
 
@@ -47,7 +47,11 @@ public class DefaultFormServiceTest {
             ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
             async.complete();
         });
-        defaultFormService.listByIds(formIds, null);
+
+        defaultFormService.listByIds(formIds)
+                .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
     }
 
     @Test

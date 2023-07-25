@@ -1,11 +1,16 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.core.enums.I18nKeys;
 import fr.openent.form.core.enums.RgpdLifetimes;
 import fr.openent.form.helpers.EventBusHelper;
+import fr.openent.form.helpers.I18nHelper;
 import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.export.FormQuestionsExportPDF;
 import fr.openent.formulaire.helpers.DataChecker;
 import fr.openent.form.helpers.FutureHelper;
+import fr.openent.formulaire.helpers.folder_exporter.FolderExporterZip;
+import fr.openent.formulaire.helpers.upload_file.Attachment;
+import fr.openent.formulaire.helpers.upload_file.FileHelper;
 import fr.openent.formulaire.security.*;
 import fr.openent.formulaire.service.*;
 import fr.openent.formulaire.service.impl.*;
@@ -26,6 +31,7 @@ import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.events.EventStore;
 import org.entcore.common.http.filter.ResourceFilter;
+import org.entcore.common.http.request.JsonHttpServerRequest;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
@@ -167,11 +173,11 @@ public class FormController extends ControllerHelper {
             }
 
             formService.listForLinker(groupsAndUserIds, user)
-                .onSuccess(result -> renderJson(request, result))
-                .onFailure(err -> {
-                    log.error(err.getMessage());
-                    renderError(request);
-                });
+                    .onSuccess(result -> renderJson(request, result))
+                    .onFailure(err -> {
+                        log.error(err.getMessage());
+                        renderError(request);
+                    });
         });
     }
 
@@ -296,8 +302,7 @@ public class FormController extends ControllerHelper {
                                     }
                                     renderJson(request, createEvt.right().getValue());
                                 });
-                            }
-                            else {
+                            } else {
                                 renderJson(request, createEvt.right().getValue());
                             }
                         });
@@ -417,8 +422,7 @@ public class FormController extends ControllerHelper {
                                     }
                                     renderJson(request, createdForms);
                                 });
-                            }
-                            else {
+                            } else {
                                 renderJson(request, createdForms);
                             }
                         });
@@ -531,8 +535,8 @@ public class FormController extends ControllerHelper {
         for (Object questions : questionsEvt.result().list()) {
             JsonArray questionsInfos = ((JsonArray) questions).getJsonArray(1);
             if (questionsInfos.size() > 0
-                && questionsInfos.getJsonObject(0).getInteger(ID) != null
-                && questionsInfos.getJsonObject(0).getInteger(FORM_ID) != null) {
+                    && questionsInfos.getJsonObject(0).getInteger(ID) != null
+                    && questionsInfos.getJsonObject(0).getInteger(FORM_ID) != null) {
                 for (int i = 0; i < questionsInfos.size(); i++) {
                     JsonObject questionInfo = questionsInfos.getJsonObject(i);
                     int formId = questionInfo.getInteger(FORM_ID);
@@ -573,8 +577,7 @@ public class FormController extends ControllerHelper {
 
             if (folderId != ID_ROOT_FOLDER) { // We do not sync root folder counts (useless)
                 folderService.syncNbChildren(user, new JsonArray().add(folderId), arrayResponseHandler(request));
-            }
-            else {
+            } else {
                 renderJson(request, createRelEvt.right().getValue());
             }
         });
@@ -658,8 +661,7 @@ public class FormController extends ControllerHelper {
 
                             formService.update(formId, form, defaultResponseHandler(request));
                         });
-                    }
-                    else {
+                    } else {
                         formService.update(formId, form, defaultResponseHandler(request));
                     }
                 });
@@ -701,8 +703,7 @@ public class FormController extends ControllerHelper {
                         formService.delete(formId, defaultResponseHandler(request));
                     });
                 });
-            }
-            else {
+            } else {
                 formService.delete(formId, defaultResponseHandler(request));
             }
         });
@@ -768,8 +769,7 @@ public class FormController extends ControllerHelper {
                         if (relFormFolderEvt.right().getValue().isEmpty() && targetFolderId == ID_ARCHIVED_FOLDER) {
                             relFormFolderService.create(user, formIds, targetFolderId, arrayResponseHandler(request));
                             return;
-                        }
-                        else if (relFormFolderEvt.right().getValue().isEmpty()) {
+                        } else if (relFormFolderEvt.right().getValue().isEmpty()) {
                             String message = "[Formulaire@moveForms] No relation form-folders found for forms with ids " + formIds;
                             log.error(message);
                             notFound(request, message);
@@ -803,7 +803,7 @@ public class FormController extends ControllerHelper {
                             // Check if targetFolderId is not owned by the connected user
                             String folderOwner = targetedFolderEvt.right().getValue().getString(USER_ID);
                             if (!BASE_FOLDER_IDS.contains(targetFolderId) &&
-                                (folderOwner == null || !user.getUserId().equals(folderOwner))) {
+                                    (folderOwner == null || !user.getUserId().equals(folderOwner))) {
                                 String message = "[Formulaire@moveForms] You're not owner of the targeted folder with id " + targetFolderId;
                                 log.error(message);
                                 unauthorized(request, message);
@@ -827,8 +827,7 @@ public class FormController extends ControllerHelper {
 
                                 if (folderIdsToSync.size() > 0) {
                                     folderService.syncNbChildren(user, folderIdsToSync, arrayResponseHandler(request));
-                                }
-                                else {
+                                } else {
                                     renderJson(request, updateEvt.right().getValue());
                                 }
                             });
@@ -976,8 +975,7 @@ public class FormController extends ControllerHelper {
 
                                 doSendReminder(request, formId, form, distributions, mail, user);
                             });
-                        }
-                        else {
+                        } else {
                             doSendReminder(request, formId, form, distributions, mail, user);
                         }
                     });
@@ -993,9 +991,9 @@ public class FormController extends ControllerHelper {
         // Generate list of mails to send
         for (int i = 0; i < distributions.size(); i++) {
             List<String> localRespondersIds = distributionsList.stream()
-                .filter(d -> (form.getBoolean(MULTIPLE) || form.getBoolean(ANONYMOUS) || d.getString(DATE_RESPONSE) == null))
-                .map(d -> d.getString(RESPONDER_ID))
-                .collect(Collectors.toList());
+                    .filter(d -> (form.getBoolean(MULTIPLE) || form.getBoolean(ANONYMOUS) || d.getString(DATE_RESPONSE) == null))
+                    .map(d -> d.getString(RESPONDER_ID))
+                    .collect(Collectors.toList());
 
             // Generate new mail object if limit or end loop are reached
             if (i == distributions.size() - 1 || localRespondersIds.size() == config.getInteger(ZIMBRA_MAX_RECIPIENTS, 50)) {
@@ -1029,8 +1027,7 @@ public class FormController extends ControllerHelper {
                 if (!messageEvt.result().body().getString(STATUS).equals(OK)) {
                     log.error("[Formulaire@FormController::sendReminder] Failed to send reminder : " + messageEvt.cause());
                     future.handle(Future.failedFuture(messageEvt.cause()));
-                }
-                else {
+                } else {
                     future.handle(Future.succeededFuture(messageEvt.result().body()));
                 }
             });
@@ -1102,18 +1099,147 @@ public class FormController extends ControllerHelper {
         });
     }
 
-    // Export / Import
+    // Exports
 
-    @Post("/forms/export/:fileType")
-    @ApiDoc("Export forms in a file (ZIP or PDF)")
+    @Get("/forms/export/pdf")
+    @ApiDoc("Export forms into a PDF file")
     @ResourceFilter(CreationRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    public void exportForm(final HttpServerRequest request) {
-        String fileType = request.getParam(PARAM_FILE_TYPE);
+    public void exportPdf(final HttpServerRequest request) {
+        JsonArray formIds = new JsonArray(request.params().getAll(ID));
+        if (formIds.isEmpty()) {
+            log.error("[Formulaire@FormController::exportPdf] No form ids to export.");
+            noContent(request);
+            return;
+        }
+
+        UserUtils.getUserInfos(eb, request, user -> {
+            if (user == null) {
+                String message = "[Formulaire@FormController::exportPdf] User not found in session.";
+                log.error(message);
+                unauthorized(request, message);
+                return;
+            }
+
+            final List<String> groupsAndUserIds = new ArrayList<>();
+            groupsAndUserIds.add(user.getUserId());
+            if (user.getGroupsIds() != null) {
+                groupsAndUserIds.addAll(user.getGroupsIds());
+            }
+
+            formService.checkFormsRights(groupsAndUserIds, user, MANAGER_RESOURCE_BEHAVIOUR, formIds, hasRightsEvt -> {
+                if (hasRightsEvt.isLeft()) {
+                    log.error("[Formulaire@FormController::exportPdf] Fail to check rights for method " + hasRightsEvt.left().getValue());
+                    renderError(request);
+                    return;
+                }
+                if (hasRightsEvt.right().getValue().isEmpty()) {
+                    String message = "[Formulaire@FormController::exportPdf] No rights found for forms with ids " + formIds;
+                    log.error(message);
+                    notFound(request);
+                    return;
+                }
+
+                // Check if user is owner or manager to all the forms
+                Long count = hasRightsEvt.right().getValue().getLong(COUNT);
+                if (count == null || count != formIds.size()) {
+                    String message = "[Formulaire@FormController::exportPdf] You're missing rights on one form or more.";
+                    log.error(message);
+                    unauthorized(request);
+                    return;
+                }
+
+                formService.listByIds(formIds)
+                        .compose(forms -> {
+                            if (forms.isEmpty()) {
+                                String errMessage = "[Formulaire@FormController::exportPdf] No form found for ids " + formIds;
+                                log.error(errMessage);
+                                return Future.failedFuture(errMessage);
+                            }
+
+                            List<Future<JsonObject>> pdfInfos = new ArrayList<>();
+                            forms.forEach(form -> pdfInfos.add(new FormQuestionsExportPDF(request, vertx, config, storage, eb, form).launch()));
+
+                            return FutureHelper.all(pdfInfos);
+                        })
+                        .compose(pdfInfos -> {
+                            if (pdfInfos.list().size() == 1) {
+                                JsonObject pdfInfo = pdfInfos.resultAt(0);
+                                Promise<FolderExporterZip.ZipContext> promise = Promise.promise();
+                                JsonObject metadata = new JsonObject().put(CONTENT_TYPE, "application/pdf; charset=utf-8");
+                                storage.sendFile(pdfInfo.getString(FILE_ID), pdfInfo.getString(TITLE), request, false, metadata, evt -> {
+                                    if (evt.failed()) {
+                                        String errMessage = "Formulaire@FormController::exportPdf] Failed to export form " +
+                                                "with id " + formIds.getString(0) + " : " + evt.cause();
+                                        log.error(errMessage);
+                                        promise.fail(evt.cause());
+                                    }
+                                    else promise.complete(null);
+                                });
+                                return promise.future();
+                            }
+
+                            // Export all files of the 'listFiles' in a folder defined by the 'root' object
+                            List<JsonObject> filesList = new ArrayList<>();
+
+                            JsonObject root = new JsonObject()
+                                    .put(ID, UUID.randomUUID().toString())
+                                    .put(TYPE, FOLDER)
+                                    .put(NAME, I18nHelper.getI18nValue(I18nKeys.EXPORT_PDF_QUESTIONS_TITLE, request))
+                                    .put(FOLDERS, new JsonArray());
+
+                            pdfInfos.list().stream()
+                                    .map(JsonObject.class::cast)
+                                    .forEach(pdfInfo -> {
+                                        JsonObject file = new JsonObject()
+                                                .put(ID, pdfInfo.getString(FILE_ID))
+                                                .put(NAME, pdfInfo.getString(TITLE))
+                                                .put(FILE, pdfInfo.getString(FILE_ID))
+                                                .put(TYPE, FILE);
+                                        filesList.add(file);
+                                    });
+
+                            FolderExporterZip zipBuilder = new FolderExporterZip(storage, vertx.fileSystem(), false);
+                            return zipBuilder.exportAndSendZip(root, filesList, request, false);
+                        })
+                        .compose(zipContext -> {
+                            if (zipContext == null) return Future.succeededFuture();
+
+                            log.info("Formulaire@FormController::exportPdf] Zip folder downloaded !");
+                            Promise<Void> promise = Promise.promise();
+
+                            JsonArray pdfIds = zipContext.docByFolders.values().stream()
+                                    .flatMap(Collection::stream)
+                                    .map(doc -> doc.getString(FILE))
+                                    .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+
+                            storage.removeFiles(pdfIds, removeEvt -> {
+                                if (!removeEvt.getString(STATUS).equals(OK)) promise.fail("");
+                                else promise.complete();
+                            });
+
+                            return promise.future();
+                        })
+                        .onSuccess(result -> log.info("Formulaire@FormController::exportPdf] Forms successfully exported !"))
+                        .onFailure(err -> {
+                            String errorMessage = "[Formulaire@FormController::exportPdf] Failed to export PDF " +
+                                    "for forms with id " + formIds + " : " + err.getMessage();
+                            log.error(errorMessage);
+                            renderError(request);
+                        });
+            });
+        });
+    }
+
+    @Post("/forms/export/zip")
+    @ApiDoc("Export forms into a ZIP file")
+    @ResourceFilter(CreationRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void exportZip(final HttpServerRequest request) {
         RequestUtils.bodyToJsonArray(request, formIds -> {
             UserUtils.getUserInfos(eb, request, user -> {
                 if (user == null) {
-                    String message = "[Formulaire@FormController::exportForm] User not found in session.";
+                    String message = "[Formulaire@FormController::exportZip] User not found in session.";
                     log.error(message);
                     unauthorized(request, message);
                     return;
@@ -1127,74 +1253,43 @@ public class FormController extends ControllerHelper {
 
                 formService.checkFormsRights(groupsAndUserIds, user, MANAGER_RESOURCE_BEHAVIOUR, formIds, hasRightsEvt -> {
                     if (hasRightsEvt.isLeft()) {
-                        log.error("[Formulaire@FormController::exportForm] Fail to check rights for method " + hasRightsEvt.left().getValue());
+                        log.error("[Formulaire@FormController::exportZip] Fail to check rights for method " + hasRightsEvt.left().getValue());
                         renderError(request);
                         return;
                     }
                     if (hasRightsEvt.right().getValue().isEmpty()) {
-                        String message = "[Formulaire@FormController::exportForm] No rights found for forms with ids " + formIds;
+                        String message = "[Formulaire@FormController::exportZip] No rights found for forms with ids " + formIds;
                         log.error(message);
-                        notFound(request, message);
+                        notFound(request);
                         return;
                     }
 
                     // Check if user is owner or manager to all the forms
                     Long count = hasRightsEvt.right().getValue().getLong(COUNT);
                     if (count == null || count != formIds.size()) {
-                        String message = "[Formulaire@FormController::exportForm] You're missing rights on one form or more.";
+                        String message = "[Formulaire@FormController::exportZip] You're missing rights on one form or more.";
                         log.error(message);
-                        unauthorized(request, message);
+                        unauthorized(request);
                         return;
                     }
 
-                    switch (fileType) {
-                        case ZIP:
-                            // Create the directory in the file system
-                            JsonObject ebMessage = new JsonObject()
-                                    .put(ACTION, START)
-                                    .put(PARAM_USER_ID, user.getUserId())
-                                    .put(LOCALE, I18n.acceptLanguage(request))
-                                    .put(APPS, new JsonArray().add(DB_SCHEMA))
-                                    .put(PARAM_RESOURCES_IDS, new JsonArray().addAll(formIds));
+                    // Create the directory in the file system
+                    JsonObject ebMessage = new JsonObject()
+                            .put(ACTION, START)
+                            .put(PARAM_USER_ID, user.getUserId())
+                            .put(LOCALE, I18n.acceptLanguage(request))
+                            .put(APPS, new JsonArray().add(DB_SCHEMA))
+                            .put(PARAM_RESOURCES_IDS, new JsonArray().addAll(formIds));
 
-                            DeliveryOptions deliveryOptions = new DeliveryOptions();
+                    DeliveryOptions deliveryOptions = new DeliveryOptions();
 
-                            EventBusHelper.requestJsonObject(EXPORT_ADDRESS, eb, ebMessage, deliveryOptions)
-                                    .onSuccess(res -> renderJson(request, res))
-                                    .onFailure(err -> {
-                                        String message = "[Formulaire@FormController::exportForm] Failed to export data : " + err.getMessage();
-                                        log.error(message);
-                                        renderError(request);
-                                    });
-                            break;
-                        case PDF:
-                            formService.get(String.valueOf(formIds.getInteger(0)))
-                                    .compose(form -> {
-                                        if (!form.isPresent()) {
-                                            String errMessage = "[Formulaire@FormController::exportForm] No form found for id " + formIds.getInteger(0);
-                                            log.error(errMessage);
-                                            return Future.failedFuture((String)null);
-                                        } else {
-                                            return new FormQuestionsExportPDF(request, vertx, config, storage, eb, form.get()).launch();
-                                        }
-                                    })
-                                    .onSuccess(pdfInfo -> {
-                                        request.response()
-                                                .putHeader("Content-Type", "application/pdf; charset=utf-8")
-                                                .putHeader("Content-Disposition", "attachment; filename=" + pdfInfo.getString(TITLE))
-                                                .end(pdfInfo.getString(BUFFER));
-                                    })
-                                    .onFailure(err -> {
-                                        log.error("[Formulaire@FormController::exportForm] Failed to export form " + formIds.getInteger(0) + " : " + err.getMessage());
-                                        renderError(request);
-                                    });
-                            break;
-                        default:
-                            String message = "[Formulaire@FormController::exportForm] Wrong export format type : " + fileType;
+                    EventBusHelper.requestJsonObject(EXPORT_ADDRESS, eb, ebMessage, deliveryOptions)
+                        .onSuccess(res -> renderJson(request, res))
+                        .onFailure(err -> {
+                            String message = "[Formulaire@FormController::exportZip] Failed to export data : " + err.getMessage();
                             log.error(message);
-                            badRequest(request, message);
-                            break;
-                    }
+                            renderError(request);
+                        });
                 });
             });
         });

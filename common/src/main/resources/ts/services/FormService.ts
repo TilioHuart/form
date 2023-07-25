@@ -20,8 +20,9 @@ export interface FormService {
     delete(formId: number) : Promise<any>;
     move(formIds : number[], parentId: number) : Promise<any>;
     sendReminder(formId: number, mail: {}) : Promise<any>;
-    export(formIds: number[], type: Exports) : Promise<any>;
-    verifyExportAndDownload(exportId: string) : Promise<void>;
+    exportPdf(formIds: number[]) : Promise<any>;
+    exportZip(formIds: number[]) : Promise<any>;
+    verifyExportAndDownloadZip(exportId: string) : Promise<void>;
     import(zipFile: FormData) : Promise<any>;
     unshare(formId: number) : Promise<any>;
     getMyFormRights(formId: number) : Promise<any>;
@@ -163,22 +164,26 @@ export const formService: FormService = {
         }
     },
 
-    async export(formIds: number[], type: Exports) : Promise<any> {
+    async exportPdf(formIds: number[]) : Promise<any> {
         try {
-            if (type === Exports.ZIP) {
-                let res = await http.post(`/formulaire/forms/export/zip`, formIds);
-                return res.data.exportId;
-            }
-            else if (type === Exports.PDF) {
-                return await http.post(`/formulaire/forms/export/pdf`, formIds, {responseType: "arraybuffer"});
-            }
+            return await http.get(`/formulaire/forms/export/pdf`, { params: formIds });
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.export'));
             throw err;
         }
     },
 
-    async verifyExportAndDownload(exportId: string) : Promise<void> {
+    async exportZip(formIds: number[]) : Promise<any> {
+        try {
+            let res = await http.post(`/formulaire/forms/export/zip`, formIds);
+            return res.data.exportId;
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.formService.export'));
+            throw err;
+        }
+    },
+
+    async verifyExportAndDownloadZip(exportId: string) : Promise<void> {
         try {
             await http.get(`/archive/export/verify/${exportId}`);
             window.location.href = `/archive/export/${exportId}`;

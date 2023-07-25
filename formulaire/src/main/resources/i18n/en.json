@@ -191,6 +191,7 @@
   "formulaire.export.explanation.pdf": "All selected forms will be downloaded in PDF format. Please note that some question types may not be suitable for this type of export (e.g. cursor, document submission, etc.)",
   "formulaire.format.zip": "Zip format",
   "formulaire.format.pdf": "PDF format",
+  "formulaire.export.pdf.questions.title": "Forms PDF export",
   "formulaire.import.explanation": "Déposez le dossier compressé (.zip) contenant vos formulaires pour les importer. Vous pourrez retrouver ces derniers dans le dossier racine 'Mes formulaires'.",
   "formulaire.form.download.all.results.pdf": "Télécharger tous les résultats (PDF)",
   "formulaire.form.download.all.results.csv": "Télécharger tous les résultats (CSV)",

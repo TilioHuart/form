@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.zip.Deflater;
 
+import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.storage.Storage;
@@ -39,16 +40,12 @@ public class FolderExporterZip extends FolderExporter {
     }
 
     private Future<JsonObject> createZip(ZipContext context) {
-        Future<JsonObject> future = Future.future();
+        Promise<JsonObject> promise = Promise.promise();
         Zip.getInstance().zipFolder(context.basePath, context.zipFullPath, true, Deflater.NO_COMPRESSION, res -> {
-            if (OK.equals(res.body().getString(STATUS))) {
-                future.complete(res.body());
-            }
-            else {
-                future.fail(res.body().getString(MESSAGE));
-            }
+            if (OK.equals(res.body().getString(STATUS))) promise.complete(res.body());
+            else promise.fail(res.body().getString(MESSAGE));
         });
-        return future;
+        return promise.future();
     }
 
     public FolderExporterZip(Storage storage, FileSystem fs, boolean throwErrors) {
@@ -59,14 +56,15 @@ public class FolderExporterZip extends FolderExporter {
         UUID uuid = UUID.randomUUID();
         String baseName = root.isPresent() ? root.get().getString(NAME, ARCHIVE) : ARCHIVE;
         String rootBase = Paths.get(System.getProperty("java.io.tmpdir"), uuid.toString()).normalize().toString();
-        String basePath = Paths.get(System.getProperty("java.io.tmpdir"), uuid.toString(), baseName).normalize()
-                .toString();
+        String basePath = Paths.get(System.getProperty("java.io.tmpdir"), uuid.toString(), baseName).normalize().toString();
         ZipContext context = new ZipContext(rootBase, basePath, baseName);
-        return this.export(context, rows).compose(res -> this.createZip(context)).map(res -> context);
+        return this.export(context, rows)
+                .compose(res -> this.createZip(context))
+                .map(res -> context);
     }
 
     public Future<Void> sendZip(HttpServerRequest req, ZipContext context) {
-        Future<Void> future = Future.future();
+        Promise<Void> promise = Promise.promise();
         try {
             final HttpServerResponse resp = req.response();
             log.info("Sending zip file...");
@@ -74,29 +72,27 @@ public class FolderExporterZip extends FolderExporter {
             resp.putHeader("Content-Type", "application/octet-stream");
             resp.putHeader("Content-Description", "File Transfer");
             resp.putHeader("Content-Transfer-Encoding", "binary");
-            resp.sendFile(context.zipFullPath, future.completer());
+            resp.sendFile(context.zipFullPath, promise);
         }
         catch (java.lang.IllegalStateException e) {
-            future.complete();
+            promise.complete();
         }
 
-        return future;
+        return promise.future();
     }
 
     public Future<ZipContext> exportAndSendZip(JsonObject root, List<JsonObject> rows, HttpServerRequest req, boolean clean) {
-        return this.exportToZip(Optional.ofNullable(root), rows).compose(res -> this.sendZip(req, res).map((r)->res)).compose(res -> {
-            if (clean) {
-                return removeZip(res);
-            }
-            else {
-                return Future.succeededFuture(res);
-            }
-        });
+        return this.exportToZip(Optional.ofNullable(root), rows)
+                .compose(res -> this.sendZip(req, res).map((r)->res))
+                .compose(res -> {
+                    if (clean) return removeZip(res);
+                    return Future.succeededFuture(res);
+                });
     }
 
     public Future<ZipContext> removeZip(ZipContext context){
-        Future<ZipContext> future = Future.future();
-        this.fs.deleteRecursive(context.rootBase,true, resRmDir -> future.complete());
-        return future;
+        Promise<ZipContext> promise = Promise.promise();
+        this.fs.deleteRecursive(context.rootBase,true, resRmDir -> promise.complete());
+        return promise.future();
     }
 }

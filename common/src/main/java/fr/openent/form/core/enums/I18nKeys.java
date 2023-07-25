@@ -5,7 +5,8 @@ public enum I18nKeys {
     COPY("formulaire.copy"),
     OTHER("formulaire.other"),
     MAX_USERS_SHARING_ERROR("formulaire.share.error.max.users"),
-    END_FORM("formulaire.access.end");
+    END_FORM("formulaire.access.end"),
+    EXPORT_PDF_QUESTIONS_TITLE("formulaire.export.pdf.questions.title");
 
     private final String key;
 
