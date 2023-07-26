@@ -3,7 +3,7 @@ import {Form, FormElement, FormElements, Question, QuestionChoice} from "@common
 import {I18nUtils} from "@common/utils";
 import {Direction} from "@common/core/enums";
 import {RootsConst} from "../../../../core/constants/roots.const";
-import {IScope} from "angular";
+import {IScope, IParseService} from "angular";
 
 interface IQuestionTypeSingleanswerProps {
     question: Question;
@@ -11,6 +11,7 @@ interface IQuestionTypeSingleanswerProps {
     formElements: FormElements;
     isRadio: boolean;
     form: Form;
+    onSave?;
 }
 
 interface IQuestionTypeSingleanswerRadioScope extends IScope, IQuestionTypeSingleanswerProps{
@@ -28,6 +29,7 @@ interface IViewModel extends ng.IController, IQuestionTypeSingleanswerProps {
     deleteImageSelect(index: number): void;
     filterNextElements(formElement: FormElement): boolean;
     onSelectOption(choice: QuestionChoice): void;
+    save?(): void;
 }
 
 class Controller implements IViewModel {
@@ -83,9 +85,10 @@ class Controller implements IViewModel {
         const choice = this.question.choices.all[index];
         choice.image = null;
     }
+
 }
 
-function directive() {
+function directive($parse: IParseService) {
     return {
         restrict: 'E',
         templateUrl: `${RootsConst.directive}question/question-type/question-type-singleanswer/question-type-singleanswer.html`,
@@ -95,16 +98,21 @@ function directive() {
             hasFormResponses: '=',
             formElements: '<',
             isRadio: '<',
-            form: '<'
+            form: '<',
+            onSave: '&'
         },
         controllerAs: 'vm',
         bindToController: true,
-        controller: ['$scope', '$sce', Controller],
+        controller: ['$scope', '$sce', '$parse', Controller],
         /* interaction DOM/element */
         link: function ($scope: IQuestionTypeSingleanswerRadioScope,
                         element: ng.IAugmentedJQuery,
                         attrs: ng.IAttributes,
                         vm: IViewModel) {
+
+            vm.save = () : void => {
+                $parse($scope.vm.onSave())({});
+            }
         }
     }
 }

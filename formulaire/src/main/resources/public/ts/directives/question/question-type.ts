@@ -1,7 +1,9 @@
 import {Directive, ng} from "entcore";
 import {Form, FormElements, Question, Types} from "@common/models";
+import {IScope, IParseService, ILocationService, IWindowService} from "angular";
 
-interface IViewModel {
+interface IViewModel extends ng.IController, IQuestionTypeProps {
+    save?(): void;
     question: Question;
     form: Form;
     hasFormResponses: boolean;
@@ -10,7 +12,36 @@ interface IViewModel {
     matrixType: number;
 }
 
-export const questionType: Directive = ng.directive('questionType', () => {
+interface IQuestionTypeProps {
+    onSave?;
+}
+
+interface IQuestionTypeScope extends  IScope, IQuestionTypeProps {
+    vm: IViewModel;
+}
+
+
+class Controller implements IViewModel {
+    question : Question;
+    form: Form;
+    hasFormResponses: boolean;
+    formElements: FormElements;
+    matrixType: number;
+    types: typeof Types;
+
+    constructor(private $scope: IQuestionTypeScope,
+                private $location: ILocationService,
+                private $window: IWindowService) {
+    }
+
+    $onInit() {
+    }
+
+    $onDestroy() {
+    }
+}
+
+function directive($parse: IParseService) {
 
     return {
         restrict: 'E',
@@ -20,7 +51,8 @@ export const questionType: Directive = ng.directive('questionType', () => {
             form: '<',
             hasFormResponses: '=',
             formElements: '<',
-            matrixType: '<'
+            matrixType: '<',
+            onSave: '&?',
         },
         controllerAs: 'vm',
         bindToController: true,
@@ -45,6 +77,7 @@ export const questionType: Directive = ng.directive('questionType', () => {
                                             has-form-responses="vm.hasFormResponses"
                                             form-elements="vm.formElements"
                                             is-radio="false"
+                                            on-save="vm.save()"
                                             form="vm.form">
                 </question-type-singleanswer>
                 <!-- MULTIPLEANSWER -->
@@ -70,6 +103,7 @@ export const questionType: Directive = ng.directive('questionType', () => {
                                             question="vm.question"
                                             has-form-responses="vm.hasFormResponses"
                                             form-elements="vm.formElements"
+                                            on-save="vm.save()"
                                             is-radio="true">
                 </question-type-singleanswer>
                 <!-- MATRIX -->
@@ -90,13 +124,19 @@ export const questionType: Directive = ng.directive('questionType', () => {
                 </question-type-ranking>
             </div>
         `,
-
-        controller: function ($scope) {
-            const vm: IViewModel = <IViewModel> this;
-        },
-        link: function ($scope, $element) {
-            const vm: IViewModel = $scope.vm;
+        controller: ['$scope', '$location', '$window', '$parse', Controller],
+        link: function ($scope: IQuestionTypeScope,
+                        element: ng.IAugmentedJQuery,
+                        attrs: ng.IAttributes,
+                        vm: IViewModel) {
             vm.types = Types;
+            vm.save = (): void => {
+                $parse($scope.vm.onSave())({});
+            }
         }
-    };
-});
+    }
+}
+
+
+export const questionType: Directive = ng.directive('questionType', directive);
+

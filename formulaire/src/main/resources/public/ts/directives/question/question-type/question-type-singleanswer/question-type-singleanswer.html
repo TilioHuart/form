@@ -20,6 +20,7 @@
                    ng-class="vm.question.conditional ? 'eleven eight-mobile' : 'width95 ten-mobile'"
                    placeholder="[[vm.i18n.getWithParam('formulaire.choice', choice.position)]]">
             <input type="text" ng-model="choice.value" ng-if="vm.question.selected && !choice.is_custom" input-guard
+                   ng-keydown="$event.keyCode === 13 && vm.save()"
                    ng-class="vm.question.conditional ? 'eleven eight-mobile' : 'width95 ten-mobile'"
                    placeholder="[[vm.i18n.getWithParam('formulaire.choice', choice.position)]]">
             <input type="text" value="[[vm.i18n.translate('formulaire.other')]] : " ng-if="choice.is_custom" disabled

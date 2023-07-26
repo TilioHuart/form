@@ -11,7 +11,7 @@ import {
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
 import {Constants} from "@common/core/constants";
 import {RootsConst} from "../../../core/constants/roots.const";
-import {IScope} from "angular";
+import {IParseService, IScope, isFunction} from "angular";
 
 interface IQuestionItemProps {
     question: Question;
@@ -19,6 +19,8 @@ interface IQuestionItemProps {
     reorder: boolean;
     hasFormResponses: boolean;
     formElements: FormElements;
+    onSave?;
+
 }
 
 interface IViewModel extends ng.IController, IQuestionItemProps {
@@ -34,6 +36,7 @@ interface IViewModel extends ng.IController, IQuestionItemProps {
     onSwitchConditional(isConditional: boolean): void;
     cursorChoiceIsConsistent(): boolean;
     isImageMissingLabel(): boolean;
+    save?();
 }
 
 interface IQuestionItemScope extends IScope, IQuestionItemProps{
@@ -144,7 +147,7 @@ class Controller implements IViewModel {
     };
 }
 
-function directive() {
+function directive($parse: IParseService) {
     return {
         restrict: 'E',
         templateUrl: `${RootsConst.directive}question/question-item/question-item.html`,
@@ -154,7 +157,8 @@ function directive() {
             form: '<',
             reorder: '=',
             hasFormResponses: '=',
-            formElements: '<'
+            formElements: '<',
+            onSave: '&',
         },
         controllerAs: 'vm',
         bindToController: true,
@@ -164,6 +168,9 @@ function directive() {
                         element: ng.IAugmentedJQuery,
                         attrs: ng.IAttributes,
                         vm: IViewModel) {
+            vm.save = (): void => {
+                $parse($scope.vm.onSave())({});
+            }
         }
     }
 }
