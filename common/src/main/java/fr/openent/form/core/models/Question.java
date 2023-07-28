@@ -183,7 +183,7 @@ public class Question extends FormElement implements IModel<Question> {
                 .put(PLACEHOLDER, this.placeholder)
                 .put(MATRIX_ID, this.matrixId)
                 .put(MATRIX_POSITION, this.matrixPosition)
-                .put(SPECIFIC_FIELDS, this.specificFields)
+                .put(SPECIFIC_FIELDS, this.specificFields != null ? this.specificFields.toJson() : null)
                 .put(CHOICES, this.choices != null ? IModelHelper.toJsonArray(this.choices) : null)
                 .put(CHILDREN, this.children != null ? IModelHelper.toJsonArray(this.children) : null);
     }
