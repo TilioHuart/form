@@ -283,12 +283,14 @@ public class FormResponsesExportPDF {
         HashMap<Integer, JsonObject> mapSectionsPosition = new HashMap<>();
         for (Object s : sections) {
             JsonObject section = (JsonObject)s;
-            section.put(DESCRIPTION,
-                    "<div>" + section.getString(DESCRIPTION)
-                    .replace("\"","'")
-                    .replace("<o:p></o:p>", " ")
-                    + "</div>"
-            );
+            if(section.containsKey(DESCRIPTION) && section.getString(DESCRIPTION) != null) {
+                section.put(DESCRIPTION,
+                        "<div>" + section.getString(DESCRIPTION)
+                                .replace("\"","'")
+                                .replace("<o:p></o:p>", " ")
+                                + "</div>"
+                );
+            }
             section.put(QUESTIONS, new JsonArray());
             mapSectionsId.put(section.getInteger(ID), section);
             mapSectionsPosition.put(section.getInteger(POSITION), section);
