@@ -635,7 +635,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 //     vm.preview.page = PreviewPage.RECAP;
                 // }
             }
-            else if (nextPosition != undefined) {
+            else if (nextPosition !== undefined) {
                 vm.preview.page = PreviewPage.RECAP;
                 $scope.safeApply();
             }
