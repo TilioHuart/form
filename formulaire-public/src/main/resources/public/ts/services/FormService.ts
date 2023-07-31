@@ -1,4 +1,4 @@
-import {idiom, ng, notify} from 'entcore';
+import {ng} from 'entcore';
 import http from 'axios';
 import {DataUtils} from "@common/utils";
 
@@ -11,7 +11,6 @@ export const formService: FormService = {
         try {
             return DataUtils.getData(await http.get(`/formulaire-public/forms/key/${formKey}`));
         } catch (err) {
-            notify.error(idiom.translate('formulaire.public.error.formService.get'));
             throw err;
         }
     }
