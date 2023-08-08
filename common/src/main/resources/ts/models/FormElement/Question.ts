@@ -401,8 +401,8 @@ export class QuestionPayload implements FormElementPayload {
         this.conditional = question.conditional ? question.conditional : false;
         this.matrix_id = typeof question.matrix_id == 'number' ? question.matrix_id : null;
         this.matrix_position = question.matrix_position ? question.matrix_position : null;
-        this.choices = question.choices.all.map((c: QuestionChoice) => new QuestionChoicePayload(c));
-        this.children = question.children.all.map((q: Question) => new QuestionPayload(q));
+        this.choices = question.choices ? question.choices.all.map((c: QuestionChoice) => new QuestionChoicePayload(c)) : null;
+        this.children = question.children ? question.children.all.map((q: Question) => new QuestionPayload(q)) : null;
         this.placeholder = question.placeholder ? question.placeholder : null;
         this.specific_fields = new QuestionSpecificFieldsPayload(question);
     }

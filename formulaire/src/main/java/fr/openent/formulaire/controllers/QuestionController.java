@@ -185,7 +185,7 @@ public class QuestionController extends ControllerHelper {
                 }
 
                 List<Question> questions = IModelHelper.toList(questionsJson, Question.class).stream()
-                        .filter(question -> question.getFormId() == Long.parseLong(formId))
+                        .filter(question -> !question.getTitle().isEmpty() && question.getFormId() == Long.parseLong(formId))
                         .collect(Collectors.toList());
 
                 // Check section infos validity
