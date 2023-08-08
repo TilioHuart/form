@@ -95,9 +95,9 @@ class Controller implements IViewModel {
             }
         }
 
-        if (this.question.question_type === Types.CURSOR) {
+        if (this.question.question_type === Types.CURSOR && this.question.specific_fields) {
             let answer: number = Number.parseInt(this.responses.all[0].answer.toString());
-            this.responses.all[0].answer = Number.isNaN(answer) ? this.question.cursor_min_val : answer;
+            this.responses.all[0].answer = Number.isNaN(answer) ? this.question.specific_fields.cursor_min_val : answer;
         }
     }
 

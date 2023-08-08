@@ -1,8 +1,11 @@
 package fr.openent.formulaire.service.impl;
 
 import fr.openent.form.core.enums.QuestionTypes;
+import fr.openent.form.core.models.FormElement;
 import fr.openent.form.core.models.Question;
+import fr.openent.form.core.models.TransactionElement;
 import fr.openent.form.helpers.IModelHelper;
+import fr.openent.form.helpers.TransactionHelper;
 import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.form.helpers.FutureHelper;
 import fr.openent.formulaire.service.QuestionService;
@@ -16,6 +19,8 @@ import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.sql.SqlStatementsBuilder;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static fr.openent.form.core.constants.Constants.*;
@@ -245,11 +250,47 @@ public class DefaultQuestionService implements QuestionService {
     }
 
     @Override
-    public Future<JsonArray> update(String formId, JsonArray questions) {
-        Promise<JsonArray> promise = Promise.promise();
+    public Future<List<Question>> update(String formId, List<Question> questions) {
+        Promise<List<Question>> promise = Promise.promise();
+
+        if (questions == null || questions.isEmpty()) {
+            promise.complete(new ArrayList<>());
+            return promise.future();
+        }
+
+        String nullifyerQuery = "UPDATE " + QUESTION_TABLE + " SET position = NULL, section_id = NULL, section_position = NULL, " +
+                "matrix_id = NULL, matrix_position = NULL WHERE id IN " + Sql.listPrepared(questions) + ";";
+        String query = "UPDATE " + QUESTION_TABLE + " SET title = ?, position = ?, question_type = ?, " +
+                "statement = ?, mandatory = ?, section_id = ?, section_position = ?, conditional = ?, placeholder = ?, " +
+                "matrix_id = ?, matrix_position = ? WHERE id = ? RETURNING *;";
+
+        List<TransactionElement> transactionElements = new ArrayList<>();
+
+        JsonArray questionIds = questions.stream().map(FormElement::getId).collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+        transactionElements.add(new TransactionElement(nullifyerQuery, questionIds));
+
+        for (Question question : questions) {
+            JsonArray params = new JsonArray()
+                    .add(question.getTitle())
+                    .add(question.getPosition())
+                    .add(question.getQuestionType())
+                    .add(question.getStatement())
+                    .add(question.getMandatory())
+                    .add(question.getSectionId())
+                    .add(question.getSectionPosition())
+                    .add(question.getConditional())
+                    .add(question.getPlaceholder())
+                    .add(question.getMatrixId())
+                    .add(question.getMatrixPosition())
+                    .add(question.getId());
+            transactionElements.add(new TransactionElement(query, params));
+        }
+        transactionElements.add(new TransactionElement(getUpdateDateModifFormRequest(), getParamsForUpdateDateModifFormRequest(formId)));
 
         String errorMessage = "[Formulaire@DefaultQuestionService::update] Fail to update questions " + questions + " : ";
-        update(formId, questions, FutureHelper.handlerEither(promise, errorMessage));
+        TransactionHelper.executeTransactionAndGetJsonObjectResults(transactionElements, errorMessage)
+            .onSuccess(result -> promise.complete(IModelHelper.toList(result, Question.class)))
+            .onFailure(err -> promise.fail(err.getMessage()));
 
         return promise.future();
     }

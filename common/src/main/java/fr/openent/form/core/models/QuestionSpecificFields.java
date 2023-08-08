@@ -8,6 +8,8 @@ import java.util.Optional;
 import static fr.openent.form.core.constants.Fields.*;
 
 public class QuestionSpecificFields implements IModel<QuestionSpecificFields> {
+    private Long id;
+    private Long questionId;
     private Long cursorMinVal;
     private Long cursorMaxVal;
     private Long cursorStep;
@@ -21,6 +23,8 @@ public class QuestionSpecificFields implements IModel<QuestionSpecificFields> {
     }
 
     public QuestionSpecificFields(JsonObject questionSpecificFields) {
+        this.id = questionSpecificFields.getLong(ID, null);
+        this.questionId = questionSpecificFields.getLong(QUESTION_ID, null);
         this.cursorMinVal = questionSpecificFields.getLong(CURSOR_MIN_VAL,1L);
         this.cursorMaxVal = questionSpecificFields.getLong(CURSOR_MAX_VAL,10L);
         this.cursorStep = questionSpecificFields.getLong(CURSOR_STEP, 1L);
@@ -30,6 +34,10 @@ public class QuestionSpecificFields implements IModel<QuestionSpecificFields> {
 
 
     // Getters
+
+    public Long getId() { return id; }
+
+    public Long getQuestionId() { return questionId; }
 
     public Long getCursorMinVal() { return cursorMinVal; }
 
@@ -43,6 +51,16 @@ public class QuestionSpecificFields implements IModel<QuestionSpecificFields> {
 
 
     // Setters
+
+    public QuestionSpecificFields setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    public QuestionSpecificFields setQuestionId(Long questionId) {
+        this.questionId = questionId;
+        return this;
+    }
 
     public QuestionSpecificFields setCursorMinVal(Long cursorMinVal) {
         this.cursorMinVal = cursorMinVal;

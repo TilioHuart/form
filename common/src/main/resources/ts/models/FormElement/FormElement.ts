@@ -8,7 +8,6 @@ export abstract class FormElement implements Selectable {
     title: string;
     position: number;
     form_element_type: FormElementType;
-    nb_responses: number;
     selected: boolean;
     label: string;
 
@@ -17,9 +16,18 @@ export abstract class FormElement implements Selectable {
         this.form_id = null;
         this.title = null;
         this.position = null;
-        this.nb_responses = 0;
         this.selected = null;
         this.label = null;
+    }
+
+    build(data: IFormElementResponse) : FormElement {
+        this.id = data.id ? data.id : null;
+        this.form_id = data.formId ? data.formId : null;
+        this.title = data.title ? data.title : null;
+        this.position = data.position ? data.position : null;
+        this.selected = data.selected ? data.selected : false;
+        this.label = data.label ? data.label : null;
+        return this;
     }
 
     toJson() : Object {
@@ -29,7 +37,6 @@ export abstract class FormElement implements Selectable {
             title: this.title,
             position: this.position,
             form_element_type: this.form_element_type,
-            nb_responses: this.nb_responses,
             selected: this.selected,
             label: this.label
         }
@@ -106,4 +113,13 @@ export interface FormElementPayload {
     title: string;
     position: number;
     form_element_type: FormElementType;
+}
+
+export interface IFormElementResponse {
+    id: number;
+    formId: number;
+    title: string;
+    position: number,
+    selected: boolean;
+    label: string;
 }

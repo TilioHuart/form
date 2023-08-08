@@ -1,13 +1,12 @@
 import {idiom, ng, notify} from 'entcore';
 import http from 'axios';
 import {DataUtils} from "../../utils";
-import {Question, QuestionPayload} from "../../models";
-import {Mix} from "entcore-toolkit";
+import {IQuestionResponse, Question, QuestionPayload} from "../../models";
 
 export interface QuestionService {
-    list(id: number, isForSection?: boolean) : Promise<any>;
-    listAll(id: number) : Promise<any>;
-    listChildren(questions: Question[]) : Promise<any>;
+    list(id: number, isForSection?: boolean) : Promise<Question[]>;
+    listAll(id: number) : Promise<Question[]>;
+    listChildren(questions: Question[]) : Promise<Question[]>;
     get(questionId: number) : Promise<any>;
     save(questions: Question[]) : Promise<Question[]>;
     create(questions: Question[]) : Promise<Question[]>;
@@ -20,26 +19,28 @@ export interface QuestionService {
 
 export const questionService: QuestionService = {
 
-    async list(id: number, isForSection: boolean = false) : Promise<any> {
+    async list(id: number, isForSection: boolean = false) : Promise<Question[]> {
         try {
             let parentEntity = isForSection ? 'sections' : 'forms';
-            return DataUtils.getData(await http.get(`/formulaire/${parentEntity}/${id}/questions`));
+            let data: IQuestionResponse[] = DataUtils.getData(await http.get(`/formulaire/${parentEntity}/${id}/questions`));
+            return data.map((qr: IQuestionResponse) => new Question().build(qr));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.list'));
             throw err;
         }
     },
 
-    async listAll(formId: number) : Promise<any> {
+    async listAll(formId: number) : Promise<Question[]> {
         try {
-            return DataUtils.getData(await http.get(`/formulaire/forms/${formId}/questions/all`));
+            let data: IQuestionResponse[] = DataUtils.getData(await http.get(`/formulaire/forms/${formId}/questions/all`));
+            return data.map((qr: IQuestionResponse) => new Question().build(qr));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.list'));
             throw err;
         }
     },
 
-    async listChildren(questions: Question[]) : Promise<any> {
+    async listChildren(questions: Question[]) : Promise<Question[]> {
         try {
             let questionIds: number[] = questions.map((q: Question) => q.id);
             return DataUtils.getData(await http.get(`/formulaire/questions/children`, { params: questionIds }));
@@ -90,7 +91,8 @@ export const questionService: QuestionService = {
                 return [];
             }
             let questionsPayload: QuestionPayload[] = questions.map((q: Question) => new QuestionPayload(q));
-            return Mix.castArrayAs(Question, DataUtils.getData(await http.put(`/formulaire/forms/${questions[0].form_id}/questions`, questionsPayload)));
+            let data: IQuestionResponse[] = DataUtils.getData(await http.put(`/formulaire/forms/${questions[0].form_id}/questions`, questionsPayload))
+            return data.map((qr: IQuestionResponse) => new Question().build(qr));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.update'));
             throw err;

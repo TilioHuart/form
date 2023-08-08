@@ -7,6 +7,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface QuestionService {
@@ -113,7 +114,7 @@ public interface QuestionService {
      * @param formId question identifier
      * @param questions JsonArray data
      */
-    Future<JsonArray> update(String formId, JsonArray questions);
+    Future<List<Question>> update(String formId, List<Question> questions);
 
     /**
      * Delete a specific question

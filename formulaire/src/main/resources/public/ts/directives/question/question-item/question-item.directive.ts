@@ -121,9 +121,11 @@ class Controller implements IViewModel {
     }
 
     cursorChoiceIsConsistent = () : boolean => {
-        const minVal: number = this.question.cursor_min_val != null ? this.question.cursor_min_val : Constants.DEFAULT_CURSOR_MIN_VALUE;
-        const maxVal: number = this.question.cursor_max_val != null ? this.question.cursor_max_val : Constants.DEFAULT_CURSOR_MAX_VALUE;
-        const step: number = this.question.cursor_step != null ? this.question.cursor_step : Constants.DEFAULT_CURSOR_STEP;
+        if (this.question.question_type != Types.CURSOR) return true;
+        if (!this.question.specific_fields) return false;
+        const minVal: number = this.question.specific_fields.cursor_min_val != null ? this.question.specific_fields.cursor_min_val : Constants.DEFAULT_CURSOR_MIN_VALUE;
+        const maxVal: number = this.question.specific_fields.cursor_max_val != null ? this.question.specific_fields.cursor_max_val : Constants.DEFAULT_CURSOR_MAX_VALUE;
+        const step: number = this.question.specific_fields.cursor_step != null ? this.question.specific_fields.cursor_step : Constants.DEFAULT_CURSOR_STEP;
         return (maxVal - minVal) % step == 0;
     }
 

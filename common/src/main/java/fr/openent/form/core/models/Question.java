@@ -4,7 +4,10 @@ import fr.openent.form.core.enums.QuestionTypes;
 import fr.openent.form.helpers.IModelHelper;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+
+import static fr.openent.form.core.constants.Constants.CONDITIONAL_QUESTIONS;
 import static fr.openent.form.core.constants.Fields.*;
+import static fr.openent.form.core.constants.Tables.QUESTION_TYPE;
 
 import java.util.List;
 
@@ -33,17 +36,20 @@ public class Question extends FormElement implements IModel<Question> {
         super(question);
         this.questionType = question.getInteger(QUESTION_TYPE, null);
         this.statement = question.getString(STATEMENT, "");
-        this.mandatory = question.getBoolean(MANDATORY, false);
+        this.conditional = CONDITIONAL_QUESTIONS.contains(this.questionType) && question.getBoolean(CONDITIONAL, false);
+        this.mandatory = question.getBoolean(MANDATORY, false) || this.conditional;
         this.originalQuestionId = question.getLong(ORIGINAL_QUESTION_ID, null);
         this.sectionId = question.getLong(SECTION_ID, null);
         this.sectionPosition = question.getLong(SECTION_POSITION, null);
-        this.conditional = question.getBoolean(CONDITIONAL, false);
         this.placeholder = question.getString(PLACEHOLDER, "");
         this.matrixId = question.getLong(MATRIX_ID,null);
         this.matrixPosition = question.getLong(MATRIX_POSITION,null);
         this.specificFields = question.getJsonObject(SPECIFIC_FIELDS) != null && this.questionType == QuestionTypes.CURSOR.getCode()
                 ? new QuestionSpecificFields(question.getJsonObject(SPECIFIC_FIELDS, new JsonObject()))
                 : null;
+
+        // A question cannot have a sectionPosition and a position both not null
+        if (this.sectionPosition != null) this.setPosition(null);
 
         if (question.getValue(CHOICES, null) instanceof JsonArray) {
             this.choices = new QuestionChoice().toList(question.getJsonArray(CHOICES, null));

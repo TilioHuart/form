@@ -3,8 +3,8 @@ import {idiom, notify} from "entcore";
 import {Question, Questions} from "./Question";
 import {FormElement} from "./FormElement";
 import {Section, Sections} from "./Section";
-import {QuestionChoice, Types} from "@common/models";
-import {questionChoiceService, questionService, sectionService} from "@common/services";
+import {Types} from "@common/models";
+import {questionService, sectionService} from "@common/services";
 
 export class FormElements extends Selection<FormElement> {
     all: FormElement[];
@@ -24,8 +24,7 @@ export class FormElements extends Selection<FormElement> {
             // Questions
             try {
                 let allQuestions: Questions = new Questions();
-                let data = await questionService.listAll(formId);
-                allQuestions.all = Mix.castArrayAs(Question, data);
+                allQuestions.all = await questionService.listAll(formId);
 
                 // Choices and Children of matrix
                 if (allQuestions.all.length > 0) {

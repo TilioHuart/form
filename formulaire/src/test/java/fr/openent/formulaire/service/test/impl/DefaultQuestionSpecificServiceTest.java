@@ -1,6 +1,7 @@
 package fr.openent.formulaire.service.test.impl;
 
-import fr.openent.form.core.constants.Fields;
+import fr.openent.form.core.enums.QuestionTypes;
+import fr.openent.form.core.models.Question;
 import fr.openent.form.core.models.QuestionSpecificFields;
 import fr.openent.formulaire.service.impl.DefaultQuestionSpecificFieldsService;
 import io.vertx.core.Vertx;
@@ -14,8 +15,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static fr.openent.form.core.constants.EbFields.FORMULAIRE_ADDRESS;
 import static fr.openent.form.core.constants.Fields.*;
+import static fr.openent.form.core.constants.Fields.QUESTION_TYPE;
 import static fr.openent.form.core.constants.Tables.*;
 
 @RunWith(VertxUnitRunner.class)
@@ -42,9 +47,13 @@ public class DefaultQuestionSpecificServiceTest {
     @Test
     public void testListSpecificField(TestContext ctx) {
         Async async = ctx.async();
-        JsonArray questionIds = new JsonArray().add("1").add("2").add("3");
+        List<Long> questionIds = new ArrayList<>();
+        questionIds.add(1L);
+        questionIds.add(2L);
+        questionIds.add(3L);
+
         String expectedQuery = "SELECT * FROM " + QUESTION_SPECIFIC_FIELDS_TABLE + " WHERE question_id IN " + Sql.listPrepared(questionIds);
-        JsonArray expectedParams = new JsonArray().addAll(questionIds);
+        JsonArray expectedParams = new JsonArray("[1, 2, 3]");
 
         vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
             JsonObject body = (JsonObject) message.body();
@@ -78,39 +87,47 @@ public class DefaultQuestionSpecificServiceTest {
         defaultQuestionSpecificFieldsService.create(this.questionSpecificFields, 1L)
             .onSuccess(result -> async.complete());
 
-        async.awaitSuccess(10000);;
+        async.awaitSuccess(10000);
     }
 
     @Test
     public void update(TestContext ctx) {
         Async async = ctx.async();
 
-        JsonObject question1 = new JsonObject();
-        question1.put(Fields.QUESTION_TYPE, 11)
+        JsonObject questionSpecificFieldsJson1 = new JsonObject()
+                .put(ID, 11)
+                .put(QUESTION_TYPE, 11)
                 .put(CURSOR_MIN_VAL, 1)
                 .put(CURSOR_MAX_VAL, 10)
                 .put(CURSOR_STEP, 1)
                 .put(CURSOR_MIN_LABEL, "label_min_val")
-                .put(CURSOR_MAX_LABEL, "label_max_val")
-                .put(ID, 1);
+                .put(CURSOR_MAX_LABEL, "label_max_val");
+        Question question1 = new Question(new JsonObject()
+                .put(ID, 1)
+                .put(QUESTION_TYPE, QuestionTypes.CURSOR.getCode())
+                .put(SPECIFIC_FIELDS, questionSpecificFieldsJson1));
 
-        JsonObject question2 = new JsonObject();
-        question2.put(Fields.QUESTION_TYPE, 11)
+        JsonObject questionSpecificFieldsJson2 = new JsonObject()
+                .put(ID, 12)
+                .put(QUESTION_TYPE, 11)
                 .put(CURSOR_MIN_VAL, 2)
                 .put(CURSOR_MAX_VAL, 12)
                 .put(CURSOR_STEP, 2)
                 .put(CURSOR_MIN_LABEL, "label_mined_val")
-                .put(CURSOR_MAX_LABEL, "label_maxed_val")
-                .put(ID, 2);
+                .put(CURSOR_MAX_LABEL, "label_maxed_val");
+        Question question2 = new Question(new JsonObject()
+                .put(ID, 2)
+                .put(QUESTION_TYPE, QuestionTypes.CURSOR.getCode())
+                .put(SPECIFIC_FIELDS, questionSpecificFieldsJson2));
 
-        JsonArray questions = new JsonArray();
-        questions.add(question1)
-                .add(question2);
+        List<Question> questions = new ArrayList<>();
+        questions.add(question1);
+        questions.add(question2);
 
-        String expectedQuery = "[{\"action\":\"raw\",\"command\":\"BEGIN;\"}," +
+        String expectedQuery = "[" +
                 "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_SPECIFIC_FIELDS_TABLE + " SET cursor_min_val = ?, cursor_max_val = ?, cursor_step = ?, cursor_min_label = ?, cursor_max_label = ? WHERE question_id = ? RETURNING *;\",\"values\":[1,10,1,\"label_min_val\",\"label_max_val\",1]}," +
-                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_SPECIFIC_FIELDS_TABLE + " SET cursor_min_val = ?, cursor_max_val = ?, cursor_step = ?, cursor_min_label = ?, cursor_max_label = ? WHERE question_id = ? RETURNING *;\",\"values\":[2,12,2,\"label_mined_val\",\"label_maxed_val\",2]}," +
-                "{\"action\":\"raw\",\"command\":\"COMMIT;\"}]";
+                "{\"action\":\"prepared\",\"statement\":\"UPDATE " + QUESTION_SPECIFIC_FIELDS_TABLE + " SET cursor_min_val = ?, cursor_max_val = ?, cursor_step = ?, cursor_min_label = ?, cursor_max_label = ? WHERE question_id = ? RETURNING *;\",\"values\":[2,12,2,\"label_mined_val\",\"label_maxed_val\",2]}" +
+            "]";
 
         vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
             JsonObject body = (JsonObject) message.body();
@@ -118,6 +135,9 @@ public class DefaultQuestionSpecificServiceTest {
             ctx.assertEquals(expectedQuery, body.getJsonArray(STATEMENTS).toString());
             async.complete();
         });
-        defaultQuestionSpecificFieldsService.update(questions, null);
+        defaultQuestionSpecificFieldsService.update(questions)
+            .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
     }
 }

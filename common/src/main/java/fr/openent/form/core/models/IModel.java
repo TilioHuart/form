@@ -14,7 +14,9 @@ public interface IModel<I extends IModel<I>> {
      * @deprecated Should instead use IModelHelper directly
      */
     @Deprecated
-    I model(JsonObject model);
+    default I model(JsonObject model) {
+        return null;
+    }
 
     /**
      * @deprecated Should instead use IModelHelper directly

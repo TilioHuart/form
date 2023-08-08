@@ -39,6 +39,22 @@ export class QuestionChoice {
         this.image = image ? image : null;
     }
 
+    build(data: IQuestionChoiceResponse) : QuestionChoice {
+        this.id = data.id ? data.id : null;
+        this.question_id = data.questionId ? data.questionId : null;
+        this.value = data.value ? data.value : "";
+        this.position = data.position ? data.position : null;
+        this.type = ChoiceTypes.TXT;
+        this.next_form_element = null;
+        this.next_form_element_id = data.nextFormElementId ? data.nextFormElementId : null;
+        this.next_form_element_type = data.nextFormElementType ? data.nextFormElementType : null;
+        this.is_next_form_element_default = data.isNextFormElementDefault ? data.isNextFormElementDefault : false;
+        this.is_custom = data.isCustom ? data.isCustom : null;
+        this.nbResponses = 0;
+        this.image = data.image ? data.image : null;
+        return this;
+    }
+
     toJson() : Object {
         return {
             id: this.id,
@@ -80,6 +96,11 @@ export class QuestionChoices {
 
     constructor() {
         this.all = [];
+    }
+
+    build(data: IQuestionChoiceResponse[]) : QuestionChoices {
+        this.all = data.map((qcr: IQuestionChoiceResponse) => new QuestionChoice().build(qcr));
+        return this;
     }
 
     sync = async (questionId: number) : Promise<void> => {
@@ -139,4 +160,17 @@ export class QuestionChoicePayload {
             image: this.image
         }
     }
+}
+
+export interface IQuestionChoiceResponse {
+    id: number;
+    questionId: number;
+    value: string;
+    position: number,
+    type: ChoiceTypes;
+    nextFormElementId: number;
+    nextFormElementType: FormElementType;
+    isNextFormElementDefault: boolean;
+    isCustom: boolean;
+    image: string;
 }

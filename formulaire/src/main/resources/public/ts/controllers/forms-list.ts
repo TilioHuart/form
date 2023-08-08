@@ -14,7 +14,6 @@ import {
 } from "../models";
 import {distributionService, folderService, formService, questionService} from "../services";
 import {Exports, FiltersFilters, FiltersOrders, FORMULAIRE_EMIT_EVENT} from "@common/core/enums";
-import {Mix} from "entcore-toolkit";
 import {Element} from "entcore/types/src/ts/workspace/model";
 import {I18nUtils} from "@common/utils";
 
@@ -286,7 +285,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     vm.shareForm = async() : Promise<void> => {
-        let questions: Question[] =  Mix.castArrayAs(Question, await questionService.list(vm.forms.selected[0].id));
+        let questions: Question[] =  await questionService.list(vm.forms.selected[0].id);
         let sections: Sections = new Sections();
         await sections.sync(vm.forms.selected[0].id);
 

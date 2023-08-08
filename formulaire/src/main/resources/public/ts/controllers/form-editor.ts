@@ -164,9 +164,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             if (questionsTypeCursor.length > 0) {
                 // We search for question where : (maxVal - minVal) % step == 0
                 let inconsistencyCursorChoice: Question[] = questionsTypeCursor.filter((q: Question) => (
-                        ((q.cursor_max_val != null ? q.cursor_max_val : Constants.DEFAULT_CURSOR_MAX_VALUE) -
-                         (q.cursor_min_val != null ? q.cursor_min_val : Constants.DEFAULT_CURSOR_MIN_VALUE)) %
-                        (q.cursor_step != null ? q.cursor_step : Constants.DEFAULT_CURSOR_STEP) != 0));
+                        ((q.specific_fields.cursor_max_val != null ? q.specific_fields.cursor_max_val : Constants.DEFAULT_CURSOR_MAX_VALUE) -
+                         (q.specific_fields.cursor_min_val != null ? q.specific_fields.cursor_min_val : Constants.DEFAULT_CURSOR_MIN_VALUE)) %
+                        (q.specific_fields.cursor_step != null ? q.specific_fields.cursor_step : Constants.DEFAULT_CURSOR_STEP) != 0));
                 if (inconsistencyCursorChoice.length > 0) {
                     notify.error(idiom.translate('formulaire.question.save.missing.field'));
                     return;
@@ -757,9 +757,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 let isCursorQuestionAndValuesOk: boolean = formElement
                     && formElement instanceof Question
                     && formElement.question_type == Types.CURSOR
-                    && formElement.cursor_min_val != null
-                    && formElement.cursor_max_val != null
-                    && formElement.cursor_min_val != formElement.cursor_max_val;
+                    && formElement.specific_fields.cursor_min_val != null
+                    && formElement.specific_fields.cursor_max_val != null
+                    && formElement.specific_fields.cursor_min_val != formElement.specific_fields.cursor_max_val;
 
                 if (isSection || isQuestionNotCursor || isCursorQuestionAndValuesOk) {
                     // Save form element

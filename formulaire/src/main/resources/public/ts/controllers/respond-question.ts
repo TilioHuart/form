@@ -124,8 +124,8 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                     }
                 }
             }
-            else if (question.question_type === Types.CURSOR) {
-                questionResponses.all.push(new Response(question.id, null, question.cursor_min_val, vm.distribution.id));
+            else if (question.question_type === Types.CURSOR && question.specific_fields) {
+                questionResponses.all.push(new Response(question.id, null, question.specific_fields.cursor_min_val, vm.distribution.id));
             }
             else if (question.isRanking()) {
                 let questionChoices: QuestionChoice[] = question.choices.all;

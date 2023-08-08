@@ -1,16 +1,18 @@
 package fr.openent.form.helpers;
 
+import fr.openent.form.core.models.Question;
+import fr.openent.form.core.models.QuestionSpecificFields;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static fr.openent.form.core.constants.Fields.ID;
-import static fr.openent.form.core.constants.Fields.QUESTION_ID;
 
 public class UtilsHelper {
     private static final Logger log = LoggerFactory.getLogger(UtilsHelper.class);
@@ -55,33 +57,15 @@ public class UtilsHelper {
         return values;
     }
 
-    public static JsonArray mergeQuestionsAndSpecifics(JsonArray questions, JsonArray specifics) {
-        List<String> columnNames = specifics.size() > 0 ?
-                specifics.getJsonObject(0).fieldNames().stream().collect(Collectors.toList()) : new ArrayList<>();
-        if (columnNames.size() > 0) {
-            columnNames.remove(ID);
-            columnNames.remove(QUESTION_ID);
-        }
+    public static List<Question> mergeQuestionsAndSpecifics(List<Question> questions, List<QuestionSpecificFields> specifics) {
+        Map<Long, Question> questionMap = questions.stream().collect(Collectors.toMap(Question::getId, Function.identity()));
+        specifics.stream()
+            .filter(specific -> questionMap.containsKey(specific.getQuestionId()))
+            .forEach(specific -> {
+                Question question = questionMap.get(specific.getQuestionId());
+                question.setSpecificFields(specific);
+            });
 
-        List<JsonObject> questionsList = new ArrayList<>();
-        questionsList.addAll(questions.getList());
-
-        for (int i = 0; i < specifics.size(); i++) {
-            JsonObject questionSpec = specifics.getJsonObject(i);
-            Integer questionId = questionSpec.getInteger(QUESTION_ID);
-
-            JsonObject question = questionsList.stream()
-                    .filter(q -> q.getInteger(ID).equals(questionId))
-                    .findFirst()
-                    .orElse(null);
-
-            if (question != null) {
-                for (String columnName : columnNames) {
-                    question.put(columnName, questionSpec.getValue(columnName));
-                }
-            }
-        }
-
-        return new JsonArray(questionsList);
+        return questions;
     }
 }

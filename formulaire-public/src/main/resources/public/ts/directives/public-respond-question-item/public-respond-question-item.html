@@ -100,18 +100,18 @@
     <div ng-if ="vm.question.question_type == vm.Types.CURSOR">
       <div class="formulaire-cursor-input-wrapper">
         <div class="formulaire-cursor-input-label">
-          <label>[[vm.question.cursor_min_label]]</label> <!-- label minimum value (optional) -->
+          <label>[[vm.question.specific_fields.cursor_min_label]]</label> <!-- label minimum value (optional) -->
         </div>
         <div class="formulaire-cursor-input-range">
           <div class="range-slider"
-               style="--min:[[vm.question.cursor_min_val]];
-                                            --max:[[vm.question.cursor_max_val]];
-                                            --step:[[vm.question.cursor_step]];
+               style="--min:[[vm.question.specific_fields.cursor_min_val]];
+                                            --max:[[vm.question.specific_fields.cursor_max_val]];
+                                            --step:[[vm.question.specific_fields.cursor_step]];
                                             --value:[[vm.responses.all[0].answer]];">
             <!-- native cursor -->
             <input type="range" class="twelve" ng-model="vm.responses.all[0].answer"
-                   min="[[vm.question.cursor_min_val]]" max="[[vm.question.cursor_max_val]]"
-                   step="[[vm.question.cursor_step]]">
+                   min="[[vm.question.specific_fields.cursor_min_val]]" max="[[vm.question.specific_fields.cursor_max_val]]"
+                   step="[[vm.question.specific_fields.cursor_step]]">
             <!-- pin cursor -->
             <output class="pin">
               <div class="pin-content">[[vm.responses.all[0].answer]]</div>
@@ -121,12 +121,12 @@
           </div>
           <!-- Display MIN and MAX -->
           <div class="formulaire-cursor-input-range-values">
-            <div>[[vm.question.cursor_min_val]]</div> <!-- minimum value -->
-            <div>[[vm.question.cursor_max_val]]</div> <!-- maximum value -->
+            <div>[[vm.question.specific_fields.cursor_min_val]]</div> <!-- minimum value -->
+            <div>[[vm.question.specific_fields.cursor_max_val]]</div> <!-- maximum value -->
           </div>
         </div>
         <div class="formulaire-cursor-input-label">
-          <label>[[vm.question.cursor_max_label]]</label> <!-- label maximum value (optional) -->
+          <label>[[vm.question.specific_fields.cursor_max_label]]</label> <!-- label maximum value (optional) -->
         </div>
       </div>
     </div>

@@ -2,12 +2,10 @@ package fr.openent.formulaire.service;
 
 import fr.openent.form.core.models.Question;
 import fr.openent.form.core.models.QuestionSpecificFields;
-import fr.wseduc.webutils.Either;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface QuestionSpecificFieldsService {
@@ -22,7 +20,7 @@ public interface QuestionSpecificFieldsService {
      * List all the specifics fields of question from a list of ids
      * @param questionIds questions identifiers
      */
-    Future<JsonArray> listByIds(JsonArray questionIds);
+    Future<List<QuestionSpecificFields>> listByIds(List<Long> questionIds);
 
     /**
      * Add specific fields to a question
@@ -34,13 +32,6 @@ public interface QuestionSpecificFieldsService {
     /**
      * Update specific fields of questions
      * @param questions JsonArray data
-     * @param handler function handler returning JsonArray data
      */
-    void update(JsonArray questions, Handler<Either<String, JsonArray>> handler);
-
-    /**
-     * Update specific fields of questions
-     * @param questions JsonArray data
-     */
-    Future<JsonArray> update(JsonArray questions);
+    Future<List<QuestionSpecificFields>> update(List<Question> questions);
 }

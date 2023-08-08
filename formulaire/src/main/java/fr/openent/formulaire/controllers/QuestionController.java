@@ -68,10 +68,11 @@ public class QuestionController extends ControllerHelper {
                 renderError(request);
                 return;
             }
+
             JsonArray questions = listQuestionsEvt.right().getValue();
             questionSpecificFieldsService.syncQuestionSpecs(questions)
-                    .onSuccess(result -> renderJson(request, result))
-                    .onFailure(error -> renderError(request));
+                .onSuccess(result -> renderJson(request, result))
+                .onFailure(error -> renderError(request));
         });
     }
 
@@ -84,15 +85,20 @@ public class QuestionController extends ControllerHelper {
 
         questionService.listForSection(sectionId, getQuestionEvt -> {
             if (getQuestionEvt.isLeft()) {
-                log.error("[Formulaire@listForSection] Fail to list questions for section with id : " + sectionId);
-                renderInternalError(request, getQuestionEvt);
+                String errMessage = "[Formulaire@listForSection] Fail to list questions for section with id " + sectionId;
+                log.error(errMessage + " : " + getQuestionEvt.left().getValue());
+                renderError(request);
                 return;
             }
-            JsonArray questions = getQuestionEvt.right().getValue();
 
+            JsonArray questions = getQuestionEvt.right().getValue();
             questionSpecificFieldsService.syncQuestionSpecs(questions)
-                    .onSuccess(result -> renderJson(request, result))
-                    .onFailure(error -> renderError(request));
+                .onSuccess(result -> renderJson(request, result))
+                .onFailure(error -> {
+                    String errMessage = "[Formulaire@QuestionController::get] Failed to list questions section with id " + sectionId;
+                    log.error(errMessage + " : " + error.getMessage());
+                    renderError(request);
+                });
         });
     }
 
@@ -104,13 +110,14 @@ public class QuestionController extends ControllerHelper {
         String formId = request.getParam(PARAM_FORM_ID);
 
         questionService.listForFormAndSection(formId)
-                .onSuccess(result -> renderJson(request, result))
-                .onFailure(error -> {
-                    String errorMessage = "[Formulaire@QuestionController::listForFormAndSection] " +
-                            "Failed to list questions for form and sections : " + error.getMessage();
-                    log.error(errorMessage);
-                    renderError(request);
-                });
+            .compose(questions -> questionSpecificFieldsService.syncQuestionSpecs(questions))
+            .onSuccess(result -> renderJson(request, result))
+            .onFailure(error -> {
+                String errorMessage = "[Formulaire@QuestionController::listForFormAndSection] " +
+                        "Failed to list questions for form and sections";
+                log.error(errorMessage + " : " + error.getMessage());
+                renderError(request);
+            });
     }
 
     @Get("/questions/children")
@@ -136,7 +143,24 @@ public class QuestionController extends ControllerHelper {
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String questionId = request.getParam(PARAM_QUESTION_ID);
-        questionService.get(questionId, defaultResponseHandler(request));
+        questionService.get(questionId, getQuestionEvt -> {
+            if (getQuestionEvt.isLeft()) {
+                String errMessage = "[Formulaire@QuestionController::get] Failed to get question with id " + questionId;
+                log.error(errMessage + " : " + getQuestionEvt.left().getValue());
+                renderError(request);
+                return;
+            }
+
+            JsonObject question = getQuestionEvt.right().getValue();
+            questionSpecificFieldsService.syncQuestionSpecs(new JsonArray().add(question))
+                .onSuccess(result -> renderJson(request, result))
+                .onFailure(error -> {
+                    String errMessage = "[Formulaire@QuestionController::get] Failed to get question and its specific " +
+                            "fields for question with id " + questionId;
+                    log.error(errMessage + " : " + error.getMessage());
+                    renderError(request);
+                });
+        });
     }
 
     @Post("/forms/:formId/questions")
@@ -330,39 +354,40 @@ public class QuestionController extends ControllerHelper {
                 return;
             }
 
-            RequestUtils.bodyToJsonArray(request, questions -> {
-                if (questions == null || questions.isEmpty()) {
+            RequestUtils.bodyToJsonArray(request, jsonQuestions -> {
+                if (jsonQuestions == null || jsonQuestions.isEmpty()) {
                     log.error("[Formulaire@QuestionController::update] No questions to update.");
                     noContent(request);
                     return;
                 }
 
+                List<Question> questions = IModelHelper.toList(jsonQuestions, Question.class);
                 // Check section infos validity
                 int i = 0;
-                while (i < questions.size()) {
-                    JsonObject question = questions.getJsonObject(i);
+                while (i < jsonQuestions.size()) {
+                    JsonObject question = jsonQuestions.getJsonObject(i);
                     Long sectionId = question.getLong(SECTION_ID);
                     Long sectionPosition = question.getLong(SECTION_POSITION);
 
                     if (sectionId == null ^ sectionPosition == null) { // ^ = XOR -> return true if they have different value, return false if they both have same value
                         String message = "[Formulaire@QuestionController::update] sectionId and sectionPosition must be both null or both not null : " + question;
                         log.error(message);
-                        badRequest(request, message);
+                        badRequest(request);
                         return;
                     } else if (sectionId != null && (sectionId <= 0 || sectionPosition <= 0)) {
                         String message = "[Formulaire@QuestionController::update] sectionId and sectionPosition must have values greater than 0 : " + question;
                         log.error(message);
-                        badRequest(request, message);
+                        badRequest(request);
                         return;
                     } else if (sectionPosition != null && question.getInteger(POSITION) != null) {
                         String message = "[Formulaire@QuestionController::update] A question is either in or out of a section, it cannot have a position and a section_position : " + question;
                         log.error(message);
-                        badRequest(request, message);
+                        badRequest(request);
                         return;
                     } else if (question.getBoolean(CONDITIONAL) && !CONDITIONAL_QUESTIONS.contains(question.getInteger(QUESTION_TYPE))) {
                         String message = "[Formulaire@QuestionController::update] A question conditional question must be of type : " + CONDITIONAL_QUESTIONS;
                         log.error(message);
-                        badRequest(request, message);
+                        badRequest(request);
                         return;
                     }
                     i++;
@@ -370,8 +395,9 @@ public class QuestionController extends ControllerHelper {
 
                 formService.get(formId, user, formEvt -> {
                     if (formEvt.isLeft()) {
-                        log.error("[Formulaire@QuestionController::update] Failed to get form with id : " + formId);
-                        renderInternalError(request, formEvt);
+                        String errMeassge = "[Formulaire@QuestionController::update] Failed to get form with id : " + formId;
+                        log.error(errMeassge + " : " + formEvt.left().getValue());
+                        renderError(request);
                         return;
                     }
                     if (formEvt.right().getValue().isEmpty()) {
@@ -384,7 +410,7 @@ public class QuestionController extends ControllerHelper {
                     JsonObject form = formEvt.right().getValue();
 
                     // Check if the type of question if it's for a public form (type FILE is forbidden)
-                    JsonArray questionTypes = getByProp(questions, QUESTION_TYPE);
+                    JsonArray questionTypes = getByProp(jsonQuestions, QUESTION_TYPE);
                     if (form.getBoolean(IS_PUBLIC) && questionTypes.contains(8)) {
                         String message = "[Formulaire@QuestionController::update] You cannot create a question type FILE for the public form with id " + formId;
                         log.error(message);
@@ -393,19 +419,20 @@ public class QuestionController extends ControllerHelper {
                     }
 
                     // Check if sections of conditional questions to create already have conditional questions
-                    JsonArray questionIds = UtilsHelper.getIds(questions);
+                    JsonArray questionIds = UtilsHelper.getIds(jsonQuestions);
                     questionService.getSectionIdsWithConditionalQuestions(formId, questionIds, sectionIdsEvt -> {
                         if (sectionIdsEvt.isLeft()) {
-                            log.error("[Formulaire@QuestionController::update] Failed to get section ids for form with id : " + formId);
-                            renderInternalError(request, sectionIdsEvt);
+                            String errMessage = "[Formulaire@QuestionController::update] Failed to get section ids for form with id" + formId;
+                            log.error(errMessage + " : " + sectionIdsEvt.left().getValue());
+                            renderError(request);
                             return;
                         }
 
                         JsonArray sectionIds = getByProp(sectionIdsEvt.right().getValue(), SECTION_ID);
                         Long conflictingSectionId = null;
                         int j = 0;
-                        while (conflictingSectionId == null && j < questions.size()) {
-                            JsonObject question = questions.getJsonObject(j);
+                        while (conflictingSectionId == null && j < jsonQuestions.size()) {
+                            JsonObject question = jsonQuestions.getJsonObject(j);
                             if (question.getBoolean(CONDITIONAL) && sectionIds.contains(question.getLong(SECTION_ID))) {
                                 conflictingSectionId = question.getLong(SECTION_ID);
                             }
@@ -420,10 +447,10 @@ public class QuestionController extends ControllerHelper {
                         }
 
                         // If no conditional question conflict, we update
-                        JsonObject composeInfos = new JsonObject();
+                        Map<String, List<Question>> composeInfos = new HashMap<>();
                         sectionService.list(formId)
                             .compose(sections -> {
-                                JsonArray questionPositions = UtilsHelper.getByProp(questions, POSITION);
+                                JsonArray questionPositions = UtilsHelper.getByProp(jsonQuestions, POSITION);
                                 JsonArray sectionPositions = UtilsHelper.getByProp(sections, POSITION);
 
                                 List<Object> doubles = questionPositions.stream().filter(sectionPositions::contains).collect(Collectors.toList());
@@ -431,23 +458,21 @@ public class QuestionController extends ControllerHelper {
                                     String message = "Position(s) " + doubles + " are/is already used by some question(s).";
                                     return Future.failedFuture(message);
                                 }
+
                                 return questionService.update(formId, questions);
                             })
-                            .compose(updatedQuestionsInfos -> {
-                                JsonArray updatedQuestions = new JsonArray();
-                                for (int k = 0; k < updatedQuestionsInfos.size(); k++) {
-                                    updatedQuestions.addAll(updatedQuestionsInfos.getJsonArray(k));
-                                }
+                            .compose(updatedQuestions -> {
                                 composeInfos.put(QUESTIONS, updatedQuestions);
 
                                 return questionSpecificFieldsService.update(questions);
                             })
                             .onSuccess(updatedSpecifics -> {
-                                JsonArray updatedQuestionsAndSpecifics = UtilsHelper.mergeQuestionsAndSpecifics(composeInfos.getJsonArray(QUESTIONS), updatedSpecifics);
-                                renderJson(request, updatedQuestionsAndSpecifics);
+                                List<Question> updatedQuestionsAndSpecifics = UtilsHelper.mergeQuestionsAndSpecifics(composeInfos.get(QUESTIONS), updatedSpecifics);
+                                renderJson(request, IModelHelper.toJsonArray(updatedQuestionsAndSpecifics));
                             })
                             .onFailure(err -> {
-                                log.error("[Formulaire@QuestionController::update] Failed to update questions " + questions + " : " + err.getMessage());
+                                String errMessage = "[Formulaire@QuestionController::update] Failed to update questions " + jsonQuestions;
+                                log.error(errMessage + " : " + err.getMessage());
                                 renderError(request);
                             });
                     });

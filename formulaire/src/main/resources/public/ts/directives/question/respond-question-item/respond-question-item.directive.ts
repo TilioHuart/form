@@ -74,8 +74,8 @@ class Controller implements ng.IController, IViewModel {
     };
 
     initRespondQuestionItem = async () : Promise<void> => {
-        if (this.question.question_type === Types.CURSOR) {
-            this.responses.all[0].answer = this.question.cursor_min_val;
+        if (this.question.question_type === Types.CURSOR && this.question.specific_fields) {
+            this.responses.all[0].answer = this.question.specific_fields.cursor_min_val;
         }
 
         if (this.question.isTypeMultipleRep()) {
@@ -115,9 +115,9 @@ class Controller implements ng.IController, IViewModel {
             await responses.syncMine(this.question.id, this.distribution.id);
             if (responses.all.length > 0) {
                 this.responses.all = [...responses.all];
-                if (this.question.question_type === Types.CURSOR) {
+                if (this.question.question_type === Types.CURSOR && this.question.specific_fields) {
                     let answer: number = Number.parseInt(this.responses.all[0].answer.toString());
-                    this.responses.all[0].answer = Number.isNaN(answer) ? this.question.cursor_min_val : answer;
+                    this.responses.all[0].answer = Number.isNaN(answer) ? this.question.specific_fields.cursor_min_val : answer;
                 }
             }
             if (!this.responses.all[0].question_id) this.responses.all[0].question_id = this.question.id;

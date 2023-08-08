@@ -3,7 +3,7 @@ import {idiom, notify} from "entcore";
 import {questionChoiceService, questionService} from "../../services";
 import {
     FormElementPayload,
-    FormElements,
+    FormElements, IQuestionChoiceResponse,
     QuestionChoice,
     QuestionChoicePayload,
     QuestionChoices,
@@ -17,7 +17,11 @@ import {Constants} from "@common/core/constants";
 import {FormElementUtils} from "@common/utils";
 import {PropPosition} from "@common/core/enums/prop-position";
 import {FormElementType} from "@common/core/enums/form-element-type";
-import {QuestionSpecificFieldsPayload} from "@common/models/QuestionSpecificFields";
+import {
+    IQuestionSpecificFieldsResponse,
+    QuestionSpecificFields,
+    QuestionSpecificFieldsPayload
+} from "@common/models/QuestionSpecificFields";
 
 export class Question extends FormElement {
     question_type: number;
@@ -31,11 +35,7 @@ export class Question extends FormElement {
     choices: QuestionChoices;
     placeholder: string;
     children: Questions;
-    cursor_min_val: number;
-    cursor_max_val: number;
-    cursor_step: number;
-    cursor_min_label: string;
-    cursor_max_label: string;
+    specific_fields: QuestionSpecificFields;
 
     constructor(matrixId?: number, questionType?: number, matrixPosition?: number) {
         super();
@@ -50,12 +50,26 @@ export class Question extends FormElement {
         this.choices = new QuestionChoices();
         this.children = new Questions();
         this.placeholder = null;
-        this.cursor_min_val = null;
-        this.cursor_max_val = null;
-        this.cursor_step = null;
-        this.cursor_min_label = null;
-        this.cursor_max_label = null;
+        this.specific_fields = new QuestionSpecificFields(this.id);
         this.form_element_type = FormElementType.QUESTION;
+    }
+
+    build(data: IQuestionResponse) : Question {
+        super.build(data);
+        this.question_type = data.questionType ? data.questionType : null;
+        this.statement = data.statement ? data.statement : null;
+        this.mandatory = data.mandatory ? data.mandatory : false;
+        this.section_id = data.sectionId ? data.sectionId : null;
+        this.section_position = data.sectionPosition ? data.sectionPosition : null;
+        this.conditional = data.conditional ? data.conditional : false;
+        this.matrix_id = data.matrixId ? data.matrixId : null;
+        this.matrix_position = data.matrixPosition ? data.matrixPosition : null;
+        this.choices = data.choices ? new QuestionChoices().build(data.choices) : new QuestionChoices();
+        this.children = data.children ? new Questions().build(data.children) : new Questions();
+        this.placeholder = data.placeholder ? data.placeholder : null;
+        this.specific_fields = data.specificFields ? new QuestionSpecificFields().build(data.specificFields) : null;
+        this.form_element_type = FormElementType.QUESTION;
+        return this;
     }
 
     toJson() : Object {
@@ -76,11 +90,7 @@ export class Question extends FormElement {
             matrix_position: this.matrix_position,
             choices: this.choices,
             children: this.children,
-            cursor_min_val: this.cursor_min_val,
-            cursor_max_val: this.cursor_max_val,
-            cursor_step: this.cursor_step,
-            cursor_min_label: this.cursor_min_label,
-            cursor_max_label: this.cursor_max_label,
+            specifics_fields: this.specific_fields,
             form_element_type: this.form_element_type
         }
     }
@@ -300,10 +310,14 @@ export class Questions extends Selection<Question> {
         super([]);
     }
 
+    build(data: IQuestionResponse[]) : Questions {
+        this.all = data.map((qr: IQuestionResponse) => new Question().build(qr));
+        return this;
+    }
+
     sync = async (id: number, isForSection= false) : Promise<void> => {
         try {
-            let data = await questionService.list(id, isForSection);
-            this.all = Mix.castArrayAs(Question, data);
+            this.all = await questionService.list(id, isForSection);
             if (this.all.length > 0) {
                 await this.syncChoices();
                 await this.syncChildren();
@@ -335,8 +349,7 @@ export class Questions extends Selection<Question> {
     syncChildren = async () : Promise<void> => {
         let matrixQuestions: Question[] = this.all.filter((q: Question) => q.question_type == Types.MATRIX);
         if (matrixQuestions.length > 0) {
-            let data = await questionService.listChildren(matrixQuestions);
-            let listChildrenQuestions: Question[] = Mix.castArrayAs(Question, data);
+            let listChildrenQuestions: Question[] = await questionService.listChildren(matrixQuestions);
             for (let question of matrixQuestions) {
                 question.children.all = listChildrenQuestions.filter((q: Question) => q.matrix_id === question.id);
                 let nbChildren: number = question.children.all.length;
@@ -357,7 +370,6 @@ export class QuestionPayload implements FormElementPayload {
     title: string;
     position: number;
     form_element_type: FormElementType;
-    nb_responses: number;
     selected: boolean;
     label: string;
     question_type: number;
@@ -417,4 +429,27 @@ export class QuestionPayload implements FormElementPayload {
             form_element_type: this.form_element_type
         }
     }
+}
+
+
+export interface IQuestionResponse {
+    id: number;
+    formId: number;
+    title: string;
+    position: number;
+    formElementType: FormElementType;
+    selected: boolean;
+    label: string;
+    questionType: number;
+    statement: string;
+    mandatory: boolean;
+    sectionId: number;
+    sectionPosition: number;
+    conditional: boolean;
+    matrixId: number;
+    matrixPosition: number;
+    choices: IQuestionChoiceResponse[];
+    placeholder: string;
+    children: IQuestionResponse[];
+    specificFields: IQuestionSpecificFieldsResponse;
 }
