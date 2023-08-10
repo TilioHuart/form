@@ -67,9 +67,18 @@ export const formTreeViewController = ng.controller('FormTreeViewController', ['
             svg.call(zoom);
 
             // Run the renderer. This is what draws the final graph.
-             render_graph(render, nodes, edgeList, inner, svg);
+            render_graph(render, nodes, edgeList, inner, svg);
 
             // Center the graph
+            centerGraph(svg, zoom);
+
+            // Make it responsive
+            window.addEventListener('resize', function() {
+                centerGraph(svg, zoom);
+            });
+        }
+
+        const centerGraph = (svg: any, zoom: d3.ZoomBehavior<Element, unknown>) : void => {
             const treeView: any = d3.select(".tree-view");
             const treeViewWidth: number = treeView.node().offsetWidth;
             const vh: number = window.innerHeight - (window.innerHeight * 25 / 100);
