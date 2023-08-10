@@ -94,9 +94,6 @@ public class QuestionSpecificFields implements IModel<QuestionSpecificFields> {
         return IModelHelper.toJson(this, true, true);
     }
 
-    /**
-     * @deprecated Should instead use IModelHelper directly
-     */
     @Deprecated
     @Override
     public QuestionSpecificFields model(JsonObject questionSpecificFields){

@@ -37,11 +37,8 @@ public class DefaultFolderService implements FolderService {
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
-    /**
-     * @deprecated Use {@link #get(String)}
-     */
-    @Override
     @Deprecated
+    @Override
     public void get(String folderId, Handler<Either<String, JsonObject>> handler) {
         this.get(folderId)
             .onSuccess(res -> handler.handle(new Either.Right<>(res.get().toJson())))

@@ -51,6 +51,7 @@ public interface QuestionService {
     void listChildren(JsonArray questionIds, Handler<Either<String, JsonArray>> handler);
 
     /**
+     * @deprecated Should use {@link #getExportInfos(String, boolean)}  instead
      * List all the questions of a specific form without freetext questions
      * @param formId form identifier
      * @param isPdf is export for PDF

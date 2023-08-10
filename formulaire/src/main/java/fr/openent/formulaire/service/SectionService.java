@@ -7,8 +7,11 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.util.List;
+
 public interface SectionService {
     /**
+     * @deprecated Should use {@link #list(String)} instead
      * List all the sections of a specific form
      * @param formId form identifier
      * @param handler function handler returning JsonArray data

@@ -13,7 +13,7 @@ interface IQuestionTypeSingleanswerProps {
     form: Form;
 }
 
-interface IQuestionTypeSingleanswerRadioScope extends IScope, IQuestionTypeSingleanswerProps{
+interface IQuestionTypeSingleanswerScope extends IScope, IQuestionTypeSingleanswerProps{
     vm: IViewModel;
 }
 
@@ -41,7 +41,7 @@ class Controller implements IViewModel {
     direction: typeof Direction;
     selectedChoiceIndex: number;
 
-    constructor(private $scope: IQuestionTypeSingleanswerRadioScope, private $sce: ng.ISCEService) {
+    constructor(private $scope: IQuestionTypeSingleanswerScope, private $sce: ng.ISCEService) {
         this.i18n = I18nUtils;
         this.direction = Direction;
         this.selectedChoiceIndex = -1;
@@ -101,7 +101,7 @@ function directive() {
         bindToController: true,
         controller: ['$scope', '$sce', Controller],
         /* interaction DOM/element */
-        link: function ($scope: IQuestionTypeSingleanswerRadioScope,
+        link: function ($scope: IQuestionTypeSingleanswerScope,
                         element: ng.IAugmentedJQuery,
                         attrs: ng.IAttributes,
                         vm: IViewModel) {

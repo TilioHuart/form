@@ -1,9 +1,13 @@
 package fr.openent.formulaire.service;
 
+import fr.openent.form.core.models.ResponseFile;
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+
+import java.util.List;
 
 public interface ResponseFileService {
     /**
@@ -45,11 +49,19 @@ public interface ResponseFileService {
     void create(String responseId, String fileId, String filename, String type, Handler<Either<String, JsonObject>> handler);
 
     /**
+     * @deprecated Should use {@link #deleteAllByResponse(List<String>)} instead
      * Delete all response_files of specific responses
      * @param responseIds response identifiers
      * @param handler function handler returning JsonArray data
      */
+    @Deprecated
     void deleteAllByResponse(JsonArray responseIds, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * Delete all response_files of specific responses
+     * @param responseIds response identifiers
+     */
+    Future<List<ResponseFile>> deleteAllByResponse(List<String> responseIds);
 
     /**
      * Delete all response_files by their ids

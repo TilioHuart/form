@@ -22,6 +22,7 @@ public interface FormService {
     void list(List<String> groupsAndUserIds, UserInfos user, Handler<Either<String, JsonArray>> handler);
 
     /**
+     * @deprecated Should use {@link #listByIds(JsonArray)} instead
      * List all forms by ids
      * @param formIds list of form ids
      * @param handler function handler returning JsonArray data
@@ -81,6 +82,7 @@ public interface FormService {
     Future<JsonObject> get(String formId, UserInfos user);
 
     /**
+     * @deprecated Should use {@link #get(String, UserInfos)} instead
      * Get a specific form by id
      * @param formId form identifier
      * @param user user connected

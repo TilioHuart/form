@@ -26,6 +26,7 @@ public interface FolderService {
     void listByIds(JsonArray folderIds, Handler<Either<String, JsonArray>> handler);
 
     /**
+     * @deprecated Use {@link #get(String)}
      * Get a folder by id
      * @param folderId  folder identifier
      * @param handler   function handler returning JsonObject data

@@ -56,7 +56,7 @@ interface ViewModel {
     preview: {
         formElement: FormElement, // Question for preview
         responses: Map<Question, Responses>, // Responses list for preview
-        files: Map<Question, Array<File>>,
+        files: Map<Question, File[]>,
         historicPosition: number[],
         page: string,
         last: boolean
@@ -575,7 +575,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     }
 
                     vm.preview.responses.set(question, questionResponses);
-                    vm.preview.files.set(question, new Array<File>());
+                    if (!vm.preview.files.has(question)) vm.preview.files.set(question, []);
                 }
             }
             if (vm.form.rgpd) {

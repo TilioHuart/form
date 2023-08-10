@@ -10,6 +10,7 @@ interface IQuestionTypeCursorProps {
 }
 
 interface IViewModel extends ng.IController, IQuestionTypeCursorProps {
+    getHtmlDescription(description: string): string;
     onChangeStep(newStep: number): void;
 }
 

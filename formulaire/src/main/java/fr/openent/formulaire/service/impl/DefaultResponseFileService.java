@@ -1,12 +1,20 @@
 package fr.openent.formulaire.service.impl;
 
+import fr.openent.form.core.models.ResponseFile;
+import fr.openent.form.helpers.IModelHelper;
 import fr.openent.formulaire.service.ResponseFileService;
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static fr.openent.form.core.constants.Tables.*;
 
@@ -54,12 +62,34 @@ public class DefaultResponseFileService implements ResponseFileService {
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
     }
 
+    @Deprecated
     @Override
     public void deleteAllByResponse(JsonArray responseIds, Handler<Either<String, JsonArray>> handler) {
-        String query = "DELETE FROM " + RESPONSE_FILE_TABLE +
-                " WHERE response_id IN " + Sql.listPrepared(responseIds) + " RETURNING id;";
-        JsonArray params = new JsonArray().addAll(responseIds);
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+        List<String> responseIdsList = responseIds.stream().map(String.class::cast).collect(Collectors.toList());
+        deleteAllByResponse(responseIdsList)
+            .onSuccess(result -> handler.handle(new Either.Right<>(new JsonArray(result))))
+            .onFailure(err -> handler.handle(new Either.Left<>(err.getMessage())));
+    }
+
+    @Override
+    public Future<List<ResponseFile>> deleteAllByResponse(List<String> responseIds) {
+        Promise<List<ResponseFile>> promise = Promise.promise();
+
+        if (responseIds == null || responseIds.isEmpty()) {
+            promise.complete(new ArrayList<>());
+            return promise.future();
+        }
+
+        String query = "DELETE FROM " + RESPONSE_FILE_TABLE + " " +
+                "WHERE response_id IN " + Sql.listPrepared(responseIds) + " " +
+                "RETURNING *;";
+        JsonArray params = new JsonArray(responseIds);
+
+        String errorMessage = "[Formulaire@DefaultResponseFileService::deleteAllByResponse] Fail to delete response files " +
+                "for responses " + responseIds + " : ";
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler((IModelHelper.sqlResultToIModel(promise, ResponseFile.class, errorMessage))));
+
+        return promise.future();
     }
 
     @Override

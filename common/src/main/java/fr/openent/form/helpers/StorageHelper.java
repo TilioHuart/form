@@ -53,12 +53,12 @@ public class StorageHelper {
         Promise<JsonObject> promise = Promise.promise();
         if (fileIds.isEmpty()) {
             promise.complete(new JsonObject().put("remove file status", OK));
-        } else {
+        }
+        else {
             storage.removeFiles(new JsonArray(fileIds), result -> {
                 if (!result.getString(STATUS).equals(OK)) {
-                    String message = "[Formulaire@removeFiles] Failed to remove files : " + result.getString(MESSAGE);
-                    log.error(message);
-                    promise.fail(message);
+                    log.error("[Formulaire@StorageHelper::removeFiles] Failed to remove files : " + result.getString(MESSAGE));
+                    promise.fail(result.getString(MESSAGE));
                     return;
                 }
                 promise.complete(result);

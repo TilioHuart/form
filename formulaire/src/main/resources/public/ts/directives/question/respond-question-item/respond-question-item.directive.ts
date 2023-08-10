@@ -1,5 +1,5 @@
 import {Directive, ng} from "entcore";
-import {Direction} from "@common/core/enums";
+import {Direction, FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
 import {
     Distribution,
     Question,
@@ -9,7 +9,7 @@ import {
     Responses,
     Types
 } from "@common/models";
-import {FormElementUtils, I18nUtils} from "@common/utils";
+import {FormElementUtils, I18nUtils, UtilsUtils} from "@common/utils";
 import {PropPosition} from "@common/core/enums/prop-position";
 import * as Sortable from "sortablejs";
 import {RankingUtils} from "@common/utils/ranking";
@@ -21,14 +21,13 @@ interface IRespondQuestionItemScopeProps {
     responses: Responses;
     distribution: Distribution;
     direction: typeof Direction;
-    files: Array<File>;
+    files: File[];
     types: typeof Types;
     I18n: I18nUtils;
     mapChoiceResponseIndex: Map<QuestionChoice, number>;
 }
 
 interface IViewModel extends ng.IController, IRespondQuestionItemScopeProps {
-    $onInit() : Promise<void>;
     moveResponse(resp: Response, direction: string): void;
     getHtmlDescription(description: string) : string;
     $onChanges(changes: any): void;
@@ -44,12 +43,12 @@ interface IRespondQuestionItemScope extends IScope, IRespondQuestionItemScopePro
     vm: IViewModel;
 }
 
-class Controller implements ng.IController, IViewModel {
+class Controller implements IViewModel {
     question: Question;
     responses: Responses;
     distribution: Distribution;
     direction: typeof Direction;
-    files: Array<File>;
+    files: File[];
     types: typeof Types;
     I18n: I18nUtils;
     mapChoiceResponseIndex: Map<QuestionChoice, number>;
@@ -62,16 +61,17 @@ class Controller implements ng.IController, IViewModel {
 
     $onInit = async () : Promise<void> => {
         await this.initRespondQuestionItem();
-        if (this.question.question_type === Types.RANKING) {
-            this.initDrag();
-        }
         this.$scope.$apply();
     };
 
-    $onChanges = (changes: any) : void => {
+    $onChanges = async (changes: any) : Promise<void> => {
         this.question = changes.question.currentValue;
-        this.$onInit();
+        await this.initRespondQuestionItem();
+        this.$scope.$broadcast(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.CHANGE_FILE_PICKER, this.files);
+        this.$scope.$apply();
     };
+
+    $onDestroy = async () : Promise<void> => {};
 
     initRespondQuestionItem = async () : Promise<void> => {
         if (this.question.question_type === Types.CURSOR && this.question.specific_fields) {
@@ -127,19 +127,24 @@ class Controller implements ng.IController, IViewModel {
         if (this.question.question_type === Types.TIME && typeof this.responses.all[0].answer == "string") {
             this.responses.all[0].answer = new Date("January 01 1970 " + this.responses.all[0].answer);
         }
-
-        if (this.question.question_type === Types.FILE) {
-            this.files = new Array<File>();
+        else if (this.question.question_type === Types.FILE) {
+            this.files = [];
             if (this.responses.all[0].id) {
                 let responseFiles: ResponseFiles = new ResponseFiles();
                 await responseFiles.sync(this.responses.all[0].id);
                 for (let repFile of responseFiles.all) {
                     if (repFile.id)  {
+                        repFile.filename = UtilsUtils.getFilenameWithoutOwnerName(repFile.filename);
                         let file: File = new File([repFile.id], repFile.filename);
-                        this.files.push(file);
+                        if (!this.files.find((f: File) => f.name == repFile.filename)) {
+                            this.files.push(file);
+                        }
                     }
                 }
             }
+        }
+        else if (this.question.question_type === Types.RANKING) {
+            this.initDrag();
         }
     };
 

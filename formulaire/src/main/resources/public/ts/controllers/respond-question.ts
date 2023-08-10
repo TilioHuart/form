@@ -14,6 +14,7 @@ import {
 import {responseFileService, responseService} from "../services";
 import {FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_EMIT_EVENT, FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
 import {FormElementType} from "@common/core/enums/form-element-type";
+import {UtilsUtils} from "@common/utils";
 
 interface ViewModel {
     formElements: FormElements;
@@ -28,7 +29,8 @@ interface ViewModel {
     loading : boolean;
     historicPosition: number[];
     currentResponses: Map<Question, Responses>;
-    currentFiles: Map<Question, Array<File>>;
+    currentFiles: Map<Question, File[]>;
+    currentQuestionFiles: File[];
 
     $onInit() : Promise<void>;
     prev() : Promise<void>;
@@ -139,7 +141,8 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             }
 
             vm.currentResponses.set(question, questionResponses);
-            vm.currentFiles.set(question, new Array<File>());
+            if (!vm.currentFiles.has(question)) vm.currentFiles.set(question, []);
+            vm.currentQuestionFiles = vm.currentFiles.get(question);
         }
 
         $scope.safeApply();
@@ -256,18 +259,12 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             }
         }
 
-        if (isSavingOk) {
-            $scope.$broadcast(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DESTROY_FILE_PICKER);
-            return true;
-        }
-        else {
-            return false;
-        }
+        return isSavingOk;
     };
 
     const saveQuestionResponses = async (question: Question) : Promise<boolean> => {
         let responses: Responses = vm.currentResponses.get(question);
-        let files: File[] = vm.currentFiles.get(question);
+        let files: File[] = vm.currentQuestionFiles;
 
         if (question.isTypeMultipleRep() || question.isRanking()) {
             await responseService.deleteByQuestionAndDistribution(question.id, vm.distribution.id);
@@ -309,23 +306,24 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         responses.all[0] = await responseService.save(responses.all[0], question.question_type);
 
         if (question.question_type === Types.FILE && files) {
-            return (await saveFiles(responses.all[0], files));
+            return (await saveFiles(question, responses.all[0], files));
         }
 
         return true;
     };
 
-    const saveFiles = async (response: Response, files: File[]) : Promise<boolean> => {
+    const saveFiles = async (question: Question, response: Response, files: File[]) : Promise<boolean> => {
         if (files.length > 10) {
             notify.info(idiom.translate('formulaire.response.file.tooMany'));
             return false;
         }
         else {
+            vm.currentFiles.set(question, files);
             await responseFileService.deleteAll(response.id);
             for (let i = 0; i < files.length; i++) {
                 let filename = files[i].name;
                 if (files[i].type && !$scope.form.anonymous) {
-                    filename = model.me.firstName + model.me.lastName + "_" + filename;
+                    filename = UtilsUtils.getOwnerNameWithUnderscore() + filename;
                 }
                 let file = new FormData();
                 file.append("file", files[i], filename);

@@ -1,3 +1,5 @@
+import {model} from "entcore";
+
 export class UtilsUtils {
     static safeApply = (scope, fn?) => {
         const phase = scope.$root.$$phase;
@@ -22,5 +24,20 @@ export class UtilsUtils {
         let randomIndex: number = Math.floor(Math.random() * list.length);
         let randomColor: string = list[randomIndex];
         return !(<any>excludedValues).includes(randomColor) ? randomColor : UtilsUtils.getRandomValueInList(list, excludedValues);
+    }
+
+    static getOwnerName = () : string => {
+        return model.me.firstName + model.me.lastName;
+    }
+
+    static getOwnerNameWithUnderscore = () : string => {
+        return UtilsUtils.getOwnerName() + "_";
+    }
+
+    static getFilenameWithoutOwnerName = (filename: string) : string => {
+        let ownerNameUnderscore = UtilsUtils.getOwnerNameWithUnderscore();
+        let indexStartFilename: number = filename.indexOf(ownerNameUnderscore) == 0 ?
+            ownerNameUnderscore.length : 0;
+        return filename.substring(indexStartFilename);
     }
 }

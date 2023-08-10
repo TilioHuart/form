@@ -13,6 +13,7 @@ import {
 import {FORMULAIRE_EMIT_EVENT} from "@common/core/enums";
 import {IScope} from "angular";
 import {RootsConst} from "../../../core/constants/roots.const";
+import {UtilsUtils} from "@common/utils";
 
 interface IRecapQuestionItemProps {
     question: Question;
@@ -105,7 +106,7 @@ class Controller implements IViewModel {
     getResponseFileNames = () : string[] => {
         let responses: Response[] = this.responses.all.filter((r: Response) => r.question_id === this.question.id);
         if (responses && responses.length === 1 && responses[0].files.all.length > 0) {
-            return responses[0].files.all.map((rf: ResponseFile) => rf.filename.substring(rf.filename.indexOf("_") + 1));
+            return responses[0].files.all.map((rf: ResponseFile) => UtilsUtils.getFilenameWithoutOwnerName(rf.filename));
         }
         else {
             return [this.missingResponseHtml];

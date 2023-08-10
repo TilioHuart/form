@@ -1,7 +1,9 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.enums.I18nKeys;
+import fr.openent.form.core.models.ResponseFile;
 import fr.openent.form.helpers.I18nHelper;
+import fr.openent.form.helpers.StorageHelper;
 import fr.openent.formulaire.helpers.folder_exporter.FolderExporterZip;
 import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.ResponseFileService;
@@ -10,6 +12,7 @@ import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
@@ -23,6 +26,7 @@ import org.entcore.common.storage.Storage;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.*;
@@ -230,34 +234,31 @@ public class ResponseFileController extends ControllerHelper {
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void deleteAll(HttpServerRequest request) {
         String responseId = request.getParam(PARAM_RESPONSE_ID);
-        if (responseId == null) {
-            log.error("[Formulaire@deleteAllFile] No responseId for deleting files.");
-            noContent(request);
-            return;
-        }
-
-        responseFileService.deleteAllByResponse(new JsonArray().add(responseId), deleteEvt -> {
-            if (deleteEvt.isLeft()) {
-                log.error("[Formulaire@deleteAllFile] An error occurred while deleting files for response with id : " + responseId);
-                renderInternalError(request, deleteEvt);
-                return;
-            }
-
-            JsonArray deletedFiles = deleteEvt.right().getValue();
-            request.response().setStatusCode(204).end();
-            if (!deletedFiles.isEmpty()) {
-                deleteFiles(storage, deletedFiles, deleteFilesEvt -> {
-                    if (deleteFilesEvt.isLeft()) {
-                        log.error("[Formulaire@deleteAllFile] An error occurred while deleting storage files : " + deletedFiles);
-                        renderInternalError(request, deleteFilesEvt);
-                        return;
-                    }
-                    ok(request);
-                });
-            }
-        });
+        List<String> responseIds = new ArrayList<>();
+        responseIds.add(responseId);
+        responseFileService.deleteAllByResponse(responseIds)
+            .compose(deletedResponseFiles -> {
+                if (!deletedResponseFiles.isEmpty()) {
+                    List<String> fileIds = deletedResponseFiles.stream()
+                            .map(ResponseFile::getId)
+                            .map(String.class::cast)
+                            .collect(Collectors.toList());
+                    return StorageHelper.removeFiles(storage, fileIds);
+                }
+                return Future.succeededFuture();
+            })
+            .onSuccess(result -> ok(request))
+            .onFailure(err -> {
+                log.error("[Formulaire@ResponseFileController::deleteAll] An error occurred while deleting response files " +
+                        "with ids " + responseIds + " and their associated files : " + err.getMessage());
+                renderError(request);
+            });
     }
 
+    /**
+     * @deprecated Should use StorageHelper.removeFiles(Storage storage, List<String> fileIds) instead
+     */
+    @Deprecated
     public static void deleteFiles(Storage storage, JsonArray fileIds, Handler<Either<String, JsonObject>> handler) {
         storage.removeFiles(fileIds, deleteFilesEvt -> {
             if (!OK.equals(deleteFilesEvt.getString(STATUS))) {
