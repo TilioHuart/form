@@ -20,10 +20,10 @@ export class QuestionSpecificFields {
 
     build(data: IQuestionSpecificFieldsResponse) : QuestionSpecificFields {
         this.id = data.id ? data.id : null;
-        this.question_id = data.questionId ? data.questionId : null;
-        this.cursor_min_val = data.cursorMinVal ? data.cursorMinVal : null;
-        this.cursor_max_val = data.cursorMaxVal ? data.cursorMaxVal : null;
-        this.cursor_step = data.cursorStep ? data.cursorStep : null;
+        this.question_id = data.questionId != null ? data.questionId : null;
+        this.cursor_min_val = data.cursorMinVal != null ? data.cursorMinVal : null;
+        this.cursor_max_val = data.cursorMaxVal != null ? data.cursorMaxVal : null;
+        this.cursor_step = data.cursorStep != null ? data.cursorStep : null;
         this.cursor_min_label = data.cursorMinLabel ? data.cursorMinLabel : null;
         this.cursor_max_label = data.cursorMaxLabel ? data.cursorMaxLabel : null;
         return this;
@@ -53,11 +53,11 @@ export class QuestionSpecificFieldsPayload {
 
     constructor(question: Question) {
         if (!question.specific_fields) return;
-        this.cursor_min_val = question.specific_fields.cursor_min_val ? question.specific_fields.cursor_min_val : null;
-        this.cursor_max_val = question.specific_fields.cursor_max_val ? question.specific_fields.cursor_max_val : null;
-        this.cursor_step = question.specific_fields.cursor_step ? question.specific_fields.cursor_step : null;
-        this.cursor_min_label = question.specific_fields.cursor_min_label ? question.specific_fields.cursor_min_label : null;
-        this.cursor_max_label = question.specific_fields.cursor_max_label ? question.specific_fields.cursor_max_label : null;
+        this.cursor_min_val = question.specific_fields.cursor_min_val != null ? question.specific_fields.cursor_min_val : null;
+        this.cursor_max_val = question.specific_fields.cursor_max_val != null ? question.specific_fields.cursor_max_val : null;
+        this.cursor_step = question.specific_fields.cursor_step != null ? question.specific_fields.cursor_step : null;
+        this.cursor_min_label = question.specific_fields.cursor_min_label != null ? question.specific_fields.cursor_min_label : null;
+        this.cursor_max_label = question.specific_fields.cursor_max_label != null ? question.specific_fields.cursor_max_label : null;
     }
 
     toJson() : Object {
