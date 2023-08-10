@@ -9,14 +9,10 @@
     @media screen and (max-width: $formulaire-screen-laptop) { width: 100%; }
 
     .domino {
-      .picture {
-        &:hover {
-          cursor: pointer;
-        }
-
-        image-select {
-          width: 100%;
-        }
+      .image-container {
+        display: flex;
+        align-items: center;
+        position: relative;
       }
 
       .data {

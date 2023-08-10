@@ -14,8 +14,9 @@
     <div class="prop-form dominos" guard-root>
         <div class="item">
             <div class="domino">
-                <div class="three cell picture" ng-class="{'empty': !vm.form.picture}">
-                    <image-select ng-model="vm.form.picture"
+                <div class="three image-container" ng-class="{'empty': !vm.form.picture}">
+                    <image-select class="initialFloat cell"
+                                  ng-model="vm.form.picture"
                                   ng-change="vm.getImage()"
                                   default="/img/illustrations/image-default.svg">
                     </image-select>
