@@ -63,7 +63,7 @@ public class CustomShareAndOwner implements ResourcesProvider {
                     break;
                 case PARAM_FILE_ID:
                     query += "(SELECT form_id FROM " + QUESTION_TABLE + " WHERE id =" +
-                            "(SELECT question_id FROM " + RESPONSE_TABLE + " WHERE id = " +
+                            "(SELECT DISTINCT question_id FROM " + RESPONSE_TABLE + " WHERE id IN " +
                             "(SELECT response_id FROM " + RESPONSE_FILE_TABLE + " WHERE id = ?)))";
                     break;
                 default: break;
