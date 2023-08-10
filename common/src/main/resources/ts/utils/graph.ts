@@ -12,17 +12,17 @@ export class GraphUtils {
      * @param responses   Array of responses which we want to display the results
      * @param isExportPDF Boolean to determine if we generate a graph for result or for PDF Export
      * @param charts      ApexCharts to store and render at the end
-     * @param distribs  Distrib's number for each question
+     * @param nbDistribs  Number of distrib for the question
      */
     static generateGraphForResult = async (question: Question, charts: ApexChart[], responses: Response[],
-                                           distribs: number, isExportPDF: boolean) : Promise<void> => {
+                                           nbDistribs: number, isExportPDF: boolean) : Promise<void> => {
         switch (question.question_type) {
             case Types.SINGLEANSWER:
             case Types.SINGLEANSWERRADIO:
                 await GraphUtils.generateSingleAnswerChart(question, charts, isExportPDF);
                 break;
             case Types.MULTIPLEANSWER:
-                await GraphUtils.generateMultipleAnswerChart(question, charts, distribs, isExportPDF);
+                await GraphUtils.generateMultipleAnswerChart(question, charts, nbDistribs, isExportPDF);
                 break;
             case Types.MATRIX:
                 await GraphUtils.generateMatrixChart(question, charts, isExportPDF);
@@ -61,12 +61,9 @@ export class GraphUtils {
         // Generate options with labels and colors
         let baseHeight: number = 40 * question.choices.all.length;
         let height: number = baseHeight < 200 ? 200 : (baseHeight > 500 ? 500 : baseHeight);
-
         let colors: string[] = ColorUtils.generateColorList(labels.length);
-
         let newOptions: any = isExportPDF ?
-            GraphUtils.generateOptions(question.question_type, colors, labels)
-            :
+            GraphUtils.generateOptions(question.question_type, colors, labels) :
             GraphUtils.generateOptions(question.question_type, colors, labels, height, '100%');
 
         newOptions.series = series;
@@ -105,8 +102,7 @@ export class GraphUtils {
         let colors: string[] = ColorUtils.generateColorList(series.length);
 
         let newOptions: any = isExportPDF ?
-            GraphUtils.generateOptions(question.question_type, colors, labels, null, null)
-            :
+            GraphUtils.generateOptions(question.question_type, colors, labels, null, null) :
             GraphUtils.generateOptions(question.question_type, colors, labels, '100%', '100%');
 
         newOptions.series = series;
@@ -134,8 +130,7 @@ export class GraphUtils {
         let colors: string[] = ColorUtils.generateColorList(labels.length);
 
         let newPDFOptions: any = isExportPDF ?
-            GraphUtils.generateOptions(question.question_type, colors, labels,null, null)
-            :
+            GraphUtils.generateOptions(question.question_type, colors, labels,null, null) :
             GraphUtils.generateOptions(question.question_type, colors, labels,'100%', '100%');
 
         newPDFOptions.series = [{ name: lang.translate('formulaire.number.responses'), data: Array.from(map.values()) }];
@@ -191,8 +186,7 @@ export class GraphUtils {
 
         let colors: string[] = ColorUtils.generateColorList(choices.length);
         let newOptions: any = isExportPDF ?
-            GraphUtils.generateOptions(question.question_type, colors, labels, null, null)
-            :
+            GraphUtils.generateOptions(question.question_type, colors, labels, null, null) :
             GraphUtils.generateOptions(question.question_type, colors, labels, '100%', '100%');
 
         newOptions.series = series;
@@ -203,10 +197,10 @@ export class GraphUtils {
      * Generate and render graph of the results of a multiple answers question
      * @param question    Question object which we want to display the results
      * @param charts      ApexCharts to store and render at the end
-     * @param distribs    Distrib's number for each question
+     * @param nbDistribs  Number of distrib for the question
      * @param isExportPDF Boolean to identify if it's a PDF export case
      */
-    static generateMultipleAnswerChart = async (question: Question, charts: ApexChart[], distribs: number, isExportPDF: boolean) : Promise<void> => {
+    static generateMultipleAnswerChart = async (question: Question, charts: ApexChart[], nbDistribs: number, isExportPDF: boolean) : Promise<void> => {
         if (question.question_type != Types.MULTIPLEANSWER) {
             return null;
         }
@@ -220,14 +214,16 @@ export class GraphUtils {
         for (let choice of choices) {
             series.push(choice.nbResponses); // Fill data
             // Fill labels
-            !choice.id ?
-                labels.push(idiom.translate('formulaire.response.empty')) :
-                labels.push(choice.value.substring(0, 40) + (choice.value.length > 40 ? "..." : ""))
-            seriesPercent.push((choice.nbResponses/distribs)*100)
+            choice.id ?
+                labels.push(choice.value.substring(0, 40) + (choice.value.length > 40 ? "..." : "")) :
+                labels.push(idiom.translate('formulaire.response.empty'));
+            seriesPercent.push((choice.nbResponses / nbDistribs) * 100)
         }
 
+        let baseHeight: number = 50 * choices.length;
+        let height: number = baseHeight < 200 ? 200 : (baseHeight > 500 ? 500 : baseHeight);
         let colors: string[] = ColorUtils.generateColorList(labels.length);
-        let newOptions: any = GraphUtils.generateOptions(question.question_type, colors, labels, null, null, seriesPercent);
+        let newOptions: any = GraphUtils.generateOptions(question.question_type, colors, labels, height, null, seriesPercent);
         newOptions.series = [{ data: series }];
 
         await GraphUtils.renderChartForResult(newOptions, charts, question, isExportPDF);
@@ -286,6 +282,9 @@ export class GraphUtils {
                     width: width ? width : 600,
                     animations: {
                         enabled: false
+                    },
+                    toolbar: {
+                        show: false
                     }
                 },
                 plotOptions: {
@@ -296,10 +295,7 @@ export class GraphUtils {
                     }
                 },
                 dataLabels: {
-                    enable: true,
-                    formatter: function (val: number, opt: any): string {
-                        return (val + " (" + seriesPercent[opt.dataPointIndex].toFixed(2)  + "%)")
-                    },
+                    enable: true
                 },
                 colors: colors,
                 xaxis: {

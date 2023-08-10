@@ -8,7 +8,7 @@ import {
     Response,
     Responses,
     Types
-} from "../../../models";
+} from "@common/models";
 import {ColorUtils, DateUtils} from "@common/utils";
 import {GraphUtils} from "@common/utils/graph";
 import {IScope} from "angular";
@@ -31,9 +31,9 @@ interface IResultQuestionItemScopeProps {
     hasFiles: boolean;
     nbResponses;
 
-    Types: typeof Types;
-    DistributionStatus: typeof DistributionStatus;
-    DateUtils: DateUtils;
+    types: typeof Types;
+    distributionStatus: typeof DistributionStatus;
+    dateUtils: DateUtils;
 }
 
 interface IViewModel extends ng.IController, IResultQuestionItemScopeProps {
@@ -42,7 +42,7 @@ interface IViewModel extends ng.IController, IResultQuestionItemScopeProps {
     syncResultsMap() : void;
     downloadFile(fileId: number) : void;
     zipAndDownload() : void;
-    getWidth(nbResponses: number, divisor: number) : number;
+    getPercentage(nbResponses: number, divisor: number) : number;
     getAverage(responses: Response[]): number;
     getColor(choiceId: number) : string;
     formatAnswers(distribId: number) : any;
@@ -64,6 +64,7 @@ class Controller implements ng.IController, IViewModel {
     isGraphQuestion: boolean;
     colors: string[];
     singleAnswerResponseChart: any;
+    multipleAnswerResponseChart: any;
     matrixResponseChart: any;
     cursorResponseChart: any;
     rankingResponseChart: any;
@@ -71,14 +72,14 @@ class Controller implements ng.IController, IViewModel {
     hasFiles: boolean;
     nbResponses;
 
-    Types: typeof Types;
-    DistributionStatus: typeof DistributionStatus;
-    DateUtils: DateUtils;
+    types: typeof Types;
+    distributionStatus: typeof DistributionStatus;
+    dateUtils: DateUtils;
 
     constructor(private $scope: IResultQuestionItemScope, private $sce: ng.ISCEService) {
-        this.Types = Types;
-        this.DistributionStatus = DistributionStatus;
-        this.DateUtils = DateUtils;
+        this.types = Types;
+        this.distributionStatus = DistributionStatus;
+        this.dateUtils = DateUtils;
 
         this.$scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.REFRESH_QUESTION, () => { this.$onInit(); });
     }
@@ -101,7 +102,7 @@ class Controller implements ng.IController, IViewModel {
                 if (this.question.canHaveCustomAnswers()) this.syncResultsMap();
                 this.question.fillChoicesInfo(this.distributions, this.responses.all);
                 this.colors = ColorUtils.generateColorList(this.question.choices.all.length);
-                this.generateChart();
+                await this.generateChart();
             }
             else {
                 this.syncResultsMap();
@@ -111,26 +112,26 @@ class Controller implements ng.IController, IViewModel {
         this.$scope.$apply();
     };
 
-    generateChart = () : void => {
+    generateChart = async () : Promise<void> => {
         if (this.question.question_type == Types.SINGLEANSWER || this.question.question_type == Types.SINGLEANSWERRADIO) {
             if (this.singleAnswerResponseChart) { this.singleAnswerResponseChart.destroy(); }
-            GraphUtils.generateGraphForResult(this.question, [this.singleAnswerResponseChart], null,
-                null, false);
+            await GraphUtils.generateGraphForResult(this.question, [this.singleAnswerResponseChart], null, null, false);
+        }
+        else if (this.question.question_type == Types.MULTIPLEANSWER) {
+            if (this.multipleAnswerResponseChart) { this.multipleAnswerResponseChart.destroy(); }
+            await GraphUtils.generateGraphForResult(this.question, [this.multipleAnswerResponseChart], null, this.nbResponses, false);
         }
         else if (this.question.question_type == Types.MATRIX) {
             if (this.matrixResponseChart) { this.matrixResponseChart.destroy(); }
-            GraphUtils.generateGraphForResult(this.question, [this.matrixResponseChart], null,
-                null,false);
+            await GraphUtils.generateGraphForResult(this.question, [this.matrixResponseChart], null, null,false);
         }
         else if (this.question.question_type == Types.CURSOR) {
             if (this.cursorResponseChart) { this.cursorResponseChart.destroy(); }
-            GraphUtils.generateGraphForResult(this.question, [this.cursorResponseChart], this.responses.all,
-                null, false);
+            await GraphUtils.generateGraphForResult(this.question, [this.cursorResponseChart], this.responses.all, null, false);
         }
         else if (this.question.question_type == Types.RANKING) {
             if (this.rankingResponseChart) { this.cursorResponseChart.destroy(); }
-            GraphUtils.generateGraphForResult(this.question, [this.rankingResponseChart], this.responses.all,
-                null, false);
+            await GraphUtils.generateGraphForResult(this.question, [this.rankingResponseChart], this.responses.all, null, false);
         }
     };
 
@@ -155,7 +156,7 @@ class Controller implements ng.IController, IViewModel {
         window.open(`/formulaire/responses/${this.question.id}/files/download/zip`);
     };
 
-    getWidth = (nbResponses: number, divisor: number) : number => {
+    getPercentage = (nbResponses: number, divisor: number) : number => {
         let width: number = nbResponses / (this.distributions.all.length > 0 ? this.distributions.all.length : 1) * divisor;
         return width < 0 ? 0 : (width > divisor ? divisor : width);
     }

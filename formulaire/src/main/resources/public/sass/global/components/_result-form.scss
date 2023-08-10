@@ -89,23 +89,16 @@
       }
     }
 
-    .graph {
-      &-bar {
-        height: 25px;
-        margin-left: 25px;
+    .graph-container {
+      display: flex;
+      justify-content: center;
+
+      &-multipleanswer {
+        margin-top: -24px;
       }
 
-      &-camembert, &-histogram {
-        display: flex;
-        justify-content: center;
-
-        &-cursor {
-          flex-direction: column;
-        }
-      }
-
-      .apexcharts-toolbar {
-        display: none;
+      &-cursor {
+        flex-direction: column;
       }
     }
 

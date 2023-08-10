@@ -1,54 +1,46 @@
 <div class="question">
     <!-- Question title -->
     <div class="title">
-        <h4 ng-if="vm.question.question_type == vm.Types.FREETEXT">[[vm.question.title]]</h4>
-        <h4 ng-if="vm.question.question_type != vm.Types.FREETEXT && vm.nbResponses > 1">
+        <h4 ng-if="vm.question.question_type == vm.types.FREETEXT">[[vm.question.title]]</h4>
+        <h4 ng-if="vm.question.question_type != vm.types.FREETEXT && vm.nbResponses > 1">
             [[vm.question.title]] ([[vm.nbResponses]] <i18n>formulaire.responses</i18n>)<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span>
         </h4>
-        <h4 ng-if="vm.question.question_type != vm.Types.FREETEXT && vm.nbResponses <= 1">
+        <h4 ng-if="vm.question.question_type != vm.types.FREETEXT && vm.nbResponses <= 1">
             [[vm.question.title]] ([[vm.nbResponses]] <i18n>formulaire.response</i18n>)<span ng-if="vm.question.mandatory" style="color:red;margin-left:10px">*</span>
         </h4>
-        <button class="cell" ng-click="vm.zipAndDownload()" ng-if="vm.question.question_type == vm.Types.FILE" ng-disabled="!vm.hasFiles">
+        <button class="cell" ng-click="vm.zipAndDownload()" ng-if="vm.question.question_type == vm.types.FILE" ng-disabled="!vm.hasFiles">
             <i18n>formulaire.form.download.all.files</i18n>
         </button>
     </div>
 
     <!-- List of results FREETEXT -->
-    <div ng-if="vm.question.question_type == vm.Types.FREETEXT" class="freetext" data-ng-bind-html="vm.getHtmlDescription(vm.question.statement)"></div>
+    <div ng-if="vm.question.question_type == vm.types.FREETEXT" class="freetext" data-ng-bind-html="vm.getHtmlDescription(vm.question.statement)"></div>
 
     <!-- List of results SINGLEANSWER, MULTIPLEANSWER, SINGLEANSWERRADIO -->
     <div ng-if="vm.question.canHaveCustomAnswers()">
         <div class="choices">
             <!-- Data -->
-            <div class="twelve-mobile" ng-class="vm.question.question_type == vm.Types.MULTIPLEANSWER ? 'twelve' : 'five'">
+            <div class="twelve-mobile five">
                 <div ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']" class="choice">
-                    <!-- Data for MULTIPLEANSWER -->
-                    <div class="infos twelve-mobile" ng-class="vm.question.question_type == vm.Types.MULTIPLEANSWER  ? 'five' : 'twelve'">
+                    <div class="infos twelve-mobile twelve">
                         <div class="choice-value eight twelve-mobile ellipsis">
                             <span ng-if="($index+1) != vm.question.choices.all.length">[[$index + 1]]. </span>[[choice.value]]
                         </div>
                         <div class="four twelve-mobile ellipsis bold">
                             [[choice.nbResponses]]
-                            <i18n ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER && choice.nbResponses <= 1">formulaire.vote</i18n>
-                            <i18n ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER && choice.nbResponses > 1">formulaire.votes</i18n>
-                            <i18n ng-if="vm.question.question_type != vm.Types.MULTIPLEANSWER && choice.nbResponses <= 1">formulaire.response</i18n>
-                            <i18n ng-if="vm.question.question_type != vm.Types.MULTIPLEANSWER && choice.nbResponses > 1">formulaire.responses</i18n>
-                            ([[vm.getWidth(choice.nbResponses, 100).toFixed(2)]]%)
-                        </div>
-                    </div>
-                    <!-- Graph for MULTIPLEANSWER -->
-                    <div ng-if="vm.question.question_type == vm.Types.MULTIPLEANSWER" class="seven zero-mobile">
-                        <div class="graph-bar"
-                             ng-style="{width: (vm.getWidth(choice.nbResponses, 95) + '%'), 'background-color': vm.getColor(choice.id)}">
+                            <i18n ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER && choice.nbResponses <= 1">formulaire.vote</i18n>
+                            <i18n ng-if="vm.question.question_type == vm.types.MULTIPLEANSWER && choice.nbResponses > 1">formulaire.votes</i18n>
+                            <i18n ng-if="vm.question.question_type != vm.types.MULTIPLEANSWER && choice.nbResponses <= 1">formulaire.response</i18n>
+                            <i18n ng-if="vm.question.question_type != vm.types.MULTIPLEANSWER && choice.nbResponses > 1">formulaire.responses</i18n>
+                            ([[vm.getPercentage(choice.nbResponses, 100).toFixed(2)]]%)
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Graph for SINGLEANSWER, SINGLEANSWERRADIO -->
-            <div class="graph-camembert seven zero-mobile"
-                 ng-if="vm.question.question_type == vm.Types.SINGLEANSWER
-                                || vm.question.question_type == vm.Types.SINGLEANSWERRADIO">
+            <!-- Graph for SINGLEANSWER, SINGLEANSWERRADIO, MULTIPLEANSWER -->
+            <div class="graph-container zero-mobile seven "
+                 ng-class="{'graph-container-multipleanswer' : vm.question.question_type == vm.types.MULTIPLEANSWER}">
                 <div class="eight">
                     <div id="chart-[[vm.question.id]]"></div>
                 </div>
@@ -61,7 +53,7 @@
             <div ng-repeat="distrib in vm.distributions.all | filter: vm.getCustomResponse | orderBy:'date_response':true" class="distrib"
                  ng-if="vm.results.get(distrib.id).length > 0 && vm.question.hasCustomChoice()">
                 <div class="infos four twelve-mobile">
-                    <div class="four twelve-mobile">[[vm.DateUtils.displayDate(distrib.date_response)]]</div>
+                    <div class="four twelve-mobile">[[vm.dateUtils.displayDate(distrib.date_response)]]</div>
                     <div class="eight twelve-mobile ellipsis" ng-if="!vm.form.anonymous">[[distrib.responder_name]]</div>
                 </div>
                 <div class="eight twelve-mobile results">
@@ -72,29 +64,29 @@
     </div>
 
     <!-- Graph for MATRIX -->
-    <div class="graph-histogram twelve" ng-if="vm.question.question_type == vm.Types.MATRIX">
+    <div class="graph-container twelve" ng-if="vm.question.question_type == vm.types.MATRIX">
         <div class="eight" style="height: 400px">
             <div id="chart-[[vm.question.id]]"></div>
         </div>
     </div>
 
     <!-- List of results SHORTANSWER, LONGANSWER, DATE, TIME, FILE -->
-    <div ng-if="!vm.question.isTypeGraphQuestion() && vm.question.question_type != vm.Types.FREETEXT">
+    <div ng-if="!vm.question.isTypeGraphQuestion() && vm.question.question_type != vm.types.FREETEXT">
         <div ng-repeat="distrib in vm.distributions.all | orderBy:'date_response':true" class="distrib" ng-if="vm.results.get(distrib.id).length > 0">
             <div class="infos four twelve-mobile">
-                <div class="four twelve-mobile">[[vm.DateUtils.displayDate(distrib.date_response)]]</div>
+                <div class="four twelve-mobile">[[vm.dateUtils.displayDate(distrib.date_response)]]</div>
                 <div class="eight twelve-mobile ellipsis" ng-if="!vm.form.anonymous">[[distrib.responder_name]]</div>
             </div>
             <div class="eight twelve-mobile results">
                 <div ng-repeat="result in vm.results.get(distrib.id)"
                      ng-class="{'notLast' : !$last}">
-                    <div ng-if="vm.question.question_type == vm.Types.SHORTANSWER ||
-                                        vm.question.question_type == vm.Types.LONGANSWER ||
-                                        vm.question.question_type == vm.Types.DATE ||
-                                        vm.question.question_type == vm.Types.TIME ||
-                                        (vm.question.question_type == vm.Types.FILE && result.files.all.length <= 0)"
+                    <div ng-if="vm.question.question_type == vm.types.SHORTANSWER ||
+                                        vm.question.question_type == vm.types.LONGANSWER ||
+                                        vm.question.question_type == vm.types.DATE ||
+                                        vm.question.question_type == vm.types.TIME ||
+                                        (vm.question.question_type == vm.types.FILE && result.files.all.length <= 0)"
                          data-ng-bind-html="vm.getHtmlDescription(result.answer)"></div>
-                    <div ng-repeat="file in result.files.all" ng-if="vm.question.question_type == vm.Types.FILE">
+                    <div ng-repeat="file in result.files.all" ng-if="vm.question.question_type == vm.types.FILE">
                         <a ng-if="file.id" ng-click="vm.downloadFile(file.id)">
                             <i class="i-download lg-icon spaced-right"></i> [[file.filename]]
                         </a>
@@ -105,7 +97,7 @@
     </div>
 
     <!-- Graph for CURSOR -->
-    <div class="graph-histogram-cursor twelve" ng-if="vm.question.question_type == vm.Types.CURSOR">
+    <div class="graph-container-cursor twelve" ng-if="vm.question.question_type == vm.types.CURSOR">
         <div class="eight margin-auto" style="height: 400px">
             <div id="chart-[[vm.question.id]]"></div>
         </div>
@@ -115,7 +107,7 @@
     </div>
 
     <!-- Graph for RANKING -->
-    <div class="graph-histogram twelve" ng-if="vm.question.question_type == vm.Types.RANKING">
+    <div class="graph-container twelve" ng-if="vm.question.question_type == vm.types.RANKING">
         <div class="eight" style="height: 400px">
             <div id="chart-[[vm.question.id]]"></div>
         </div>
