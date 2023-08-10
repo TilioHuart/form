@@ -1,8 +1,12 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.core.enums.I18nKeys;
 import fr.openent.form.core.enums.QuestionTypes;
 import fr.openent.form.core.models.ApiVersion;
 import fr.openent.form.core.models.Question;
+import fr.openent.form.core.models.QuestionSpecificFields;
+import fr.openent.form.helpers.BusResultHelper;
+import fr.openent.form.helpers.I18nHelper;
 import fr.openent.form.helpers.IModelHelper;
 import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.helpers.ApiVersionHelper;
@@ -304,7 +308,7 @@ public class QuestionController extends ControllerHelper {
                             if (questionSectionIds.size() > 0) {
                                 log.error("[Formulaire@QuestionController::create] A conditional question is " +
                                         "already existing for the sections with ids " + questionSectionIds);
-                                badRequest(request);
+                                badRequest(request, I18nHelper.getI18nValue(I18nKeys.ERROR_QUESTION_DUPLICATE, request));
                                 return;
                             }
 

@@ -80,7 +80,8 @@ export const questionService: QuestionService = {
             let questionsPayload: QuestionPayload[] = questions.map((q: Question) => new QuestionPayload(q));
             return DataUtils.getData(await http.post(`/formulaire/forms/${questionsPayload[0].form_id}/questions`, questionsPayload));
         } catch (err) {
-            notify.error(idiom.translate('formulaire.error.questionService.create'));
+            let specificError: string = DataUtils.getSpecificError(err);
+            notify.error(specificError ? specificError : idiom.translate('formulaire.error.questionService.create'));
             throw err;
         }
     },

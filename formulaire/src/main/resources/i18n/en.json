@@ -416,6 +416,9 @@
   "formulaire.success.folders.delete": "Tous les dossiers sélectionnés ont bien été supprimés !",
   "formulaire.success.move": "Tous les éléments sélectionnés ont bien été déplacés !",
 
+
+  "formulaire.error.question.duplicate": "You cannot have two conditional questions in the same section",
+
   "group.HeadTeacher": "Professeurs principaux de {0}.",
   "group.Direction": "Directeurs de {0}.",
   "group.Func": "Personnels de fonction {0}.",

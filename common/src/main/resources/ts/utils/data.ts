@@ -1,4 +1,4 @@
-import {AxiosResponse} from "axios";
+import {AxiosError, AxiosResponse} from "axios";
 
 export class DataUtils {
     static isStatusSuccess = (response: AxiosResponse) : any => {
@@ -22,5 +22,12 @@ export class DataUtils {
     static getDataIf200 = (response: AxiosResponse) : any => {
         if (DataUtils.isStatusXXX(response, 200)) { return response.data; }
         else { return null; }
+    };
+
+    static getSpecificError = (error: AxiosError) : string => {
+        if (error && error.response && error.response.data && (error.response.data as any).error) {
+            return (error.response.data as any).error;
+        }
+        return null;
     };
 }
