@@ -88,13 +88,13 @@
 
         .input-radio-checkbox {
             display: flex;
-            flex-direction: row;
-            justify-content: space-around;
+            flex-direction: column;
         }
 
         .input-radio-checkbox .choice {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+            margin-bottom: 8px;
         }
 
         .date-and-hour {
@@ -210,7 +210,9 @@
 <body class="page">
 <h1 class="title">{{form_title}}</h1>
     {{#form_elements}}
+        <!-- A form element SECTION -->
         {{^is_question}}
+            <!-- Section infos -->
             <div class="section nobreakpage">
                 <h4 class="top">{{title}}</h4>
                 <span class="description">
@@ -219,12 +221,10 @@
                 </span>
             </div>
 
+            <!-- List of questions in the section -->
             {{#questions}}
                 <div class="question nobreakpage">
-                    <h4>
-                        {{title}}{{#mandatory}}<span class="mandatory">*</span>{{/mandatory}}
-                    </h4>
-
+                    <h4>{{title}}{{#mandatory}}<span class="mandatory">*</span>{{/mandatory}}</h4>
                     <div class="main">
                         <!-- Type freetext -->
                         {{#is_type_freetext}}
@@ -234,123 +234,6 @@
                         {{/is_type_freetext}}
 
                         <!-- Type short_answer -->
-                        {{#is_short_answer}}
-                            <div class="shortanswer"></div>
-                        {{/is_short_answer}}
-
-                        <!-- Type long_answer -->
-                        {{#is_long_answer}}
-                            <div class="longanswer"></div>
-                        {{/is_long_answer}}
-
-                        <!-- Single answer, radio btn -->
-                        <div class="input-radio-checkbox">
-                            {{#is_radio_btn}}
-                                {{#choices}}
-                            <div class="choice">
-                                    <input type="radio"/><label>{{value}}</label>
-                                    {{#conditional}}
-                                        (Aller à : {{title_next}})
-                                    {{/conditional}}
-                                    <div class="image-container">
-                                        {{#imageChoice}}<img src="{{imageChoice}}" alt="Img"/>{{/imageChoice}}
-                                    </div>
-                                </div>
-                                {{/choices}}
-                            {{/is_radio_btn}}
-                        </div>
-
-                        <!-- Multiple answer -->
-                        <div class="input-radio-checkbox">
-                            {{#is_multiple_choice}}
-                                {{#choices}}
-                                <div class="choice">
-                                    <input type="checkbox"/><label>{{value}}</label>
-                                    <div class="image-container">
-                                        {{#imageChoice}}<img src="{{imageChoice}}" alt="Img"/>{{/imageChoice}}
-                                    </div>
-                                </div>
-                                {{/choices}}
-                            {{/is_multiple_choice}}
-                        </div>
-
-                        <!-- Date, hour -->
-                        {{#is_date_hour}}
-                            <div class="date-and-hour"></div>
-                        {{/is_date_hour}}
-
-                    <!-- Matrix -->
-                    {{#is_matrix}}
-                    <table class="matrix-table" style="border-collapse: collapse;">
-                        <thead>
-                        <tr>
-                            <th></th>
-                            {{#choices}}
-                            <th style="border-bottom: 1px solid black; padding: 5px;">{{value}}</th>
-                            {{/choices}}
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {{#children}}
-                        <tr style="border-bottom: 1px solid black;">
-                            <th style="border-right: 1px solid black; padding: 5px;">{{title}}</th>
-                            {{#choices}}
-                            <td style="border-right: 1px solid black; padding: 5px; text-align: center;">
-                                {{#is_matrix_single}}
-                                    <input type="radio"/>
-                                {{/is_matrix_single}}
-                                {{#is_matrix_multiple}}
-                                    <input type="checkbox"/>
-                                {{/is_matrix_multiple}}
-                            </td>
-                            {{/choices}}
-                        </tr>
-                        {{/children}}
-                        </tbody>
-                    </table>
-                    {{/is_matrix}}
-
-                        <!-- Cursor -->
-                        {{#is_cursor}}
-                        <div class="cursor-container">
-                            <div class="cursor-label-right">
-                                <div>{{cursor_min_label}} {{cursor_min_val}}</div>
-                            </div>
-                                <div class="cursor-line"></div>
-                            <div class="cursor-label-left">
-                                <div>{{cursor_max_val}} {{cursor_max_label}}</div>
-                            </div>
-                        </div>
-                        {{/is_cursor}}
-
-                        <!-- Ranking -->
-                        {{#is_ranking}}
-                            {{#choices}}
-                                <div class="ranking-value">
-                                    {{value}}
-                                </div>
-                            {{/choices}}
-                        {{/is_ranking}}
-                    </div>
-                </div>
-            {{/questions}}
-        {{/is_question}}
-
-        {{#is_question}}
-        <div class="question nobreakpage">
-            <h4>
-                {{title}}{{#mandatory}}<span class="mandatory">*</span>{{/mandatory}}
-            </h4>
-
-                <div class="main">
-                        <!-- Type freetext -->
-                        {{#is_type_freetext}}
-                            {{#statement}}
-                                {{{statement}}}
-                            {{/statement}}
-                        {{/is_type_freetext}}
-
-                        <!-- Type shortanswer -->
                         {{#is_short_answer}}
                             <div class="shortanswer"></div>
                         {{/is_short_answer}}
@@ -398,21 +281,21 @@
 
                         <!-- Matrix -->
                         {{#is_matrix}}
-                        <table class="matrix-table">
+                        <table class="matrix-table" style="border-collapse: collapse;">
                             <thead>
                             <tr>
                                 <th></th>
                                 {{#choices}}
-                                <th >{{value}}</th>
+                                <th style="border-bottom: 1px solid black; padding: 5px;">{{value}}</th>
                                 {{/choices}}
                             </tr>
                             </thead>
                             <tbody>
                             {{#children}}
-                            <tr >
-                                <th>{{title}}</th>
+                            <tr style="border-bottom: 1px solid black;">
+                                <th style="border-right: 1px solid black; padding: 5px;">{{title}}</th>
                                 {{#choices}}
-                                <td >
+                                <td style="border-right: 1px solid black; padding: 5px; text-align: center;">
                                     {{#is_matrix_single}}
                                         <input type="radio"/>
                                     {{/is_matrix_single}}
@@ -448,7 +331,122 @@
                                 </div>
                             {{/choices}}
                         {{/is_ranking}}
+                    </div>
                 </div>
+            {{/questions}}
+        {{/is_question}}
+
+        <!-- A form element QUESTION -->
+        {{#is_question}}
+        <div class="question nobreakpage">
+            <h4>{{title}}{{#mandatory}}<span class="mandatory">*</span>{{/mandatory}}</h4>
+            <div class="main">
+                <!-- Type freetext -->
+                {{#is_type_freetext}}
+                    {{#statement}}
+                        {{{statement}}}
+                    {{/statement}}
+                {{/is_type_freetext}}
+
+                <!-- Type shortanswer -->
+                {{#is_short_answer}}
+                    <div class="shortanswer"></div>
+                {{/is_short_answer}}
+
+                <!-- Type long_answer -->
+                {{#is_long_answer}}
+                    <div class="longanswer"></div>
+                {{/is_long_answer}}
+
+                <!-- Single answer, radio btn -->
+                <div class="input-radio-checkbox">
+                    {{#is_radio_btn}}
+                        {{#choices}}
+                        <div class="choice">
+                            <input type="radio"/><label>{{value}}</label>
+                            {{#conditional}}
+                                (Aller à : {{title_next}})
+                            {{/conditional}}
+                            <div class="image-container">
+                                {{#imageChoice}}<img src="{{imageChoice}}" alt="Img"/>{{/imageChoice}}
+                            </div>
+                        </div>
+                        {{/choices}}
+                    {{/is_radio_btn}}
+                </div>
+
+                <!-- Multiple answer -->
+                <div class="input-radio-checkbox">
+                    {{#is_multiple_choice}}
+                        {{#choices}}
+                        <div class="choice">
+                            <input type="checkbox"/><label>{{value}}</label>
+                            <div class="image-container">
+                                {{#imageChoice}}<img src="{{imageChoice}}" alt="Img"/>{{/imageChoice}}
+                            </div>
+                        </div>
+                        {{/choices}}
+                    {{/is_multiple_choice}}
+                </div>
+
+                <!-- Date, hour -->
+                {{#is_date_hour}}
+                    <div class="date-and-hour"></div>
+                {{/is_date_hour}}
+
+                <!-- Matrix -->
+                {{#is_matrix}}
+                <table class="matrix-table">
+                    <thead>
+                    <tr>
+                        <th></th>
+                        {{#choices}}
+                        <th >{{value}}</th>
+                        {{/choices}}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{#children}}
+                    <tr >
+                        <th>{{title}}</th>
+                        {{#choices}}
+                        <td >
+                            {{#is_matrix_single}}
+                                <input type="radio"/>
+                            {{/is_matrix_single}}
+                            {{#is_matrix_multiple}}
+                                <input type="checkbox"/>
+                            {{/is_matrix_multiple}}
+                        </td>
+                        {{/choices}}
+                    </tr>
+                    {{/children}}
+                    </tbody>
+                </table>
+                {{/is_matrix}}
+
+                <!-- Cursor -->
+                {{#is_cursor}}
+                <div class="cursor-container">
+                    <div class="cursor-label-right">
+                        <div>{{cursor_min_label}} {{cursor_min_val}}</div>
+                    </div>
+                        <div class="cursor-line"></div>
+                    <div class="cursor-label-left">
+                        <div>{{cursor_max_val}} {{cursor_max_label}}</div>
+                    </div>
+                </div>
+                {{/is_cursor}}
+
+                <!-- Ranking -->
+                {{#is_ranking}}
+                    {{#choices}}
+                        <div class="ranking-value">
+                            {{value}}
+                        </div>
+                    {{/choices}}
+                {{/is_ranking}}
+            </div>
         </div>
         {{/is_question}}
     {{/form_elements}}
