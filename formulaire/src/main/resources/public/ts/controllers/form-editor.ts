@@ -784,17 +784,17 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         // Save children (for MATRIX questions)
                         positionCounter = 1;
                         if (formElement.question_type === Types.MATRIX) {
-                            let registeredChildrenTitles: string[] = [];
+                            let validatedChildren: Question[] = [];
                             for (let child of formElement.children.all) {
-                                if (child.title && !registeredChildrenTitles.find((t: string) => t === child.title)) {
+                                if (child.title && !validatedChildren.find((q: Question) => q.title === child.title)) {
                                     child.matrix_position = positionCounter;
                                     child.matrix_id = newId;
                                     child.form_id = formElement.form_id;
-                                    registeredChildrenTitles.push(child.title);
+                                    validatedChildren.push(child);
                                     positionCounter++;
                                 }
                             }
-                            await questionService.save(formElement.children.all);
+                            await questionService.save(validatedChildren);
                         }
                     }
 
