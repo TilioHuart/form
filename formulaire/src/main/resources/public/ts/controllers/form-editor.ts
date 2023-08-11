@@ -784,6 +784,12 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         // Save children (for MATRIX questions)
                         positionCounter = 1;
                         if (formElement.question_type === Types.MATRIX) {
+                            let promises: Promise<any>[] = [];
+                            formElement.children.all
+                                .filter((q: Question) => !q.title && q.id)
+                                .forEach((q: Question) => promises.push(questionService.delete(q.id)));
+                            await Promise.all(promises);
+
                             let validatedChildren: Question[] = [];
                             for (let child of formElement.children.all) {
                                 if (child.title && !validatedChildren.find((q: Question) => q.title === child.title)) {
