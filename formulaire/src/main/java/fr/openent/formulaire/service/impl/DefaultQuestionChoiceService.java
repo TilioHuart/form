@@ -40,10 +40,16 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
     public Future<JsonArray> listChoices(JsonArray questionIds) {
         Promise<JsonArray> promise = Promise.promise();
 
+        if (questionIds == null || questionIds.isEmpty()) {
+            promise.complete(new JsonArray());
+            return promise.future();
+        }
+
         String query = "SELECT * FROM " + QUESTION_CHOICE_TABLE + " WHERE question_id IN " + Sql.listPrepared(questionIds);
         JsonArray params = new JsonArray().addAll(questionIds);
 
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(FutureHelper.handlerJsonArray(promise)));
+        String errMessage = "[Formulaire@DefaultQuestionChoiceService::listChoices] Failed to list choices for questions with id " + questionIds + " : ";
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(FutureHelper.handlerJsonArray(promise, errMessage)));
 
         return promise.future();
     }

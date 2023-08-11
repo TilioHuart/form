@@ -76,9 +76,17 @@ public class DefaultQuestionService implements QuestionService {
     public Future<JsonArray> listChildren(JsonArray questionIds) {
         Promise<JsonArray> promise = Promise.promise();
 
+        if (questionIds == null || questionIds.isEmpty()) {
+            promise.complete(new JsonArray());
+            return promise.future();
+        }
+
         String query = "SELECT * FROM " + QUESTION_TABLE + " WHERE matrix_id IN " + Sql.listPrepared(questionIds);
         JsonArray params = new JsonArray().addAll(questionIds);
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(FutureHelper.handlerJsonArray(promise)));
+
+        String errMessage = "[Formulaire@DefaultQuestionService::listChildren] Failed to list children for questions with id " + questionIds + " : ";
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(FutureHelper.handlerJsonArray(promise, errMessage)));
+
         return promise.future();
     }
 

@@ -3,9 +3,11 @@ import {idiom, notify, Rights, Shareable} from "entcore";
 import {formService, utilsService} from "../services";
 import {Distribution, Distributions, DistributionStatus} from "./Distribution";
 import {FiltersFilters, FiltersOrders} from "../core/enums";
-import {FormElement, FormElements, Question, Questions, Section} from "./FormElement";
+import {FormElement, FormElements, IQuestionResponse, Question, Questions, Section} from "./FormElement";
 import {QuestionChoice, QuestionChoices} from "./QuestionChoice";
 import {Fields} from "@common/core/constants";
+import {Types} from "@common/models/QuestionType";
+import {QuestionSpecificFields} from "@common/models/QuestionSpecificFields";
 
 export class Form implements Selectable, Shareable  {
     shared: any;
@@ -158,10 +160,21 @@ export class Form implements Selectable, Shareable  {
         }
 
         let question: Question = Mix.castAs(Question, e);
+        if (question.question_type === Types.CURSOR) this.formatIntoQuestionCursor(question, e);
+
         question.choices = choices;
         question.children = children;
         return question;
     };
+
+    formatIntoQuestionCursor = (q: Question, e: FormElement) : void => {
+        q.specific_fields = new QuestionSpecificFields(q.id);
+        q.specific_fields.cursor_min_val = e[Fields.SPECIFIC_FIELDS][Fields.CURSOR_MIN_VAL];
+        q.specific_fields.cursor_max_val = e[Fields.SPECIFIC_FIELDS][Fields.CURSOR_MAX_VAL];
+        q.specific_fields.cursor_step = e[Fields.SPECIFIC_FIELDS][Fields.CURSOR_STEP];
+        q.specific_fields.cursor_min_label = e[Fields.SPECIFIC_FIELDS][Fields.CURSOR_MIN_LABEL];
+        q.specific_fields.cursor_max_label = e[Fields.SPECIFIC_FIELDS][Fields.CURSOR_MAX_LABEL];
+    }
 
     getDistributionKey = () : string => {
         let distributionKey = this[Fields.DISTRIBUTION_KEY].toString();

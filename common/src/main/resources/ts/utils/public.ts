@@ -1,15 +1,16 @@
 import {
     FormElement,
-    FormElements,
+    FormElements, IQuestionResponse,
     Question,
     QuestionChoice,
     QuestionChoices,
     Questions,
     Response, Responses,
-    Section
+    Section, Types
 } from "@common/models";
 import {Mix} from "entcore-toolkit";
 import {Fields} from "@common/core/constants";
+import {QuestionSpecificFields} from "@common/models/QuestionSpecificFields";
 
 export class PublicUtils {
     /**
@@ -79,9 +80,20 @@ export class PublicUtils {
         questionChoices.all.sort((a, b) => a.position - b.position);
 
         let question: Question = Mix.castAs(Question, e);
+        if (question.question_type === Types.CURSOR) this.formatIntoQuestionCursor(question, e);
+
         question.choices = questionChoices;
         return question;
     };
+
+    static formatIntoQuestionCursor = (q: Question, e: FormElement) : void => {
+        q.specific_fields = new QuestionSpecificFields(q.id);
+        q.specific_fields.cursor_min_val = e[Fields.SPECIFIC_FIELDS][Fields.CURSOR_MIN_VAL];
+        q.specific_fields.cursor_max_val = e[Fields.SPECIFIC_FIELDS][Fields.CURSOR_MAX_VAL];
+        q.specific_fields.cursor_step = e[Fields.SPECIFIC_FIELDS][Fields.CURSOR_STEP];
+        q.specific_fields.cursor_min_label = e[Fields.SPECIFIC_FIELDS][Fields.CURSOR_MIN_LABEL];
+        q.specific_fields.cursor_max_label = e[Fields.SPECIFIC_FIELDS][Fields.CURSOR_MAX_LABEL];
+    }
 
     // Cookies
 

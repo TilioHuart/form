@@ -1,6 +1,9 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.core.models.IModel;
+import fr.openent.form.core.models.Question;
 import fr.openent.form.helpers.BusResultHelper;
+import fr.openent.form.helpers.IModelHelper;
 import fr.openent.formulaire.service.QuestionChoiceService;
 import fr.openent.formulaire.service.QuestionService;
 import fr.openent.formulaire.service.QuestionSpecificFieldsService;
@@ -10,10 +13,14 @@ import fr.openent.formulaire.service.impl.DefaultQuestionService;
 import fr.openent.formulaire.service.impl.DefaultQuestionSpecificFieldsService;
 import fr.openent.formulaire.service.impl.DefaultSectionService;
 import fr.wseduc.bus.BusAddress;
+import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
+
+import java.util.stream.Collectors;
 
 import static fr.openent.form.core.constants.EbFields.*;
 import static fr.openent.form.core.constants.EbFields.ACTION;
@@ -37,8 +44,13 @@ public class EventBusController extends ControllerHelper {
             case LIST_QUESTION_FOR_FORM_AND_SECTION:
                 formId = body.getString(PARAM_FORM_ID);
                 questionService.listForFormAndSection(formId)
-                        .onSuccess(listQuestionsEvt -> {
-                            BusResultHelper.busArrayHandler(questionSpecificFieldsService.syncQuestionSpecs(listQuestionsEvt), message);
+                        .compose(questionSpecificFieldsService::syncQuestionSpecs)
+                        .onSuccess(questionsWithSpecs -> {
+                            JsonArray result = questionsWithSpecs.stream()
+                                    .filter(Question.class::isInstance)
+                                    .map(q -> ((Question) q).toJson())
+                                    .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+                            message.reply((new JsonObject()).put(STATUS, OK).put(RESULT, result));
                         })
                         .onFailure(error -> {
                             String errMessage = String.format("[Formulaire@%s::bus]:  " +
