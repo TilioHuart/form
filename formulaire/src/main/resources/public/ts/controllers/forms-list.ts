@@ -1,4 +1,4 @@
-import {angular, idiom, model, ng, notify, template} from 'entcore';
+import {angular, FolderTreeProps, idiom, model, ng, notify, template} from 'entcore';
 import {
     Distribution,
     Distributions,
@@ -14,8 +14,14 @@ import {
 } from "../models";
 import {distributionService, folderService, formService, questionService} from "../services";
 import {Exports, FiltersFilters, FiltersOrders, FORMULAIRE_EMIT_EVENT} from "@common/core/enums";
-import {Element} from "entcore/types/src/ts/workspace/model";
+import {Element, Tree} from "entcore/types/src/ts/workspace/model";
 import {I18nUtils} from "@common/utils";
+
+interface Responder {
+    name: string,
+    nbResponses: number
+}
+
 
 interface ViewModel {
     forms: Forms;
@@ -27,7 +33,7 @@ interface ViewModel {
     allFoldersSelected: boolean;
     targetFolderId: number;
     searchInput: string;
-    responders: any[];
+    responders: Responder[];
     mail: {
         link: string,
         subject: string,
@@ -70,7 +76,8 @@ interface ViewModel {
         warning: boolean
     };
     files: File[];
-    folderTree: any;
+    folderTree: FolderTreeProps;
+    openedFolder: Array<Element>;
     openedFoldersIds: number[];
     selectedFolder: Element;
     draggable : Draggable;
@@ -468,7 +475,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         window.setTimeout(async function () { await initFormsList(); }, 100);
     };
 
-    vm.filterResponses = () : any => {
+    vm.filterResponses = () : Responder[] => {
         if (vm.remindfilter.answered && !vm.remindfilter.notanswered) {
             return vm.responders.filter(a => a.nbResponses > 0);
         }
@@ -549,7 +556,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         }
     };
 
-    vm.selectItem = (item : any) : void => {
+    vm.selectItem = (item : Form | Folder) : void => {
         item.selected = !item.selected;
         if (item instanceof Form) {
             vm.folders.deselectAll();
@@ -628,24 +635,24 @@ export const formsListController = ng.controller('FormsListController', ['$scope
         vm.switchAllFolders(false);
         vm.folderTree = {
             cssTree: "folders-tree",
-            get trees() {
+            get trees(): any | Array<Tree> {
                 return vm.folders.trees;
             },
-            isDisabled(folder) {
+            isDisabled(folder: Element): boolean {
                 if (vm.display.lightbox.move) {
-                    let selectedIds : any = vm.folders.selected.map(f => f.id);
-                    return selectedIds.includes(folder.id);
+                    let selectedIds : number[] = vm.folders.selected.map(f => f.id);
+                    return selectedIds.indexOf(parseInt(folder._id)) !== -1;
                 }
                 return false;
             },
-            isOpenedFolder(folder) {
-                return vm.openedFoldersIds && vm.openedFoldersIds.filter(id => id === folder.id).length > 0;
+            isOpenedFolder(folder: Element): boolean {
+                return vm.openedFoldersIds && vm.openedFoldersIds.filter(id => id == parseInt(folder._id)).length > 0;
             },
             isSelectedFolder(folder) {
                 return vm.selectedFolder === folder;
             },
             openFolder(folder) {
-                if (!vm.folderTree.isDisabled(folder)) {
+                if (!this.isDisabled(folder)) {
                     vm.targetFolderId = folder.id;
                     vm.selectedFolder = folder;
 
@@ -862,9 +869,9 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     vm.isCloseConfirmationOpen = () : boolean => {
-        let elems = document.getElementsByTagName('share-panel');
+        let elems: HTMLElement[] = Array.from(document.getElementsByTagName('share-panel')) as HTMLElement[];
         if (elems && elems.length > 0 && elems[0]) {
-            let elem: any = elems[0];
+            let elem: HTMLElement = elems[0];
             let sharePanelScope = angular.element(elem).scope();
             if (sharePanelScope && sharePanelScope.display) {
                 return sharePanelScope.display.showCloseConfirmation;
