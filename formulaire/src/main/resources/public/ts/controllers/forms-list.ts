@@ -76,6 +76,7 @@ interface ViewModel {
     draggable : Draggable;
     draggedItem : any;
     exportFormat: Exports;
+    isProcessing: boolean;
 
     importForms() : void;
     doImportForms(): Promise<void>;
@@ -195,6 +196,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     vm.folderTree = {};
     vm.openedFoldersIds = null;
     vm.selectedFolder = null;
+    vm.isProcessing = false;
 
     vm.$onInit = async () : Promise<void> => {
         await initFormsList();
@@ -266,6 +268,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     };
 
     vm.duplicateForms = async () : Promise<void> => {
+        vm.isProcessing = true;
         try {
             let formIds = [];
             for (let form of vm.forms.selected) {
@@ -277,6 +280,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             await formService.duplicate(formIds, targetFolderId);
             notify.success(idiom.translate('formulaire.success.forms.duplicate'));
             vm.openFolder(vm.folder);
+            vm.isProcessing = false;
             $scope.safeApply();
         }
         catch (e) {
@@ -505,12 +509,14 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.doArchiveForms = async () : Promise<void> => {
         try {
+            vm.isProcessing = true;
             for (let form of vm.forms.selected) {
                 await formService.archive(form, vm.folders.archivedFormsFolder.id);
             }
             template.close('lightbox');
             vm.display.lightbox.archive = false;
             vm.display.warning = false;
+            vm.isProcessing = false;
             notify.success(idiom.translate('formulaire.success.forms.archive'));
             vm.openFolder(vm.folder);
             $scope.safeApply();

@@ -65,6 +65,7 @@ interface ViewModel {
     nestedSortables: any[];
     iconUtils: IconUtils;
     initializing: boolean;
+    isProcessing: boolean;
 
     $onInit() : Promise<void>;
 
@@ -137,6 +138,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         // Global functions
 
         vm.saveAll = async (displaySuccess= true) : Promise<void> => {
+            vm.isProcessing = true;
             vm.dontSave = true;
 
             // Check conditional questions
@@ -185,6 +187,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
             await saveFormElements(displaySuccess && wrongElements.length <= 0);
             vm.dontSave = false;
+            vm.isProcessing = false;
         };
 
 
@@ -261,6 +264,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         };
 
         vm.doOrganizeFormElements = async () : Promise<void> => {
+            vm.isProcessing = true;
             for (let question of vm.formElements.getAllQuestions().all) {
                 if ((question.section_id || question.section_position) && question.position) {
                     if (question.position > 0) {
@@ -275,6 +279,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
             await formElementService.update(vm.formElements.getAllSectionsAndAllQuestions());
             vm.display.lightbox.reorganization = false;
+            vm.isProcessing = false;
             template.close('lightbox');
             $scope.safeApply();
         };
@@ -821,6 +826,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         const onClickQuestion = async (event) : Promise<void> => {
             if (!vm.dontSave && $scope.currentPage === Pages.EDIT_FORM) {
+                vm.isProcessing = true;
                 let question = isInFocusable(event.target);
                 if (question && question.id && question.id > 0) {
                     if (!question.selected) {
@@ -839,6 +845,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 else if(!isInDontSave(event.target)) {
                     await saveFormElements();
                 }
+                vm.isProcessing = false;
                 $scope.safeApply();
             }
         };

@@ -134,7 +134,7 @@
                             </div>
                             <div class="action-buttons">
                                 <button class="cell cancel" ng-click="redirectTo('/list/mine')"><i18n>formulaire.cancel</i18n></button>
-                                <button class="cell" reset-guard="vm.saveGuard()" ng-disabled="!vm.form.title || !vm.checkIntervalDates()"><i18n>formulaire.save</i18n></button>
+                                <button class="cell" reset-guard="vm.saveGuard()" ng-disabled="!vm.form.title || !vm.checkIntervalDates() || vm.isProcessing"><i18n>formulaire.save</i18n></button>
                             </div>
                         </div>
                     </div>

@@ -21,6 +21,6 @@
     </table>
     <div class="action-buttons">
         <button class="cell cancel" ng-click="vm.display.lightbox.archive = false"><i18n>formulaire.cancel</i18n></button>
-        <button class="cell" ng-click="vm.doArchiveForms()"><i18n>formulaire.archive</i18n></button>
+        <button class="cell" ng-click="vm.doArchiveForms()" ng-disabled="vm.isProcessing"><i18n>formulaire.archive</i18n></button>
     </div>
 </lightbox>

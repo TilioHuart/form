@@ -49,8 +49,9 @@
             <!-- Bottom page buttons -->
             <div class="buttons">
                 <button class="cell" ng-if="vm.formElement.position <= 1" ng-disabled="true"><i18n>formulaire.public.prev</i18n></button>
-                <button class="cell cancel" reset-guard="vm.prev()" ng-if="vm.formElement.position > 1"><i18n>formulaire.public.prev</i18n></button>
-                <button class="cell" reset-guard="vm.next()"><i18n>formulaire.public.next</i18n></button>
+                <button class="cell cancel" reset-guard="vm.prev()" ng-disabled="vm.isProcessing"
+                        ng-if="vm.formElement.position > 1"><i18n>formulaire.public.prev</i18n></button>
+                <button class="cell" reset-guard="vm.next()" ng-disabled="vm.isProcessing"><i18n>formulaire.public.next</i18n></button>
             </div>
         </div>
     </div>

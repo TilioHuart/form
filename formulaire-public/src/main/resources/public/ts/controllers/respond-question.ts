@@ -23,6 +23,7 @@ interface ViewModel {
 	form: Form;
 	nbFormElements: number;
 	historicPosition: number[];
+	isProcessing: boolean;
 
 	$onInit(): Promise<void>;
 	prev() : void;
@@ -52,6 +53,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 	}
 
 	vm.prev = () : void => {
+		vm.isProcessing = true;
 		formatResponses();
 		let prevPosition = vm.historicPosition[vm.historicPosition.length - 2];
 		if (prevPosition > 0) {
@@ -60,21 +62,27 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 			vm.historicPosition.pop();
 			goToFormElement(isCursorAgain);
 		}
+		vm.isProcessing = false;
+		$scope.safeApply();
 	};
 
 	vm.next = () : void => {
+		vm.isProcessing = true;
 		formatResponses();
 		let nextPosition = getNextPositionIfValid();
 		if (nextPosition && nextPosition <= vm.nbFormElements) {
 			let isCursorAgain: boolean = vm.formElement.isSameQuestionTypeOfType(vm.formElements.all[nextPosition - 1], Types.CURSOR);
 			vm.formElement = vm.formElements.all[nextPosition - 1];
 			vm.historicPosition.push(vm.formElement.position);
+			vm.isProcessing = false;
 			goToFormElement(isCursorAgain);
 		}
 		else if (nextPosition !== undefined) {
 			updateStorage();
+			vm.isProcessing = false;
 			template.open('main', 'containers/recap');
 		}
+		$scope.safeApply();
 	};
 
 	vm.getHtmlDescription = (description: string) : string => {

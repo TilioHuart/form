@@ -50,7 +50,7 @@
 
         <!-- Navigation buttons -->
         <div class="buttons">
-            <button class="cell" ng-click="vm.prev()" ng-disabled="vm.formElement.position == 1">
+            <button class="cell" ng-click="vm.prev()" ng-disabled="vm.formElement.position == 1 || vm.isProcessing">
                 <i18n class="zero-mobile">formulaire.prev</i18n>
                 <i class="i-chevron-left zero-desktop"></i>
             </button>
@@ -63,7 +63,7 @@
                     </option>
                 </select>
             </div>
-            <button class="cell" ng-click="vm.next()" ng-disabled="vm.last">
+            <button class="cell" ng-click="vm.next()" ng-disabled="vm.last || vm.isProcessing">
                 <i18n class="zero-mobile">formulaire.next</i18n>
                 <i class="i-chevron-right zero-desktop"></i>
             </button>

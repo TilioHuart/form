@@ -26,7 +26,7 @@
                         <i18n>formulaire.organize</i18n>
                     </button>
                     <button class="cell cancel dontSave" ng-click="vm.goPreview()" ng-show="vm.formElements.all.length >= 1"><i18n>formulaire.preview</i18n></button>
-                    <button class="cell" ng-click="vm.saveAll(true)"><i18n>formulaire.save</i18n></button>
+                    <button class="cell" ng-click="vm.saveAll(true)" ng-disabled="vm.isProcessing"><i18n>formulaire.save</i18n></button>
                 </div>
             </section>
 
@@ -84,7 +84,7 @@
             <div class="buttons">
                 <div class="flexend nine zero-mobile">
                     <button class="cell" id="createNewEltConfirm1" ng-class="{blueButton: vm.form.nb_responses <= 0}"
-                            ng-click="vm.createNewElement()" ng-disabled="vm.form.nb_responses > 0">
+                            ng-click="vm.createNewElement()" ng-disabled="vm.form.nb_responses > 0 || vm.display.lightbox.newElement">
                         <i18n>formulaire.add.element</i18n>
                     </button>
                 </div>

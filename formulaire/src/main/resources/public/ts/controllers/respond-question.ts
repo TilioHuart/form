@@ -31,6 +31,7 @@ interface ViewModel {
     currentResponses: Map<Question, Responses>;
     currentFiles: Map<Question, File[]>;
     currentQuestionFiles: File[];
+    isProcessing: boolean;
 
     $onInit() : Promise<void>;
     prev() : Promise<void>;
@@ -150,13 +151,15 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
     vm.prev = async () : Promise<void> => {
         let prevPosition: number = vm.historicPosition[vm.historicPosition.length - 2];
+        vm.isProcessing = true;
         if (prevPosition > 0) {
             await saveResponses();
             vm.formElement = vm.formElements.all[prevPosition - 1];
             vm.historicPosition.pop();
             vm.longestPath = vm.historicPosition.length + findLongestPathInFormElement(vm.formElement.id, vm.formElements) - 1;
             goToFormElement();
-        }
+        };
+        vm.isProcessing = false;
     };
 
     vm.prevGuard = () => {
@@ -165,12 +168,14 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
     vm.next = async () : Promise<void> => {
         let nextPosition: number = getNextPositionIfValid();
+        vm.isProcessing = true;
         if (nextPosition && nextPosition <= vm.nbFormElements) {
             await saveResponses();
             vm.formElement = vm.formElements.all[nextPosition - 1];
             vm.longestPath = findLongestPathInFormElement(vm.formElement.id, vm.formElements);
             vm.historicPosition.push(vm.formElement.position);
             vm.longestPath = vm.historicPosition.length + findLongestPathInFormElement(vm.formElement.id, vm.formElements) - 1;
+            vm.isProcessing = false;
             goToFormElement();
         }
         else if (nextPosition !== undefined) {
@@ -179,6 +184,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                 path: `/form/${vm.form.id}/${vm.distribution.id}/questions/recap`,
                 historicPosition: vm.historicPosition
             };
+            vm.isProcessing = false;
             $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, data);
         }
     };

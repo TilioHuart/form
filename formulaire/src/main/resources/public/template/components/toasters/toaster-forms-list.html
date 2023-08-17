@@ -8,7 +8,7 @@
             <button ng-click="vm.openPropertiesForm()" class="cell" ng-show="vm.forms.selected.length === 1">
                 <i18n>formulaire.properties</i18n>
             </button>
-            <button ng-click="vm.duplicateForms()" class="cell">
+            <button ng-click="vm.duplicateForms()" ng-disabled="vm.isProcessing" class="cell">
                 <i18n>formulaire.duplicate</i18n>
             </button>
             <button ng-click="vm.moveItems()" class="cell" ng-show="vm.folder.id != vm.folders.sharedFormsFolder.id">

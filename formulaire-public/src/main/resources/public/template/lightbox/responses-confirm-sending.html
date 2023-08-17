@@ -8,6 +8,6 @@
     </div>
     <div class="action-buttons">
         <button class="cell cancel" ng-click="vm.display.lightbox.sending = false;"><i18n>formulaire.public.cancel</i18n></button>
-        <button class="cell" ng-click="vm.doSend()"><i18n>formulaire.public.confirm</i18n></button>
+        <button class="cell" ng-click="vm.doSend()" ng-disabled="vm.isProcessing"><i18n>formulaire.public.confirm</i18n></button>
     </div>
 </lightbox>

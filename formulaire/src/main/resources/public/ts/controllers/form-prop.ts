@@ -12,7 +12,8 @@ interface ViewModel {
     rgpdLifetimeChoices: number[];
     display: {
         date_ending: boolean
-    }
+    },
+    isProcessing: boolean;
 
     $onInit() : Promise<void>;
     saveGuard(): void;
@@ -33,6 +34,7 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
         vm.display = {
             date_ending: false
         };
+        vm.isProcessing = false;
 
         vm.$onInit = async () : Promise<void> => {
             vm.form = $scope.form;
@@ -52,8 +54,10 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
         };
 
         vm.save = async () : Promise<void> => {
-            if (vm.form.title && vm.checkIntervalDates()) {
+            if (vm.form.title && vm.checkIntervalDates() && !vm.isProcessing) {
+                vm.isProcessing = true;
                 vm.form = await formService.save(vm.form);
+                vm.isProcessing = false;
                 $scope.redirectTo(`/form/${vm.form.id}/edit`);
                 $scope.safeApply();
             }

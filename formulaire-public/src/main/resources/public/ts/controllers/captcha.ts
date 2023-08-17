@@ -16,6 +16,7 @@ interface ViewModel {
             sending: boolean
         }
     };
+    isProcessing: boolean;
 
     $onInit() : Promise<void>;
     send() : void;
@@ -63,6 +64,7 @@ export const captchaController = ng.controller('CaptchaController', ['$scope',
     };
 
     vm.doSend = async () : Promise<void> => {
+        vm.isProcessing = true;
         let distributionData = await responseService.sendResponses(vm.formKey, vm.distributionKey, vm.responseCaptcha, vm.responses);
         let distribution = Mix.castAs(Question, distributionData);
 
@@ -80,6 +82,7 @@ export const captchaController = ng.controller('CaptchaController', ['$scope',
                 template.open('main', 'containers/end/thanks');
             }, 1000);
         }
+        vm.isProcessing = false;
     };
 
     // Utils

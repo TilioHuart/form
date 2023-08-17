@@ -25,6 +25,7 @@ interface ViewModel {
             sending: boolean
         }
     };
+    isProcessing: boolean;
 
     $onInit(): Promise<void>;
     send(): Promise<void>;
@@ -95,6 +96,7 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
         let distrib = vm.distribution;
         distrib.status = DistributionStatus.FINISHED;
         distrib.structure = distrib.structure ? distrib.structure : model.me.structureNames[0];
+        vm.isProcessing = true;
 
         if (distrib.original_id) {
             let questionFileIds: any = vm.formElements.all.filter(q => q instanceof Question && q.question_type === Types.FILE).map(q => q.id);
@@ -111,6 +113,7 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
         }
         template.close('lightbox');
         vm.display.lightbox.sending = false;
+        vm.isProcessing = false;
         notify.success(idiom.translate('formulaire.success.responses.save'));
         window.setTimeout(function () { $scope.redirectTo(`/list/responses`); }, 1000);
     };

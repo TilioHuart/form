@@ -26,6 +26,6 @@
     </div>
     <div class="action-buttons">
         <button class="cell cancel" ng-click="vm.display.lightbox.sending = false;"><i18n>formulaire.cancel</i18n></button>
-        <button class="cell" ng-click="vm.doSend()"><i18n>formulaire.confirm</i18n></button>
+        <button class="cell" ng-click="vm.doSend()" ng-disabled="vm.isProcessing"><i18n>formulaire.confirm</i18n></button>
     </div>
 </lightbox>

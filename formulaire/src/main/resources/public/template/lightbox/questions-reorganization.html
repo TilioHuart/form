@@ -31,6 +31,6 @@
     </div>
     <div class="action-buttons">
         <button class="cell cancel" ng-click="vm.cancelOrganizeFormElements()"><i18n>formulaire.cancel</i18n></button>
-        <button class="cell" id="organizeConfirm" ng-click="vm.doOrganizeFormElements()"><i18n>formulaire.confirm</i18n></button>
+        <button class="cell" id="organizeConfirm" ng-click="vm.doOrganizeFormElements()" ng-disabled="vm.isProcessing"><i18n>formulaire.confirm</i18n></button>
     </div>
 </lightbox>
