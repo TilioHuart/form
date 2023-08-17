@@ -81,7 +81,7 @@ interface ViewModel {
     openedFoldersIds: number[];
     selectedFolder: Element;
     draggable : Draggable;
-    draggedItem : any;
+    draggedItem : Form;
     exportFormat: Exports;
     isProcessing: boolean;
 
@@ -570,8 +570,8 @@ export const formsListController = ng.controller('FormsListController', ['$scope
 
     vm.initDragAndDrop = () : void => {
         vm.draggable = {
-            dragConditionHandler(event: DragEvent, content?: any): boolean { return true; },
-            dragStartHandler(event: DragEvent, content?: any): void {
+            dragConditionHandler(event: DragEvent, content?: Form): boolean { return true; },
+            dragStartHandler(event: DragEvent, content?: Form): void {
                 try {
                     event.dataTransfer.setData('application/json', JSON.stringify(content));
                     vm.draggedItem = content;
@@ -579,33 +579,33 @@ export const formsListController = ng.controller('FormsListController', ['$scope
                     event.dataTransfer.setData('text', JSON.stringify(content));
                 }
             },
-            dragEndHandler(event: DragEvent, content?: any): void {},
-            dropConditionHandler(event: DragEvent, content?: any): boolean {
-                let folderTarget = angular.element(event.srcElement).scope().folder;
-                let isTargetAlreadyMyParent = folderTarget && folderTarget.id === vm.folder.id;
+            dragEndHandler(event: DragEvent, content?: Form): void {},
+            dropConditionHandler(event: DragEvent, content?: Form): boolean {
+                let folderTarget: Folder = angular.element(event.srcElement).scope().folder;
+                let isTargetAlreadyMyParent: boolean = folderTarget && folderTarget.id === vm.folder.id;
 
                 // Check if target is self or already parent
-                let isTargetMyself = vm.draggedItem && folderTarget && folderTarget.id === vm.draggedItem.id;
-                let isTargetSelected = vm.folders.selected.filter(f => f.id === folderTarget.id).length > 0;
+                let isTargetMyself : boolean= vm.draggedItem && folderTarget && folderTarget.id === vm.draggedItem.id;
+                let isTargetSelected: boolean = vm.folders.selected.filter(f => f.id === folderTarget.id).length > 0;
 
                 // Check if dragged item is in myForms folder
-                let isArchivedItem = vm.draggedItem.archived;
-                let isSharedItem = vm.draggedItem.collab && vm.draggedItem.owner_id != model.me.userId;
-                let isItemInMyForms = !isArchivedItem && !isSharedItem;
+                let isArchivedItem: boolean = vm.draggedItem.archived;
+                let isSharedItem: boolean = vm.draggedItem.collab && vm.draggedItem.owner_id != model.me.userId;
+                let isItemInMyForms: boolean = !isArchivedItem && !isSharedItem;
 
                 // Check if target is in myForms folder
-                let isTargetSharedFolder = folderTarget.id === vm.folders.sharedFormsFolder.id;
-                let isTargetArchivedFolder = folderTarget.id === vm.folders.archivedFormsFolder.id;
-                let isTargetInMyForms = !isTargetSharedFolder && !isTargetArchivedFolder;
+                let isTargetSharedFolder: boolean = folderTarget.id === vm.folders.sharedFormsFolder.id;
+                let isTargetArchivedFolder: boolean = folderTarget.id === vm.folders.archivedFormsFolder.id;
+                let isTargetInMyForms: boolean = !isTargetSharedFolder && !isTargetArchivedFolder;
 
                 return !isTargetAlreadyMyParent && !isTargetMyself && !isTargetSelected && isItemInMyForms && isTargetInMyForms;
             },
             async dragDropHandler(event: DragEvent, content?: any): Promise<void> {
-                let originalItem = JSON.parse(event.dataTransfer.getData("application/json"));
-                let targetItem = angular.element(event.srcElement).scope().folder;
+                let originalItem: Form = JSON.parse(event.dataTransfer.getData("application/json"));
+                let targetItem: Folder = angular.element(event.srcElement).scope().folder;
 
-                let idOriginalItem = originalItem.id;
-                let idTargetItem = targetItem.id;
+                let idOriginalItem: number = originalItem.id;
+                let idTargetItem: number = targetItem.id;
 
                 if (vm.forms.selected.length > 0) { // Move several forms
                     await formService.move(vm.forms.selected.map(f => f.id), idTargetItem ? idTargetItem : 1);
@@ -614,13 +614,13 @@ export const formsListController = ng.controller('FormsListController', ['$scope
                     await folderService.move(vm.folders.selected.map(f => f.id), idTargetItem ? idTargetItem : 1);
                 }
                 else {
-                    let isForm = !!originalItem.folder_id;
+                    let isForm: boolean = !!originalItem.folder_id;
                     if (isForm) { // Move one form
-                        let draggedItemIds = vm.forms.all.filter(f => f.id === idOriginalItem).map(f => f.id);
+                        let draggedItemIds: number[] = vm.forms.all.filter(f => f.id === idOriginalItem).map(f => f.id);
                         await formService.move(draggedItemIds, idTargetItem ? idTargetItem : 1);
                     }
                     else if (!isForm) { // Move one folder
-                        let draggedItemIds = vm.folders.all.filter(f => f.id === idOriginalItem).map(f => f.id);
+                        let draggedItemIds: number[] = vm.folders.all.filter(f => f.id === idOriginalItem).map(f => f.id);
                         await folderService.move(draggedItemIds, idTargetItem ? idTargetItem : 1);
                     }
                 }
@@ -881,7 +881,7 @@ export const formsListController = ng.controller('FormsListController', ['$scope
     }
 
     const initMail = () : void => {
-        let endPath = vm.forms.selected[0].rgpd ? 'rgpd' : 'new';
+        let endPath: string = vm.forms.selected[0].rgpd ? 'rgpd' : 'new';
         vm.mail.link = `${window.location.origin}${window.location.pathname}#/form/${vm.forms.selected[0].id}/${endPath}`;
         vm.mail.subject = idiom.translate('formulaire.remind.default.subject');
         vm.mail.body = I18nUtils.getWithParams('formulaire.remind.default.body', [vm.mail.link, vm.mail.link]);
