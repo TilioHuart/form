@@ -99,11 +99,6 @@ export const recapQuestionsController = ng.controller('RecapQuestionsController'
         vm.isProcessing = true;
 
         if (distrib.original_id) {
-            let questionFileIds: any = vm.formElements.all.filter(q => q instanceof Question && q.question_type === Types.FILE).map(q => q.id);
-            let responseFiles = vm.responses.all.filter(r => questionFileIds.includes(r.question_id));
-            for (let responseFile of responseFiles) {
-                await responseFileService.deleteAll(responseFile.original_id);
-            }
             await cleanResponses();
             await distributionService.replace(distrib);
         }
