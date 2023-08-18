@@ -188,6 +188,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             await saveFormElements(displaySuccess && wrongElements.length <= 0);
             vm.dontSave = false;
             vm.isProcessing = false;
+            $scope.safeApply();
         };
 
 
