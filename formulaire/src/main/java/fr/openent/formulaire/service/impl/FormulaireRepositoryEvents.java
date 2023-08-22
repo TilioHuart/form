@@ -1,8 +1,10 @@
 package fr.openent.formulaire.service.impl;
 
 import fr.openent.form.helpers.FutureHelper;
+import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import org.entcore.common.folders.FolderImporter;
 import org.entcore.common.service.impl.SqlRepositoryEvents;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
@@ -13,6 +15,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
+import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -178,8 +181,8 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
             .compose(forms -> importExportService.getTableContent(importPath, schema, SECTION, tableContents))
             .compose(sections -> importExportService.getTableContent(importPath, schema, QUESTION, tableContents))
             .compose(questions -> importExportService.getTableContent(importPath, schema, QUESTION_CHOICE, tableContents))
-            .compose(questionSpecifics -> importExportService.getTableContent(importPath, schema, QUESTION_SPECIFIC_FIELDS, tableContents))
-            .compose(questionChoices -> importExportService.importForms(tableContents.get(FORM), userId, userName))
+            .compose(questionChoices -> importExportService.getTableContent(importPath, schema, QUESTION_SPECIFIC_FIELDS, tableContents))
+            .compose(questionSpecifics -> importExportService.importForms(tableContents.get(FORM), userId, userName))
             .compose(oldNewFormIds -> {
                 Map<Integer, Integer> oldNewFormIdsMap = importExportService.generateMappingIntInt(oldNewFormIds, ORIGINAL_FORM_ID, ID);
                 tableMappingIds.put(FORM, oldNewFormIdsMap);
@@ -203,13 +206,13 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
                 tableMappingIds.get(QUESTION).putAll(oldNewChildrenQuestionIdsMap);
                 return importExportService.importQuestionSpecifics(tableContents.get(QUESTION_SPECIFIC_FIELDS), tableMappingIds.get(QUESTION));
             })
-            .compose(newQuestionSpecifics -> importExportService.importQuestionChoices(tableContents.get(QUESTION_CHOICE), tableMappingIds.get(QUESTION), tableMappingIds.get(SECTION)))
-            .compose(newQuestionChoices -> {
-                Promise<JsonArray> promise = Promise.promise();
-                super.importDocumentsDependancies(importPath, userId, userName, new SqlStatementsBuilder().build(), FutureHelper.handler(promise));
-                return promise.future();
+            .compose(newQuestionSpecifics -> customImportDocumentsDependencies(importPath, userId, userName, builder.build()))
+            .compose(documentsIdMapping -> {
+                JsonObject questionChoices = tableContents.get(QUESTION_CHOICE);
+                updateImageIds(questionChoices.getJsonArray(FIELDS).getList(), questionChoices.getJsonArray(RESULTS), documentsIdMapping);
+                return importExportService.importQuestionChoices(questionChoices, tableMappingIds.get(QUESTION), tableMappingIds.get(SECTION));
             })
-            .compose(attachments -> importExportService.createFolderLinks(tableMappingIds.get(FORM), userId))
+            .compose(newQuestionChoices -> importExportService.createFolderLinks(tableMappingIds.get(FORM), userId))
             .onSuccess(result -> {
                 int nbFormsImported = tableMappingIds.get(FORM).size();
                 JsonObject finalResultInfos = new JsonObject().put(STATUS, OK)
@@ -232,6 +235,36 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
                 err.printStackTrace();
                 handler.handle(finalResultInfos);
             });
+    }
+
+    protected void updateImageIds(List<String> fields, JsonArray results, Map<String, String> documentsIdMapping ) {
+        for (int i = 0; i < results.size(); ++i) {
+            JsonArray entry = results.getJsonArray(i);
+            int columnImageIndex = fields.indexOf(IMAGE);
+            String imageValue = entry.getString(columnImageIndex);
+            String imageId = imageValue != null && !imageValue.isEmpty() ? imageValue.replace(IMAGE_PATH_PREFIX, "") : null;
+            if (imageId != null && documentsIdMapping.containsKey(imageId)) {
+                entry.set(columnImageIndex, IMAGE_PATH_PREFIX + documentsIdMapping.get(imageId));
+            }
+        }
+    }
+
+    protected Future<Map<String, String>> customImportDocumentsDependencies(String importPath, String userId, String userName, JsonArray statements) {
+        Promise<Map<String, String>> promise = Promise.promise();
+        final String filePath = importPath + File.separator + DOCUMENTS;
+        fs.exists(filePath, exist -> {
+            if (exist.failed() || !exist.result()) {
+                promise.complete(new HashMap<>());
+                return;
+            }
+
+            FolderImporter.FolderImporterContext ctx = new FolderImporter.FolderImporterContext(filePath, userId, userName);
+            fileImporter.importFoldersFlatFormat(ctx, rapport -> { // import in mongo + generate mapOldNewIds
+                promise.complete(ctx.oldIdsToNewIds);
+            });
+        });
+
+        return promise.future();
     }
 
 
