@@ -114,7 +114,7 @@
             </div>
         </div>
     </div>
-    <div class="question-edit" ng-if="(vm.form.editable || vm.distribution.status != vm.DistributionStatus.FINISHED)
+    <div class="question-edit" ng-if="(vm.form.editable || vm.distribution.status != vm.distributionStatus.FINISHED)
                     && vm.question.question_type != vm.types.FREETEXT">
         <a ng-click="vm.openQuestion()"><i18n>formulaire.edit</i18n></a>
     </div>
