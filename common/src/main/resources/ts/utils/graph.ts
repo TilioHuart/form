@@ -300,6 +300,11 @@ export class GraphUtils {
                 colors: colors,
                 xaxis: {
                     categories: labels,
+                    labels: {
+                        formatter: function (val) {
+                            return val === Math.round(val) ? val.toFixed() : null;
+                        }
+                    }
                 }
             }
         }
