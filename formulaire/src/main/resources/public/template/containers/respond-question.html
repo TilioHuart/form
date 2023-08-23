@@ -25,7 +25,7 @@
                                    question="vm.formElement"
                                    responses="vm.currentResponses.get(vm.formElement)"
                                    distribution="vm.distribution"
-                                   files="vm.currentQuestionFiles">
+                                   files="vm.currentFiles.get(vm.formElement)">
             </respond-question-item>
             <respond-matrix ng-if="FormElementUtils.isQuestion(vm.formElement) && vm.formElement.question_type == Types.MATRIX"
                             question="vm.formElement"

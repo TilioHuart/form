@@ -5,6 +5,7 @@ export abstract class Constants {
     static readonly DEFAULT_CURSOR_MIN_VALUE: number = 1;
     static readonly DEFAULT_CURSOR_MAX_VALUE: number = 10;
     static readonly DEFAULT_CURSOR_STEP: number = 1;
+    static readonly MAX_FILES_SAVE: number = 10;
 
     // Colors
     static readonly GRAPH_COLORS: string[] = ['#37A4CD','#1691C0','#056F98','#5AB7DA','#89CEE9'];

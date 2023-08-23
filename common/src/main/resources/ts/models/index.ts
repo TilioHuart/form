@@ -2,6 +2,7 @@ export * from './FormElement';
 export * from './TreeGraph';
 export * from './Delegate';
 export * from './Distribution';
+export * from './Files';
 export * from './Form';
 export * from './QuestionChoice';
 export * from './QuestionType';

@@ -1,7 +1,7 @@
 import {Directive, ng} from "entcore";
 import {Direction, FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
 import {
-    Distribution,
+    Distribution, Files,
     Question,
     QuestionChoice,
     Response,
@@ -20,14 +20,15 @@ interface IRespondQuestionItemScopeProps {
     question: Question;
     responses: Responses;
     distribution: Distribution;
-    direction: typeof Direction;
-    files: File[];
-    types: typeof Types;
-    I18n: I18nUtils;
-    mapChoiceResponseIndex: Map<QuestionChoice, number>;
+    files: Files;
 }
 
 interface IViewModel extends ng.IController, IRespondQuestionItemScopeProps {
+    direction: typeof Direction;
+    types: typeof Types;
+    i18n: I18nUtils;
+    mapChoiceResponseIndex: Map<QuestionChoice, number>;
+
     moveResponse(resp: Response, direction: string): void;
     getHtmlDescription(description: string) : string;
     $onChanges(changes: any): void;
@@ -47,15 +48,15 @@ class Controller implements IViewModel {
     question: Question;
     responses: Responses;
     distribution: Distribution;
+    files: Files;
     direction: typeof Direction;
-    files: File[];
     types: typeof Types;
-    I18n: I18nUtils;
+    i18n: I18nUtils;
     mapChoiceResponseIndex: Map<QuestionChoice, number>;
 
     constructor(private $scope: IRespondQuestionItemScope, private $sce: ng.ISCEService) {
         this.types = Types;
-        this.I18n = I18nUtils;
+        this.i18n = I18nUtils;
         this.direction = Direction;
     }
 
@@ -67,7 +68,7 @@ class Controller implements IViewModel {
     $onChanges = async (changes: any) : Promise<void> => {
         this.question = changes.question.currentValue;
         await this.initRespondQuestionItem();
-        this.$scope.$broadcast(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.CHANGE_FILE_PICKER, this.files);
+        this.$scope.$broadcast(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.CHANGE_FILE_PICKER, this.files.all);
         this.$scope.$apply();
     };
 
@@ -127,8 +128,8 @@ class Controller implements IViewModel {
         if (this.question.question_type === Types.TIME && typeof this.responses.all[0].answer == "string") {
             this.responses.all[0].answer = new Date("January 01 1970 " + this.responses.all[0].answer);
         }
-        else if (this.question.question_type === Types.FILE) {
-            this.files = [];
+        else if (this.question.question_type === Types.FILE && this.distribution) {
+            this.files.all = [];
             if (this.responses.all[0].id) {
                 let responseFiles: ResponseFiles = new ResponseFiles();
                 await responseFiles.sync(this.responses.all[0].id);
@@ -136,8 +137,8 @@ class Controller implements IViewModel {
                     if (repFile.id)  {
                         repFile.filename = UtilsUtils.getFilenameWithoutOwnerName(repFile.filename);
                         let file: File = new File([repFile.id], repFile.filename);
-                        if (!this.files.find((f: File) => f.name == repFile.filename)) {
-                            this.files.push(file);
+                        if (!this.files.all.find((f: File) => f.name == repFile.filename)) {
+                            this.files.all.push(file);
                         }
                     }
                 }

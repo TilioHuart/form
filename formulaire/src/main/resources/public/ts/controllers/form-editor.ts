@@ -1,5 +1,6 @@
 import {angular, idiom, ng, notify, template} from 'entcore';
 import {
+    Files,
     Form,
     FormElement,
     FormElements,
@@ -55,8 +56,8 @@ interface ViewModel {
     };
     preview: {
         formElement: FormElement, // Question for preview
-        responses: Map<Question, Responses>, // Responses list for preview
-        files: Map<Question, File[]>,
+        currentResponses: Map<Question, Responses>, // Responses list for preview
+        currentFiles: Map<Question, Files>,
         historicPosition: number[],
         page: string,
         last: boolean
@@ -550,8 +551,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             await vm.saveAll(false);
             vm.preview = {
                 formElement: new Question(),
-                responses: new Map(),
-                files: new Map(),
+                currentResponses: new Map(),
+                currentFiles: new Map(),
                 historicPosition: [],
                 page: PreviewPage.QUESTION,
                 last: false
@@ -580,8 +581,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         questionResponses.all.push(new Response(question.id));
                     }
 
-                    vm.preview.responses.set(question, questionResponses);
-                    if (!vm.preview.files.has(question)) vm.preview.files.set(question, []);
+                    vm.preview.currentResponses.set(question, questionResponses);
+                    if (!vm.preview.currentFiles.has(question)) vm.preview.currentFiles.set(question, new Files());
                 }
             }
             if (vm.form.rgpd) {
@@ -655,13 +656,13 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             // Check if there are valid conditional questions and find next element position accordingly
             if (vm.preview.formElement instanceof Question && vm.preview.formElement.conditional) {
                 conditionalQuestion = vm.preview.formElement;
-                response = vm.preview.responses.get(conditionalQuestion).all[0];
+                response = vm.preview.currentResponses.get(conditionalQuestion).all[0];
             }
             else if (vm.preview.formElement instanceof Section) {
                 let conditionalQuestions = vm.preview.formElement.questions.all.filter((q: Question) => q.conditional);
                 if (conditionalQuestions.length === 1) {
                     conditionalQuestion = conditionalQuestions[0];
-                    response = vm.preview.responses.get(conditionalQuestion).all[0];
+                    response = vm.preview.currentResponses.get(conditionalQuestion).all[0];
                 }
             }
 

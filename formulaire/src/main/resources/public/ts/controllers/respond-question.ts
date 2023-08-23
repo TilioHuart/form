@@ -1,6 +1,6 @@
-import {idiom, model, ng, notify} from "entcore";
+import {idiom, ng, notify} from "entcore";
 import {
-    Distribution,
+    Distribution, Files,
     Form,
     FormElement,
     FormElements,
@@ -12,9 +12,10 @@ import {
     Types
 } from "../models";
 import {responseFileService, responseService} from "../services";
-import {FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_EMIT_EVENT, FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
+import {FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_EMIT_EVENT} from "@common/core/enums";
 import {FormElementType} from "@common/core/enums/form-element-type";
 import {UtilsUtils} from "@common/utils";
+import {Constants} from "@common/core/constants";
 
 interface ViewModel {
     formElements: FormElements;
@@ -29,8 +30,7 @@ interface ViewModel {
     loading : boolean;
     historicPosition: number[];
     currentResponses: Map<Question, Responses>;
-    currentFiles: Map<Question, File[]>;
-    currentQuestionFiles: File[];
+    currentFiles: Map<Question, Files>;
     isProcessing: boolean;
 
     $onInit() : Promise<void>;
@@ -105,7 +105,6 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         }
     }
 
-
     const initFormElementResponses = () : void => {
         let nbQuestions: number = vm.formElement instanceof Question ? 1 : (vm.formElement as Section).questions.all.length;
         for (let i = 0; i < nbQuestions; i++) {
@@ -142,8 +141,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             }
 
             vm.currentResponses.set(question, questionResponses);
-            if (!vm.currentFiles.has(question)) vm.currentFiles.set(question, []);
-            vm.currentQuestionFiles = vm.currentFiles.get(question);
+            if (!vm.currentFiles.has(question)) vm.currentFiles.set(question, new Files());
         }
 
         $scope.safeApply();
@@ -270,7 +268,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
     const saveQuestionResponses = async (question: Question) : Promise<boolean> => {
         let responses: Responses = vm.currentResponses.get(question);
-        let files: File[] = vm.currentQuestionFiles;
+        let files: Files = vm.currentFiles.get(question);
 
         if (question.isTypeMultipleRep() || question.isRanking()) {
             await responseService.deleteByQuestionAndDistribution(question.id, vm.distribution.id);
@@ -318,24 +316,24 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         return true;
     };
 
-    const saveFiles = async (question: Question, response: Response, files: File[]) : Promise<boolean> => {
-        if (files.length > 10) {
+    const saveFiles = async (question: Question, response: Response, files: Files) : Promise<boolean> => {
+        if (files.all.length > Constants.MAX_FILES_SAVE) {
             notify.info(idiom.translate('formulaire.response.file.tooMany'));
             return false;
         }
         else {
             vm.currentFiles.set(question, files);
             await responseFileService.deleteAll(response.id);
-            for (let i = 0; i < files.length; i++) {
-                let filename = files[i].name;
-                if (files[i].type && !$scope.form.anonymous) {
+            for (let i = 0; i < files.all.length; i++) {
+                let filename = files.all[i].name;
+                if (files.all[i].type && !$scope.form.anonymous) {
                     filename = UtilsUtils.getOwnerNameWithUnderscore() + filename;
                 }
                 let file = new FormData();
-                file.append("file", files[i], filename);
+                file.append("file", files.all[i], filename);
                 await responseFileService.create(response.id, file);
             }
-            response.answer = files.length > 0 ? idiom.translate('formulaire.response.file.send') : "";
+            response.answer = files.all.length > 0 ? idiom.translate('formulaire.response.file.send') : "";
             await responseService.update(response);
             return true;
         }
