@@ -81,22 +81,22 @@ public class ResponseFileController extends ControllerHelper {
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void download(HttpServerRequest request) {
         String fileId = request.getParam(PARAM_FILE_ID);
-        responseFileService.get(fileId, fileEvt -> {
-            if (fileEvt.isLeft()) {
-                log.error("[Formulaire@downloadFile] Error in getting responseFile with id : " + fileId);
-                renderInternalError(request, fileEvt);
-                return;
-            }
-            if (fileEvt.right().getValue().isEmpty()) {
-                String message = "[Formulaire@downloadFile] No file found for id " + fileId;
-                log.error(message);
-                notFound(request, message);
-                return;
-            }
+        responseFileService.getFinished(fileId)
+            .onSuccess(responseFile -> {
+                if (!responseFile.isPresent()) {
+                    String errMessage = "[Formulaire@ResponseFileController::download] No response file found for id " + fileId;
+                    log.error(errMessage);
+                    renderError(request);
+                    return;
+                }
 
-            JsonObject file = fileEvt.right().getValue();
-            storage.sendFile(file.getString(ID), file.getString(FILENAME), request, false, new JsonObject());
-        });
+                storage.sendFile(responseFile.get().getId(), responseFile.get().getFilename(), request, false, new JsonObject());
+            })
+            .onFailure(err -> {
+                String errMessage = "[Formulaire@ResponseFileController::download] Failed to get response file for id " + fileId + " : ";
+                log.error(errMessage + err.getMessage());
+                renderError(request);
+            });
     }
 
     @Get("/responses/:questionId/files/download/zip")

@@ -1,5 +1,6 @@
 package fr.openent.formulaire.service.impl;
 
+import fr.openent.form.core.constants.DistributionStatus;
 import fr.openent.form.core.models.ResponseFile;
 import fr.openent.form.helpers.IModelHelper;
 import fr.openent.formulaire.service.ResponseFileService;
@@ -14,6 +15,7 @@ import org.entcore.common.sql.SqlResult;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static fr.openent.form.core.constants.Tables.*;
@@ -53,6 +55,22 @@ public class DefaultResponseFileService implements ResponseFileService {
         String query = "SELECT * FROM " + RESPONSE_FILE_TABLE + " WHERE id = ?;";
         JsonArray params = new JsonArray().add(fileId);
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    @Override
+    public Future<Optional<ResponseFile>> getFinished(String fileId) {
+        Promise<Optional<ResponseFile>> promise = Promise.promise();
+
+        String query = "SELECT rf.* FROM " + RESPONSE_FILE_TABLE + " rf " +
+                "LEFT JOIN " + RESPONSE_TABLE + " r ON r.id = rf.response_id " +
+                "LEFT JOIN " + DISTRIBUTION_TABLE + " d ON d.id = r.distribution_id " +
+                "WHERE rf.id = ? AND d.status = ?;";
+        JsonArray params = new JsonArray().add(fileId).add(DistributionStatus.FINISHED);
+
+        String errorMessage = "[Formulaire@DefaultResponseFileService::getFinished] Fail to get response file for id " + fileId + " : ";
+        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(IModelHelper.sqlUniqueResultToIModel(promise, ResponseFile.class, errorMessage)));
+
+        return promise.future();
     }
 
     @Override

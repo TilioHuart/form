@@ -82,7 +82,6 @@ public class CustomShareAndOwner implements ResourcesProvider {
         }
     }
 
-
     private String getKeyByBinding(Binding binding) {
         if (isListByFormAndResponderDistribution(binding) || isCountDistribution(binding) || isGetByFormResponderAndStatusDistribution(binding) ||
                 isGetForm(binding) || isUpdateForm(binding) || isDeleteForm(binding) || isSendReminderForm(binding) ||

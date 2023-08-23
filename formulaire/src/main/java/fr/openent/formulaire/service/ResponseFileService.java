@@ -7,7 +7,9 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.Optional;
 
 public interface ResponseFileService {
     /**
@@ -37,6 +39,12 @@ public interface ResponseFileService {
      * @param handler function handler returning JsonObject data
      */
     void get(String fileId, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Get a specific file by id for a finished distribution
+     * @param fileId file identifier
+     */
+    Future<Optional<ResponseFile>> getFinished(String fileId);
 
     /**
      * Create a response_file
