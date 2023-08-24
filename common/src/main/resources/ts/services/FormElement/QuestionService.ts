@@ -22,7 +22,7 @@ export const questionService: QuestionService = {
     async list(id: number, isForSection: boolean = false) : Promise<Question[]> {
         try {
             let parentEntity = isForSection ? 'sections' : 'forms';
-            let data: IQuestionResponse[] = DataUtils.getData(await http.get(`/formulaire/${parentEntity}/${id}/questions`));
+            let data: IQuestionResponse[] = DataUtils.getData(await http.get(`/formulaire/${parentEntity}/${id}/questions`, { headers: { Accept: 'application/json;version=2.0'} }));
             return data.map((qr: IQuestionResponse) => new Question().build(qr));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.list'));
@@ -32,7 +32,7 @@ export const questionService: QuestionService = {
 
     async listAll(formId: number) : Promise<Question[]> {
         try {
-            let data: IQuestionResponse[] = DataUtils.getData(await http.get(`/formulaire/forms/${formId}/questions/all`));
+            let data: IQuestionResponse[] = DataUtils.getData(await http.get(`/formulaire/forms/${formId}/questions/all`, { headers: { Accept: 'application/json;version=2.0'} }));
             return data.map((qr: IQuestionResponse) => new Question().build(qr));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.list'));
@@ -52,7 +52,7 @@ export const questionService: QuestionService = {
 
     async get(questionId: number) : Promise<any> {
         try {
-            return DataUtils.getData(await http.get(`/formulaire/questions/${questionId}`));
+            return DataUtils.getData(await http.get(`/formulaire/questions/${questionId}`, { headers: { Accept: 'application/json;version=2.0'} }));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.get'));
             throw err;

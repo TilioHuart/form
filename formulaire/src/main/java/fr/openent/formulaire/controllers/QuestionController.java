@@ -1,11 +1,11 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.enums.QuestionTypes;
+import fr.openent.form.core.models.ApiVersion;
 import fr.openent.form.core.models.Question;
-import fr.openent.form.core.models.QuestionSpecificFields;
-import fr.openent.form.helpers.BusResultHelper;
 import fr.openent.form.helpers.IModelHelper;
 import fr.openent.form.helpers.UtilsHelper;
+import fr.openent.formulaire.helpers.ApiVersionHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
 import fr.openent.formulaire.service.*;
@@ -33,6 +33,7 @@ import static fr.openent.form.core.constants.Constants.CONDITIONAL_QUESTIONS;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_RIGHT;
 import static fr.openent.form.core.constants.ShareRights.READ_RESOURCE_RIGHT;
+import static fr.openent.form.core.enums.ApiVersions.*;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
 import static fr.openent.form.helpers.UtilsHelper.getByProp;
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
@@ -61,6 +62,8 @@ public class QuestionController extends ControllerHelper {
     @SecuredAction(value = READ_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void listForForm(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
+        ApiVersion apiVersion = new ApiVersion(RequestUtils.acceptVersion(request));
+        boolean shouldAdaptDataToApiVersionTwo = apiVersion.isBefore(TWO_ZERO);
 
         questionService.listForForm(formId, listQuestionsEvt -> {
             if (listQuestionsEvt.isLeft()) {
@@ -71,8 +74,15 @@ public class QuestionController extends ControllerHelper {
 
             JsonArray questions = listQuestionsEvt.right().getValue();
             questionSpecificFieldsService.syncQuestionSpecs(questions)
-                .onSuccess(result -> renderJson(request, result))
-                .onFailure(error -> renderError(request));
+                .onSuccess(result -> {
+                    if (shouldAdaptDataToApiVersionTwo) result = ApiVersionHelper.formatQuestions(result);
+                    renderJson(request, result);
+                })
+                .onFailure(error -> {
+                    String errMessage = "[Formulaire@QuestionController::listForForm] Failed to sync specifics for question of form with id " + formId;
+                    log.error(errMessage + " : " + error.getMessage());
+                    renderError(request);
+                });
         });
     }
 
@@ -82,10 +92,12 @@ public class QuestionController extends ControllerHelper {
     @SecuredAction(value = READ_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void listForSection(HttpServerRequest request) {
         String sectionId = request.getParam(PARAM_SECTION_ID);
+        ApiVersion apiVersion = new ApiVersion(RequestUtils.acceptVersion(request));
+        boolean shouldAdaptDataToApiVersionTwo = apiVersion.isBefore(TWO_ZERO);
 
         questionService.listForSection(sectionId, getQuestionEvt -> {
             if (getQuestionEvt.isLeft()) {
-                String errMessage = "[Formulaire@listForSection] Fail to list questions for section with id " + sectionId;
+                String errMessage = "[Formulaire@QuestionController::listForSection] Fail to list questions for section with id " + sectionId;
                 log.error(errMessage + " : " + getQuestionEvt.left().getValue());
                 renderError(request);
                 return;
@@ -93,9 +105,12 @@ public class QuestionController extends ControllerHelper {
 
             JsonArray questions = getQuestionEvt.right().getValue();
             questionSpecificFieldsService.syncQuestionSpecs(questions)
-                .onSuccess(result -> renderJson(request, result))
+                .onSuccess(result -> {
+                    if (shouldAdaptDataToApiVersionTwo) result = ApiVersionHelper.formatQuestions(result);
+                    renderJson(request, result);
+                })
                 .onFailure(error -> {
-                    String errMessage = "[Formulaire@QuestionController::get] Failed to list questions section with id " + sectionId;
+                    String errMessage = "[Formulaire@QuestionController::listForSection] Failed to list questions section with id " + sectionId;
                     log.error(errMessage + " : " + error.getMessage());
                     renderError(request);
                 });
@@ -108,10 +123,15 @@ public class QuestionController extends ControllerHelper {
     @SecuredAction(value = READ_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void listForFormAndSection(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
+        ApiVersion apiVersion = new ApiVersion(RequestUtils.acceptVersion(request));
+        boolean shouldAdaptDataToApiVersionTwo = apiVersion.isBefore(TWO_ZERO);
 
         questionService.listForFormAndSection(formId)
             .compose(questions -> questionSpecificFieldsService.syncQuestionSpecs(questions))
-            .onSuccess(result -> renderJson(request, result))
+            .onSuccess(result -> {
+                if (shouldAdaptDataToApiVersionTwo) result = ApiVersionHelper.formatQuestions(result);
+                renderJson(request, result);
+            })
             .onFailure(error -> {
                 String errorMessage = "[Formulaire@QuestionController::listForFormAndSection] " +
                         "Failed to list questions for form and sections";
@@ -143,6 +163,9 @@ public class QuestionController extends ControllerHelper {
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void get(HttpServerRequest request) {
         String questionId = request.getParam(PARAM_QUESTION_ID);
+        ApiVersion apiVersion = new ApiVersion(RequestUtils.acceptVersion(request));
+        boolean shouldAdaptDataToApiVersionTwo = apiVersion.isBefore(TWO_ZERO);
+
         questionService.get(questionId, getQuestionEvt -> {
             if (getQuestionEvt.isLeft()) {
                 String errMessage = "[Formulaire@QuestionController::get] Failed to get question with id " + questionId;
@@ -153,7 +176,10 @@ public class QuestionController extends ControllerHelper {
 
             JsonObject question = getQuestionEvt.right().getValue();
             questionSpecificFieldsService.syncQuestionSpecs(new JsonArray().add(question))
-                .onSuccess(result -> renderJson(request, result))
+                .onSuccess(result -> {
+                    if (shouldAdaptDataToApiVersionTwo) result = ApiVersionHelper.formatQuestions(result);
+                    renderJson(request, result);
+                })
                 .onFailure(error -> {
                     String errMessage = "[Formulaire@QuestionController::get] Failed to get question and its specific " +
                             "fields for question with id " + questionId;

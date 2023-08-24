@@ -234,6 +234,7 @@ public class Fields {
     public static final String UNDEFINED = "undefined";
     public static final String USERS = "users";
     public static final String VALUES = "values";
+    public static final String VERSION = "version";
     public static final String ZIP = "zip";
 
     private Fields() {

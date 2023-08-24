@@ -3,7 +3,8 @@ package fr.openent.form.core.enums;
 import java.util.Arrays;
 
 public enum ApiVersions {
-  ONE_NINE("1.9");
+  ONE_NINE("1.9"),
+  TWO_ZERO("2.0");
 
   private final String value;
 
@@ -23,6 +24,10 @@ public enum ApiVersions {
   }
 
   public boolean isUnderOrEqual(String version) {
+    return version != null && this.getValue().compareTo(version) <= 0;
+  }
+
+  public boolean isAfter(String version) {
     return version != null && this.getValue().compareTo(version) <= 0;
   }
 }
