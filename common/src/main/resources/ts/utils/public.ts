@@ -11,6 +11,7 @@ import {
 import {Mix} from "entcore-toolkit";
 import {Fields} from "@common/core/constants";
 import {QuestionSpecificFields} from "@common/models/QuestionSpecificFields";
+import {FormElementType} from "@common/core/enums/form-element-type";
 
 export class PublicUtils {
     /**
@@ -55,7 +56,7 @@ export class PublicUtils {
                 formElements.all.push(PublicUtils.formatIntoQuestion(e));
             }
         }
-        formElements.all.sort((a, b) => a.position - b.position);
+        formElements.all.sort((a: FormElement, b: FormElement) => a.position - b.position);
     };
 
     static formatIntoSection = (e: FormElement) : Section => {
@@ -65,10 +66,11 @@ export class PublicUtils {
                 questions.all.push(PublicUtils.formatIntoQuestion(q));
             }
         }
-        questions.all.sort((a, b) => a.section_position - b.section_position);
+        questions.all.sort((a: Question, b: Question) => a.section_position - b.section_position);
 
         let section: Section = Mix.castAs(Section, e);
         section.questions = questions;
+        section.form_element_type = FormElementType.SECTION;
         return section;
     };
 
@@ -77,11 +79,12 @@ export class PublicUtils {
         if (e[Fields.CHOICES] && e[Fields.CHOICES].all.length > 0) {
             questionChoices.all = Mix.castArrayAs(QuestionChoice, e[Fields.CHOICES].all);
         }
-        questionChoices.all.sort((a, b) => a.position - b.position);
+        questionChoices.all.sort((a: QuestionChoice, b: QuestionChoice) => a.position - b.position);
 
         let question: Question = Mix.castAs(Question, e);
         if (question.question_type === Types.CURSOR) this.formatIntoQuestionCursor(question, e);
 
+        question.form_element_type = FormElementType.QUESTION;
         question.choices = questionChoices;
         return question;
     };
@@ -112,7 +115,7 @@ export class PublicUtils {
         return null;
     };
 
-    static setCookie = (name: string, value: string, expires?: Date, path= '/', domain?: string, secure = false, sameSite = 'strict') : void => {
+    static setCookie = (name: string, value: string, expires?: Date, path: string= '/', domain?: string, secure: boolean = false, sameSite: string = 'strict') : void => {
         let cookie = `${name} = ${value}`;
         if (expires) { cookie += `; ${Fields.EXPIRES} = ${expires.toUTCString()}` }
         if (path) { cookie += `; ${Fields.PATH} = ${path}` }
