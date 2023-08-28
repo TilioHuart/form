@@ -72,8 +72,25 @@ public class DefaultQuestionService implements QuestionService {
         return promise.future();
     }
 
+    public Future<List<Question>> listChildren(JsonArray questionIds) {
+        Promise<List<Question>> promise = Promise.promise();
+
+        if (questionIds == null || questionIds.isEmpty()) {
+            promise.complete(new ArrayList<>());
+            return promise.future();
+        }
+
+        String query = "SELECT * FROM " + QUESTION_TABLE + " WHERE matrix_id IN " + Sql.listPrepared(questionIds);
+        JsonArray params = new JsonArray().addAll(questionIds);
+
+        String errMessage = "[Formulaire@DefaultQuestionService::listChildren] Failed to list children for questions with id " + questionIds + " : ";
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(IModelHelper.sqlResultToIModel(promise, Question.class, errMessage)));
+
+        return promise.future();
+    }
+
     @Override
-    public Future<JsonArray> listChildren(JsonArray questionIds) {
+    public Future<JsonArray> listOldChildren(JsonArray questionIds) {
         Promise<JsonArray> promise = Promise.promise();
 
         if (questionIds == null || questionIds.isEmpty()) {
@@ -92,7 +109,7 @@ public class DefaultQuestionService implements QuestionService {
 
     @Override
     public void listChildren(JsonArray questionIds, Handler<Either<String, JsonArray>> handler) {
-        listChildren(questionIds)
+        listOldChildren(questionIds)
                 .onSuccess(result -> handler.handle(new Either.Right<>(result)))
                 .onFailure(err -> handler.handle(new Either.Left<>(err.getMessage())));
     }

@@ -147,7 +147,7 @@ public class FormQuestionsExportPDF extends ControllerHelper {
                 JsonObject listChoicesInfos = new JsonObject();
                 listChoicesInfos.put(QUESTIONS_CHOICES, listChoices);
                 setChoicesInfos(listChoicesInfos);
-                return questionService.listChildren(questionsIds.get());
+                return questionService.listOldChildren(questionsIds.get());
             })
             .compose(listChildren -> {
                 setMatrixChildren(listChildren);

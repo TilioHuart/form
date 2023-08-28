@@ -158,7 +158,13 @@ public class QuestionController extends ControllerHelper {
             noContent(request);
             return;
         }
-        questionService.listChildren(questionIds, arrayResponseHandler(request));
+        questionService.listChildren(questionIds)
+                .onSuccess(result -> renderJson(request, new JsonArray(result)))
+                .onFailure(error -> {
+                    String errMessage = "[Formulaire@QuestionController::listChildren] Failed to get children";
+                    log.error(errMessage + " : " + error.getMessage());
+                    renderError(request);
+                });
     }
 
     @Get("/questions/:questionId")
