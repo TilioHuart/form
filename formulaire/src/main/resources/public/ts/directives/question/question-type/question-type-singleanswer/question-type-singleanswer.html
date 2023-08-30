@@ -24,7 +24,7 @@
                    placeholder="[[vm.i18n.getWithParam('formulaire.choice', choice.position)]]">
             <input type="text" value="[[vm.i18n.translate('formulaire.other')]] : " ng-if="choice.is_custom" disabled
                    ng-class="vm.question.conditional ? 'eleven eight-mobile' : 'width95 ten-mobile'">
-            <div class="image-container">
+            <div class="image-container" ng-if="vm.isRadio">
                 <i class="i-close lg-icon focusable" ng-click="vm.deleteImageSelect($index)"
                    ng-if="vm.question.selected && !vm.hasFormResponses && !!choice.image"></i>
                     <image-select id="img-{{$index}}" class="initialFloat cell"
@@ -38,7 +38,7 @@
                          alt="">
             </div>
         </label>
-        <i class="i-image lg-icon" ng-click="vm.displayImageSelect($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
+        <i class="i-image lg-icon" ng-click="vm.displayImageSelect($index)" ng-if="vm.isRadio && vm.question.selected && !vm.hasFormResponses"></i>
         <i class="i-cancel lg-icon dontSave" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
         <select class="five" ng-if="vm.question.conditional" ng-model="choice.next_form_element"
                 ng-change="vm.onSelectOption(choice)" ng-disabled="!vm.question.selected" input-guard>

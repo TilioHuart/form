@@ -70,7 +70,8 @@ export const questionType: Directive = ng.directive('questionType', () => {
                                             question="vm.question"
                                             has-form-responses="vm.hasFormResponses"
                                             form-elements="vm.formElements"
-                                            is-radio="true">
+                                            is-radio="true"
+                                            form="vm.form">
                 </question-type-singleanswer>
                 <!-- MATRIX -->
                 <question-type-matrix ng-if="vm.question.question_type == vm.types.MATRIX"
