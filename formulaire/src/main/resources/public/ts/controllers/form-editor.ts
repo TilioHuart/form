@@ -327,7 +327,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         if (!choice.question_id) choice.question_id = questionId;
                         if (choice.value) {
                             await questionChoiceService.save(choice);
-                            await questionChoiceService.create(new QuestionChoice(newQuestion.id, choice.position, choice.value, choice.image));
+                            await questionChoiceService.create(new QuestionChoice(newQuestion.id, choice.position, choice.value, choice.image, choice.is_custom));
                         }
                     }
                     if (question.question_type == Types.MATRIX) {
