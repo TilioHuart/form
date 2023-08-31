@@ -1,10 +1,14 @@
 package fr.openent.formulaire.service.impl;
 
+import com.mongodb.QueryBuilder;
 import fr.openent.form.helpers.FutureHelper;
+import fr.openent.formulaire.helpers.folder_importer.FolderImporter;
+import fr.wseduc.mongodb.MongoQueryBuilder;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import org.entcore.common.folders.FolderImporter;
+import org.entcore.common.folders.FolderExporter;
+import org.entcore.common.service.VisibilityFilter;
 import org.entcore.common.service.impl.SqlRepositoryEvents;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
@@ -14,6 +18,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.entcore.common.utils.ResourceUtils;
 
 import java.io.File;
 import java.util.*;
@@ -30,10 +35,12 @@ import static fr.openent.form.core.constants.Tables.SECTION;
 public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
     private static final Logger log = LoggerFactory.getLogger(FormulaireRepositoryEvents.class);
     private ImportExportService importExportService;
+    protected final FolderImporter folderImporter;
 
     public FormulaireRepositoryEvents(Vertx vertx) {
         super(vertx);
         this.importExportService = new ImportExportService(sql, fs, vertx);
+        this.folderImporter = new FolderImporter(vertx, vertx.fileSystem(), vertx.eventBus());
     }
 
     // Export/Import events
@@ -103,6 +110,65 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
                     }
                 });
             });
+    }
+
+    @Override
+    protected void exportDocumentsDependancies(JsonArray prevResults, final String exportPath, final Handler<Boolean> handler) {
+        if (!prevResults.isEmpty()) {
+            String res = prevResults.encode();
+            JsonArray documentsPublicIds = new JsonArray(ResourceUtils.extractIds(res, VisibilityFilter.PUBLIC));
+            JsonArray documentsIds = new JsonArray(ResourceUtils.extractIds(res)).addAll(documentsPublicIds);
+            if (!documentsIds.isEmpty()) {
+                QueryBuilder findDocsbyId = QueryBuilder.start(_ID).in(documentsIds);
+                JsonObject query = MongoQueryBuilder.build(findDocsbyId);
+                this.mongo.find("documents", query, event -> {
+                    JsonArray results = event.body().getJsonArray(RESULTS);
+                    if (OK.equals(event.body().getString(STATUS)) && results != null && !results.isEmpty()) {
+                        List<JsonObject> list = new ArrayList();
+                        results.forEach((elem) -> {
+                            JsonObject doc = (JsonObject)elem;
+                            String filename = doc.getString(NAME);
+                            String fileId = doc.getString(_ID);
+                            int dot = filename.lastIndexOf(46);
+                            filename = dot > -1 ? filename.substring(0, dot) + "_" + fileId + filename.substring(dot) : filename + "_" + fileId;
+                            doc.put(NAME, filename);
+                            doc.getJsonObject(METADATA).put(FILENAME, filename);
+                            list.add(doc);
+                        });
+                        String exportPathTmp = exportPath + "_tmp";
+                        String exportPathFinal = exportPath + File.separator + DOCUMENTS;
+                        exporter.export(new FolderExporter.FolderExporterContext(exportPathTmp), list).setHandler((res1) -> {
+                            if (res1.failed()) {
+                                String errMessage = "[Formulaire@FormulaireRepositoryEvents::exportDocumentsDependencies] Failed to export document to " + exportPathTmp;
+                                log.error(errMessage + " : " + res1.cause());
+                            }
+
+                            vertx.fileSystem().move(exportPathTmp, exportPathFinal, (resMove) -> {
+                                if (resMove.succeeded()) {
+                                    log.info("[Formulaire@FormulaireRepositoryEvents::exportDocumentsDependencies] Documents successfully exported from " + exportPathTmp + " to " + exportPathFinal);
+                                    handler.handle(true);
+                                } else {
+                                    String errMessage = "[Formulaire@FormulaireRepositoryEvents::exportDocumentsDependencies] Failed to export document from " + exportPathTmp + " to " + exportPathFinal;
+                                    log.error(errMessage + " : " + resMove.cause());
+                                    handler.handle(true);
+                                }
+
+                            });
+                        });
+                    } else {
+                        String errMessage = "[Formulaire@FormulaireRepositoryEvents::exportDocumentsDependencies] Failed to export document ";
+                        log.error(errMessage + " : " + event.body().getString(MESSAGE));
+                        handler.handle(true);
+                    }
+
+                });
+            } else {
+                handler.handle(true);
+            }
+        } else {
+            handler.handle(true);
+        }
+
     }
 
     /**
@@ -211,7 +277,10 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
                 tableMappingIds.get(QUESTION).putAll(oldNewChildrenQuestionIdsMap);
                 return importExportService.importQuestionSpecifics(tableContents.get(QUESTION_SPECIFIC_FIELDS), tableMappingIds.get(QUESTION));
             })
-            .compose(newQuestionSpecifics -> customImportDocumentsDependencies(importPath, userId, userName, builder.build()))
+            .compose(newQuestionSpecifics -> {
+                List<String> publicDocumentsIds = getPublicDocumentsIds(tableContents.get(QUESTION_CHOICE));
+                return customImportDocumentsDependencies(importPath, userId, userName, publicDocumentsIds);
+            })
             .compose(documentsIdMapping -> {
                 JsonObject questionChoices = tableContents.get(QUESTION_CHOICE);
                 updateImageIds(questionChoices.getJsonArray(FIELDS).getList(), questionChoices.getJsonArray(RESULTS), documentsIdMapping);
@@ -246,15 +315,19 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
         for (int i = 0; i < results.size(); ++i) {
             JsonArray entry = results.getJsonArray(i);
             int columnImageIndex = fields.indexOf(IMAGE);
-            String imageValue = entry.getString(columnImageIndex);
-            String imageId = imageValue != null && !imageValue.isEmpty() ? imageValue.replace(IMAGE_PATH_PREFIX, "") : null;
+            String imageUrl = entry.getString(columnImageIndex);
+            String imageId = imageUrl != null && !imageUrl.isEmpty() ? imageUrl.replace(IMAGE_PATH_PREFIX, "") : null;
             if (imageId != null && documentsIdMapping.containsKey(imageId)) {
                 entry.set(columnImageIndex, IMAGE_PATH_PREFIX + documentsIdMapping.get(imageId));
             }
         }
     }
 
-    protected Future<Map<String, String>> customImportDocumentsDependencies(String importPath, String userId, String userName, JsonArray statements) {
+    private List<String> getPublicDocumentsIds(JsonObject questionChoices) {
+        return ResourceUtils.extractIds(questionChoices.getJsonArray(RESULTS, new JsonArray()).encode(), VisibilityFilter.PUBLIC);
+    }
+
+    protected Future<Map<String, String>> customImportDocumentsDependencies(String importPath, String userId, String userName, List<String> publicDocumentsIds) {
         Promise<Map<String, String>> promise = Promise.promise();
         final String filePath = importPath + File.separator + DOCUMENTS;
         fs.exists(filePath, exist -> {
@@ -263,10 +336,13 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
                 return;
             }
 
-            FolderImporter.FolderImporterContext ctx = new FolderImporter.FolderImporterContext(filePath, userId, userName);
-            fileImporter.importFoldersFlatFormat(ctx, rapport -> { // import in mongo + generate mapOldNewIds
-                promise.complete(ctx.oldIdsToNewIds);
-            });
+            FolderImporter.FolderImporterContext ctx = new FolderImporter.FolderImporterContext(filePath, userId, userName, publicDocumentsIds);
+            folderImporter.importFoldersFlatFormat(ctx) // import in mongo + generate mapOldNewIds
+                .onSuccess(result -> promise.complete(ctx.oldIdsToNewIds))
+                .onFailure(err -> {
+                    String errMessage = "[Formulaire@FormulaireRepositoryEvents::customImportDocumentsDependencies] Failed to import document dependencies from path " + filePath;
+                    log.error(errMessage + " : " + err.getMessage());
+                });
         });
 
         return promise.future();
