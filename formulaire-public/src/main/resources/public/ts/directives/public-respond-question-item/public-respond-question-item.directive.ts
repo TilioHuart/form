@@ -34,6 +34,8 @@ interface IViewModel extends ng.IController, IPublicQuestionItemProps {
     onClickChoice(choice: QuestionChoice): void;
     resetDate(): void;
     hasImages(): boolean;
+    getPinSizePx(answer: number): number;
+    initDrag(): void;
 }
 
 interface IPublicQuestionItemScope extends IScope, IPublicQuestionItemProps {
@@ -136,6 +138,11 @@ class Controller implements IViewModel {
 
     hasImages = () : boolean => {
         return this.question.choices.all.some((choice: QuestionChoice) => choice.image !== null && choice.image !== undefined && choice.image !== '');
+    }
+
+    getPinSizePx = (answer: number) : number => {
+        let pinSize: number = String(answer).replace('.', '').length * 8;
+        return pinSize > 24 ? pinSize : 24;
     }
 
     initDrag = (): void => {

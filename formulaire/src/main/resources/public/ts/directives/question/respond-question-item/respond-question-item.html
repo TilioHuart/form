@@ -108,9 +108,10 @@
                 <div class="formulaire-cursor-input-range">
                     <div class="range-slider"
                          style="--min:[[vm.question.specific_fields.cursor_min_val]];
-                                            --max:[[vm.question.specific_fields.cursor_max_val]];
-                                            --step:[[vm.question.specific_fields.cursor_step]];
-                                            --value:[[vm.responses.all[0].answer]];">
+                                --max:[[vm.question.specific_fields.cursor_max_val]];
+                                --step:[[vm.question.specific_fields.cursor_step]];
+                                --value:[[vm.responses.all[0].answer]];
+                                --pinSize:[[vm.getPinSizePx(vm.responses.all[0].answer)]]">
                         <!-- native cursor -->
                         <input type="range" class="twelve" ng-model="vm.responses.all[0].answer"
                                min="[[vm.question.specific_fields.cursor_min_val]]" max="[[vm.question.specific_fields.cursor_max_val]]"

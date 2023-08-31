@@ -105,7 +105,7 @@
         appearance: none;
         background-color: $formulaire-grey-very-light;
         border-radius: 100px;
-        height: 16px;
+        height: 17px;
         width: 16px;
         cursor: grabbing;
         position: relative;
@@ -117,7 +117,7 @@
       input[type="range"]::-moz-range-thumb {
         background-color: $formulaire-grey-very-light;
         border-radius: 100px;
-        height: 16px;
+        height: 17px;
         width: 16px;
         cursor: grabbing;
         position: relative;
@@ -144,11 +144,12 @@
       /***** Pin cursor styles *****/
       .pin {
         position: absolute;
-        left: calc(((var(--value) - var(--min)) / (var(--max) - var(--min))) * 100%
-                    - calc(((var(--value) - var(--min)) / (var(--max) - var(--min))) * 15px)
-                    - 2px);
+        --minPos: calc(2px - calc(var(--pinSize) * 1px / 8 - 2px) * 4); // gap when cursor at min value
+        --maxPos: calc(100% - var(--pinSize) * 1px / 2 + 8px - 2px); // gap when cursor at max value
+        --dist: (var(--value) - var(--min)) / (var(--max) - var(--min)); // cursor normalized (between 0 and 1) position on the bar
+        left: calc(calc(var(--maxPos) - var(--minPos) - 12px) * var(--dist) + var(--minPos));
         bottom: 35px;
-        width: 22px;
+        width: calc(var(--pinSize) * 1px);
         height: 20px;
         background-color: $formulaire-blue;
 
@@ -164,9 +165,9 @@
           top: 20px;
           width: 0;
           height: 0;
-          border-left: 12px solid transparent;
-          border-right: 11px solid transparent;
-          border-top: 11px solid $formulaire-blue;
+          border-left: calc(var(--pinSize) * 1px / 2) solid transparent;
+          border-right: calc(var(--pinSize) * 1px / 2) solid transparent;
+          border-top: 12px solid $formulaire-blue;
           content: '';
         }
       }
@@ -176,8 +177,8 @@
         &::before {
           position: absolute;
           height: 10px;
-          width: calc((var(--value) - var(--min))/(var(--max) - var(--min)) * 100%
-                      - calc((var(--value) - var(--min))/(var(--max) - var(--min)) * 15px));
+          --dist: calc((var(--value) - var(--min)) / (var(--max) - var(--min)));
+          width: calc(var(--dist) * (100% - 16px));
           bottom: 8px;
           left: 9px;
           background-color: $formulaire-blue;
