@@ -243,6 +243,13 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             if (!parentSection) {
                 vm.newElement.position = vm.formElements.all.length + 1;
                 vm.formElements.all.push(vm.newElement);
+
+                // Update positions of all elements to prevent mistakes
+                for (let i = 0; i < vm.formElements.all.length; i++) {
+                    let elt = vm.formElements.all[i];
+                    elt.position = i + 1;
+                }
+
                 vm.nbFormElements = vm.formElements.all.length;
                 window.scrollTo(0, document.body.scrollHeight);
             }
