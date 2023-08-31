@@ -55,6 +55,11 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
     public void exportResources(JsonArray resourcesIds, boolean exportDocuments, boolean exportSharedResources, String exportId,
                                 String userId, JsonArray groups, String exportPath, String locale, String host, final Handler<Boolean> handler) {
 
+        if (resourcesIds == null || resourcesIds.isEmpty()) {
+            handler.handle(true);
+            return;
+        }
+
         HashMap<String,JsonArray> infos = new HashMap<>();
         HashMap<String, JsonArray> fieldsToNull = new HashMap<>();
         AtomicBoolean exported = new AtomicBoolean(false);
