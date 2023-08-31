@@ -200,7 +200,7 @@ public class QuestionController extends ControllerHelper {
     }
 
     @Post("/forms/:formId/questions")
-    @ApiDoc("Create a question in a specific form")
+    @ApiDoc("Create questions in a specific form")
     @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void create(HttpServerRequest request) {
@@ -296,7 +296,8 @@ public class QuestionController extends ControllerHelper {
                             return;
                         }
 
-                        List<Long> questionSectionIds = questions.stream()
+                        List<Long> conditionnalQuestionSectionIds = questions.stream()
+                                .filter(question -> question.getConditional())
                                 .map(question -> question.getSectionId())
                                 .filter(Objects::nonNull)
                                 .collect(Collectors.toList());
@@ -310,10 +311,10 @@ public class QuestionController extends ControllerHelper {
                             }
 
                             JsonArray sectionIds = getByProp(sectionIdsEvt.right().getValue(), SECTION_ID);
-                            questionSectionIds.retainAll(sectionIds.getList());
-                            if (questionSectionIds.size() > 0) {
+                            conditionnalQuestionSectionIds.retainAll(sectionIds.getList());
+                            if (conditionnalQuestionSectionIds.size() > 0) {
                                 log.error("[Formulaire@QuestionController::create] A conditional question is " +
-                                        "already existing for the sections with ids " + questionSectionIds);
+                                        "already existing for the sections with ids " + conditionnalQuestionSectionIds);
                                 badRequest(request, I18nHelper.getI18nValue(I18nKeys.ERROR_QUESTION_DUPLICATE, request));
                                 return;
                             }
