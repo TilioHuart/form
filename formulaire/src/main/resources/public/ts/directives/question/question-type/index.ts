@@ -9,3 +9,4 @@ export * from './question-type-matrix/question-type-matrix.directive';
 export * from './question-type-multipleanswer/question-type-multipleanswer.directive';
 export * from './question-type-shortanswer';
 export * from './question-type-time';
+export * from './question-type/question-type.directive';
