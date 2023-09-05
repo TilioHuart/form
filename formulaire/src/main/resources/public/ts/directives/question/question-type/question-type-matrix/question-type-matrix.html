@@ -1,0 +1,51 @@
+<div class="twelve matrix">
+    <!-- Define the columns' titles (= choices) -->
+    <div class="matrix-columns">
+        <h4><i18n>formulaire.matrix.columns</i18n></h4>
+        <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
+            <div class="container-arrow" ng-if="vm.question.selected">
+                <div ng-class="{hidden : $first}" ng-click="vm.moveChoice(choice, vm.direction.UP)">
+                    <i class="i-chevron-up lg-icon"></i>
+                </div>
+                <div ng-class="{hidden : $last}" ng-click="vm.moveChoice(choice, vm.direction.DOWN)">
+                    <i class="i-chevron-down lg-icon"></i>
+                </div>
+            </div>
+            <label class="twelve left-spacing-twice">
+                <span style="cursor: default"></span>
+                <input type="text" class="width95-always" ng-model="choice.value" ng-if="!vm.question.selected" disabled
+                       placeholder="[[vm.i18n.getWithParam('formulaire.option', choice.position)]]">
+                <input type="text" class="width95-always" ng-model="choice.value" ng-if="vm.question.selected" input-guard
+                       placeholder="[[vm.i18n.getWithParam('formulaire.option', choice.position)]]">
+            </label>
+            <i class="i-cancel lg-icon dontSave" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
+        </div>
+        <div style="display: flex; justify-content: center;" ng-if="vm.question.selected && !vm.hasFormResponses">
+            <i class="i-plus-circle lg-icon" ng-click="vm.createNewChoice()"></i>
+        </div>
+    </div>
+    <!-- Define the lines' titles (= children questions) -->
+    <div class="matrix-lines">
+        <h4><i18n>formulaire.matrix.lines</i18n></h4>
+        <div class="choice" ng-repeat="child in vm.question.children.all | orderBy:'matrix_position'" guard-root="formTitle">
+            <div class="container-arrow" ng-if="vm.question.selected">
+                <div ng-class="{hidden : $first}" ng-click="vm.moveChild(child, vm.direction.UP)">
+                    <i class="i-chevron-up lg-icon"></i>
+                </div>
+                <div ng-class="{hidden : $last}" ng-click="vm.moveChild(child, vm.direction.DOWN)">
+                </div>
+            </div>
+            <label class="twelve left-spacing-twice">
+                <span style="cursor: default"></span>
+                <input type="text" class="width95-always" ng-model="child.title" ng-if="!vm.question.selected" disabled
+                       placeholder="[[vm.i18n.getWithParam('formulaire.option', child.matrix_position)]]">
+                <input type="text" class="width95-always" ng-model="child.title" ng-if="vm.question.selected" input-guard
+                       placeholder="[[vm.i18n.getWithParam('formulaire.option', child.matrix_position)]]">
+            </label>
+            <i class="i-cancel lg-icon dontSave" ng-click="vm.deleteChild($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
+        </div>
+        <div style="display: flex; justify-content: center;" ng-if="vm.question.selected && !vm.hasFormResponses">
+            <i class="i-plus-circle lg-icon" ng-click="vm.createNewChild()"></i>
+        </div>
+    </div>
+</div>

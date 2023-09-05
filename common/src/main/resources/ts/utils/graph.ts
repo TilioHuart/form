@@ -130,8 +130,8 @@ export class GraphUtils {
         let colors: string[] = ColorUtils.generateColorList(labels.length);
 
         let newPDFOptions: any = isExportPDF ?
-            GraphUtils.generateOptions(question.question_type, colors, labels,null, null) :
-            GraphUtils.generateOptions(question.question_type, colors, labels,'100%', '100%');
+            GraphUtils.generateOptions(question.question_type, colors, labels, null, null) :
+            GraphUtils.generateOptions(question.question_type, colors, labels, '100%', '100%');
 
         newPDFOptions.series = [{ name: lang.translate('formulaire.number.responses'), data: Array.from(map.values()) }];
 
@@ -223,7 +223,7 @@ export class GraphUtils {
         let baseHeight: number = 50 * choices.length;
         let height: number = baseHeight < 200 ? 200 : (baseHeight > 500 ? 500 : baseHeight);
         let colors: string[] = ColorUtils.generateColorList(labels.length);
-        let newOptions: any = GraphUtils.generateOptions(question.question_type, colors, labels, height, null, seriesPercent);
+        let newOptions: any = GraphUtils.generateOptions(question.question_type, colors, labels, height, null);
         newOptions.series = [{ data: series }];
 
         await GraphUtils.renderChartForResult(newOptions, charts, question, isExportPDF);
@@ -255,10 +255,9 @@ export class GraphUtils {
      * @param labels        Labels to display on the cart
      * @param height        Height of the chart to display (optional)
      * @param width         Width of the chart to display (optional)
-     * @param seriesPercent Percentage to use for the graph (optional)
      */
-    static generateOptions = (type: Types, colors: string[], labels: (string | number)[], height?: any, width?: any,
-                              seriesPercent?: number[]) : any => {
+    static generateOptions = (type: Types, colors: string[], labels: (string | number)[], height?: any,
+                              width?: any) : any => {
         let options: any;
         if (type === Types.SINGLEANSWER || type === Types.SINGLEANSWERRADIO) {
             options = {
@@ -327,6 +326,9 @@ export class GraphUtils {
                 },
                 xaxis: {
                     categories: labels,
+                    labels: {
+                        trim: true,
+                    }
                 },
                 yaxis: {
                     forceNiceScale: true,

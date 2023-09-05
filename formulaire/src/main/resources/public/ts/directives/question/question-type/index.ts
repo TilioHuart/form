@@ -5,7 +5,7 @@ export * from './question-type-date';
 export * from './question-type-file/question-type-file.directive';
 export * from './question-type-freetext';
 export * from './question-type-longanswer';
-export * from './question-type-matrix';
+export * from './question-type-matrix/question-type-matrix.directive';
 export * from './question-type-multipleanswer/question-type-multipleanswer.directive';
 export * from './question-type-shortanswer';
 export * from './question-type-time';

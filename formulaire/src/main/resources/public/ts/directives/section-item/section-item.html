@@ -28,10 +28,10 @@
                 </div>
                 <!-- Interaction buttons-->
                 <div class="icons-section dontSave" ng-if="vm.section.selected">
-                    <i class="i-delete lg-icon spaced-right" ng-class="{disabled: vm.hasFormResponses}"
+                    <i class="i-delete lg-icon spaced-right cursor-pointer" ng-class="{disabled: vm.hasFormResponses}"
                        reset-guard="vm.deleteSection()" title="[[vm.getTitle('delete')]]"></i>
-                    <i class="i-undo lg-icon spaced-right" reset-guard="vm.undoSectionChanges()" title="[[vm.getTitle('cancel')]]"></i>
-                    <i class="i-validate lg-icon spaced-right" reset-guard="vm.validateSection()" title="[[vm.getTitle('validate')]]"></i>
+                    <i class="i-undo lg-icon spaced-right cursor-pointer" reset-guard="vm.undoSectionChanges()" title="[[vm.getTitle('cancel')]]"></i>
+                    <i class="i-validate lg-icon spaced-right cursor-pointer" reset-guard="vm.validateSection()" title="[[vm.getTitle('validate')]]"></i>
                 </div>
             </div>
         </div>
