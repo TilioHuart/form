@@ -1,4 +1,4 @@
-import {ng} from "entcore";
+import {Directive, ng} from "entcore";
 import {Question, Types} from "@common/models";
 import {IScope} from "angular";
 import {RootsConst} from "../../../../core/constants/roots.const";
@@ -66,4 +66,4 @@ function directive() {
     }
 }
 
-export const questionTypeCursor = ng.directive('questionTypeCursor', directive);
+export const questionTypeCursor: Directive = ng.directive('questionTypeCursor', directive);
