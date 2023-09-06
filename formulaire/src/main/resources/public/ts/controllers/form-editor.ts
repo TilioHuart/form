@@ -243,13 +243,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             if (!parentSection) {
                 vm.newElement.position = vm.formElements.all.length + 1;
                 vm.formElements.all.push(vm.newElement);
-
-                // Update positions of all elements to prevent mistakes
-                for (let i = 0; i < vm.formElements.all.length; i++) {
-                    let elt = vm.formElements.all[i];
-                    elt.position = i + 1;
-                }
-
                 vm.nbFormElements = vm.formElements.all.length;
                 window.scrollTo(0, document.body.scrollHeight);
             }
@@ -762,6 +755,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         const saveFormElements = async (displaySuccess: boolean = false) : Promise<void> => {
             try {
                 switchDragAndDropTo(true);
+                let originalPositions: number[] = vm.formElements.all.map((e: FormElement) => e.position);
                 FormElementUtils.rePositionFormElements(vm.formElements, PropPosition.POSITION);
                 let formElement: FormElement = vm.formElements.getSelectedElement();
                 let isSection: boolean = formElement && formElement instanceof Section;
@@ -826,6 +820,12 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     vm.form.setFromJson(await formService.update(vm.form));
                     if (displaySuccess) { notify.success(idiom.translate('formulaire.success.form.save')); }
                 }
+
+                // If position changes were needed we save them here
+                if (originalPositions != vm.formElements.all.map((e: FormElement) => e.position)) {
+                    await formElementService.update(vm.formElements.all);
+                }
+
                 await vm.$onInit();
             }
             catch (e) {

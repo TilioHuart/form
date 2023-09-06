@@ -40,6 +40,8 @@
         </label>
         <i class="i-image lg-icon" ng-click="vm.displayImageSelect($index)" ng-if="vm.isRadio && vm.question.selected && !vm.hasFormResponses"></i>
         <i class="i-cancel lg-icon dontSave" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
+
+        <!-- Target selector for conditional question -->
         <select class="five" ng-if="vm.question.conditional" ng-model="choice.next_form_element"
                 ng-change="vm.onSelectOption(choice)" ng-disabled="!vm.question.selected" input-guard>
             <option ng-if="vm.followingFormElement != null" ng-value="vm.followingFormElement">[[vm.i18n.translate('formulaire.access.next')]]</option>
