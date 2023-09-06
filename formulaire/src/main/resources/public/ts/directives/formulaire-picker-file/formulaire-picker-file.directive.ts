@@ -103,7 +103,7 @@ function directive() {
 
                 element.find('.drop-zone').removeClass('dragover');
                 e.preventDefault();
-                this.listFiles(e.originalEvent.dataTransfer.files);
+                vm.listFiles(e.originalEvent.dataTransfer.files);
                 this.$scope.$apply();
             }
 
@@ -121,8 +121,8 @@ function directive() {
                 element.find('.drop-zone').removeClass('dragover');
             });
 
-            body.on('drop', '.icons-view', this.dropFiles);
-            element.on('drop', this.dropFiles);
+            body.on('drop', '.icons-view', dropFiles);
+            element.on('drop', dropFiles);
 
 
         }
