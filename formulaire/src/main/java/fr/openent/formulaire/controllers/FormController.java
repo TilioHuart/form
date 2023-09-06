@@ -1,16 +1,13 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.enums.I18nKeys;
-import fr.openent.form.core.enums.RgpdLifetimes;
 import fr.openent.form.helpers.EventBusHelper;
+import fr.openent.form.helpers.FutureHelper;
 import fr.openent.form.helpers.I18nHelper;
 import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.export.FormQuestionsExportPDF;
 import fr.openent.formulaire.helpers.DataChecker;
-import fr.openent.form.helpers.FutureHelper;
 import fr.openent.formulaire.helpers.folder_exporter.FolderExporterZip;
-import fr.openent.formulaire.helpers.upload_file.Attachment;
-import fr.openent.formulaire.helpers.upload_file.FileHelper;
 import fr.openent.formulaire.security.*;
 import fr.openent.formulaire.service.*;
 import fr.openent.formulaire.service.impl.*;
@@ -31,26 +28,29 @@ import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.events.EventStore;
 import org.entcore.common.http.filter.ResourceFilter;
-import org.entcore.common.http.request.JsonHttpServerRequest;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static fr.openent.form.core.constants.EbFields.*;
-import static fr.openent.form.core.constants.EbFields.ACTION;
-import static fr.openent.form.core.constants.Tables.DB_SCHEMA;
-import static fr.openent.form.core.enums.Events.CREATE;
 import static fr.openent.form.core.constants.ConfigFields.ZIMBRA_MAX_RECIPIENTS;
 import static fr.openent.form.core.constants.ConsoleRights.*;
-import static fr.openent.form.core.constants.Constants.*;
+import static fr.openent.form.core.constants.Constants.CHOICES_TYPE_QUESTIONS;
+import static fr.openent.form.core.constants.EbFields.ACTION;
+import static fr.openent.form.core.constants.EbFields.*;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.FolderIds.*;
 import static fr.openent.form.core.constants.ShareRights.*;
+import static fr.openent.form.core.constants.Tables.DB_SCHEMA;
+import static fr.openent.form.core.enums.Events.CREATE;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
-import static fr.openent.form.helpers.UtilsHelper.*;
+import static fr.openent.form.helpers.UtilsHelper.getByProp;
+import static fr.openent.form.helpers.UtilsHelper.getStringIds;
 import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
 import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
 
@@ -312,125 +312,6 @@ public class FormController extends ControllerHelper {
         });
     }
 
-    @Post("/forms/multiple")
-    @ApiDoc("Create several forms")
-    @ResourceFilter(CreationRight.class)
-    @SecuredAction(value = "", type = ActionType.RESOURCE)
-    public void createMultiple(HttpServerRequest request) {
-        UserUtils.getUserInfos(eb, request, user -> {
-            if (user == null) {
-                String message = "[Formulaire@createMultipleForm] User not found in session.";
-                log.error(message);
-                unauthorized(request, message);
-                return;
-            }
-
-            RequestUtils.bodyToJsonArray(request, forms -> {
-                if (forms == null || forms.isEmpty()) {
-                    log.error("[Formulaire@createMultipleForm] No forms to create.");
-                    noContent(request);
-                    return;
-                }
-
-                // Check if the user has right to create a public form
-                if (DataChecker.hasPublicForm(forms) && !WorkflowActionUtils.hasRight(user, WorkflowActions.CREATION_RIGHT.toString())) {
-                    String message = "[Formulaire@createMultipleForm] You are not authorized to create a public form.";
-                    log.error(message);
-                    unauthorized(request, message);
-                    return;
-                }
-
-                // date_ending should be after date_ending if not null
-                boolean areDateValid = DataChecker.checkFormDatesValidity(forms);
-                if (!areDateValid) {
-                    String message = "[Formulaire@createMultipleForm] You cannot create a form with an ending date before the opening date.";
-                    log.error(message);
-                    badRequest(request, message);
-                    return;
-                }
-
-                // RGPD lifetime should be in [3, 6, 9, 12]
-                boolean isRGPDLifetimeOk = DataChecker.checkRGPDLifetimeValidity(forms);
-                if (!isRGPDLifetimeOk) {
-                    String message = "[Formulaire@createMultipleForm] A RGPD lifetime value should be in " + RgpdLifetimes.getAllValues();
-                    log.error(message);
-                    badRequest(request, message);
-                    return;
-                }
-
-                JsonArray folderIds = getByProp(forms, FOLDER_ID);
-                folderService.listByIds(folderIds, foldersEvt -> {
-                    if (foldersEvt.isLeft()) {
-                        log.error("[Formulaire@createMultipleForm] Fail to list folders for ids " + folderIds);
-                        renderInternalError(request, foldersEvt);
-                        return;
-                    }
-                    if (foldersEvt.right().getValue().isEmpty()) {
-                        String message = "[Formulaire@createMultipleForm] No folders found for ids " + folderIds;
-                        log.error(message);
-                        notFound(request, message);
-                        return;
-                    }
-
-                    // Check if one of the folders is not owned by the connected user
-                    JsonArray folders = foldersEvt.right().getValue();
-                    boolean areUserIdsOk = DataChecker.checkFolderIdsValidity(folders, user.getUserId());
-                    if (!areUserIdsOk) {
-                        String message = "[Formulaire@createMultipleForm] Your not owner of one of the folders with ids " + folderIds;
-                        log.error(message);
-                        unauthorized(request, message);
-                        return;
-                    }
-
-                    formService.createMultiple(forms, user, formsEvt -> {
-                        if (formsEvt.isLeft()) {
-                            log.error("[Formulaire@createMultipleForm] Failed to create forms : " + forms);
-                            renderInternalError(request, formsEvt);
-                            return;
-                        }
-                        eventStore.createAndStoreEvent(CREATE.name(), request);
-
-                        // Get result of creation
-                        JsonArray createdFormsInfos = formsEvt.right().getValue();
-                        JsonArray createdForms = new JsonArray();
-                        for (int k = 0; k < createdFormsInfos.size(); k++) {
-                            createdForms.addAll(createdFormsInfos.getJsonArray(k));
-                        }
-
-                        JsonArray formIds = getIds(createdForms, false);
-                        JsonArray finalFolderIds = getByProp(forms, FOLDER_ID);
-                        relFormFolderService.createMultiple(user, formIds, finalFolderIds, createRelEvt -> {
-                            if (createRelEvt.isLeft()) {
-                                log.error("[Formulaire@createMultipleForm] Failed to create relations form-folder for forms : " + formIds);
-                                renderInternalError(request, createRelEvt);
-                                return;
-                            }
-
-                            JsonArray folderIdsToSync = new JsonArray();
-                            for (int j = 0; j < finalFolderIds.size(); j++) {
-                                if (finalFolderIds.getInteger(j) != ID_ROOT_FOLDER) {
-                                    folderIdsToSync.add(finalFolderIds.getInteger(j));
-                                }
-                            }
-
-                            if (folderIdsToSync.size() > 0) {
-                                folderService.syncNbChildren(user, folderIdsToSync, syncEvt -> {
-                                    if (syncEvt.isLeft()) {
-                                        log.error("[Formulaire@createMultipleForm] Error in sync children counts for folders with ids " + folderIdsToSync);
-                                        renderInternalError(request, syncEvt);
-                                        return;
-                                    }
-                                    renderJson(request, createdForms);
-                                });
-                            } else {
-                                renderJson(request, createdForms);
-                            }
-                        });
-                    });
-                });
-            });
-        });
-    }
 
     @Post("/forms/duplicate/:folderId")
     @ApiDoc("Duplicate several forms and put them into a specific folder")

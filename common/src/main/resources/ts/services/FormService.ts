@@ -12,7 +12,6 @@ export interface FormService {
     get(formId: number) : Promise<any>;
     save(form: Form) : Promise<any>;
     create(form: Form) : Promise<any>;
-    createMultiple(forms: Form[]) : Promise<any>;
     duplicate(formIds: number[], folderId: number) : Promise<any>;
     update(form: Form) : Promise<any>;
     archive(form: Form, destinationFolderId: number) : Promise<any>;
@@ -89,14 +88,6 @@ export const formService: FormService = {
         }
     },
 
-    async createMultiple(forms: Form[]) : Promise<any> {
-        try {
-            return DataUtils.getData(await http.post('/formulaire/forms/multiple', forms));
-        } catch (err) {
-            notify.error(idiom.translate('formulaire.error.formService.createMultiple'));
-            throw err;
-        }
-    },
 
     async duplicate(formIds: number[], folderId: number) : Promise<any> {
         try {

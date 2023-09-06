@@ -54,15 +54,6 @@ public interface RelFormFolderService {
     void create(UserInfos user, JsonArray formIds, Integer folderId, Handler<Either<String, JsonArray>> handler);
 
     /**
-     * Create relations form-folder for multiple folders
-     * @param user      user connected
-     * @param formIds   forms identifiers
-     * @param folderIds  folders identifiers
-     * @param handler   function handler returning JsonArray data
-     */
-    void createMultiple(UserInfos user, JsonArray formIds, JsonArray folderIds, Handler<Either<String, JsonArray>> handler);
-
-    /**
      * Update multiple relations form-folder
      * @param user          user connected
      * @param formIds       form identifiers

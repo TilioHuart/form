@@ -1,8 +1,7 @@
 package fr.openent.formulaire.controllers;
 
-import fr.openent.form.core.models.Folder;
-import fr.openent.formulaire.helpers.DataChecker;
 import fr.openent.form.helpers.FutureHelper;
+import fr.openent.formulaire.helpers.DataChecker;
 import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.service.FolderService;
 import fr.openent.formulaire.service.FormService;

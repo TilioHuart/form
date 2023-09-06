@@ -78,25 +78,6 @@ public class DefaultRelFormFolderService implements RelFormFolderService {
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
-    @Override
-    public void createMultiple(UserInfos user, JsonArray formIds, JsonArray folderIds, Handler<Either<String, JsonArray>> handler) {
-        if (formIds.size() != folderIds.size()) {
-            handler.handle(new Either.Left<>("[Formulaire@createRelFormFolder] There must be as mush formIds that folderIds"));
-        }
-        else {
-            String query = "INSERT INTO " + REL_FORM_FOLDER_TABLE + " (user_id, form_id, folder_id) VALUES ";
-            JsonArray params = new JsonArray();
-
-            for (int i = 0; i < formIds.size(); i++) {
-                query += "(?, ?, ?), ";
-                params.add(user.getUserId()).add(formIds.getInteger(i)).add(folderIds.getInteger(i));
-            }
-
-            query = query.substring(0, query.length() - 2) + " RETURNING *;";
-
-            Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
-        }
-    }
 
     @Override
     public void update(UserInfos user, JsonArray formIds, int newFolderId, Handler<Either<String, JsonArray>> handler) {
