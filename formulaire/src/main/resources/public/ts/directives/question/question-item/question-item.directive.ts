@@ -10,8 +10,8 @@ import {
 } from "@common/models";
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
 import {Constants} from "@common/core/constants";
-import {RootsConst} from "../../../core/constants/roots.const";
 import {IScope} from "angular";
+import {RootsConst} from "../../../core/constants/roots.const";
 
 interface IQuestionItemProps {
     question: Question;
@@ -36,7 +36,7 @@ interface IViewModel extends ng.IController, IQuestionItemProps {
     isImageMissingLabel(): boolean;
 }
 
-interface IQuestionItemScope extends IScope, IQuestionItemProps{
+interface IQuestionItemScope extends IScope, IQuestionItemProps {
     vm: IViewModel;
 }
 

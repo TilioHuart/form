@@ -1,0 +1,9 @@
+<div>
+  <div ng-if="!vm.question.selected">
+    <div ng-if="vm.question.statement" data-ng-bind-html="vm.getHtmlDescription(vm.question.statement)"></div>
+    <textarea disabled ng-if="!vm.question.statement" i18n-placeholder="formulaire.question.type.FREETEXT"></textarea>
+  </div>
+  <div ng-if="vm.question.selected">
+    <editor ng-model="vm.question.statement" visibility="vm.form.is_public ? 'public' : ''" input-guard></editor>
+  </div>
+</div>

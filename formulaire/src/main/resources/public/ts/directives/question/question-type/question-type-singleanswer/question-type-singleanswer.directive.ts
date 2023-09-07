@@ -2,8 +2,8 @@ import {Directive, ng} from "entcore";
 import {Form, FormElement, FormElements, Question, QuestionChoice} from "@common/models";
 import {I18nUtils} from "@common/utils";
 import {Direction} from "@common/core/enums";
-import {RootsConst} from "../../../../core/constants/roots.const";
 import {IScope} from "angular";
+import {RootsConst} from "../../../../core/constants/roots.const";
 
 interface IQuestionTypeSingleanswerProps {
     question: Question;
@@ -11,10 +11,6 @@ interface IQuestionTypeSingleanswerProps {
     formElements: FormElements;
     isRadio: boolean;
     form: Form;
-}
-
-interface IQuestionTypeSingleanswerScope extends IScope, IQuestionTypeSingleanswerProps{
-    vm: IViewModel;
 }
 
 interface IViewModel extends ng.IController, IQuestionTypeSingleanswerProps {
@@ -28,6 +24,10 @@ interface IViewModel extends ng.IController, IQuestionTypeSingleanswerProps {
     deleteImageSelect(index: number): void;
     filterNextElements(formElement: FormElement): boolean;
     onSelectOption(choice: QuestionChoice): void;
+}
+
+interface IQuestionTypeSingleanswerScope extends IScope, IQuestionTypeSingleanswerProps {
+    vm: IViewModel;
 }
 
 class Controller implements IViewModel {

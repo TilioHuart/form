@@ -1,5 +1,6 @@
 import {Directive, ng} from "entcore";
 import {Form, FormElements, Question, Types} from "@common/models";
+import {IScope} from "angular";
 import {RootsConst} from "../../../../core/constants/roots.const";
 
 interface IQuestionTypeProps {
@@ -10,11 +11,15 @@ interface IQuestionTypeProps {
     matrixType: number;
 }
 
-interface IViewModel {
+interface IViewModel extends ng.IController, IQuestionTypeProps {
     types: typeof Types;
 }
 
-class Controller implements ng.IController, IViewModel {
+interface IQuestionTypeScope extends IScope, IQuestionTypeProps {
+    vm: IViewModel;
+}
+
+class Controller implements IViewModel {
     question: Question;
     form: Form;
     hasFormResponses: boolean;
@@ -22,7 +27,7 @@ class Controller implements ng.IController, IViewModel {
     matrixType: number;
     types: typeof Types;
 
-    constructor(private $scope: IQuestionTypeProps, private $sce: ng.ISCEService) {
+    constructor(private $scope: IQuestionTypeScope, private $sce: ng.ISCEService) {
         this.types = Types;
     }
 
@@ -47,7 +52,7 @@ function directive() {
         bindToController: true,
         controller: ['$scope', '$sce', Controller],
         /* interaction DOM/element */
-        link: function ($scope: IQuestionTypeProps,
+        link: function ($scope: IQuestionTypeScope,
                         element: ng.IAugmentedJQuery,
                         attrs: ng.IAttributes,
                         vm: IViewModel) {

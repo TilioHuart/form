@@ -4,33 +4,37 @@ import {FormElementUtils, I18nUtils} from "@common/utils";
 import {PropPosition} from "@common/core/enums/prop-position";
 import {questionChoiceService} from "@common/services";
 import {Direction} from "@common/core/enums";
+import {IScope} from "angular";
 import {RootsConst} from "../../../../core/constants/roots.const";
 
 interface IQuestionTypeRankingProps {
-    I18n: I18nUtils;
     question: Question;
-    direction: typeof Direction;
 }
 
 interface IViewModel extends ng.IController, IQuestionTypeRankingProps {
+    i18n: I18nUtils;
+    direction: typeof Direction;
+
     createNewChoice(): void;
     moveChoice(choice: QuestionChoice, direction: string): void;
     deleteChoice(index: number): Promise<void>;
 }
 
-class Controller implements ng.IController, IViewModel {
-    I18n: I18nUtils;
+interface IQuestionTypeRankingScope extends IScope, IQuestionTypeRankingProps {
+    vm: IViewModel;
+}
+
+class Controller implements IViewModel {
     question: Question;
+    i18n: I18nUtils;
     direction: typeof Direction;
 
     constructor(private $scope: IQuestionTypeRankingProps, private $sce: ng.ISCEService) {
-        this.I18n = I18nUtils;
+        this.i18n = I18nUtils;
         this.direction = Direction;
     }
 
-    $onInit = async () : Promise<void> => {
-
-    }
+    $onInit = async () : Promise<void> => {}
 
     $onDestroy = async () : Promise<void> => {}
 
@@ -70,7 +74,7 @@ function directive() {
         bindToController: true,
         controller: ['$scope', '$sce', Controller],
         /* interaction DOM/element */
-        link: function ($scope: IQuestionTypeRankingProps,
+        link: function ($scope: IQuestionTypeRankingScope,
                         element: ng.IAugmentedJQuery,
                         attrs: ng.IAttributes,
                         vm: IViewModel) {

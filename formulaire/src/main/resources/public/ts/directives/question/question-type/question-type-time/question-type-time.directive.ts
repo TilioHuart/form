@@ -3,20 +3,20 @@ import {Question} from "@common/models";
 import {IScope} from "angular";
 import {RootsConst} from "../../../../core/constants/roots.const";
 
-interface IQuestionTypeDateProps {
+interface IQuestionTypeTimeProps {
     question: Question;
 }
 
-interface IViewModel extends ng.IController, IQuestionTypeDateProps {}
+interface IViewModel extends ng.IController, IQuestionTypeTimeProps {}
 
-interface IQuestionTypeDateScope extends IScope, IQuestionTypeDateProps {
+interface IQuestionTypeTimeScope extends IScope, IQuestionTypeTimeProps {
     vm: IViewModel;
 }
 
 class Controller implements IViewModel {
     question: Question;
 
-    constructor(private $scope: IQuestionTypeDateScope, private $sce: ng.ISCEService) {}
+    constructor(private $scope: IQuestionTypeTimeScope, private $sce: ng.ISCEService) {}
 
     $onInit = async (): Promise<void> => {}
 
@@ -26,7 +26,7 @@ class Controller implements IViewModel {
 function directive() {
     return {
         restrict: 'E',
-        templateUrl: `${RootsConst.directive}question/question-type/question-type-date/question-type-date.html`,
+        templateUrl: `${RootsConst.directive}question/question-type/question-type-time/question-type-time.html`,
         transclude: true,
         scope: {
             question: '='
@@ -35,7 +35,7 @@ function directive() {
         bindToController: true,
         controller: ['$scope', '$sce', Controller],
         /* interaction DOM/element */
-        link: function ($scope: IQuestionTypeDateScope,
+        link: function ($scope: IQuestionTypeTimeScope,
                         element: ng.IAugmentedJQuery,
                         attrs: ng.IAttributes,
                         vm: IViewModel) {
@@ -43,4 +43,4 @@ function directive() {
     }
 }
 
-export const questionTypeDate: Directive = ng.directive('questionTypeDate', directive);
+export const questionTypeTime: Directive = ng.directive('questionTypeTime', directive);

@@ -2,6 +2,7 @@ import {Directive, ng} from "entcore";
 import {Form, Question} from "@common/models";
 import {I18nUtils} from "@common/utils";
 import {Direction} from "@common/core/enums";
+import {IScope} from "angular";
 import {RootsConst} from "../../../../core/constants/roots.const";
 
 interface IQuestionTypeMultipleanswerProps {
@@ -10,7 +11,7 @@ interface IQuestionTypeMultipleanswerProps {
     form: Form;
 }
 
-interface IViewModel {
+interface IViewModel extends ng.IController, IQuestionTypeMultipleanswerProps {
     i18n: I18nUtils;
     direction: typeof Direction;
     selectedChoiceIndex: number;
@@ -20,7 +21,11 @@ interface IViewModel {
     deleteImageSelect(index: number): void;
 }
 
-class Controller implements ng.IController, IViewModel {
+interface IQuestionTypeMultipleanswerScope extends IScope, IQuestionTypeMultipleanswerProps {
+    vm: IViewModel;
+}
+
+class Controller implements IViewModel {
     question: Question;
     hasFormResponses: boolean;
     form: Form;
@@ -67,7 +72,7 @@ function directive() {
         bindToController: true,
         controller: ['$scope', '$sce', Controller],
         /* interaction DOM/element */
-        link: function ($scope: IQuestionTypeMultipleanswerProps,
+        link: function ($scope: IQuestionTypeMultipleanswerScope,
                         element: ng.IAugmentedJQuery,
                         attrs: ng.IAttributes,
                         vm: IViewModel) {

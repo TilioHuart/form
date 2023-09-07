@@ -1,4 +1,4 @@
-import {ng} from "entcore";
+import {Directive, ng} from "entcore";
 import {Question} from "@common/models";
 import {IScope} from "angular";
 import {RootsConst} from "../../../../core/constants/roots.const";
@@ -7,8 +7,7 @@ interface IQuestionTypeFileProps {
     question: Question;
 }
 
-interface IViewModel extends ng.IController, IQuestionTypeFileProps {
-}
+interface IViewModel extends ng.IController, IQuestionTypeFileProps {}
 
 interface IQuestionTypeFileScope extends IScope, IQuestionTypeFileProps {
     vm: IViewModel;
@@ -44,4 +43,4 @@ function directive() {
     }
 }
 
-export const questionTypeFile = ng.directive('questionTypeFile', directive);
+export const questionTypeFile: Directive = ng.directive('questionTypeFile', directive);

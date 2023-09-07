@@ -1,6 +1,7 @@
-import {ng} from "entcore";
+import {Directive, ng} from "entcore";
 import {Form, Question} from "@common/models";
 import {IScope} from "angular";
+import {RootsConst} from "../../../../core/constants/roots.const";
 
 interface IQuestionTypeFreetextProps {
     question: Question;
@@ -28,12 +29,12 @@ class Controller implements IViewModel {
     getHtmlDescription = (description: string): string => {
         return !!description ? this.$sce.trustAsHtml(description) : null;
     }
-
 }
 
 function directive() {
     return {
         restrict: 'E',
+        templateUrl: `${RootsConst.directive}question/question-type/question-type-freetext/question-type-freetext.html`,
         transclude: true,
         scope: {
             question: '=',
@@ -41,17 +42,6 @@ function directive() {
         },
         controllerAs: 'vm',
         bindToController: true,
-        template: `
-            <div>
-                <div ng-if="!vm.question.selected">
-                    <div ng-if="vm.question.statement" data-ng-bind-html="vm.getHtmlDescription(vm.question.statement)"></div>
-                    <textarea disabled ng-if="!vm.question.statement" i18n-placeholder="formulaire.question.type.FREETEXT"></textarea>
-                </div>
-                <div ng-if="vm.question.selected">
-                    <editor ng-model="vm.question.statement" visibility="vm.form.is_public ? 'public' : ''" input-guard></editor>
-                </div>
-            </div>
-        `,
         controller: ['$scope', '$sce', Controller],
         /* interaction DOM/element */
         link: function ($scope: IQuestionTypeFreetextScope,
@@ -62,4 +52,4 @@ function directive() {
     }
 }
 
-export const questionTypeFreetext = ng.directive('questionTypeFreetext', directive);
+export const questionTypeFreetext: Directive = ng.directive('questionTypeFreetext', directive);

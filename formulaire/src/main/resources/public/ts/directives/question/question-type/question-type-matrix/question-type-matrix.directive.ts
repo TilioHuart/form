@@ -30,7 +30,7 @@ interface IQuestionTypeMatrixScope extends IScope, IQuestionTypeMatrixProps {
     vm: IViewModel;
 }
 
-class Controller implements ng.IController, IViewModel {
+class Controller implements IViewModel {
     question: Question;
     hasFormResponses: boolean;
     formElements: FormElements;
@@ -108,7 +108,7 @@ function directive() {
         bindToController: true,
         controller: ['$scope', '$sce', Controller],
         /* interaction DOM/element */
-        link: function ($scope: IQuestionTypeMatrixProps,
+        link: function ($scope: IQuestionTypeMatrixScope,
                         element: ng.IAugmentedJQuery,
                         attrs: ng.IAttributes,
                         vm: IViewModel) {
