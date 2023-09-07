@@ -511,7 +511,7 @@ public class DefaultFormService implements FormService {
                         .add(form.getPicture() != null ? form.getPicture() : "")
                         .add("NOW()")
                         .add(form.getDateOpening() != null ? form.getDateOpening().toString() : "NOW()")
-                        .add(form.getDateEnding())
+                        .add(form.getDateEnding() != null ? form.getDateEnding().toString() : null)
                         .add(form.getSent())
                         .add(form.getCollab())
                         .add(form.getReminded())
