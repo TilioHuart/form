@@ -125,10 +125,9 @@ public interface FormService {
 
     /**
      * Update multiple forms
-     * @param forms JsonArray data
-     * @param handler function handler returning JsonArray data
+     * @param forms List of forms to update
      */
-    void updateMultiple(JsonArray forms, Handler<Either<String, JsonArray>> handler);
+    Future<List<Form>> updateMultiple(List<Form> forms);
 
     /**
      * Delete a scpecific form

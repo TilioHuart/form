@@ -3,9 +3,11 @@ package fr.openent.formulaire.service.impl;
 import fr.openent.form.core.enums.I18nKeys;
 import fr.openent.form.core.models.Form;
 import fr.openent.form.core.models.ShareMember;
+import fr.openent.form.core.models.TransactionElement;
 import fr.openent.form.helpers.FutureHelper;
 import fr.openent.form.helpers.I18nHelper;
 import fr.openent.form.helpers.IModelHelper;
+import fr.openent.form.helpers.TransactionHelper;
 import fr.openent.formulaire.service.FormService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Future;
@@ -27,6 +29,8 @@ import static fr.openent.form.core.constants.DistributionStatus.FINISHED;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.*;
 import static fr.openent.form.core.constants.Tables.*;
+import static fr.openent.form.helpers.SqlHelper.getParamsForUpdateDateModifFormRequest;
+import static fr.openent.form.helpers.SqlHelper.getUpdateDateModifFormRequest;
 
 public class DefaultFormService implements FormService {
     private final Sql sql = Sql.getInstance();
@@ -481,57 +485,59 @@ public class DefaultFormService implements FormService {
     }
 
     @Override
-    public void updateMultiple(JsonArray forms, Handler<Either<String, JsonArray>> handler) {
+    public Future<List<Form>> updateMultiple(List<Form> forms) {
+        Promise<List<Form>> promise = Promise.promise();
+        List<TransactionElement> transactionElements = new ArrayList<>();
         if (!forms.isEmpty()) {
-            SqlStatementsBuilder s = new SqlStatementsBuilder();
-
-            s.raw(TRANSACTION_BEGIN_QUERY);
-            for (int i = 0; i < forms.size(); i++) {
-                JsonObject form = forms.getJsonObject(i);
-                int formId = form.getInteger(ID, null);
+            forms.forEach(form -> {
+                Number formId = form.getId();
 
                 String query = "WITH nbResponses AS (SELECT COUNT(*) FROM " + DISTRIBUTION_TABLE +
                         " WHERE form_id = ? AND status = ?) " +
                         "UPDATE " + FORM_TABLE + " SET title = ?, description = ?, picture = ?, date_modification = ?, " +
                         "date_opening = ?, date_ending = ?, sent = ?, collab = ?, reminded = ?, archived = ?, " +
                         "multiple = CASE (SELECT count > 0 FROM nbResponses) " +
-                        "WHEN false THEN ? WHEN true THEN (SELECT multiple FROM " + FORM_TABLE +" WHERE id = ?) END, " +
+                        "WHEN false THEN ? WHEN true THEN (SELECT multiple FROM " + FORM_TABLE + " WHERE id = ?) END, " +
                         "anonymous = CASE (SELECT count > 0 FROM nbResponses) " +
-                        "WHEN false THEN ? WHEN true THEN (SELECT anonymous FROM " + FORM_TABLE +" WHERE id = ?) END, " +
-                        "response_notified = ?, editable = ?, rgpd = ?, rgpd_goal = ?, rgpd_lifetime = ?" +
+                        "WHEN false THEN ? WHEN true THEN (SELECT anonymous FROM " + FORM_TABLE + " WHERE id = ?) END, " +
+                        "response_notified = ?, editable = ?, rgpd = ?, rgpd_goal = ?, rgpd_lifetime = ? " +
                         "WHERE id = ? RETURNING *;";
 
                 JsonArray params = new JsonArray()
                         .add(formId)
                         .add(FINISHED)
-                        .add(form.getString(TITLE, ""))
-                        .add(form.getString(DESCRIPTION, ""))
-                        .add(form.getString(PICTURE, ""))
+                        .add(form.getTitle() != null ? form.getTitle() : "")
+                        .add(form.getDescription() != null ? form.getDescription() : "")
+                        .add(form.getPicture() != null ? form.getPicture() : "")
                         .add("NOW()")
-                        .add(form.getString(DATE_OPENING, "NOW()"))
-                        .add(form.getString(DATE_ENDING, null))
-                        .add(form.getBoolean(SENT, false))
-                        .add(form.getBoolean(COLLAB, false))
-                        .add(form.getBoolean(REMINDED, false))
-                        .add(form.getBoolean(ARCHIVED, false))
-                        .add(form.getBoolean(MULTIPLE, false)).add(formId)
-                        .add(form.getBoolean(ANONYMOUS, false)).add(formId)
-                        .add(form.getBoolean(RESPONSE_NOTIFIED, false))
-                        .add(form.getBoolean(EDITABLE, false))
-                        .add(form.getBoolean(RGPD, false))
-                        .add(form.getString(RGPD_GOAL, ""))
-                        .add(form.getInteger(RGPD_LIFETIME, 12))
+                        .add(form.getDateOpening() != null ? form.getDateOpening().toString() : "NOW()")
+                        .add(form.getDateEnding())
+                        .add(form.getSent())
+                        .add(form.getCollab())
+                        .add(form.getReminded())
+                        .add(form.getArchived())
+                        .add(form.getMultiple()).add(formId)
+                        .add(form.getAnonymous()).add(formId)
+                        .add(form.getResponseNotified())
+                        .add(form.getEditable())
+                        .add(form.getRgpd())
+                        .add(form.getRgpdGoal() != null ? form.getRgpdGoal() : "")
+                        .add(form.getRgpdLifetime() != null ? form.getRgpdLifetime() : 12)
                         .add(formId);
 
-                s.prepared(query, params);
-            }
-            s.raw(TRANSACTION_COMMIT_QUERY);
-
-            sql.transaction(s.build(), SqlResult.validResultsHandler(handler));
+                transactionElements.add(new TransactionElement(query, params));
+                transactionElements.add(new TransactionElement(getUpdateDateModifFormRequest(), getParamsForUpdateDateModifFormRequest(formId.toString())));
+            });
         }
         else {
-            handler.handle(new Either.Right<>(new JsonArray()));
+            promise.fail("[Formulaire@DefaultFormService::updateMultiple] Empty forms list, nothing to update");
+            promise.complete(new ArrayList<>());
         }
+        String errorMessage = "[Formulaire@DefaultFormService::updateMultiple] Fail to update these forms";
+        TransactionHelper.executeTransactionAndGetJsonObjectResults(transactionElements, errorMessage)
+                .onSuccess(result -> promise.complete(IModelHelper.toList(result, Form.class)))
+                .onFailure(err -> promise.fail(err.getMessage()));
+        return promise.future();
     }
 
     @Override

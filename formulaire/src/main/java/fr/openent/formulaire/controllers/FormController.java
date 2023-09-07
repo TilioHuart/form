@@ -1,6 +1,7 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.enums.I18nKeys;
+import fr.openent.form.core.models.Form;
 import fr.openent.form.helpers.EventBusHelper;
 import fr.openent.form.helpers.FutureHelper;
 import fr.openent.form.helpers.I18nHelper;
@@ -782,11 +783,15 @@ public class FormController extends ControllerHelper {
                             }
 
                             JsonArray forms = formsEvt.right().getValue();
-                            for (int i = 0; i < forms.size(); i++) {
-                                forms.getJsonObject(i).put(ARCHIVED, false);
-                            }
+                            List<Form> formList = forms.getList();
+                            formList.forEach(f -> f.setArchived(false));
 
-                            formService.updateMultiple(forms, arrayResponseHandler(request));
+                            formService.updateMultiple(formList)
+                                    .onSuccess(result -> renderJson(request, new JsonArray(result)))
+                                    .onFailure(err -> {
+                                        log.error("[Formulaire@FormController::restore] Failed to restore forms : " + err.getMessage());
+                                        renderError(request);
+                                    });
                         });
                     });
                 });
@@ -1054,8 +1059,7 @@ public class FormController extends ControllerHelper {
                                                 "with id " + formIds.getString(0) + " : " + evt.cause();
                                         log.error(errMessage);
                                         promise.fail(evt.cause());
-                                    }
-                                    else promise.complete(null);
+                                    } else promise.complete(null);
                                 });
                                 return promise.future();
                             }
@@ -1165,12 +1169,12 @@ public class FormController extends ControllerHelper {
                     DeliveryOptions deliveryOptions = new DeliveryOptions();
 
                     EventBusHelper.requestJsonObject(EXPORT_ADDRESS, eb, ebMessage, deliveryOptions)
-                        .onSuccess(res -> renderJson(request, res))
-                        .onFailure(err -> {
-                            String message = "[Formulaire@FormController::exportZip] Failed to export data : " + err.getMessage();
-                            log.error(message);
-                            renderError(request);
-                        });
+                            .onSuccess(res -> renderJson(request, res))
+                            .onFailure(err -> {
+                                String message = "[Formulaire@FormController::exportZip] Failed to export data : " + err.getMessage();
+                                log.error(message);
+                                renderError(request);
+                            });
                 });
             });
         });
