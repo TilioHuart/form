@@ -43,7 +43,7 @@ export const questionService: QuestionService = {
     async listChildren(questions: Question[]) : Promise<Question[]> {
         try {
             let questionIds: number[] = questions.map((q: Question) => q.id);
-            let data: IQuestionResponse[] = DataUtils.getData(await http.get(`/formulaire/questions/children`, { params: questionIds }));
+            let data: IQuestionResponse[] = DataUtils.getData(await http.get(`/formulaire/questions/children`, { params: questionIds, headers: { Accept: 'application/json;version=2.0'} }));
             return data.map((qr: IQuestionResponse) => new Question().build(qr));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.list'));

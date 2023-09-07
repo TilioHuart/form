@@ -150,6 +150,9 @@ public class QuestionController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     public void listChildren(HttpServerRequest request) {
         JsonArray questionIds = new JsonArray();
+        ApiVersion apiVersion = new ApiVersion(RequestUtils.acceptVersion(request));
+        boolean shouldAdaptDataToApiVersionTwo = apiVersion.isBefore(TWO_ZERO);
+
         for (Integer i = 0; i < request.params().size(); i++) {
             questionIds.add(request.getParam(i.toString()));
         }
@@ -158,8 +161,13 @@ public class QuestionController extends ControllerHelper {
             noContent(request);
             return;
         }
+
         questionService.listChildren(questionIds)
-                .onSuccess(result -> renderJson(request, new JsonArray(result)))
+                .onSuccess(result -> {
+                    JsonArray finalResult = new JsonArray(result);
+                    if (shouldAdaptDataToApiVersionTwo) finalResult = ApiVersionHelper.formatQuestions(finalResult);
+                    renderJson(request, finalResult);
+                })
                 .onFailure(error -> {
                     String errMessage = "[Formulaire@QuestionController::listChildren] Failed to get children";
                     log.error(errMessage + " : " + error.getMessage());
