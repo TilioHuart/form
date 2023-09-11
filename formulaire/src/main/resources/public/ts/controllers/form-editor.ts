@@ -668,7 +668,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
             if (conditionalQuestion && response && !response.choice_id) {
                 notify.info('formulaire.response.next.invalid');
-                nextPosition = null;
+                nextPosition = undefined;
             }
             else if (conditionalQuestion && response) {
                 let choices: QuestionChoice[] = conditionalQuestion.choices.all.filter((c: QuestionChoice) => c.id === response.choice_id);

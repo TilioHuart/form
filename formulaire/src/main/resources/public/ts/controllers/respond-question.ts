@@ -185,6 +185,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             vm.isProcessing = false;
             $scope.$emit(FORMULAIRE_EMIT_EVENT.REDIRECT, data);
         }
+        vm.isProcessing = false;
     };
 
     vm.nextGuard = () => {
