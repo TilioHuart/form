@@ -345,3 +345,7 @@ body.formulaire-module section.main {
 popover {
   z-index: 2;
 }
+
+*:disabled {
+  pointer-events: none;
+}
