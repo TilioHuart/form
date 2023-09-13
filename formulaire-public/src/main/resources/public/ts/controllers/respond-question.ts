@@ -86,6 +86,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 			vm.isProcessing = false;
 			template.open('main', 'containers/recap');
 		}
+		vm.isProcessing = false;
 		$scope.safeApply();
 	};
 

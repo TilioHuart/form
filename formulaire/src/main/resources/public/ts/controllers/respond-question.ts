@@ -125,7 +125,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             vm.historicPosition.pop();
             vm.longestPath = vm.historicPosition.length + FormElementUtils.findLongestPathInFormElement(vm.formElement.id, vm.formElements) - 1;
             goToFormElement();
-        };
+        }
         vm.isProcessing = false;
     };
 
