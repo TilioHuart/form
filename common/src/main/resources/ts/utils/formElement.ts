@@ -377,4 +377,34 @@ export class FormElementUtils {
             .filter((q: Question) => q.conditional);
         return formElements.all.concat(insideConditionalQuestions);
     }
+
+    static findLongestPathInFormElement = (formElementId: number, formElements: FormElements): number => {
+        let currentNode: FormElement = formElements.all.find((node: FormElement) => node.id === formElementId);
+        if (!currentNode) return 1;
+        if (currentNode.isSection()) {
+            let questions: Question[] = (<Section>currentNode).questions.all;
+            let conditionalQuestions: any = questions.filter((q: Question) => q.conditional);
+            let choices: Question[] = (conditionalQuestions && conditionalQuestions.length > 0) ? conditionalQuestions.flatMap((q: Question) => q.choices.all) : null;
+            return FormElementUtils.findLongestPathInQuestionChoices(choices, currentNode, formElements);
+        } else {
+            let question: Question = <Question>currentNode;
+            let questionChoices: QuestionChoice[] = question.conditional ? question.choices.all : null;
+            return FormElementUtils.findLongestPathInQuestionChoices(questionChoices, currentNode, formElements);
+        }
+    }
+
+
+    static findLongestPathInQuestionChoices = (choices: any, currentFormElement: FormElement, formElements: FormElements): number => {
+        if (!choices || choices.length === 0) {
+            let nextElementId: number = currentFormElement.getNextFormElementId(formElements);
+            if (!nextElementId) {return 1;}
+            return FormElementUtils.findLongestPathInFormElement(nextElementId, formElements) + 1;
+        } else {
+            let tab: number[] = choices.map((choice: any) => {
+                if (!choice.next_form_element_id) return 1;
+                return FormElementUtils.findLongestPathInFormElement(choice.next_form_element_id, formElements);
+            });
+            return Math.max(...tab) + 1;
+        }
+    }
 }

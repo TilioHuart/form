@@ -13,7 +13,7 @@ import {
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
 import {Mix} from "entcore-toolkit";
 import {FormElementType} from "@common/core/enums/form-element-type";
-import {PublicUtils} from "@common/utils";
+import {FormElementUtils, PublicUtils} from "@common/utils";
 
 interface ViewModel {
 	formKey: string;
@@ -22,6 +22,7 @@ interface ViewModel {
 	formElement: FormElement;
 	form: Form;
 	nbFormElements: number;
+	longestPath: number;
 	historicPosition: number[];
 	isProcessing: boolean;
 
@@ -48,6 +49,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 		syncWithStorageData();
 		let formElementPosition = vm.historicPosition[vm.historicPosition.length - 1];
 		vm.formElement = vm.formElements.all[formElementPosition - 1];
+		vm.longestPath = vm.historicPosition.length + FormElementUtils.findLongestPathInFormElement(vm.formElement.id, vm.formElements) - 1;
 		initFormElementResponses();
 		$scope.safeApply();
 	}
@@ -60,6 +62,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 			let isCursorAgain: boolean = vm.formElement.isSameQuestionTypeOfType(vm.formElements.all[prevPosition - 1], Types.CURSOR);
 			vm.formElement = vm.formElements.all[prevPosition - 1];
 			vm.historicPosition.pop();
+			vm.longestPath = vm.historicPosition.length + FormElementUtils.findLongestPathInFormElement(vm.formElement.id, vm.formElements) - 1;
 			goToFormElement(isCursorAgain);
 		}
 		vm.isProcessing = false;
@@ -74,6 +77,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 			let isCursorAgain: boolean = vm.formElement.isSameQuestionTypeOfType(vm.formElements.all[nextPosition - 1], Types.CURSOR);
 			vm.formElement = vm.formElements.all[nextPosition - 1];
 			vm.historicPosition.push(vm.formElement.position);
+			vm.longestPath = vm.historicPosition.length + FormElementUtils.findLongestPathInFormElement(vm.formElement.id, vm.formElements) - 1;
 			vm.isProcessing = false;
 			goToFormElement(isCursorAgain);
 		}
