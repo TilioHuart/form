@@ -50,6 +50,8 @@ export class Section extends FormElement {
     }
 
     getNextFormElement = (formElements: FormElements) : FormElement => {
+        if (this.is_next_form_element_default) return this.getFollowingFormElement(formElements);
+
         return formElements.all.find((e: FormElement) =>
             e.id === this.next_form_element_id &&
             e.form_element_type === this.next_form_element_type
