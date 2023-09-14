@@ -199,7 +199,7 @@
   "formulaire.form.download.all.results.lightbox.title": "Téléchargement des résultats ({0})",
   "formulaire.form.download.all.results.lightbox.description.p1": "Les réponses du formulaire vont être téléchargées au format {0}.",
   "formulaire.form.download.all.results.lightbox.description.p2": "Les documents déposés dans les questions de type \"Dépôt de fichier\" ne seront pas téléchargés lors de cet export.",
-  "formulaire.form.download.all.results.lightbox.description.p3": "Si votre formulaire a reçu plus de 100 réponses, seuls les graphiques des questions de type \"Choix multiples\" et \"Réponse unique\" seront téléchargés.",
+  "formulaire.form.download.all.results.lightbox.description.p3": "Si votre formulaire a reçu plus de 100 réponses, seuls les graphiques des questions de type \"Choix multiple\" et \"Réponse unique\" seront téléchargés.",
   "formulaire.form.download.all.files": "Télécharger tout (ZIP)",
   "formulaire.image.incompatible": "Seuls les formats d'image suivants sont acceptés : .jpg, .jpeg, .png, .gif",
 
@@ -231,7 +231,7 @@
   "formulaire.question.type.SHORTANSWER": "Réponse courte",
   "formulaire.question.type.LONGANSWER": "Paragraphe",
   "formulaire.question.type.SINGLEANSWER": "Réponse unique",
-  "formulaire.question.type.MULTIPLEANSWER": "Choix multiples",
+  "formulaire.question.type.MULTIPLEANSWER": "Choix multiple",
   "formulaire.question.type.DATE": "Date",
   "formulaire.question.type.TIME": "Heure",
   "formulaire.question.type.FILE": "Dépôt de fichier",
@@ -275,7 +275,7 @@
   "formulaire.question.multipleanswer.value.mandatory": "Attention, le choix ne peut pas comporter une image seule. Veuillez aussi saisir du texte.",
 
   "formulaire.matrix.type.SINGLEANSWERRADIO": "Matrice à choix unique",
-  "formulaire.matrix.type.MULTIPLEANSWER": "Matrice avec cases à cocher",
+  "formulaire.matrix.type.MULTIPLEANSWER": "Matrice à choix multiple",
   "formulaire.matrix.columns": "Colonnes (Options de réponses)",
   "formulaire.matrix.lines": "Lignes",
 
