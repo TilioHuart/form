@@ -33,7 +33,7 @@ export class QuestionChoice {
         this.next_form_element = null;
         this.next_form_element_id = null;
         this.next_form_element_type = null;
-        this.is_next_form_element_default = false;
+        this.is_next_form_element_default = true;
         this.is_custom = isCustom ? isCustom : false;
         this.nbResponses = 0;
         this.image = image ? image : null;
@@ -48,7 +48,7 @@ export class QuestionChoice {
         this.next_form_element = null;
         this.next_form_element_id = data.nextFormElementId ? data.nextFormElementId : null;
         this.next_form_element_type = data.nextFormElementType ? data.nextFormElementType : null;
-        this.is_next_form_element_default = data.isNextFormElementDefault ? data.isNextFormElementDefault : false;
+        this.is_next_form_element_default = data.isNextFormElementDefault ? data.isNextFormElementDefault : true;
         this.is_custom = data.isCustom ? data.isCustom : null;
         this.nbResponses = 0;
         this.image = data.image ? data.image : null;
@@ -78,7 +78,9 @@ export class QuestionChoice {
         this.is_next_form_element_default = true;
     }
 
-    getNextFormElement = (formElements: FormElements) : FormElement => {
+    getNextFormElement = (formElements: FormElements, parentQuestion?: Question) : FormElement => {
+        if (this.is_next_form_element_default) return parentQuestion.getFollowingFormElement(formElements);
+
         return formElements.all.find((e: FormElement) =>
             e.id === this.next_form_element_id &&
             e.form_element_type === this.next_form_element_type
