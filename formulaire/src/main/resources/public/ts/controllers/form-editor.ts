@@ -769,6 +769,14 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     && formElement.specific_fields.cursor_max_val != null
                     && formElement.specific_fields.cursor_min_val != formElement.specific_fields.cursor_max_val;
 
+                let originalSectionPositions: number[];
+                let sectionParent: Section;
+                if (formElement instanceof Question) {
+                    sectionParent = formElement.getParentSection(vm.formElements);
+                    originalSectionPositions = sectionParent.questions.all.map((q: Question) => q.section_position);
+                    FormElementUtils.rePositionFormElements(sectionParent.questions, PropPosition.SECTION_POSITION);
+                }
+
                 if (isSection || isQuestionNotCursor || isCursorQuestionAndValuesOk) {
                     // Save form element
                     let savedElement: FormElement = await formElementService.save(formElement);
@@ -824,6 +832,10 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 // If position changes were needed we save them here
                 if (originalPositions != vm.formElements.all.map((e: FormElement) => e.position)) {
                     await formElementService.update(vm.formElements.all);
+                }
+                // If section_position changes were needed we save them here
+                if (originalSectionPositions && sectionParent && originalSectionPositions != sectionParent.questions.all.map((q: Question) => q.section_position)) {
+                    await questionService.update(sectionParent.questions.all);
                 }
 
                 await vm.$onInit();
