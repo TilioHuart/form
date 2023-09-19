@@ -771,10 +771,12 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
                 let originalSectionPositions: number[];
                 let sectionParent: Section;
-                if (formElement instanceof Question) {
+                if (formElement instanceof Question && formElement.section_id) {
                     sectionParent = formElement.getParentSection(vm.formElements);
-                    originalSectionPositions = sectionParent.questions.all.map((q: Question) => q.section_position);
-                    FormElementUtils.rePositionFormElements(sectionParent.questions, PropPosition.SECTION_POSITION);
+                    if (sectionParent) {
+                        originalSectionPositions = sectionParent.questions.all.map((q: Question) => q.section_position);
+                        FormElementUtils.rePositionFormElements(sectionParent.questions, PropPosition.SECTION_POSITION);
+                    }
                 }
 
                 if (isSection || isQuestionNotCursor || isCursorQuestionAndValuesOk) {
