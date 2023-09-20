@@ -89,7 +89,7 @@
                    ng-click="vm.onClickChoice(choice)" input-guard>
             <span>[[choice.value]]</span>
             <span ng-if="choice.is_custom">&nbsp;:
-              <input type="text" ng-model="vm.responses.all[vm.mapChoiceResponseIndex.get(choice)].custom_answer"
+              <input type="text" ng-model="vm.responses.all[0].custom_answer"
                      ng-change="vm.deselectIfEmpty(choice)"
                      i18n-placeholder="formulaire.public.response.custom.write">
             </span>
