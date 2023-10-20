@@ -848,7 +848,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         };
 
         const onClickQuestion = async (event) : Promise<void> => {
-            if (!vm.dontSave && $scope.currentPage === Pages.EDIT_FORM) {
+            if (!vm.dontSave && !vm.isProcessing && $scope.currentPage === Pages.EDIT_FORM) {
                 vm.isProcessing = true;
                 let question = isInFocusable(event.target);
                 if (question && question.id && question.id > 0) {
