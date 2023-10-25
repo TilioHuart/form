@@ -66,7 +66,14 @@ public interface QuestionChoiceService {
      * @param choices List<QuestionChoice> data
      * @param locale locale language
      */
-    Future<JsonArray> update(List<QuestionChoice> choices, String locale);
+    Future<JsonArray> updateOld(List<QuestionChoice> choices, String locale);
+
+    /**
+     * Update a list of specific choices
+     * @param choices List<QuestionChoice> data
+     * @param locale locale language
+     */
+    Future<List<QuestionChoice>> update(List<QuestionChoice> choices, String locale);
 
     /**
      * Delete a specific choice

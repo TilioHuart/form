@@ -115,7 +115,7 @@ public class FormElementController extends ControllerHelper {
                             .map(Question.class::cast)
                             .flatMap(q -> q.getChoices().stream())
                             .collect(Collectors.toList());
-                    return questionChoiceService.update(choices, I18n.acceptLanguage(request));
+                    return questionChoiceService.updateOld(choices, I18n.acceptLanguage(request));
                 })
                 .onSuccess(result -> renderJson(request, result))
                 .onFailure(err -> {

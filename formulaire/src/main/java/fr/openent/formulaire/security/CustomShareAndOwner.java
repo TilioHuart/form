@@ -87,8 +87,9 @@ public class CustomShareAndOwner implements ResourcesProvider {
                 isGetForm(binding) || isUpdateForm(binding) || isDeleteForm(binding) || isSendReminderForm(binding) ||
                 isGetMyFormRightsForm(binding) || isCountFormElements(binding) || isGetByPositionFormElement(binding) ||
                 isUpdateFormElement(binding) || isListForFormQuestion(binding) || isListForFormAndSectionQuestion(binding) ||
-                isCreateQuestion(binding) || isListByFormResponse(binding) || isDeleteResponse(binding) || isExportResponse(binding) ||
-                isListSection(binding) || isCreateSection(binding) || isUpdateSection(binding) || isUpdateQuestion(binding)) {
+                isCreateQuestion(binding) || isUpdateMultipleQuestionChoice(binding) || isListByFormResponse(binding) ||
+                isDeleteResponse(binding) || isExportResponse(binding) || isListSection(binding) || isCreateSection(binding) ||
+                isUpdateSection(binding) || isUpdateQuestion(binding)) {
             return PARAM_FORM_ID;
         }
         else if (isGetDistribution(binding) || isAddDistribution(binding) || isUpdateDistribution(binding) ||
@@ -204,6 +205,10 @@ public class CustomShareAndOwner implements ResourcesProvider {
 
     private boolean isUpdateQuestionChoice(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.PUT, "fr.openent.formulaire.controllers.QuestionChoiceController|update");
+    }
+
+    private boolean isUpdateMultipleQuestionChoice(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.PUT, "fr.openent.formulaire.controllers.QuestionChoiceController|updateMultiple");
     }
 
     private boolean isDeleteQuestionChoice(final Binding binding) {

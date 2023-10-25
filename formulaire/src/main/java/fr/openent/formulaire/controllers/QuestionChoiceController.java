@@ -2,6 +2,8 @@ package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.enums.ChoiceTypes;
 import fr.openent.form.core.models.QuestionChoice;
+import fr.openent.form.helpers.FutureHelper;
+import fr.openent.form.helpers.IModelHelper;
 import fr.openent.formulaire.helpers.ApiVersionHelper;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
@@ -13,12 +15,17 @@ import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.CONTRIB_RESOURCE_RIGHT;
@@ -181,6 +188,55 @@ public class QuestionChoiceController extends ControllerHelper {
                 })
                 .onFailure(err -> {
                     log.error(err.getMessage());
+                    renderError(request);
+                });
+        });
+    }
+
+    @Put("/:formId/choices")
+    @ApiDoc("Update multiple choices")
+    @ResourceFilter(CustomShareAndOwner.class)
+    @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void updateMultiple(HttpServerRequest request) {
+        RequestUtils.bodyToJsonArray(request, choicesJson -> {
+            if (choicesJson == null || choicesJson.isEmpty()) {
+                log.error("[Formulaire@QuestionChoiceController::updateMultiple] No choice to update.");
+                noContent(request);
+                return;
+            }
+
+            List<QuestionChoice> choices = IModelHelper.toList(choicesJson, QuestionChoice.class);
+            String locale = I18n.acceptLanguage(request);
+
+            // Check choice type validity
+            List<QuestionChoice> wrongChoices = choices.stream()
+                    .filter(choice -> !choice.getType().equals(ChoiceTypes.TXT.getValue()))
+                    .collect(Collectors.toList());
+            if (wrongChoices.size() > 0) {
+                String errMessage = "[Formulaire@QuestionChoiceController::updateMultiple] Invalid choice type for choices with id : ";
+                log.error(errMessage + wrongChoices.stream().map(QuestionChoice::getId).collect(Collectors.toList()));
+                badRequest(request);
+                return;
+            }
+
+            List<Future<Boolean>> futures = new ArrayList<>();
+            for (QuestionChoice choice : choices) futures.add(questionChoiceService.isTargetValid(choice));
+
+            FutureHelper.all(futures)
+                .compose(choicesValidity -> {
+                    boolean hasNotValidChoice = choicesValidity.result().list().stream()
+                            .map(Boolean.class::cast)
+                            .anyMatch(choiceValidity -> !choiceValidity);
+                    if (hasNotValidChoice) {
+                        String errorMessage = "[Formulaire@QuestionChoiceController::updateMultiple] Some choices are invalid.";
+                        return Future.failedFuture(errorMessage);
+                    }
+                    return questionChoiceService.update(choices, locale);
+                })
+                .onSuccess(result -> renderJson(request, new JsonArray(result)))
+                .onFailure(err -> {
+                    String errMessage = "[Formulaire@QuestionChoiceController::updateMultiple] Failed to update choices " + choices;
+                    log.error(errMessage + " : " + err.getMessage());
                     renderError(request);
                 });
         });

@@ -48,10 +48,23 @@ class Controller implements IViewModel {
     }
 
     $onInit = async () : Promise<void> => {
-        for (let choice of this.question.choices.all) {
-            choice.next_form_element = choice.getNextFormElement(this.formElements, this.question);
-        }
         this.followingFormElement = this.question.getFollowingFormElement(this.formElements);
+        let questionPosition: number = this.question.getPosition(this.formElements);
+        for (let choice of this.question.choices.all) {
+            let nextFormElement: FormElement = choice.getNextFormElement(this.formElements, this.question);
+            if (nextFormElement && nextFormElement.position > questionPosition) {
+                choice.next_form_element = nextFormElement;
+            }
+            else if (nextFormElement) {
+                choice.next_form_element = this.followingFormElement;
+                choice.next_form_element_id = this.followingFormElement.id;
+                choice.next_form_element_type = this.followingFormElement.form_element_type;
+                choice.is_next_form_element_default = true;
+            }
+            else {
+                choice.next_form_element = undefined;
+            }
+        }
     }
 
     $onDestroy = async () : Promise<void> => {}

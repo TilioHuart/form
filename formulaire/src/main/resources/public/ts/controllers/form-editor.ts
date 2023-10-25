@@ -30,11 +30,12 @@ import {
     Pages
 } from "@common/core/enums";
 import * as Sortable from "sortablejs";
-import {FormElementUtils} from "@common/utils";
+import {DataUtils, FormElementUtils} from "@common/utils";
 import {Constants} from "@common/core/constants";
 import {PropPosition} from "@common/core/enums/prop-position";
 import {FormElementType} from "@common/core/enums/form-element-type";
 import {IconUtils} from "@common/utils/icon";
+import http from "axios";
 
 enum PreviewPage { RGPD = 'rgpd', QUESTION = 'question', RECAP = 'recap'}
 
@@ -280,6 +281,12 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             }
 
             await formElementService.update(vm.formElements.getAllSectionsAndAllQuestions());
+            try {
+                await questionChoiceService.updateMultiple(FormElementUtils.getConditionalQuestionsChoices(vm.formElements), vm.form.id);
+            } catch (err) {
+                notify.error(idiom.translate('formulaire.error.questionChoiceService.update'));
+                throw err;
+            }
             vm.display.lightbox.reorganization = false;
             vm.isProcessing = false;
             template.close('lightbox');

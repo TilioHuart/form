@@ -1,6 +1,10 @@
 import {idiom, ng, notify} from 'entcore';
 import http from 'axios';
-import {QuestionChoice, QuestionChoicePayload} from '../models';
+import {
+    IQuestionChoiceResponse,
+    QuestionChoice,
+    QuestionChoicePayload
+} from '../models';
 import {DataUtils} from "../utils";
 
 export interface QuestionChoiceService {
@@ -9,6 +13,7 @@ export interface QuestionChoiceService {
     save(choice: QuestionChoice) : Promise<any>;
     create(choice: QuestionChoice) : Promise<any>;
     update(choice: QuestionChoice) : Promise<any>;
+    updateMultiple(choices: QuestionChoice[], formId: number) : Promise<QuestionChoice[]>;
     delete(choiceId: number) : Promise<any>;
 }
 
@@ -55,6 +60,16 @@ export const questionChoiceService: QuestionChoiceService = {
             return DataUtils.getData(await http.put(`/formulaire/choices/${choice.id}`, choicePayload, { headers: { Accept: 'application/json;version=1.9'} }));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionChoiceService.update'));
+            throw err;
+        }
+    },
+
+    async updateMultiple(choices: QuestionChoice[], formId: number) : Promise<QuestionChoice[]> {
+        try {
+            let choicesPayload: QuestionChoicePayload[] = choices.map((c: QuestionChoice) => new QuestionChoicePayload(c));
+            let data: IQuestionChoiceResponse[] = DataUtils.getData(await http.put(`/formulaire/${formId}/choices`, choicesPayload));
+            return data.map((qcr: IQuestionChoiceResponse) => new QuestionChoice().build(qcr));
+        } catch (err) {
             throw err;
         }
     },

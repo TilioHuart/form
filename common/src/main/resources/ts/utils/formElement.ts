@@ -11,8 +11,8 @@ import {
 } from "../models";
 import {Mix} from "entcore-toolkit";
 import {Direction} from "../core/enums";
-import {angular, idiom, notify} from "entcore";
-import {formElementService, questionService} from "../services";
+import {idiom, notify} from "entcore";
+import {formElementService, questionChoiceService, questionService} from "../services";
 import {PropPosition} from "@common/core/enums/prop-position";
 
 export class FormElementUtils {
@@ -146,7 +146,7 @@ export class FormElementUtils {
                 FormElementUtils.rePositionFormElements(oldSection.questions, PropPosition.SECTION_POSITION);
                 FormElementUtils.rePositionFormElements(formElements, PropPosition.POSITION);
                 FormElementUtils.updateNextFormElementValues(formElements);
-                await formElementService.update(FormElementUtils.getSectionsAndInsideConditionalQuestions(formElements));
+                await formElementService.update(FormElementUtils.concatConditionalQuestionsInsideSections(formElements));
                 await questionService.update(oldSection.questions.all);
             }
             else { // Item moved FROM vm.formElements TO vm.formElements
@@ -156,7 +156,7 @@ export class FormElementUtils {
                 item.section_position = null;
                 FormElementUtils.rePositionFormElements(formElements, PropPosition.POSITION);
                 FormElementUtils.updateNextFormElementValues(formElements);
-                await formElementService.update(FormElementUtils.getSectionsAndInsideConditionalQuestions(formElements));
+                await formElementService.update(FormElementUtils.concatConditionalQuestionsInsideSections(formElements));
             }
         }
         else {
@@ -193,8 +193,15 @@ export class FormElementUtils {
                 FormElementUtils.rePositionFormElements(formElements, PropPosition.POSITION);
                 FormElementUtils.updateNextFormElementValues(formElements);
                 await questionService.update(newSection.questions.all);
-                await formElementService.update(FormElementUtils.getSectionsAndInsideConditionalQuestions(formElements));
+                await formElementService.update(FormElementUtils.concatConditionalQuestionsInsideSections(formElements));
             }
+        }
+
+        try {
+            await questionChoiceService.updateMultiple(FormElementUtils.getConditionalQuestionsChoices(formElements), item.form_id);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.questionChoiceService.update'));
+            throw err;
         }
     };
 
@@ -370,12 +377,17 @@ export class FormElementUtils {
         }
     }
 
-    static getSectionsAndInsideConditionalQuestions = (formElements: FormElements) : FormElement[] => {
+    static concatConditionalQuestionsInsideSections = (formElements: FormElements) : FormElement[] => {
         let insideConditionalQuestions: FormElement[] = (formElements.all as any)
             .filter((e: FormElement) => e instanceof Section)
             .flatMap((s: Section) => s.questions.all)
             .filter((q: Question) => q.conditional);
         return formElements.all.concat(insideConditionalQuestions);
+    }
+
+    static getConditionalQuestionsChoices = (formElements: FormElements) : QuestionChoice[] => {
+        let conditionalQuestions: Question[] = formElements.getAllQuestions().all.filter((q: Question) => q.conditional);
+        return (<any>conditionalQuestions).flatMap((q: Question) => q.choices.all);
     }
 
     static findLongestPathInFormElement = (formElementId: number, formElements: FormElements): number => {

@@ -5,6 +5,7 @@ import fr.openent.form.core.enums.I18nKeys;
 import fr.openent.form.core.models.QuestionChoice;
 import fr.openent.form.helpers.FutureHelper;
 import fr.openent.form.helpers.I18nHelper;
+import fr.openent.form.helpers.IModelHelper;
 import fr.openent.formulaire.service.QuestionChoiceService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Future;
@@ -18,6 +19,7 @@ import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.sql.SqlStatementsBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static fr.openent.form.core.constants.Constants.TRANSACTION_BEGIN_QUERY;
@@ -141,7 +143,7 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
     }
 
     @Override
-    public Future<JsonArray> update(List<QuestionChoice> choices, String locale) {
+    public Future<JsonArray> updateOld(List<QuestionChoice> choices, String locale) {
         Promise<JsonArray> promise = Promise.promise();
 
         if (!choices.isEmpty()) {
@@ -172,6 +174,43 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
         }
         else {
             promise.complete(new JsonArray());
+        }
+
+        return promise.future();
+    }
+
+    @Override
+    public Future<List<QuestionChoice>> update(List<QuestionChoice> choices, String locale) {
+        Promise<List<QuestionChoice>> promise = Promise.promise();
+
+        if (!choices.isEmpty()) {
+            SqlStatementsBuilder s = new SqlStatementsBuilder();
+            String query = "UPDATE " + QUESTION_CHOICE_TABLE + " SET value = ?, position = ?, type = ?, " +
+                    "next_form_element_id = ?, next_form_element_type = ?, is_next_form_element_default = ?, is_custom = ?, " +
+                    "image = ? WHERE id = ? RETURNING *;";
+
+            s.raw(TRANSACTION_BEGIN_QUERY);
+            for (QuestionChoice choice : choices) {
+                boolean isCustom = choice.getIsCustom();
+                JsonArray params = new JsonArray()
+                        .add(isCustom ? I18nHelper.getI18nValue(I18nKeys.OTHER, locale) : choice.getValue())
+                        .add(choice.getPosition())
+                        .add(choice.getType())
+                        .add(choice.getNextFormElementId())
+                        .add(choice.getNextFormElementType())
+                        .add(choice.getIsNextFormElementDefault())
+                        .add(isCustom)
+                        .add(choice.getImage())
+                        .add(choice.getId());
+                s.prepared(query, params);
+            }
+            s.raw(TRANSACTION_COMMIT_QUERY);
+
+            String errorMessage = "[Formulaire@DefaultQuestionChoiceService::update] Fail to update question choice : ";
+            sql.transaction(s.build(), SqlResult.validResultsHandler(IModelHelper.sqlResultToIModel(promise, QuestionChoice.class, errorMessage)));
+        }
+        else {
+            promise.complete(new ArrayList<>());
         }
 
         return promise.future();
