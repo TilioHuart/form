@@ -30,12 +30,11 @@ import {
     Pages
 } from "@common/core/enums";
 import * as Sortable from "sortablejs";
-import {DataUtils, FormElementUtils} from "@common/utils";
+import {FormElementUtils, UtilsUtils} from "@common/utils";
 import {Constants} from "@common/core/constants";
 import {PropPosition} from "@common/core/enums/prop-position";
 import {FormElementType} from "@common/core/enums/form-element-type";
 import {IconUtils} from "@common/utils/icon";
-import http from "axios";
 
 enum PreviewPage { RGPD = 'rgpd', QUESTION = 'question', RECAP = 'recap'}
 
@@ -776,13 +775,24 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     && formElement.specific_fields.cursor_max_val != null
                     && formElement.specific_fields.cursor_min_val != formElement.specific_fields.cursor_max_val;
 
+                // Reformat positions of siblings questions of parent section if existing
                 let originalSectionPositions: number[];
                 let sectionParent: Section;
-                if (formElement instanceof Question && formElement.section_id) {
+                if (formElement && formElement instanceof Question && formElement.section_id) {
                     sectionParent = formElement.getParentSection(vm.formElements);
                     if (sectionParent) {
                         originalSectionPositions = sectionParent.questions.all.map((q: Question) => q.section_position);
                         FormElementUtils.rePositionFormElements(sectionParent.questions, PropPosition.SECTION_POSITION);
+                    }
+                }
+
+                // Reformat positions of choices if existing
+                let originalChoicePositions: number[];
+                if (formElement && formElement instanceof Question && formElement.choices.all.length > 0) {
+                    originalChoicePositions = formElement.choices.all.map((c: QuestionChoice) => c.position);
+                    formElement.choices.all.sort((a: QuestionChoice, b: QuestionChoice) => a.position - b.position);
+                    for (let i: number = 0; i < formElement.choices.all.length; i++) {
+                        formElement.choices.all[i][PropPosition.POSITION] = i + 1;
                     }
                 }
 
@@ -800,7 +810,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         for (let choice of formElement.choices.all) {
                             if (!choice.value && choice.id) {
                                 await questionChoiceService.delete(choice.id);
-                            } else if (choice.value && !registeredChoiceValues.some((v: string) => v === choice.value)) {
+                            }
+                            else if (choice.value && !registeredChoiceValues.some((v: string) => v === choice.value)) {
                                 choice.position = positionCounter;
                                 choice.question_id = newId;
                                 choice.id = (await questionChoiceService.save(choice)).id;
@@ -839,17 +850,25 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 }
 
                 // If position changes were needed we save them here
-                if (originalPositions != vm.formElements.all.map((e: FormElement) => e.position)) {
+                let newPositions: number[] = vm.formElements.all.map((e: FormElement) => e.position);
+                if (!UtilsUtils.areArrayEqual(originalPositions, newPositions)) {
                     await formElementService.update(vm.formElements.all);
                 }
                 // If section_position changes were needed we save them here
-                if (originalSectionPositions && sectionParent && originalSectionPositions != sectionParent.questions.all.map((q: Question) => q.section_position)) {
+                let newSectionPositions: number[] = sectionParent ? sectionParent.questions.all.map((q: Question) => q.section_position) : null;
+                if (originalSectionPositions && sectionParent && newSectionPositions && !UtilsUtils.areArrayEqual(originalSectionPositions, newSectionPositions)) {
                     await questionService.update(sectionParent.questions.all);
+                }
+                // If choice_position changes were needed we save them here
+                let newChoicePositions: number[] = formElement instanceof Question ? formElement.choices.all.map((c: QuestionChoice) => c.position) : null;
+                if (formElement instanceof Question && originalChoicePositions && newChoicePositions && !UtilsUtils.areArrayEqual(originalChoicePositions, newChoicePositions)) {
+                    await questionChoiceService.updateMultiple(formElement.choices.all, vm.form.id);
                 }
 
                 await vm.$onInit();
             }
             catch (e) {
+                vm.isProcessing = false;
                 throw e;
             }
         };
