@@ -48,10 +48,24 @@ export class Response implements Selectable {
             image: this.image
         }
     }
+
+    build(data: IResponseResponse) : Response {
+        this.id = data.id ? data.id : null;
+        this.question_id = data.questionId ? data.questionId : null;
+        this.choice_id = data.choiceId ? data.choiceId : null;
+        this.answer = data.answer ? data.answer : "";
+        this.distribution_id = data.distributionId ? data.distributionId : null;
+        this.original_id = data.originalId ? data.originalId : null;
+        this.custom_answer = data.customAnswer ? data.customAnswer : null;
+        this.choice_position = data.choicePosition ? data.choicePosition : null;
+        this.image = data.image ? data.image : null;
+        return this;
+    }
 }
 
 export class Responses extends Selection<Response> {
     all: Response[];
+    hasLoaded: boolean;
 
     constructor() {
         super([]);
@@ -83,6 +97,15 @@ export class Responses extends Selection<Response> {
         }
     }
 
+    syncMineByQuestionIds = async (questionIds: number[], distributionId: number) : Promise<void> => {
+        try{
+            this.all = await responseService.listMineByDistributionAndQuestions(questionIds, distributionId);
+        } catch (e) {
+            notify.error(idiom.translate('formulaire.error.response.sync'));
+            throw e;
+        }
+    }
+
     syncByDistribution = async (distributionId: number) : Promise<void> => {
         try {
             let data = await responseService.listByDistribution(distributionId);
@@ -102,4 +125,17 @@ export class Responses extends Selection<Response> {
             throw e;
         }
     }
+}
+
+export interface IResponseResponse {
+    id: number;
+    questionId: number;
+    choiceId: number;
+    answer: string|Date|number;
+    distributionId: number;
+    originalId: number;
+    customAnswer: string;
+    choicePosition: number; // For question type ranking to order
+    image: string;
+    responderId: string;
 }

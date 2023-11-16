@@ -21,7 +21,7 @@
         <div class="nine twelve-mobile">
 
             <!-- Display question -->
-            <respond-question-item ng-if="FormElementUtils.isQuestion(vm.formElement) && vm.formElement.question_type != Types.MATRIX"
+            <respond-question-item ng-if="FormElementUtils.isQuestion(vm.formElement) && vm.formElement.question_type != Types.MATRIX && vm.currentResponses.get(vm.formElement).hasLoaded"
                                    question="vm.formElement"
                                    responses="vm.currentResponses.get(vm.formElement)"
                                    distribution="vm.distribution"
@@ -43,13 +43,13 @@
                 </div>
                 <div class="section-main">
                     <div ng-repeat="question in vm.formElement.questions.all | orderBy:'section_position'">
-                        <respond-question-item ng-if="question.question_type != Types.MATRIX"
+                        <respond-question-item ng-if="question.question_type != Types.MATRIX && vm.currentResponses.get(question).hasLoaded"
                                                question="question"
                                                responses="vm.currentResponses.get(question)"
                                                distribution="vm.distribution"
                                                files="vm.currentFiles.get(question)">
                         </respond-question-item>
-                        <respond-matrix ng-if="question.question_type == Types.MATRIX"
+                        <respond-matrix ng-if="question.question_type == Types.MATRIX && vm.currentResponses.get(question).hasLoaded"
                                         question="question"
                                         responses="vm.currentResponses.get(question)"
                                         distribution="vm.distribution">

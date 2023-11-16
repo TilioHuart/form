@@ -1,13 +1,23 @@
 package fr.openent.formulaire.service.impl;
 
+import fr.openent.form.core.models.Response;
+import fr.openent.form.helpers.IModelHelper;
+import fr.openent.formulaire.controllers.ResponseController;
 import fr.openent.formulaire.service.ResponseService;
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
+
+import java.util.Collections;
+import java.util.List;
 
 import static fr.openent.form.core.constants.Constants.QUESTIONS_WITHOUT_RESPONSES;
 import static fr.openent.form.core.constants.DistributionStatus.FINISHED;
@@ -15,6 +25,8 @@ import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.Tables.*;
 
 public class DefaultResponseService implements ResponseService {
+
+    private static final Logger log = LoggerFactory.getLogger(ResponseController.class);
 
     @Override
     public void list(String questionId, String nbLines, JsonArray distribs, Handler<Either<String, JsonArray>> handler) {
@@ -46,6 +58,28 @@ public class DefaultResponseService implements ResponseService {
         JsonArray params = new JsonArray().add(questionId).add(user.getUserId()).add(distributionId);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
+
+    @Override
+    public Future<List<Response>> ListMineByQuestionsIds(JsonArray questionsIds, String distributionId, String userId){
+        Promise<List<Response>> promise = Promise.promise();
+
+        if (questionsIds.isEmpty()) {
+            promise.complete(Collections.emptyList());
+            return promise.future();
+        }
+
+        String query = "SELECT * FROM " + RESPONSE_TABLE + " WHERE question_id IN " + Sql.listPrepared(questionsIds) + " " +
+                "AND responder_id = ? AND distribution_id = ? " +
+                "ORDER BY choice_id;";
+        JsonArray params = new JsonArray().addAll(questionsIds).add(userId).add(distributionId);
+
+        String errorMessage = "[Formulaire@DefaultResponseService::ListMineByQuestionsIds] Failed to get responses";
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(IModelHelper.sqlResultToIModel(promise, Response.class, errorMessage)));
+
+        return promise.future();
+    }
+
+
 
     @Override
     public void listByDistribution(String distributionId, Handler<Either<String, JsonArray>> handler) {

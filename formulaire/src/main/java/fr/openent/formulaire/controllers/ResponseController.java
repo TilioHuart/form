@@ -11,6 +11,7 @@ import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
+import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -97,6 +98,40 @@ public class ResponseController extends ControllerHelper {
                 return;
             }
             responseService.listMineByDistribution(questionId, distributionId, user, arrayResponseHandler(request));
+        });
+    }
+
+    @Post("/distributions/:distributionId/responses/multiple")
+    @ApiDoc("List all responses for a specific distribution and questions list")
+    @ResourceFilter(CustomShareAndOwner.class)
+    @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void listMineByDistributionAndQuestions(HttpServerRequest request) {
+        String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);
+
+        RequestUtils.bodyToJsonArray(request, questionIds -> {
+            if (questionIds == null || questionIds.isEmpty()) {
+                log.error("[Formulaire@ResponseController::listMineByDistributionAndQuestions] No question to return a response.");
+                noContent(request);
+                return;
+            }
+
+            UserUtils.getAuthenticatedUserInfos(eb, request)
+                .compose(user -> {
+                    if (user == null) {
+                        String errMessage = "[Formulaire@ResponseController::listMineByDistributionAndQuestions] User not found in session.";
+                        log.error(errMessage);
+                        unauthorized(request);
+                        return Future.failedFuture("User not found in session");
+                    }
+
+                    return responseService.ListMineByQuestionsIds(questionIds, distributionId, user.getUserId());
+                })
+                .onSuccess(responses -> renderJson(request, new JsonArray(responses)))
+                .onFailure(err -> {
+                    String errMessage = "[Formulaire@ResponseController::listMineByDistributionAndQuestions] Failed to list responses";
+                    log.error(errMessage + " : " + err.getMessage());
+                    if (!request.isEnded()) renderError(request);
+                });
         });
     }
 

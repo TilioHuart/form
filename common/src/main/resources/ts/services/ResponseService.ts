@@ -1,13 +1,22 @@
 import {idiom, ng, notify, moment} from 'entcore';
 import http from 'axios';
-import {FormElement, Question, Response, Section, Types} from "../models";
+import {
+    FormElement,
+    IQuestionChoiceResponse,
+    IResponseResponse,
+    Question,
+    QuestionChoice,
+    Response,
+    Section,
+    Types
+} from "../models";
 import {DataUtils} from "../utils";
 import {Exports} from "@common/core/enums";
-
 export interface ResponseService {
     list(question: Question, nbLines: number) : Promise<any>;
     listByForm(formId: number) : Promise<any>;
     listMineByDistribution(questionId: number, distributionId: number) : Promise<any>;
+    listMineByDistributionAndQuestions(questionIds: number[], distributionId: number) : Promise<Response[]>;
     listByDistribution(distributionId: number) : Promise<any>;
     countByFormElement(formElement: FormElement) : Promise<any>;
     save(response: Response, questionType?: number) : Promise<any>;
@@ -24,6 +33,7 @@ export const responseService: ResponseService = {
             return DataUtils.getData(await http.get(`/formulaire/questions/${question.id}/responses?nbLines=${nbLines}&formId=${question.form_id}`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.list'));
+
             throw err;
         }
     },
@@ -40,6 +50,16 @@ export const responseService: ResponseService = {
     async listMineByDistribution(questionId: number, distributionId: number) : Promise<any> {
         try {
             return DataUtils.getData(await http.get(`/formulaire/questions/${questionId}/distributions/${distributionId}/responses`));
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.responseService.list'));
+            throw err;
+        }
+    },
+
+    async listMineByDistributionAndQuestions(questionIds: number[], distributionId: number) : Promise<Response[]> {
+        try {
+            let data: IResponseResponse[] = DataUtils.getData(await http.post(`/formulaire/distributions/${distributionId}/responses/multiple`, { "question_ids": questionIds }));
+            return data.map((rr: IResponseResponse) => new Response().build(rr));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.list'));
             throw err;

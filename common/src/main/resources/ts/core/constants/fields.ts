@@ -12,6 +12,7 @@ export abstract class Fields {
     static readonly CURSOR_STEP: string = "cursor_step";
     static readonly CURSOR_MIN_LABEL: string = "cursor_min_label";
     static readonly CURSOR_MAX_LABEL: string = "cursor_max_label";
+    static readonly JANUARY_01_1970: string = "January 01 1970 ";
 
     // Cookies
     static readonly DOMAIN: string = "domain";

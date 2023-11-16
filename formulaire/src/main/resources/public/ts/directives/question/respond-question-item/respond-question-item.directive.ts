@@ -76,29 +76,20 @@ class Controller implements IViewModel {
 
     $onDestroy = async () : Promise<void> => {};
 
-    initRespondQuestionItem = async () : Promise<void> => {
-        if (this.question.question_type === Types.CURSOR && this.question.specific_fields) {
-            this.responses.all[0].answer = this.question.specific_fields.cursor_min_val;
-        }
 
+    initRespondQuestionItem = async () : Promise<void> => {
         if (this.question.isTypeMultipleRep()) {
             let existingResponses: Responses = new Responses();
-            if (this.distribution) await existingResponses.syncMine(this.question.id, this.distribution.id);
+            //existing responses have the selected property set to true
+            existingResponses.all = this.responses.filter((response:Response) => response.selected);
             this.mapChoiceResponseIndex = new Map();
             for (let choice of this.question.choices.all) {
-                // Get potential existing response for this choice
-                let existingMatchingResponses: Response[] = existingResponses.all.filter((r:Response) => r.choice_id == choice.id);
 
                 // Get default response matching this choice and get its index in list
                 let matchingResponses: Response[] = this.responses.all.filter((r:Response) => r.choice_id == choice.id);
                 if (matchingResponses.length != 1) console.error("Be careful, 'this.responses' has been badly implemented !!");
                 let matchingIndex = this.responses.all.indexOf(matchingResponses[0]);
 
-                // If there was an existing response we use it to replace the default one
-                if (existingMatchingResponses.length == 1) {
-                    this.responses.all[matchingIndex] = existingMatchingResponses[0];
-                    this.responses.all[matchingIndex].selected = true;
-                }
 
                 // If question type multipleanswer or singleanswer, assign image to each choice
                 if (this.question.canHaveImages()) {
@@ -112,25 +103,11 @@ class Controller implements IViewModel {
 
                 this.mapChoiceResponseIndex.set(choice, matchingIndex);
             }
-        }
-        else if (this.distribution) {
-            let responses: Responses = new Responses();
-            await responses.syncMine(this.question.id, this.distribution.id);
-            if (responses.all.length > 0) {
-                this.responses.all = [...responses.all];
-                if (this.question.question_type === Types.CURSOR && this.question.specific_fields) {
-                    let answer: number = Number.parseInt(this.responses.all[0].answer.toString());
-                    this.responses.all[0].answer = Number.isNaN(answer) ? this.question.specific_fields.cursor_min_val : answer;
-                }
-            }
+        }else if (this.distribution) {
             if (!this.responses.all[0].question_id) this.responses.all[0].question_id = this.question.id;
             if (!this.responses.all[0].distribution_id) this.responses.all[0].distribution_id = this.distribution.id;
         }
-
-        if (this.question.question_type === Types.TIME && typeof this.responses.all[0].answer == "string") {
-            this.responses.all[0].answer = new Date("January 01 1970 " + this.responses.all[0].answer);
-        }
-        else if (this.question.question_type === Types.FILE && this.distribution) {
+        if (this.question.question_type === Types.FILE && this.distribution) {
             this.files.all = [];
             if (this.responses.all[0].id) {
                 let responseFiles: ResponseFiles = new ResponseFiles();
@@ -150,6 +127,7 @@ class Controller implements IViewModel {
             this.initDrag();
         }
     };
+
 
     getHtmlDescription = (description: string) : string => {
         return !!description ? this.$sce.trustAsHtml(description) : null;

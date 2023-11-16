@@ -94,7 +94,7 @@ public class CustomShareAndOwner implements ResourcesProvider {
         }
         else if (isGetDistribution(binding) || isAddDistribution(binding) || isUpdateDistribution(binding) ||
                 isDuplicateWithResponsesDistribution(binding) || isReplaceDistribution(binding) || isDeleteDistribution(binding) ||
-                isListByDistributionResponse(binding) || isDeleteByQuestionResponse(binding)) {
+                isListByDistributionResponse(binding) || isDeleteByQuestionResponse(binding) || isListByDistributionAndQuestions(binding)) {
             return PARAM_DISTRIBUTION_ID;
         }
         else if (isListForSectionQuestion(binding) || isGetSection(binding) || isDeleteSection(binding)) {
@@ -251,6 +251,10 @@ public class CustomShareAndOwner implements ResourcesProvider {
 
     private boolean isListMineByDistributionResponse(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseController|listMineByDistribution");
+    }
+
+    private boolean isListByDistributionAndQuestions(final Binding binding){
+        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.ResponseController|listMineByDistributionAndQuestions");
     }
 
     private boolean isListByDistributionResponse(final Binding binding) {

@@ -1,10 +1,14 @@
 package fr.openent.formulaire.service;
 
+import fr.openent.form.core.models.Response;
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.user.UserInfos;
+
+import java.util.List;
 
 public interface ResponseService {
     /**
@@ -23,6 +27,14 @@ public interface ResponseService {
      * @param handler function handler returning JsonArray data
      */
     void listMineByDistribution(String questionId, String distributionId, UserInfos user, Handler<Either<String, JsonArray>> handler);
+
+
+    /**
+     * @param questionsIds array of questions identifiers
+     * @param distributionId distribution identifier
+     * @param userId  connected user's id
+     */
+    Future<List<Response>> ListMineByQuestionsIds(JsonArray questionsIds, String distributionId, String userId);
 
     /**
      * List all responses for a specific distribution
@@ -129,4 +141,6 @@ public interface ResponseService {
      * @param handler function handler returning JsonObject data
      */
     void deleteOldResponse(JsonArray distributionIds, Handler<Either<String, JsonArray>> handler);
+
+
 }

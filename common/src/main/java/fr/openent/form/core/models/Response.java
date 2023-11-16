@@ -13,6 +13,8 @@ public class Response implements IModel<Response> {
     private Number originalId;
     private String customAnswer;
 
+    private Number choicePosition;
+
 
     // Constructors
 
@@ -27,6 +29,7 @@ public class Response implements IModel<Response> {
         this.distributionId = response.getNumber(DISTRIBUTION_ID, null);
         this.originalId = response.getNumber(ORIGINAL_ID, null);
         this.customAnswer = response.getString(CUSTOM_ANSWER, null);
+        this.choicePosition = response.getNumber(CHOICE_POSITION, null);
     }
 
 
@@ -48,7 +51,7 @@ public class Response implements IModel<Response> {
 
     public String getCustomAnswer() { return customAnswer; }
 
-
+    public Number getChoicePosition() { return choicePosition; }
     // Setters
 
     public Response setId(Number id) {
@@ -91,7 +94,10 @@ public class Response implements IModel<Response> {
         return this;
     }
 
-
+    public Response setChoicePosition(Number choicePosition) {
+        this.choicePosition = choicePosition;
+        return this;
+    }
     // Functions
 
     public JsonObject toJson() {
@@ -103,7 +109,8 @@ public class Response implements IModel<Response> {
                 .put(CHOICE_ID, this.choiceId)
                 .put(DISTRIBUTION_ID, this.distributionId)
                 .put(ORIGINAL_ID, this.originalId)
-                .put(CUSTOM_ANSWER, this.customAnswer);
+                .put(CUSTOM_ANSWER, this.customAnswer)
+                .put(CHOICE_POSITION, this.choicePosition);
     }
 
     @Override

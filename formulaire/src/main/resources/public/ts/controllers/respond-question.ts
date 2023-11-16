@@ -1,4 +1,4 @@
-import {idiom, ng, notify} from "entcore";
+import {currentLanguage, idiom, ng, notify} from "entcore";
 import {
     Distribution, Files,
     Form,
@@ -15,7 +15,7 @@ import {responseFileService, responseService} from "../services";
 import {FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_EMIT_EVENT} from "@common/core/enums";
 import {FormElementType} from "@common/core/enums/form-element-type";
 import {FormElementUtils, UtilsUtils} from "@common/utils";
-import {Constants} from "@common/core/constants";
+import {Constants, Fields} from "@common/core/constants";
 
 interface ViewModel {
     formElements: FormElements;
@@ -59,7 +59,6 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
     vm.$onInit = async () : Promise<void> => {
         await initRespondQuestionController();
     };
-
     const initRespondQuestionController = async () : Promise<void> => {
         vm.loading = true;
         vm.form = $scope.form;
@@ -69,14 +68,15 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         vm.nbFormElements = vm.formElements.all.length;
         vm.historicPosition = $scope.historicPosition.length > 0 ? $scope.historicPosition : [1];
         vm.longestPath = vm.historicPosition.length + FormElementUtils.findLongestPathInFormElement(vm.formElement.id, vm.formElements) - 1;
-        initFormElementResponses();
+        await initFormElementResponses();
         window.setTimeout(() => vm.loading = false,500);
         $scope.safeApply();
     }
 
-    const initFormElementResponses = () : void => {
+    const initFormElementResponses = async (): Promise<void> => {
         let nbQuestions: number = vm.formElement instanceof Question ? 1 : (vm.formElement as Section).questions.all.length;
         for (let i = 0; i < nbQuestions; i++) {
+            //Check if it's a question or a section
             let question: Question = vm.formElement instanceof Question ? vm.formElement : (vm.formElement as Section).questions.all[i];
             let questionResponses: Responses = new Responses();
 
@@ -86,40 +86,98 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                         for (let child of question.children.all) {
                             questionResponses.all.push(new Response(child.id, choice.id, choice.value, vm.distribution.id));
                         }
-                    }
-                    else if (!choice.is_custom) {
+                    } else if (!choice.is_custom) {
                         questionResponses.all.push(new Response(question.id, choice.id, choice.value, vm.distribution.id));
-                    }
-                    else {
+                    } else {
                         questionResponses.all.push(new Response(question.id, choice.id, null, vm.distribution.id));
                     }
                 }
-            }
-            else if (question.question_type === Types.CURSOR && question.specific_fields) {
-                questionResponses.all.push(new Response(question.id, null, question.specific_fields.cursor_min_val, vm.distribution.id));
-            }
-            else if (question.isRanking()) {
+            } else if (question.question_type === Types.CURSOR && question.specific_fields) {
+                let newResponse: Response = new Response(question.id, null, question.specific_fields.cursor_min_val, vm.distribution.id)
+                //Check if the answer is a number
+                newResponse.answer = !Number.isFinite(newResponse.answer) ? question.specific_fields.cursor_min_val : newResponse.answer;
+                questionResponses.all.push(newResponse);
+            } else if (question.isRanking()) {
                 let questionChoices: QuestionChoice[] = question.choices.all;
                 for (let i: number = 0; i < questionChoices.length; i++) {
                     let questionChoice: QuestionChoice = questionChoices[i];
                     questionResponses.all.push(new Response(question.id, questionChoice.id, questionChoice.value, vm.distribution.id, questionChoice.position));
                 }
-            }
-            else {
+            } else {
                 questionResponses.all.push(new Response(question.id, null, null, vm.distribution.id));
             }
 
             vm.currentResponses.set(question, questionResponses);
             if (!vm.currentFiles.has(question)) vm.currentFiles.set(question, new Files());
         }
-
+        await fillResponses();
         $scope.safeApply();
     };
+
+    const fillResponses = async (): Promise<void> => {
+        //If in edit
+        if (!this.distribution)
+            return;
+
+
+        //Check if formElement is a Question or a Section
+        const questions: Question[] = vm.formElement instanceof Question ? [vm.formElement] : (vm.formElement as Section).questions.all;
+        const allResponses: Responses = new Responses();
+        await allResponses.syncMineByQuestionIds(questions.map((q: Question) => q.id), vm.distribution.id);
+
+        //Group responses by question id
+        const responsesByQuestionId: Map<Question, Responses> = new Map();
+        for (const question of questions) {
+            let responses: Responses = new Responses();
+            responses.all = allResponses.all.filter((response: Response) => response.question_id === question.id);
+            responsesByQuestionId.set(question, responses);
+        }
+
+        const promises = Array.from(responsesByQuestionId.entries()).map(
+            ([question, responses]: [Question, Responses]) => processResponses(question, responses)
+        );
+
+        await Promise.all(promises);
+    }
+
+    const processResponses = async (question: Question, newResponses: Responses) => {
+        //Contain blank responses initialised in initFormElementResponses for question we are processing
+        let blankResponses: Responses = vm.currentResponses.get(question);
+
+        if (question.isTypeMultipleRep()) {
+            blankResponses.all.forEach((response: Response) => {
+                // If the response is in the new responses, it means user answered it, so we set it to selected
+                if (newResponses.all.some((newResponse: Response) => newResponse.choice_id == response.choice_id)) {
+                    let newResponse: Response = newResponses.all.find((dataResponse: Response) => dataResponse.choice_id == response.choice_id);
+                    newResponse.selected = true;
+                    let index: number = blankResponses.all.indexOf(response);
+                    blankResponses.all[index] = newResponse;
+                }
+            })
+            // replace blankResponses by modified ones
+            vm.currentResponses.set(question, blankResponses);
+        } else {
+            if (newResponses.all.length >= 1) {
+                if (question.question_type == Types.TIME) {
+                    newResponses.all[0].answer = new Date(Fields.JANUARY_01_1970 + newResponses.all[0].answer);
+                } else if (question.question_type == Types.CURSOR) {
+                    let answer: number = Number.parseInt(newResponses.all[0].answer.toString());
+                    newResponses.all[0].answer = Number.isNaN(answer) ? this.question.specific_fields.cursor_min_val : answer;
+                }
+                // replace blankResponses by the one from the user
+                blankResponses.all = newResponses.all;
+                vm.currentResponses.set(question, blankResponses);
+            }
+        }
+        blankResponses.hasLoaded = true;
+    };
+
 
     vm.prev = async () : Promise<void> => {
         let prevPosition: number = vm.historicPosition[vm.historicPosition.length - 2];
         vm.isProcessing = true;
         if (prevPosition > 0) {
+            unloadLastResponses();
             await saveResponses();
             vm.formElement = vm.formElements.all[prevPosition - 1];
             vm.historicPosition.pop();
@@ -137,6 +195,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         let nextPosition: number = getNextPositionIfValid();
         vm.isProcessing = true;
         if (nextPosition && nextPosition <= vm.nbFormElements) {
+            unloadLastResponses();
             await saveResponses();
             vm.formElement = vm.formElements.all[nextPosition - 1];
             vm.historicPosition.push(vm.formElement.position);
@@ -307,6 +366,17 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             return true;
         }
     };
+
+    const unloadLastResponses = () : void => {
+        if (vm.formElement instanceof Question) {
+            vm.currentResponses.get(vm.formElement).hasLoaded = false;
+        }
+        else if (vm.formElement instanceof Section) {
+            for (let question of vm.formElement.questions.all) {
+                vm.currentResponses.get(question).hasLoaded = false;
+            }
+        }
+    }
 
     $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_RESPOND_QUESTION, () => { initRespondQuestionController() });
 }]);
