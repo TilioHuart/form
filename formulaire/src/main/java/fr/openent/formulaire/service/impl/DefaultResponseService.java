@@ -1,8 +1,9 @@
 package fr.openent.formulaire.service.impl;
 
 import fr.openent.form.core.models.Response;
+import fr.openent.form.core.models.TransactionElement;
 import fr.openent.form.helpers.IModelHelper;
-import fr.openent.formulaire.controllers.ResponseController;
+import fr.openent.form.helpers.TransactionHelper;
 import fr.openent.formulaire.service.ResponseService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Future;
@@ -16,8 +17,10 @@ import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
+
+import java.util.Collections;
 
 import static fr.openent.form.core.constants.Constants.QUESTIONS_WITHOUT_RESPONSES;
 import static fr.openent.form.core.constants.DistributionStatus.FINISHED;
@@ -26,7 +29,7 @@ import static fr.openent.form.core.constants.Tables.*;
 
 public class DefaultResponseService implements ResponseService {
 
-    private static final Logger log = LoggerFactory.getLogger(ResponseController.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultResponseService.class);
 
     @Override
     public void list(String questionId, String nbLines, JsonArray distribs, Handler<Either<String, JsonArray>> handler) {
@@ -60,7 +63,7 @@ public class DefaultResponseService implements ResponseService {
     }
 
     @Override
-    public Future<List<Response>> ListMineByQuestionsIds(JsonArray questionsIds, String distributionId, String userId){
+    public Future<List<Response>> listMineByQuestionsIds(JsonArray questionsIds, String distributionId, String userId){
         Promise<List<Response>> promise = Promise.promise();
 
         if (questionsIds.isEmpty()) {
@@ -95,6 +98,23 @@ public class DefaultResponseService implements ResponseService {
                 "WHERE form_id = ? ORDER BY question_id, choice_id;";
         JsonArray params = new JsonArray().add(formId);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    public Future<List<Response>> listByIds(List<String> responseIds) {
+        Promise<List<Response>> promise = Promise.promise();
+
+        if (responseIds == null || responseIds.isEmpty()) {
+            promise.complete(new ArrayList<>());
+            return promise.future();
+        }
+
+        String query = "SELECT * FROM " + RESPONSE_TABLE + " WHERE id IN " + Sql.listPrepared(responseIds);
+        JsonArray params = new JsonArray(responseIds);
+
+        String errorMessage = "[Formulaire@DefaultResponseService::listByIds] An error occurred while listing responses for ids " + responseIds;
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(IModelHelper.sqlResultToIModel(promise, Response.class, errorMessage)));
+
+        return promise.future();
     }
 
     @Override
@@ -141,6 +161,40 @@ public class DefaultResponseService implements ResponseService {
     }
 
     @Override
+    public Future<List<Response>> createMultiple(List<Response> responses, String userId) {
+        Promise<List<Response>> promise = Promise.promise();
+
+        if (responses == null || responses.isEmpty()) {
+            promise.complete(new ArrayList<>());
+            return promise.future();
+        }
+
+        List<TransactionElement> transactionElements = new ArrayList<>();
+        responses.forEach(response -> {
+            String query = "INSERT INTO " + RESPONSE_TABLE + " (question_id, choice_id, answer, responder_id, distribution_id, choice_position, custom_answer, image) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+            JsonArray params = new JsonArray()
+                    .add(response.getQuestionId())
+                    .add(response.getChoiceId())
+                    .add(response.getAnswer())
+                    .add(userId)
+                    .add(response.getDistributionId())
+                    .add(response.getChoicePosition())
+                    .add(response.getCustomAnswer())
+                    .add(response.getImage());
+
+            transactionElements.add(new TransactionElement(query, params));
+        });
+
+        String errorMessage = "[Formulaire@DefaultResponseService::createMultiple] Failed to create multiple responses";
+        TransactionHelper.executeTransactionAndGetJsonObjectResults(transactionElements, errorMessage)
+                .onSuccess(result -> promise.complete(IModelHelper.toList(result, Response.class)))
+                .onFailure(err -> promise.fail(err.getMessage()));
+
+        return promise.future();
+    }
+
+    @Override
     public void update(UserInfos user, String responseId, JsonObject response, Handler<Either<String, JsonObject>> handler) {
         String query = "UPDATE " + RESPONSE_TABLE + " SET answer = ?, choice_id = ?, custom_answer = ?, image = ? " +
                 "WHERE responder_id = ? AND id = ? RETURNING *;";
@@ -153,6 +207,38 @@ public class DefaultResponseService implements ResponseService {
                 .add(responseId);
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    @Override
+    public Future<List<Response>> updateMultiple(List<Response> responses, String userId) {
+        Promise<List<Response>> promise = Promise.promise();
+
+        if (responses == null || responses.isEmpty()) {
+            promise.complete(new ArrayList<>());
+            return promise.future();
+        }
+
+        List<TransactionElement> transactionElements = new ArrayList<>();
+        responses.forEach(response -> {
+            String query = "UPDATE " + RESPONSE_TABLE + " SET answer = ?, choice_id = ?, custom_answer = ?, image = ? " +
+                    "WHERE responder_id = ? AND id = ? RETURNING *;";
+            JsonArray params = new JsonArray()
+                    .add(response.getAnswer())
+                    .add(response.getChoiceId())
+                    .add(response.getCustomAnswer())
+                    .add(response.getImage())
+                    .add(userId)
+                    .add(response.getId());
+
+            transactionElements.add(new TransactionElement(query, params));
+        });
+
+        String errorMessage = "[Formulaire@DefaultResponseService::createMultiple] Failed to create multiple responses";
+        TransactionHelper.executeTransactionAndGetJsonObjectResults(transactionElements, errorMessage)
+                .onSuccess(result -> promise.complete(IModelHelper.toList(result, Response.class)))
+                .onFailure(err -> promise.fail(err.getMessage()));
+
+        return promise.future();
     }
 
     @Override
@@ -178,8 +264,35 @@ public class DefaultResponseService implements ResponseService {
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
     }
 
+    public Future<Void> deleteByQuestionsAndDistribution(List<Long> questionIds, String distributionId) {
+        Promise<Void> promise = Promise.promise();
+
+        if (questionIds == null || questionIds.isEmpty()) {
+            promise.complete();
+            return promise.future();
+        }
+
+        String query = "DELETE FROM " + RESPONSE_TABLE + " " +
+                "WHERE question_id IN " + Sql.listPrepared(questionIds) + " " +
+                "AND distribution_id = ?;";
+        JsonArray params = new JsonArray(questionIds).add(distributionId);
+
+        String errorMessage = "[Formulaire@DefaultResponseService::deleteByQuestionAndDistribution] Failed to delete multiple responses for question ids " + questionIds;
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(either -> {
+            if (either.isLeft()){
+                log.error(errorMessage + " : " + either.left().getValue());
+                promise.fail(either.left().getValue());
+            }
+            else {
+                promise.complete();
+            }
+        }));
+
+        return promise.future();
+    }
+
     @Override
-    public void deleteMultipleByDistribution(String distributionId, Handler<Either<String, JsonArray>> handler) {
+    public void deleteAllByDistribution(String distributionId, Handler<Either<String, JsonArray>> handler) {
         String query = "DELETE FROM " + RESPONSE_TABLE + " WHERE distribution_id = ?;";
         JsonArray params = new JsonArray().add(distributionId);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));

@@ -34,7 +34,7 @@ public interface ResponseService {
      * @param distributionId distribution identifier
      * @param userId  connected user's id
      */
-    Future<List<Response>> ListMineByQuestionsIds(JsonArray questionsIds, String distributionId, String userId);
+    Future<List<Response>> listMineByQuestionsIds(JsonArray questionsIds, String distributionId, String userId);
 
     /**
      * List all responses for a specific distribution
@@ -49,6 +49,12 @@ public interface ResponseService {
      * @param handler function handler returning JsonArray data
      */
     void listByForm(String formId, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * List all responses for specific ids
+     * @param responseIds response identifiers
+     */
+    Future<List<Response>> listByIds(List<String> responseIds);
 
     /**
      * Count all the responses to a list of questions
@@ -82,6 +88,13 @@ public interface ResponseService {
     void create(JsonObject response, UserInfos user, String questionId, Handler<Either<String, JsonObject>> handler);
 
     /**
+     * Create multiple responses
+     * @param responses responses to create
+     * @param userId    id of the connected user
+     */
+    Future<List<Response>> createMultiple(List<Response> responses, String userId);
+
+    /**
      * Update a specific response
      * @param user user connected
      * @param responseId response identifier
@@ -89,6 +102,13 @@ public interface ResponseService {
      * @param handler function handler returning JsonObject data
      */
     void update(UserInfos user, String responseId, JsonObject response, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Update multiple responses
+     * @param responses responses to update
+     * @param userId    id of the connected user
+     */
+    Future<List<Response>> updateMultiple(List<Response> responses, String userId);
 
     /**
      * Delete specific responses
@@ -108,11 +128,19 @@ public interface ResponseService {
     void deleteByQuestionAndDistribution(String questionId, String distributionId, UserInfos user, Handler<Either<String, JsonArray>> handler);
 
     /**
+     * Delete responses for multiple questions of a specific distribution
+     * @param questionIds list of question identifiers
+     * @param distributionId distribution identifier
+     * @return Future<Void>
+     */
+    Future<Void> deleteByQuestionsAndDistribution(List<Long> questionIds, String distributionId);
+
+    /**
      * Delete responses by distribution id
      * @param String distribution identifier
      * @param handler function handler returning JsonArray data
      */
-    void deleteMultipleByDistribution(String String, Handler<Either<String, JsonArray>> handler);
+    void deleteAllByDistribution(String String, Handler<Either<String, JsonArray>> handler);
 
     /**
      * Get all the responders of a specific form to export into a CSV file

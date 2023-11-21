@@ -57,6 +57,12 @@ public interface QuestionService {
     void listChildren(JsonArray questionIds, Handler<Either<String, JsonArray>> handler);
 
     /**
+     * List all the questions of a list of questionIds
+     * @param questionIds question identifiers
+     */
+    Future<List<Question>> listByIds(List<Long> questionIds);
+
+    /**
      * @deprecated Should use {@link #getExportInfos(String, boolean)}  instead
      * List all the questions of a specific form without freetext questions
      * @param formId form identifier

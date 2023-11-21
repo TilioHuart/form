@@ -39,11 +39,11 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
     }
 
     @Override
-    public Future<JsonArray> listChoices(JsonArray questionIds) {
-        Promise<JsonArray> promise = Promise.promise();
+    public Future<List<QuestionChoice>> listChoices(JsonArray questionIds) {
+        Promise<List<QuestionChoice>> promise = Promise.promise();
 
         if (questionIds == null || questionIds.isEmpty()) {
-            promise.complete(new JsonArray());
+            promise.complete(new ArrayList<>());
             return promise.future();
         }
 
@@ -51,7 +51,7 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
         JsonArray params = new JsonArray().addAll(questionIds);
 
         String errMessage = "[Formulaire@DefaultQuestionChoiceService::listChoices] Failed to list choices for questions with id " + questionIds + " : ";
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(FutureHelper.handlerJsonArray(promise, errMessage)));
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(IModelHelper.sqlResultToIModel(promise, QuestionChoice.class, errMessage)));
 
         return promise.future();
     }
@@ -59,8 +59,8 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
     @Override
     public void listChoices(JsonArray questionIds, Handler<Either<String, JsonArray>> handler) {
         listChoices(questionIds)
-                .onSuccess(result -> handler.handle(new Either.Right<>(result)))
-                .onFailure(err -> handler.handle(new Either.Left<>(err.getMessage())));
+            .onSuccess(choices -> handler.handle(new Either.Right<>(IModelHelper.toJsonArray(choices))))
+            .onFailure(err -> handler.handle(new Either.Left<>(err.getMessage())));
     }
 
     @Override

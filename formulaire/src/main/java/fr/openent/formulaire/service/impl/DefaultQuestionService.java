@@ -114,6 +114,23 @@ public class DefaultQuestionService implements QuestionService {
                 .onFailure(err -> handler.handle(new Either.Left<>(err.getMessage())));
     }
 
+    public Future<List<Question>> listByIds(List<Long> questionIds) {
+        Promise<List<Question>> promise = Promise.promise();
+
+        if (questionIds == null || questionIds.isEmpty()) {
+            promise.complete(new ArrayList<>());
+            return promise.future();
+        }
+
+        String query = "SELECT * FROM " + QUESTION_TABLE + " WHERE id IN " + Sql.listPrepared(questionIds);
+        JsonArray params = new JsonArray(questionIds);
+
+        String errMessage = "[Formulaire@DefaultQuestionService::listByIds] Failed to list questions with ids " + questionIds;
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(IModelHelper.sqlResultToIModel(promise, Question.class, errMessage)));
+
+        return promise.future();
+    }
+
     @Override
     @Deprecated
     public void getExportInfos(String formId, boolean isPdf, Handler<Either<String, JsonArray>> handler) {

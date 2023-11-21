@@ -1,5 +1,7 @@
 package fr.openent.formulaire.service.test.impl;
 
+import fr.openent.form.core.constants.DistributionStatus;
+import fr.openent.form.core.models.Distribution;
 import fr.openent.formulaire.service.impl.DefaultDistributionService;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -8,6 +10,7 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.entcore.common.sql.Sql;
+import org.entcore.common.user.UserInfos;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,12 +24,54 @@ import static fr.openent.form.core.constants.Tables.*;
 public class DefaultDistributionServiceTest {
     private Vertx vertx;
     private DefaultDistributionService defaultDistributionService;
+    private Distribution distribution;
 
     @Before
     public void setUp() {
         vertx = Vertx.vertx();
         defaultDistributionService = new DefaultDistributionService();
         Sql.getInstance().init(vertx.eventBus(), FORMULAIRE_ADDRESS);
+
+        JsonObject distributionJson = new JsonObject()
+                .put(ID, 4)
+                .put(FORM_ID, 1)
+                .put(SENDER_ID, "4265605f-3352-4f42-8cef-18e150bbf6bf")
+                .put(SENDER_NAME, "PRUDON Nathalie")
+                .put(RESPONDER_ID, "50251834-1745-4fb9-a3ad-cc034438c688")
+                .put(RESPONDER_NAME, "GUZMAN Mohamed")
+                .put(STATUS, DistributionStatus.TO_DO)
+                .put(DATE_SENDING, "2023-11-16 14:39:56.140463+00")
+                .put(DATE_RESPONSE, (String)null)
+                .put(ACTIVE, true)
+                .put(STRUCTURE, (String)null)
+                .put(ORIGINAL_ID, (Long)null)
+                .put(PUBLIC_KEY, (Boolean)null)
+                .put(CAPTCHA_ID, (Long)null);
+        distribution = new Distribution(distributionJson);
+    }
+
+    @Test
+    public void testListByResponder(TestContext ctx) {
+        Async async = ctx.async();
+        UserInfos user = new UserInfos();
+        user.setUsername("GUZMAN Mohamed");
+        user.setUserId("50251834-1745-4fb9-a3ad-cc034438c688");
+
+        String expectedQuery = "SELECT * FROM " + DISTRIBUTION_TABLE + " WHERE responder_id = ? AND active = ? ORDER BY date_sending DESC;";
+        JsonArray expectedParams = new JsonArray("[\"50251834-1745-4fb9-a3ad-cc034438c688\", true]");
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getString(STATEMENT));
+            ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
+            async.complete();
+        });
+
+        defaultDistributionService.listByResponder(user)
+            .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
     }
 
     @Test

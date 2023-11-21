@@ -1,5 +1,6 @@
 package fr.openent.formulaire.service;
 
+import fr.openent.form.core.models.Distribution;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -23,6 +24,12 @@ public interface DistributionService {
      * @param handler function handler returning JsonArray data
      */
     void listByResponder(UserInfos user, Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * List all the distributions of the forms sent to me
+     * @param user user connected
+     */
+    Future<List<Distribution>> listByResponder(UserInfos user);
 
     /**
      * List all the distributions of a specific form

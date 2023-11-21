@@ -1,6 +1,8 @@
 package fr.openent.formulaire.service.impl;
 
+import fr.openent.form.core.models.Distribution;
 import fr.openent.form.helpers.FutureHelper;
+import fr.openent.form.helpers.IModelHelper;
 import fr.openent.formulaire.service.DistributionService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Future;
@@ -41,6 +43,20 @@ public class DefaultDistributionService implements DistributionService {
                 "ORDER BY date_sending DESC;";
         JsonArray params = new JsonArray().add(user.getUserId()).add(true);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public Future<List<Distribution>> listByResponder(UserInfos user) {
+        Promise<List<Distribution>> promise = Promise.promise();
+
+        String query = "SELECT * FROM " + DISTRIBUTION_TABLE + " WHERE responder_id = ? AND active = ? " +
+                "ORDER BY date_sending DESC;";
+        JsonArray params = new JsonArray().add(user.getUserId()).add(true);
+
+        String errorMessage = "[Formulaire@DefaultDistributionService::listByResponder] Fail to list distributions for user " + user.getUsername() + " : ";
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(IModelHelper.sqlResultToIModel(promise, Distribution.class, errorMessage)));
+
+        return promise.future();
     }
 
     @Override

@@ -5,6 +5,7 @@ import fr.openent.form.core.enums.QuestionTypes;
 import fr.openent.form.core.models.Form;
 import fr.openent.form.helpers.FutureHelper;
 import fr.openent.form.helpers.I18nHelper;
+import fr.openent.form.helpers.IModelHelper;
 import fr.openent.formulaire.service.QuestionChoiceService;
 import fr.openent.formulaire.service.QuestionService;
 import fr.openent.formulaire.service.QuestionSpecificFieldsService;
@@ -143,9 +144,9 @@ public class FormQuestionsExportPDF extends ControllerHelper {
                 return questionSpecificFieldsService.syncQuestionSpecs(questionsInfos);
             })
             .compose(questionsWithSpecifics -> questionChoiceService.listChoices(questionsIds.get()))
-            .compose(listChoices -> {
+            .compose(choices -> {
                 JsonObject listChoicesInfos = new JsonObject();
-                listChoicesInfos.put(QUESTIONS_CHOICES, listChoices);
+                listChoicesInfos.put(QUESTIONS_CHOICES, IModelHelper.toJsonArray(choices));
                 setChoicesInfos(listChoicesInfos);
                 return questionService.listOldChildren(questionsIds.get());
             })

@@ -1,17 +1,25 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.enums.I18nKeys;
+import fr.openent.form.core.models.Distribution;
+import fr.openent.form.core.models.Response;
 import fr.openent.form.core.models.ResponseFile;
 import fr.openent.form.helpers.I18nHelper;
 import fr.openent.form.helpers.StorageHelper;
 import fr.openent.formulaire.helpers.folder_exporter.FolderExporterZip;
 import fr.openent.formulaire.security.CustomShareAndOwner;
+import fr.openent.formulaire.security.ResponseRight;
+import fr.openent.formulaire.service.DistributionService;
 import fr.openent.formulaire.service.ResponseFileService;
+import fr.openent.formulaire.service.ResponseService;
+import fr.openent.formulaire.service.impl.DefaultDistributionService;
 import fr.openent.formulaire.service.impl.DefaultResponseFileService;
+import fr.openent.formulaire.service.impl.DefaultResponseService;
 import fr.wseduc.rs.*;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.Either;
+import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
@@ -22,6 +30,7 @@ import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.storage.Storage;
+import org.entcore.common.user.UserUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -37,6 +46,8 @@ import static org.entcore.common.http.response.DefaultResponseHandler.defaultRes
 public class ResponseFileController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(ResponseFileController.class);
     private final ResponseFileService responseFileService;
+    private final ResponseService responseService;
+    private final DistributionService distributionService;
     private final Storage storage;
     private final SimpleDateFormat dateGetter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
     private final SimpleDateFormat dateFormatter = new SimpleDateFormat("ddMMyyyy_HH'h'mm_");
@@ -44,6 +55,8 @@ public class ResponseFileController extends ControllerHelper {
     public ResponseFileController(Storage storage) {
         super();
         this.responseFileService = new DefaultResponseFileService();
+        this.responseService = new DefaultResponseService();
+        this.distributionService = new DefaultDistributionService();
         this.storage = storage;
         dateFormatter.setTimeZone(TimeZone.getTimeZone("Europe/Paris")); // TODO to adapt for not France timezone
     }
@@ -236,6 +249,53 @@ public class ResponseFileController extends ControllerHelper {
         String responseId = request.getParam(PARAM_RESPONSE_ID);
         List<String> responseIds = new ArrayList<>();
         responseIds.add(responseId);
+        deleteAllByResponse(request, responseIds);
+    }
+
+    @Delete("/responses/files")
+    @ApiDoc("Delete all files of a specific response")
+    @ResourceFilter(ResponseRight.class)
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    public void deleteAllMultiple(HttpServerRequest request) {
+        UserUtils.getUserInfos(eb, request, user -> {
+            RequestUtils.bodyToJsonArray(request, responseIdsJson -> {
+                if (responseIdsJson == null || responseIdsJson.isEmpty()) {
+                    log.error("[Formulaire@ResponseFileController::deleteAllMultiple] No responseFile to delete.");
+                    noContent(request);
+                    return;
+                }
+
+                List<String> responseIds = responseIdsJson.stream().map(String.class::cast).collect(Collectors.toList());
+                List<Long> distributionIds = new ArrayList<>();
+
+                // Check rights for this responses
+                distributionService.listByResponder(user)
+                    .compose(distributions -> {
+                        distributionIds.addAll(distributions.stream().map(Distribution::getId).collect(Collectors.toList()));
+                        return responseService.listByIds(responseIds);
+                    })
+                    .onSuccess(responses -> {
+                        List<Long> responsesDistributionIds = responses.stream().map(Response::getDistributionId).collect(Collectors.toList());
+                        responsesDistributionIds.retainAll(distributionIds);
+
+                        if (responsesDistributionIds.size() > 0) {
+                            log.error("[Formulaire@ResponseFileController::deleteAllByResponse] " + user.getUsername() + " does not have right for all the responses with id " + responseIds);
+                            unauthorized(request);
+                            return;
+                        }
+
+                        deleteAllByResponse(request, responseIds);
+                    })
+                    .onFailure(err -> {
+                        log.error("[Formulaire@ResponseFileController::deleteAllByResponse] An error occurred while checking " +
+                                "rights for user " + user.getUsername() + " : " + err.getMessage());
+                        renderError(request);
+                    });
+            });
+        });
+    }
+
+    private void deleteAllByResponse(HttpServerRequest request, List<String> responseIds) {
         responseFileService.deleteAllByResponse(responseIds)
             .compose(deletedResponseFiles -> {
                 if (!deletedResponseFiles.isEmpty()) {
@@ -249,8 +309,8 @@ public class ResponseFileController extends ControllerHelper {
             })
             .onSuccess(result -> ok(request))
             .onFailure(err -> {
-                log.error("[Formulaire@ResponseFileController::deleteAll] An error occurred while deleting response files " +
-                        "with ids " + responseIds + " and their associated files : " + err.getMessage());
+                log.error("[Formulaire@ResponseFileController::deleteAllByResponse] An error occurred while deleting " +
+                        "response files with ids " + responseIds + " and their associated files : " + err.getMessage());
                 renderError(request);
             });
     }

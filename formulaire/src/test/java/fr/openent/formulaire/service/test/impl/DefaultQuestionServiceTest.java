@@ -1,6 +1,5 @@
 package fr.openent.formulaire.service.test.impl;
 
-import fr.openent.form.core.enums.QuestionTypes;
 import fr.openent.form.core.models.Question;
 import fr.openent.formulaire.service.impl.DefaultQuestionService;
 import io.vertx.core.Vertx;
@@ -13,6 +12,10 @@ import io.vertx.ext.unit.Async;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static fr.openent.form.core.constants.Constants.*;
 import static fr.openent.form.core.constants.EbFields.FORMULAIRE_ADDRESS;
@@ -107,7 +110,7 @@ public class DefaultQuestionServiceTest {
     }
 
     @Test
-    public void testLisChildren(TestContext ctx) {
+    public void testListChildren(TestContext ctx) {
         Async async = ctx.async();
         JsonArray questionIds = new JsonArray().add("1").add("2").add("3");
         String expectedQuery = "SELECT * FROM " + QUESTION_TABLE + " WHERE matrix_id IN " + Sql.listPrepared(questionIds);
@@ -121,6 +124,50 @@ public class DefaultQuestionServiceTest {
             async.complete();
         });
         defaultQuestionService.listChildren(questionIds, null);
+    }
+
+    @Test
+    public void testListByIds_NoQuestionIds(TestContext ctx) {
+        Async async = ctx.async();
+        List<Long> questionIds = new ArrayList<>();
+
+        String expectedQuery = "SELECT * FROM " + QUESTION_TABLE + " WHERE id IN " + Sql.listPrepared(questionIds);
+        JsonArray expectedParams = new JsonArray();
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getString(STATEMENT));
+            ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
+            async.complete();
+        });
+
+        defaultQuestionService.listByIds(questionIds)
+                .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
+    }
+
+    @Test
+    public void testListByIds_QuestionIds(TestContext ctx) {
+        Async async = ctx.async();
+        List<Long> questionIds = Arrays.asList(1L,2L,5L,4L);
+
+        String expectedQuery = "SELECT * FROM " + QUESTION_TABLE + " WHERE id IN " + Sql.listPrepared(questionIds);
+        JsonArray expectedParams = new JsonArray("[1, 2, 5, 4]");
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getString(STATEMENT));
+            ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
+            async.complete();
+        });
+
+        defaultQuestionService.listByIds(questionIds)
+            .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
     }
 
     @Test

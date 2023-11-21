@@ -234,6 +234,7 @@ public class Fields {
     public static final String TYPE_TEXT = "type_text";
     public static final String TYPE_GRAPH = "type_graph";
     public static final String UNDEFINED = "undefined";
+    public static final String USER = "user";
     public static final String USERS = "users";
     public static final String VALUES = "values";
     public static final String VERSION = "version";

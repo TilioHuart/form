@@ -1,10 +1,15 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.enums.QuestionTypes;
+import fr.openent.form.core.models.Distribution;
 import fr.openent.form.core.models.Question;
+import fr.openent.form.core.models.QuestionChoice;
+import fr.openent.form.core.models.Response;
+import fr.openent.form.helpers.IModelHelper;
 import fr.openent.formulaire.export.*;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
+import fr.openent.formulaire.security.ResponseRight;
 import fr.openent.formulaire.service.*;
 import fr.openent.formulaire.service.impl.*;
 import fr.wseduc.rs.*;
@@ -12,6 +17,7 @@ import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -25,6 +31,8 @@ import org.entcore.common.user.UserUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static fr.openent.form.core.constants.Constants.*;
 import static fr.openent.form.core.constants.DistributionStatus.FINISHED;
@@ -101,38 +109,31 @@ public class ResponseController extends ControllerHelper {
         });
     }
 
-    @Post("/distributions/:distributionId/responses/multiple")
+    @Get("/distributions/:distributionId/responses/multiple")
     @ApiDoc("List all responses for a specific distribution and questions list")
     @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void listMineByDistributionAndQuestions(HttpServerRequest request) {
         String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);
 
-        RequestUtils.bodyToJsonArray(request, questionIds -> {
-            if (questionIds == null || questionIds.isEmpty()) {
-                log.error("[Formulaire@ResponseController::listMineByDistributionAndQuestions] No question to return a response.");
-                noContent(request);
-                return;
-            }
+        JsonArray questionIds = new JsonArray();
+        for (Integer i = 0; i < request.params().size(); i++) {
+            questionIds.add(request.getParam(i.toString()));
+        }
+        if (questionIds.size() <= 0) {
+            log.error("[Formulaire@ResponseController::listMineByDistributionAndQuestions] No question to return a response");
+            noContent(request);
+            return;
+        }
 
-            UserUtils.getAuthenticatedUserInfos(eb, request)
-                .compose(user -> {
-                    if (user == null) {
-                        String errMessage = "[Formulaire@ResponseController::listMineByDistributionAndQuestions] User not found in session.";
-                        log.error(errMessage);
-                        unauthorized(request);
-                        return Future.failedFuture("User not found in session");
-                    }
-
-                    return responseService.ListMineByQuestionsIds(questionIds, distributionId, user.getUserId());
-                })
-                .onSuccess(responses -> renderJson(request, new JsonArray(responses)))
-                .onFailure(err -> {
-                    String errMessage = "[Formulaire@ResponseController::listMineByDistributionAndQuestions] Failed to list responses";
-                    log.error(errMessage + " : " + err.getMessage());
-                    if (!request.isEnded()) renderError(request);
-                });
-        });
+        UserUtils.getAuthenticatedUserInfos(eb, request)
+            .compose(user -> responseService.listMineByQuestionsIds(questionIds, distributionId, user.getUserId()))
+            .onSuccess(responses -> renderJson(request, new JsonArray(responses)))
+            .onFailure(err -> {
+                String errMessage = "[Formulaire@ResponseController::listMineByDistributionAndQuestions] Failed to list responses";
+                log.error(errMessage + " : " + err.getMessage());
+                renderError(request);
+            });
     }
 
     @Get("/distributions/:distributionId/responses")
@@ -186,7 +187,7 @@ public class ResponseController extends ControllerHelper {
         String questionId = request.getParam(PARAM_QUESTION_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
-                String message = "[Formulaire@ResponseController::createResponse] User not found in session.";
+                String message = "[Formulaire@ResponseController::create] User not found in session.";
                 log.error(message);
                 unauthorized(request);
                 return;
@@ -194,21 +195,21 @@ public class ResponseController extends ControllerHelper {
 
             RequestUtils.bodyToJson(request, response -> {
                 if (response == null || response.isEmpty()) {
-                    log.error("[Formulaire@ResponseController::createResponse] No response to create.");
+                    log.error("[Formulaire@ResponseController::create] No response to create.");
                     noContent(request);
                     return;
                 }
 
                 questionService.get(questionId, questionEvt -> {
                     if (questionEvt.isLeft()) {
-                        String message = "[Formulaire@ResponseController::createResponse] Fail to get question " +
+                        String message = "[Formulaire@ResponseController::create] Fail to get question " +
                                 "corresponding to id " + questionId + " : " + questionEvt.left().getValue();
                         log.error(message);
                         renderInternalError(request, questionEvt);
                         return;
                     }
                     if (questionEvt.right().getValue().isEmpty()) {
-                        String message = "[Formulaire@ResponseController::createResponse] No question found for id " + questionId;
+                        String message = "[Formulaire@ResponseController::create] No question found for id " + questionId;
                         log.error(message);
                         notFound(request);
                         return;
@@ -219,7 +220,7 @@ public class ResponseController extends ControllerHelper {
 
                     // Check if it's a question type you can respond to
                     if (FORBIDDEN_QUESTIONS.contains(question.getQuestionType())) {
-                        String message = "[Formulaire@ResponseController::createResponse] You cannot create a response " +
+                        String message = "[Formulaire@ResponseController::create] You cannot create a response " +
                                 "for a question of type " + question.getQuestionType();
                         log.error(message);
                         badRequest(request);
@@ -230,14 +231,14 @@ public class ResponseController extends ControllerHelper {
                     if (choice_id != null && CHOICES_TYPE_QUESTIONS.contains(question.getQuestionType())) {
                         questionChoiceService.get(choice_id.toString(), choiceEvt -> {
                             if (choiceEvt.isLeft()) {
-                                String message = "[Formulaire@ResponseController::createResponse] Fail to get question " +
+                                String message = "[Formulaire@ResponseController::create] Fail to get question " +
                                         "choice corresponding to id " + choice_id + " : " + choiceEvt.left().getValue();
                                 log.error(message);
                                 renderInternalError(request, choiceEvt);
                                 return;
                             }
                             if (choiceEvt.right().getValue().isEmpty()) {
-                                String message = "[Formulaire@ResponseController::createResponse] No choice found for id " + choice_id;
+                                String message = "[Formulaire@ResponseController::create] No choice found for id " + choice_id;
                                 log.error(message);
                                 notFound(request);
                                 return;
@@ -250,7 +251,7 @@ public class ResponseController extends ControllerHelper {
                             if (question.getMatrixId() != null &&
                                 (!question.getMatrixId().equals(choice.getInteger(QUESTION_ID).longValue()) ||
                                 !choice.getString(VALUE).equals(response.getString(ANSWER)))) {
-                                String message = "[Formulaire@ResponseController::createResponse] Wrong choice for response " + response;
+                                String message = "[Formulaire@ResponseController::create] Wrong choice for response " + response;
                                 log.error(message);
                                 badRequest(request);
                                 return;
@@ -258,7 +259,7 @@ public class ResponseController extends ControllerHelper {
                             else if (question.getMatrixId() == null &&
                                     (!question.getId().equals(choice.getInteger(QUESTION_ID).longValue()) ||
                                     (!isCustomChoice && !choice.getString(VALUE).equals(response.getString(ANSWER))))) {
-                                String message = "[Formulaire@ResponseController::createResponse] Wrong choice for response " + response;
+                                String message = "[Formulaire@ResponseController::create] Wrong choice for response " + response;
                                 log.error(message);
                                 badRequest(request);
                                 return;
@@ -316,6 +317,64 @@ public class ResponseController extends ControllerHelper {
             }
 
             responseService.create(response, user, questionId, defaultResponseHandler(request));
+        });
+    }
+
+    @Post("/distributions/:distributionId/responses/multiple")
+    @ApiDoc("Create multiple response at once")
+    @ResourceFilter(CustomShareAndOwner.class)
+    @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void createMultiple(HttpServerRequest request){
+        Long distributionId = Long.parseLong(request.getParam(PARAM_DISTRIBUTION_ID));
+
+        RequestUtils.bodyToJsonArray(request, responsesJson -> {
+            if (responsesJson == null || responsesJson.isEmpty()) {
+                log.error("[Formulaire@ResponseController::createMultiple] No responses to create.");
+                noContent(request);
+                return;
+            }
+
+            List<Response> responses = IModelHelper.toList(responsesJson, Response.class);
+            Map<String, Object> composeMap = new HashMap<>();
+
+            UserUtils.getAuthenticatedUserInfos(eb, request)
+                .compose(user -> {
+                    composeMap.put(USER_ID, user.getUserId());
+                    return checkResponsesValidity(request, responses, distributionId, user.getUserId());
+                })
+                .compose(existingResponses -> {
+                    String userId = (String) composeMap.get(USER_ID);
+
+                    // Search for responses duplicates of existing ones
+                    boolean found = responses.stream()
+                        .anyMatch(response -> {
+                            Long choiceId = response.getChoiceId();
+                            String answer = response.getAnswer();
+                            return existingResponses.stream()
+                                .anyMatch(existingResponse -> {
+                                    boolean checkQuestionId = existingResponse.getQuestionId().equals(distributionId);
+                                    boolean checkResponderId = existingResponse.getResponderId().equals(userId);
+                                    boolean checkDistributionId = existingResponse.getDistributionId().equals(distributionId);
+                                    boolean checkAnswerId = existingResponse.getAnswer().equals(answer);
+                                    boolean checkChoiceId = existingResponse.getChoiceId() == choiceId;
+                                    return checkQuestionId && checkResponderId && checkDistributionId && checkAnswerId && checkChoiceId;
+                                });
+                        });
+
+                    if (found) {
+                        String errMessage = "At least one response is duplicate of an existing one";
+                        log.error("[Formulaire@ResponseController::createMultiple] " + errMessage);
+                        return Future.failedFuture(errMessage);
+                    }
+
+                    return responseService.createMultiple(responses, userId);
+                })
+                .onSuccess(createdResponses -> render(request, createdResponses))
+                .onFailure(err -> {
+                    String errMessage = "[Formulaire@ResponseController::updateMultiple] Failed to update multiple responses";
+                    log.error(errMessage + " : " + err.getMessage());
+                    renderError(request);
+                });
         });
     }
 
@@ -421,6 +480,121 @@ public class ResponseController extends ControllerHelper {
         });
     }
 
+    @Put("/distributions/:distributionId/responses")
+    @ApiDoc("Update multiple response at once")
+    @ResourceFilter(CustomShareAndOwner.class)
+    @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void updateMultiple(HttpServerRequest request) {
+        Long distributionId = Long.parseLong(request.getParam(PARAM_DISTRIBUTION_ID));
+
+        RequestUtils.bodyToJsonArray(request, responsesJson -> {
+            if (responsesJson == null || responsesJson.isEmpty()) {
+                log.error("[Formulaire@ResponseController::updateMultiple] No responses to update");
+                noContent(request);
+                return;
+            }
+
+            List<Response> responses = IModelHelper.toList(responsesJson, Response.class);
+            Map<String, Object> composeMap = new HashMap<>();
+
+            UserUtils.getAuthenticatedUserInfos(eb, request)
+                .compose(user -> {
+                    composeMap.put(USER_ID, user.getUserId());
+                    return checkResponsesValidity(request, responses, distributionId, (String) composeMap.get(USER_ID));
+                })
+                .compose(existingResponses -> {
+                    List<Long> responseIds = responses.stream().map(Response::getId).collect(Collectors.toList());
+                    List<Long> existingResponseIds = existingResponses.stream().map(Response::getId).collect(Collectors.toList());
+                    if (responseIds.stream().anyMatch(responseId -> !existingResponseIds.contains(responseId))) {
+                        String errMessage = "Some responseIds are wrong";
+                        log.error("[Formulaire@ResponseController::checkResponsesValidity] " + errMessage);
+                        unauthorized(request);
+                        return Future.failedFuture(errMessage);
+                    }
+                    return responseService.updateMultiple(responses, (String) composeMap.get(USER_ID));
+                })
+                .onSuccess(updatedResponses -> render(request, updatedResponses))
+                .onFailure(err -> {
+                    String errMessage = "[Formulaire@ResponseController::updateMultiple] Failed to update multiple responses";
+                    log.error(errMessage + " : " + err.getMessage());
+                    if (!request.isEnded()) renderError(request);
+                });
+        });
+    }
+
+    Future<List<Response>> checkResponsesValidity (HttpServerRequest request, List<Response> responses, Long distributionId, String userId) {
+        Promise<List<Response>> promise = Promise.promise();
+
+        List<Long> distributionIds = responses.stream().map(Response::getDistributionId).collect(Collectors.toList());
+        if (distributionIds.stream().anyMatch(distribId -> !Objects.equals(distribId, distributionId))) {
+            String errMessage = "Some distributionIds are wrong";
+            log.error("[Formulaire@ResponseController::checkResponsesValidity] " + errMessage);
+            unauthorized(request);
+            promise.fail(errMessage);
+            return promise.future();
+        }
+
+        List<Long> questionIds = responses.stream().map(Response::getQuestionId).collect(Collectors.toList());
+        Map<String, Object> composeMap = new HashMap<>();
+
+        questionService.listByIds(questionIds)
+            .compose(questions -> {
+                // Check if there are forbidden questions type
+                if (questions.stream().anyMatch(question -> FORBIDDEN_QUESTIONS.contains(question.getQuestionType()))) {
+                    String errMessage = "You cannot update a response for a question of a forbidden type";
+                    log.error("[Formulaire@ResponseController::checkResponsesValidity] " + errMessage);
+                    badRequest(request);
+                    return Future.failedFuture(errMessage);
+                }
+
+                composeMap.put(QUESTIONS, questions);
+                return questionChoiceService.listChoices(new JsonArray(questionIds));
+            })
+            .compose(choices -> {
+                List<Question> questions = (List<Question>) composeMap.get(QUESTIONS);
+
+                // If there are choices they should match existing QuestionChoice
+                boolean hasWrongResponses = responses.stream()
+                    .anyMatch(response -> {
+                        Question question = questions.stream()
+                            .filter(q -> q.getId().equals(response.getQuestionId()))
+                            .findFirst()
+                            .orElse(null);
+                        QuestionChoice choice = choices.stream()
+                            .filter(qc -> qc.getId().equals(response.getChoiceId()))
+                            .findFirst()
+                            .orElse(null);
+
+                        if (question == null) return true;
+                        if (choice != null && CHOICES_TYPE_QUESTIONS.contains(question.getQuestionType())) {
+                            boolean isWrongMatrixResponse = question.getMatrixId() != null && (!question.getMatrixId().equals(choice.getQuestionId()) || !choice.getValue().equals(response.getAnswer()));
+                            boolean isWrongCustomResponse = question.getMatrixId() == null && !question.getId().equals(choice.getQuestionId()) || (!choice.getIsCustom() && !choice.getValue().equals(response.getAnswer()));
+                            return isWrongMatrixResponse || isWrongCustomResponse;
+                        }
+
+                        return false;
+                    });
+
+                if (hasWrongResponses) {
+                    String errMessage = "Some responses have the wrong data (question or choices)";
+                    log.error("[Formulaire@ResponseController::checkResponsesValidity] " + errMessage);
+                    badRequest(request);
+                    return Future.failedFuture(errMessage);
+                }
+
+                return responseService.listMineByQuestionsIds(new JsonArray(questionIds), distributionId.toString(), userId);
+            })
+            .onSuccess(promise::complete)
+            .onFailure(err -> {
+                String errMessage = "[Formulaire@ResponseController::checkResponsesValidity] Failed to check responses validity";
+                log.error(errMessage + " : " + err.getMessage());
+                if (!request.isEnded()) renderError(request);
+                promise.fail(err.getMessage());
+            });
+
+        return promise.future();
+    }
+
     @Delete("/responses/:formId")
     @ApiDoc("Delete specific responses")
     @ResourceFilter(CustomShareAndOwner.class)
@@ -447,13 +621,40 @@ public class ResponseController extends ControllerHelper {
         String questionId = request.getParam(PARAM_QUESTION_ID);
         UserUtils.getUserInfos(eb, request, user -> {
             if (user == null) {
-                String message = "[Formulaire@deleteByQuestionAndDistribution] User not found in session.";
+                String message = "[Formulaire@ResponseController::deleteByQuestionAndDistribution] User not found in session.";
                 log.error(message);
                 unauthorized(request, message);
                 return;
             }
 
             responseService.deleteByQuestionAndDistribution(questionId, distributionId, user, arrayResponseHandler(request));
+        });
+    }
+
+    @Delete("/responses/:distributionId/questions")
+    @ApiDoc("Delete multiple responses of a specific distribution")
+    @ResourceFilter(CustomShareAndOwner.class)
+    @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void deleteMultipleByDistribution(HttpServerRequest request) {
+        String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);
+
+        RequestUtils.bodyToJsonArray(request, responsesJson -> {
+            if (responsesJson == null || responsesJson.isEmpty()) {
+                log.error("[Formulaire@ResponseController::deleteMultipleByDistribution] No responses to delete");
+                noContent(request);
+                return;
+            }
+
+            List<Response> responses = IModelHelper.toList(responsesJson, Response.class);
+            List<Long> questionIds = responses.stream().map(Response::getQuestionId).collect(Collectors.toList());
+
+            responseService.deleteByQuestionsAndDistribution(questionIds, distributionId)
+                .onSuccess(result -> ok(request))
+                .onFailure(err -> {
+                    String errMessage = "[Formulaire@ResponseController::deleteMultipleByDistribution] Failed to delete multiple responses";
+                    log.error(errMessage + " : " + err.getMessage());
+                    renderError(request);
+                });
         });
     }
 

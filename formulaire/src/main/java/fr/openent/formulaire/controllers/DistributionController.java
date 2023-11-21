@@ -503,7 +503,7 @@ public class DistributionController extends ControllerHelper {
                             return;
                         }
 
-                        responseService.deleteMultipleByDistribution(originalDistributionId, deleteRepEvt -> {
+                        responseService.deleteAllByDistribution(originalDistributionId, deleteRepEvt -> {
                             if (deleteRepEvt.isLeft()) {
                                 log.error("[Formulaire@replaceDistribution] Error in deleting responses for distribution with id " + originalDistributionId);
                                 renderInternalError(request, deleteRepEvt);

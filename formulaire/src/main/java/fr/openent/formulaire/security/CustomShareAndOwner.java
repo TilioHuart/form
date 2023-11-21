@@ -94,7 +94,8 @@ public class CustomShareAndOwner implements ResourcesProvider {
         }
         else if (isGetDistribution(binding) || isAddDistribution(binding) || isUpdateDistribution(binding) ||
                 isDuplicateWithResponsesDistribution(binding) || isReplaceDistribution(binding) || isDeleteDistribution(binding) ||
-                isListByDistributionResponse(binding) || isDeleteByQuestionResponse(binding) || isListByDistributionAndQuestions(binding)) {
+                isListByDistributionResponse(binding) || isDeleteByQuestionResponse(binding) || isListMineByDistributionAndQuestions(binding) ||
+                isCreateMultipleResponse(binding) || isUpdateMultipleResponse(binding) || isDeleteMultipleByDistribution(binding)) {
             return PARAM_DISTRIBUTION_ID;
         }
         else if (isListForSectionQuestion(binding) || isGetSection(binding) || isDeleteSection(binding)) {
@@ -253,8 +254,8 @@ public class CustomShareAndOwner implements ResourcesProvider {
         return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseController|listMineByDistribution");
     }
 
-    private boolean isListByDistributionAndQuestions(final Binding binding){
-        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.ResponseController|listMineByDistributionAndQuestions");
+    private boolean isListMineByDistributionAndQuestions(final Binding binding){
+        return bindingIsThatMethod(binding, HttpMethod.GET, "fr.openent.formulaire.controllers.ResponseController|listMineByDistributionAndQuestions");
     }
 
     private boolean isListByDistributionResponse(final Binding binding) {
@@ -269,8 +270,16 @@ public class CustomShareAndOwner implements ResourcesProvider {
         return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.ResponseController|create");
     }
 
+    private boolean isCreateMultipleResponse(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.POST, "fr.openent.formulaire.controllers.ResponseController|createMultiple");
+    }
+
     private boolean isUpdateResponse(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.PUT, "fr.openent.formulaire.controllers.ResponseController|update");
+    }
+
+    private boolean isUpdateMultipleResponse(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.PUT, "fr.openent.formulaire.controllers.ResponseController|updateMultiple");
     }
 
     private boolean isDeleteResponse(final Binding binding) {
@@ -279,6 +288,10 @@ public class CustomShareAndOwner implements ResourcesProvider {
 
     private boolean isDeleteByQuestionResponse(final Binding binding) {
         return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.ResponseController|deleteByQuestionAndDistribution");
+    }
+
+    private boolean isDeleteMultipleByDistribution(final Binding binding) {
+        return bindingIsThatMethod(binding, HttpMethod.DELETE, "fr.openent.formulaire.controllers.ResponseController|deleteMultipleByDistribution");
     }
 
     private boolean isExportResponse(final Binding binding) {

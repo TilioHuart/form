@@ -13,6 +13,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Arrays;
+
 import static fr.openent.form.core.constants.EbFields.FORMULAIRE_ADDRESS;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.Tables.*;
@@ -41,6 +43,50 @@ public class DefaultQuestionChoiceServiceTest {
                 .put(IS_CUSTOM, true)
                 .put(IMAGE, "/workspace/document/25389fc4-dbd8-4952-b4bd-bce9fb30b559");
         choice = new QuestionChoice(questionChoice);
+    }
+
+    @Test
+    public void testListChoices_NoQuestionIds(TestContext ctx) {
+        Async async = ctx.async();
+        JsonArray questionIds = new JsonArray();
+
+        String expectedQuery = "SELECT * FROM " + QUESTION_CHOICE_TABLE + " WHERE question_id IN " + Sql.listPrepared(questionIds);
+        JsonArray expectedParams = new JsonArray();
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getString(STATEMENT));
+            ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
+            async.complete();
+        });
+
+        defaultQuestionChoiceService.listChoices(questionIds)
+            .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
+    }
+
+    @Test
+    public void testListChoices_QuestionIds(TestContext ctx) {
+        Async async = ctx.async();
+        JsonArray questionIds = new JsonArray(Arrays.asList(1,2,5,4));
+
+        String expectedQuery = "SELECT * FROM " + QUESTION_CHOICE_TABLE + " WHERE question_id IN " + Sql.listPrepared(questionIds);
+        JsonArray expectedParams = new JsonArray("[1, 2, 5, 4]");
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getString(STATEMENT));
+            ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
+            async.complete();
+        });
+
+        defaultQuestionChoiceService.listChoices(questionIds)
+            .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
     }
 
     @Test

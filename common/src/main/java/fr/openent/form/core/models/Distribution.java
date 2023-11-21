@@ -12,8 +12,8 @@ import static fr.openent.form.core.constants.DateFormats.YYYY_MM_DD_T_HH_MM_SS_S
 public class Distribution implements IModel<Distribution> {
     private final SimpleDateFormat dateFormatter = new SimpleDateFormat(YYYY_MM_DD_T_HH_MM_SS_SSS);
 
-    private Number id;
-    private Number formId;
+    private Long id;
+    private Long formId;
     private String senderId;
     private String senderName;
     private String responderId;
@@ -23,9 +23,9 @@ public class Distribution implements IModel<Distribution> {
     private Date dateResponse;
     private Boolean active;
     private String structure;
-    private Number originalId;
+    private Long originalId;
     private String publicKey;
-    private Number captchaId;
+    private Long captchaId;
 
 
     // Constructors
@@ -33,8 +33,8 @@ public class Distribution implements IModel<Distribution> {
     public Distribution() {}
 
     public Distribution(JsonObject distribution) {
-        this.id = distribution.getNumber(ID, null);
-        this.formId = distribution.getNumber(FORM_ID,null);
+        this.id = distribution.getLong(ID, null);
+        this.formId = distribution.getLong(FORM_ID,null);
         this.senderId = distribution.getString(SENDER_ID,null);
         this.senderName = distribution.getString(SENDER_NAME, null);
         this.responderId = distribution.getString(RESPONDER_ID, null);
@@ -47,17 +47,17 @@ public class Distribution implements IModel<Distribution> {
         catch (ParseException e) { e.printStackTrace(); }
         this.active = distribution.getBoolean(ACTIVE, null);
         this.structure = distribution.getString(STRUCTURE, null);
-        this.originalId = distribution.getNumber(ORIGINAL_ID,null);
+        this.originalId = distribution.getLong(ORIGINAL_ID,null);
         this.publicKey = distribution.getString(PUBLIC_KEY, null);
-        this.captchaId = distribution.getNumber(CAPTCHA_ID,null);
+        this.captchaId = distribution.getLong(CAPTCHA_ID,null);
     }
 
 
     // Getters
 
-    public Number getId() {return id; }
+    public Long getId() {return id; }
 
-    public Number getFormId() { return formId; }
+    public Long getFormId() { return formId; }
 
     public String getSenderId() { return senderId; }
 
@@ -77,22 +77,22 @@ public class Distribution implements IModel<Distribution> {
 
     public String getStructure() { return structure; }
 
-    public Number getOriginalId() { return originalId; }
+    public Long getOriginalId() { return originalId; }
 
     public String getPublicKey() { return publicKey; }
 
-    public Number getCaptchaId() { return captchaId; }
+    public Long getCaptchaId() { return captchaId; }
 
 
     // Setters
 
 
-    public Distribution setId(Number id) {
+    public Distribution setId(Long id) {
         this.id = id;
         return this;
     }
 
-    public Distribution setFormId(Number formId) {
+    public Distribution setFormId(Long formId) {
         this.formId = formId;
         return this;
     }
@@ -142,7 +142,7 @@ public class Distribution implements IModel<Distribution> {
         return this;
     }
 
-    public Distribution setOriginalId(Number originalId) {
+    public Distribution setOriginalId(Long originalId) {
         this.originalId = originalId;
         return this;
     }
@@ -152,7 +152,7 @@ public class Distribution implements IModel<Distribution> {
         return this;
     }
 
-    public Distribution setCaptchaId(Number captchaId) {
+    public Distribution setCaptchaId(Long captchaId) {
         this.captchaId = captchaId;
         return this;
     }

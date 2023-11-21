@@ -4,16 +4,16 @@ import io.vertx.core.json.JsonObject;
 import static fr.openent.form.core.constants.Fields.*;
 
 public class Response implements IModel<Response> {
-    private Number id;
-    private Number questionId;
+    private Long id;
+    private Long questionId;
     private String answer;
     private String responderId;
-    private Number choiceId;
-    private Number distributionId;
-    private Number originalId;
+    private Long choiceId;
+    private Long distributionId;
+    private Long originalId;
     private String customAnswer;
-
-    private Number choicePosition;
+    private Long choicePosition;
+    private String image;
 
 
     // Constructors
@@ -21,45 +21,50 @@ public class Response implements IModel<Response> {
     public Response() {}
 
     public Response(JsonObject response) {
-        this.id = response.getNumber(ID, null);
-        this.questionId = response.getNumber(QUESTION_ID,null);
+        this.id = response.getLong(ID, null);
+        this.questionId = response.getLong(QUESTION_ID,null);
         this.answer = response.getString(ANSWER,null);
         this.responderId = response.getString(RESPONDER_ID, null);
-        this.choiceId = response.getNumber(CHOICE_ID, null);
-        this.distributionId = response.getNumber(DISTRIBUTION_ID, null);
-        this.originalId = response.getNumber(ORIGINAL_ID, null);
+        this.choiceId = response.getLong(CHOICE_ID, null);
+        this.distributionId = response.getLong(DISTRIBUTION_ID, null);
+        this.originalId = response.getLong(ORIGINAL_ID, null);
         this.customAnswer = response.getString(CUSTOM_ANSWER, null);
-        this.choicePosition = response.getNumber(CHOICE_POSITION, null);
+        this.choicePosition = response.getLong(CHOICE_POSITION, null);
+        this.image = response.getString(IMAGE, null);
     }
 
 
     // Getters
 
-    public Number getId() {return id; }
+    public Long getId() {return id; }
 
-    public Number getQuestionId() { return questionId; }
+    public Long getQuestionId() { return questionId; }
 
     public String getAnswer() { return answer; }
 
     public String getResponderId() { return responderId; }
 
-    public Number getChoiceId() { return choiceId; }
+    public Long getChoiceId() { return choiceId; }
 
-    public Number getDistributionId() { return distributionId; }
+    public Long getDistributionId() { return distributionId; }
 
-    public Number getOriginalId() { return originalId; }
+    public Long getOriginalId() { return originalId; }
 
     public String getCustomAnswer() { return customAnswer; }
 
-    public Number getChoicePosition() { return choicePosition; }
+    public Long getChoicePosition() { return choicePosition; }
+
+    public String getImage() { return image; }
+
+
     // Setters
 
-    public Response setId(Number id) {
+    public Response setId(Long id) {
         this.id = id;
         return this;
     }
 
-    public Response setQuestionId(Number questionId) {
+    public Response setQuestionId(Long questionId) {
         this.questionId = questionId;
         return this;
     }
@@ -74,17 +79,17 @@ public class Response implements IModel<Response> {
         return this;
     }
 
-    public Response setChoiceId(Number choiceId) {
+    public Response setChoiceId(Long choiceId) {
         this.choiceId = choiceId;
         return this;
     }
 
-    public Response setDistributionId(Number distributionId) {
+    public Response setDistributionId(Long distributionId) {
         this.distributionId = distributionId;
         return this;
     }
 
-    public Response setOriginalId(Number originalId) {
+    public Response setOriginalId(Long originalId) {
         this.originalId = originalId;
         return this;
     }
@@ -94,10 +99,17 @@ public class Response implements IModel<Response> {
         return this;
     }
 
-    public Response setChoicePosition(Number choicePosition) {
+    public Response setChoicePosition(Long choicePosition) {
         this.choicePosition = choicePosition;
         return this;
     }
+
+    public Response setImage(String image) {
+        this.image = image;
+        return this;
+    }
+
+
     // Functions
 
     public JsonObject toJson() {
@@ -110,7 +122,8 @@ public class Response implements IModel<Response> {
                 .put(DISTRIBUTION_ID, this.distributionId)
                 .put(ORIGINAL_ID, this.originalId)
                 .put(CUSTOM_ANSWER, this.customAnswer)
-                .put(CHOICE_POSITION, this.choicePosition);
+                .put(CHOICE_POSITION, this.choicePosition)
+                .put(IMAGE, this.image);
     }
 
     @Override
