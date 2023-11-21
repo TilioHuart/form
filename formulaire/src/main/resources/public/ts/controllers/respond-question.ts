@@ -247,10 +247,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         }
         else if (conditionalQuestion && response) {
             let choices: QuestionChoice[] = conditionalQuestion.choices.all.filter((c: QuestionChoice) => c.id === response.choice_id);
-            let nextElementId: number = choices.length === 1 ? choices[0].next_form_element_id : null;
-            let nextElementType: FormElementType = choices.length === 1 ? choices[0].next_form_element_type : null;
-            let filteredElements: FormElement[] = vm.formElements.all.filter((e: FormElement) => e.id === nextElementId && e.form_element_type == nextElementType);
-            let targetedElement: FormElement = filteredElements.length === 1 ? filteredElements[0] : null;
+            let targetedElement: FormElement = choices.length === 1 ? choices[0].getNextFormElement(vm.formElements, conditionalQuestion) : null;
             nextPosition = targetedElement ? targetedElement.position : null;
         }
         else if (vm.formElement instanceof Section && vm.formElement.questions.all.filter((q: Question) => q.conditional).length == 0) {
