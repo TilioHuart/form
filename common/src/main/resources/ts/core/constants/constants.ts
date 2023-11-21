@@ -15,4 +15,13 @@ export abstract class Constants {
     static readonly ORANGE_COLORS: string[] = ['#FFA23C','#F27E00','#FF8E13','#FFB463','#FFCA91'];
     static readonly COLORS_GROUPS: Array<string[]> = [Constants.BLUE_COLORS, Constants.YELLOW_COLORS, Constants.PURPLE_COLORS, Constants.ORANGE_COLORS];
     static readonly NB_COLORS_AVAILABLE: number = 25;
+
+    // Dates format
+    static readonly HH_MM: string = "HH:mm";
+    static readonly DD_MM_YYYY: string = "DD/MM/YYYY";
+
+    // Types
+    static readonly STRING: string = "string";
+    static readonly FILE: string = "file";
+
 }

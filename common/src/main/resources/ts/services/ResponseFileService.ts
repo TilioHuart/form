@@ -10,6 +10,7 @@ export interface ResponseFileService {
     zipAndDownload(questionId: number) : Promise<any>;
     create(responseId: number, file) : Promise<any>;
     deleteAll(responseId : number) : Promise<any>;
+    deleteAllMultiple(responseIds: number[]) : Promise<void>;
 }
 
 export const responseFileService: ResponseFileService = {
@@ -71,6 +72,15 @@ export const responseFileService: ResponseFileService = {
     async deleteAll(responseId: number) : Promise<any> {
         try {
             return DataUtils.getData(await http.delete(`/formulaire/responses/${responseId}/files`));
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.responseFileService.delete'));
+            throw err;
+        }
+    },
+
+    async deleteAllMultiple(responseIds: number[]) : Promise<void> {
+        try {
+            return DataUtils.getData(await http.delete(`/formulaire/responses/files`));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseFileService.delete'));
             throw err;

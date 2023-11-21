@@ -79,7 +79,7 @@ export class QuestionChoice {
     }
 
     getNextFormElement = (formElements: FormElements, parentQuestion?: Question) : FormElement => {
-        if (this.is_next_form_element_default) return parentQuestion.getFollowingFormElement(formElements);
+        if (parentQuestion && this.is_next_form_element_default) return parentQuestion.getFollowingFormElement(formElements);
 
         return formElements.all.find((e: FormElement) =>
             e.id === this.next_form_element_id &&

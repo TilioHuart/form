@@ -23,6 +23,14 @@ export class ResponseFile {
             type: this.type
         }
     }
+
+    build(data: IResponseFileResponse) : ResponseFile {
+        this.id = data.id ? data.id : null;
+        this.response_id = data.responseId ? data.responseId : null;
+        this.filename = data.filename ? data.filename : null;
+        this.type = data.type ? data.type : null;
+        return this;
+    }
 }
 
 export class ResponseFiles {
@@ -41,4 +49,11 @@ export class ResponseFiles {
             throw e;
         }
     }
+}
+
+export interface IResponseFileResponse {
+    id: string;
+    responseId: number;
+    filename: string;
+    type: string;
 }

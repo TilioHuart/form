@@ -1,9 +1,10 @@
-import {idiom, notify} from "entcore";
+import {idiom, moment, notify} from "entcore";
 import {responseFileService, responseService} from "../services";
 import {Mix, Selectable, Selection} from "entcore-toolkit";
 import {ResponseFile, ResponseFiles} from "./ResponseFile";
 import {Question} from "./FormElement";
-import {Form} from "@common/models/Form";
+import {Types} from "@common/models/QuestionType";
+import {Constants} from "@common/core/constants";
 
 export class Response implements Selectable {
     id: number;
@@ -60,6 +61,23 @@ export class Response implements Selectable {
         this.choice_position = data.choicePosition ? data.choicePosition : null;
         this.image = data.image ? data.image : null;
         return this;
+    }
+
+    formatBeforeSaving = (questionType: Types) : void => {
+        if (this.answer == undefined) {
+            this.answer = "";
+        }
+        else {
+            if (questionType === Types.TIME && typeof this.answer != Constants.STRING) {
+                this.answer = moment(this.answer).format(Constants.HH_MM);
+            }
+            else if (questionType === Types.DATE && typeof this.answer != Constants.STRING) {
+                this.answer = moment(this.answer).format(Constants.DD_MM_YYYY);
+            }
+            else if (questionType === Types.CURSOR && typeof this.answer != Constants.STRING) {
+                this.answer = this.answer.toString();
+            }
+        }
     }
 }
 

@@ -1,6 +1,6 @@
-import {currentLanguage, idiom, ng, notify} from "entcore";
+import {idiom, ng, notify} from "entcore";
 import {
-    Distribution, Files,
+    Distribution, FilePayload, Files,
     Form,
     FormElement,
     FormElements,
@@ -14,9 +14,8 @@ import {
 import {responseFileService, responseService} from "../services";
 import {FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_EMIT_EVENT} from "@common/core/enums";
 import {FormElementType} from "@common/core/enums/form-element-type";
-import {FormElementUtils, UtilsUtils} from "@common/utils";
+import {FormElementUtils} from "@common/utils";
 import {Constants, Fields} from "@common/core/constants";
-
 interface ViewModel {
     formElements: FormElements;
     formElement: FormElement;
@@ -281,89 +280,106 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 
         if (!vm.loading) {
             if (vm.formElement instanceof Question) {
-                isSavingOk = await saveQuestionResponses(vm.formElement);
+                isSavingOk = await saveQuestionsResponses([vm.formElement]);
             }
             else if (vm.formElement instanceof Section) {
-                isSavingOk = true;
-                for (let question of vm.formElement.questions.all) {
-                    isSavingOk = isSavingOk && await saveQuestionResponses(question);
-                }
+                isSavingOk = await saveQuestionsResponses(vm.formElement.questions.all);
             }
         }
 
         return isSavingOk;
     };
 
-    const saveQuestionResponses = async (question: Question) : Promise<boolean> => {
-        let responses: Responses = vm.currentResponses.get(question);
-        let files: Files = vm.currentFiles.get(question);
+    const saveQuestionsResponses = async (questions: Question[]) : Promise<boolean> => {
+        let questionIdsResponseToDelete: number[] = [];
+        let mapQuestionsResponsesToSave: Map<Question, Response[]> = new Map<Question, Response[]>();
+        let responsesFiles: FilePayload[] = [];
+        let responseIdOfResponseFilesToDelete: number[] = [];
 
-        if (question.isTypeMultipleRep() || question.isRanking()) {
-            await responseService.deleteByQuestionAndDistribution(question.id, vm.distribution.id);
-            if (responses.selected.length > 0) {
-                for (let response of responses.selected) {
-                    await responseService.create(response);
-                }
-            }
-            else if (question.children.all.length > 0) {
-                for (let child of question.children.all) {
-                    await responseService.create(new Response(child.id, null, null, vm.distribution.id));
-                }
-            }
-            else if (question.isRanking()) { // In case of question type ranking, we need to add a choice index to each Response
-                let promises: any = [];
-                for (let resp of responses.all) {
-                    promises.push(responseService.create(new Response(question.id, resp.choice_id, resp.answer, vm.distribution.id,  resp.choice_position)));
-                }
-                await Promise.all(promises);
-            }
-            else {
-                await responseService.create(new Response(question.id, null, null, vm.distribution.id));
-            }
-            return true;
-        }
+        for (let question of questions) {
+            let responsesToSave: Response[] = [];
+            let questionResponses: Responses = vm.currentResponses.get(question);
+            let files: Files = vm.currentFiles.get(question);
 
-        if (responses.all[0].choice_id) {
-            let matchingChoices: QuestionChoice[] = question.choices.all.filter((c: QuestionChoice) => c.id === responses.all[0].choice_id);
-            if (matchingChoices.length == 1) {
-                if (!matchingChoices[0].is_custom) {
-                    responses.all[0].answer = matchingChoices[0].value;
-                    responses.all[0].custom_answer = null;
+            if (question.isTypeMultipleRep() || question.isRanking()) {
+                questionIdsResponseToDelete.push(question.id);
+
+                if (questionResponses.selected.length > 0) {
+                    for (let questionResponse of questionResponses.selected) {
+                        questionResponse.id = null; // to force creation instead of update
+                        responsesToSave.push(questionResponse);
+                    }
+                }
+                else if (question.children.all.length > 0) {
+                    for (let child of question.children.all) {
+                        responsesToSave.push(new Response(child.id, null, null, vm.distribution.id));
+                    }
+                }
+                else if (question.isRanking()) { // In case of question type ranking, we need to add a choice index to each Response
+                    for (let questionResponse of questionResponses.all) {
+                        responsesToSave.push(new Response(question.id, questionResponse.choice_id, questionResponse.answer, vm.distribution.id, questionResponse.choice_position));
+                    }
                 }
                 else {
-                    responses.all[0].answer = null;
+                    responsesToSave.push(new Response(question.id, null, null, vm.distribution.id));
                 }
             }
-        }
-        responses.all[0] = await responseService.save(responses.all[0], question.question_type);
+            else if (questionResponses.all[0].choice_id) { // Custom answer security/formatting
+                let questionResponse: Response = questionResponses.all[0];
+                let matchingChoices: QuestionChoice[] = question.choices.all.filter((c: QuestionChoice) => c.id === questionResponse.choice_id);
+                if (matchingChoices.length == 1) {
+                    if (!matchingChoices[0].is_custom) {
+                        questionResponse.answer = matchingChoices[0].value;
+                        questionResponse.custom_answer = null;
+                    }
+                    else {
+                        questionResponse.answer = null;
+                    }
+                }
+                responsesToSave.push(questionResponses.all[0]);
+            }
+            else if (question.question_type === Types.FILE && files) { // Files management
+                if (files.all.length > Constants.MAX_FILES_SAVE) {
+                    notify.info(idiom.translate('formulaire.response.file.tooMany'));
+                    return false;
+                }
 
-        if (question.question_type === Types.FILE && files) {
-            return (await saveFiles(question, responses.all[0], files));
+                let questionResponse: Response = questionResponses.all[0];
+                questionResponse.answer = files.all.length > 0 ? idiom.translate('formulaire.response.file.send') : "";
+                responsesToSave.push(questionResponse);
+
+                responseIdOfResponseFilesToDelete.push(questionResponse.id);
+
+                vm.currentFiles.set(question, files);
+                files.formatForSaving(vm.form);
+                responsesFiles.push(...files.all.map((f: File) => new FilePayload(f, questionResponse.id)));
+            }
+            else {
+                responsesToSave.push(questionResponses.all[0]);
+            }
+
+            mapQuestionsResponsesToSave.set(question, responsesToSave);
         }
+
+        if (responseIdOfResponseFilesToDelete.length > 0) await responseFileService.deleteAllMultiple(responseIdOfResponseFilesToDelete);
+        await responseService.deleteMultipleByQuestionAndDistribution(questionIdsResponseToDelete, vm.distribution.id); // Delete toutes les reponses isTypeMultipleRep
+        await responseService.saveMultiple(mapQuestionsResponsesToSave, vm.distribution.id);
+        if (responsesFiles.length > 0) await this.saveFiles(responsesFiles);
 
         return true;
     };
 
-    const saveFiles = async (question: Question, response: Response, files: Files) : Promise<boolean> => {
-        if (files.all.length > Constants.MAX_FILES_SAVE) {
-            notify.info(idiom.translate('formulaire.response.file.tooMany'));
-            return false;
-        }
-        else {
-            vm.currentFiles.set(question, files);
-            await responseFileService.deleteAll(response.id);
-            for (let i = 0; i < files.all.length; i++) {
-                let filename = files.all[i].name;
-                if (files.all[i].type && !$scope.form.anonymous) {
-                    filename = UtilsUtils.getOwnerNameWithUnderscore() + filename;
-                }
-                let file = new FormData();
-                file.append("file", files.all[i], filename);
-                await responseFileService.create(response.id, file);
+    const saveFiles = async (filePayloads: FilePayload[]) : Promise<boolean> => {
+        try {
+            let promises: Promise<Responses>[] = [];
+            for (let filePayload of filePayloads) {
+                promises.push(await responseFileService.create(filePayload.responseId, filePayload.file));
             }
-            response.answer = files.all.length > 0 ? idiom.translate('formulaire.response.file.send') : "";
-            await responseService.update(response);
-            return true;
+            let results: any[] = await Promise.all(promises);
+            return results[0].all.concat(results[1].all);
+        } catch (err) {
+            notify.error(idiom.translate('formulaire.error.responseFileService.create'));
+            throw err;
         }
     };
 
