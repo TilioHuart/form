@@ -115,7 +115,7 @@ export class SectionPayload implements FormElementPayload {
         this.description = section.description ? section.description : null;
         this.next_form_element_id = typeof section.next_form_element_id == 'number' ? section.next_form_element_id : null;
         this.next_form_element_type = section.next_form_element_type ? section.next_form_element_type : null;
-        this.is_next_form_element_default = section.is_next_form_element_default ? section.is_next_form_element_default : true;
+        this.is_next_form_element_default = section.is_next_form_element_default != undefined ? section.is_next_form_element_default : true;
         this.questions = section.questions ? section.questions.all.map((q: Question) => new QuestionPayload(q)) : null;
     }
 

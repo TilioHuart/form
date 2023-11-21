@@ -143,7 +143,7 @@ export class QuestionChoicePayload {
         this.type = questionChoice.type ? questionChoice.type : ChoiceTypes.TXT;
         this.next_form_element_id = questionChoice.next_form_element_id ? questionChoice.next_form_element_id : null;
         this.next_form_element_type = questionChoice.next_form_element_type ? questionChoice.next_form_element_type : null;
-        this.is_next_form_element_default = questionChoice.is_next_form_element_default ? questionChoice.is_next_form_element_default : false;
+        this.is_next_form_element_default = questionChoice.is_next_form_element_default != undefined ? questionChoice.is_next_form_element_default : true;
         this.is_custom = questionChoice.is_custom ? questionChoice.is_custom : false;
         this.image = questionChoice.image ? questionChoice.image : null;
     }
