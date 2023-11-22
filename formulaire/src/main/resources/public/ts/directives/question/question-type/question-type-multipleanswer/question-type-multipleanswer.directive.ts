@@ -3,6 +3,7 @@ import {Form, Question} from "@common/models";
 import {I18nUtils} from "@common/utils";
 import {Direction} from "@common/core/enums";
 import {RootsConst} from "../../../../core/constants/roots.const";
+import {IScope} from "angular";
 
 interface IQuestionTypeMultipleanswerProps {
     question: Question;
@@ -10,7 +11,11 @@ interface IQuestionTypeMultipleanswerProps {
     form: Form;
 }
 
-interface IViewModel {
+interface IQuestionTypeMultipleanswerScope extends IScope, IQuestionTypeMultipleanswerProps{
+    vm: IViewModel;
+}
+
+interface IViewModel extends ng.IController, IQuestionTypeMultipleanswerProps {
     i18n: I18nUtils;
     direction: typeof Direction;
     selectedChoiceIndex: number;
@@ -20,7 +25,7 @@ interface IViewModel {
     deleteImageSelect(index: number): void;
 }
 
-class Controller implements ng.IController, IViewModel {
+class Controller implements IViewModel {
     question: Question;
     hasFormResponses: boolean;
     form: Form;
@@ -28,7 +33,7 @@ class Controller implements ng.IController, IViewModel {
     direction: typeof Direction;
     selectedChoiceIndex: number;
 
-    constructor(private $scope: IQuestionTypeMultipleanswerProps, private $sce: ng.ISCEService) {
+    constructor(private $scope: IQuestionTypeMultipleanswerScope, private $sce: ng.ISCEService) {
         this.i18n = I18nUtils;
         this.direction = Direction;
         this.selectedChoiceIndex = -1;
@@ -40,6 +45,7 @@ class Controller implements ng.IController, IViewModel {
 
     deleteChoice = async (index: number) : Promise<void> => {
         await this.question.deleteChoice(index);
+        this.$scope.$apply();
     }
 
     displayImageSelect = (index: number): void => {
@@ -67,7 +73,7 @@ function directive() {
         bindToController: true,
         controller: ['$scope', '$sce', Controller],
         /* interaction DOM/element */
-        link: function ($scope: IQuestionTypeMultipleanswerProps,
+        link: function ($scope: IQuestionTypeMultipleanswerScope,
                         element: ng.IAugmentedJQuery,
                         attrs: ng.IAttributes,
                         vm: IViewModel) {

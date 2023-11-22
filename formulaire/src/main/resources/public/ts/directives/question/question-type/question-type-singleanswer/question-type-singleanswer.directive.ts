@@ -71,6 +71,7 @@ class Controller implements IViewModel {
 
     deleteChoice = async (index: number) : Promise<void> => {
         await this.question.deleteChoice(index);
+        this.$scope.$apply();
     }
 
     filterNextElements = (formElement: FormElement) : boolean => {
