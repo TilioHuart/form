@@ -232,6 +232,7 @@ public class Fields {
     public static final String SIZE = "size";
     public static final String SLASH = "/";
     public static final String IMAGE_PATH_PREFIX = "/workspace/document/";
+    public static final String SHARE_INFOS = "share_infos";
     public static final String SPECIFIC_FIELDS = "specific_fields";
     public static final String STATEMENTS = "statements";
     public static final String SUBJECT = "subject";

@@ -1,8 +1,13 @@
 package fr.openent.formulaire.service;
 
+import fr.openent.form.core.models.Sharing.ShareBookmark;
+import fr.openent.form.core.models.Sharing.ShareUser;
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
+
+import java.util.List;
 
 public interface NeoService {
 
@@ -36,4 +41,8 @@ public interface NeoService {
     void getIdsFromBookMarks(JsonArray bookmarksIds, Handler<Either<String, JsonArray>> handler);
 
     void getUsersInfosFromIds(JsonArray userIds, JsonArray groupIds, Handler<Either<String, JsonArray>> handler);
+
+    Future<List<ShareBookmark>> getIdsFromBookMarks(JsonArray bookmarksIds);
+
+    Future<List<ShareUser>> getUsersInfosFromIds(JsonArray userIds, JsonArray groupIds);
 }

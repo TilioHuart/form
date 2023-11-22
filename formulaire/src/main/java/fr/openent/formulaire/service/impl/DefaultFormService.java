@@ -2,7 +2,7 @@ package fr.openent.formulaire.service.impl;
 
 import fr.openent.form.core.enums.I18nKeys;
 import fr.openent.form.core.models.Form;
-import fr.openent.form.core.models.ShareMember;
+import fr.openent.form.core.models.Sharing.ShareMember;
 import fr.openent.form.core.models.TransactionElement;
 import fr.openent.form.helpers.FutureHelper;
 import fr.openent.form.helpers.I18nHelper;

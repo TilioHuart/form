@@ -22,7 +22,10 @@ public class ShareInfosGroups implements IModel<ShareInfosGroups> {
 
     public ShareInfosGroups(JsonObject shareInfosGroups) {
         this.checked = shareInfosGroups.getJsonObject(CHECKED, null).getMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> (List<String>)e));
-        this.visibles = shareInfosGroups.getJsonArray(VISIBLES, new JsonArray()).stream().map(ShareInfosGroupsVisible.class::cast).collect(Collectors.toList());
+        this.visibles = shareInfosGroups.getJsonArray(VISIBLES, new JsonArray()).stream()
+                .map(JsonObject.class::cast)
+                .map(ShareInfosGroupsVisible::new)
+                .collect(Collectors.toList());
     }
 
 

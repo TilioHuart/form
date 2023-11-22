@@ -24,7 +24,10 @@ public class ShareInfos implements IModel<ShareInfos> {
     public ShareInfos() { }
 
     public ShareInfos(JsonObject shareInfos) {
-        this.actions = shareInfos.getJsonArray(ACTIONS, new JsonArray()).stream().map(ShareInfosAction.class::cast).collect(Collectors.toList());
+        this.actions = shareInfos.getJsonArray(ACTIONS, new JsonArray()).stream()
+                .map(JsonObject.class::cast)
+                .map(ShareInfosAction::new)
+                .collect(Collectors.toList());
         this.groups = new ShareInfosGroups(shareInfos.getJsonObject(GROUPS, null));
         this.users = new ShareInfosUsers(shareInfos.getJsonObject(USERS, null));
     }

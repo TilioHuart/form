@@ -23,7 +23,10 @@ public class ShareInfosUsers implements IModel<ShareInfosUsers> {
 
     public ShareInfosUsers(JsonObject shareInfosUsers) {
         this.checked = shareInfosUsers.getJsonObject(CHECKED, null).getMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> (List<String>)e));
-        this.visibles = shareInfosUsers.getJsonArray(VISIBLES, new JsonArray()).stream().map(ShareInfosUsersVisible.class::cast).collect(Collectors.toList());
+        this.visibles = shareInfosUsers.getJsonArray(VISIBLES, new JsonArray()).stream()
+                .map(JsonObject.class::cast)
+                .map(ShareInfosUsersVisible::new)
+                .collect(Collectors.toList());
     }
 
 

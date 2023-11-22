@@ -16,7 +16,7 @@ public class ShareObjectUsers implements IModel<ShareObjectUsers> {
     public ShareObjectUsers() {}
 
     public ShareObjectUsers(JsonObject users) {
-        this.usersRights = users.getMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> (List<String>)e));
+        this.usersRights = users.getMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> (List<String>) e.getValue()));
     }
 
 

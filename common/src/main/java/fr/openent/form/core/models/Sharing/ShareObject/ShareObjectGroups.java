@@ -16,7 +16,7 @@ public class ShareObjectGroups implements IModel<ShareObjectGroups> {
     public ShareObjectGroups() {}
 
     public ShareObjectGroups(JsonObject shareObjectGroups) {
-        this.groupsRights = shareObjectGroups.getMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> (List<String>)e));
+        this.groupsRights = shareObjectGroups.getMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> (List<String>) e.getValue()));
     }
 
 

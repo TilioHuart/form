@@ -1,17 +1,31 @@
 package fr.openent.formulaire.service.impl;
 
+import fr.openent.form.core.models.Sharing.ShareBookmark;
+import fr.openent.form.core.models.Sharing.ShareInfo.ShareInfosAction;
+import fr.openent.form.core.models.Sharing.ShareUser;
+import fr.openent.form.helpers.IModelHelper;
+import fr.openent.formulaire.controllers.QuestionController;
 import fr.openent.formulaire.service.NeoService;
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.neo4j.Neo4j;
 import org.entcore.common.neo4j.Neo4jResult;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static fr.openent.form.core.constants.Fields.*;
 
 public class DefaultNeoService implements NeoService {
+    private static final Logger log = LoggerFactory.getLogger(DefaultNeoService.class);
 
+    // Unused
     @Override
     public void getUsers(final JsonArray usersIds, Handler<Either<String, JsonArray>> handler) {
         JsonObject params = new JsonObject().put(PARAM_USERS_IDS, usersIds);
@@ -22,6 +36,7 @@ public class DefaultNeoService implements NeoService {
         Neo4j.getInstance().execute(queryUsersNeo4j, params, Neo4jResult.validResultHandler(handler));
     }
 
+    // Unused
     @Override
     public void getGroups(final JsonArray groupsIds, Handler<Either<String, JsonArray>> handler) {
         JsonObject params = new JsonObject().put(PARAM_GROUPS_IDS, groupsIds);
@@ -33,6 +48,7 @@ public class DefaultNeoService implements NeoService {
         Neo4j.getInstance().execute(queryGroupsNeo4j, params, Neo4jResult.validResultHandler(handler));
     }
 
+    // Unused
     @Override
     public void getSharedBookMark(final JsonArray bookmarksIds, Handler<Either<String, JsonArray>> handler) {
         JsonObject params = new JsonObject()
@@ -48,6 +64,7 @@ public class DefaultNeoService implements NeoService {
         Neo4j.getInstance().execute(queryNeo4j, params, Neo4jResult.validResultHandler(handler));
     }
 
+    // Unused
     @Override
     public void getSharedBookMarkUsers(final JsonArray bookmarksIds, Handler<Either<String, JsonArray>> handler) {
         JsonObject params = new JsonObject()
@@ -63,8 +80,6 @@ public class DefaultNeoService implements NeoService {
 
         Neo4j.getInstance().execute(queryNeo4j, params, Neo4jResult.validResultHandler(handler));
     }
-
-
 
     @Override
     public void getIdsFromBookMarks(final JsonArray bookmarksIds, Handler<Either<String, JsonArray>> handler) {
@@ -93,5 +108,66 @@ public class DefaultNeoService implements NeoService {
         String finalQuery = queryUsersNeo4j + "UNION " + queryGroupsNeo4j + ";";
 
         Neo4j.getInstance().execute(finalQuery, params, Neo4jResult.validResultHandler(handler));
+    }
+
+
+
+    @Override
+    public Future<List<ShareBookmark>> getIdsFromBookMarks(final JsonArray bookmarksIds) {
+        Promise<List<ShareBookmark>> promise = Promise.promise();
+
+        String query = "WITH {bookmarksIds} AS shareBookmarkIds " +
+                "UNWIND shareBookmarkIds AS shareBookmarkId " +
+                "MATCH (u:User)-[:HAS_SB]->(sb:ShareBookmark) " +
+                "UNWIND TAIL(sb[shareBookmarkId]) as vid MATCH (v:Visible {id : vid}) " +
+                "WITH {ids: COLLECT(DISTINCT{id: v.id, name: v.name})} as sharedBookMark " +
+                "RETURN COLLECT(sharedBookMark) as ids;";
+        JsonObject params = new JsonObject().put(PARAM_BOOKMARKS_IDS, bookmarksIds);
+
+        String errorMessage = "[Formulaire@DefaultNeoService::getUsersInfosFromIds] Failed to get user infos";
+        Neo4j.getInstance().execute(query, params, Neo4jResult.validResultHandler(event -> {
+            if (event.isLeft()) {
+                log.error(errorMessage + " : " + event.left().getValue());
+                promise.fail(event.left().getValue());
+                return;
+            }
+
+            JsonArray bookmarks = event.right().getValue().getJsonObject(0).getJsonArray(IDS).getJsonObject(0).getJsonArray(IDS);
+            promise.complete(IModelHelper.toList(bookmarks, ShareBookmark.class));
+        }));
+
+        return promise.future();
+    }
+
+    @Override
+    public Future<List<ShareUser>> getUsersInfosFromIds(JsonArray userIds, JsonArray groupIds) {
+        Promise<List<ShareUser>> promise = Promise.promise();
+
+        String queryUsersNeo4j = "MATCH(ug:User) WHERE ug.id IN {userIds} WITH ug, " +
+                "collect({id: ug.id, username: ug.displayName}) AS users return users ";
+        String queryGroupsNeo4j = "MATCH(g:Group)-[:IN]-(ug:User) WHERE g.id IN {groupIds} WITH g, " +
+                "collect({id: ug.id, username: ug.displayName}) AS users return users ";
+        String finalQuery = queryUsersNeo4j + "UNION " + queryGroupsNeo4j + ";";
+        JsonObject params = new JsonObject().put(PARAM_USER_IDS, userIds).put(PARAM_GROUP_IDS, groupIds);
+
+        String errorMessage = "[Formulaire@DefaultNeoService::getUsersInfosFromIds] Failed to get user infos";
+        Neo4j.getInstance().execute(finalQuery, params, Neo4jResult.validResultHandler(event -> {
+            if (event.isLeft()) {
+                log.error(errorMessage + " : " + event.left().getValue());
+                promise.fail(event.left().getValue());
+                return;
+            }
+
+            List<ShareUser> shareUsers = event.right().getValue().stream()
+                    .map(JsonObject.class::cast)
+                    .flatMap(e -> e.getJsonArray("users").stream())
+                    .map(JsonObject.class::cast)
+                    .map(ShareUser::new)
+                    .collect(Collectors.toList());
+            promise.complete(shareUsers);
+
+        }));
+
+        return promise.future();
     }
 }

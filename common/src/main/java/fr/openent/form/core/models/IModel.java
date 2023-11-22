@@ -10,6 +10,10 @@ import java.util.stream.Collectors;
 public interface IModel<I extends IModel<I>> {
     JsonObject toJson();
 
+    default JsonObject toJson(boolean snakeCase) {
+        return toJson();
+    }
+
     /**
      * @deprecated Should use IModelHelper instead
      */

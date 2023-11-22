@@ -1,7 +1,6 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.enums.I18nKeys;
-import fr.openent.form.core.models.Form;
 import fr.openent.form.core.models.Sharing.ShareInfo.ShareInfos;
 import fr.openent.form.core.models.Sharing.ShareInfo.ShareInfosAction;
 import fr.openent.form.core.models.Sharing.ShareObject.ShareObject;
@@ -18,7 +17,9 @@ import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -67,50 +68,57 @@ public class SharingController extends ControllerHelper {
     @SecuredAction(value = MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void shareJson(final HttpServerRequest request) {
         final String formId = request.params().get(ID);
+        Map<String, Object> composeMap = new HashMap<>();
 
-        UserUtils.getUserInfos(this.eb, request, user -> {
-            if (user == null) {
-                log.error("[Formulaire@SharingController::shareJson] User not found in session.");
-                unauthorized(request);
-                return;
-            }
-
-            super.shareService.shareInfos(user.getUserId(), formId, I18n.acceptLanguage(request), request.params().get(SEARCH), shareInfosEvt -> {
-                if (shareInfosEvt.isLeft()) {
-                    log.error("[Formulaire@SharingController::shareResource] Fail to get sharing infos : " + shareInfosEvt.left().getValue());
-                    renderError(request);
+        UserUtils.getAuthenticatedUserInfos(eb, request)
+            .compose(user -> shareInfos(request, user.getUserId(), formId))
+            .compose(shareInfos -> {
+                composeMap.put(SHARE_INFOS, shareInfos);
+                return formService.get(formId);
+            })
+            .onSuccess(form -> {
+                if (!form.isPresent()) {
+                    log.error("[Formulaire@SharingController::shareJson] No form found for id " + formId);
+                    noContent(request);
                     return;
                 }
 
-                formService.get(formId)
-                    .onSuccess(result -> {
-                        if (!result.isPresent()) {
-                            log.error("[Formulaire@SharingController::shareJson] No form found for id " + formId);
-                            noContent(request);
-                            return;
-                        }
+                boolean isPublicForm = form.get().getIsPublic();
 
-                        boolean isPublicForm = result.get().getIsPublic();
+                ShareInfos shareInfos = (ShareInfos) composeMap.get(SHARE_INFOS);
+                List<ShareInfosAction> filteredActions = shareInfos.getActions().stream()
+                        .filter(action -> {
+                            boolean isReadRight = action.getDisplayName().equals(READ_RESOURCE_RIGHT);
+                            boolean isResponderRight = action.getDisplayName().equals(RESPONDER_RESOURCE_RIGHT);
+                            return !(isReadRight || (isPublicForm && isResponderRight));
+                        })
+                        .collect(Collectors.toList());
+                shareInfos.setActions(filteredActions);
 
-                        ShareInfos shareInfos = new ShareInfos(shareInfosEvt.right().getValue());
-                        List<ShareInfosAction> filteredActions = shareInfos.getActions().stream()
-                                .filter(action -> {
-                                    boolean isReadRight = action.getDisplayName().equals(READ_RESOURCE_RIGHT);
-                                    boolean isResponderRight = action.getDisplayName().equals(RESPONDER_RESOURCE_RIGHT);
-                                    return !(isReadRight || (isPublicForm && isResponderRight));
-                                })
-                                .collect(Collectors.toList());
-                        shareInfos.setActions(filteredActions);
-
-                        renderJson(request, shareInfos.toJson(false));
-                    })
-                    .onFailure(err -> {
-                        String errMessage = "[Formulaire@SharingController::shareJson] Fail to get form with id " + formId;
-                        log.error(errMessage + " : " + err.getMessage());
-                        renderError(request);
-                    });
+                renderJson(request, shareInfos.toJson(false));
+            })
+            .onFailure(err -> {
+                String errMessage = "[Formulaire@SharingController::shareJson] Fail to list rights for form " + formId;
+                log.error(errMessage + " : " + err.getMessage());
+                renderError(request);
             });
+    }
+
+    private Future<ShareInfos> shareInfos(HttpServerRequest request, String userId, String formId) {
+        Promise<ShareInfos> promise = Promise.promise();
+
+        super.shareService.shareInfos(userId, formId, I18n.acceptLanguage(request), request.params().get(SEARCH), shareInfosEvt -> {
+            if (shareInfosEvt.isLeft()) {
+                log.error("[Formulaire@SharingController::shareInfos] Fail to get sharing infos : " + shareInfosEvt.left().getValue());
+                promise.fail(shareInfosEvt.left().getValue());
+            }
+            else {
+                ShareInfos shareInfos = new ShareInfos(shareInfosEvt.right().getValue());
+                promise.complete(shareInfos);
+            }
         });
+
+        return promise.future();
     }
 
     @Put("/share/json/:id")
@@ -118,15 +126,15 @@ public class SharingController extends ControllerHelper {
     @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void shareSubmit(final HttpServerRequest request) {
-        UserUtils.getUserInfos(eb, request, user -> {
-            if (user == null) {
-                log.error("[Formulaire@SharingController::shareSubmit] User not found in session.");
-                unauthorized(request);
-                return;
-            }
-
-            SharingController.super.shareJsonSubmit(request, null, false, new JsonObject(), null);
-        });
+        UserUtils.getAuthenticatedUserInfos(eb, request)
+            .onSuccess(user -> {
+                SharingController.super.shareJsonSubmit(request, null, false, new JsonObject(), null);
+            })
+            .onFailure(err -> {
+                String errMessage = "[Formulaire@SharingController::shareSubmit] Failed to add rights for form " + request.getParam(ID);
+                log.error(errMessage + " : " + err.getMessage());
+                renderError(request);
+            });
     }
 
     @Put("/share/resource/:id")
@@ -135,6 +143,7 @@ public class SharingController extends ControllerHelper {
     @SecuredAction(value = MANAGER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void shareResource(final HttpServerRequest request) {
         final String formId = request.params().get(ID);
+        Map<String, Object> composeMap = new HashMap<>();
 
         RequestUtils.bodyToJson(request, pathPrefix + "share", shareObjectJson -> {
             if (shareObjectJson == null || shareObjectJson.isEmpty()) {
@@ -142,24 +151,22 @@ public class SharingController extends ControllerHelper {
                 noContent(request);
                 return;
             }
+
             ShareObject shareObject = new ShareObject(shareObjectJson);
+            UserUtils.getAuthenticatedUserInfos(eb, request)
+                .compose(user -> {
+                    composeMap.put(USER, user);
+                    return shareInfos(request, user.getUserId(), formId);
+                })
+                .compose(shareInfos -> {
+                    composeMap.put(SHARE_INFOS, shareInfos);
+                    return formService.get(formId);
+                })
+                .compose(form -> {
+                    ShareInfos shareInfos = (ShareInfos) composeMap.get(SHARE_INFOS);
 
-            UserUtils.getUserInfos(eb, request, user -> {
-                if (user == null) {
-                    log.error("[Formulaire@SharingController::shareResource] User not found in session.");
-                    unauthorized(request);
-                    return;
-                }
-
-                super.shareService.shareInfos(user.getUserId(), formId, I18n.acceptLanguage(request), request.params().get(SEARCH), shareInfosEvt -> {
-                    if (shareInfosEvt.isLeft()) {
-                        log.error("[Formulaire@SharingController::shareResource] Fail to get sharing infos : " + shareInfosEvt.left().getValue());
-                        renderError(request);
-                        return;
-                    }
-
-                    JsonObject shareInfos = shareInfosEvt.right().getValue();
-                    List<String> readRights = shareInfos.getJsonArray(ACTIONS).stream()
+                    // TODO change from here
+                    List<String> readRights = shareInfos.getActions().stream()
                             .map(JsonObject.class::cast)
                             .filter(action -> action.getString(PARAM_DISPLAY_NAME).equals(READ_RESOURCE_RIGHT))
                             .findFirst()
@@ -169,7 +176,6 @@ public class SharingController extends ControllerHelper {
                             .map(String.class::cast)
                             .collect(Collectors.toList());
                     shareObject.addCommonRights(readRights);
-
 
                     // Get all ids, filter the one about sending (response right)
                     Map<String, List<String>> idUsers = shareObject.getUsers().getUsersRights();
@@ -221,6 +227,7 @@ public class SharingController extends ControllerHelper {
                                 return;
                             }
 
+                            UserInfos user = (UserInfos) composeMap.get(USER);
                             syncDistributions(request, formId, user, responders, syncEvt -> {
                                 if (syncEvt.isLeft()) {
                                     log.error("[Formulaire@SharingController::shareResource] " +
@@ -246,9 +253,26 @@ public class SharingController extends ControllerHelper {
                             });
                         });
                     });
+
+                    return Future.succeededFuture();
+                })
+                .onSuccess(result -> {
+
+                })
+                .onFailure(err -> {
+                    String errMessage = "[Formulaire@SharingController::shareResource] Failed to share form " + formId;
+                    log.error(errMessage + " : " + err.getMessage());
+                    renderError(request);
                 });
-            });
         });
+    }
+
+    private Future<Void> test() {
+        Promise<Void> promise = Promise.promise();
+
+
+
+        return promise.future();
     }
 
     private Map<String, List<String>> filterIdsForSending(Map<String, List<String>> map) {

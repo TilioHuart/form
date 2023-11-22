@@ -68,13 +68,13 @@ public class IModelHelper {
                     if (!ignoreNull) statisticsData.putNull(fieldName);
                 }
                 else if (object instanceof IModel) {
-                    statisticsData.put(fieldName, ((IModel<?>)object).toJson());
+                    statisticsData.put(fieldName, ((IModel<?>)object).toJson(snakeCase));
                 } else if (validJsonClasses.stream().anyMatch(aClass -> aClass.isInstance(object))) {
                     statisticsData.put(fieldName, object);
                 } else if (object instanceof Enum) {
                     statisticsData.put(fieldName, (Enum) object);
                 } else if (object instanceof List) {
-                    statisticsData.put(fieldName, listToJsonArray(((List<?>)object)));
+                    statisticsData.put(fieldName, listToJsonArray((List<?>)object, snakeCase));
                 }
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
@@ -92,20 +92,20 @@ public class IModelHelper {
      * @param objects List of object
      * @return {@link JsonArray}
      */
-    private static JsonArray listToJsonArray(List<?> objects) {
+    private static JsonArray listToJsonArray(List<?> objects, boolean snakeCase) {
         JsonArray res = new JsonArray();
         objects.stream()
                 .filter(Objects::nonNull)
                 .forEach(object -> {
                     if (object instanceof IModel) {
-                        res.add(((IModel<?>) object).toJson());
+                        res.add(((IModel<?>) object).toJson(snakeCase));
                     }
                     else if (validJsonClasses.stream().anyMatch(aClass -> aClass.isInstance(object))) {
                         res.add(object);
                     } else if (object instanceof Enum) {
                         res.add((Enum)object);
                     } else if (object instanceof List) {
-                        res.add(listToJsonArray(((List<?>) object)));
+                        res.add(listToJsonArray((List<?>) object, snakeCase));
                     }
                 });
         return res;

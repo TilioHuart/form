@@ -16,7 +16,7 @@ public class ShareObjectBookmarks implements IModel<ShareObjectBookmarks> {
     public ShareObjectBookmarks() {}
 
     public ShareObjectBookmarks(JsonObject bookmarks) {
-        this.bookmarksRights = bookmarks.getMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> (List<String>)e));
+        this.bookmarksRights = bookmarks.getMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> (List<String>) e.getValue()));
     }
 
 
