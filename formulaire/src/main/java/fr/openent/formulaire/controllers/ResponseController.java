@@ -638,16 +638,14 @@ public class ResponseController extends ControllerHelper {
     public void deleteMultipleByDistribution(HttpServerRequest request) {
         String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);
 
-        RequestUtils.bodyToJsonArray(request, responsesJson -> {
-            if (responsesJson == null || responsesJson.isEmpty()) {
-                log.error("[Formulaire@ResponseController::deleteMultipleByDistribution] No responses to delete");
+        RequestUtils.bodyToJsonArray(request, questionIdsJson -> {
+            if (questionIdsJson == null || questionIdsJson.isEmpty()) {
+                log.error("[Formulaire@ResponseController::deleteMultipleByDistribution] No questionIds to delete responses");
                 noContent(request);
                 return;
             }
 
-            List<Response> responses = IModelHelper.toList(responsesJson, Response.class);
-            List<Long> questionIds = responses.stream().map(Response::getQuestionId).collect(Collectors.toList());
-
+            List<Long> questionIds = questionIdsJson.stream().map(Object::toString).map(Long::parseLong).collect(Collectors.toList());
             responseService.deleteByQuestionsAndDistribution(questionIds, distributionId)
                 .onSuccess(result -> ok(request))
                 .onFailure(err -> {
