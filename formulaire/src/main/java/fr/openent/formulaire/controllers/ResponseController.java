@@ -635,7 +635,7 @@ public class ResponseController extends ControllerHelper {
     @ApiDoc("Delete multiple responses of a specific distribution")
     @ResourceFilter(CustomShareAndOwner.class)
     @SecuredAction(value = RESPONDER_RESOURCE_RIGHT, type = ActionType.RESOURCE)
-    public void deleteMultipleByDistribution(HttpServerRequest request) {
+    public void deleteMultipleByQuestionAndDistribution(HttpServerRequest request) {
         String distributionId = request.getParam(PARAM_DISTRIBUTION_ID);
 
         RequestUtils.bodyToJsonArray(request, questionIdsJson -> {

@@ -13,7 +13,6 @@ import {
 } from "../models";
 import {responseFileService, responseService} from "../services";
 import {FORMULAIRE_BROADCAST_EVENT, FORMULAIRE_EMIT_EVENT} from "@common/core/enums";
-import {FormElementType} from "@common/core/enums/form-element-type";
 import {FormElementUtils} from "@common/utils";
 import {Constants, Fields} from "@common/core/constants";
 interface ViewModel {
@@ -345,11 +344,10 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                 questionResponse.answer = files.all.length > 0 ? idiom.translate('formulaire.response.file.send') : "";
                 responsesToSave.push(questionResponse);
 
-                responseIdOfResponseFilesToDelete.push(questionResponse.id);
+                if (questionResponse.id) responseIdOfResponseFilesToDelete.push(questionResponse.id);
 
                 vm.currentFiles.set(question, files);
-                files.formatForSaving(vm.form);
-                responsesFiles.push(...files.all.map((f: File) => new FilePayload(f, questionResponse.id)));
+                responsesFiles.push(...files.all.map((f: File) => new FilePayload(f, questionResponse.id, vm.form)));
             }
             else {
                 responsesToSave.push(questionResponses.all[0]);
@@ -361,7 +359,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         if (responseIdOfResponseFilesToDelete.length > 0) await responseFileService.deleteAllMultiple(responseIdOfResponseFilesToDelete);
         await responseService.deleteMultipleByQuestionAndDistribution(questionIdsResponseToDelete, vm.distribution.id); // Delete toutes les reponses isTypeMultipleRep
         await responseService.saveMultiple(mapQuestionsResponsesToSave, vm.distribution.id);
-        if (responsesFiles.length > 0) await this.saveFiles(responsesFiles);
+        if (responsesFiles.length > 0) await saveFiles(responsesFiles);
 
         return true;
     };
@@ -370,10 +368,10 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         try {
             let promises: Promise<Responses>[] = [];
             for (let filePayload of filePayloads) {
-                promises.push(await responseFileService.create(filePayload.responseId, filePayload.file));
+                promises.push(await responseFileService.create(filePayload.responseId, filePayload.formData));
             }
-            let results: any[] = await Promise.all(promises);
-            return results[0].all.concat(results[1].all);
+            await Promise.all(promises);
+            return true;
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseFileService.create'));
             throw err;

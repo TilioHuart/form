@@ -80,7 +80,7 @@ export const responseFileService: ResponseFileService = {
 
     async deleteAllMultiple(responseIds: number[]) : Promise<void> {
         try {
-            return DataUtils.getData(await http.delete(`/formulaire/responses/files`));
+            return DataUtils.getData(await http.delete(`/formulaire/responses/files/multiple`, { data: responseIds }));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseFileService.delete'));
             throw err;

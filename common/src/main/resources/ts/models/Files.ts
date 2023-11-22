@@ -8,25 +8,24 @@ export class Files {
     constructor () {
         this.all = [];
     }
-
-    formatForSaving = (form: Form) : void => {
-        for (let i = 0; i < this.all.length; i++) {
-            let filename = this.all[i].name;
-            if (this.all[i].type && !form.anonymous) {
-                filename = UtilsUtils.getOwnerNameWithUnderscore() + filename;
-            }
-            let file = new FormData();
-            file.append(Constants.FILE, this.all[i], filename);
-        }
-    }
 }
 
 export class FilePayload {
-    file: File;
+    formData: FormData;
     responseId: number;
 
-    constructor (file: File, responseId: number) {
-        this.file = file;
+    constructor (file: File, responseId: number, form: Form) {
+        this.formData = this.formatForSaving(form, file);
         this.responseId = responseId;
+    }
+
+    formatForSaving = (form: Form, file: File) : FormData => {
+        let filename = file.name;
+        if (file.type && !form.anonymous) {
+            filename = UtilsUtils.getOwnerNameWithUnderscore() + filename;
+        }
+        let formData = new FormData();
+        formData.append(Constants.FILE, file, filename);
+        return formData;
     }
 }

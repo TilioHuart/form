@@ -252,7 +252,7 @@ public class ResponseFileController extends ControllerHelper {
         deleteAllByResponse(request, responseIds);
     }
 
-    @Delete("/responses/files")
+    @Delete("/responses/files/multiple")
     @ApiDoc("Delete all files of a specific response")
     @ResourceFilter(ResponseRight.class)
     @SecuredAction(value = "", type = ActionType.RESOURCE)
@@ -265,7 +265,7 @@ public class ResponseFileController extends ControllerHelper {
                     return;
                 }
 
-                List<String> responseIds = responseIdsJson.stream().map(String.class::cast).collect(Collectors.toList());
+                List<String> responseIds = responseIdsJson.stream().map(Object::toString).collect(Collectors.toList());
                 List<Long> distributionIds = new ArrayList<>();
 
                 // Check rights for this responses
@@ -276,7 +276,7 @@ public class ResponseFileController extends ControllerHelper {
                     })
                     .onSuccess(responses -> {
                         List<Long> responsesDistributionIds = responses.stream().map(Response::getDistributionId).collect(Collectors.toList());
-                        responsesDistributionIds.retainAll(distributionIds);
+                        responsesDistributionIds.removeAll(distributionIds);
 
                         if (responsesDistributionIds.size() > 0) {
                             log.error("[Formulaire@ResponseFileController::deleteAllByResponse] " + user.getUsername() + " does not have right for all the responses with id " + responseIds);
