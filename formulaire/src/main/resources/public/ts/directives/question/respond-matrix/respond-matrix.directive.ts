@@ -16,7 +16,7 @@ interface IRespondMatrixProps {
     distribution: Distribution;
 }
 
-interface IViewModel {
+interface IViewModel extends ng.IController, IRespondMatrixProps {
     mapChildChoicesResponseIndex: Map<Question, Map<QuestionChoice, number>>;
     types: typeof Types;
     i18n: I18nUtils;
@@ -59,22 +59,13 @@ class Controller implements IViewModel {
         for (let child of this.question.children.all) {
             this.mapChildChoicesResponseIndex.set(child, new Map());
             let existingResponses: Responses = new Responses();
-            if (this.distribution) await existingResponses.syncMine(child.id, this.distribution.id);
+            existingResponses.all = this.responses.filter((response:Response) => response.selected);
 
             for (let choice of this.question.choices.all) {
-                // Get potential existing response for this choice
-                let existingMatchingResponses: Response[] = existingResponses.all.filter((r:Response) => r.choice_id == choice.id);
-
                 // Get default response matching this choice and child and get its index in list
                 let matchingResponses: Response[] = this.responses.all.filter((r:Response) => r.choice_id == choice.id && r.question_id == child.id);
-                if (matchingResponses.length != 1) console.error("Be careful, 'vm.responses' has been badly implemented !!");
+                if (matchingResponses.length != 1) console.error("Be careful, 'this.responses' has been badly implemented !!");
                 let matchingIndex = this.responses.all.indexOf(matchingResponses[0]);
-
-                // If there was an existing response we use it to replace the default one
-                if (existingMatchingResponses.length == 1) {
-                    this.responses.all[matchingIndex] = existingMatchingResponses[0];
-                    this.responses.all[matchingIndex].selected = true;
-                }
 
                 this.mapChildChoicesResponseIndex.get(child).set(choice, matchingIndex);
             }

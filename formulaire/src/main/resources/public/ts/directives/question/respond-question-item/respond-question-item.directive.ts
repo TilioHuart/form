@@ -80,16 +80,16 @@ class Controller implements IViewModel {
     initRespondQuestionItem = async () : Promise<void> => {
         if (this.question.isTypeMultipleRep()) {
             let existingResponses: Responses = new Responses();
-            //existing responses have the selected property set to true
-            existingResponses.all = this.responses.filter((response:Response) => response.selected);
             this.mapChoiceResponseIndex = new Map();
-            for (let choice of this.question.choices.all) {
 
+            // Existing responses have the selected property set to true
+            existingResponses.all = this.responses.filter((response:Response) => response.selected);
+
+            for (let choice of this.question.choices.all) {
                 // Get default response matching this choice and get its index in list
                 let matchingResponses: Response[] = this.responses.all.filter((r:Response) => r.choice_id == choice.id);
                 if (matchingResponses.length != 1) console.error("Be careful, 'this.responses' has been badly implemented !!");
                 let matchingIndex = this.responses.all.indexOf(matchingResponses[0]);
-
 
                 // If question type multipleanswer or singleanswer, assign image to each choice
                 if (this.question.canHaveImages()) {
@@ -103,10 +103,12 @@ class Controller implements IViewModel {
 
                 this.mapChoiceResponseIndex.set(choice, matchingIndex);
             }
-        }else if (this.distribution) {
+        }
+        else if (this.distribution) {
             if (!this.responses.all[0].question_id) this.responses.all[0].question_id = this.question.id;
             if (!this.responses.all[0].distribution_id) this.responses.all[0].distribution_id = this.distribution.id;
         }
+
         if (this.question.question_type === Types.FILE && this.distribution) {
             this.files.all = [];
             if (this.responses.all[0].id) {

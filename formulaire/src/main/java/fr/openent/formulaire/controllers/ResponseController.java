@@ -1,7 +1,6 @@
 package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.enums.QuestionTypes;
-import fr.openent.form.core.models.Distribution;
 import fr.openent.form.core.models.Question;
 import fr.openent.form.core.models.QuestionChoice;
 import fr.openent.form.core.models.Response;
@@ -9,7 +8,6 @@ import fr.openent.form.helpers.IModelHelper;
 import fr.openent.formulaire.export.*;
 import fr.openent.formulaire.security.AccessRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
-import fr.openent.formulaire.security.ResponseRight;
 import fr.openent.formulaire.service.*;
 import fr.openent.formulaire.service.impl.*;
 import fr.wseduc.rs.*;

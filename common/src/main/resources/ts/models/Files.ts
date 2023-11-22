@@ -13,10 +13,12 @@ export class Files {
 export class FilePayload {
     formData: FormData;
     responseId: number;
+    questionId: number;
 
-    constructor (file: File, responseId: number, form: Form) {
+    constructor (file: File, responseId: number, questionId: number, form: Form) {
         this.formData = this.formatForSaving(form, file);
         this.responseId = responseId;
+        this.questionId = questionId;
     }
 
     formatForSaving = (form: Form, file: File) : FormData => {
