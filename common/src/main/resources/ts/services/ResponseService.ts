@@ -59,6 +59,7 @@ export const responseService: ResponseService = {
 
     async listMineByDistributionAndQuestions(questionIds: number[], distributionId: number) : Promise<Response[]> {
         try {
+            if (!questionIds || questionIds.length <= 0) return [];
             let data: IResponseResponse[] = DataUtils.getData(await http.get(`/formulaire/distributions/${distributionId}/responses/multiple`, { params: questionIds }));
             return data.map((rr: IResponseResponse) => new Response().build(rr));
         } catch (err) {
@@ -100,9 +101,7 @@ export const responseService: ResponseService = {
     },
 
     async saveMultiple(mapQuestionResponsesToSave: Map<Question, Response[]>, distributionId: number) : Promise<Response[]> {
-        if (!mapQuestionResponsesToSave || mapQuestionResponsesToSave.size <= 0) {
-            return [];
-        }
+        if (!mapQuestionResponsesToSave || mapQuestionResponsesToSave.size <= 0) return [];
 
         let  responsesToUpdate: Response[] = [];
         let responsesToCreate: Response[] = [];
@@ -135,9 +134,7 @@ export const responseService: ResponseService = {
 
     async createMultiple(distributionId: number, responses: Response[]) : Promise<Response[]> {
         try {
-            if (!responses || responses.length <= 0) {
-                return [];
-            }
+            if (!responses || responses.length <= 0) return [];
             let data: IResponseResponse[] = DataUtils.getData(await http.post(`/formulaire/distributions/${distributionId}/responses/multiple`, responses));
             return data.map((rr: IResponseResponse) => new Response().build(rr));
         } catch (err) {
@@ -157,9 +154,7 @@ export const responseService: ResponseService = {
 
     async updateMultiple(distributionId: number, responses: Response[]) : Promise<Response[]> {
         try {
-            if (!responses || responses.length <= 0) {
-                return [];
-            }
+            if (!responses || responses.length <= 0) return [];
             let data: IResponseResponse[] = DataUtils.getData(await http.put(`/formulaire/distributions/${distributionId}/responses`, responses));
             return data.map((rr: IResponseResponse) => new Response().build(rr));
         } catch (err) {
@@ -188,9 +183,7 @@ export const responseService: ResponseService = {
 
     async deleteMultipleByQuestionAndDistribution(questionIds: number[], distributionId: number) : Promise<any> {
         try {
-            if (!questionIds || questionIds.length <= 0) {
-                return [];
-            }
+            if (!questionIds || questionIds.length <= 0) return [];
             return DataUtils.getData(await http.delete(`/formulaire/responses/${distributionId}/questions`, { data: questionIds }));
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.responseService.delete'));

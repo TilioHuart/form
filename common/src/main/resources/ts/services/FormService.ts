@@ -20,7 +20,7 @@ export interface FormService {
     move(formIds : number[], parentId: number) : Promise<any>;
     sendReminder(formId: number, mail: {}) : Promise<any>;
     exportPdf(formIds: number[]) : Promise<any>;
-    exportZip(formIds: number[]) : Promise<any>;
+    exportZip(formIds: number[]) : Promise<string>;
     verifyExportAndDownloadZip(exportId: string) : Promise<void>;
     import(zipFile: FormData) : Promise<any>;
     unshare(formId: number) : Promise<any>;
@@ -91,6 +91,7 @@ export const formService: FormService = {
 
     async duplicate(formIds: number[], folderId: number) : Promise<any> {
         try {
+            if (!formIds || formIds.length <= 0) return [];
             return DataUtils.getData(await http.post(`/formulaire/forms/duplicate/${folderId}`, formIds));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.duplicate'));
@@ -120,6 +121,7 @@ export const formService: FormService = {
 
     async restore(forms: Form[]) : Promise<any> {
         try {
+            if (!forms || forms.length <= 0) return [];
             return DataUtils.getData(await http.put(`/formulaire/forms/restore`, forms.map(f => f.id)));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.restore'));
@@ -137,8 +139,9 @@ export const formService: FormService = {
         }
     },
 
-    async move(formIds, parentId) : Promise<any> {
+    async move(formIds: number[], parentId: number) : Promise<any> {
         try {
+            if (!formIds || formIds.length <= 0) return [];
             return DataUtils.getData(await http.put(`/formulaire/forms/move/${parentId}`, formIds));
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.formService.move'));
@@ -157,6 +160,7 @@ export const formService: FormService = {
 
     async exportPdf(formIds: number[]) : Promise<any> {
         try {
+            if (!formIds || formIds.length <= 0) return [];
             return await http.get(`/formulaire/forms/export/pdf`, { params: formIds });
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.formService.export'));
@@ -164,8 +168,9 @@ export const formService: FormService = {
         }
     },
 
-    async exportZip(formIds: number[]) : Promise<any> {
+    async exportZip(formIds: number[]) : Promise<string> {
         try {
+            if (!formIds || formIds.length <= 0) return null;
             let res = await http.post(`/formulaire/forms/export/zip`, formIds);
             return res.data.exportId;
         } catch (err) {

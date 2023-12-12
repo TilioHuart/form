@@ -51,9 +51,7 @@ export const sectionService: SectionService = {
 
     async update(sections: Section[]) : Promise<Section[]> {
         try {
-            if (sections.length <= 0) {
-                return [];
-            }
+            if (!sections || sections.length <= 0) return [];
             let sectionsPayload: SectionPayload[] = sections.map((s: Section) => new SectionPayload(s));
             let data: any = DataUtils.getData(await http.put(`/formulaire/forms/${sections[0].form_id}/sections`, sectionsPayload));
             let updatedSections: Section[] = Mix.castArrayAs(Section, data);

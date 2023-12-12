@@ -42,6 +42,7 @@ export const questionService: QuestionService = {
 
     async listChildren(questions: Question[]) : Promise<Question[]> {
         try {
+            if (!questions || questions.length <= 0) return [];
             let questionIds: number[] = questions.map((q: Question) => q.id);
             let data: IQuestionResponse[] = DataUtils.getData(await http.get(`/formulaire/questions/children`, { params: questionIds, headers: { Accept: 'application/json;version=2.0'} }));
             return data.map((qr: IQuestionResponse) => new Question().build(qr));
@@ -75,9 +76,7 @@ export const questionService: QuestionService = {
 
     async create(questions: Question[]) : Promise<Question[]> {
         try {
-            if (questions.length <= 0) {
-                return [];
-            }
+            if (!questions || questions.length <= 0) return [];
             let questionsPayload: QuestionPayload[] = questions.map((q: Question) => new QuestionPayload(q));
             return DataUtils.getData(await http.post(`/formulaire/forms/${questionsPayload[0].form_id}/questions`, questionsPayload));
         } catch (err) {
@@ -89,9 +88,7 @@ export const questionService: QuestionService = {
 
     async update(questions: Question[]) : Promise<Question[]> {
         try {
-            if (questions.length <= 0) {
-                return [];
-            }
+            if (!questions || questions.length <= 0) return [];
             let questionsPayload: QuestionPayload[] = questions.map((q: Question) => new QuestionPayload(q));
             let data: IQuestionResponse[] = DataUtils.getData(await http.put(`/formulaire/forms/${questions[0].form_id}/questions`, questionsPayload))
             return data.map((qr: IQuestionResponse) => new Question().build(qr));

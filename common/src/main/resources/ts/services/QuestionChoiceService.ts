@@ -30,9 +30,7 @@ export const questionChoiceService: QuestionChoiceService = {
 
     async listChoices(questionIds: number[]) : Promise<any>{
         try{
-            if (questionIds.length <= 0) {
-                return [];
-            }
+            if (!questionIds || questionIds.length <= 0) return [];
             return DataUtils.getData(await http.get(`/formulaire/questions/choices/all`, { params: questionIds, headers: { Accept: 'application/json;version=1.9'} }));
         } catch(err){
             notify.error(idiom.translate('formulaire.error.questionChoiceService.list'));
@@ -66,6 +64,7 @@ export const questionChoiceService: QuestionChoiceService = {
 
     async updateMultiple(choices: QuestionChoice[], formId: number) : Promise<QuestionChoice[]> {
         try {
+            if (!choices || choices.length <= 0) return [];
             let choicesPayload: QuestionChoicePayload[] = choices.map((c: QuestionChoice) => new QuestionChoicePayload(c));
             let data: IQuestionChoiceResponse[] = DataUtils.getData(await http.put(`/formulaire/${formId}/choices`, choicesPayload));
             return data.map((qcr: IQuestionChoiceResponse) => new QuestionChoice().build(qcr));
