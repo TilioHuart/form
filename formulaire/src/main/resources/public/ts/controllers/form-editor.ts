@@ -33,7 +33,6 @@ import * as Sortable from "sortablejs";
 import {FormElementUtils, UtilsUtils} from "@common/utils";
 import {Constants} from "@common/core/constants";
 import {PropPosition} from "@common/core/enums/prop-position";
-import {FormElementType} from "@common/core/enums/form-element-type";
 import {IconUtils} from "@common/utils/icon";
 
 enum PreviewPage { RGPD = 'rgpd', QUESTION = 'question', RECAP = 'recap'}
@@ -65,7 +64,6 @@ interface ViewModel {
     PreviewPage: typeof PreviewPage;
     nestedSortables: any[];
     iconUtils: IconUtils;
-    initializing: boolean;
     isProcessing: boolean;
 
     $onInit() : Promise<void>;
@@ -122,7 +120,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         vm.iconUtils = IconUtils;
 
         vm.$onInit = async () : Promise<void> => {
-            vm.initializing = true;
             vm.form = $scope.form;
             vm.form.nb_responses = vm.form.id ? (await distributionService.count(vm.form.id)).count : 0;
             await vm.formElements.sync(vm.form.id);
@@ -132,7 +129,6 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             $scope.safeApply();
 
             initNestedSortables();
-            vm.initializing = false;
             $scope.safeApply();
         };
 
@@ -207,9 +203,11 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
         };
 
         vm.createNewElement = async (parentSection?) : Promise<void> => {
+            vm.isProcessing = true;
             vm.parentSection = parentSection ? parentSection : null;
             template.open('lightbox', 'lightbox/new-element');
             vm.display.lightbox.newElement = true;
+            vm.isProcessing = false;
             $scope.safeApply();
         };
 
