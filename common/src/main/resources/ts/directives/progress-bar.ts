@@ -18,9 +18,9 @@ export const progressBubbleBar: Directive = ng.directive('progressBubbleBar', ()
         controllerAs: 'vm',
         bindToController: true,
         template: `
-            <div class="progressbar-container" ng-if="vm.longestPath > 0">
+            <div class="progressbar-container">
                 <ul class="progressbar six twelve-mobile">
-                    <li ng-repeat="n in [].constructor(vm.longestPath) track by $index"
+                    <li ng-repeat="n in [].constructor(vm.historicPosition.length + vm.longestPath) track by $index"
                     ng-class="{ active: $index+1 <= vm.historicPosition.length }"></li>
                 </ul>
             </div>

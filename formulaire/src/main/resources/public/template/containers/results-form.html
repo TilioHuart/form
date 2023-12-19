@@ -21,13 +21,13 @@
     <div class="result-element">
 
         <!-- Display question -->
-        <result-question-item ng-if="FormElementUtils.isQuestion(vm.formElement) && (!vm.loading || vm.display.lightbox.export)"
+        <result-question-item ng-if="vm.formElement.isQuestion() && (!vm.loading || vm.display.lightbox.export)"
                               question="vm.formElement"
                               form="vm.form">
         </result-question-item>
 
         <!-- Display section -->
-        <div class="section" ng-if="!FormElementUtils.isQuestion(formElement) && (!vm.loading || vm.display.lightbox.export)">
+        <div class="section" ng-if="vm.formElement.isSection() && (!vm.loading || vm.display.lightbox.export)">
             <div class="section-top">
                 <div class="title"><h4>[[vm.formElement.title]]</h4></div>
                 <div class="description" ng-if="vm.formElement.description">

@@ -1,6 +1,25 @@
 import {Selectable} from "entcore-toolkit";
 import {FormElementType} from "@common/core/enums/form-element-type";
-import {FormElements, Question, Section, Types} from "@common/models";
+import {FormElements, Question, QuestionChoice, Section, Types} from "@common/models";
+
+export class FormElementIdType {
+    id: number;
+    type: FormElementType;
+
+    constructor(id: number, type: FormElementType) {
+        this.id = id ? id : null;
+        this.type = type ? type : null;
+    }
+
+    equals = (formElementIdType: FormElementIdType) : boolean => {
+        let areBothUndefined: boolean = this === undefined && formElementIdType === undefined;
+        return areBothUndefined || this && formElementIdType && this.id === formElementIdType.id && this.type === formElementIdType.type;
+    }
+
+    toString = () : string => {
+        return JSON.stringify(this);
+    }
+}
 
 export abstract class FormElement implements Selectable {
     id: number;
@@ -102,6 +121,43 @@ export abstract class FormElement implements Selectable {
             }
         }
         this.label = label;
+    }
+
+    getIdType = () : FormElementIdType => {
+        return new FormElementIdType(this.id, this.form_element_type);
+    }
+
+    getAllPotentialNextFormElements = (formElements: FormElements) : FormElement[] => {
+        if (this instanceof Section) {
+            let conditionalQuestions: Question[] = (this as Section).questions.all.filter((q: Question) => q.conditional);
+            if (conditionalQuestions.length > 0) {
+                let choices: QuestionChoice[] = (conditionalQuestions as any).flatMap((q: Question) => q.choices.all);
+                return choices.map((qc: QuestionChoice) => qc.getNextFormElement(formElements));
+            }
+            return [this.getFollowingFormElement(formElements)];
+        }
+        else if (this instanceof Question) {
+            return this.conditional ? this.getNextFormElements(formElements) : [this.getFollowingFormElement(formElements)];
+        }
+        else {
+            return [];
+        }
+    }
+
+    getAllPotentialNextFormElementsIdTypes = (formElements: FormElements) : FormElementIdType[] => {
+        let formElementIdTypes: FormElementIdType[] = this.getAllPotentialNextFormElements(formElements).map((e: FormElement) => e ? e.getIdType() : (e as any));
+        let uniqueFormElementIdTypes: FormElementIdType[] = [];
+
+        for (let formElementIdType of formElementIdTypes) {
+            let match: FormElementIdType = uniqueFormElementIdTypes.find((feit: FormElementIdType) => feit.equals(formElementIdType));
+            if (!match) uniqueFormElementIdTypes.push(formElementIdType);
+        }
+
+        return uniqueFormElementIdTypes;
+    }
+
+    getCurrentLongestPath = (longestPathsMap: Map<string, number>) : number => {
+        return longestPathsMap.get(new FormElementIdType(this.id, this.form_element_type).toString());
     }
 
     abstract getPayload(): FormElementPayload;

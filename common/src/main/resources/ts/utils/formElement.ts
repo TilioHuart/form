@@ -1,7 +1,7 @@
 import {
     Distribution,
     Form,
-    FormElement,
+    FormElement, FormElementIdType,
     FormElements,
     Question, QuestionChoice,
     Questions,
@@ -23,13 +23,6 @@ export class FormElementUtils {
         else {
             return Mix.castAs(Section, formElement);
         }
-    };
-
-    /**
-     * @deprecated Should instead use method isQuestion() from FormElement model directly
-     */
-    static isQuestion = (formElement: FormElement) : boolean => {
-        return formElement instanceof Question;
     };
 
     static switchPositions = (elements: any, index: number, direction: string, propPosition: PropPosition) : void => {
@@ -390,33 +383,40 @@ export class FormElementUtils {
         return (<any>conditionalQuestions).flatMap((q: Question) => q.choices.all);
     }
 
-    static findLongestPathInFormElement = (formElementId: number, formElements: FormElements): number => {
-        let currentNode: FormElement = formElements.all.find((node: FormElement) => node.id === formElementId);
-        if (!currentNode) return 1;
-        if (currentNode.isSection()) {
-            let questions: Question[] = (<Section>currentNode).questions.all;
-            let conditionalQuestions: any = questions.filter((q: Question) => q.conditional);
-            let choices: Question[] = (conditionalQuestions && conditionalQuestions.length > 0) ? conditionalQuestions.flatMap((q: Question) => q.choices.all) : null;
-            return FormElementUtils.findLongestPathInQuestionChoices(choices, currentNode, formElements);
-        } else {
-            let question: Question = <Question>currentNode;
-            let questionChoices: QuestionChoice[] = question.conditional ? question.choices.all : null;
-            return FormElementUtils.findLongestPathInQuestionChoices(questionChoices, currentNode, formElements);
-        }
+    // Progress-bar
+
+    static getLongestPaths = (formElements: FormElements): Map<string, number> => {
+        let pathsMap: Map<string, FormElementIdType[]> = this.getPathsMap(formElements);
+        let longestPathsMap: Map<string, number> = new Map<string, number>();
+        this.fillLongestPathsMap(pathsMap.keys().next().value, pathsMap, longestPathsMap);
+        return longestPathsMap;
     }
 
-
-    static findLongestPathInQuestionChoices = (choices: any, currentFormElement: FormElement, formElements: FormElements): number => {
-        if (!choices || choices.length === 0) {
-            let nextElementId: number = currentFormElement.getNextFormElementId(formElements);
-            if (!nextElementId) {return 1;}
-            return FormElementUtils.findLongestPathInFormElement(nextElementId, formElements) + 1;
-        } else {
-            let tab: number[] = choices.map((choice: any) => {
-                if (!choice.next_form_element_id) return 1;
-                return FormElementUtils.findLongestPathInFormElement(choice.next_form_element_id, formElements);
-            });
-            return Math.max(...tab) + 1;
+    static getPathsMap = (formElements: FormElements): Map<string, FormElementIdType[]> => {
+        let pathsMap: Map<string, FormElementIdType[]> = new Map<string, FormElementIdType[]>();
+        for (let formElement of formElements.all) {
+            pathsMap.set(formElement.getIdType().toString(), formElement.getAllPotentialNextFormElementsIdTypes(formElements));
         }
+        return pathsMap;
+    }
+
+    static fillLongestPathsMap = (formElementIdType: string, pathsMap: Map<string, FormElementIdType[]>, longestPathsMap: Map<string, number>): number => {
+        let stringFormElementIdType: string = formElementIdType.toString();
+        let currentLongestPath: number = longestPathsMap.get(stringFormElementIdType);
+        let targets: FormElementIdType[] = pathsMap.get(formElementIdType);
+
+        // End of the form, there's no next element
+        if (!targets || targets.every(((feit: FormElementIdType) => !feit))) {
+            longestPathsMap.set(stringFormElementIdType, 0);
+            return 0;
+        }
+
+        // If we got some targets we keep the max of their respective longestPaths
+        let targetsLengths: number[] = targets
+            .filter((feit: FormElementIdType) => feit)
+            .map((feit: FormElementIdType) => this.fillLongestPathsMap(feit.toString(), pathsMap, longestPathsMap));
+        let myLongestPath = Math.max(...targetsLengths) + 1;
+        if (!currentLongestPath || currentLongestPath < myLongestPath) longestPathsMap.set(stringFormElementIdType, myLongestPath);
+        return myLongestPath;
     }
 }

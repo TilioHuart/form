@@ -4,20 +4,20 @@
         <ul id="orga-container-0" class="orga-nested-container">
             <li class="row" ng-repeat="formElement in vm.formElements.all | orderBy:'position'">
                 <!-- Display Question -->
-                <element-item-organization ng-if="FormElementUtils.isQuestion(formElement)"
+                <element-item-organization ng-if="formElement.isQuestion()"
                                            form-element="formElement"
                                            is-section-child="false"
                                            is-first="formElement.position == 1"
                                            is-last="formElement.position == vm.formElements.all.length">
                 </element-item-organization>
                 <!-- Display Section -->
-                <element-item-organization ng-if="!FormElementUtils.isQuestion(formElement)" class="section-orga"
+                <element-item-organization ng-if="formElement.isSection()" class="section-orga"
                                            form-element="formElement"
                                            is-section-child="false"
                                            is-first="formElement.position == 1"
                                            is-last="formElement.position == vm.formElements.all.length">
                 </element-item-organization>
-                <ul id="orga-container-[[formElement.id]]" class="orga-nested-container" ng-if="!FormElementUtils.isQuestion(formElement)">
+                <ul id="orga-container-[[formElement.id]]" class="orga-nested-container" ng-if="formElement.isSection()">
                     <li class="row" ng-repeat="question in formElement.questions.all | orderBy:'section_position'">
                         <element-item-organization form-element="question"
                                                    is-section-child="true"

@@ -30,6 +30,7 @@ interface ViewModel {
     currentResponses: Map<Question, Responses>;
     currentFiles: Map<Question, Files>;
     isProcessing: boolean;
+    longestPathsMap: Map<string, number>;
 
     $onInit() : Promise<void>;
     prev() : Promise<void>;
@@ -66,7 +67,8 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
         vm.formElement = vm.formElements.all[$scope.responsePosition - 1];
         vm.nbFormElements = vm.formElements.all.length;
         vm.historicPosition = $scope.historicPosition.length > 0 ? $scope.historicPosition : [1];
-        vm.longestPath = vm.historicPosition.length + FormElementUtils.findLongestPathInFormElement(vm.formElement.id, vm.formElements) - 1;
+        vm.longestPathsMap = FormElementUtils.getLongestPaths(vm.formElements);
+        vm.longestPath = vm.formElement.getCurrentLongestPath(vm.longestPathsMap);
         await initFormElementResponses();
         window.setTimeout(() => vm.loading = false,500);
         $scope.safeApply();
@@ -183,7 +185,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             await saveResponses();
             vm.formElement = vm.formElements.all[prevPosition - 1];
             vm.historicPosition.pop();
-            vm.longestPath = vm.historicPosition.length + FormElementUtils.findLongestPathInFormElement(vm.formElement.id, vm.formElements) - 1;
+            vm.longestPath = vm.formElement.getCurrentLongestPath(vm.longestPathsMap);
             goToFormElement();
         }
         vm.isProcessing = false;
@@ -201,7 +203,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
             await saveResponses();
             vm.formElement = vm.formElements.all[nextPosition - 1];
             vm.historicPosition.push(vm.formElement.position);
-            vm.longestPath = vm.historicPosition.length + FormElementUtils.findLongestPathInFormElement(vm.formElement.id, vm.formElements) - 1;
+            vm.longestPath = vm.formElement.getCurrentLongestPath(vm.longestPathsMap);
             vm.isProcessing = false;
             goToFormElement();
         }

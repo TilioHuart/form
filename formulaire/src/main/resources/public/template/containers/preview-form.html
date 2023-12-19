@@ -35,20 +35,20 @@
     <div class="nine twelve-mobile top-spacing-three" ng-if="vm.preview.page == vm.PreviewPage.QUESTION">
 
         <!-- Display question -->
-        <respond-question-item ng-if="FormElementUtils.isQuestion(vm.preview.formElement) && vm.preview.formElement.question_type != Types.MATRIX"
+        <respond-question-item ng-if="vm.preview.formElement.isQuestion() && vm.preview.formElement.question_type != Types.MATRIX"
                                question="vm.preview.formElement"
                                responses="vm.preview.currentResponses.get(vm.preview.formElement)"
                                distribution="null"
                                files="vm.preview.currentFiles.get(vm.preview.formElement)">
         </respond-question-item>
-        <respond-matrix ng-if="FormElementUtils.isQuestion(vm.preview.formElement) && vm.preview.formElement.question_type == Types.MATRIX"
+        <respond-matrix ng-if="vm.preview.formElement.isQuestion() && vm.preview.formElement.question_type == Types.MATRIX"
                         question="vm.preview.formElement"
                         responses="vm.preview.currentResponses.get(vm.preview.formElement)"
                         distribution="null">
         </respond-matrix>
 
         <!-- Display section -->
-        <div class="section" ng-if="!FormElementUtils.isQuestion(vm.preview.formElement)">
+        <div class="section" ng-if="vm.preview.formElement.isSection()">
             <div class="section-top">
                 <div class="title"><h4>[[vm.preview.formElement.title]]</h4></div>
                 <div class="description" ng-if="vm.preview.formElement.description">

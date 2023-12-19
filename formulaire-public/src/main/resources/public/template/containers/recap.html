@@ -15,7 +15,7 @@
             <div ng-repeat="formElement in vm.formElements.all | orderBy:'position'">
 
                 <!-- Display question -->
-                <public-recap-question-item ng-if="FormElementUtils.isQuestion(formElement)"
+                <public-recap-question-item ng-if="formElement.isQuestion()"
                                             question="formElement"
                                             responses="vm.responses"
                                             form-elements="vm.formElements"
@@ -23,7 +23,7 @@
                 </public-recap-question-item>
 
                 <!-- Display section -->
-                <div class="section" ng-if="!FormElementUtils.isQuestion(formElement)">
+                <div class="section" ng-if="formElement.isSection()">
                     <div class="section-top">
                         <div class="title"><h4>[[formElement.title]]</h4></div>
                         <div class="description" ng-if="formElement.description">

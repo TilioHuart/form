@@ -25,6 +25,7 @@ interface ViewModel {
 	longestPath: number;
 	historicPosition: number[];
 	isProcessing: boolean;
+	longestPathsMap: Map<string, number>;
 
 	$onInit(): Promise<void>;
 	prev() : void;
@@ -49,7 +50,8 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 		syncWithStorageData();
 		let formElementPosition = vm.historicPosition[vm.historicPosition.length - 1];
 		vm.formElement = vm.formElements.all[formElementPosition - 1];
-		vm.longestPath = vm.historicPosition.length + FormElementUtils.findLongestPathInFormElement(vm.formElement.id, vm.formElements) - 1;
+		vm.longestPathsMap = FormElementUtils.getLongestPaths(vm.formElements);
+		vm.longestPath = vm.formElement.getCurrentLongestPath(vm.longestPathsMap);
 		initFormElementResponses();
 		$scope.safeApply();
 	}
@@ -62,7 +64,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 			let isCursorAgain: boolean = vm.formElement.isSameQuestionTypeOfType(vm.formElements.all[prevPosition - 1], Types.CURSOR);
 			vm.formElement = vm.formElements.all[prevPosition - 1];
 			vm.historicPosition.pop();
-			vm.longestPath = vm.historicPosition.length + FormElementUtils.findLongestPathInFormElement(vm.formElement.id, vm.formElements) - 1;
+			vm.longestPath = vm.formElement.getCurrentLongestPath(vm.longestPathsMap);
 			goToFormElement(isCursorAgain);
 		}
 		vm.isProcessing = false;
@@ -77,7 +79,7 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 			let isCursorAgain: boolean = vm.formElement.isSameQuestionTypeOfType(vm.formElements.all[nextPosition - 1], Types.CURSOR);
 			vm.formElement = vm.formElements.all[nextPosition - 1];
 			vm.historicPosition.push(vm.formElement.position);
-			vm.longestPath = vm.historicPosition.length + FormElementUtils.findLongestPathInFormElement(vm.formElement.id, vm.formElements) - 1;
+			vm.longestPath = vm.formElement.getCurrentLongestPath(vm.longestPathsMap);
 			vm.isProcessing = false;
 			goToFormElement(isCursorAgain);
 		}

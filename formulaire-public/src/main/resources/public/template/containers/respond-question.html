@@ -15,17 +15,17 @@
         <div class="nine twelve-mobile">
 
             <!-- Display question -->
-            <public-question-item ng-if="FormElementUtils.isQuestion(vm.formElement) && vm.formElement.question_type != Types.MATRIX"
+            <public-question-item ng-if="vm.formElement.isQuestion() && vm.formElement.question_type != Types.MATRIX"
                                   question="vm.formElement"
                                   responses="vm.allResponsesInfos.get(vm.formElement).get(vm.formElement)">
             </public-question-item>
-            <public-respond-matrix ng-if="FormElementUtils.isQuestion(vm.formElement) && vm.formElement.question_type == Types.MATRIX"
+            <public-respond-matrix ng-if="vm.formElement.isQuestion() && vm.formElement.question_type == Types.MATRIX"
                            question="vm.formElement"
                            responses="vm.allResponsesInfos.get(vm.formElement).get(vm.formElement)">
             </public-respond-matrix>
 
             <!-- Display section -->
-            <div class="section" ng-if="!FormElementUtils.isQuestion(vm.formElement)">
+            <div class="section" ng-if="vm.formElement.isSection()">
                 <div class="section-top">
                     <div class="title"><h4>[[vm.formElement.title]]</h4></div>
                     <div class="description" ng-if="vm.formElement.description">

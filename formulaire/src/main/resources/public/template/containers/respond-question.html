@@ -21,20 +21,20 @@
         <div class="nine twelve-mobile">
 
             <!-- Display question -->
-            <respond-question-item ng-if="FormElementUtils.isQuestion(vm.formElement) && vm.formElement.question_type != Types.MATRIX && vm.currentResponses.get(vm.formElement).hasLoaded"
+            <respond-question-item ng-if="vm.formElement.isQuestion() && vm.formElement.question_type != Types.MATRIX && vm.currentResponses.get(vm.formElement).hasLoaded"
                                    question="vm.formElement"
                                    responses="vm.currentResponses.get(vm.formElement)"
                                    distribution="vm.distribution"
                                    files="vm.currentFiles.get(vm.formElement)">
             </respond-question-item>
-            <respond-matrix ng-if="FormElementUtils.isQuestion(vm.formElement) && vm.formElement.question_type == Types.MATRIX"
+            <respond-matrix ng-if="vm.formElement.isQuestion() && vm.formElement.question_type == Types.MATRIX"
                             question="vm.formElement"
                             responses="vm.currentResponses.get(vm.formElement)"
                             distribution="vm.distribution">
             </respond-matrix>
 
             <!-- Display section -->
-            <div class="section" ng-if="!FormElementUtils.isQuestion(vm.formElement)">
+            <div class="section" ng-if="vm.formElement.isSection()">
                 <div class="section-top">
                     <div class="title"><h4>[[vm.formElement.title]]</h4></div>
                     <div class="description" ng-if="vm.formElement.description">
