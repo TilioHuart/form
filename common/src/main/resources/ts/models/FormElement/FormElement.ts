@@ -146,13 +146,16 @@ export abstract class FormElement implements Selectable {
 
     getAllPotentialNextFormElementsIdTypes = (formElements: FormElements) : FormElementIdType[] => {
         let formElementIdTypes: FormElementIdType[] = this.getAllPotentialNextFormElements(formElements).map((e: FormElement) => e ? e.getIdType() : (e as any));
+        let isThereUndefined: boolean = formElementIdTypes.some((feit: FormElementIdType) => !feit);
+        formElementIdTypes = formElementIdTypes.filter((feit: FormElementIdType) => feit); // filter undefined values
         let uniqueFormElementIdTypes: FormElementIdType[] = [];
 
         for (let formElementIdType of formElementIdTypes) {
-            let match: FormElementIdType = uniqueFormElementIdTypes.find((feit: FormElementIdType) => feit.equals(formElementIdType));
+            let match: FormElementIdType = uniqueFormElementIdTypes.find((feit: FormElementIdType) => feit && feit.equals(formElementIdType));
             if (!match) uniqueFormElementIdTypes.push(formElementIdType);
         }
 
+        if (isThereUndefined) uniqueFormElementIdTypes.push(undefined);
         return uniqueFormElementIdTypes;
     }
 

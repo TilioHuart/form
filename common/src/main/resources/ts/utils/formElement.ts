@@ -429,7 +429,7 @@ export class FormElementUtils {
         let targetsLengths: number[] = targets
             .filter((feit: FormElementIdType) => feit)
             .map((feit: FormElementIdType) => this.fillLongestPathsMap(feit.toString(), pathsMap, longestPathsMap));
-        let myLongestPath = Math.max(...targetsLengths) + 1;
+        let myLongestPath = (targetsLengths.length > 0 ? Math.max(...targetsLengths) : 0) + 1;
         if (!currentLongestPath || currentLongestPath < myLongestPath) longestPathsMap.set(stringFormElementIdType, myLongestPath);
         return myLongestPath;
     }
