@@ -138,51 +138,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             vm.isProcessing = true;
             vm.dontSave = true;
 
-            // Check conditional questions
-            let sectionQuestionsList: Question[][] = vm.formElements.getSections().all
-                .filter((s: Section) => s.id)
-                .map((s: Section) => s.questions.all);
+            let checksResult: boolean = FormElementUtils.checkFormElementsBeforeSave(vm.formElements);
 
-            for (let sectionQuestions of sectionQuestionsList) {
-                let conditionalQuestions: Question[] = sectionQuestions.filter(q => q.conditional);
-                if (conditionalQuestions.length >= 2) {
-                    notify.error(idiom.translate('formulaire.question.save.missing.field'));
-                    return;
-                }
-            }
-
-            // Check titles
-            let wrongElements: FormElement[] = vm.formElements.all.filter(fe => !fe.title); // TODO check more than just titles later
-            if (wrongElements.length > 0) {
-                notify.error(idiom.translate('formulaire.question.save.missing.field'));
-                return;
-            }
-
-            // Check cursor values
-            let questionsTypeCursor: Question[] = vm.formElements.getAllQuestions().filter((q: Question) => q.question_type == Types.CURSOR);
-            if (questionsTypeCursor.length > 0) {
-                // We search for question where : (maxVal - minVal) % step == 0
-                let inconsistencyCursorChoice: Question[] = questionsTypeCursor.filter((q: Question) => (
-                        ((q.specific_fields.cursor_max_val != null ? q.specific_fields.cursor_max_val : Constants.DEFAULT_CURSOR_MAX_VALUE) -
-                         (q.specific_fields.cursor_min_val != null ? q.specific_fields.cursor_min_val : Constants.DEFAULT_CURSOR_MIN_VALUE)) %
-                        (q.specific_fields.cursor_step != null ? q.specific_fields.cursor_step : Constants.DEFAULT_CURSOR_STEP) != 0));
-                if (inconsistencyCursorChoice.length > 0) {
-                    notify.error(idiom.translate('formulaire.question.save.missing.field'));
-                    return;
-                }
-            }
-
-            // Check choice.image and choice.value for questions of type MULTIPLEANSWER & SINGLEANSWER
-            let multipleanswerOrSingleanswer: Question[] =
-                vm.formElements.getAllQuestions().filter((q: Question) => q.canHaveImages());
-            const foundChoice = (<any>multipleanswerOrSingleanswer).flatMap((question: Question) => question.choices.all)
-                .find((choice: QuestionChoice) => (choice.image && !choice.value));
-
-            if (foundChoice) {
-                notify.error(idiom.translate('formulaire.question.save.missing.field'));
-            }
-
-            await saveFormElements(displaySuccess && wrongElements.length <= 0);
+            await saveFormElements(displaySuccess && checksResult);
             vm.dontSave = false;
             vm.isProcessing = false;
             $scope.safeApply();
@@ -275,6 +233,12 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         question.position = null;
                     }
                 }
+            }
+
+            let checksResult: boolean = FormElementUtils.checkFormElementsBeforeSave(vm.formElements);
+            if (!checksResult) {
+                vm.isProcessing = false;
+                return;
             }
 
             await formElementService.update(vm.formElements.getAllSectionsAndAllQuestions());

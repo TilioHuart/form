@@ -91,5 +91,5 @@
     </div>
 
     <div class="warning" ng-if="!vm.section.title"><i18n>formulaire.section.missing.field.title</i18n></div>
-    <div class="warning" ng-if="vm.verifConditional()"><i18n>formulaire.element.block.multiple.conditional</i18n></div>
+    <div class="warning" ng-if="vm.hasSeveralConditionals()"><i18n>formulaire.element.block.multiple.conditional</i18n></div>
 </div>

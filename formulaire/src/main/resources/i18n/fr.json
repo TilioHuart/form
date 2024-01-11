@@ -221,6 +221,7 @@
   "formulaire.section.missing.field.title": "Attention, la section ci-dessus nécessite un titre pour être valide.",
   "formulaire.section.missing.field.choice": "Attention, la section ci-dessus nécessite au moins un choix pour être valide.",
   "formulaire.section.save.missing.field": "Attention, certaines sections manquent d'informations pour être valides !",
+  "formulaire.section.save.multiple.conditional" : "Attention, une section ne doit comporter qu'une question conditionnelle pour être valide",
   "formulaire.question.save.image.missing.field": "Attention, le choix ne peut pas comporter une image seule. Veuillez saisir du texte.",
   "formulaire.question.save.images.missing.fields": "Attention, les choix ne peuvent pas comporter une image seule. Veuillez saisir du texte.",
   "formulaire.element.block.multiple.conditional" : "Attention, la section ci-dessus ne doit comporter qu'une question conditionnelle pour être valide",

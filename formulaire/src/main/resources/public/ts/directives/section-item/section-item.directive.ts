@@ -28,6 +28,7 @@ interface IViewModel extends ng.IController, ISectionItemProps {
     addQuestionToSection(): Promise<void>;
     addQuestionToSectionGuard(): void;
     hasConditional() : boolean;
+    hasSeveralConditionals(): boolean;
     filterNextElements(formElement: FormElement): boolean;
     onSelectOption(): Promise<void>;
 }
@@ -100,6 +101,10 @@ class Controller implements IViewModel {
 
     hasConditional = (): boolean => {
         return this.section.questions.all.filter((q: Question) => q.conditional).length > 0;
+    }
+
+    hasSeveralConditionals = () : boolean => {
+        return this.section.questions.all.filter((q: Question) => q.conditional).length >= 2;
     }
 
     filterNextElements = (formElement: FormElement) : boolean => {
