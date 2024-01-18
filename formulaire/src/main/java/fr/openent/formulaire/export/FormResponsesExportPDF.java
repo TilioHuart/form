@@ -205,11 +205,12 @@ public class FormResponsesExportPDF {
             // Fill each question with responses' data
             for (int i = 0; i < data.size(); i++) {
                 JsonObject response = data.getJsonObject(i);
+                if (response == null) continue;
 
                 // Format answer (empty string, simple text, html)
                 JsonObject question = mapQuestions.get(response.getInteger(QUESTION_ID));
                 Integer questionType = question != null ? question.getJsonObject(QUESTION_TYPE).getInteger(QUESTION_TYPE_ID) : null;
-                if (response.getString(ANSWER).isEmpty()) {
+                if (response.getString(ANSWER, "").isEmpty()) {
                     response.put(ANSWER, "-");
                 }
                 if (questionType != null) {

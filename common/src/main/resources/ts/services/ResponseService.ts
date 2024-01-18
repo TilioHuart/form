@@ -5,17 +5,19 @@ import {
     IResponseResponse,
     Question,
     Response,
-    Section
+    Section,
+    Types
 } from "../models";
 import {DataUtils} from "../utils";
 import {Exports} from "@common/core/enums";
+
 export interface ResponseService {
     list(question: Question, nbLines: number) : Promise<any>;
     listByForm(formId: number) : Promise<any>;
     listMineByDistribution(questionId: number, distributionId: number) : Promise<any>;
     listMineByDistributionAndQuestions(questionIds: number[], distributionId: number) : Promise<Response[]>;
     listByDistribution(distributionId: number) : Promise<any>;
-    countByFormElement(formElement: FormElement) : Promise<any>;
+    countByFormElement(formElement: FormElement) : Promise<number>;
     save(response: Response, questionType: number) : Promise<any>;
     saveMultiple(mapQuestionResponsesToSave: Map<Question, Response[]>, distributionId: number) : Promise<Response[]>;
     create(response: Response) : Promise<any>;
@@ -77,18 +79,24 @@ export const responseService: ResponseService = {
         }
     },
 
-    async countByFormElement (formElement: FormElement) : Promise<any> {
+    async countByFormElement (formElement: FormElement) : Promise<number> {
         try {
             let questionIds = [];
             if (formElement instanceof Section) {
                 for (let question of formElement.questions.all) {
                     questionIds.push(question.id);
+                    if (question.question_type == Types.MATRIX) {
+                        questionIds = questionIds.concat(question.children.all.map((q: Question) => q.id));
+                    }
                 }
             }
             else if (formElement instanceof Question) {
                 questionIds.push(formElement.id);
+                if (formElement.question_type == Types.MATRIX) {
+                    questionIds = questionIds.concat(formElement.children.all.map((q: Question) => q.id));
+                }
             }
-            return DataUtils.getData(await http.get(`/formulaire/responses/count`, { params: questionIds }));
+            return DataUtils.getData(await http.get(`/formulaire/responses/count`, { params: questionIds })).count;
         } catch(err) {
             notify.error(idiom.translate('formulaire.error.responseService.get'));
             throw err;

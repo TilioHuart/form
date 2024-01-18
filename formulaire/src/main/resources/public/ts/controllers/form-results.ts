@@ -1,4 +1,4 @@
-import {ng, template} from 'entcore';
+import {idiom, ng, notify, template} from 'entcore';
 import * as ApexCharts from 'apexcharts';
 import {
     Distribution,
@@ -79,7 +79,13 @@ export const formResultsController = ng.controller('FormResultsController', ['$s
 
         // Functions
 
-        vm.export = (typeExport: Exports) : void => {
+        vm.export = async (typeExport: Exports) : Promise<void> => {
+            let allQuestions: Question[] = vm.formElements.getAllQuestions().all;
+            let nbResponsesForFirstElement: number = allQuestions.length > 0 ? await responseService.countByFormElement(allQuestions[0]) : 0;
+            if (nbResponsesForFirstElement <= 0) {
+                notify.error(idiom.translate('formulaire.export.no.responses'));
+                return;
+            }
             vm.typeExport = typeExport;
             template.open('lightbox', 'lightbox/results-confirm-export');
             vm.display.lightbox.export = true;
