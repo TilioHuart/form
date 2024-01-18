@@ -189,6 +189,7 @@
   "formulaire.export.choice.format": "Please choose the format for your form's export:",
   "formulaire.export.explanation.zip": "All selected forms will be downloaded in a compressed file (.zip). If you want to export the forms separately, please select them one by one. You can then import these forms back into the application.",
   "formulaire.export.explanation.pdf": "All selected forms will be downloaded in PDF format. Please note that some question types may not be suitable for this type of export (e.g. cursor, document submission, etc.)",
+  "formulaire.export.no.responses": "There is no response to export for this form",
   "formulaire.format.zip": "Zip format",
   "formulaire.format.pdf": "PDF format",
   "formulaire.export.pdf.questions.title": "Forms PDF export",

@@ -327,9 +327,9 @@ public class DefaultResponseService implements ResponseService {
         String query = "SELECT question_id, date_response, d.responder_id, responder_name, structure, answer, " +
             "custom_answer, rf.filename " +
             "FROM " + DISTRIBUTION_TABLE + " d " +
-            "LEFT JOIN " + RESPONSE_TABLE + " r ON r.distribution_id = d.id " +
+            "INNER JOIN " + RESPONSE_TABLE + " r ON r.distribution_id = d.id " +
             "LEFT JOIN " + RESPONSE_FILE_TABLE + " rf ON rf.response_id = r.id " +
-            "LEFT JOIN " + QUESTION_TABLE + " q ON r.question_id = q.id " +
+            "INNER JOIN " + QUESTION_TABLE + " q ON r.question_id = q.id " +
             "WHERE d.form_id = ? AND d.status = ? " +
             "ORDER BY position ASC, date_response DESC;";
 
