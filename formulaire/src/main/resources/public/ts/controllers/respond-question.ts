@@ -93,12 +93,14 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                         questionResponses.all.push(new Response(question.id, choice.id, null, vm.distribution.id));
                     }
                 }
-            } else if (question.question_type === Types.CURSOR && question.specific_fields) {
+            }
+            else if (question.question_type === Types.CURSOR && question.specific_fields) {
                 let newResponse: Response = new Response(question.id, null, question.specific_fields.cursor_min_val, vm.distribution.id)
                 //Check if the answer is a number
                 newResponse.answer = !Number.isFinite(newResponse.answer) ? question.specific_fields.cursor_min_val : newResponse.answer;
                 questionResponses.all.push(newResponse);
-            } else if (question.isRanking()) {
+            }
+            else if (question.isRanking()) {
                 let questionChoices: QuestionChoice[] = question.choices.all;
                 for (let i: number = 0; i < questionChoices.length; i++) {
                     let questionChoice: QuestionChoice = questionChoices[i];
@@ -320,6 +322,17 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
                     }
                 }
                 else if (question.isRanking()) { // In case of question type ranking, we need to add a choice index to each Response
+                    if (questionResponses.all.length > question.choices.all.length) {
+                        notify.info(idiom.translate('???'));
+                        let rankingResponses: Responses = new Responses();
+                        let questionChoices: QuestionChoice[] = question.choices.all;
+                        for (let i: number = 0; i < questionChoices.length; i++) {
+                            let questionChoice: QuestionChoice = questionChoices[i];
+                            rankingResponses.all.push(new Response(question.id, questionChoice.id, questionChoice.value, vm.distribution.id, questionChoice.position));
+                        }
+                        vm.currentResponses.set(question, rankingResponses);
+                        return false;
+                    }
                     for (let questionResponse of questionResponses.all) {
                         responsesToSave.push(new Response(question.id, questionResponse.choice_id, questionResponse.answer, vm.distribution.id, questionResponse.choice_position));
                     }
