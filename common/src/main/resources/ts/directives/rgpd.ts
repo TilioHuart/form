@@ -6,10 +6,10 @@ import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
 
 interface IRgpdProps {
     form: Form;
-    delegates: Delegates;
 }
 
 interface IViewModel extends ng.IController, IRgpdProps {
+    delegates: Delegates;
     init(): Promise<void>;
     getHtmlDescription(description: string): string;
     getRgpdDescriptionIntro(): string;
@@ -73,9 +73,7 @@ function directive() {
         restrict: 'E',
         transclude: true,
         scope: {
-            question: '=',
-            response: '=',
-            selectedIndexes: '='
+            form: '='
         },
         controllerAs: 'vm',
         bindToController: true,
