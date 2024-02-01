@@ -2,6 +2,7 @@ import {idiom, idiom as lang} from 'entcore';
 import {Question, QuestionChoice, Response, Types} from "@common/models";
 import {ColorUtils} from "@common/utils/color";
 import ApexCharts from 'apexcharts';
+import {Constants} from "@common/core/constants";
 
 export class GraphUtils {
 
@@ -61,7 +62,7 @@ export class GraphUtils {
         // Generate options with labels and colors
         let baseHeight: number = 40 * question.choices.all.length;
         let height: number = baseHeight < 200 ? 200 : (baseHeight > 500 ? 500 : baseHeight);
-        let colors: string[] = ColorUtils.generateColorList(labels.length);
+        let colors: string[] = Constants.GRAPH_COLORS;
         let newOptions: any = isExportPDF ?
             GraphUtils.generateOptions(question.question_type, colors, labels) :
             GraphUtils.generateOptions(question.question_type, colors, labels, height, '100%');
@@ -99,7 +100,7 @@ export class GraphUtils {
         }
 
         // Generate options with labels and colors
-        let colors: string[] = ColorUtils.generateColorList(series.length);
+        let colors: string[] = Constants.GRAPH_COLORS;
 
         let newOptions: any = isExportPDF ?
             GraphUtils.generateOptions(question.question_type, colors, labels, null, null) :
@@ -127,7 +128,7 @@ export class GraphUtils {
             acc.set(e, (acc.get(e) || 0) + 1), new Map());
 
         let labels: number[] = Array.from(map.keys());
-        let colors: string[] = ColorUtils.generateColorList(labels.length);
+        let colors: string[] = Constants.GRAPH_COLORS;
 
         let newPDFOptions: any = isExportPDF ?
             GraphUtils.generateOptions(question.question_type, colors, labels, null, null) :
@@ -184,7 +185,7 @@ export class GraphUtils {
             series.push(seriesOptions);
         });
 
-        let colors: string[] = ColorUtils.generateColorList(choices.length);
+        let colors: string[] = Constants.GRAPH_COLORS;
         let newOptions: any = isExportPDF ?
             GraphUtils.generateOptions(question.question_type, colors, labels, null, null) :
             GraphUtils.generateOptions(question.question_type, colors, labels, '100%', '100%');
@@ -222,7 +223,7 @@ export class GraphUtils {
 
         let baseHeight: number = 50 * choices.length;
         let height: number = baseHeight < 200 ? 200 : (baseHeight > 500 ? 500 : baseHeight);
-        let colors: string[] = ColorUtils.generateColorList(labels.length);
+        let colors: string[] = Constants.GRAPH_COLORS;
         let newOptions: any = GraphUtils.generateOptions(question.question_type, colors, labels, height, null);
         newOptions.series = [{ data: series }];
 

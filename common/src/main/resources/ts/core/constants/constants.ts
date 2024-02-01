@@ -8,12 +8,22 @@ export abstract class Constants {
     static readonly MAX_FILES_SAVE: number = 10;
 
     // Colors
-    static readonly GRAPH_COLORS: string[] = ['#37A4CD','#1691C0','#056F98','#5AB7DA','#89CEE9'];
+    private static getGraphColors = (colorsGroups: Array<string[]>) : string[] => {
+        let colors: string[] = [];
+        let nbColorPerGroup: number = colorsGroups[0].length || 0;
+        for (let i = 0; i < nbColorPerGroup; i++) {
+            for (let groupColor of colorsGroups) {
+                colors.push(groupColor[i]);
+            }
+        }
+        return colors;
+    }
     static readonly BLUE_COLORS: string[] = ['#37A4CD','#1691C0','#056F98','#5AB7DA','#89CEE9'];
     static readonly YELLOW_COLORS: string[] = ['#FFC73C','#F2AE00','#FFBB13','#FFD263','#FFDF91'];
     static readonly PURPLE_COLORS: string[] = ['#475DD5','#1129A6','#2741C9','#687BE0','#93A1EC'];
     static readonly ORANGE_COLORS: string[] = ['#FFA23C','#F27E00','#FF8E13','#FFB463','#FFCA91'];
     static readonly COLORS_GROUPS: Array<string[]> = [Constants.BLUE_COLORS, Constants.YELLOW_COLORS, Constants.PURPLE_COLORS, Constants.ORANGE_COLORS];
+    static readonly GRAPH_COLORS: string[] = this.getGraphColors(this.COLORS_GROUPS);
     static readonly NB_COLORS_AVAILABLE: number = 25;
 
     // Dates format
@@ -23,5 +33,4 @@ export abstract class Constants {
     // Types
     static readonly STRING: string = "string";
     static readonly FILE: string = "file";
-
 }

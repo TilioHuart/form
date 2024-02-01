@@ -9,11 +9,12 @@ import {
     Responses,
     Types
 } from "@common/models";
-import {ColorUtils, DateUtils} from "@common/utils";
+import {DateUtils} from "@common/utils";
 import {GraphUtils} from "@common/utils/graph";
 import {IScope} from "angular";
 import {RootsConst} from "../../../core/constants/roots.const";
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
+import {Constants} from "@common/core/constants";
 
 interface IResultQuestionItemScopeProps {
     question: Question;
@@ -101,7 +102,7 @@ class Controller implements ng.IController, IViewModel {
             if (this.isGraphQuestion) {
                 if (this.question.canHaveCustomAnswers()) this.syncResultsMap();
                 this.question.fillChoicesInfo(this.distributions, this.responses.all);
-                this.colors = ColorUtils.generateColorList(this.question.choices.all.length);
+                this.colors = Constants.GRAPH_COLORS;
                 await this.generateChart();
             }
             else {
