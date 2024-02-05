@@ -77,6 +77,8 @@ interface ViewModel {
     organizeFormElements() : Promise<void>;
     doOrganizeFormElements() : Promise<void>;
     cancelOrganizeFormElements() : Promise<void>;
+    duplicateFormElement(formElement: FormElement) : Promise<void>;
+    duplicateSection(section: Section) : Promise<void>;
     duplicateQuestion(question: Question) : Promise<void>;
     deleteFormElement() : Promise<void>;
     doDeleteFormElement() : Promise<void>;
@@ -261,6 +263,75 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         // FormElements functions
 
+        vm.duplicateFormElement = async (formElement: FormElement) : Promise<void> => {
+            if (formElement instanceof Question) await vm.duplicateQuestion(formElement)
+            else if (formElement instanceof Section) await vm.duplicateSection(formElement)
+            else notify.error(idiom.translate('formulaire.error.duplicate.type'));
+        }
+
+        vm.duplicateSection = async (section: Section) : Promise<void> => {
+            try {
+                vm.dontSave = true;
+
+                // Duplicate current section
+                let duplicata: Section = section;
+
+                // Reposition form elements
+                for (let i = section.position; i < vm.formElements.all.length; i++) {
+                    vm.formElements.all[i].position++;
+                }
+                await formElementService.update(vm.formElements.all.slice(section.position));
+                duplicata.position++;
+
+                // Save duplicata section
+                duplicata.setNextFormElementValuesWithDefault(vm.formElements);
+                let newSection: Section = await sectionService.create(duplicata);
+
+                // Save all questions inside section
+                duplicata.questions.all.forEach((q: Question) => q.section_id = newSection.id);
+                let newQuestions: Question[] = await questionService.create(duplicata.questions.all);
+
+                // Deal with choices in questions
+                let choiceToCreate: QuestionChoice[] = [];
+                let childrenToCreate: Question[] = [];
+                for (let question of duplicata.questions.all) {
+                    if (question.isTypeChoicesQuestion()) {
+                        question.choices.all.sort((a: QuestionChoice, b: QuestionChoice) => a.position - b.position);
+                        let matchingNewQuestion: Question = newQuestions.find((q: Question) => q.section_position == question.section_position);
+                        if (!matchingNewQuestion) continue;
+
+                        for (let choice of question.choices.all) {
+                            if (!choice.question_id) choice.question_id =  matchingNewQuestion.id;
+                            if (choice.value) {
+                                choiceToCreate.push(new QuestionChoice(matchingNewQuestion.id, choice.position, choice.value, choice.image, choice.is_custom));
+                            }
+                        }
+                        if (question.question_type == Types.MATRIX) {
+                            for (let child of question.children.all) {
+                                child.form_id = question.form_id;
+                                child.matrix_id = matchingNewQuestion.id;
+                                if (child.title) {
+                                    let duplicateChild: Question = new Question(matchingNewQuestion.id, child.question_type, child.matrix_position);
+                                    duplicateChild.form_id = question.form_id;
+                                    duplicateChild.title = child.title;
+                                    childrenToCreate.push(duplicateChild);
+                                }
+                            }
+                        }
+                    }
+                }
+                if (choiceToCreate.length > 0) await questionChoiceService.createMultiple(choiceToCreate, vm.form.id);
+                if (childrenToCreate.length > 0) await questionService.create(childrenToCreate);
+                notify.success(idiom.translate('formulaire.success.section.duplicate'));
+                await vm.formElements.sync(vm.form.id);
+                vm.dontSave = false;
+                $scope.safeApply();
+            }
+            catch (e) {
+                throw e;
+            }
+        }
+
         vm.duplicateQuestion = async (question: Question) : Promise<void> => {
             try {
                 vm.dontSave = true;
@@ -281,6 +352,9 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                     await formElementService.update(vm.formElements.all.slice(question.position));
                     duplicata.position++;
                 }
+
+                let choiceToCreate: QuestionChoice[] = [];
+                let childrenToCreate: Question[] = [];
                 let newQuestion = await questionService.createSingle(duplicata);
                 if (question.isTypeChoicesQuestion()) {
                     question.choices.all.sort((a, b) => a.position - b.position);
@@ -288,7 +362,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                         if (!choice.question_id) choice.question_id = questionId;
                         if (choice.value) {
                             await questionChoiceService.save(choice);
-                            await questionChoiceService.create(new QuestionChoice(newQuestion.id, choice.position, choice.value, choice.image, choice.is_custom));
+                            choiceToCreate.push(new QuestionChoice(newQuestion.id, choice.position, choice.value, choice.image, choice.is_custom));
                         }
                     }
                     if (question.question_type == Types.MATRIX) {
@@ -300,11 +374,13 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                                 let duplicateChild: Question = new Question(newQuestion.id, child.question_type, child.matrix_position);
                                 duplicateChild.form_id = question.form_id;
                                 duplicateChild.title = child.title;
-                                await questionService.createSingle(duplicateChild);
+                                childrenToCreate.push(duplicateChild);
                             }
                         }
                     }
                 }
+                if (choiceToCreate.length > 0) await questionChoiceService.createMultiple(choiceToCreate, vm.form.id);
+                if (childrenToCreate.length > 0) await questionService.create(childrenToCreate);
                 notify.success(idiom.translate('formulaire.success.question.duplicate'));
                 await vm.formElements.sync(vm.form.id);
                 vm.dontSave = false;
@@ -880,7 +956,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
 
         document.onclick = e => { if ($scope.currentPage === Pages.EDIT_FORM) onClickQuestion(e); };
 
-        $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DUPLICATE_ELEMENT, (e) => { vm.duplicateQuestion(e.targetScope.vm.question) });
+        $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DUPLICATE_ELEMENT, (e) => { vm.duplicateFormElement(e.targetScope.vm.question || e.targetScope.vm.section) });
         $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DELETE_ELEMENT, () => { vm.deleteFormElement() });
         $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.UNDO_CHANGES, () => { vm.undoFormElementChanges() });
         $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.VALIDATE_SECTION, () => { vm.validateSection() });

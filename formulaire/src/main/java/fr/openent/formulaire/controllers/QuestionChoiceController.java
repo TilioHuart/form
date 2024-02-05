@@ -137,6 +137,57 @@ public class QuestionChoiceController extends ControllerHelper {
         });
     }
 
+
+
+    @Post("/:formId/choices")
+    @ApiDoc("Create multiple choices")
+    @ResourceFilter(CustomShareAndOwner.class)
+    @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
+    public void createMultiple(HttpServerRequest request) {
+        RequestUtils.bodyToJsonArray(request, choicesJson -> {
+            if (choicesJson == null || choicesJson.isEmpty()) {
+                log.error("[Formulaire@QuestionChoiceController::createMultiple] No choices to create.");
+                noContent(request);
+                return;
+            }
+
+            List<QuestionChoice> choices = IModelHelper.toList(choicesJson, QuestionChoice.class);
+            String locale = I18n.acceptLanguage(request);
+
+            // Check choice type validity
+            List<QuestionChoice> invalidChoices = choices.stream()
+                    .filter(choice -> !choice.getType().equals(ChoiceTypes.TXT.getValue()))
+                    .collect(Collectors.toList());
+            if (invalidChoices.size() > 0) {
+                String message = "[Formulaire@QuestionChoiceController::createMultiple] Invalid types for choices : " + invalidChoices;
+                log.error(message);
+                badRequest(request);
+                return;
+            }
+
+            List<Future<Boolean>> futures = new ArrayList<>();
+            for (QuestionChoice choice : choices) futures.add(questionChoiceService.isTargetValid(choice));
+
+            FutureHelper.all(futures)
+                .compose(choicesValidity -> {
+                    boolean hasNotValidChoice = choicesValidity.result().list().stream()
+                            .map(Boolean.class::cast)
+                            .anyMatch(choiceValidity -> !choiceValidity);
+                    if (hasNotValidChoice) {
+                        String errorMessage = "[Formulaire@QuestionChoiceController::createMultiple] Some choices are invalid.";
+                        return Future.failedFuture(errorMessage);
+                    }
+                    return questionChoiceService.create(choices, locale);
+                })
+                .onSuccess(result -> renderJson(request, new JsonArray(result)))
+                .onFailure(err -> {
+                    String errMessage = "[Formulaire@QuestionChoiceController::createMultiple] Failed to create choices " + choices;
+                    log.error(errMessage + " : " + err.getMessage());
+                    renderError(request);
+                });
+        });
+    }
+
     @Put("/choices/:choiceId")
     @ApiDoc("Update a specific choice")
     @ResourceFilter(CustomShareAndOwner.class)

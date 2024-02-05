@@ -2,10 +2,14 @@ package fr.openent.formulaire.service.impl;
 
 import fr.openent.form.core.enums.FormElementTypes;
 import fr.openent.form.core.enums.I18nKeys;
+import fr.openent.form.core.models.FormElement;
+import fr.openent.form.core.models.Question;
 import fr.openent.form.core.models.QuestionChoice;
+import fr.openent.form.core.models.TransactionElement;
 import fr.openent.form.helpers.FutureHelper;
 import fr.openent.form.helpers.I18nHelper;
 import fr.openent.form.helpers.IModelHelper;
+import fr.openent.form.helpers.TransactionHelper;
 import fr.openent.formulaire.service.QuestionChoiceService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Future;
@@ -26,6 +30,8 @@ import static fr.openent.form.core.constants.Constants.TRANSACTION_BEGIN_QUERY;
 import static fr.openent.form.core.constants.Constants.TRANSACTION_COMMIT_QUERY;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.Tables.*;
+import static fr.openent.form.helpers.SqlHelper.getParamsForUpdateDateModifFormRequest;
+import static fr.openent.form.helpers.SqlHelper.getUpdateDateModifFormRequest;
 
 public class DefaultQuestionChoiceService implements QuestionChoiceService {
     private final Sql sql = Sql.getInstance();
@@ -91,6 +97,39 @@ public class DefaultQuestionChoiceService implements QuestionChoiceService {
 
         String errorMessage = "[Formulaire@DefaultQuestionChoiceService::create] Fail to create question choice : ";
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(FutureHelper.handlerEither(promise, errorMessage)));
+
+        return promise.future();
+    }
+
+    @Override
+    public Future<List<QuestionChoice>> create(List<QuestionChoice> choices, String locale) {
+        Promise<List<QuestionChoice>> promise = Promise.promise();
+
+        List<TransactionElement> transactionElements = new ArrayList<>();
+
+        String query = "INSERT INTO " + QUESTION_CHOICE_TABLE + " (question_id, value, position, type, " +
+                "next_form_element_id, next_form_element_type, is_next_form_element_default, is_custom, image) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
+
+        for (QuestionChoice choice : choices) {
+            boolean isCustom = choice.getIsCustom();
+            JsonArray params = new JsonArray()
+                    .add(choice.getQuestionId())
+                    .add(isCustom ? I18nHelper.getI18nValue(I18nKeys.OTHER, locale) : choice.getValue())
+                    .add(choice.getPosition())
+                    .add(choice.getType())
+                    .add(choice.getNextFormElementId())
+                    .add(choice.getNextFormElementType())
+                    .add(choice.getIsNextFormElementDefault())
+                    .add(isCustom)
+                    .add(choice.getImage());
+            transactionElements.add(new TransactionElement(query, params));
+        }
+
+        String errorMessage = "[Formulaire@DefaultQuestionChoiceService::create] Fail to create question choices : ";
+        TransactionHelper.executeTransactionAndGetJsonObjectResults(transactionElements, errorMessage)
+            .onSuccess(result -> promise.complete(IModelHelper.toList(result, QuestionChoice.class)))
+            .onFailure(err -> promise.fail(err.getMessage()));
 
         return promise.future();
     }

@@ -1,14 +1,14 @@
 import {idiom, ng, notify} from 'entcore';
 import http from 'axios';
 import {DataUtils} from "../../utils";
-import {Section, SectionPayload} from "../../models";
+import {ISectionResponse, Section, SectionPayload} from "../../models";
 import {Mix} from "entcore-toolkit";
 
 export interface SectionService {
     list(formId: number) : Promise<any>;
     get(sectionId: number) : Promise<any>;
-    save(section: Section) : Promise<any>;
-    create(section: Section) : Promise<any>;
+    save(section: Section) : Promise<Section>;
+    create(section: Section) : Promise<Section>;
     update(sections: Section[]) : Promise<Section[]>;
     delete(sectionId: number) : Promise<any>;
 }
@@ -35,14 +35,19 @@ export const sectionService: SectionService = {
         }
     },
 
-    async save(section: Section) : Promise<any> {
-        return section.id ? await this.update([section]) : await this.create(section);
+    async save(section: Section) : Promise<Section> {
+        if (section.id) {
+            let sections: Section[] = await this.update([section]);
+            return (sections && sections.length == 1) ? sections[0] : null;
+        }
+        else return await this.create(section);
     },
 
-    async create(section: Section) : Promise<any> {
+    async create(section: Section) : Promise<Section> {
         try {
             let sectionPayload: SectionPayload = new SectionPayload(section);
-            return DataUtils.getData(await http.post(`/formulaire/forms/${section.form_id}/sections`, sectionPayload));
+            let data: ISectionResponse = DataUtils.getData(await http.post(`/formulaire/forms/${section.form_id}/sections`, sectionPayload));
+            return new Section().build(data);
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.sectionService.create'));
             throw err;

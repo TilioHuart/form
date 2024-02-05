@@ -31,6 +31,7 @@ interface IViewModel extends ng.IController, ISectionItemProps {
     hasSeveralConditionals(): boolean;
     filterNextElements(formElement: FormElement): boolean;
     onSelectOption(): Promise<void>;
+    duplicateSection(): void;
 }
 
 interface ISectionItemScope extends IScope, ISectionItemProps{
@@ -120,6 +121,12 @@ class Controller implements IViewModel {
             followingFormElement == null;
         await sectionService.update([this.section]);
         this.$scope.$apply();
+    }
+
+    duplicateSection = () : void => {
+        if (!this.hasFormResponses) {
+            this.$scope.$emit(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DUPLICATE_ELEMENT);
+        }
     }
 }
 

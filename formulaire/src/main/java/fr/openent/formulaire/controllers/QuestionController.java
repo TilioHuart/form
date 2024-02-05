@@ -345,8 +345,8 @@ public class QuestionController extends ControllerHelper {
         });
     }
 
-    private Future<JsonObject> createQuestion(Question question, String formId) {
-        Promise<JsonObject> promise = Promise.promise();
+    private Future<Question> createQuestion(Question question, String formId) {
+        Promise<Question> promise = Promise.promise();
         Map<String,Question> promiseInfos = new HashMap<>();
 
         sectionService.list(formId)
@@ -375,7 +375,7 @@ public class QuestionController extends ControllerHelper {
             .onSuccess(specificFields -> {
                 Question createdQuestion = promiseInfos.get(QUESTION);
                 createdQuestion.addSpecificFields(specificFields.orElse(null));
-                promise.complete(createdQuestion.toJson());
+                promise.complete(createdQuestion);
             })
             .onFailure(err -> {
                 log.error("[Formulaire@QuestionController::createQuestion] Failed to create question " + question + " : " + err.getMessage());

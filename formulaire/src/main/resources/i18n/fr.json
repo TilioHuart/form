@@ -414,12 +414,13 @@
   "formulaire.success.forms.duplicate": "Tous les formulaires sélectionnés ont bien été dupliqués !",
   "formulaire.success.element.delete": "Votre élément et tout ce qu'il contient ont bien été supprimés !",
   "formulaire.success.question.duplicate": "Votre question a bien été dupliquée !",
+  "formulaire.success.section.duplicate": "Votre section a bien été dupliquée !",
   "formulaire.success.responses.save": "Vos réponses ont bien été enregistrées !",
   "formulaire.success.reminder.send": "Votre rappel a bien été envoyé !",
   "formulaire.success.folders.delete": "Tous les dossiers sélectionnés ont bien été supprimés !",
   "formulaire.success.move": "Tous les éléments sélectionnés ont bien été déplacés !",
 
-
+  "formulaire.error.duplicate.type": "Vous pouvez seulement dupliquer une question ou une section !",
   "formulaire.error.question.duplicate": "Impossible d'avoir deux questions conditionnelle dans une même section",
 
   "group.HeadTeacher": "Professeurs principaux de {0}.",

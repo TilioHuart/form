@@ -1,5 +1,6 @@
 <div class="ten section-item">
     <div class="domino" ng-class="{'sectionError': !vm.section.title || vm.verifConditional()}">
+        <!-- Head -->
         <div class="section-top" ng-class="{'disabled & dontSave': vm.hasFormResponses || vm.section.selected}">
             <!-- Drag and drop icon -->
             <div class="section-top-dots grab">
@@ -18,8 +19,13 @@
                         <h4 ng-if="!vm.section.title" class="empty">
                             <i18n>formulaire.section.title.empty</i18n>
                         </h4>
-                        <i class="i-edit md-icon dontSave" ng-click="vm.editSection()" title="[[vm.getTitle('edit')]]"
-                           ng-if="!vm.isOtherElementSelected()"></i>
+                        <div class="icons-section">
+                            <i class="i-duplicate md-icon spaced-right cursor-pointer" reset-guard="vm.duplicateSection()"
+                               ng-class="{disabled: vm.hasFormResponses}" title="[[vm.getTitle('duplicate')]]"
+                               ng-if="vm.formElements.selected.length <= 0"></i>
+                            <i class="i-edit md-icon dontSave" ng-click="vm.editSection()" title="[[vm.getTitle('edit')]]"
+                               ng-if="!vm.isOtherElementSelected()"></i>
+                        </div>
                     </div>
                     <div class="top-spacing-twice" ng-if="vm.section.selected">
                         <input type="text" class="twelve" i18n-placeholder="formulaire.section.title.empty"
@@ -35,6 +41,8 @@
                 </div>
             </div>
         </div>
+
+        <!-- Body -->
         <div class="nofocusable" id="[[vm.section.position]]">
             <!-- Description -->
             <div class="description row" guard-root="formTitle">

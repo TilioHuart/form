@@ -46,6 +46,13 @@ public interface QuestionChoiceService {
     Future<JsonObject> create(String questionId, QuestionChoice choice, String locale);
 
     /**
+     * Create multiple choices
+     * @param choices List<QuestionChoice> data
+     * @param locale locale language
+     */
+    Future<List<QuestionChoice>> create(List<QuestionChoice> choices, String locale);
+
+    /**
      * Duplicate choices of a specific question
      * @param formId new form identifier
      * @param questionId question identifier

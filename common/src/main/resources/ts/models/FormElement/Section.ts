@@ -2,7 +2,7 @@ import {Mix, Selection} from "entcore-toolkit";
 import {idiom, notify} from "entcore";
 import {sectionService} from "../../services";
 import {FormElement, FormElementPayload} from "./FormElement";
-import {Question, QuestionPayload, Questions} from "./Question";
+import {IQuestionResponse, Question, QuestionPayload, Questions} from "./Question";
 import {FormElementType} from "@common/core/enums/form-element-type";
 import {FormElements} from "@common/models";
 
@@ -23,6 +23,18 @@ export class Section extends FormElement {
         this.next_form_element_type = null;
         this.is_next_form_element_default = true;
         this.questions = new Questions();
+    }
+
+    build(data: ISectionResponse) : Section {
+        super.build(data);
+        this.form_element_type = FormElementType.SECTION;
+        this.description = data.description ? data.description : null;
+        this.next_form_element = null;
+        this.next_form_element_id = data.nextFormElementId ? data.nextFormElementId : null;
+        this.next_form_element_type = data.nextFormElementType ? data.nextFormElementType : null;
+        this.is_next_form_element_default = data.isNextFormElementDefault ? data.isNextFormElementDefault : true;
+        this.questions = data.questions ? new Questions().build(data.questions) : new Questions();
+        return this;
     }
 
     toJson() : Object {
@@ -73,6 +85,11 @@ export class Sections extends Selection<Section> {
 
     constructor() {
         super([]);
+    }
+
+    build(data: ISectionResponse[]) : Sections {
+        this.all = data.map((sr: ISectionResponse) => new Section().build(sr));
+        return this;
     }
 
     sync = async (formId: number) : Promise<void> => {
@@ -133,4 +150,20 @@ export class SectionPayload implements FormElementPayload {
             questions: this.questions
         }
     }
+}
+
+
+export interface ISectionResponse {
+    id: number;
+    formId: number;
+    title: string;
+    position: number;
+    selected: boolean;
+    label: string;
+    formElementType: FormElementType;
+    description: string;
+    nextFormElementId: number;
+    nextFormElementType: FormElementType;
+    isNextFormElementDefault: boolean;
+    questions: IQuestionResponse[];
 }

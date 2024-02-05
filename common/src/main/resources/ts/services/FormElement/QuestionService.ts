@@ -78,7 +78,8 @@ export const questionService: QuestionService = {
         try {
             if (!questions || questions.length <= 0) return [];
             let questionsPayload: QuestionPayload[] = questions.map((q: Question) => new QuestionPayload(q));
-            return DataUtils.getData(await http.post(`/formulaire/forms/${questionsPayload[0].form_id}/questions`, questionsPayload));
+            let data: IQuestionResponse[] = DataUtils.getData(await http.post(`/formulaire/forms/${questionsPayload[0].form_id}/questions`, questionsPayload));
+            return data.map((qr: IQuestionResponse) => new Question().build(qr));
         } catch (err) {
             let specificError: string = DataUtils.getSpecificError(err);
             notify.error(specificError ? specificError : idiom.translate('formulaire.error.questionService.create'));
@@ -90,7 +91,7 @@ export const questionService: QuestionService = {
         try {
             if (!questions || questions.length <= 0) return [];
             let questionsPayload: QuestionPayload[] = questions.map((q: Question) => new QuestionPayload(q));
-            let data: IQuestionResponse[] = DataUtils.getData(await http.put(`/formulaire/forms/${questions[0].form_id}/questions`, questionsPayload))
+            let data: IQuestionResponse[] = DataUtils.getData(await http.put(`/formulaire/forms/${questions[0].form_id}/questions`, questionsPayload));
             return data.map((qr: IQuestionResponse) => new Question().build(qr));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.questionService.update'));
