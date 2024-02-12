@@ -7,7 +7,7 @@ import {
     Types
 } from "@common/models";
 import {Direction, FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
-import {FormElementUtils, I18nUtils, RankingUtils} from "@common/utils";
+import {FormElementUtils, I18nUtils, RankingUtils, UtilsUtils} from "@common/utils";
 import {IScope} from "angular";
 import {PropPosition} from "@common/core/enums/prop-position";
 import * as Sortable from "sortablejs";
@@ -63,13 +63,15 @@ class Controller implements IViewModel {
             this.responses = data.get(this.question);
             this.init();
         });
-
-        if (this.question.question_type === Types.RANKING) {
-            this.initDrag();
-        }
     }
 
     $onDestroy = async (): Promise<void> => {}
+
+    $onChanges = async (changes: any) : Promise<void> => {
+        this.question = changes.question.currentValue;
+        await this.init();
+        UtilsUtils.safeApply(this.$scope);
+    };
 
     init = async () : Promise<void> => {
         if (this.responses == null) return; // happens when previous question is not same type than this one
@@ -100,6 +102,10 @@ class Controller implements IViewModel {
         if (this.question.question_type === Types.CURSOR && this.question.specific_fields) {
             let answer: number = Number.parseInt(this.responses.all[0].answer.toString());
             this.responses.all[0].answer = Number.isNaN(answer) ? this.question.specific_fields.cursor_min_val : answer;
+        }
+
+        if (this.question.question_type === Types.RANKING) {
+            this.initDrag();
         }
     }
 
