@@ -2,6 +2,7 @@ import {ng, Document, $} from 'entcore';
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
 import {IScope} from "angular";
 import {RootsConst} from "../../core/constants/roots.const";
+import {UtilsUtils} from "@common/utils";
 
 interface IFormulairePickerFileProps {
     files: File[];
@@ -37,7 +38,7 @@ class Controller implements IViewModel {
     $onInit = async () : Promise<void> => {
         window.setTimeout(() => {
             this.filesArray = this.files;
-            this.$scope.$apply();
+            UtilsUtils.safeApply(this.$scope);
             this.$scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.CHANGE_FILE_PICKER, (e, files) => {
                 this.files = files;
                 this.filesArray = this.files;
@@ -55,7 +56,7 @@ class Controller implements IViewModel {
             this.filesArray.push(files[i]);
         }
         this.files = this.$scope.files = this.filesArray;
-        this.$scope.$apply();
+        UtilsUtils.safeApply(this.$scope);
     }
 
     delete = (file: File) : void => {
@@ -104,7 +105,7 @@ function directive() {
                 element.find('.drop-zone').removeClass('dragover');
                 e.preventDefault();
                 vm.listFiles(e.originalEvent.dataTransfer.files);
-                this.$scope.$apply();
+                UtilsUtils.safeApply(this.$scope);
             }
 
             let body = $('body');

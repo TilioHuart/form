@@ -20,7 +20,6 @@ interface IViewModel extends ng.IController, IQuestionTypeMultipleanswerProps {
     direction: typeof Direction;
     selectedChoiceIndex: number;
 
-    deleteChoice(index: number): Promise<void>;
     displayImageSelect(index: number): void;
     deleteImageSelect(index: number): void;
 }
@@ -43,11 +42,6 @@ class Controller implements IViewModel {
 
     $onDestroy = async () : Promise<void> => {}
 
-    deleteChoice = async (index: number) : Promise<void> => {
-        await this.question.deleteChoice(index);
-        this.$scope.$apply();
-    }
-
     displayImageSelect = (index: number): void => {
         this.selectedChoiceIndex = index;
     };
@@ -62,7 +56,7 @@ class Controller implements IViewModel {
 function directive() {
     return {
         restrict: 'E',
-        templateUrl: `${RootsConst.directive}question/question-type/question-type-multipleanswer/question-type-multipleanswer.html`,
+        templateUrl: `${RootsConst.directiveQuestionTypes}/question-type-multipleanswer/question-type-multipleanswer.html`,
         transclude: true,
         scope: {
             question: '=',

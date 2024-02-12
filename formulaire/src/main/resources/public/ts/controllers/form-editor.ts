@@ -834,6 +834,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 if (isSection || isQuestionNotCursor || isCursorQuestionAndValuesOk) {
                     // Save form element
                     let savedElement: FormElement = await formElementService.save(formElement);
+                    if (!savedElement) return await vm.$onInit();
                     let newId: number = savedElement.id;
                     formElement.id = newId;
 

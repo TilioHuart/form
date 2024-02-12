@@ -1,11 +1,16 @@
 <div class="twelve">
+    <div class="sort-icon" ng-if="vm.question.selected">
+        <i ng-class="vm.question.choices.sorted ? 'i-sort-desc' : 'i-sort-asc'" class="md-icon"
+           ng-click="vm.question.choices.sortChoices()"></i>
+        <i18n ng-click="vm.question.choices.sortChoices()">formulaire.sort</i18n>
+    </div>
     <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']" guard-root="formTitle">
         <!-- Arrow to order -->
         <div class="container-arrow" ng-if="vm.question.selected">
-            <div ng-class="{hidden : $first}" ng-click="vm.moveChoice(choice, vm.direction.UP)">
+            <div ng-class="{hidden : $first}" ng-click="vm.question.moveChoice(choice, vm.direction.UP)">
                 <i class="i-chevron-up lg-icon"></i>
             </div>
-            <div ng-class="{hidden : $last}" ng-click="vm.moveChoice(choice, vm.direction.DOWN)">
+            <div ng-class="{hidden : $last}" ng-click="vm.question.moveChoice(choice, vm.direction.DOWN)">
                 <i class="i-chevron-down lg-icon"></i>
             </div>
         </div>
@@ -15,13 +20,14 @@
             <input type="text" class="width95 ten-mobile" ng-model="choice.value" ng-if="!vm.question.selected" disabled
                    placeholder="[[vm.I18n.getWithParam('formulaire.choice', choice.position)]]">
             <input type="text" class="width95 ten-mobile" ng-model="choice.value" ng-if="vm.question.selected" input-guard
-                   placeholder="[[vm.I18n.getWithParam('formulaire.choice', choice.position)]]">
+                   placeholder="[[vm.I18n.getWithParam('formulaire.choice', choice.position)]]"
+                   ng-focus="vm.question.choices.updateSorted()">
         </label>
         <!-- Cross to delete choice -->
-        <i class="i-cancel lg-icon dontSave" ng-click="vm.deleteChoice($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
+        <i class="i-cancel lg-icon dontSave" ng-click="vm.question.deleteChoice($index)" ng-if="vm.question.selected && !vm.hasFormResponses"></i>
     </div>
     <!-- Plus to add new choice -->
     <div style="display: flex; justify-content: center;" ng-if="vm.question.selected && !vm.hasFormResponses">
-        <i class="i-plus-circle lg-icon" ng-click="vm.createNewChoice()"></i>
+        <i class="i-plus-circle lg-icon" ng-click="vm.question.createNewChoice()"></i>
     </div>
 </div>

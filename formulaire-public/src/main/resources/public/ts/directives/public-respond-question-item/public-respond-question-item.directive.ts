@@ -164,7 +164,7 @@ class Controller implements IViewModel {
                     ghostClass: "sortable-ghost",
                     onEnd: async (evt): Promise<void> => {
                         await RankingUtils.onEndRankingDragAndDrop(evt, this.responses);
-                        this.$scope.$apply();
+                        UtilsUtils.safeApply(this.$scope);
                     },
                 });
             }

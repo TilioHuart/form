@@ -1,6 +1,6 @@
 import {idiom, ng} from "entcore";
 import {Delegate, Delegates, Form} from "../models";
-import {I18nUtils} from "../utils";
+import {I18nUtils, UtilsUtils} from "../utils";
 import {IScope} from "angular";
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
 
@@ -37,7 +37,7 @@ class Controller implements IViewModel {
         this.delegates = new Delegates();
         await this.delegates.sync();
         this.$scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.REFRESH_QUESTION, () => { this.init(); });
-        this.$scope.$apply();
+        UtilsUtils.safeApply(this.$scope);
     }
 
     getHtmlDescription = (description: string): string => {

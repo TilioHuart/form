@@ -1,7 +1,7 @@
 import {Directive, idiom, ng} from "entcore";
 import {Form, FormElement, FormElements, Question, Section} from "@common/models";
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
-import {I18nUtils} from "@common/utils";
+import {I18nUtils, UtilsUtils} from "@common/utils";
 import {RootsConst} from "../../core/constants/roots.const";
 import {IScope} from "angular";
 import {sectionService} from "@common/services";
@@ -120,7 +120,7 @@ class Controller implements IViewModel {
             this.section.next_form_element.equals(followingFormElement) :
             followingFormElement == null;
         await sectionService.update([this.section]);
-        this.$scope.$apply();
+        UtilsUtils.safeApply(this.$scope);
     }
 
     duplicateSection = () : void => {

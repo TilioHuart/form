@@ -3,6 +3,7 @@ import {idiom, notify} from "entcore";
 import {questionChoiceService} from "../services";
 import {FormElementType} from "@common/core/enums/form-element-type";
 import {FormElement, FormElements, Question} from "@common/models/FormElement";
+import {UtilsUtils} from "@common/utils";
 
 export enum ChoiceTypes {
     TXT = 'TXT',
@@ -95,9 +96,11 @@ export class QuestionChoice {
 
 export class QuestionChoices {
     all: QuestionChoice[];
+    sorted: boolean
 
     constructor() {
         this.all = [];
+        this.sorted = false;
     }
 
     build(data: IQuestionChoiceResponse[]) : QuestionChoices {
@@ -120,6 +123,28 @@ export class QuestionChoices {
         for (let i = 0; i < this.all.length; i++) {
             this.all[i].value = this.all[i].value.replace(/\u00A0/," ");
         }
+    }
+
+    updateSorted = () : void => {
+        let choices: QuestionChoice[] = this.all.filter((c: QuestionChoice) => !c.is_custom);
+        let currentChoices: number[] = choices
+            .sort((a: QuestionChoice, b: QuestionChoice) => a.position - b.position)
+            .map((c: QuestionChoice) => c.position);
+        let sortedChoices: number[] = choices
+            .sort((a: QuestionChoice, b: QuestionChoice) => a.value > b.value ? 1 : -1)
+            .map((c: QuestionChoice) => c.position);
+        this.sorted = UtilsUtils.areArrayEqual(currentChoices, sortedChoices);
+    }
+
+    sortChoices = () : void => {
+        let customChoice: QuestionChoice = this.all.find((c: QuestionChoice) => c.is_custom);
+        let choices: QuestionChoice[] = this.all.filter((c: QuestionChoice) => !c.is_custom);
+        choices = this.sorted ? choices.reverse() : choices.sort((a: QuestionChoice, b: QuestionChoice) => a.value > b.value ? 1 : -1);
+        for (let i = 0; i < choices.length; i++) choices[i].position = i+1;
+        choices.sort((a: QuestionChoice, b: QuestionChoice) => a.position - b.position);
+        this.all = choices;
+        if (customChoice) this.all.push(customChoice);
+        this.sorted = !this.sorted;
     }
 }
 

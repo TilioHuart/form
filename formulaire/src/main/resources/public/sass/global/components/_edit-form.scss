@@ -110,6 +110,13 @@
               font-size: 12px;
             }
 
+            .sort-icon {
+              display: flex;
+              justify-content: flex-end;
+              align-items: center;
+              color: $formulaire-blue;
+            }
+
             h4, .add-choice {
               font-size: 16px;
             }

@@ -12,6 +12,7 @@ import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
 import {Constants} from "@common/core/constants";
 import {RootsConst} from "../../../core/constants/roots.const";
 import {IScope} from "angular";
+import {UtilsUtils} from "@common/utils";
 
 interface IQuestionItemProps {
     question: Question;
@@ -58,6 +59,7 @@ class Controller implements IViewModel {
         this.matrixType = this.question.children.all.length > 0 && this.question.children.all[0].question_type ?
             this.question.children.all[0].question_type : this.types.SINGLEANSWERRADIO;
         this.matrixTypes = [this.types.SINGLEANSWERRADIO, this.types.MULTIPLEANSWER];
+        this.question.choices.updateSorted();
     }
 
     $onDestroy = async () : Promise<void> => {}
@@ -107,7 +109,7 @@ class Controller implements IViewModel {
         if (!isMandatory && this.question.conditional) {
             this.question.mandatory = true;
         }
-        this.$scope.$apply();
+        UtilsUtils.safeApply(this.$scope);
     }
 
     onSwitchConditional = (isConditional: boolean) : void => {
@@ -117,7 +119,7 @@ class Controller implements IViewModel {
         this.question.mandatory = this.question.conditional;
         this.question.setChoicesNextFormElementsProps(this.formElements);
         this.question.setParentSectionNextFormElements(this.formElements);
-        this.$scope.$apply();
+        UtilsUtils.safeApply(this.$scope);
     }
 
     cursorChoiceIsConsistent = () : boolean => {

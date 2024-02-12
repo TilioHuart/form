@@ -9,7 +9,7 @@ import {
     Responses,
     Types
 } from "@common/models";
-import {DateUtils} from "@common/utils";
+import {DateUtils, UtilsUtils} from "@common/utils";
 import {GraphUtils} from "@common/utils/graph";
 import {IScope} from "angular";
 import {RootsConst} from "../../../core/constants/roots.const";
@@ -110,7 +110,7 @@ class Controller implements ng.IController, IViewModel {
                 this.hasFiles = (this.responses.all.map((r: Response) => r.files.all) as any).flat().length > 0;
             }
         }
-        this.$scope.$apply();
+        UtilsUtils.safeApply(this.$scope);
     };
 
     generateChart = async () : Promise<void> => {
@@ -194,7 +194,7 @@ class Controller implements ng.IController, IViewModel {
             await this.distributions.syncByFormAndStatus(this.form.id, DistributionStatus.FINISHED, this.question.id,
                 this.distributions.all.length);
             this.syncResultsMap();
-            this.$scope.$apply();
+            UtilsUtils.safeApply(this.$scope);
         }
     };
 

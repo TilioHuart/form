@@ -112,6 +112,7 @@ export class Question extends FormElement {
             choice.value = idiom.translate('formulaire.other');
         }
 
+        this.choices.updateSorted();
         this.choices.all.push(choice);
         this.choices.all.sort((a: QuestionChoice, b: QuestionChoice) => a.position - b.position);
     }
@@ -119,6 +120,7 @@ export class Question extends FormElement {
     moveChoice = (choice: QuestionChoice, direction: string) : void => {
         FormElementUtils.switchPositions(this.choices, choice.position - 1, direction, PropPosition.POSITION);
         this.choices.all.sort((a: QuestionChoice, b: QuestionChoice) => a.position - b.position);
+        this.choices.updateSorted();
     }
 
     deleteChoice = async (index: number) : Promise<void> => {
@@ -130,6 +132,7 @@ export class Question extends FormElement {
         }
         this.choices.all.splice(index,1);
         this.choices.all.sort((a: QuestionChoice, b: QuestionChoice) => a.position - b.position);
+        this.choices.updateSorted();
         return;
     }
 
@@ -305,9 +308,11 @@ export class Question extends FormElement {
 
 export class Questions extends Selection<Question> {
     all: Question[];
+    sorted: boolean;
 
     constructor() {
         super([]);
+        this.sorted = false;
     }
 
     build(data: IQuestionResponse[]) : Questions {

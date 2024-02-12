@@ -98,153 +98,163 @@ i {
 
   &.i-bell::before {
     font-family: 'formulaire-mdi';
-    content: "\F09C";
+    content: "\F009C";
   }
 
   &.i-earth::before {
     font-family: 'formulaire-mdi';
-    content: "\F1E7";
+    content: "\F01E7";
   }
 
   &.i-cancel::before {
     font-family: 'formulaire-mdi';
-    content: "\F156";
+    content: "\F0156";
   }
 
   &.i-chevron-down::before {
     font-family: 'formulaire-mdi';
-    content: "\F140";
+    content: "\F0140";
   }
 
   &.i-chevron-left::before {
     font-family: 'formulaire-mdi';
-    content: "\F141";
+    content: "\F0141";
   }
 
   &.i-chevron-right::before {
     font-family: 'formulaire-mdi';
-    content: "\F142";
+    content: "\F0142";
   }
 
   &.i-chevron-up::before {
     font-family: 'formulaire-mdi';
-    content: "\F143";
+    content: "\F0143";
   }
 
   &.i-clock::before {
     font-family: 'formulaire-mdi';
-    content: "\F150";
+    content: "\F0150";
     color: $formulaire-grey-dark;
   }
 
   &.i-delete::before {
     font-family: 'formulaire-mdi';
-    content: "\F1C0";
+    content: "\F01B4";
   }
 
   &.i-download::before {
     font-family: 'formulaire-mdi';
-    content: "\F1DA";
+    content: "\F01DA";
     color: $formulaire-grey-dark;
   }
 
   &.i-drag::before {
     font-family: 'formulaire-mdi';
-    content: "\F1D8";
+    content: "\F01D8";
     color: $formulaire-grey;
   }
 
   &.i-duplicate::before {
     font-family: 'formulaire-mdi';
-    content: "\F18F";
+    content: "\F018F";
   }
 
   &.i-validate::before {
     font-family: 'formulaire-mdi';
-    content: "\F12C";
+    content: "\F012C";
   }
 
   &.i-plus-circle::before {
     font-family: 'formulaire-mdi';
-    content: "\F417";
+    content: "\F0417";
   }
 
   &.i-send::before {
     font-family: 'formulaire-mdi';
-    content: "\F0108";
+    content: "\F10DD";
     color: $formulaire-grey-dark;
   }
 
   &.i-share::before {
     font-family: 'formulaire-mdi';
-    content: "\F497";
+    content: "\F0497";
     color: $formulaire-grey-dark;
   }
 
   &.i-view-cards::before {
     font-family: 'formulaire-mdi';
-    content: "\FE4D";
+    content: "\F0E6A";
     color: $formulaire-grey-light;
   }
 
   &.i-view-tab::before {
     font-family: 'formulaire-mdi';
-    content: "\F572";
+    content: "\F0572";
     color: $formulaire-grey-light;
   }
 
   &.i-undo::before {
     font-family: 'formulaire-mdi';
-    content: "\F54C";
+    content: "\F054C";
   }
 
   &.i-folder::before {
     font-family: 'formulaire-mdi';
-    content: "\F24B";
+    content: "\F024B";
     color: $formulaire-blue;
   }
 
   &.i-eye::before {
     font-family: 'formulaire-mdi';
-    content: "\F208";
+    content: "\F0208";
     color: $formulaire-blue;
   }
 
   &.i-eye:hover::before {
     font-family: 'formulaire-mdi';
-    content: "\F208";
+    content: "\F0208";
     color: $formulaire-orange;
   }
 
   &.i-info::before {
     font-family: 'formulaire-mdi';
-    content: "\F2FD";
+    content: "\F02FD";
     color: $formulaire-blue;
   }
 
   &.i-edit::before {
     font-family: 'formulaire-mdi';
-    content: "\F3EB";
+    content: "\F03EB";
   }
 
   &.i-reload::before {
     font-family: 'formulaire-mdi';
-    content: "\F453";
+    content: "\F0453";
   }
 
   &.i-restore::before {
     font-family: 'formulaire-mdi';
-    content: "\F99A";
+    content: "\F099B";
   }
 
   &.i-image::before {
     font-family: 'formulaire-mdi';
-    content: "\F2E9";
+    content: "\F02E9";
     color: $formulaire-orange;
   }
 
   &.i-close::before {
     font-family: 'formulaire-mdi';
-    content: "\F159";
+    content: "\F0159";
+  }
+
+  &.i-sort-asc::before {
+    font-family: 'formulaire-mdi';
+    content: "\F05BD";
+  }
+
+  &.i-sort-desc::before {
+    font-family: 'formulaire-mdi';
+    content: "\F05BF";
   }
 }

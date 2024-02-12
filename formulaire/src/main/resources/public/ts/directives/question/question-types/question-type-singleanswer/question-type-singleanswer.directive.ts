@@ -1,6 +1,6 @@
 import {Directive, ng} from "entcore";
 import {Form, FormElement, FormElements, Question, QuestionChoice} from "@common/models";
-import {I18nUtils} from "@common/utils";
+import {I18nUtils, UtilsUtils} from "@common/utils";
 import {Direction} from "@common/core/enums";
 import {RootsConst} from "../../../../core/constants/roots.const";
 import {IScope} from "angular";
@@ -71,7 +71,7 @@ class Controller implements IViewModel {
 
     deleteChoice = async (index: number) : Promise<void> => {
         await this.question.deleteChoice(index);
-        this.$scope.$apply();
+        UtilsUtils.safeApply(this.$scope);
     }
 
     filterNextElements = (formElement: FormElement) : boolean => {
@@ -102,7 +102,7 @@ class Controller implements IViewModel {
 function directive() {
     return {
         restrict: 'E',
-        templateUrl: `${RootsConst.directive}question/question-type/question-type-singleanswer/question-type-singleanswer.html`,
+        templateUrl: `${RootsConst.directiveQuestionTypes}/question-type-singleanswer/question-type-singleanswer.html`,
         transclude: true,
         scope: {
             question: '=',

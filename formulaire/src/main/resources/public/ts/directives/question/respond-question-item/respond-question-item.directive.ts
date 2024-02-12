@@ -64,14 +64,14 @@ class Controller implements IViewModel {
 
     $onInit = async () : Promise<void> => {
         await this.initRespondQuestionItem();
-        this.$scope.$apply();
+        UtilsUtils.safeApply(this.$scope);
     };
 
     $onChanges = async (changes: any) : Promise<void> => {
         this.question = changes.question.currentValue;
         await this.initRespondQuestionItem();
         this.$scope.$broadcast(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.CHANGE_FILE_PICKER, this.files.all);
-        this.$scope.$apply();
+        UtilsUtils.safeApply(this.$scope);
     };
 
     $onDestroy = async () : Promise<void> => {};
@@ -186,7 +186,7 @@ class Controller implements IViewModel {
                     ghostClass: "sortable-ghost",
                     onEnd: async (evt): Promise<void> => {
                         await RankingUtils.onEndRankingDragAndDrop(evt, this.responses);
-                        this.$scope.$apply();
+                        UtilsUtils.safeApply(this.$scope);
                     }
                 });
             }

@@ -1,4 +1,9 @@
 <div class="twelve">
+    <div class="sort-icon" ng-if="vm.question.selected">
+        <i ng-class="vm.question.choices.sorted ? 'i-sort-desc' : 'i-sort-asc'" class="md-icon"
+           ng-click="vm.question.choices.sortChoices()"></i>
+        <i18n ng-click="vm.question.choices.sortChoices()">formulaire.sort</i18n>
+    </div>
     <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
         <div class="container-arrow" ng-if="vm.question.selected">
             <div ng-class="{hidden : $first || choice.is_custom}" ng-click="vm.question.moveChoice(choice, vm.direction.UP)">
@@ -21,7 +26,8 @@
                    placeholder="[[vm.i18n.getWithParam('formulaire.choice', choice.position)]]">
             <input type="text" ng-model="choice.value" ng-if="vm.question.selected && !choice.is_custom" input-guard
                    ng-class="vm.question.conditional ? 'eleven eight-mobile' : 'width95 ten-mobile'"
-                   placeholder="[[vm.i18n.getWithParam('formulaire.choice', choice.position)]]">
+                   placeholder="[[vm.i18n.getWithParam('formulaire.choice', choice.position)]]"
+                   ng-focus="vm.question.choices.updateSorted()">
             <input type="text" value="[[vm.i18n.translate('formulaire.other')]] : " ng-if="choice.is_custom" disabled
                    ng-class="vm.question.conditional ? 'eleven eight-mobile' : 'width95 ten-mobile'">
             <div class="image-container" ng-if="vm.isRadio">

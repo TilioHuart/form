@@ -6,7 +6,7 @@ import {
     Responses,
     Types
 } from "../../../models";
-import {I18nUtils} from "@common/utils";
+import {I18nUtils, UtilsUtils} from "@common/utils";
 import {RootsConst} from "../../../core/constants/roots.const";
 import {IScope} from "angular";
 
@@ -71,7 +71,7 @@ class Controller implements IViewModel {
             }
         }
 
-        this.$scope.$apply();
+        UtilsUtils.safeApply(this.$scope);
     }
 
     switchValue = (child: Question, choice: QuestionChoice) : void => {

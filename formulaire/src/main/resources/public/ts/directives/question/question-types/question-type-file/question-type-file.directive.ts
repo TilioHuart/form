@@ -27,7 +27,7 @@ class Controller implements IViewModel {
 function directive() {
     return {
         restrict: 'E',
-        templateUrl: `${RootsConst.directive}question/question-type/question-type-file/question-type-file.html`,
+        templateUrl: `${RootsConst.directiveQuestionTypes}/question-type-file/question-type-file.html`,
         transclude: true,
         scope: {
             question: '='
