@@ -57,9 +57,8 @@ public interface DistributionService {
      * @param formId form identifier
      * @param status status
      * @param nbLines number of lines already loaded
-     * @param handler function handler returning JsonArray data
      */
-    void listByFormAndStatus(String formId, String status, String nbLines, Handler<Either<String, JsonArray>> handler);
+    Future<List<Distribution>> listByFormAndStatus(String formId, String status, String nbLines);
 
     /**
      * List all the distributions of a specific question of a specific form with specific status
@@ -164,4 +163,10 @@ public interface DistributionService {
      * @param handler function handler returning JsonArray data
      */
     void deleteOldDistributions(Handler<Either<String, JsonArray>> handler);
+
+    /**
+     * Delete all distributions of a specific form
+     * @param formId    Form identifier
+     */
+    Future<List<Distribution>> deleteByForm(Number formId);
 }

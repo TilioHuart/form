@@ -3,7 +3,7 @@ import {idiom, notify, Rights, Shareable} from "entcore";
 import {formService, utilsService} from "../services";
 import {Distribution, Distributions, DistributionStatus} from "./Distribution";
 import {FiltersFilters, FiltersOrders} from "../core/enums";
-import {FormElement, FormElements, IQuestionResponse, Question, Questions, Section} from "./FormElement";
+import {FormElement, FormElements, Question, Questions, Section} from "./FormElement";
 import {QuestionChoice, QuestionChoices} from "./QuestionChoice";
 import {Fields} from "@common/core/constants";
 import {Types} from "@common/models/QuestionType";

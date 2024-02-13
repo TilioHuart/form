@@ -95,6 +95,7 @@ public class Fields {
     public static final String STRUCTURE = "structure";
     public static final String TITLE = "title";
     public static final String TYPE = "type";
+    public static final String UPDATED_FORM = "updated_form";
     public static final String URI = "uri";
     public static final String USERNAME = "username";
     public static final String USER_ID = "user_id";
@@ -142,6 +143,7 @@ public class Fields {
     public static final String PARAM_USER_IDS = "userIds";
     public static final String PARAM_USER_URI = "userUri";
     public static final String PARAM_USERS_IDS = "usersIds";
+    public static final String PARAM_WAS_FORM_REF_PUBLIC = "wasFormRefPublic";
 
 
     // Others

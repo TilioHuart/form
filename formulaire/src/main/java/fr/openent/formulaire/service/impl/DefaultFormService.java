@@ -15,6 +15,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.sql.SqlStatementsBuilder;
@@ -33,6 +35,7 @@ import static fr.openent.form.helpers.SqlHelper.getParamsForUpdateDateModifFormR
 import static fr.openent.form.helpers.SqlHelper.getUpdateDateModifFormRequest;
 
 public class DefaultFormService implements FormService {
+    private static final Logger log = LoggerFactory.getLogger(DefaultFormService.class);
     private final Sql sql = Sql.getInstance();
     private final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
@@ -448,40 +451,102 @@ public class DefaultFormService implements FormService {
 
     @Override
     public void update(String formId, JsonObject form, Handler<Either<String, JsonObject>> handler) {
-        String query = "WITH nbResponses AS (SELECT COUNT(*) FROM " + DISTRIBUTION_TABLE +
-                " WHERE form_id = ? AND status = ?) " +
-                "UPDATE " + FORM_TABLE + " SET title = ?, description = ?, picture = ?, date_modification = ?, " +
-                "date_opening = ?, date_ending = ?, sent = ?, collab = ?, reminded = ?, archived = ?, " +
-                "multiple = CASE (SELECT count > 0 FROM nbResponses) " +
-                "WHEN false THEN ? WHEN true THEN (SELECT multiple FROM " + FORM_TABLE +" WHERE id = ?) END, " +
-                "anonymous = CASE (SELECT count > 0 FROM nbResponses) " +
-                "WHEN false THEN ? WHEN true THEN (SELECT anonymous FROM " + FORM_TABLE +" WHERE id = ?) END, " +
-                "response_notified = ?, editable = ?, rgpd = ?, rgpd_goal = ?, rgpd_lifetime = ?" +
-                "WHERE id = ? RETURNING *;";
+        this.getFormPublicKey(form)
+            .onSuccess(publicKey -> {
+                String query = "WITH nbResponses AS (SELECT COUNT(*) FROM " + DISTRIBUTION_TABLE +
+                        " WHERE form_id = ? AND status = ?) " +
+                        "UPDATE " + FORM_TABLE + " SET title = ?, description = ?, picture = ?, date_modification = ?, " +
+                        "date_opening = ?, date_ending = ?, sent = ?, collab = ?, reminded = ?, archived = ?, " +
+                        "multiple = CASE (SELECT count > 0 FROM nbResponses) " +
+                        "WHEN false THEN ? WHEN true THEN (SELECT multiple FROM " + FORM_TABLE +" WHERE id = ?) END, " +
+                        "anonymous = CASE (SELECT count > 0 FROM nbResponses) " +
+                        "WHEN false THEN ? WHEN true THEN (SELECT anonymous FROM " + FORM_TABLE +" WHERE id = ?) END, " +
+                        "response_notified = ?, editable = ?, rgpd = ?, rgpd_goal = ?, rgpd_lifetime = ?, is_public = ?, public_key = ? " +
+                        "WHERE id = ? RETURNING *;";
 
-        JsonArray params = new JsonArray()
-                .add(formId)
-                .add(FINISHED)
-                .add(form.getString(TITLE, ""))
-                .add(form.getString(DESCRIPTION, ""))
-                .add(form.getString(PICTURE, ""))
-                .add("NOW()")
-                .add(form.getString(DATE_OPENING, "NOW()"))
-                .add(form.getString(DATE_ENDING, null))
-                .add(form.getBoolean(SENT, false))
-                .add(form.getBoolean(COLLAB, false))
-                .add(form.getBoolean(REMINDED, false))
-                .add(form.getBoolean(ARCHIVED, false))
-                .add(form.getBoolean(MULTIPLE, false)).add(formId)
-                .add(form.getBoolean(ANONYMOUS, false)).add(formId)
-                .add(form.getBoolean(RESPONSE_NOTIFIED, false))
-                .add(form.getBoolean(EDITABLE, false))
-                .add(form.getBoolean(RGPD, false))
-                .add(form.getString(RGPD_GOAL, ""))
-                .add(form.getInteger(RGPD_LIFETIME, 12))
-                .add(formId);
+                JsonArray params = new JsonArray()
+                        .add(formId)
+                        .add(FINISHED)
+                        .add(form.getString(TITLE, ""))
+                        .add(form.getString(DESCRIPTION, ""))
+                        .add(form.getString(PICTURE, ""))
+                        .add("NOW()")
+                        .add(form.getString(DATE_OPENING, "NOW()"))
+                        .add(form.getString(DATE_ENDING, null))
+                        .add(form.getBoolean(SENT, false))
+                        .add(form.getBoolean(COLLAB, false))
+                        .add(form.getBoolean(REMINDED, false))
+                        .add(form.getBoolean(ARCHIVED, false))
+                        .add(form.getBoolean(MULTIPLE, false)).add(formId)
+                        .add(form.getBoolean(ANONYMOUS, false)).add(formId)
+                        .add(form.getBoolean(RESPONSE_NOTIFIED, false))
+                        .add(form.getBoolean(EDITABLE, false))
+                        .add(form.getBoolean(RGPD, false))
+                        .add(form.getString(RGPD_GOAL, ""))
+                        .add(form.getInteger(RGPD_LIFETIME, 12))
+                        .add(form.getBoolean(IS_PUBLIC, false))
+                        .add(publicKey)
+                        .add(formId);
 
-        Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+                Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+            })
+            .onFailure(err -> {
+                log.error("[Formulaire@DefaultFormService::update] " + err.getMessage());
+                handler.handle(new Either.Left<>(err.getMessage()));
+            });
+    }
+
+    @Override
+    public Future<Optional<Form>> update(Form form) {
+        Promise<Optional<Form>> promise = Promise.promise();
+
+        this.getFormPublicKey(form.toJson())
+            .onSuccess(publicKey -> {
+                String query =
+                        "WITH nbResponses AS (SELECT COUNT(*) FROM " + DISTRIBUTION_TABLE + " WHERE form_id = ? AND status = ?) " +
+                        "UPDATE " + FORM_TABLE + " SET title = ?, description = ?, picture = ?, date_modification = ?, " +
+                        "date_opening = ?, date_ending = ?, sent = ?, collab = ?, reminded = ?, archived = ?, " +
+                        "multiple = CASE (SELECT count > 0 FROM nbResponses) " +
+                        "WHEN false THEN ? WHEN true THEN (SELECT multiple FROM " + FORM_TABLE +" WHERE id = ?) END, " +
+                        "anonymous = CASE (SELECT count > 0 FROM nbResponses) " +
+                        "WHEN false THEN ? WHEN true THEN (SELECT anonymous FROM " + FORM_TABLE +" WHERE id = ?) END, " +
+                        "response_notified = ?, editable = ?, rgpd = ?, rgpd_goal = ?, rgpd_lifetime = ?, is_public = ?, public_key = ? " +
+                        "WHERE id = ? RETURNING *;";
+
+                Number formId = form.getId();
+                JsonArray params = new JsonArray()
+                        .add(formId)
+                        .add(FINISHED)
+                        .add(form.getTitle() != null ? form.getTitle() : "")
+                        .add(form.getDescription() != null ? form.getDescription() : "")
+                        .add(form.getPicture() != null ? form.getPicture() : "")
+                        .add("NOW()")
+                        .add(form.getDateOpening() != null ? form.getDateOpening().toString() : "NOW()")
+                        .add(form.getDateEnding() != null ? form.getDateEnding().toString() : null)
+                        .add(form.getSent())
+                        .add(form.getCollab())
+                        .add(form.getReminded())
+                        .add(form.getArchived())
+                        .add(!form.getIsPublic() && form.getMultiple()).add(formId)
+                        .add(form.getIsPublic() || form.getAnonymous()).add(formId)
+                        .add(form.getResponseNotified())
+                        .add(!form.getIsPublic() && form.getEditable())
+                        .add(form.getRgpd())
+                        .add(form.getRgpdGoal() != null ? form.getRgpdGoal() : "")
+                        .add(form.getRgpdLifetime() != null ? form.getRgpdLifetime() : 12)
+                        .add(form.getIsPublic())
+                        .add(publicKey)
+                        .add(formId);
+
+                String errorMessage = "[Formulaire@DefaultFormService::update] Fail to update form with id " + formId;
+                Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(IModelHelper.sqlUniqueResultToIModel(promise, Form.class, errorMessage)));
+            })
+            .onFailure(err -> {
+                log.error("[Formulaire@DefaultFormService::update] " + err.getMessage());
+                promise.fail(err.getMessage());
+            });
+
+        return promise.future();
     }
 
     @Override
@@ -583,5 +648,43 @@ public class DefaultFormService implements FormService {
                 .addAll(formIds);
 
         Sql.getInstance().prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    private Future<String> getFormPublicKey(JsonObject form) {
+        Promise<String> promise = Promise.promise();
+
+        if (!form.getBoolean(IS_PUBLIC, false)) {
+            promise.complete(null);
+            return promise.future();
+        }
+
+        if (form.getString(DATE_ENDING, null) == null || form.getString(DATE_OPENING, null) == null) {
+            String errorMessage = "A public form must have an ending date.";
+            log.error("[Formulaire@DefaultFormService::getFormPublicKey] " + errorMessage);
+            promise.fail(errorMessage);
+            return promise.future();
+        }
+
+        try {
+            Date startDate = dateFormatter.parse(form.getString(DATE_OPENING));
+            Date endDate = dateFormatter.parse(form.getString(DATE_ENDING));
+
+            if (endDate.before(new Date()) || endDate.before(startDate)) {
+                String errorMessage = "This form is closed, you cannot access it anymore.";
+                log.error("[Formulaire@DefaultFormService::getFormPublicKey] " + errorMessage);
+                promise.fail(errorMessage);
+                return promise.future();
+            }
+
+            promise.complete(UUID.randomUUID().toString());
+            return promise.future();
+        }
+        catch (ParseException e) {
+            e.printStackTrace();
+            String errorMessage = "This form is closed, you cannot access it anymore.";
+            log.error("[Formulaire@DefaultFormService::getFormPublicKey] " + errorMessage);
+            promise.fail(errorMessage);
+            return promise.future();
+        }
     }
 }

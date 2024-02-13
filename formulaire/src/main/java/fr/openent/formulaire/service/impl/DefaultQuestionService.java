@@ -1,6 +1,7 @@
 package fr.openent.formulaire.service.impl;
 
 import fr.openent.form.core.enums.QuestionTypes;
+import fr.openent.form.core.models.Form;
 import fr.openent.form.core.models.FormElement;
 import fr.openent.form.core.models.Question;
 import fr.openent.form.core.models.TransactionElement;
@@ -21,9 +22,12 @@ import org.entcore.common.sql.SqlStatementsBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static fr.openent.form.core.constants.Constants.*;
+import static fr.openent.form.core.constants.DistributionStatus.FINISHED;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.Tables.*;
 import static fr.openent.form.core.constants.Tables.QUESTION_TYPE;
@@ -346,5 +350,104 @@ public class DefaultQuestionService implements QuestionService {
         params.addAll(getParamsForUpdateDateModifFormRequest(question.getInteger(FORM_ID).toString()));
 
         sql.prepared(query, params, SqlResult.validUniqueResultHandler(handler));
+    }
+
+    @Override
+    public Future<List<Question>> deleteFileQuestionsForForm(Number formId) {
+        Promise<List<Question>> promise = Promise.promise();
+        String query = "DELETE FROM " + QUESTION_TABLE + " WHERE form_id = ? AND question_type = ? RETURNING *;";
+        JsonArray params = new JsonArray().add(formId).add(QuestionTypes.FILE.getCode());
+
+        String errorMessage = "[Formulaire@DefaultQuestionService::deleteFileQuestionsForForm] Failed to delete questions file for form with id " + formId;
+        sql.prepared(query, params, SqlResult.validResultHandler(IModelHelper.sqlResultToIModel(promise, Question.class, errorMessage)));
+
+        return promise.future();
+    }
+
+    @Override
+    public Future<Void> reorderQuestionsAfterDeletion(Number formId, List<Question> deletedQuestions) {
+        Promise<Void> promise = Promise.promise();
+        List<TransactionElement> transactionElements = new ArrayList<>();
+
+        if (deletedQuestions == null || deletedQuestions.isEmpty()) {
+            promise.complete();
+            return promise.future();
+        }
+
+        // Reorder questions in sections
+        List<Long> sectionIdToUpdate = deletedQuestions.stream()
+                .map(Question::getSectionId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        String querySection =
+                "WITH ranking_position AS ( " +
+                    "SELECT *, RANK() OVER (PARTITION BY form_id ORDER BY section_position) AS rank " +
+                    "FROM " + QUESTION_TABLE + " WHERE section_id = ? " +
+                "), " +
+                "nullify_questions AS ( " +
+                    "UPDATE " + QUESTION_TABLE + " SET section_position = NULL, section_id = NULL WHERE section_id = ? " +
+                ") " +
+                "UPDATE " + QUESTION_TABLE + " q " +
+                "SET section_position = (SELECT rank FROM ranking_position WHERE q.id = ranking_position.id), section_id = ? " +
+                "WHERE section_id = ? " +
+                "RETURNING *";
+
+        for (Long sectionId : sectionIdToUpdate) {
+            JsonArray paramsSection = new JsonArray().add(sectionId).add(sectionId).add(sectionId).add(sectionId);
+            transactionElements.add(new TransactionElement(querySection, paramsSection));
+        }
+
+        // Reorder form elements in form
+        String queryForm =
+                "WITH ranking_position AS ( " +
+                    "SELECT *, RANK() OVER (PARTITION BY form_id ORDER BY position, id_section, id_question) AS rank " +
+                    "FROM ( " +
+                        "SELECT form_id, id AS id_section, null AS id_question, position FROM " + SECTION_TABLE +
+                        " WHERE form_id = ? " +
+                        "UNION " +
+                        "SELECT form_id, null AS id_section, id AS id_question, position FROM " + QUESTION_TABLE +
+                        " WHERE form_id = ? AND position IS NOT NULL " +
+                    ") AS elements " +
+                "), " +
+                "nullify_sections AS ( " +
+                    "UPDATE " + SECTION_TABLE + " SET position = NULL WHERE form_id = ? " +
+                "), " +
+                "nullify_questions AS ( " +
+                    "UPDATE " + QUESTION_TABLE + " SET position = NULL WHERE form_id = ? AND position IS NOT NULL " +
+                ")," +
+                "updated_sections AS ( " +
+                    "UPDATE " + SECTION_TABLE + " s " +
+                    "SET position = ( " +
+                        "SELECT rank FROM ranking_position " +
+                        "WHERE ranking_position.id_section IS NOT NULL AND s.id = ranking_position.id_section " +
+                    ") " +
+                    "WHERE form_id = ? " +
+                    "RETURNING id, form_id, title, position, true AS is_section " +
+                "), " +
+                "updated_questions AS ( " +
+                    "UPDATE " + QUESTION_TABLE + " q " +
+                    "SET position = ( " +
+                        "SELECT rank FROM ranking_position " +
+                        "WHERE ranking_position.id_question IS NOT NULL AND q.id = ranking_position.id_question " +
+                    ") " +
+                    "WHERE form_id = ? " +
+                    "RETURNING id, form_id, title, position, false AS is_section " +
+                ") " +
+                "SELECT * FROM updated_sections " +
+                "UNION " +
+                "SELECT * FROM updated_questions " +
+                "ORDER BY form_id, position, id";
+
+        JsonArray paramsForm = new JsonArray().add(formId).add(formId).add(formId).add(formId).add(formId).add(formId);
+        transactionElements.add(new TransactionElement(queryForm, paramsForm));
+
+        String errorMessage = "[Formulaire@DefaultQuestionService::reorderQuestionsAfterDeletion] Fail to reorder questions and form elements of form with id " + formId;
+        TransactionHelper.executeTransaction(transactionElements, errorMessage)
+                .onSuccess(result -> promise.complete())
+                .onFailure(err -> promise.fail(err.getMessage()));
+
+        return promise.future();
     }
 }

@@ -182,7 +182,9 @@ export class FormElementUtils {
                 // Check new organisation and update
                 let checksResult: boolean = FormElementUtils.checkFormElementsBeforeSave(formElements);
                 if (!checksResult) return;
-                await questionService.update(newSection.questions.all.concat(oldSection.questions.all));
+                let questionsToUpdate: Question[] = newSection.questions.all;
+                if (newSection.id != oldSection.id) questionsToUpdate.concat(oldSection.questions.all);
+                await questionService.update(questionsToUpdate);
             }
             else { // Item moved FROM vm.formElements TO section with id 'newSectionId'
                 this.updateSiblingsPositions(formElements, false, null, oldIndex);

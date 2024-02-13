@@ -1,8 +1,7 @@
 import {idiom, ng, notify} from 'entcore';
-import http, {CancelToken, CancelTokenSource, CancelTokenStatic} from 'axios';
+import http, {CancelTokenSource, CancelTokenStatic} from 'axios';
 import {Form} from '../models';
 import {DataUtils} from "../utils";
-import {Exports} from "../core/enums";
 import Axios from "axios";
 
 export interface FormService {

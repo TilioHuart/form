@@ -1,5 +1,6 @@
 package fr.openent.formulaire.service.test.impl;
 
+import fr.openent.form.core.models.Form;
 import fr.openent.formulaire.service.impl.DefaultFormService;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -25,12 +26,38 @@ import static fr.openent.form.core.constants.Tables.*;
 public class DefaultFormServiceTest {
     private Vertx vertx;
     private DefaultFormService defaultFormService;
+    private Form form;
 
     @Before
     public void setUp(){
         vertx = Vertx.vertx();
         defaultFormService = new DefaultFormService();
         Sql.getInstance().init(vertx.eventBus(), FORMULAIRE_ADDRESS);
+
+        JsonObject formJson = new JsonObject()
+                .put(ID, 12)
+                .put(TITLE, "My amazing form")
+                .put(DESCRIPTION, "This is a test form")
+                .put(PICTURE, (String)null)
+                .put(OWNER_ID, "4265605f-3352-4f42-8cef-18e150bbf6bf")
+                .put(OWNER_NAME, "Quentin PERIE")
+                .put(DATE_OPENING, "2024-12-08T00:00:00.000Z")
+                .put(DATE_ENDING, (String)null)
+                .put(MULTIPLE, true)
+                .put(ANONYMOUS, false)
+                .put(REMINDED, false)
+                .put(RESPONSE_NOTIFIED, false)
+                .put(EDITABLE, true)
+                .put(RGPD, true)
+                .put(ARCHIVED, false)
+                .put(SEND, true)
+                .put(COLLAB, true)
+                .put(RGPD_GOAL, "This is my goal")
+                .put(RGPD_LIFETIME, 3)
+                .put(IS_PUBLIC, false)
+                .put(PUBLIC_KEY, (String)null)
+                .put(ORIGINAL_FORM_ID, 1);
+        form = new Form(formJson);
     }
 
     @Test
@@ -240,6 +267,37 @@ public class DefaultFormServiceTest {
         });
 
         defaultFormService.checkFormsRights(groupsAndUserIds, user, "manager", new JsonArray(formIds), null);
+        async.awaitSuccess(10000);
+    }
+
+    @Test
+    public void testUpdate(TestContext ctx) {
+        Async async = ctx.async();
+
+        String expectedQuery =
+                "WITH nbResponses AS (SELECT COUNT(*) FROM " + DISTRIBUTION_TABLE + " WHERE form_id = ? AND status = ?) " +
+                "UPDATE " + FORM_TABLE + " SET title = ?, description = ?, picture = ?, date_modification = ?, " +
+                "date_opening = ?, date_ending = ?, sent = ?, collab = ?, reminded = ?, archived = ?, " +
+                "multiple = CASE (SELECT count > 0 FROM nbResponses) " +
+                "WHEN false THEN ? WHEN true THEN (SELECT multiple FROM " + FORM_TABLE +" WHERE id = ?) END, " +
+                "anonymous = CASE (SELECT count > 0 FROM nbResponses) " +
+                "WHEN false THEN ? WHEN true THEN (SELECT anonymous FROM " + FORM_TABLE +" WHERE id = ?) END, " +
+                "response_notified = ?, editable = ?, rgpd = ?, rgpd_goal = ?, rgpd_lifetime = ?, is_public = ?, public_key = ? " +
+                "WHERE id = ? RETURNING *;";
+        JsonArray expectedParams = new JsonArray("[12,\"FINISHED\",\"My amazing form\",\"This is a test form\",\"\",\"NOW()\"," +
+                "\"Sun Dec 08 00:00:00 GMT 2024\",null,false,true,false,false,true,12,false,12,false,true,true,\"This is my goal\",3,false,null,12]");
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getString(STATEMENT));
+            ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
+            async.complete();
+        });
+
+        defaultFormService.update(form)
+            .onSuccess(result -> async.complete());
+
         async.awaitSuccess(10000);
     }
 }

@@ -1,5 +1,7 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.core.models.Distribution;
+import fr.openent.form.helpers.IModelHelper;
 import fr.openent.formulaire.security.CreationRight;
 import fr.openent.formulaire.security.ResponseRight;
 import fr.openent.formulaire.security.CustomShareAndOwner;
@@ -115,7 +117,14 @@ public class DistributionController extends ControllerHelper {
         String formId = request.getParam(PARAM_FORM_ID);
         String status = request.getParam(STATUS);
         String nbLines = request.params().get(PARAM_NB_LINES);
-        distributionService.listByFormAndStatus(formId, status, nbLines, arrayResponseHandler(request));
+        distributionService.listByFormAndStatus(formId, status, nbLines)
+            .onSuccess(result -> renderJson(request, IModelHelper.toJsonArray(result)))
+            .onFailure(err -> {
+                String errorMessage = "[Formulaire@DistributionController::listByFormAndStatus] Failed to list distributions " +
+                        "for form with id " + formId + " and status " + status;
+                log.error(errorMessage + " " + err.getMessage());
+                renderError(request);
+            });
     }
 
     @Get("/distributions/forms/:formId/questions/:questionId/list/:status")

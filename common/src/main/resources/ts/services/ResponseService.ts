@@ -13,7 +13,7 @@ import {Exports} from "@common/core/enums";
 
 export interface ResponseService {
     list(question: Question, nbLines: number) : Promise<any>;
-    listByForm(formId: number) : Promise<any>;
+    listByForm(formId: number) : Promise<Response[]>;
     listMineByDistribution(questionId: number, distributionId: number) : Promise<any>;
     listMineByDistributionAndQuestions(questionIds: number[], distributionId: number) : Promise<Response[]>;
     listByDistribution(distributionId: number) : Promise<any>;
@@ -41,9 +41,10 @@ export const responseService: ResponseService = {
         }
     },
 
-    async listByForm(formId: number) : Promise<any> {
+    async listByForm(formId: number) : Promise<Response[]> {
         try {
-            return DataUtils.getData(await http.get(`/formulaire/forms/${formId}/responses`));
+            let data: IResponseResponse[] = DataUtils.getData(await http.get(`/formulaire/forms/${formId}/responses`));
+            return data.map((rr: IResponseResponse) => new Response().build(rr));
         } catch (err) {
             notify.error(idiom.translate('formulaire.error.responseService.list'));
             throw err;

@@ -89,6 +89,11 @@ export class Responses extends Selection<Response> {
         super([]);
     }
 
+    build(data: IResponseResponse[]) : Responses {
+        this.all = data.map((rr: IResponseResponse) => new Response().build(rr));
+        return this;
+    }
+
     sync = async (question: Question, isFileQuestion: boolean, nbLines: number = null) : Promise<void> => {
         try {
             let data = await responseService.list(question, nbLines);
@@ -136,8 +141,7 @@ export class Responses extends Selection<Response> {
 
     syncForForm = async (formId: number) : Promise<void> => {
         try {
-            let data = await responseService.listByForm(formId);
-            this.all = Mix.castArrayAs(Response, data);
+            this.all = await responseService.listByForm(formId);
         } catch (e) {
             notify.error(idiom.translate('formulaire.error.response.sync'));
             throw e;

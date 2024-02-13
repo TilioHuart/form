@@ -2,10 +2,7 @@ package fr.openent.formulaire.controllers;
 
 import fr.openent.form.core.enums.I18nKeys;
 import fr.openent.form.core.models.Form;
-import fr.openent.form.helpers.EventBusHelper;
-import fr.openent.form.helpers.FutureHelper;
-import fr.openent.form.helpers.I18nHelper;
-import fr.openent.form.helpers.UtilsHelper;
+import fr.openent.form.helpers.*;
 import fr.openent.formulaire.export.FormQuestionsExportPDF;
 import fr.openent.formulaire.helpers.DataChecker;
 import fr.openent.formulaire.helpers.folder_exporter.FolderExporterZip;
@@ -33,21 +30,20 @@ import org.entcore.common.storage.Storage;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static fr.openent.form.core.constants.ConfigFields.ZIMBRA_MAX_RECIPIENTS;
 import static fr.openent.form.core.constants.ConsoleRights.*;
 import static fr.openent.form.core.constants.Constants.CHOICES_TYPE_QUESTIONS;
+import static fr.openent.form.core.constants.DistributionStatus.FINISHED;
 import static fr.openent.form.core.constants.EbFields.ACTION;
 import static fr.openent.form.core.constants.EbFields.*;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.FolderIds.*;
 import static fr.openent.form.core.constants.ShareRights.*;
 import static fr.openent.form.core.constants.Tables.DB_SCHEMA;
+import static fr.openent.form.core.constants.Tables.FORM;
 import static fr.openent.form.core.enums.Events.CREATE;
 import static fr.openent.form.helpers.RenderHelper.renderInternalError;
 import static fr.openent.form.helpers.UtilsHelper.getByProp;
@@ -61,7 +57,9 @@ public class FormController extends ControllerHelper {
     private final Storage storage;
     private final EventBus eb;
     private final FormService formService;
+    private final FormSharesService formSharesService;
     private final DistributionService distributionService;
+    private final QuestionService questionService;
     private final QuestionChoiceService questionChoiceService;
     private final ResponseService responseService;
     private final ResponseFileService responseFileService;
@@ -74,7 +72,9 @@ public class FormController extends ControllerHelper {
         this.storage = storage;
         this.eb = eb;
         this.formService = new DefaultFormService();
+        this.formSharesService = new DefaultFormSharesService();
         this.distributionService = new DefaultDistributionService();
+        this.questionService = new DefaultQuestionService();
         this.questionChoiceService = new DefaultQuestionChoiceService();
         this.responseService = new DefaultResponseService();
         this.responseFileService = new DefaultResponseFileService();
@@ -230,8 +230,8 @@ public class FormController extends ControllerHelper {
                 }
 
                 // date_ending should be after date_opening if not null
-                boolean areDateValid = DataChecker.checkFormDatesValidity(form);
-                if (!areDateValid) {
+                boolean areDatesValid = DataChecker.checkFormDatesValidity(form);
+                if (!areDatesValid) {
                     String message = "[Formulaire@createForm] You cannot create a form with a ending date before the opening date.";
                     log.error(message);
                     badRequest(request, message);
@@ -471,84 +471,134 @@ public class FormController extends ControllerHelper {
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void update(HttpServerRequest request) {
         String formId = request.getParam(PARAM_FORM_ID);
-        UserUtils.getUserInfos(eb, request, user -> {
-            if (user == null) {
-                String message = "[Formulaire@updateForm] User not found in session.";
-                log.error(message);
-                unauthorized(request, message);
+
+        RequestUtils.bodyToJson(request, formJson -> {
+            if (formJson == null || formJson.isEmpty()) {
+                log.error("[Formulaire@FormController::update] No form to update.");
+                noContent(request);
                 return;
             }
 
-            RequestUtils.bodyToJson(request, form -> {
-                if (form == null || form.isEmpty()) {
-                    log.error("[Formulaire@updateForm] No form to update.");
-                    noContent(request);
-                    return;
-                }
+            Form form = new Form(formJson);
+            Map<String, Form> mapInfoForms = new HashMap<>();
+            JsonObject composeInfo = new JsonObject();
+            UserUtils.getAuthenticatedUserInfos(eb, request)
+                .compose(user -> {
+                    String errorMessage = checkUpdateValidity(request, formJson, user);
+                    return errorMessage == null ? Future.succeededFuture() : Future.failedFuture(errorMessage);
+                })
+                .compose(result -> formService.get(formId))
+                .compose(formRef -> {
+                    if (formRef.isPresent()) {
+                        mapInfoForms.put(FORM, formRef.get());
+                        return distributionService.listByFormAndStatus(formId, FINISHED, null);
+                    }
+                    else return Future.failedFuture("No form to get.");
+                })
+                .compose(finishedDistributions -> {
+                    Form formRef = mapInfoForms.get(FORM);
+                    composeInfo.put(PARAM_WAS_FORM_REF_PUBLIC, formRef.getIsPublic());
 
-                // Check if the user has right to update a public form
-                boolean isFormPublic = form.getBoolean(IS_PUBLIC);
-                if (isFormPublic && !WorkflowActionUtils.hasRight(user, WorkflowActions.CREATION_RIGHT.toString())) {
-                    String message = "[Formulaire@updateForm] You are not authorized to create a public form.";
-                    log.error(message);
-                    unauthorized(request, message);
-                    return;
-                }
-
-                // date_ending should be after date_ending if not null
-                boolean areDateValid = DataChecker.checkFormDatesValidity(form);
-                if (!areDateValid) {
-                    String message = "[Formulaire@updateForm] You cannot update a form with an ending date before the opening date.";
-                    log.error(message);
-                    badRequest(request, message);
-                    return;
-                }
-
-                // RGPD lifetime should be in [3, 6, 9, 12]
-                boolean isRGPDLifetimeOk = DataChecker.checkRGPDLifetimeValidity(new JsonArray().add(form));
-                if (!isRGPDLifetimeOk) {
-                    String message = "[Formulaire@updateForm] Wrong RGPD lifetime value : " + form.getInteger(RGPD_LIFETIME);
-                    log.error(message);
-                    badRequest(request, message);
-                    return;
-                }
-
-                // Check if some properties can be changed (unable if there are already responses)
-                responseService.listByForm(formId, responsesEvt -> {
-                    if (responsesEvt.isLeft()) {
-                        log.error("[Formulaire@updateForm] Fail to get responses for form with id " + formId);
-                        renderInternalError(request, responsesEvt);
-                        return;
+                    if (!finishedDistributions.isEmpty()) {
+                        // Reset props 'public', 'multiple', 'anonymous' and 'rgpd' to their current values
+                        form.setIsPublic(formRef.getIsPublic());
+                        form.setMultiple(formRef.getMultiple());
+                        form.setAnonymous(formRef.getAnonymous());
+                        form.setRgpd(formRef.getRgpd());
                     }
 
-                    if (!responsesEvt.right().getValue().isEmpty()) {
-                        formService.get(formId, user, formEvt -> {
-                            if (formEvt.isLeft()) {
-                                log.error("[Formulaire@updateForm] Fail to get form for id " + formId);
-                                renderInternalError(request, formEvt);
-                                return;
-                            }
-                            if (formEvt.right().getValue().isEmpty()) {
-                                String message = "[Formulaire@updateForm] No form found for id " + formId;
-                                log.error(message);
-                                notFound(request, message);
-                                return;
-                            }
+                    return formService.update(form);
+                })
+                .compose(updatedFormOpt -> {
+                    if (!updatedFormOpt.isPresent()) {
+                        String errorMessage = "[Formulaire@FormController::update] No form updated.";
+                        log.error(errorMessage);
+                        renderError(request);
+                        return Future.succeededFuture();
+                    }
 
-                            // Reset props ''multiple', 'anonymous' and 'rgpd' to their current values
-                            JsonObject formRef = formEvt.right().getValue();
-                            form.put(MULTIPLE, formRef.getBoolean(MULTIPLE));
-                            form.put(ANONYMOUS, formRef.getBoolean(ANONYMOUS));
-                            form.put(RGPD, formRef.getBoolean(RGPD));
+                    Form updatedForm = updatedFormOpt.get();
+                    mapInfoForms.put(UPDATED_FORM, updatedForm);
+                    // If form switch from private to public we clean what's needed
+                    boolean doesSwitchToPublic = Boolean.FALSE.equals(composeInfo.getBoolean(PARAM_WAS_FORM_REF_PUBLIC)) && Boolean.TRUE.equals(form.getIsPublic());
+                    return doesSwitchToPublic ? cleanDataWhenSwitchingToPublicForm(form) : Future.succeededFuture();
+                })
+                .onSuccess(result -> render(request, mapInfoForms.get(UPDATED_FORM).toJson()))
+                .onFailure(err -> {
+                    String errorMessage = "[Formulaire@FormController::update] Failed to update form with id " + formId;
+                    log.error(errorMessage + " " + err.getMessage());
 
-                            formService.update(formId, form, defaultResponseHandler(request));
-                        });
-                    } else {
-                        formService.update(formId, form, defaultResponseHandler(request));
+                    if (!request.isEnded()) {
+                        Form formRef = mapInfoForms.get(FORM);
+                        formService.update(formRef)
+                            .onSuccess(result -> {
+                                log.error("[Formulaire@FormController::update] Form with id " + formId + " was successfully rollback");
+                                renderError(request);
+                            })
+                            .onFailure(rollbackErr -> {
+                                String rollBackErrorMessage = "[Formulaire@FormController::update] Failed to rollback form with id " + formId;
+                                log.error(rollBackErrorMessage + " " + rollbackErr.getMessage());
+                                renderError(request);
+                            });
                     }
                 });
-            });
         });
+    }
+
+    private String checkUpdateValidity(HttpServerRequest request, JsonObject form, UserInfos user) {
+        String logHeader = "[Formulaire@FormController::checkUpdateValidity] ";
+
+        // Check if the user has right to update a public form
+        boolean isFormPublic = form.getBoolean(IS_PUBLIC);
+        if (isFormPublic && !WorkflowActionUtils.hasRight(user, WorkflowActions.CREATION_PUBLIC_RIGHT.toString())) {
+            String message = "You are not authorized to create a public form.";
+            log.error(logHeader + message);
+            unauthorized(request, message);
+            return message;
+        }
+
+        // date_ending should be after date_ending if not null
+        boolean areDatesValid = DataChecker.checkFormDatesValidity(form);
+        if (!areDatesValid) {
+            String message = "You cannot update a form with an ending date before the opening date.";
+            log.error(logHeader + message);
+            badRequest(request, message);
+            return message;
+        }
+
+        // RGPD lifetime should be in [3, 6, 9, 12]
+        boolean isRGPDLifetimeOk = DataChecker.checkRGPDLifetimeValidity(new JsonArray().add(form));
+        if (!isRGPDLifetimeOk) {
+            String message = "[Wrong RGPD lifetime value : " + form.getInteger(RGPD_LIFETIME);
+            log.error(logHeader + message);
+            badRequest(request, message);
+            return message;
+        }
+
+        return null;
+    }
+
+
+    private Future<Void> cleanDataWhenSwitchingToPublicForm(Form form) {
+        Promise<Void> promise = Promise.promise();
+        Number formId = form.getId();
+
+        questionService.deleteFileQuestionsForForm(formId)
+            .compose(deletedQuestions -> questionService.reorderQuestionsAfterDeletion(formId, deletedQuestions))
+            .compose(result -> distributionService.deleteByForm(formId))
+            .compose(deletedDistributions -> {
+                List<String> rightMethods = RightsHelper.getRightMethods(RESPONDER_RESOURCE_RIGHT, securedActions);
+                return formSharesService.deleteForFormAndRight(formId, rightMethods);
+            })
+            .onSuccess(result -> promise.complete())
+            .onFailure(err -> {
+                String errorMessage = "[Formulaire@FormController::cleanDataWhenSwitchingToPublicForm] Failed to clean data " +
+                        "when switching to public form for form with id " + formId;
+                log.error(errorMessage + " " + err.getMessage());
+                promise.fail(err.getMessage());
+            });
+
+        return promise.future();
     }
 
     @Delete("/forms/:formId")

@@ -70,6 +70,29 @@ public class DefaultResponseServiceTest {
     }
 
     @Test
+    public void testListForm(TestContext ctx) {
+        Async async = ctx.async();
+
+        String expectedQuery = "SELECT r.* FROM " + RESPONSE_TABLE + " r " +
+                "JOIN " + DISTRIBUTION_TABLE + " d ON d.id = r.distribution_id " +
+                "WHERE form_id = ? ORDER BY question_id, choice_id;";
+        JsonArray expectedParams = new JsonArray("[\"24\"]");
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getString(STATEMENT));
+            ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
+            async.complete();
+        });
+
+        defaultResponseService.listByForm("24")
+            .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
+    }
+
+    @Test
     public void testListByIds_NoQuestionIds(TestContext ctx) {
         Async async = ctx.async();
         List<String> responseIds = new ArrayList<>();

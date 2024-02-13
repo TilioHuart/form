@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static fr.openent.form.core.constants.Constants.NB_NEW_LINES;
+import static fr.openent.form.core.constants.DistributionStatus.FINISHED;
 import static fr.openent.form.core.constants.EbFields.FORMULAIRE_ADDRESS;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.Tables.*;
@@ -40,7 +41,7 @@ public class DefaultDistributionServiceTest {
                 .put(RESPONDER_ID, "50251834-1745-4fb9-a3ad-cc034438c688")
                 .put(RESPONDER_NAME, "GUZMAN Mohamed")
                 .put(STATUS, DistributionStatus.TO_DO)
-                .put(DATE_SENDING, "2023-11-16 14:39:56.140463+00")
+                .put(DATE_SENDING, "2024-11-16 14:39:56.140463+00")
                 .put(DATE_RESPONSE, (String)null)
                 .put(ACTIVE, true)
                 .put(STRUCTURE, (String)null)
@@ -109,6 +110,50 @@ public class DefaultDistributionServiceTest {
 
         defaultDistributionService.listByForms(formIds)
                 .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
+    }
+
+    @Test
+    public void testListByFormAndStatus_NbLinesNull(TestContext ctx) {
+        Async async = ctx.async();
+
+        String expectedQuery = "SELECT * FROM " + DISTRIBUTION_TABLE + " WHERE form_id = ? AND status = ? " +
+                "ORDER BY date_response DESC;";
+        JsonArray expectedParams = new JsonArray("[\"9\",\"FINISHED\"]");
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getString(STATEMENT));
+            ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
+            async.complete();
+        });
+
+        defaultDistributionService.listByFormAndStatus("9", FINISHED, null)
+            .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
+    }
+
+    @Test
+    public void testListByFormAndStatus_NbLinesNotNull(TestContext ctx) {
+        Async async = ctx.async();
+
+        String expectedQuery = "SELECT * FROM " + DISTRIBUTION_TABLE + " WHERE form_id = ? AND status = ? " +
+                "ORDER BY date_response DESC LIMIT ? OFFSET ?;";
+        JsonArray expectedParams = new JsonArray("[\"9\",\"FINISHED\",10,\"50\"]");
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getString(STATEMENT));
+            ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
+            async.complete();
+        });
+
+        defaultDistributionService.listByFormAndStatus("9", FINISHED, "50")
+            .onSuccess(result -> async.complete());
 
         async.awaitSuccess(10000);
     }
@@ -184,6 +229,27 @@ public class DefaultDistributionServiceTest {
             async.complete();
         });
         defaultDistributionService.duplicateWithResponses("1234a");
+        async.awaitSuccess(10000);
+    }
+
+    @Test
+    public void testDeleteByForm(TestContext ctx) {
+        Async async = ctx.async();
+
+        String expectedQuery = "DELETE FROM " + DISTRIBUTION_TABLE + " WHERE form_id = ? RETURNING *;";
+        JsonArray expectedParams = new JsonArray("[24]");
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getString(STATEMENT));
+            ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
+            async.complete();
+        });
+
+        defaultDistributionService.deleteByForm(24)
+            .onSuccess(result -> async.complete());
+
         async.awaitSuccess(10000);
     }
 }

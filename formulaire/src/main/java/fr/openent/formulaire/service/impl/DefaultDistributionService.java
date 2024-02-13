@@ -96,7 +96,9 @@ public class DefaultDistributionService implements DistributionService {
     }
 
     @Override
-    public void listByFormAndStatus(String formId, String status, String nbLines, Handler<Either<String, JsonArray>> handler) {
+    public Future<List<Distribution>> listByFormAndStatus(String formId, String status, String nbLines) {
+        Promise<List<Distribution>> promise = Promise.promise();
+
         String query = "SELECT * FROM " + DISTRIBUTION_TABLE + " WHERE form_id = ? AND status = ? " +
                 "ORDER BY date_response DESC";
         JsonArray params = new JsonArray().add(formId).add(status);
@@ -107,7 +109,12 @@ public class DefaultDistributionService implements DistributionService {
         }
 
         query += ";";
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+
+        String errorMessage = "[Formulaire@DefaultDistributionService::listByFormAndStatus] Failed to list all the " +
+                "distributions for form with id " + formId + " and status " + status;
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(IModelHelper.sqlResultToIModel(promise, Distribution.class, errorMessage)));
+
+        return promise.future();
     }
 
     @Override
@@ -339,5 +346,18 @@ public class DefaultDistributionService implements DistributionService {
                 "RETURNING *;";
         JsonArray params = new JsonArray().add(true);
         Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+    }
+
+    @Override
+    public Future<List<Distribution>> deleteByForm(Number formId) {
+        Promise<List<Distribution>> promise = Promise.promise();
+
+        String query = "DELETE FROM " + DISTRIBUTION_TABLE + " WHERE form_id = ? RETURNING *;";
+        JsonArray params = new JsonArray().add(formId);
+
+        String errorMessage = "[Formulaire@DefaultDistributionService::deleteByForm] Failed to delete all the distributions for form with id " + formId;
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(IModelHelper.sqlResultToIModel(promise, Distribution.class, errorMessage)));
+
+        return promise.future();
     }
 }

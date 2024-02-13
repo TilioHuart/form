@@ -47,8 +47,8 @@ public class DefaultQuestionServiceTest {
                 .put(STATEMENT, "Freetext blabla")
                 .put(MANDATORY, false)
                 .put(ORIGINAL_QUESTION_ID, 1)
-                .put(SECTION_ID, (Long)null)
-                .put(SECTION_POSITION, (Long)null)
+                .put(SECTION_ID, 4)
+                .put(SECTION_POSITION, 3)
                 .put(CONDITIONAL, false)
                 .put(PLACEHOLDER, PLACEHOLDER)
                 .put(MATRIX_ID, (Long)null)
@@ -243,13 +243,13 @@ public class DefaultQuestionServiceTest {
     }
 
     @Test
-    public void create(TestContext ctx) {
+    public void testCreate(TestContext ctx) {
         Async async = ctx.async();
 
         String expectedQuery = "INSERT INTO " + QUESTION_TABLE + " (form_id, title, position, question_type, statement, " +
                 "mandatory, section_id, section_position, conditional, placeholder, matrix_id, matrix_position) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;";
-        JsonArray expectedParams = new JsonArray("[\"9\", \"title\", 2, 8, \"Freetext blabla\", false, null, null, false, \"placeholder\", null, null]");
+        JsonArray expectedParams = new JsonArray("[\"9\", \"title\", null, 8, \"Freetext blabla\", false, 4, 3, false, \"placeholder\", null, null]");
 
         String expectedQueryResult = expectedQuery + getUpdateDateModifFormRequest();
         expectedParams.addAll(getParamsForUpdateDateModifFormRequest("9"));
@@ -269,7 +269,7 @@ public class DefaultQuestionServiceTest {
     }
 
     @Test
-    public void update(TestContext ctx) {
+    public void testUpdate(TestContext ctx) {
         Async async = ctx.async();
         JsonObject tabQuestion = new JsonObject();
         tabQuestion.put(TITLE, TITLE)
@@ -321,7 +321,7 @@ public class DefaultQuestionServiceTest {
     }
 
     @Test
-    public void delete(TestContext ctx){
+    public void testDelete(TestContext ctx){
         Async async = ctx.async();
         JsonObject tabQuestion = new JsonObject();
         tabQuestion.put(TITLE, TITLE)
@@ -350,5 +350,133 @@ public class DefaultQuestionServiceTest {
             async.complete();
         });
         defaultQuestionService.delete(tabQuestion, null);
+    }
+
+    @Test
+    public void testDeleteFileQuestionsForForm(TestContext ctx) {
+        Async async = ctx.async();
+
+        String expectedQuery = "DELETE FROM " + QUESTION_TABLE + " WHERE form_id = ? AND question_type = ? RETURNING *;";
+        JsonArray expectedParams = new JsonArray("[24,8]");
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getString(STATEMENT));
+            ctx.assertEquals(expectedParams.toString(), body.getJsonArray(VALUES).toString());
+            async.complete();
+        });
+
+        defaultQuestionService.deleteFileQuestionsForForm(24)
+            .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
+    }
+
+    @Test
+    public void testReorderQuestionsAfterDeletion_emptyQuestions(TestContext ctx) {
+        Async async = ctx.async();
+        List<Question> deletedQuestions = new ArrayList<>();
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(PREPARED, body.getString(ACTION));
+            async.complete();
+        });
+
+        defaultQuestionService.reorderQuestionsAfterDeletion(24, deletedQuestions)
+            .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
+    }
+
+    @Test
+    public void testReorderQuestionsAfterDeletion_withQuestions(TestContext ctx) {
+        Async async = ctx.async();
+        Question question3 = new Question(question.toJson()).setSectionId(5L);
+        List<Question> deletedQuestions = Arrays.asList(question, question, question3);
+
+        String querySection =
+                "WITH ranking_position AS ( " +
+                        "SELECT *, RANK() OVER (PARTITION BY form_id ORDER BY section_position) AS rank " +
+                        "FROM " + QUESTION_TABLE + " WHERE section_id = ? " +
+                "), " +
+                "nullify_questions AS ( " +
+                    "UPDATE " + QUESTION_TABLE + " SET section_position = NULL, section_id = NULL WHERE section_id = ? " +
+                ") " +
+                "UPDATE " + QUESTION_TABLE + " q " +
+                "SET section_position = (SELECT rank FROM ranking_position WHERE q.id = ranking_position.id), section_id = ? " +
+                "WHERE section_id = ? " +
+                "RETURNING *";
+
+        // Reorder form elements in form
+        String queryForm =
+                "WITH ranking_position AS ( " +
+                    "SELECT *, RANK() OVER (PARTITION BY form_id ORDER BY position, id_section, id_question) AS rank " +
+                    "FROM ( " +
+                        "SELECT form_id, id AS id_section, null AS id_question, position FROM " + SECTION_TABLE +
+                        " WHERE form_id = ? " +
+                        "UNION " +
+                        "SELECT form_id, null AS id_section, id AS id_question, position FROM " + QUESTION_TABLE +
+                        " WHERE form_id = ? AND position IS NOT NULL " +
+                    ") AS elements " +
+                "), " +
+                "nullify_sections AS ( " +
+                    "UPDATE " + SECTION_TABLE + " SET position = NULL WHERE form_id = ? " +
+                "), " +
+                "nullify_questions AS ( " +
+                    "UPDATE " + QUESTION_TABLE + " SET position = NULL WHERE form_id = ? AND position IS NOT NULL " +
+                ")," +
+                "updated_sections AS ( " +
+                    "UPDATE " + SECTION_TABLE + " s " +
+                    "SET position = ( " +
+                        "SELECT rank FROM ranking_position " +
+                        "WHERE ranking_position.id_section IS NOT NULL AND s.id = ranking_position.id_section " +
+                    ") " +
+                    "WHERE form_id = ? " +
+                    "RETURNING id, form_id, title, position, true AS is_section " +
+                "), " +
+                "updated_questions AS ( " +
+                    "UPDATE " + QUESTION_TABLE + " q " +
+                    "SET position = ( " +
+                        "SELECT rank FROM ranking_position " +
+                        "WHERE ranking_position.id_question IS NOT NULL AND q.id = ranking_position.id_question " +
+                    ") " +
+                    "WHERE form_id = ? " +
+                    "RETURNING id, form_id, title, position, false AS is_section " +
+                ") " +
+                "SELECT * FROM updated_sections " +
+                "UNION " +
+                "SELECT * FROM updated_questions " +
+                "ORDER BY form_id, position, id";
+
+        String expectedQuery = "[" +
+                "{" +
+                    "\"action\":\"prepared\"," +
+                    "\"statement\":\"" + querySection + "\"," +
+                    "\"values\":[4,4,4,4]" +
+                "}," +
+                "{" +
+                    "\"action\":\"prepared\"," +
+                    "\"statement\":\"" + querySection + "\"," +
+                    "\"values\":[5,5,5,5]" +
+                "}," +
+                "{\"action\":\"prepared\"," +
+                    "\"statement\":\"" + queryForm + "\"," +
+                    "\"values\":[24,24,24,24,24,24]" +
+                "}" +
+            "]";
+
+        vertx.eventBus().consumer(FORMULAIRE_ADDRESS, message -> {
+            JsonObject body = (JsonObject) message.body();
+            ctx.assertEquals(TRANSACTION, body.getString(ACTION));
+            ctx.assertEquals(expectedQuery, body.getJsonArray(STATEMENTS).toString());
+            async.complete();
+        });
+
+        defaultQuestionService.reorderQuestionsAfterDeletion(24, deletedQuestions)
+            .onSuccess(result -> async.complete());
+
+        async.awaitSuccess(10000);
     }
 }

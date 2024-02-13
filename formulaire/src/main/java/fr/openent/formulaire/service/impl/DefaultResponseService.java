@@ -92,12 +92,18 @@ public class DefaultResponseService implements ResponseService {
     }
 
     @Override
-    public void listByForm(String formId, Handler<Either<String, JsonArray>> handler) {
+    public Future<List<Response>> listByForm(String formId) {
+        Promise<List<Response>> promise = Promise.promise();
+
         String query = "SELECT r.* FROM " + RESPONSE_TABLE + " r " +
                 "JOIN " + DISTRIBUTION_TABLE + " d ON d.id = r.distribution_id " +
                 "WHERE form_id = ? ORDER BY question_id, choice_id;";
         JsonArray params = new JsonArray().add(formId);
-        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(handler));
+
+        String errorMessage = "[Formulaire@DefaultResponseService::listByForm] An error occurred while listing responses for form with id " + formId;
+        Sql.getInstance().prepared(query, params, SqlResult.validResultHandler(IModelHelper.sqlResultToIModel(promise, Response.class, errorMessage)));
+
+        return promise.future();
     }
 
     public Future<List<Response>> listByIds(List<String> responseIds) {

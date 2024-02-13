@@ -135,4 +135,17 @@ public interface QuestionService {
      * @param handler function handler returning JsonObject data
      */
     void delete(JsonObject question, Handler<Either<String, JsonObject>> handler);
+
+    /**
+     * Delete all questions file from a specific form
+     * @param formId    id of the Form
+     */
+    Future<List<Question>> deleteFileQuestionsForForm(Number formId);
+
+    /**
+     *
+     * @param formId    id of the Form
+     * @param deletedQuestions deleted questions
+     */
+    Future<Void> reorderQuestionsAfterDeletion(Number formId, List<Question> deletedQuestions);
 }

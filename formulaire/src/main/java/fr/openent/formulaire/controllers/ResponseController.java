@@ -72,21 +72,13 @@ public class ResponseController extends ControllerHelper {
         String nbLines = request.params().get(PARAM_NB_LINES);
         String formId = request.params().get(PARAM_FORM_ID);
 
-        distributionService.listByFormAndStatus(formId, FINISHED, nbLines, getDistribsEvent -> {
-            if (getDistribsEvent.isLeft()) {
-                log.error("[Formulaire@listResponse] Fail to list finished distributions for form wih id : " + formId);
-                renderInternalError(request, getDistribsEvent);
-                return;
-            }
-            if (getDistribsEvent.right().getValue().isEmpty()) {
-                String message = "[Formulaire@listResponse] No distribution found for form with id " + formId;
-                log.error(message);
-                notFound(request, message);
-                return;
-            }
-
-            responseService.list(questionId, nbLines, getDistribsEvent.right().getValue(), arrayResponseHandler(request));
-        });
+        distributionService.listByFormAndStatus(formId, FINISHED, nbLines)
+            .onSuccess(result -> responseService.list(questionId, nbLines, IModelHelper.toJsonArray(result), arrayResponseHandler(request)))
+            .onFailure(err -> {
+                String errorMessage = "[Formulaire@ResponseController::list] Failed to list responses for question  with id " + questionId;
+                log.error(errorMessage + " " + err.getMessage());
+                renderError(request);
+            });
     }
 
     @Get("/questions/:questionId/distributions/:distributionId/responses")
@@ -157,7 +149,13 @@ public class ResponseController extends ControllerHelper {
     @SecuredAction(value = CONTRIB_RESOURCE_RIGHT, type = ActionType.RESOURCE)
     public void listByForm(HttpServerRequest request) {
         String formId = request.params().get(PARAM_FORM_ID);
-        responseService.listByForm(formId, arrayResponseHandler(request));
+        responseService.listByForm(formId)
+            .onSuccess(result -> renderJson(request, new JsonArray(result)))
+            .onFailure(err -> {
+                String errorMessage = "[Formulaire@ResponseController::listByForm] Failed to list response for form with id " + formId;
+                log.error(errorMessage + " " + err.getMessage());
+                renderError(request);
+            });
     }
 
     @Get("/responses/count")

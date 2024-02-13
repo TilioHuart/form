@@ -29,6 +29,7 @@ public class Form implements IModel<Form> {
     private Boolean collab;
     private String rgpdGoal;
     private RgpdLifetimes rgpdLifetime;
+    private Boolean isPublic;
     private String publicKey;
     private Number originalFormId;
     private List<FormElement> formElements;
@@ -58,6 +59,7 @@ public class Form implements IModel<Form> {
         this.editable = form.getBoolean(EDITABLE, false);
         this.rgpdGoal = form.getString(RGPD_GOAL, null);
         this.rgpdLifetime = RgpdLifetimes.getRgpdLifetimes(form.getInteger(RGPD_LIFETIME, null));
+        this.isPublic = form.getBoolean(IS_PUBLIC, null);
         this.publicKey = form.getString(PUBLIC_KEY, null);
         this.originalFormId = form.getNumber(ORIGINAL_FORM_ID,null);
 
@@ -104,16 +106,20 @@ public class Form implements IModel<Form> {
     public Boolean getRgpd() { return rgpd; }
 
     public Boolean getArchived() { return archived; }
+
     public Boolean getSent() { return sent; }
+
     public Boolean getCollab() { return collab; }
+
     public String getRgpdGoal() { return rgpdGoal; }
 
     public Number getRgpdLifetime() { return rgpdLifetime.getValue(); }
 
+    public Boolean getIsPublic() { return this.isPublic; }
+
     public String getPublicKey() { return publicKey; }
 
     public Number getOriginalFormId() { return originalFormId; }
-
 
     public List<FormElement> getFormElements() { return formElements; }
 
@@ -211,6 +217,11 @@ public class Form implements IModel<Form> {
 
     public Form setRgpdLifetime(RgpdLifetimes rgpdLifetime) {
         this.rgpdLifetime = rgpdLifetime;
+        return this;
+    }
+
+    public Form setIsPublic(Boolean isPublic) {
+        this.isPublic = isPublic;
         return this;
     }
 

@@ -21,15 +21,15 @@ public class DataChecker {
 
     // Check if date_ending is before date_opening or before current time
     public static boolean checkFormDatesValidity(JsonArray forms) {
-        boolean areDateValid = true;
+        boolean areDatesValid = true;
         int i = 0;
-        while (areDateValid && i < forms.size()) {
+        while (areDatesValid && i < forms.size()) {
             String openingDate = forms.getJsonObject(i).getString(DATE_OPENING, null);
             String endingDate = forms.getJsonObject(i).getString(DATE_ENDING, null);
             if (endingDate != null) {
                 try {
                     Date finalOpeningDate = openingDate != null ? formDateFormatter.parse(openingDate) : new Date();
-                    areDateValid = formDateFormatter.parse(endingDate).after(finalOpeningDate);
+                    areDatesValid = formDateFormatter.parse(endingDate).after(finalOpeningDate);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
@@ -37,7 +37,7 @@ public class DataChecker {
             i++;
         }
 
-        return areDateValid;
+        return areDatesValid;
     }
 
     public static boolean checkFormDatesValidity(JsonObject form) {

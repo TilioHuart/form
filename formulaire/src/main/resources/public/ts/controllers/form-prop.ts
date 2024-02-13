@@ -98,6 +98,9 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
                 vm.form.editable = false;
                 vm.form.anonymous = true;
             }
+            else {
+                vm.form.anonymous = false;
+            }
         };
 
         $scope.$on(FORMULAIRE_BROADCAST_EVENT.INIT_FORM_PROP, () => { vm.$onInit() });

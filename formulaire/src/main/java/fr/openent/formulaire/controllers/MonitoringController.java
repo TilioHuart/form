@@ -1,5 +1,6 @@
 package fr.openent.formulaire.controllers;
 
+import fr.openent.form.helpers.RightsHelper;
 import fr.openent.form.helpers.UtilsHelper;
 import fr.openent.formulaire.service.MonitoringService;
 import fr.openent.formulaire.service.impl.DefaultMonitoringService;
@@ -17,6 +18,8 @@ import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.http.filter.SuperAdminFilter;
 
 import static fr.openent.form.core.constants.Fields.*;
+import static fr.openent.form.core.constants.ShareRights.*;
+import static fr.openent.form.core.constants.Tables.DB_SCHEMA;
 
 public class MonitoringController extends ControllerHelper {
     private static final Logger log = LoggerFactory.getLogger(MonitoringController.class);
@@ -95,4 +98,35 @@ public class MonitoringController extends ControllerHelper {
                     renderError(request);
                 });
     }
+
+    @Get("/rights/:right")
+    @ApiDoc("Get all methods using giving right")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(SuperAdminFilter.class)
+    public void getRightMethods(HttpServerRequest request) {
+        String right = DB_SCHEMA + "." + request.getParam("right");
+        JsonObject finalResult = new JsonObject();
+
+        switch (right) {
+            case MANAGER_RESOURCE_RIGHT:
+                finalResult.put(MANAGER_RESOURCE_RIGHT, RightsHelper.getRightMethods(MANAGER_RESOURCE_RIGHT, securedActions));
+            case CONTRIB_RESOURCE_RIGHT:
+                finalResult.put(CONTRIB_RESOURCE_RIGHT, RightsHelper.getRightMethods(CONTRIB_RESOURCE_RIGHT, securedActions));
+                finalResult.put(READ_RESOURCE_RIGHT, RightsHelper.getRightMethods(READ_RESOURCE_RIGHT, securedActions));
+                render(request, finalResult);
+                break;
+            case RESPONDER_RESOURCE_RIGHT:
+                finalResult.put(RESPONDER_RESOURCE_RIGHT, RightsHelper.getRightMethods(RESPONDER_RESOURCE_RIGHT, securedActions));
+            case READ_RESOURCE_RIGHT:
+                finalResult.put(READ_RESOURCE_RIGHT, RightsHelper.getRightMethods(READ_RESOURCE_RIGHT, securedActions));
+                render(request, finalResult);
+                break;
+            default:
+                finalResult.put(ERROR, "The given right is not known.");
+                renderError(request);
+                break;
+        }
+    }
+
+
 }

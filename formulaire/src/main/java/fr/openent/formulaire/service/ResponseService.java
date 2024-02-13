@@ -46,9 +46,8 @@ public interface ResponseService {
     /**
      * List all responses for a specific form
      * @param formId form identifier
-     * @param handler function handler returning JsonArray data
      */
-    void listByForm(String formId, Handler<Either<String, JsonArray>> handler);
+    Future<List<Response>> listByForm(String formId);
 
     /**
      * List all responses for specific ids

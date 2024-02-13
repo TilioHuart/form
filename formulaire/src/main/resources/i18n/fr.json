@@ -103,8 +103,9 @@
   "formulaire.visualize.path": "Visualiser le parcours",
   "formulaire.sort": "Trier",
 
-  "formulaire.prop.public.label": "Créer un formulaire public",
-  "formulaire.prop.public.description": "Un formulaire public est anonyme et doit impérativement comporter une date de fin. Il n'est pas possible de transformer un formulaire public en formulaire privé et inversement.",
+  "formulaire.prop.public.label": "Formulaire public",
+  "formulaire.prop.public.description": "Attention, dans le cas d'un formulaire public est anonyme et doit impérativement comporter une date de fin.",
+  "formulaire.prop.public.warning": "Dans le cas d'un formulaire public :</br>- les questions de type FICHIER sont supprimées</br>- les partages en mode réponse sont supprimés</br>- les réponses sont anonyme",
   "formulaire.prop.public.link": "Lien du formulaire : ",
   "formulaire.prop.multiple.label": "Permettre plusieurs réponses d'un même utilisateur",
   "formulaire.prop.multiple.label.mobile": "Permettre plusieurs réponses",

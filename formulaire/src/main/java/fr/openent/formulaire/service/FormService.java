@@ -124,6 +124,12 @@ public interface FormService {
     void update(String formId, JsonObject form, Handler<Either<String, JsonObject>> handler);
 
     /**
+     * Update a specific form
+     * @param form Form data
+     */
+    Future<Optional<Form>> update(Form form);
+
+    /**
      * Update multiple forms
      * @param forms List of forms to update
      */
