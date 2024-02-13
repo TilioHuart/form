@@ -58,6 +58,8 @@ interface ViewModel {
         currentResponses: Map<Question, Responses>, // Responses list for preview
         currentFiles: Map<Question, Files>,
         historicPosition: number[],
+        longestPathsMap: Map<string, number>,
+        longestPath: number,
         page: string,
         last: boolean
     };
@@ -608,6 +610,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 currentResponses: new Map(),
                 currentFiles: new Map(),
                 historicPosition: [],
+                longestPathsMap: new Map(),
+                longestPath: 1,
                 page: PreviewPage.QUESTION,
                 last: false
             };
@@ -645,6 +649,8 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             else {
                 vm.preview.formElement = vm.formElements.all[0];
                 vm.preview.historicPosition = [1];
+                vm.preview.longestPathsMap = FormElementUtils.getLongestPaths(vm.formElements);
+                vm.preview.longestPath = vm.preview.formElement.getCurrentLongestPath(vm.preview.longestPathsMap);
                 vm.preview.last = vm.preview.formElement.position === vm.nbFormElements;
                 vm.preview.page = PreviewPage.QUESTION;
             }

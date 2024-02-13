@@ -325,8 +325,10 @@ export const formsListController = ng.controller('FormsListController', ['$scope
             let gestions: NodeListOf<HTMLElement> = document.querySelectorAll('[data-label="Gérer"]');
             let responses: NodeListOf<HTMLElement> = document.querySelectorAll('[data-label="Répondre"]');
 
-            let ownerResponseCheck: HTMLInputElement = responses[0].children[0].children[0] as HTMLInputElement;
-            ownerResponseCheck.checked = false;
+            if (responses && responses.length > 0) {
+                let ownerResponseCheck: HTMLInputElement = responses[0].children[0].children[0] as HTMLInputElement;
+                ownerResponseCheck.checked = false;
+            }
 
             for (let i = 1; i < contribs.length; i++) {
                 let contribValue: HTMLInputElement = contribs[i].children[0].children[0] as HTMLInputElement;
