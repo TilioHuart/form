@@ -2,6 +2,7 @@ package fr.openent.form.core.models;
 
 import fr.openent.form.core.enums.RgpdLifetimes;
 import fr.openent.form.helpers.DateHelper;
+import fr.openent.form.helpers.IModelHelper;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.util.Date;
@@ -244,24 +245,11 @@ public class Form implements IModel<Form> {
     // Functions
 
     public JsonObject toJson() {
-        return new JsonObject()
-                .put(ID, this.id)
-                .put(TITLE, this.title)
-                .put(DESCRIPTION, this.description)
-                .put(PICTURE, this.picture)
-                .put(OWNER_ID, this.ownerId)
-                .put(OWNER_NAME, this.ownerName)
-                .put(DATE_OPENING, this.dateOpening != null ? this.dateOpening.toString() : null)
-                .put(DATE_ENDING, this.dateEnding != null ? this.dateEnding.toString() : null)
-                .put(MULTIPLE, this.multiple)
-                .put(ANONYMOUS, this.anonymous)
-                .put(REMINDED, this.reminded)
-                .put(RGPD, this.rgpd)
-                .put(RGPD_GOAL, this.rgpdGoal)
-                .put(RGPD_LIFETIME, this.rgpdLifetime.getValue())
-                .put(PUBLIC_KEY, this.publicKey)
-                .put(ORIGINAL_FORM_ID, this.originalFormId)
-                .put(FORM_ELEMENTS, this.formElements != null ? FormElement.toJsonArrayFormElements(this.formElements) : null);
+        boolean snakeCase = true;
+        JsonObject result = IModelHelper.toJson(this, false, snakeCase);
+        result.put(snakeCase ? DATE_OPENING : PARAM_DATE_OPENING, this.dateOpening != null ? this.dateOpening.toString() : null)
+                .put(snakeCase ? DATE_ENDING : PARAM_DATE_ENDING, this.dateEnding != null ? this.dateEnding.toString() : null);
+        return result;
     }
 
     @Override

@@ -108,6 +108,8 @@ public class Fields {
     public static final String PARAM_BOOKMARKS_IDS = "bookmarksIds";
     public static final String PARAM_CHOICE_ID = "choiceId";
     public static final String PARAM_CHOICE_IMAGE = "imageChoice";
+    public static final String PARAM_DATE_OPENING = "dateOpening";
+    public static final String PARAM_DATE_ENDING = "dateEnding";
     public static final String PARAM_DISPLAY_NAME = "displayName";
     public static final String PARAM_DISTRIBUTION_ID = "distributionId";
     public static final String PARAM_DISTRIBUTION_KEY = "distributionKey";

@@ -4,10 +4,7 @@ import fr.openent.form.core.enums.I18nKeys;
 import fr.openent.form.core.models.Form;
 import fr.openent.form.core.models.ShareMember;
 import fr.openent.form.core.models.TransactionElement;
-import fr.openent.form.helpers.FutureHelper;
-import fr.openent.form.helpers.I18nHelper;
-import fr.openent.form.helpers.IModelHelper;
-import fr.openent.form.helpers.TransactionHelper;
+import fr.openent.form.helpers.*;
 import fr.openent.formulaire.service.FormService;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.Future;
@@ -27,6 +24,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static fr.openent.form.core.constants.Constants.*;
+import static fr.openent.form.core.constants.DateFormats.EEE_MMM_DD_HH_MM_SS_Z_YYYY;
+import static fr.openent.form.core.constants.DateFormats.YYYY_MM_DD_T_HH_MM_SS_SSS;
 import static fr.openent.form.core.constants.DistributionStatus.FINISHED;
 import static fr.openent.form.core.constants.Fields.*;
 import static fr.openent.form.core.constants.ShareRights.*;
@@ -37,7 +36,8 @@ import static fr.openent.form.helpers.SqlHelper.getUpdateDateModifFormRequest;
 public class DefaultFormService implements FormService {
     private static final Logger log = LoggerFactory.getLogger(DefaultFormService.class);
     private final Sql sql = Sql.getInstance();
-    private final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    private final SimpleDateFormat dateFormatter1 = new SimpleDateFormat(YYYY_MM_DD_T_HH_MM_SS_SSS);
+    private final SimpleDateFormat dateFormatter2 = new SimpleDateFormat(EEE_MMM_DD_HH_MM_SS_Z_YYYY);
 
     @Override
     public void list(List<String> groupsAndUserIds, UserInfos user, Handler<Either<String, JsonArray>> handler) {
@@ -231,8 +231,8 @@ public class DefaultFormService implements FormService {
             }
             else {
                 try {
-                    Date startDate = dateFormatter.parse(form.getString(DATE_OPENING));
-                    Date endDate = dateFormatter.parse(form.getString(DATE_ENDING));
+                    Date startDate = dateFormatter1.parse(form.getString(DATE_OPENING));
+                    Date endDate = dateFormatter1.parse(form.getString(DATE_ENDING));
                     if (endDate.after(new Date()) && endDate.after(startDate)) {
                         public_key = UUID.randomUUID().toString();
                     }
@@ -289,8 +289,8 @@ public class DefaultFormService implements FormService {
                     }
                     else {
                         try {
-                            Date startDate = dateFormatter.parse(form.getString(DATE_OPENING));
-                            Date endDate = dateFormatter.parse(form.getString(DATE_ENDING));
+                            Date startDate = dateFormatter1.parse(form.getString(DATE_OPENING));
+                            Date endDate = dateFormatter1.parse(form.getString(DATE_ENDING));
                             if (endDate.after(new Date()) && endDate.after(startDate)) {
                                 public_key = UUID.randomUUID().toString();
                             }
@@ -666,8 +666,8 @@ public class DefaultFormService implements FormService {
         }
 
         try {
-            Date startDate = dateFormatter.parse(form.getString(DATE_OPENING));
-            Date endDate = dateFormatter.parse(form.getString(DATE_ENDING));
+            Date startDate = dateFormatter1.parse(form.getString(DATE_OPENING));
+            Date endDate = dateFormatter1.parse(form.getString(DATE_ENDING));
 
             if (endDate.before(new Date()) || endDate.before(startDate)) {
                 String errorMessage = "This form is closed, you cannot access it anymore.";
@@ -679,12 +679,28 @@ public class DefaultFormService implements FormService {
             promise.complete(UUID.randomUUID().toString());
             return promise.future();
         }
-        catch (ParseException e) {
-            e.printStackTrace();
-            String errorMessage = "This form is closed, you cannot access it anymore.";
-            log.error("[Formulaire@DefaultFormService::getFormPublicKey] " + errorMessage);
-            promise.fail(errorMessage);
-            return promise.future();
+        catch (ParseException e1) {
+            try {
+                Date startDate = dateFormatter2.parse(form.getString(DATE_OPENING));
+                Date endDate = dateFormatter2.parse(form.getString(DATE_ENDING));
+
+                if (endDate.before(new Date()) || endDate.before(startDate)) {
+                    String errorMessage = "This form is closed, you cannot access it anymore.";
+                    log.error("[Formulaire@DefaultFormService::getFormPublicKey] " + errorMessage);
+                    promise.fail(errorMessage);
+                    return promise.future();
+                }
+
+                promise.complete(UUID.randomUUID().toString());
+                return promise.future();
+            }
+            catch (ParseException e2) {
+                e2.printStackTrace();
+                String errorMessage = "Failed to parse dates";
+                log.error("[Formulaire@DefaultFormService::getFormPublicKey] " + errorMessage);
+                promise.fail(e2.getMessage());
+                return promise.future();
+            }
         }
     }
 }

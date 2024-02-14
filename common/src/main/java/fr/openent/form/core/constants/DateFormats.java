@@ -6,8 +6,13 @@ public class DateFormats {
     public static final String DD_MM_YYYY_HH_MM = "dd/MM/yyyy HH:mm";
     public static final String DD_MM_YYYY = "dd/MM/yyyy";
     public static final String HH_MM = "HH:mm";
+    public static final String EEE_MMM_DD_HH_MM_SS_Z_YYYY = "EEE MMM dd HH:mm:ss z yyyy";
     private static final List<String> DATE_FORMATS = Arrays.asList(
-            YYYY_MM_DD_T_HH_MM_SS_SSS, DD_MM_YYYY_HH_MM, DD_MM_YYYY, HH_MM
+            YYYY_MM_DD_T_HH_MM_SS_SSS,
+            DD_MM_YYYY_HH_MM,
+            DD_MM_YYYY,
+            HH_MM,
+            EEE_MMM_DD_HH_MM_SS_Z_YYYY
     );
 
     public DateFormats() {
