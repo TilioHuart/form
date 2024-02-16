@@ -136,6 +136,10 @@ class Controller implements IViewModel {
 
     onClickChoice = (choice: QuestionChoice) : void => {
         this.responses.all[0].choice_id = (this.responses.all[0].choice_id != choice.id) ? choice.id : null;
+        if (choice.id) {
+            let newChoice: QuestionChoice = this.question.choices.all.find((c: QuestionChoice) => c.id === choice.id);
+            if (newChoice && !newChoice.is_custom) this.responses.all[0].custom_answer = null;
+        }
     }
 
     resetDate = () : void => {
