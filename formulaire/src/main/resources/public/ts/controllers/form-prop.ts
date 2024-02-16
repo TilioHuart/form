@@ -14,6 +14,7 @@ interface ViewModel {
         date_ending: boolean
     },
     isProcessing: boolean;
+    isCurrentlyPublic: boolean;
 
     $onInit() : Promise<void>;
     saveGuard(): void;
@@ -38,6 +39,7 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
 
         vm.$onInit = async () : Promise<void> => {
             vm.form = $scope.form;
+            vm.isCurrentlyPublic = vm.form.is_public;
             vm.folder = $scope.folder;
             vm.display.date_ending = !!vm.form.date_ending;
             await vm.delegates.sync();

@@ -50,7 +50,7 @@
                                               title="[[idiom.translate('formulaire.prop.public.label')]]"><i18n>formulaire.prop.public.label</i18n></span>
                                         <i class="i-info sm-icon centered" title="[[idiom.translate('formulaire.prop.public.description')]]"></i>
                                     </label>
-                                    <div class="subtext" ng-if="vm.form.is_public">
+                                    <div class="subtext" ng-if="vm.form.id && !vm.isCurrentlyPublic && vm.form.is_public">
                                         <div class="important">
                                             <i18n>formulaire.prop.public.warning</i18n>
                                         </div>
