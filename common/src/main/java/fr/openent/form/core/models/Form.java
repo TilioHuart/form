@@ -246,9 +246,11 @@ public class Form implements IModel<Form> {
 
     public JsonObject toJson() {
         boolean snakeCase = true;
+        Integer rgpdLifetime = this.rgpdLifetime.getValue();
         JsonObject result = IModelHelper.toJson(this, false, snakeCase);
         result.put(snakeCase ? DATE_OPENING : PARAM_DATE_OPENING, this.dateOpening != null ? this.dateOpening.toString() : null)
                 .put(snakeCase ? DATE_ENDING : PARAM_DATE_ENDING, this.dateEnding != null ? this.dateEnding.toString() : null);
+        result.put(snakeCase ? RGPD_LIFETIME : PARAM_RGPD_LIFETIME, rgpdLifetime);
         return result;
     }
 

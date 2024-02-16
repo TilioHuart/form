@@ -140,6 +140,7 @@ public class Fields {
     public static final String PARAM_RESOURCES_IDS = "resourcesIds";
     public static final String PARAM_RESOURCES_NUMBER = "resourcesNumber";
     public static final String PARAM_RESPONSE_ID = "responseId";
+    public static final String PARAM_RGPD_LIFETIME = "rgpdLifetime";
     public static final String PARAM_SECTION_ID = "sectionId";
     public static final String PARAM_USER_ID = "userId";
     public static final String PARAM_USER_IDS = "userIds";
