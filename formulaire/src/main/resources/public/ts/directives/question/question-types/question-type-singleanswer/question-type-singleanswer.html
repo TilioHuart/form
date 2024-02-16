@@ -1,8 +1,8 @@
 <div class="twelve">
     <div class="sort-icon" ng-if="vm.question.selected">
         <i ng-class="vm.question.choices.sorted ? 'i-sort-desc' : 'i-sort-asc'" class="md-icon"
-           ng-click="vm.question.choices.sortChoices()"></i>
-        <i18n ng-click="vm.question.choices.sortChoices()">formulaire.sort</i18n>
+           ng-click="vm.sortChoices($index)"></i>
+        <i18n ng-click="vm.sortChoices($index)">formulaire.sort</i18n>
     </div>
     <div class="choice" ng-repeat="choice in vm.question.choices.all | orderBy:['position', 'id']">
         <div class="container-arrow" ng-if="vm.question.selected">

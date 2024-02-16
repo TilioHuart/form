@@ -1,5 +1,5 @@
 import {Directive, ng} from "entcore";
-import {Form, Question} from "@common/models";
+import {Form, Question, QuestionChoice} from "@common/models";
 import {I18nUtils} from "@common/utils";
 import {Direction} from "@common/core/enums";
 import {RootsConst} from "../../../../core/constants/roots.const";
@@ -22,6 +22,7 @@ interface IViewModel extends ng.IController, IQuestionTypeMultipleanswerProps {
 
     displayImageSelect(index: number): void;
     deleteImageSelect(index: number): void;
+    sortChoices(index: number): void;
 }
 
 class Controller implements IViewModel {
@@ -48,8 +49,15 @@ class Controller implements IViewModel {
 
     deleteImageSelect = (index: number): void => {
         this.selectedChoiceIndex = -1;
-        const choice = this.question.choices.all[index];
-        choice.image = null;
+        if (index) {
+            let choice: QuestionChoice = this.question.choices.all[index];
+            choice.image = null;
+        }
+    }
+
+    sortChoices = (index: number): void => {
+        this.deleteImageSelect(index);
+        this.question.choices.sortChoices();
     }
 }
 

@@ -28,6 +28,7 @@ interface IViewModel extends ng.IController, IQuestionTypeSingleanswerProps {
     deleteImageSelect(index: number): void;
     filterNextElements(formElement: FormElement): boolean;
     onSelectOption(choice: QuestionChoice): void;
+    sortChoices(index: number): void;
 }
 
 class Controller implements IViewModel {
@@ -94,8 +95,15 @@ class Controller implements IViewModel {
 
     deleteImageSelect = (index: number): void => {
         this.selectedChoiceIndex = -1;
-        const choice = this.question.choices.all[index];
-        choice.image = null;
+        if (index) {
+            let choice: QuestionChoice = this.question.choices.all[index];
+            choice.image = null;
+        }
+    }
+
+    sortChoices = (index: number): void => {
+        this.deleteImageSelect(index);
+        this.question.choices.sortChoices();
     }
 }
 

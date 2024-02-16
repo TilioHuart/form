@@ -36,7 +36,7 @@
         <div class="sort-icon" ng-if="vm.question.selected">
             <i ng-class="vm.question.children.sorted ? 'i-sort-desc' : 'i-sort-asc'" class="md-icon"
                ng-click="vm.sortChildren()"></i>
-            <i18n ng-click="vm.question.choices.sortChoices()">formulaire.sort</i18n>
+            <i18n ng-click="vm.sortChildren()">formulaire.sort</i18n>
         </div>
         <div class="choice" ng-repeat="child in vm.question.children.all | orderBy:'matrix_position'" guard-root="formTitle">
             <div class="container-arrow" ng-if="vm.question.selected">
