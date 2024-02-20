@@ -59,6 +59,7 @@ export const formPropController = ng.controller('FormPropController', ['$scope',
             if (vm.form.title && vm.checkIntervalDates() && !vm.isProcessing) {
                 vm.isProcessing = true;
                 vm.form = await formService.save(vm.form);
+                if (vm.form.is_public) vm.isCurrentlyPublic = true;
                 vm.isProcessing = false;
                 $scope.redirectTo(`/form/${vm.form.id}/edit`);
                 $scope.safeApply();

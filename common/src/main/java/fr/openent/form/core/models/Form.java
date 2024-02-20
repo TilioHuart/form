@@ -5,12 +5,16 @@ import fr.openent.form.helpers.DateHelper;
 import fr.openent.form.helpers.IModelHelper;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import static fr.openent.form.core.constants.DateFormats.*;
 import static fr.openent.form.core.constants.Fields.*;
 
 public class Form implements IModel<Form> {
+    SimpleDateFormat outputFormat = new SimpleDateFormat(YYYY_MM_DD_T_HH_MM_SS_SSS);
+
     private Number id;
     private String title;
     private String description;
@@ -248,8 +252,8 @@ public class Form implements IModel<Form> {
         boolean snakeCase = true;
         Integer rgpdLifetime = this.rgpdLifetime.getValue();
         JsonObject result = IModelHelper.toJson(this, false, snakeCase);
-        result.put(snakeCase ? DATE_OPENING : PARAM_DATE_OPENING, this.dateOpening != null ? this.dateOpening.toString() : null)
-                .put(snakeCase ? DATE_ENDING : PARAM_DATE_ENDING, this.dateEnding != null ? this.dateEnding.toString() : null);
+        result.put(snakeCase ? DATE_OPENING : PARAM_DATE_OPENING, this.dateOpening != null ? outputFormat.format(this.dateOpening) : null)
+                .put(snakeCase ? DATE_ENDING : PARAM_DATE_ENDING, this.dateEnding != null ? outputFormat.format(this.dateEnding) : null);
         result.put(snakeCase ? RGPD_LIFETIME : PARAM_RGPD_LIFETIME, rgpdLifetime);
         return result;
     }
