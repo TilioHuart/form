@@ -273,6 +273,16 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             try {
                 vm.dontSave = true;
 
+                // Save current edited question in current section if existing
+                let selectedElements: FormElement[] = vm.formElements.selected.concat(section.questions.selected);
+                if (selectedElements.length > 0) {
+                    let questionToSave: FormElement = selectedElements[0];
+                    if (questionToSave instanceof Question && questionToSave.section_id === section.id) {
+                        await questionService.save([questionToSave]);
+                        await questionChoiceService.saveMultiple(questionToSave.choices.all, vm.form.id);
+                    }
+                }
+
                 // Duplicate current section
                 let duplicata: Section = section;
 

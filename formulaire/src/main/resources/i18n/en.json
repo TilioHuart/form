@@ -104,7 +104,7 @@
 
   "formulaire.prop.public.label": "Public form",
   "formulaire.prop.public.description": "Be careful, for a public form is anonymous and must necessarily have an end date.",
-  "formulaire.prop.public.warning": "You're about to change the nature of this form. If you continue :</br>- FILE type questions will be deleted</br>- responses will be anonymized",
+  "formulaire.prop.public.warning": "You are about to change the nature of this form to a public form. Any FILE questions will be removed.",
   "formulaire.prop.public.link": "Lien du formulaire : ",
   "formulaire.prop.multiple.label": "Permettre plusieurs réponses d'un même utilisateur",
   "formulaire.prop.multiple.label.mobile": "Permettre plusieurs réponses",
