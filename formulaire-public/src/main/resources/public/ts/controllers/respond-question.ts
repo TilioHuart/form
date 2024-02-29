@@ -12,7 +12,6 @@ import {
 } from "@common/models";
 import {FORMULAIRE_FORM_ELEMENT_EMIT_EVENT} from "@common/core/enums";
 import {Mix} from "entcore-toolkit";
-import {FormElementType} from "@common/core/enums/form-element-type";
 import {FormElementUtils, PublicUtils} from "@common/utils";
 
 interface ViewModel {
@@ -156,6 +155,19 @@ export const respondQuestionController = ng.controller('RespondQuestionControlle
 						response.answer = moment(response.answer).format("HH:mm");
 					} else if (questionType === Types.DATE && typeof response.answer != "string") {
 						response.answer = moment(response.answer).format("DD/MM/YYYY");
+					}
+				}
+
+				if (response.choice_id) { // Custom answer security/formatting
+					let matchingChoices: QuestionChoice[] = question.choices.all.filter((c: QuestionChoice) => c.id === response.choice_id);
+					if (matchingChoices.length == 1) {
+						if (!matchingChoices[0].is_custom) {
+							response.answer = matchingChoices[0].value;
+							response.custom_answer = null;
+						}
+						else {
+							response.answer = null;
+						}
 					}
 				}
 			}
