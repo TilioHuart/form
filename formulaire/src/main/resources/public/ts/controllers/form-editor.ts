@@ -965,7 +965,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
             return isInDontSave(el.parentNode);
         };
 
-        document.onclick = e => { if ($scope.currentPage === Pages.EDIT_FORM) onClickQuestion(e); };
+        document.onmousedown = (e: MouseEvent): void => { if ($scope.currentPage === Pages.EDIT_FORM) onClickQuestion(e); }
 
         $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DUPLICATE_ELEMENT, (e) => { vm.duplicateFormElement(e.targetScope.vm.question || e.targetScope.vm.section) });
         $scope.$on(FORMULAIRE_FORM_ELEMENT_EMIT_EVENT.DELETE_ELEMENT, () => { vm.deleteFormElement() });
