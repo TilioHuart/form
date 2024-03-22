@@ -191,7 +191,7 @@ export const formEditorController = ng.controller('FormEditorController', ['$sco
                 if (parentSection) {
                     vm.newElement.section_id = parentSection.id;
                     vm.newElement.section_position = parentSection.questions.all.length + 1;
-                    let elementSection: Section = vm.formElements.all.filter((e: FormElement) => e.id === parentSection.id)[0] as Section;
+                    let elementSection: Section = vm.formElements.all.filter((e: FormElement) => e.isSection() && e.id === parentSection.id)[0] as Section;
                     elementSection.questions.all.push(vm.newElement);
                 }
             }
