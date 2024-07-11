@@ -1,7 +1,5 @@
 package fr.openent.formulaire.helpers.upload_file;
 
-import fr.openent.form.helpers.FutureHelper;
-import fr.wseduc.swift.utils.FileUtils;
 import fr.wseduc.webutils.DefaultAsyncResult;
 import io.vertx.core.*;
 import io.vertx.core.file.FileSystem;
@@ -10,6 +8,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.storage.Storage;
+import org.entcore.common.utils.FileUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -106,7 +105,7 @@ public class FileHelper {
             makeFolders.add(makeFolder(storage, vertx, fileIds, path, i));
         }
 
-        FutureHelper.all(makeFolders)
+        Future.all(makeFolders)
             .onSuccess(success -> {
                 pathIds.set(success.list());
                 request.resume(); // once the folders created we resume request to get to "uploaded" status

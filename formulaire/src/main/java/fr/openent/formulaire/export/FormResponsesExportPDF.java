@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.entcore.common.pdf.Pdf;
 import org.entcore.common.pdf.PdfFactory;
@@ -147,7 +148,7 @@ public class FormResponsesExportPDF {
     private void formatData(JsonArray data, JsonArray questionsInfo, JsonArray sectionsInfos, boolean hasTooManyResponses, Handler<Either<String, JsonObject>> handler) {
         JsonObject results = new JsonObject();
         JsonArray questions = new JsonArray();
-        List<Future> questionsGraphs = new ArrayList<>();
+        List<Future<String>> questionsGraphs = new ArrayList<>();
 
         // Fill final object with question's data
         int nbQuestions = questionsInfo.size();
@@ -188,8 +189,7 @@ public class FormResponsesExportPDF {
 
                 // Prepare futures to get graph images
                 if (GRAPH_QUESTIONS.contains(question_type)) {
-                    questionsGraphs.add(Future.future());
-                    getGraphData(questionInfo, questionsGraphs.get(questionsGraphs.size() - 1));
+                    questionsGraphs.add(getGraphData(questionInfo));
                 }
             }
         }
@@ -251,7 +251,7 @@ public class FormResponsesExportPDF {
         }
 
         // Get graph images, affect them to their respective questions and send the result
-        CompositeFuture.all(questionsGraphs).onComplete(evt -> {
+        Future.all(questionsGraphs).onComplete(evt -> {
             if (evt.failed()) {
                 log.error("[Formulaire@FormResponsesExportPDF] Failed to retrieve graphs' data : " + evt.cause());
                 Future.failedFuture(evt.cause());
@@ -316,19 +316,21 @@ public class FormResponsesExportPDF {
         return new JsonArray(new ArrayList<>(form_elements.values()));
     }
 
-    private void getGraphData(JsonObject question, Handler<AsyncResult<String>> handler) {
+    private Future<String> getGraphData(JsonObject question) {
+        Promise<String> promise = Promise.promise();
         String idFile = form.getJsonObject(IMAGES).getJsonObject(PARAM_ID_IMAGES_PER_QUESTION).getString(question.getLong(ID).toString());
 
         if (idFile != null) {
             storage.readFile(idFile, readFileEvt -> {
                 String graph = readFileEvt.getString(0, readFileEvt.length());
-                handler.handle(Future.succeededFuture(graph));
+                promise.complete(graph);
             });
         }
         else {
             log.error("[Formulaire@getImage] : Wrong file id.");
-            handler.handle(Future.succeededFuture("Wrong file id"));
+            promise.complete("Wrong file id");
         }
+        return promise.future();
     }
 
     private void generatePDF(HttpServerRequest request, JsonObject templateProps, String templateName, Handler<Buffer> handler) {

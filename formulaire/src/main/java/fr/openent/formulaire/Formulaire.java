@@ -7,6 +7,7 @@ import fr.openent.formulaire.cron.NotifyCron;
 import fr.openent.formulaire.cron.RgpdCron;
 import fr.openent.formulaire.service.impl.FormulaireApplicationStorage;
 import fr.openent.formulaire.service.impl.FormulaireRepositoryEvents;
+import io.vertx.core.Promise;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -33,8 +34,8 @@ public class Formulaire extends BaseServer {
 	private static final Logger log = LoggerFactory.getLogger(Formulaire.class);
 
 	@Override
-	public void start() throws Exception {
-		super.start();
+	public void start(Promise<Void> startPromise) throws Exception {
+		super.start(startPromise);
 
 		Constants.MAX_RESPONSES_EXPORT_PDF = config.getInteger(MAX_RESPONSE_EXPORT_PDF, 100);
 		Constants.MAX_USERS_SHARING = config.getInteger(MAX_USERS_SHARING, 65000);

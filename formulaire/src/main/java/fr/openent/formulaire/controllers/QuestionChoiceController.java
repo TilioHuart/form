@@ -168,7 +168,7 @@ public class QuestionChoiceController extends ControllerHelper {
             List<Future<Boolean>> futures = new ArrayList<>();
             for (QuestionChoice choice : choices) futures.add(questionChoiceService.isTargetValid(choice));
 
-            FutureHelper.all(futures)
+            Future.all(futures)
                 .compose(choicesValidity -> {
                     boolean hasNotValidChoice = choicesValidity.result().list().stream()
                             .map(Boolean.class::cast)
@@ -273,7 +273,7 @@ public class QuestionChoiceController extends ControllerHelper {
             List<Future<Boolean>> futures = new ArrayList<>();
             for (QuestionChoice choice : choices) futures.add(questionChoiceService.isTargetValid(choice));
 
-            FutureHelper.all(futures)
+            Future.all(futures)
                 .compose(choicesValidity -> {
                     boolean hasNotValidChoice = choicesValidity.result().list().stream()
                             .map(Boolean.class::cast)

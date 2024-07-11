@@ -11,21 +11,18 @@ import java.util.LinkedList;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import io.vertx.core.*;
 import org.entcore.common.folders.impl.DocumentHelper;
 import org.entcore.common.utils.StringUtils;
 import org.entcore.common.utils.FileUtils;
 import org.entcore.common.service.impl.AbstractRepositoryEvents;
 import org.entcore.common.service.impl.MongoDbRepositoryEvents;
 
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.Future;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -164,9 +161,9 @@ public class FolderImporter {
 
     private Future<JsonObject> commitToMongo(FolderImporterContext context, Future<FolderImporterContext> beforeCommit) {
         FolderImporter self = this;
-        Future<JsonObject> promise = Future.future();
+        Promise<JsonObject> promise = Promise.promise();
 
-        beforeCommit.setHandler(mappedContext -> {
+        beforeCommit.onComplete(mappedContext -> {
             if (context.doCommitToDocumentsCollection == false) {
                 int nbFiles = context.fileOldIdsToNewIds.size();
                 int nbFilesDup = 0;
@@ -208,10 +205,10 @@ public class FolderImporter {
             });
         });
 
-        return promise;
+        return promise.future();
     }
 
-    private void bufferToStorage(FolderImporterContext context, JsonObject document, String filePath, Future<Void> promise) {
+    private void bufferToStorage(FolderImporterContext context, JsonObject document, String filePath, Promise<Void> promise) {
         final String docId = DocumentHelper.getId(document);
         final String fileId = DocumentHelper.getFileId(document);
 
@@ -221,7 +218,7 @@ public class FolderImporter {
                 .put("filePath", filePath)
                 .put("userId", context.userId);
         final DeliveryOptions options = new DeliveryOptions().setSendTimeout(this.busTimeoutSec * 1000);
-        this.eb.send("org.entcore.workspace", importParams, options, (Handler<AsyncResult<Message<JsonObject>>>) message -> {
+        this.eb.request("org.entcore.workspace", importParams, options, (Handler<AsyncResult<Message<JsonObject>>>) message -> {
             if (message.succeeded() == false) {
                 log.error("Could not save file to storage : " + filePath, message.cause());
                 String error = message.cause().getMessage();
@@ -272,7 +269,7 @@ public class FolderImporter {
     }
 
     private CompositeFuture importDocuments(FolderImporterContext context) {
-        ArrayList<Future> futures = new ArrayList<>(context.updatedDocs.size());
+        ArrayList<Future<Void>> futures = new ArrayList<>(context.updatedDocs.size());
 
         for (int i = context.updatedDocs.size(); i-- > 0; ) {
             JsonObject fileDoc = context.updatedDocs.getJsonObject(i);
@@ -280,14 +277,13 @@ public class FolderImporter {
             String fileDocId = DocumentHelper.getId(fileDoc);
             context.oldIdsToNewIds.put(fileDocId, fileDocId);
 
-            Future<Void> future = Future.future();
-            futures.add(future);
+            Promise<Void> promise = Promise.promise();
 
             if (DocumentHelper.isFolder(fileDoc) == false && context.skipDocumentImport == false)
-                this.bufferToStorage(context, fileDoc, context.basePath + File.separator + fileDoc.getString("localArchivePath"), future);
+                this.bufferToStorage(context, fileDoc, context.basePath + File.separator + fileDoc.getString("localArchivePath"), promise);
             else
                 // Folders don't exist in the vertx filesystem, only in the mongo docs, so do nothing
-                future.complete();
+                promise.complete();
 
             // Build the parent mapping
             if (DocumentHelper.hasParent(fileDoc) == true) {
@@ -302,11 +298,12 @@ public class FolderImporter {
                 else
                     context.oldIdsToChildren.get(parentId).add(fileDoc);
             }
+            futures.add(promise.future());
         }
 
         this.moveOrphansToRoot(context);
 
-        return CompositeFuture.join(futures);
+        return Future.join(futures);
     }
 
     /**
@@ -318,11 +315,11 @@ public class FolderImporter {
         context.updatedDocs = fileDocuments;
         Future<JsonObject> doImport = this.commitToMongo(context, this.importDocuments(context).map(context));
 
-        doImport.setHandler(res -> handler.handle(res.result()));
+        doImport.onComplete(res -> handler.handle(res.result()));
     }
 
     private Future<FolderImporterContext> importFlatFiles(FolderImporterContext context) {
-        Future<FolderImporterContext> importDone = Future.future().map(context);
+        Promise<FolderImporterContext> importDone = Promise.promise();
         FolderImporter self = this;
 
         Pattern fileId = Pattern.compile(StringUtils.UUID_REGEX);
@@ -337,12 +334,11 @@ public class FolderImporter {
             else {
                 List<String> filesInDir = result.result();
 
-                LinkedList<Future> futures = new LinkedList<Future>();
+                LinkedList<Future<Void>> futures = new LinkedList<>();
 
                 fileFor:
                 for (String filePath : filesInDir) {
-                    Future<Void> future = Future.future();
-                    futures.add(future);
+                    Promise<Void> promise = Promise.promise();
 
                     String fileTrunc = FileUtils.getFilename(filePath);
                     Matcher m = fileId.matcher(fileTrunc);
@@ -352,7 +348,7 @@ public class FolderImporter {
                         if (m.find() == false) {
                             String error = "Filename " + fileTrunc + "does not contain the file id";
                             context.addError(null, null, error, null);
-                            future.fail(new RuntimeException(error));
+                            promise.fail(new RuntimeException(error));
 
                             continue fileFor;
                         }
@@ -385,19 +381,20 @@ public class FolderImporter {
 
 
                     context.addUpdatedDoc(fileDocument);
-                    self.bufferToStorage(context, fileDocument, filePath, future);
+                    self.bufferToStorage(context, fileDocument, filePath, promise);
+                    futures.add(promise.future());
                 }
 
-                CompositeFuture.join(futures).setHandler(res -> {
+                Future.join(futures).onComplete(res -> {
                     if (res.succeeded() == true)
-                        importDone.complete();
+                        importDone.complete(context);
                     else
                         importDone.fail(res.cause());
                 });
             }
         });
 
-        return importDone;
+        return importDone.future();
     }
 
     /**

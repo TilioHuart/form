@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.utils.StringUtils;
@@ -110,18 +111,18 @@ public class FolderExporter {
             }
         }
         //
-        Future<Void> futureRoot = Future.future();
-        fs.mkdirs(context.basePath, futureRoot.completer());
-        return futureRoot.compose(resRoot -> {
+        Promise<Void> promiseRoot = Promise.promise();
+        fs.mkdirs(context.basePath, promiseRoot);
+        return promiseRoot.future().compose(resRoot -> {
             @SuppressWarnings("rawtypes")
             List<Future> futures = new ArrayList<>();
             for (String path : uniqFolders) {
-                Future<Void> future = Future.future();
+                Promise<Void> promise = Promise.promise();
                 fs.mkdirs(path, res -> {
                     log.info("Folder creation result: " + "/" + path);
-                    future.completer().handle(res);
+                    promise.handle(res);
                 });
-                futures.add(future);
+                futures.add(promise.future());
             }
             return CompositeFuture.all(futures).map(res -> null);
         });
@@ -150,8 +151,7 @@ public class FolderExporter {
         @SuppressWarnings("rawtypes")
         List<Future> futures = new ArrayList<>();
         for (String folderPath : context.docByFolders.keySet()) {
-            Future<JsonObject> future = Future.future();
-            futures.add(future);
+            Promise<JsonObject> promise = Promise.promise();
             List<JsonObject> docs = context.docByFolders.get(folderPath);
 //
             JsonObject nameByFileId = new JsonObject();
@@ -176,17 +176,18 @@ public class FolderExporter {
             String[] ids = nameByFileId.fieldNames().stream().toArray(String[]::new);
             storage.writeToFileSystem(ids, folderPath, nameByFileId, res -> {
                 if (OK.equals(res.getString(STATUS))) {
-                    future.complete(res);
+                    promise.complete(res);
                 } else if (throwErrors) {
-                    future.fail(res.getString(ERROR));
+                    promise.fail(res.getString(ERROR));
                 } else {
                     context.errors.addAll(res.getJsonArray("errors"));
-                    future.complete();
+                    promise.complete();
                     log.error("Failed to export file : " + folderPath + " - " + nameByFileId + "- "
                             + new fr.wseduc.webutils.collections.JsonArray(Arrays.asList(ids)).encode() + " - "
                             + res.encode());
                 }
             });
+            futures.add(promise.future());
         }
         return CompositeFuture.all(futures);
     }

@@ -25,3 +25,8 @@
 /package-lock.json
 /formulaire/src/main/resources/public/css/
 /yarn.lock
+.env
+target
+*/target
+.flattened-pom.xml
+*/.flattened-pom.xml

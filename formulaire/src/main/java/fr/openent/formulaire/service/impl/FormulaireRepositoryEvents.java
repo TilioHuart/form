@@ -1,12 +1,13 @@
 package fr.openent.formulaire.service.impl;
 
-import com.mongodb.QueryBuilder;
+import com.mongodb.client.model.Filters;
 import fr.openent.form.helpers.FutureHelper;
 import fr.openent.formulaire.helpers.folder_importer.FolderImporter;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import org.bson.conversions.Bson;
 import org.entcore.common.folders.FolderExporter;
 import org.entcore.common.service.VisibilityFilter;
 import org.entcore.common.service.impl.SqlRepositoryEvents;
@@ -119,7 +120,7 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
             JsonArray documentsPublicIds = new JsonArray(ResourceUtils.extractIds(res, VisibilityFilter.PUBLIC));
             JsonArray documentsIds = new JsonArray(ResourceUtils.extractIds(res)).addAll(documentsPublicIds);
             if (!documentsIds.isEmpty()) {
-                QueryBuilder findDocsbyId = QueryBuilder.start(_ID).in(documentsIds);
+                Bson findDocsbyId = Filters.in(_ID, documentsIds);
                 JsonObject query = MongoQueryBuilder.build(findDocsbyId);
                 this.mongo.find("documents", query, event -> {
                     JsonArray results = event.body().getJsonArray(RESULTS);
@@ -137,7 +138,7 @@ public class FormulaireRepositoryEvents extends SqlRepositoryEvents {
                         });
                         String exportPathTmp = exportPath + "_tmp";
                         String exportPathFinal = exportPath + File.separator + DOCUMENTS;
-                        exporter.export(new FolderExporter.FolderExporterContext(exportPathTmp), list).setHandler((res1) -> {
+                        exporter.export(new FolderExporter.FolderExporterContext(exportPathTmp), list).onComplete((res1) -> {
                             if (res1.failed()) {
                                 String errMessage = "[Formulaire@FormulaireRepositoryEvents::exportDocumentsDependencies] Failed to export document to " + exportPathTmp;
                                 log.error(errMessage + " : " + res1.cause());

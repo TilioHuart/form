@@ -951,26 +951,26 @@ public class FormController extends ControllerHelper {
 
 
         // Prepare futures to get message responses
-        List<Future> mails = new ArrayList<>();
+        List<Future<JsonObject>> mails = new ArrayList<>();
 
         // Code to send mails
         for (int i = 0; i < listMails.size(); i++) {
-            Future future = Promise.promise().future();
-            mails.add(future);
+            Promise<JsonObject> promise = Promise.promise();
 
             // Send mail via Conversation app if it exists or else with Zimbra
             eb.request(CONVERSATION_ADDRESS, listMails.getJsonObject(i), (Handler<AsyncResult<Message<JsonObject>>>) messageEvt -> {
                 if (!messageEvt.result().body().getString(STATUS).equals(OK)) {
                     log.error("[Formulaire@FormController::sendReminder] Failed to send reminder : " + messageEvt.cause());
-                    future.handle(Future.failedFuture(messageEvt.cause()));
+                    promise.fail(messageEvt.cause());
                 } else {
-                    future.handle(Future.succeededFuture(messageEvt.result().body()));
+                    promise.complete(messageEvt.result().body());
                 }
             });
+            mails.add(promise.future());
         }
 
         // Try to send effectively mails with code below and get results
-        CompositeFuture.all(mails).onComplete(sendMailsEvt -> {
+        Future.all(mails).onComplete(sendMailsEvt -> {
             if (sendMailsEvt.failed()) {
                 log.error("[Formulaire@FormController::sendReminder] Failed to send reminder : " + sendMailsEvt.cause());
                 renderInternalError(request, sendMailsEvt);
@@ -1096,7 +1096,7 @@ public class FormController extends ControllerHelper {
                             List<Future<JsonObject>> pdfInfos = new ArrayList<>();
                             forms.forEach(form -> pdfInfos.add(new FormQuestionsExportPDF(request, vertx, config, storage, eb, form).launch()));
 
-                            return FutureHelper.all(pdfInfos);
+                            return Future.all(pdfInfos);
                         })
                         .compose(pdfInfos -> {
                             if (pdfInfos.list().size() == 1) {

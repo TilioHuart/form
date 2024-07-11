@@ -153,7 +153,7 @@ public class FormQuestionsExportPDF extends ControllerHelper {
             .compose(listChildren -> {
                 setMatrixChildren(listChildren);
                 fillChoices(choicesInfos, mapSections, mapQuestions, imageInfos);
-                return FutureHelper.all(imageInfos);
+                return Future.all(imageInfos);
             })
             .compose(imageInfosResults -> {
                 //Get choices images, affect them to their respective choice and send the result
