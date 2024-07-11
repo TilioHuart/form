@@ -110,5 +110,6 @@ public class Formulaire extends BaseServer {
 		new CronTrigger(vertx, config.getString(RGPD_CRON, "0 0 0 */1 * ? *")).schedule(rgpdCron);
 		NotifyCron notifyCron = new NotifyCron(timelineHelper);
 		new CronTrigger(vertx, config.getString(NOTIFY_CRON, "0 0 0 */1 * ? *")).schedule(notifyCron);
+		startPromise.tryComplete();
 	}
 }

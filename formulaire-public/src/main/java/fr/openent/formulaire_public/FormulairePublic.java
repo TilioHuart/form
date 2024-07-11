@@ -24,5 +24,6 @@ public class FormulairePublic extends BaseServer {
 		addController(new CaptchaController());
 		addController(new FormController(timelineHelper));
 		addController(new FormulairePublicController());
+		startPromise.tryComplete();
 	}
 }
