@@ -1,5 +1,5 @@
 {
-  "name": "fr.openent~formulaire~3.4.1",
+  "name": "fr.openent~formulaire~4.2.3",
   "config": {
     "main" : "fr.openent.formulaire.Formulaire",
     "port" : 8067,
