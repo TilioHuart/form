@@ -159,17 +159,18 @@ public class FormResponsesExportPDF {
             boolean isGraph = GRAPH_QUESTIONS.contains(question_type);
 
             if (!hasTooManyResponses || isGraph) {
+                String statementNotNull = questionInfo.getString(STATEMENT) == null ? "" : questionInfo.getString(STATEMENT);
+                String formatedStatement = "<div>" + statementNotNull
+                        .replace("\"", "'")
+                        .replace("<o:p></o:p>", " ")
+                        + "</div>";
+
                 questions.add(
                     new JsonObject()
                     .put(ID, questionInfo.getInteger(ID))
                     .put(TITLE, questionInfo.getString(TITLE))
                     .put(QUESTION_TYPE, new JsonObject())
-                    .put(STATEMENT,
-                        "<div>" + questionInfo.getString(STATEMENT, "")
-                        .replace("\"","'")
-                        .replace("<o:p></o:p>", " ")
-                        + "</div>"
-                    )
+                    .put(STATEMENT, formatedStatement)
                     .put(MANDATORY, questionInfo.getBoolean(MANDATORY))
                     .put(SECTION_ID, questionInfo.getInteger(SECTION_ID))
                     .put(POSITION, questionInfo.getInteger(POSITION))
