@@ -12,7 +12,7 @@
 
     <groupId>fr.openent</groupId>
     <artifactId>form</artifactId>
-    <version>${revision}</version>
+    <version>1.12.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <repositories>
